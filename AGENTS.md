@@ -1,6 +1,5 @@
 ---
-
-## id: agents
+id: agents
 title: Agent Orientation
 status: active
 stage: validation
@@ -13,6 +12,7 @@ depends_on:
   - docs/decisions.md
   - docs/ops/agent-runtime.md
   - docs/ops/agent-documentation-contract.md
+---
 
 # Agent Orientation
 
