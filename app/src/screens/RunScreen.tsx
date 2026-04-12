@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { useTimer } from '../hooks/useTimer'
 import { useWakeLock } from '../hooks/useWakeLock'
@@ -31,6 +31,8 @@ export function RunScreen() {
     (location.state as { shortened?: boolean } | null)?.shortened ?? false
 
   const [showEndConfirm, setShowEndConfirm] = useState(false)
+  const [prerollCount, setPrerollCount] = useState<number | null>(null)
+  const [showInstructions, toggleInstructions] = useReducer((s: boolean) => !s, false)
   const blockDurRef = useRef(0)
   const remainingRef = useRef(0)
 
@@ -57,6 +59,7 @@ export function RunScreen() {
   })
 
   const handleBlockComplete = useCallback(async () => {
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100])
     const isLast = await runner.completeBlock()
     if (isLast) {
       navigate(`/review?id=${executionLogId}`, { replace: true })
@@ -72,6 +75,37 @@ export function RunScreen() {
     remainingRef.current = timer.remainingSeconds
   })
 
+  const prerollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const startWithPreroll = useCallback(() => {
+    setPrerollCount(3)
+    let count = 3
+    prerollTimerRef.current = setInterval(() => {
+      count -= 1
+      if (count <= 0) {
+        if (prerollTimerRef.current) clearInterval(prerollTimerRef.current)
+        prerollTimerRef.current = null
+        setPrerollCount(null)
+        runner.startBlock().then(() => {
+          timer.start(blockDurationSeconds)
+          wakeLock.request()
+        }).catch((err) => {
+          console.error('Failed to start block:', err)
+          navigate('/', { replace: true })
+        })
+        if (navigator.vibrate) navigator.vibrate(100)
+      } else {
+        setPrerollCount(count)
+      }
+    }, 1000)
+  }, [runner, timer, blockDurationSeconds, wakeLock, navigate])
+
+  useEffect(() => {
+    return () => {
+      if (prerollTimerRef.current) clearInterval(prerollTimerRef.current)
+    }
+  }, [])
+
   const initRef = useRef(false)
   useEffect(() => {
     if (!execution || !currentBlock || initRef.current) return
@@ -84,12 +118,13 @@ export function RunScreen() {
       runner.recoverTimerState(blockDurationSeconds).then((recovered) => {
         timer.start(recovered ?? blockDurationSeconds)
         wakeLock.request()
-      })
-    } else if (bs.status === 'planned' || execution.status === 'not_started') {
-      runner.startBlock().then(() => {
+      }).catch((err) => {
+        console.error('Failed to recover timer:', err)
         timer.start(blockDurationSeconds)
         wakeLock.request()
       })
+    } else if (bs.status === 'planned' || execution.status === 'not_started') {
+      startWithPreroll()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [execution, currentBlock, blockDurationSeconds])
@@ -125,6 +160,7 @@ export function RunScreen() {
 
   const handleNext = useCallback(async () => {
     timer.pause()
+    if (navigator.vibrate) navigator.vibrate(100)
     const isLast = await runner.completeBlock()
     if (isLast) {
       navigate(`/review?id=${executionLogId}`, { replace: true })
@@ -135,6 +171,7 @@ export function RunScreen() {
 
   const handleSkip = useCallback(async () => {
     timer.pause()
+    if (navigator.vibrate) navigator.vibrate(100)
     const isLast = await runner.skipBlock()
     if (isLast) {
       navigate(`/review?id=${executionLogId}`, { replace: true })
@@ -150,9 +187,12 @@ export function RunScreen() {
   }, [timer, runner])
 
   const handleEndSessionRequest = useCallback(() => {
-    timer.pause()
+    if (timer.isRunning) {
+      timer.pause()
+      runner.pauseBlock(blockDurRef.current - remainingRef.current)
+    }
     setShowEndConfirm(true)
-  }, [timer])
+  }, [timer, runner])
 
   const handleEndSessionConfirm = useCallback(async () => {
     await runner.endSession()
@@ -161,8 +201,7 @@ export function RunScreen() {
 
   const handleEndSessionCancel = useCallback(() => {
     setShowEndConfirm(false)
-    timer.resume()
-  }, [timer])
+  }, [])
 
   useEffect(() => {
     if (!executionLogId) return
@@ -197,39 +236,73 @@ export function RunScreen() {
         </h1>
         <p className="text-sm font-medium text-accent">{currentBlock.coachingCue}</p>
         {currentBlock.courtsideInstructions && (
-          <p className="text-sm leading-relaxed text-text-secondary">
-            {currentBlock.courtsideInstructions}
-          </p>
+          showInstructions ? (
+            <div className="flex flex-col gap-1">
+              <p className="text-sm leading-relaxed text-text-secondary">
+                {currentBlock.courtsideInstructions}
+              </p>
+              <button
+                type="button"
+                onClick={toggleInstructions}
+                className="self-start text-xs font-medium text-accent"
+              >
+                Less
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={toggleInstructions}
+              className="self-start text-xs font-medium text-accent"
+            >
+              More…
+            </button>
+          )
         )}
       </div>
 
-      <BlockTimer
-        remainingSeconds={timer.remainingSeconds}
-        totalSeconds={blockDurationSeconds}
-        isPaused={isPaused}
-      />
+      {prerollCount != null ? (
+        <div className="flex flex-col items-center gap-4 py-8">
+          <span className="text-[72px] font-bold tabular-nums leading-none text-accent">
+            {prerollCount}
+          </span>
+          <p className="text-base font-medium text-text-secondary">
+            Get ready…
+          </p>
+        </div>
+      ) : (
+        <BlockTimer
+          remainingSeconds={timer.remainingSeconds}
+          totalSeconds={blockDurationSeconds}
+          isPaused={isPaused}
+        />
+      )}
 
       <p className="text-center text-sm text-text-secondary">
         Block {currentBlockIndex + 1} of {totalBlocks}
       </p>
 
-      <RunControls
-        isPaused={isPaused}
-        isRequired={currentBlock.required}
-        onPause={handlePause}
-        onResume={handleResume}
-        onNext={handleNext}
-        onSkip={handleSkip}
-        onShorten={handleShorten}
-        onEndSession={handleEndSessionRequest}
-      />
+      {prerollCount == null && (
+        <RunControls
+          isPaused={isPaused}
+          isRequired={currentBlock.required}
+          onPause={handlePause}
+          onResume={handleResume}
+          onNext={handleNext}
+          onSkip={handleSkip}
+          onShorten={handleShorten}
+          onEndSession={handleEndSessionRequest}
+        />
+      )}
 
       {showEndConfirm && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-8">
           <div className="w-full max-w-[390px] rounded-[16px] bg-bg-primary p-6 shadow-lg">
             <h2 className="text-lg font-bold text-text-primary">End session early?</h2>
             <p className="mt-2 text-sm text-text-secondary">
-              You still have blocks remaining. Your progress will be saved and you can review what you completed.
+              {currentBlock.type === 'wrap'
+                ? 'You\u2019re in your cool-down. Skipping it may affect your recovery. Your progress will be saved.'
+                : 'You still have blocks remaining. Your progress will be saved and you can review what you completed.'}
             </p>
             <div className="mt-6 flex flex-col gap-3">
               <button

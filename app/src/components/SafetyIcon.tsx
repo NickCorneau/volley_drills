@@ -27,7 +27,7 @@ export function SafetyIcon() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-9 w-9 items-center justify-center rounded-full text-warning"
+        className="flex h-14 w-14 items-center justify-center rounded-full text-warning"
         aria-label="Safety information"
       >
         <ShieldSvg />
@@ -60,7 +60,7 @@ export function SafetyIcon() {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="mt-2 min-h-[48px] w-full rounded-[16px] bg-bg-warm px-4 py-3 text-sm font-semibold text-text-primary"
+                className="mt-2 min-h-[54px] w-full rounded-[16px] bg-bg-warm px-4 py-3 text-sm font-semibold text-text-primary"
               >
                 Got it
               </button>

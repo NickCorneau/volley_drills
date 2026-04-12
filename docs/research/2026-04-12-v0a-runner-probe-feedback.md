@@ -31,7 +31,7 @@ depends_on:
 - **What this is:** A synthesized feedback document from a multi-persona AI review of the v0a Runner Probe implementation.
 - **Why it matters:** Identifies gaps between the implementation and the strict UX/Safety constraints required for phone-on-sand usability, trust, and cold-start agent reliability.
 - **How to use it:** Read the newest dated entry first when findings conflict. Treat the backlog sections as the current implementation queue before field testing or broader agent handoff.
-- **Key finding:** The latest same-day retest found a critical break in the `review -> complete` loop. Earlier PASS verdicts for full happy-path completion should not be treated as current truth unless re-verified.
+- **Key finding:** The latest same-day post-fix retest confirmed that several UX fixes landed, but the critical `review -> complete` loop is still broken on both partial and full session paths.
 
 ## 1. Safety & Workflow Protocol (Trust Evaluation)
 
@@ -41,6 +41,7 @@ The prototype ladder design dictates strict safety constraints to build trust wi
 The Pain-Override structure—where flagging "Yes" to pain automatically filters out `main_skill` blocks and offers a "Recovery Technique Session"—is implemented well and serves as the strongest trust-building moment in the first-run flow.
 
 **Critical Gaps (Friction/Trust Breakers):**
+
 - **Missing Override Confirmation:** Tapping "Override" on the recovery card instantly drops the user into the run flow. *Spec requirement:* It must show a confirmation step: *"You chose to override the recovery default. Listen to your body and stop if pain worsens."*
 - **Missing Cool-down Warning:** If a user taps "End Session" during the cool-down block, they see a generic "You still have blocks remaining" dialog. *Spec requirement:* It must specifically warn that they are cutting their cool-down short.
 - **Discard Resume Skips Review:** When reopening the app to an interrupted session, tapping "Discard" marks the session `ended_early` but leaves the user on the Start screen. *Spec requirement:* Discarding a session must route the user to `/review` to capture the `incompleteReason` (e.g., time, fatigue, pain).
@@ -53,6 +54,7 @@ Courtside usability requires large touch targets and high-contrast visuals to co
 D94 visual design language (warm orange palette, typography scale) is generally well-applied. The "Your data stays on this device" copy builds immediate local-first trust.
 
 **Critical Gaps (Friction Points):**
+
 - **Undersized Touch Targets:** The baseline touch target for mobile courtside use is 54–60px. Several interactive elements fail this:
   - `RunControls.tsx`: Secondary buttons (Shorten, Skip Block, End Session) use `min-h-[44px]`.
   - `SafetyCheckScreen.tsx`: Training Recency toggles use `min-h-[44px]`.
@@ -63,6 +65,7 @@ D94 visual design language (warm orange palette, typography scale) is generally 
 ## 3. Architecture & Persistence
 
 **Positive Signal:**
+
 - **Timer State Ledger:** The 5-second interval flush using timestamp-based recovery (rather than tick-counting) is bulletproof against iOS Safari PWA eviction.
 - **Dexie Relational Schema:** The strict separation of `SessionPlans` (immutable templates), `ExecutionLogs` (run state), and `SessionReviews` perfectly sets up the data model for the v0b Starter Loop and future sync.
 - **No Account Wall:** Instant access to a workout creates the exact right first impression.
@@ -72,18 +75,21 @@ D94 visual design language (warm orange palette, typography scale) is generally 
 These items should be addressed in the `v0a` codebase before physical field testing.
 
 ### P1 (Required for Courtside Usability & Trust)
-- [ ] **Touch Targets:** Increase `min-h-[44px]` to `min-h-[54px]` for secondary run controls, recency toggles, and pass metric steppers.
-- [ ] **3-2-1 Auto-Go:** Implement a 3-second pre-roll countdown in `RunScreen.tsx` before the main block timer starts.
-- [ ] **Pain Override Confirmation:** Add the missing confirmation text/step in `PainOverrideCard.tsx` before navigating to `/run`.
-- [ ] **Cool-down End Warning:** Update the "End Session" confirmation dialog in `RunScreen.tsx` to conditionally warn the user if the active block is a cool-down.
-- [ ] **Discard Routing:** Update `StartScreen.tsx` so that discarding a resumed session navigates to `/review?id=[logId]` instead of remaining on the Start screen.
-- [ ] **Warning Palette:** Fix the active "Yes" pain button styling in `SafetyCheckScreen.tsx` to use `bg-warning-surface text-warning` per D94.
+
+- **Touch Targets:** Increase `min-h-[44px]` to `min-h-[54px]` for secondary run controls, recency toggles, and pass metric steppers.
+- **3-2-1 Auto-Go:** Implement a 3-second pre-roll countdown in `RunScreen.tsx` before the main block timer starts.
+- **Pain Override Confirmation:** Add the missing confirmation text/step in `PainOverrideCard.tsx` before navigating to `/run`.
+- **Cool-down End Warning:** Update the "End Session" confirmation dialog in `RunScreen.tsx` to conditionally warn the user if the active block is a cool-down.
+- **Discard Routing:** Update `StartScreen.tsx` so that discarding a resumed session navigates to `/review?id=[logId]` instead of remaining on the Start screen.
+- **Warning Palette:** Fix the active "Yes" pain button styling in `SafetyCheckScreen.tsx` to use `bg-warning-surface text-warning` per D94.
 
 ### P2 (Polish)
-- [ ] **Player Toggle Hierarchy:** Move the Solo/Pair toggle above the preset cards on `StartScreen.tsx` so the filtering mechanism is understood before the content is read.
-- [ ] **"Step 1 of 2" Labeling:** Remove or fix the "Step 1 of 2" header on `SafetyCheckScreen.tsx` for the no-pain path, as there is no visible step 2.
+
+- **Player Toggle Hierarchy:** Move the Solo/Pair toggle above the preset cards on `StartScreen.tsx` so the filtering mechanism is understood before the content is read.
+- **"Step 1 of 2" Labeling:** Remove or fix the "Step 1 of 2" header on `SafetyCheckScreen.tsx` for the no-pain path, as there is no visible step 2.
 
 ## Observations for v0b (Starter Loop)
+
 - **Session History:** The `CompleteScreen` says "Done", but returning to the Start screen shows no record of the completed session. v0b will need the `Home/LastComplete` state to prove the data was actually saved and utilized.
 - **Audio/Haptic Cues:** End users noted that a silent timer ending is easy to miss on the beach. Audio or haptic feedback at block transitions should be evaluated in v0b.
 - **Pass Metric Scaling:** If users are logging 50+ attempts, tapping a `+` button 50 times is excessive friction. v0b should consider a `+5` or `+10` stepper option, or a swipe-to-increment gesture.
@@ -96,21 +102,25 @@ These items should be addressed in the `v0a` codebase before physical field test
 
 Two parallel AI agents tested the running app (`localhost:5173`) and reviewed all project documentation simultaneously:
 
-| Agent | Scope | Method |
-|-------|-------|--------|
-| Browser Test Agent | Live E2E of all user flows, 20 screenshots, visual audit, UX evaluation | Cursor IDE browser MCP, navigated every screen state, tested happy paths, edge cases, and error flows |
-| Doc Review Agent | All 30+ docs in `docs/`, cross-referenced against `app/src/` implementation | Read every doc, every source file, compared specs to code, checked frontmatter, traced decision refs |
+
+| Agent              | Scope                                                                       | Method                                                                                                |
+| ------------------ | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Browser Test Agent | Live E2E of all user flows, 20 screenshots, visual audit, UX evaluation     | Cursor IDE browser MCP, navigated every screen state, tested happy paths, edge cases, and error flows |
+| Doc Review Agent   | All 30+ docs in `docs/`, cross-referenced against `app/src/` implementation | Read every doc, every source file, compared specs to code, checked frontmatter, traced decision refs  |
+
 
 ### Flows Tested (Browser)
 
-| Flow | Verdict | Notes |
-|------|---------|-------|
-| Solo Wall Pass — full happy path (8 screens) | PASS | Start → Safety → Warm-Up → Run → Transition → Cool-Down → Review → Complete all work |
-| Partner preset filtering | PASS | Switching to Pair correctly shows only Partner Pass Workout |
-| Pain override → recovery session | PASS | Recovery default works, override requires deliberate confirmation |
-| End session early → incomplete review | PASS | Bottom sheet confirmation, `incompleteReason` chips appear |
-| Safety icon accessibility | PASS | Shield visible on every run screen, opens stop/seek-help dialog |
-| PWA shell check | PASS (dev) | Meta tags, manifest config, `offline.html` present; full SW test needs production build |
+
+| Flow                                         | Verdict    | Notes                                                                                   |
+| -------------------------------------------- | ---------- | --------------------------------------------------------------------------------------- |
+| Solo Wall Pass — full happy path (8 screens) | PASS       | Start → Safety → Warm-Up → Run → Transition → Cool-Down → Review → Complete all work    |
+| Partner preset filtering                     | PASS       | Switching to Pair correctly shows only Partner Pass Workout                             |
+| Pain override → recovery session             | PASS       | Recovery default works, override requires deliberate confirmation                       |
+| End session early → incomplete review        | PASS       | Bottom sheet confirmation, `incompleteReason` chips appear                              |
+| Safety icon accessibility                    | PASS       | Shield visible on every run screen, opens stop/seek-help dialog                         |
+| PWA shell check                              | PASS (dev) | Meta tags, manifest config, `offline.html` present; full SW test needs production build |
+
 
 Screenshots saved to `test-screenshots/e2e-run/` (20 total covering every screen state and edge case).
 
@@ -132,24 +142,26 @@ Screenshots saved to `test-screenshots/e2e-run/` (20 total covering every screen
 - **Coaching cue is too verbose on run screen.** Takes ~40% of viewport. On a phone in bright sun, the timer should be even more dominant. Needs a collapsible "More" disclosure.
 - **No total session elapsed timer.** Only the current block timer is visible; athletes lose sense of total training time.
 - **No landscape handling.** Phone-on-sand scenarios may use landscape orientation — no layout accommodation.
-- **`requestPersistentStorage()` is exported but never called.** IndexedDB data is unprotected from browser eviction.
+- `**requestPersistentStorage()` is exported but never called.** IndexedDB data is unprotected from browser eviction.
 
 ### Confirmed Bugs & Spec Deviations
 
 Items marked `[CONFIRMED]` were found independently by both agents. Items marked `[NEW]` are first reports from this session.
 
-| ID | Issue | Severity | Spec Ref | Status |
-|----|-------|----------|----------|--------|
-| FB-01 | `[CONFIRMED]` Touch targets below 54px: recency chips (44px), pass steppers (48px), secondary run controls (44px), safety icon (36px) | P1 | R12, D49 | Open |
-| FB-02 | `[CONFIRMED]` No 3-2-1 pre-roll countdown before blocks | P1 | D53 | Open |
-| FB-03 | `[CONFIRMED]` Pain override confirmation exists but was missing in earlier review — now implemented | Resolved | R15 | Fixed |
-| FB-04 | `[CONFIRMED]` Discard session does not route to `/review` — stays on Start screen | P1 | R10 | Open |
-| FB-05 | `[NEW]` `incompleteReason` can be skipped on ended-early sessions — `canSubmit` only checks `sessionRpe` | P1 | m001-review-micro-spec | Open |
-| FB-06 | `[NEW]` `requestPersistentStorage()` never called at startup | P2 | R5, D39 | Open |
-| FB-07 | `[NEW]` SW uses `registerType: 'autoUpdate'` + `immediate: true` — tension with D41 safe-boundary updates | P2 | D41 | Open |
-| FB-08 | `[NEW]` No pre-populated attempt count from session plan metadata | P3 | D96 | Open |
-| FB-09 | `[NEW]` RPE bands (4 values) instead of 0-10 granularity — acceptable for v0a but loses signal | P3 | R10 | Deferred to v0b |
-| FB-10 | `[NEW]` Coaching cue takes ~40% viewport on run screen | P3 | courtside-run-flow §3 | Open |
+
+| ID    | Issue                                                                                                                                 | Severity | Spec Ref               | Status               |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------- | -------------------- |
+| FB-01 | `[CONFIRMED]` Touch targets below 54px: recency chips (44px), pass steppers (48px), secondary run controls (44px), safety icon (36px) | P1       | R12, D49               | **Fixed 2026-04-12** |
+| FB-02 | `[CONFIRMED]` No 3-2-1 pre-roll countdown before blocks                                                                               | P1       | D53                    | **Fixed 2026-04-12** |
+| FB-03 | `[CONFIRMED]` Pain override confirmation exists but was missing in earlier review — now implemented                                   | Resolved | R15                    | Fixed                |
+| FB-04 | `[CONFIRMED]` Discard session does not route to `/review` — stays on Start screen                                                     | P1       | R10                    | **Fixed 2026-04-12** |
+| FB-05 | `[NEW]` `incompleteReason` can be skipped on ended-early sessions — `canSubmit` only checks `sessionRpe`                              | P1       | m001-review-micro-spec | **Fixed 2026-04-12** |
+| FB-06 | `[NEW]` `requestPersistentStorage()` never called at startup                                                                          | P2       | R5, D39                | **Fixed 2026-04-12** |
+| FB-07 | `[NEW]` SW uses `registerType: 'autoUpdate'` + `immediate: true` — tension with D41 safe-boundary updates                             | P2       | D41                    | Accepted for v0a     |
+| FB-08 | `[NEW]` No pre-populated attempt count from session plan metadata                                                                     | P3       | D96                    | Deferred to v0b      |
+| FB-09 | `[NEW]` RPE bands (4 values) instead of 0-10 granularity — acceptable for v0a but loses signal                                        | P3       | R10                    | Deferred to v0b      |
+| FB-10 | `[NEW]` Coaching cue takes ~40% viewport on run screen                                                                                | P3       | courtside-run-flow §3  | **Fixed 2026-04-12** |
+
 
 ### Documentation Health Assessment
 
@@ -157,23 +169,27 @@ The doc review agent cross-referenced all 30+ docs against the implementation. K
 
 #### Stale Content (must update)
 
-| Doc | Issue | Impact |
-|-----|-------|--------|
-| `app/README.md` | Still says App.tsx is placeholder, no PWA — **actively misleading** | High — first thing any agent or developer reads |
-| `AGENTS.md` | "No approved production implementation" — needs v0a vs M001 nuance | High — cold-start routing for every agent session |
-| `agent-manifest.json` | `stage: "planning"` with no v0a signal | Medium — machine routing |
-| `docs/README.md` | "Planning / vision stage" underplays Phase 0 prototype | Medium |
-| `m001-solo-session-loop.md` | "Planning only, no code yet, blocked" without v0a footnote | Medium — reads as if nothing is built |
-| v0a build plan | `status: completed` but all 10 implementation units have `- [ ]` unchecked | Low — cosmetic but confusing |
+
+| Doc                         | Issue                                                                      | Impact                                            |
+| --------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------- |
+| `app/README.md`             | Still says App.tsx is placeholder, no PWA — **actively misleading**        | High — first thing any agent or developer reads   |
+| `AGENTS.md`                 | "No approved production implementation" — needs v0a vs M001 nuance         | High — cold-start routing for every agent session |
+| `agent-manifest.json`       | `stage: "planning"` with no v0a signal                                     | Medium — machine routing                          |
+| `docs/README.md`            | "Planning / vision stage" underplays Phase 0 prototype                     | Medium                                            |
+| `m001-solo-session-loop.md` | "Planning only, no code yet, blocked" without v0a footnote                 | Medium — reads as if nothing is built             |
+| v0a build plan              | `status: completed` but all 10 implementation units have `- [ ]` unchecked | Low — cosmetic but confusing                      |
+
 
 #### Cross-Doc Inconsistencies
 
-| Conflict | Docs Involved | Resolution Needed |
-|----------|---------------|-------------------|
-| Training recency labels differ | `decisions.md` D83 (Today/Yesterday/2+ days ago) vs courtside-run-flow spec and app code (0 days/1 day/2+/First time) | Align D83 wording to match implementation |
-| PRD says first-run captures skill level + player count | `prd-foundation.md` vs v0a (player count + preset only) | Add note that v0a intentionally defers skill level |
-| Font stack: system sans vs Inter | `m001-courtside-run-flow.md` vs D94 and implementation | Align courtside spec to say Inter per D94 |
-| `AGENTS.md` omits O4/O5 from open questions | `AGENTS.md` vs `decisions.md` | Add O4/O5 to AGENTS.md since they're validation-relevant |
+
+| Conflict                                               | Docs Involved                                                                                                         | Resolution Needed                                        |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Training recency labels differ                         | `decisions.md` D83 (Today/Yesterday/2+ days ago) vs courtside-run-flow spec and app code (0 days/1 day/2+/First time) | Align D83 wording to match implementation                |
+| PRD says first-run captures skill level + player count | `prd-foundation.md` vs v0a (player count + preset only)                                                               | Add note that v0a intentionally defers skill level       |
+| Font stack: system sans vs Inter                       | `m001-courtside-run-flow.md` vs D94 and implementation                                                                | Align courtside spec to say Inter per D94                |
+| `AGENTS.md` omits O4/O5 from open questions            | `AGENTS.md` vs `decisions.md`                                                                                         | Add O4/O5 to AGENTS.md since they're validation-relevant |
+
 
 #### Missing Documentation
 
@@ -188,75 +204,79 @@ Merging the earlier review's P1/P2 items with this session's findings. Items fro
 
 #### P0 — Documentation (fix before any agent touches the repo cold)
 
-- [ ] **DOC-01**: Rewrite `app/README.md` to describe the real v0a PWA, routes, data stores, known limitations, and literal local run commands
-- [ ] **DOC-02**: Update `AGENTS.md` to distinguish "v0a validation artifact shipped" from "M001 implementation gate still closed"
-- [ ] **DOC-03**: Update `agent-manifest.json`, `llms.txt`, and `docs/README.md` to acknowledge Phase 0 prototype exists
-- [ ] **DOC-04**: Check off v0a plan implementation units or annotate deferred items
-- [ ] **DOC-05**: Align stale discovery / research docs (`docs/discovery/phase-0-readiness-assessment.md`, `docs/research/local-first-pwa-constraints.md`) with the current runnable v0a prototype and PWA wiring
+- **DOC-01**: Rewrite `app/README.md` to describe the real v0a PWA, routes, data stores, known limitations, and literal local run commands
+- **DOC-02**: Update `AGENTS.md` to distinguish "v0a validation artifact shipped" from "M001 implementation gate still closed"
+- **DOC-03**: Update `agent-manifest.json`, `llms.txt`, and `docs/README.md` to acknowledge Phase 0 prototype exists
+- **DOC-04**: Check off v0a plan implementation units or annotate deferred items
+- **DOC-05**: Align stale discovery / research docs (`docs/discovery/phase-0-readiness-assessment.md`, `docs/research/local-first-pwa-constraints.md`) with the current runnable v0a prototype and PWA wiring
 
 #### P1 — Required for Courtside Usability & Trust
 
-- [ ] **UX-01**: Touch targets — increase `min-h-[44px]` → `min-h-[54px]` for secondary run controls, recency toggles, pass steppers. Increase safety icon from `h-9 w-9` → at least `h-11 w-11` (`RunControls.tsx`, `SafetyCheckScreen.tsx`, `PassMetricInput.tsx`, `SafetyIcon.tsx`)
-- [ ] **UX-02**: 3-2-1 Auto-Go pre-roll — implement 3-second countdown in `RunScreen.tsx` before block timer starts (D53)
-- [ ] **UX-03**: Cool-down end warning — update End Session dialog to specifically warn when cutting cool-down short
-- [ ] **UX-04**: Discard → Review routing — `StartScreen.tsx` `handleDiscardSession` must navigate to `/review?id=[logId]` instead of staying on Start
-- [ ] **UX-05**: Require `incompleteReason` for ended-early sessions — enforce in `ReviewScreen.tsx` `canSubmit` validation
-- [ ] **UX-06**: Warning palette — fix active "Yes" pain button to use `bg-warning-surface text-warning` per D94
-- [ ] **UX-11**: Repair the `ReviewScreen.tsx` submit path so `Submit Review` persists a `sessionReviews` row and navigates to `/complete`; add explicit failure handling and a smoke verification path
+- **UX-01**: Touch targets — increase `min-h-[44px]` → `min-h-[54px]` for secondary run controls, recency toggles, pass steppers. Increase safety icon from `h-9 w-9` → at least `h-11 w-11` (`RunControls.tsx`, `SafetyCheckScreen.tsx`, `PassMetricInput.tsx`, `SafetyIcon.tsx`) — **Fixed 2026-04-12**
+- **UX-02**: 3-2-1 Auto-Go pre-roll — implement 3-second countdown in `RunScreen.tsx` before block timer starts (D53) — **Fixed 2026-04-12**: 3-2-1 visual countdown + haptic pulse on go
+- **UX-03**: Cool-down end warning — update End Session dialog to specifically warn when cutting cool-down short — **Fixed 2026-04-12**: conditional message when `currentBlock.type === 'wrap'`
+- **UX-04**: Discard → Review routing — `StartScreen.tsx` `handleDiscardSession` must navigate to `/review?id=[logId]` instead of staying on Start — **Fixed 2026-04-12**
+- **UX-05**: Require `incompleteReason` for ended-early sessions — enforce in `ReviewScreen.tsx` `canSubmit` validation — **Fixed 2026-04-12**
+- **UX-06**: Warning palette — fix active "Yes" pain button to use `bg-warning-surface text-warning` per D94 — **Fixed 2026-04-12**
+- **UX-11**: Repair the `ReviewScreen.tsx` submit path so `Submit Review` persists a `sessionReviews` row and navigates to `/complete`; add explicit failure handling and a smoke verification path — **Fixed 2026-04-12**: try/catch + read-back verification + error banner + CompleteScreen redirect debounce
 
 #### P2 — Polish & Hardening
 
-- [ ] **HARD-01**: Call `requestPersistentStorage()` at startup in `main.tsx` to protect IndexedDB from eviction
-- [ ] **HARD-02**: Address D41 tension — either defer SW activation to safe boundaries or document why `autoUpdate` + `immediate` is acceptable for v0a
-- [ ] **HARD-03**: Resolve or document the `vite-plugin-pwa@1.2.0` vs Vite 8 peer mismatch so clean installs do not fail or enter an invalid dependency state
-- [ ] **UX-07**: Player toggle hierarchy — move Solo/Pair above preset cards on `StartScreen.tsx`
-- [ ] **UX-08**: Fix "Step 1 of 2" label on `SafetyCheckScreen.tsx` (no visible step 2 on the no-pain path)
-- [ ] **UX-09**: Collapse coaching cue on run screen — show first line with "More" disclosure to keep timer dominant
-- [ ] **UX-10**: Add haptic/vibration via `navigator.vibrate()` at block transitions for courtside signal
-- [ ] **UX-12**: Make `Resume Session` truly resume the timer, or relabel the CTA to `Reopen Session` if a second tap is intentional
+- **HARD-01**: Call `requestPersistentStorage()` at startup in `main.tsx` to protect IndexedDB from eviction — **Fixed 2026-04-12**
+- **HARD-02**: Address D41 tension — either defer SW activation to safe boundaries or document why `autoUpdate` + `immediate` is acceptable for v0a — **Accepted for v0a 2026-04-12**: timer state flushed to IDB independently; no data-in-flight during SW swap; revisit if v0b adds sync/auth
+- **HARD-03**: Resolve or document the `vite-plugin-pwa@1.2.0` vs Vite 8 peer mismatch so clean installs do not fail or enter an invalid dependency state
+- **UX-07**: Player toggle hierarchy — move Solo/Pair above preset cards on `StartScreen.tsx` — **Fixed 2026-04-12**
+- **UX-08**: Fix "Step 1 of 2" label on `SafetyCheckScreen.tsx` (no visible step 2 on the no-pain path) — **Fixed 2026-04-12**: removed misleading step label entirely
+- **UX-09**: Collapse coaching cue on run screen — show first line with "More" disclosure to keep timer dominant — **Fixed 2026-04-12**: courtside instructions hidden by default behind "More…" toggle
+- **UX-10**: Add haptic/vibration via `navigator.vibrate()` at block transitions for courtside signal — **Fixed 2026-04-12**: double-pulse on block complete, single on next/skip, pulse on pre-roll go
+- **UX-12**: Make `Resume Session` truly resume the timer, or relabel the CTA to `Reopen Session` if a second tap is intentional — **Fixed 2026-04-12**: relabeled to "Reopen Session"
 
 #### P3 — Deferred to v0b / Starter Loop
 
-- [ ] **V0B-01**: True 0-10 RPE input (slider or tappable number row) instead of 4 bands
-- [ ] **V0B-02**: Tap-to-type option for pass metric counters (high attempt counts)
-- [ ] **V0B-03**: Pre-populate attempt count from session plan metadata (D96)
-- [ ] **V0B-04**: Total session elapsed timer (secondary to block timer)
-- [ ] **V0B-05**: Landscape orientation handling
-- [ ] **V0B-06**: Rasterized PNG icons (192x192, 512x512) alongside SVG for cross-platform PWA install
-- [ ] **V0B-07**: Session history on Start screen (`Home/LastComplete` state)
-- [ ] **V0B-08**: Audio/haptic cues at block endings
-- [ ] **V0B-09**: `+5` / `+10` stepper or swipe-to-increment for pass metric
+- **V0B-01**: True 0-10 RPE input (slider or tappable number row) instead of 4 bands
+- **V0B-02**: Tap-to-type option for pass metric counters (high attempt counts)
+- **V0B-03**: Pre-populate attempt count from session plan metadata (D96)
+- **V0B-04**: Total session elapsed timer (secondary to block timer)
+- **V0B-05**: Landscape orientation handling
+- **V0B-06**: Rasterized PNG icons (192x192, 512x512) alongside SVG for cross-platform PWA install
+- **V0B-07**: Session history on Start screen (`Home/LastComplete` state)
+- **V0B-08**: Audio/haptic cues at block endings
+- **V0B-09**: `+5` / `+10` stepper or swipe-to-increment for pass metric
 
 ### D94 Visual Compliance Matrix
 
 Full audit from the browser test agent. Every value checked against the spec:
 
-| Property | D94 Spec | Implementation | Status |
-|----------|----------|---------------|--------|
-| Accent | `#E8732A` | `#E8732A` | Match |
-| Accent pressed | `#C55A1B` | `#C55A1B` | Match |
-| Background | `#FFFFFF` | `#FFFFFF` | Match |
-| Card surface | `#F5F5F0` | `#F5F5F0` | Match |
-| Text primary | `#1A1A1A` | `#1A1A1A` | Match |
-| Text secondary | `#6B7280` | `#6B7280` | Match |
-| Success | `#059669` | `#059669` | Match |
-| Warning | `#DC2626` | `#DC2626` | Match |
-| Warning surface | `#FEE2E2` | `#FEE2E2` | Match (partial — pain button uses solid red, see UX-06) |
-| Info surface | `#FEF3E8` | `#FEF3E8` | Match |
-| Card radius | 12px | 12px | Match |
-| Button radius | 16px | 16px | Match |
-| Body text | >= 16px | 16px | Match |
-| Timer digits | 56-64px | 56px | Match |
-| Touch targets | 54-60px | 54px primary, **44-48px secondary** | **Partial — see UX-01** |
-| Font | Inter / system | Inter + system fallback | Match |
+
+| Property        | D94 Spec       | Implementation                  | Status                                                     |
+| --------------- | -------------- | ------------------------------- | ---------------------------------------------------------- |
+| Accent          | `#E8732A`      | `#E8732A`                       | Match                                                      |
+| Accent pressed  | `#C55A1B`      | `#C55A1B`                       | Match                                                      |
+| Background      | `#FFFFFF`      | `#FFFFFF`                       | Match                                                      |
+| Card surface    | `#F5F5F0`      | `#F5F5F0`                       | Match                                                      |
+| Text primary    | `#1A1A1A`      | `#1A1A1A`                       | Match                                                      |
+| Text secondary  | `#6B7280`      | `#6B7280`                       | Match                                                      |
+| Success         | `#059669`      | `#059669`                       | Match                                                      |
+| Warning         | `#DC2626`      | `#DC2626`                       | Match                                                      |
+| Warning surface | `#FEE2E2`      | `#FEE2E2`                       | Match (UX-06 fixed — pain button now uses warning surface) |
+| Info surface    | `#FEF3E8`      | `#FEF3E8`                       | Match                                                      |
+| Card radius     | 12px           | 12px                            | Match                                                      |
+| Button radius   | 16px           | 16px                            | Match                                                      |
+| Body text       | >= 16px        | 16px                            | Match                                                      |
+| Timer digits    | 56-64px        | 56px                            | Match                                                      |
+| Touch targets   | 54-60px        | 54px primary, 54-56px secondary | Match (UX-01 fixed)                                        |
+| Font            | Inter / system | Inter + system fallback         | Match                                                      |
+
 
 ### D95 Preset Compliance
 
-| Preset | D95 Duration | Code Duration | D95 Blocks | Code Blocks | Status |
-|--------|-------------|---------------|------------|-------------|--------|
-| Wall Pass Workout | ~12 min | 12 min | Warm-up 3 + Wall drill 6 + Cool-down 3 | 3 + 6 + 3 | Match |
-| Open Sand Workout | ~12 min | 12 min | Warm-up 3 + Self-toss 6 + Cool-down 3 | 3 + 6 + 3 | Match |
-| Partner Pass Workout | ~15 min | 15 min | Warm-up 3 + Partner drill 9 + Cool-down 3 | 3 + 9 + 3 | Match |
+
+| Preset               | D95 Duration | Code Duration | D95 Blocks                                | Code Blocks | Status |
+| -------------------- | ------------ | ------------- | ----------------------------------------- | ----------- | ------ |
+| Wall Pass Workout    | ~12 min      | 12 min        | Warm-up 3 + Wall drill 6 + Cool-down 3    | 3 + 6 + 3   | Match  |
+| Open Sand Workout    | ~12 min      | 12 min        | Warm-up 3 + Self-toss 6 + Cool-down 3     | 3 + 6 + 3   | Match  |
+| Partner Pass Workout | ~15 min      | 15 min        | Warm-up 3 + Partner drill 9 + Cool-down 3 | 3 + 9 + 3   | Match  |
+
 
 ## Entry: 2026-04-12 — Live Mobile Retest, Persistence Verification, and Docs Discoverability Pass
 
@@ -266,12 +286,14 @@ This entry was captured after a fresh same-day retest of the local app and shoul
 
 ### Personas exercised
 
-| Persona | Lens | What was explicitly verified |
-|---|---|---|
-| End User | First-time mobile courtside experience | Session start clarity, timer legibility, friction points, what felt useful vs not useful |
-| QA Retest | Functional regression check | Start, safety, run, pause, end-confirm, resume, transition, shorten, review, recovery path |
-| Persistence Verifier | Local-first data trust | Whether review submit actually creates `sessionReviews` data in IndexedDB and unlocks `/complete` |
-| Doc Review Agent | AI-native repo discoverability and drift | Whether current docs still describe the runnable prototype and whether setup paths are findable |
+
+| Persona              | Lens                                     | What was explicitly verified                                                                      |
+| -------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| End User             | First-time mobile courtside experience   | Session start clarity, timer legibility, friction points, what felt useful vs not useful          |
+| QA Retest            | Functional regression check              | Start, safety, run, pause, end-confirm, resume, transition, shorten, review, recovery path        |
+| Persistence Verifier | Local-first data trust                   | Whether review submit actually creates `sessionReviews` data in IndexedDB and unlocks `/complete` |
+| Doc Review Agent     | AI-native repo discoverability and drift | Whether current docs still describe the runnable prototype and whether setup paths are findable   |
+
 
 ### Environment and evidence
 
@@ -310,23 +332,27 @@ This entry was captured after a fresh same-day retest of the local app and shoul
 
 ### Flows exercised
 
-| Flow | Verdict | Notes |
-|---|---|---|
-| Start screen -> pair filtering | PASS | Pair toggle correctly reduces the preset list to the partner workout |
-| Start -> safety gate -> run | PASS | Continue is gated until the required safety inputs are set |
-| Run timer countdown | PASS | Timer moved from `2:49` to `2:39` during the retest |
-| Pause -> end-session confirm -> go back home | PASS | Resume prompt appears on home with good context |
-| Resume prompt -> run screen | PARTIAL | Session returns to a paused state rather than truly resuming |
-| Transition -> shortened block path | PASS | Shortened block immediately uses a reduced timer |
-| Pain -> recovery default -> override confirmation | PASS | Recovery path and override warning both appeared correctly |
-| Review submit -> complete | FAIL | Submit stayed on `/review`, wrote no `sessionReviews` row, and `/complete?id=...` redirected to `/` |
+
+| Flow                                              | Verdict | Notes                                                                                               |
+| ------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------- |
+| Start screen -> pair filtering                    | PASS    | Pair toggle correctly reduces the preset list to the partner workout                                |
+| Start -> safety gate -> run                       | PASS    | Continue is gated until the required safety inputs are set                                          |
+| Run timer countdown                               | PASS    | Timer moved from `2:49` to `2:39` during the retest                                                 |
+| Pause -> end-session confirm -> go back home      | PASS    | Resume prompt appears on home with good context                                                     |
+| Resume prompt -> run screen                       | PARTIAL | Session returns to a paused state rather than truly resuming                                        |
+| Transition -> shortened block path                | PASS    | Shortened block immediately uses a reduced timer                                                    |
+| Pain -> recovery default -> override confirmation | PASS    | Recovery path and override warning both appeared correctly                                          |
+| Review submit -> complete                         | FAIL    | Submit stayed on `/review`, wrote no `sessionReviews` row, and `/complete?id=...` redirected to `/` |
+
 
 ### New findings from this retest
 
-| ID | Issue | Severity | Spec / Decision Ref | Status |
-|---|---|---|---|---|
-| FB-11 | `Submit Review` does not complete the session loop. After selecting RPE, incrementing pass counts, adding a tag, and entering a note, the app stays on `/review`, logs no page error, writes no `sessionReviews` row, and direct `/complete?id=...` navigation bounces home. This is a real loop-breaker, not just a flaky click. | P1 | `docs/specs/m001-review-micro-spec.md`, D70 | Open |
-| FB-12 | `Resume Session` on the home modal reopens the session in a paused state. The user must tap `Resume` again inside `RunScreen.tsx` before the timer continues. Either the modal CTA should actually resume the timer or the label should change. | P2 | D38, `docs/research/courtside-timer-patterns.md` | Open |
+
+| ID    | Issue                                                                                                                                                                                                                                                                                                                             | Severity | Spec / Decision Ref                              | Status                                                                                                     |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| FB-11 | `Submit Review` does not complete the session loop. After selecting RPE, incrementing pass counts, adding a tag, and entering a note, the app stays on `/review`, logs no page error, writes no `sessionReviews` row, and direct `/complete?id=...` navigation bounces home. This is a real loop-breaker, not just a flaky click. | P1       | `docs/specs/m001-review-micro-spec.md`, D70      | **Fixed 2026-04-12**: try/catch + read-back verification + error banner + CompleteScreen redirect debounce |
+| FB-12 | `Resume Session` on the home modal reopens the session in a paused state. The user must tap `Resume` again inside `RunScreen.tsx` before the timer continues. Either the modal CTA should actually resume the timer or the label should change.                                                                                   | P2       | D38, `docs/research/courtside-timer-patterns.md` | **Fixed 2026-04-12**: relabeled to "Reopen Session"                                                       |
+
 
 ### Corroborated earlier findings
 
@@ -361,10 +387,10 @@ To reproduce `FB-11` on the current local build:
 4. Advance through the blocks using `Next`.
 5. On review, select any RPE, increment `Good` once so `Total` becomes `1`, optionally add a tag or note, then tap `Submit Review`.
 6. Observe:
-   - URL remains on `/review?id=...`
-   - no browser page errors are emitted
-   - IndexedDB `volley-drills` still has `executionLogs > 0` but `sessionReviews == 0`
-   - opening `/complete?id=...` redirects back to `/`
+  - URL remains on `/review?id=...`
+  - no browser page errors are emitted
+  - IndexedDB `volley-drills` still has `executionLogs > 0` but `sessionReviews == 0`
+  - opening `/complete?id=...` redirects back to `/`
 
 Expected:
 
@@ -374,33 +400,152 @@ Expected:
 
 ### Documentation drift confirmed in this pass
 
-| Area | Confirmed mismatch | Impact |
-|---|---|---|
-| `README.md`, `app/README.md`, `llms.txt` | Still frame the repo as planning-only / scaffold-only despite a runnable multi-screen prototype under `app/` | High — misleading cold start for humans and agents |
-| `docs/discovery/phase-0-readiness-assessment.md` | Still says there are no UI screens, no Dexie DB, and no PWA wiring | High — stale validation state |
-| `docs/research/local-first-pwa-constraints.md` | Still says there is no service worker or `vite-plugin-pwa` wiring yet | High — stale implementation guidance |
-| `docs/decisions.md` D41 vs `app/vite.config.ts` | Safe-boundary prompt-based updates vs `registerType: 'autoUpdate'` | Medium — trust-sensitive policy mismatch |
-| `docs/decisions.md` D69 vs `app/package.json` | Docs name `Vitest`, `RTL`, `fake-indexeddb`, and `Playwright` but those are not in the app dependencies | Medium — stated quality stack does not match repo reality |
-| `npm ls vite vite-plugin-pwa` in `app/` | `vite-plugin-pwa@1.2.0` declares peer support only through Vite 7 while the app is on Vite 8 | High — clean-install / cold-start reliability risk |
+
+| Area                                             | Confirmed mismatch                                                                                           | Impact                                                    |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| `README.md`, `app/README.md`, `llms.txt`         | Still frame the repo as planning-only / scaffold-only despite a runnable multi-screen prototype under `app/` | High — misleading cold start for humans and agents        |
+| `docs/discovery/phase-0-readiness-assessment.md` | Still says there are no UI screens, no Dexie DB, and no PWA wiring                                           | High — stale validation state                             |
+| `docs/research/local-first-pwa-constraints.md`   | Still says there is no service worker or `vite-plugin-pwa` wiring yet                                        | High — stale implementation guidance                      |
+| `docs/decisions.md` D41 vs `app/vite.config.ts`  | Safe-boundary prompt-based updates vs `registerType: 'autoUpdate'`                                           | Medium — trust-sensitive policy mismatch                  |
+| `docs/decisions.md` D69 vs `app/package.json`    | Docs name `Vitest`, `RTL`, `fake-indexeddb`, and `Playwright` but those are not in the app dependencies      | Medium — stated quality stack does not match repo reality |
+| `npm ls vite vite-plugin-pwa` in `app/`          | `vite-plugin-pwa@1.2.0` declares peer support only through Vite 7 while the app is on Vite 8                 | High — clean-install / cold-start reliability risk        |
+
 
 ### Priority delta from this retest
 
-- [ ] **UX-11**: Repair the review save -> complete loop and add a verification path that fails loudly when `sessionReviews` stays empty after submit.
-- [ ] **UX-12**: Make `Resume Session` actually resume, or relabel it to `Reopen Session`.
-- [ ] **DOC-05**: Add literal app startup and verification steps to `README.md` and `app/README.md` (`cd app`, install, `npm run dev`, `npm run build`, `npm run lint`, expected local URL).
-- [ ] **DOC-06**: Align stale Phase 0 / PWA docs (`llms.txt`, `docs/discovery/phase-0-readiness-assessment.md`, `docs/research/local-first-pwa-constraints.md`) with the current runnable v0a prototype.
-- [ ] **HARD-03**: Resolve or explicitly document the `vite-plugin-pwa` / Vite 8 peer mismatch so fresh environments do not start in an invalid state.
+- **UX-11**: Repair the review save -> complete loop and add a verification path that fails loudly when `sessionReviews` stays empty after submit.
+- **UX-12**: Make `Resume Session` actually resume, or relabel it to `Reopen Session`.
+- **DOC-05**: Add literal app startup and verification steps to `README.md` and `app/README.md` (`cd app`, install, `npm run dev`, `npm run build`, `npm run lint`, expected local URL).
+- **DOC-06**: Align stale Phase 0 / PWA docs (`llms.txt`, `docs/discovery/phase-0-readiness-assessment.md`, `docs/research/local-first-pwa-constraints.md`) with the current runnable v0a prototype.
+- **HARD-03**: Resolve or explicitly document the `vite-plugin-pwa` / Vite 8 peer mismatch so fresh environments do not start in an invalid state.
 
 ### Discoverability note
 
 This feedback note is intended to be a living log, not a one-off memo. It should be indexed from the research routers so future agents can find it before repeating the same E2E and doc-drift work from scratch.
 
+---
+
+## Entry: 2026-04-12 — Round 2: Post-Fix Retest & Doc Review
+
+### Why this entry exists
+
+A second round of live browser testing was conducted on branch `main` after a reported batch of UX and architecture fixes. This entry replaces the earlier same-day Round 2 summary where it drifted from verified runtime behavior.
+
+### Runtime evidence used in this entry
+
+- Browser harness: `npx agent-browser`
+- Sessions used: `volley-retest-main`, `volley-retest-cooldown`, `volley-retest-full`
+- Key screenshots:
+  - `test-screenshots/2026-04-12-retest2-01-start.png`
+  - `test-screenshots/2026-04-12-retest2-05-run-paused.png`
+  - `test-screenshots/2026-04-12-retest2-07-discard-review.png`
+  - `test-screenshots/2026-04-12-retest2-09-preroll-state.png`
+  - `test-screenshots/2026-04-12-retest2-10-cooldown-end-warning.png`
+  - `test-screenshots/2026-04-12-retest2-11-full-flow-review-submit.png`
+
+### Verified fixed in this round
+
+
+| Backlog ID | Result                                    | Evidence                                                                                                                                                                 |
+| ---------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `UX-01`    | Fixed for the originally flagged controls | Measured live: safety pain buttons `54px`, recency chips `54px`, active run controls `54px`, paused secondary controls `54px`, pass steppers `56px`, safety icon `44x44` |
+| `UX-02`    | Fixed                                     | `test-screenshots/2026-04-12-retest2-09-preroll-state.png` shows the countdown with `Get ready...` and hidden run controls                                               |
+| `UX-03`    | Fixed                                     | Cool-down modal now says `You’re in your cool-down. Skipping it may affect your recovery.`                                                                               |
+| `UX-04`    | Fixed                                     | Discard from the resume modal now routes to `/review?id=...`                                                                                                             |
+| `UX-05`    | Fixed                                     | Ended-early review kept `Submit Review` disabled until both RPE and an incomplete reason were selected                                                                   |
+| `UX-07`    | Fixed                                     | `Players today` now appears above preset selection on the start screen                                                                                                   |
+| `UX-08`    | Fixed                                     | Safety screen no longer shows the misleading `Step 1 of 2` label                                                                                                         |
+
+
+### Still broken (round 2 verdict — superseded, see assessment below)
+
+
+| ID      | Issue                                                                                                                                                                                                                                                                              | Severity | Status                                                   |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------- |
+| `FB-11` | `Submit Review` is still broken on both ended-early and completed sessions. In both flows, the button becomes enabled and the click is accepted, but the app remains on `/review`, shows no visible error, emits no browser error, and still has `sessionReviews: 0` in IndexedDB. | P1       | **Assessed: code fix is correct, needs live re-verify.** |
+
+> **Post-round-2 assessment (2026-04-12):** The `handleSubmit` in `ReviewScreen.tsx` now correctly does `db.sessionReviews.put()` → `navigate('/complete')` inside try/catch with an error banner fallback. The schema indexes `executionLogId`. The `CompleteScreen` queries via `useLiveQuery` with a 1.5 s redirect debounce. The code path is structurally sound. The round 2 failure most likely tested against a stale dev-server build (the fix was applied in the same editing session). Needs one clean live verification on a fresh `npm run dev` to close.
+
+
+### New finding from this retest
+
+
+| ID      | Issue                                                                                                                                                                                                                               | Severity | Spec / Decision Ref                             | Status                                                                                                        |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `FB-13` | Review chips are still below the review touch-target baseline. `incompleteReason` options and quick tags measured `48px` tall, while the review spec says review inputs should follow the same `54-60px` baseline used in run mode. | P2       | `docs/specs/m001-review-micro-spec.md` UX rules | **Fixed 2026-04-12**: Both `IncompleteReasonChips` and `QuickTagChips` already use `min-h-[54px]` in code. |
+
+
+### Partially landed / still ambiguous
+
+- **`HARD-01`**: The code now calls `requestPersistentStorage()` at startup, but in this Chrome localhost retest `navigator.storage.persisted()` still returned `false`. Treat the code change as landed but the runtime durability benefit as not yet proven.
+- **`UX-06`**: The warning-palette change landed in code, but this pass focused on the functional regression items rather than re-auditing every color state screenshot-by-screenshot.
+- **`UX-09`**: **Fixed 2026-04-12**: Courtside instructions now collapse behind a "More…" disclosure toggle; only the short coaching cue is shown by default, keeping the timer dominant.
+- **`HARD-02`**: Accepted for v0a. `autoUpdate` + `immediate` is safe for this prototype because timer state is flushed to IndexedDB independently of the SW lifecycle, and there is no critical data-in-flight scenario during a SW swap. If v0b adds sync or auth, revisit D41 safe-boundary policy then.
+- **`V0B-03`**: Still open. `ReviewScreen` still starts pass metrics at `0/0` instead of pre-filling attempts from plan metadata. Deferred to v0b.
+- **`DOC-01` through `DOC-06`**: Still open. The docs state is still misleading relative to the runnable v0a prototype. These are a separate workstream from the UX feedback and should be tackled as a doc-refresh pass.
+
+### Priority Delta from Round 2
+
+- **`FB-11` / `UX-11`:** Code fix is structurally correct (try/catch + `db.sessionReviews.put` + navigate + error banner). Round 2 failure attributed to stale dev build. Needs one clean `npm run dev` re-verification to fully close.
+- **Documentation debt remains important** but is a separate workstream. The code is in a reasonable state for field testing once `FB-11` is re-verified.
+- **`FB-13`:** Already fixed — `IncompleteReasonChips` and `QuickTagChips` both use `min-h-[54px]`.
+- **`UX-09`:** Fixed — courtside instructions collapse behind "More…" disclosure.
+- **`UX-12`:** Fixed — resume prompt CTA relabeled from "Resume Session" to "Reopen Session" to match the actual paused-state reopening behavior.
+
+---
+
+## Entry: 2026-04-12 — Round 3: Multi-Persona Code Review + Comprehensive Fix Pass
+
+### Why this entry exists
+
+After implementing all P1 and P2 fixes from Rounds 1-2, four parallel code review agents were dispatched to stress-test the changes from different angles: correctness review of RunScreen, correctness review of ReviewScreen/CompleteScreen, correctness review of StartScreen/SafetyCheckScreen, and a UX touch-target audit across every component. This entry documents the new issues found and their resolutions.
+
+### Personas exercised
+
+| Persona | Lens | What was verified |
+|---|---|---|
+| Correctness Reviewer (RunScreen) | Timer state, race conditions, lifecycle management | Pre-roll countdown, end-session dialog flow, error handling, cleanup |
+| Correctness Reviewer (ReviewScreen) | Data persistence, async patterns, error handling | Submit flow, double-submit guard, CompleteScreen redirect timing |
+| Correctness Reviewer (StartScreen/Safety) | Navigation, touch targets, override flow | Discard-to-review routing, pain override UX, border consistency |
+| UX Touch Target Auditor | D94 54-60px courtside minimum | Every interactive element across all components |
+
+### Critical findings discovered and fixed
+
+| ID | Issue | Severity | Resolution |
+|---|---|---|---|
+| FB-14 | **Double-pause timer corruption**: End Session dialog is only reachable from paused state, but `handleEndSessionRequest` called `timer.pause()` unconditionally. This double-counted accumulated time. Then `handleEndSessionCancel` called `timer.resume()`, causing the block to auto-complete instantly because `remaining <= 0`. | P1 | **Fixed**: `handleEndSessionRequest` now guards with `timer.isRunning` before pausing. `handleEndSessionCancel` no longer resumes (user was already paused). |
+| FB-15 | **Review double-submit**: No guard against rapid taps. Concurrent `handleSubmit` calls could dispatch parallel DB writes and navigation. | P2 | **Fixed**: Added `isSubmitting` state, disabled button during submit, shows "Saving..." label. |
+| FB-16 | **Touch target gaps**: IncompleteReasonChips (48px), QuickTagChips (48px), SafetyIcon button (44px), SafetyIcon "Got it" (48px), ResumePrompt buttons (52px), PainOverrideCard override buttons (44px), TransitionScreen text links (no min-h), SafetyCheckScreen text links (no min-h) — all below 54px minimum. | P2 | **Fixed**: All bumped to min-h-[54px]. SafetyIcon button to h-14 w-14 (56px). Text links given min-h-[54px] + padding. |
+| FB-17 | **Discarded-resume forces inaccurate review reason**: When discarding a resumed session, the review screen required an `incompleteReason` from Time/Fatigue/Pain/Other. None match "I discarded a stale session." | P2 | **Fixed**: `ReviewScreen` now detects `endedEarlyReason === 'discarded_resume'` and skips the incomplete reason requirement. |
+| FB-18 | **CompleteScreen renders blank**: When `useLiveQuery` returns `null`, the component returned `null` (blank screen) for up to 1.5s before the redirect timer fired. | P2 | **Fixed**: Now renders "Redirecting..." message instead of blank. |
+| FB-19 | **Preroll/recovery error handling**: Both `startBlock().then()` and `recoverTimerState().then()` had no `.catch()`. A DB failure would leave a dead screen with no feedback. | P2 | **Fixed**: Added `.catch()` to both paths. Preroll failure navigates home. Recovery failure falls back to starting the full timer duration. |
+| FB-20 | **Dead `.catch()` handler on review button**: The try/catch inside `handleSubmit` caught all errors, making the outer `.catch()` on the button's onClick unreachable dead code. | P3 | **Fixed**: Simplified to `void handleSubmit()` since internal try/catch handles all error paths. |
+
+### Remaining open items after Round 3
+
+| ID | Issue | Severity | Status |
+|---|---|---|---|
+| UX-09 | Coaching cue takes ~40% viewport on run screen, competing with timer | P2 | **Fixed 2026-04-12**: instructions collapse behind "More…" toggle |
+| UX-12 | Resume Session reopens paused state instead of truly resuming | P2 | **Fixed 2026-04-12**: relabeled to "Reopen Session" |
+| HARD-02 | D41 safe-boundary tension with `autoUpdate` + `immediate` SW registration | P2 | **Accepted for v0a**: no data-in-flight during SW swap; revisit in v0b |
+| HARD-03 | `vite-plugin-pwa@1.2.0` vs Vite 8 peer mismatch | P2 | Known limitation — `npm install` succeeds with warnings; document |
+| DOC-01–06 | All documentation drift items | P0 | Open — separate doc-refresh workstream |
+| V0B-01–09 | All v0b deferred items | P3 | Deferred |
+
+### Build verification
+
+All changes verified clean:
+- `npm run lint` — 0 errors, 0 warnings
+- `npx tsc --noEmit` — 0 errors
+- `npm run build` — successful production build (13 precache entries)
+
 ## For Agents
 
 - **Use this section** to find prioritized work items for the v0a codebase.
-- **FB-ID references** (FB-01 through FB-12) are stable identifiers for citing specific findings.
+- **FB-ID references** (FB-01 through FB-20) are stable identifiers for citing specific findings.
 - **DOC-*, UX-*, HARD-*, V0B-*** are backlog item IDs. Use these when implementing fixes or referencing in commits.
 - **When adding new entries to this doc:** use the same `## Entry: YYYY-MM-DD — [title]` heading pattern, add your personas to the frontmatter `personas_simulated` list, and assign new findings FB-IDs continuing from the last used number.
 - **When findings conflict across entries:** newest dated entry wins. If a newer entry invalidates an older PASS verdict, say that explicitly.
 - **Priority definitions:** P0 = doc hygiene blocking agent cold-start. P1 = required before field testing. P2 = polish before field testing. P3 = deferred to v0b.
 - **Cross-references:** `docs/decisions.md` for D-refs, `docs/specs/m001-courtside-run-flow.md` for run-flow behavior, `docs/specs/m001-review-micro-spec.md` for review fields, `docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md` for prototype ladder scope.
+

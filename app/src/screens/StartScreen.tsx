@@ -149,9 +149,11 @@ export function StartScreen() {
 
   const handleDiscardSession = useCallback(async () => {
     if (!resumePrompt) return
+    const execId = resumePrompt.execution.id
     await discardInterruptedSession(resumePrompt.execution)
     setResumePrompt(null)
-  }, [resumePrompt])
+    navigate(`/review?id=${encodeURIComponent(execId)}`)
+  }, [resumePrompt, navigate])
 
   const resumeBlock =
     resumePrompt?.plan.blocks[resumePrompt.execution.activeBlockIndex]
@@ -179,6 +181,13 @@ export function StartScreen() {
         <p className="mt-1 text-text-secondary">Pick a session and try it out</p>
       </header>
 
+      <section aria-labelledby="players-heading" className="flex flex-col gap-3">
+        <h2 id="players-heading" className="text-sm font-semibold text-text-primary">
+          Players today
+        </h2>
+        <PlayerToggle value={playerCount} onChange={setPlayerCount} />
+      </section>
+
       <section aria-labelledby="sessions-heading" className="flex flex-col gap-3">
         <h2 id="sessions-heading" className="sr-only">
           Sessions
@@ -194,13 +203,6 @@ export function StartScreen() {
             </li>
           ))}
         </ul>
-      </section>
-
-      <section aria-labelledby="players-heading" className="flex flex-col gap-3">
-        <h2 id="players-heading" className="text-sm font-semibold text-text-primary">
-          Players today
-        </h2>
-        <PlayerToggle value={playerCount} onChange={setPlayerCount} />
       </section>
 
       <div className="mt-auto flex flex-col gap-4">

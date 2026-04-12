@@ -32,7 +32,7 @@ export function IncompleteReasonChips({
             aria-checked={selected}
             onClick={() => onChange(selected ? null : opt.value)}
             className={[
-              'min-h-[48px] rounded-full px-4 py-2 text-sm font-semibold transition-colors',
+              'min-h-[54px] rounded-full px-4 py-2 text-sm font-semibold transition-colors',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning focus-visible:ring-offset-2',
               selected
                 ? 'bg-warning text-white'

@@ -1,7 +1,5 @@
 ---
-
-## id: v0-prototype-ladder-design
-
+id: v0-prototype-ladder-design
 title: V0 Prototype Ladder Design
 status: draft
 stage: planning
@@ -11,35 +9,35 @@ authority: "V0 stage naming, prototype boundaries, state coverage, and gate logi
 last_updated: 2026-04-12
 wireframe_assets: assets/wireframe-v0a-*.png, assets/wireframe-v0b-*.png, assets/wireframe-*.png
 depends_on:
-
-- docs/vision.md
-- docs/decisions.md
-- docs/prd-foundation.md
-- docs/roadmap.md
-- docs/milestones/m001-solo-session-loop.md
-- docs/discovery/phase-0-readiness-assessment.md
-- docs/discovery/phase-0-wedge-validation.md
-- docs/specs/m001-courtside-run-flow.md
-- docs/specs/m001-home-and-sync-notes.md
-- docs/specs/m001-review-micro-spec.md
-- docs/specs/m001-adaptation-rules.md
-- docs/specs/m001-session-assembly.md
-- docs/specs/m001-quality-and-testing.md
+  - docs/vision.md
+  - docs/decisions.md
+  - docs/prd-foundation.md
+  - docs/roadmap.md
+  - docs/milestones/m001-solo-session-loop.md
+  - docs/discovery/phase-0-readiness-assessment.md
+  - docs/discovery/phase-0-wedge-validation.md
+  - docs/specs/m001-courtside-run-flow.md
+  - docs/specs/m001-home-and-sync-notes.md
+  - docs/specs/m001-review-micro-spec.md
+  - docs/specs/m001-adaptation-rules.md
+  - docs/specs/m001-session-assembly.md
+  - docs/specs/m001-quality-and-testing.md
 decision_refs:
-- D74
-- D82
-- D83
-- D89
-- D90
-- D91
-- D92
-- D93
-- D94
-- D95
-- D96
+  - D74
+  - D82
+  - D83
+  - D89
+  - D90
+  - D91
+  - D92
+  - D93
+  - D94
+  - D95
+  - D96
 open_question_refs:
-- O6
-- O7
+  - O6
+  - O7
+---
 
 # V0 Prototype Ladder Design
 

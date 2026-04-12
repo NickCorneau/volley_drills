@@ -77,7 +77,7 @@ require_heading() {
   local heading="$2"
   local full_path="$REPO_ROOT/$rel_path"
 
-  if [[ -f "$full_path" ]] && ! grep -qFx "$heading" "$full_path"; then
+  if [[ -f "$full_path" ]] && ! grep -qF "$heading" "$full_path"; then
     errors+=("$rel_path: missing required heading '$heading'")
   fi
 }

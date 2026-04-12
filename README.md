@@ -2,7 +2,7 @@
 id: repo-root
 title: Volley Drills
 status: active
-stage: planning
+stage: validation
 type: hub
 summary: "Repo entrypoint: layout, agent quick path, and key links for cold-start orientation."
 authority: repo layout, top-level orientation, and cold-start links into the docs system
@@ -16,21 +16,31 @@ depends_on:
 
 Beach volleyball personal training app -- structured session planning, courtside run mode, and rules-based adaptation for self-coached amateurs.
 
-**Stage**: Planning / docs-first. No approved implementation yet.
+**Stage**: Phase 0 validation. A runnable v0a prototype exists under `app/`. M001 build gate remains closed pending field-test evidence.
 **Active milestone**: M001 Solo Session Loop.
 **Stack**: Vite + React + TypeScript + Tailwind + PWA + Dexie (IndexedDB). Local-first, no backend.
+
+## Quick start (run the app locally)
+
+```bash
+cd app
+npm install
+npm run dev        # http://localhost:5173
+npm run build      # production build + PWA service worker
+npm run lint       # ESLint
+```
 
 ## Repo layout
 
 
-| Folder             | Role                                             | Start here                     |
-| ------------------ | ------------------------------------------------ | ------------------------------ |
-| `docs/`            | Product canon, specs, research, and ops          | `docs/README.md`               |
-| `app/`             | Validation-phase web shell (scaffold only)       | `app/README.md`                |
-| `ops/agent/`       | Agent control plane: task queue, handoffs, runs  | `ops/agent/README.md`          |
-| `scripts/`         | Supervisor, dispatch, verify, and notify scripts | `scripts/agent-supervisor.sh`  |
-| `.cursor/`         | Cursor rules, hooks, and worktree config         | `.cursor/rules/`               |
-| `research-output/` | Raw deep research (do not edit)                  | --                             |
+| Folder             | Role                                                        | Start here                     |
+| ------------------ | ----------------------------------------------------------- | ------------------------------ |
+| `docs/`            | Product canon, specs, research, and ops                     | `docs/README.md`               |
+| `app/`             | v0a validation PWA (React + Dexie + vite-plugin-pwa)        | `app/README.md`                |
+| `ops/agent/`       | Agent control plane: task queue, handoffs, runs              | `ops/agent/README.md`          |
+| `scripts/`         | Supervisor, dispatch, verify, and notify scripts            | `scripts/agent-supervisor.sh`  |
+| `.cursor/`         | Cursor rules, hooks, and worktree config                    | `.cursor/rules/`               |
+| `research-output/` | Raw deep research (do not edit)                             | --                             |
 
 
 ## Agent quick path
@@ -47,6 +57,10 @@ For implementation work, also read:
 
 - `docs/prd-foundation.md` -- object model, drill metadata, MVP scope
 - Relevant `docs/specs/` for milestone-level behavior
+
+For prototype feedback and field-test priorities:
+
+- `docs/research/2026-04-12-v0a-runner-probe-feedback.md` -- living UX/QA feedback log
 
 For agent control-plane work, also read:
 

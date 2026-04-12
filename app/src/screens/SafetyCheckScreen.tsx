@@ -103,7 +103,7 @@ export function SafetyCheckScreen() {
         <button
           type="button"
           onClick={() => navigate('/')}
-          className="text-sm font-medium text-accent"
+          className="min-h-[54px] px-4 text-sm font-medium text-accent"
         >
           Go back
         </button>
@@ -114,8 +114,7 @@ export function SafetyCheckScreen() {
   return (
     <div className="mx-auto flex w-full max-w-[390px] flex-col gap-6 pb-8">
       <header className="pt-2">
-        <p className="text-sm text-text-secondary">Step 1 of 2</p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight text-text-primary">
+        <h1 className="text-2xl font-bold tracking-tight text-text-primary">
           Before we start
         </h1>
       </header>
@@ -145,7 +144,7 @@ export function SafetyCheckScreen() {
               'min-h-[54px] flex-1 rounded-[16px] px-4 py-3 text-base font-semibold transition-colors',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
               painFlag === true
-                ? 'bg-warning text-white focus-visible:ring-warning'
+                ? 'border border-warning bg-warning-surface text-warning focus-visible:ring-warning'
                 : 'border-2 border-gray-200 text-text-primary active:bg-bg-warm focus-visible:ring-warning',
             ].join(' ')}
           >
@@ -176,7 +175,7 @@ export function SafetyCheckScreen() {
                 type="button"
                 onClick={() => setRecency(opt)}
                 className={[
-                  'min-h-[44px] flex-1 rounded-[16px] px-2 py-2 text-sm font-medium transition-colors',
+                  'min-h-[54px] flex-1 rounded-[16px] px-2 py-2 text-sm font-medium transition-colors',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
                   selected && isWarning
                     ? 'border border-warning bg-warning-surface text-warning focus-visible:ring-warning'
@@ -196,7 +195,7 @@ export function SafetyCheckScreen() {
         <button
           type="button"
           onClick={() => setHeatExpanded((prev) => !prev)}
-          className="flex items-center gap-2 text-sm font-medium text-accent transition-colors active:text-accent-pressed"
+          className="flex min-h-[54px] items-center gap-2 text-sm font-medium text-accent transition-colors active:text-accent-pressed"
         >
           <span aria-hidden>🔥</span>
           Heat &amp; safety tips

@@ -57,6 +57,8 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
   const navigate = useNavigate()
 
   const [loaded, setLoaded] = useState<LoadedSession>({ status: 'loading' })
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [sessionRpe, setSessionRpe] = useState<number | null>(null)
   const [good, setGood] = useState(0)
@@ -86,24 +88,35 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
   }, [executionLogId])
 
   const handleSubmit = async () => {
-    if (loaded.status !== 'ready' || sessionRpe == null) return
+    if (loaded.status !== 'ready' || sessionRpe == null || isSubmitting) return
     const { log } = loaded
+    const isEndedEarly = log.status === 'ended_early'
+    const submitWasDiscarded = isEndedEarly && log.endedEarlyReason === 'discarded_resume'
+    const submitNeedsReason = isEndedEarly && !submitWasDiscarded
+    if (submitNeedsReason && incompleteReason == null) return
 
-    const reviewId = `review-${executionLogId}`
-    await db.sessionReviews.put({
-      id: reviewId,
-      executionLogId,
-      sessionRpe,
-      goodPasses: good,
-      totalAttempts: total,
-      incompleteReason:
-        log.status === 'ended_early' ? incompleteReason ?? undefined : undefined,
-      quickTags: quickTags.length > 0 ? quickTags : undefined,
-      shortNote: shortNote.trim() || undefined,
-      submittedAt: Date.now(),
-    })
+    setSubmitError(null)
+    setIsSubmitting(true)
+    try {
+      const reviewId = `review-${executionLogId}`
+      await db.sessionReviews.put({
+        id: reviewId,
+        executionLogId,
+        sessionRpe,
+        goodPasses: good,
+        totalAttempts: total,
+        incompleteReason: submitNeedsReason ? incompleteReason ?? undefined : undefined,
+        quickTags: quickTags.length > 0 ? quickTags : undefined,
+        shortNote: shortNote.trim() || undefined,
+        submittedAt: Date.now(),
+      })
 
-    navigate(`/complete?id=${encodeURIComponent(executionLogId)}`)
+      navigate(`/complete?id=${encodeURIComponent(executionLogId)}`)
+    } catch (err) {
+      console.error('Review submit failed:', err)
+      setSubmitError('Something went wrong saving your review. Please try again.')
+      setIsSubmitting(false)
+    }
   }
 
   if (loaded.status === 'loading') {
@@ -132,7 +145,11 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
   const sessionTitle = plan?.presetName ?? 'Session'
   const durationPart = formatDurationLine(log)
   const statusPart = statusLine(log.status)
-  const canSubmit = sessionRpe != null
+  const isEndedEarly = log.status === 'ended_early'
+  const wasDiscarded = isEndedEarly && log.endedEarlyReason === 'discarded_resume'
+  const needsIncompleteReason = isEndedEarly && !wasDiscarded
+  const canSubmit =
+    sessionRpe != null && (!needsIncompleteReason || incompleteReason != null)
 
   return (
     <div className="mx-auto flex w-full max-w-[390px] flex-col gap-8 pb-8">
@@ -170,7 +187,7 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
         />
       </section>
 
-      {log.status === 'ended_early' && (
+      {needsIncompleteReason && (
         <section className="flex flex-col gap-3 rounded-[12px] bg-bg-warm p-4">
           <h2 className="text-base font-semibold text-text-primary">
             Why did you end early?
@@ -201,10 +218,16 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
         />
       </section>
 
+      {submitError && (
+        <p className="rounded-[12px] bg-warning-surface px-4 py-3 text-center text-sm font-medium text-warning">
+          {submitError}
+        </p>
+      )}
+
       <button
         type="button"
         onClick={() => void handleSubmit()}
-        disabled={!canSubmit}
+        disabled={!canSubmit || isSubmitting}
         className={[
           'min-h-[56px] w-full rounded-[16px] px-4 py-3 text-base font-semibold text-white',
           'transition-colors',
@@ -213,7 +236,7 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
           'bg-accent active:bg-accent-pressed',
         ].join(' ')}
       >
-        Submit Review
+        {isSubmitting ? 'Saving…' : 'Submit Review'}
       </button>
     </div>
   )

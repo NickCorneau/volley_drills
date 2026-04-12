@@ -48,18 +48,18 @@ export function ResumePrompt({
             type="button"
             onClick={onResume}
             className={[
-              'min-h-[52px] w-full rounded-[16px] px-4 py-3 text-base font-semibold text-white',
+              'min-h-[54px] w-full rounded-[16px] px-4 py-3 text-base font-semibold text-white',
               'bg-accent transition-colors active:bg-accent-pressed',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
             ].join(' ')}
           >
-            Resume Session
+            Reopen Session
           </button>
           <button
             type="button"
             onClick={onDiscard}
             className={[
-              'min-h-[52px] w-full rounded-[16px] border-2 border-text-secondary/25',
+              'min-h-[54px] w-full rounded-[16px] border-2 border-text-secondary/25',
               'bg-transparent px-4 py-3 text-base font-semibold text-text-primary',
               'transition-colors hover:bg-bg-warm',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',

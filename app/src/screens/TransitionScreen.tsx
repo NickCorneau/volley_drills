@@ -118,7 +118,7 @@ export function TransitionScreen() {
           <button
             type="button"
             onClick={handleStartShortened}
-            className="text-sm font-medium text-accent"
+            className="min-h-[54px] px-4 text-sm font-medium text-accent"
           >
             Shorten block
           </button>
@@ -126,7 +126,7 @@ export function TransitionScreen() {
             <button
               type="button"
               onClick={handleSkip}
-              className="text-sm font-medium text-text-secondary"
+              className="min-h-[54px] px-4 text-sm font-medium text-text-secondary"
             >
               Skip block
             </button>

@@ -1,6 +1,5 @@
 ---
-
-## id: agents
+id: agents
 title: Agent Orientation
 status: active
 stage: planning
@@ -13,12 +12,13 @@ depends_on:
   - docs/decisions.md
   - docs/ops/agent-runtime.md
   - docs/ops/agent-documentation-contract.md
+---
 
 # Agent Orientation
 
 ## Identity
 
-Beach volleyball training workflow app for self-coached amateurs. Repo remains in planning / validation mode: docs-first, with a thin validation shell under `app/` and no approved production implementation yet.
+Beach volleyball training workflow app for self-coached amateurs. A runnable v0a validation prototype exists under `app/` (React + Dexie + PWA). M001 build gate remains closed pending field-test evidence (D91).
 
 ## Purpose
 
@@ -77,10 +77,12 @@ Drift rule:
 ## Current State
 
 - **Phase**: 0 (discovery + validation)
-- **Posture**: docs-first
+- **Posture**: v0a validation prototype shipped; docs-first for M001 scope beyond v0a
 - **Active milestone**: `M001` Solo Session Loop
-- **Blocking gate**: pre-build validation must pass before `M001` moves to implementation
+- **v0a status**: runnable PWA under `app/` with 6 routes, Dexie persistence, preset sessions, safety gates, timer, review, and resume flow
+- **Blocking gate**: field-test evidence (D91) must pass before `M001` moves to full implementation
 - **Key open questions**: `O6`, `O7`, `O11`, `O12` in `docs/decisions.md`
+- **Prototype feedback**: `docs/research/2026-04-12-v0a-runner-probe-feedback.md` — living backlog of UX/QA findings
 
 ## Cold-Start Protocol
 
@@ -153,8 +155,16 @@ Durable doc conventions live in `docs/ops/agent-documentation-contract.md`. In p
 - Queue, handoff, schema, or control-plane changes: run `bash scripts/validate-agent-control-plane.sh`
 - If a change crosses multiple entry surfaces, update companions named in `docs/ops/agent-documentation-contract.md` in the same pass
 
-## Learned Preferences
+## Learned User Preferences
 
 - Prefer product clarity and the smallest useful MVP over premature feature expansion.
 - Favor structured objects and workflows over chat-first UX.
 - Optimize for fast, low-typing, readable courtside interaction.
+- When the runnable app and documentation disagree, fix docs and machine-readable entry surfaces first; do not leave stale narrative in place where it can be mistaken for current truth.
+- Prefer actively demoting or removing stale documentation over leaving misleading material discoverable at the same tier as canonical docs.
+
+## Learned Workspace Facts
+
+- A v0a session-loop prototype runs from `app/`; some entry and research docs may still read like scaffold-only or intermediate states—verify against code and `docs/catalog.json` when assessing drift.
+- Demoting or deleting docs should include updating `docs/catalog.json`, `agent-manifest.json`, `llms.txt`, and other cross-references required by `docs/ops/agent-documentation-contract.md` so machine routing stays consistent.
+- `bash scripts/validate-agent-docs.sh` enforces strict heading and structure checks; malformed YAML frontmatter, heading drift, or CRLF-related line-ending mismatches can fail validation on Windows-oriented checkouts—normalize entry docs and re-run the script after edits.

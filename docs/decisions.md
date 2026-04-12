@@ -1,4 +1,5 @@
-## id: decisions
+---
+id: decisions
 title: Decisions Log
 status: active
 stage: planning
@@ -8,6 +9,7 @@ summary: "Single source of truth for what is decided, open, and ruled out."
 last_updated: 2026-04-12
 depends_on:
   - docs/vision.md
+---
 
 # Decisions Log
 

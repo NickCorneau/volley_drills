@@ -38,7 +38,7 @@ export function PassMetricInput({
               onClick={decGood}
               disabled={good <= 0}
               aria-label="Decrease good passes"
-              className="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-text-primary/20 bg-bg-primary text-xl font-semibold text-text-primary transition-colors disabled:cursor-not-allowed disabled:opacity-40 active:bg-bg-warm"
+              className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-text-primary/20 bg-bg-primary text-xl font-semibold text-text-primary transition-colors disabled:cursor-not-allowed disabled:opacity-40 active:bg-bg-warm"
             >
               −
             </button>
@@ -46,7 +46,7 @@ export function PassMetricInput({
               type="button"
               onClick={incGood}
               aria-label="Increase good passes"
-              className="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-text-primary/20 bg-bg-primary text-xl font-semibold text-text-primary transition-colors active:bg-bg-warm"
+              className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-text-primary/20 bg-bg-primary text-xl font-semibold text-text-primary transition-colors active:bg-bg-warm"
             >
               +
             </button>
@@ -63,7 +63,7 @@ export function PassMetricInput({
               onClick={decTotal}
               disabled={total <= good}
               aria-label="Decrease total attempts"
-              className="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-text-primary/20 bg-bg-primary text-xl font-semibold text-text-primary transition-colors disabled:cursor-not-allowed disabled:opacity-40 active:bg-bg-warm"
+              className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-text-primary/20 bg-bg-primary text-xl font-semibold text-text-primary transition-colors disabled:cursor-not-allowed disabled:opacity-40 active:bg-bg-warm"
             >
               −
             </button>
@@ -71,7 +71,7 @@ export function PassMetricInput({
               type="button"
               onClick={incTotal}
               aria-label="Increase total attempts"
-              className="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-text-primary/20 bg-bg-primary text-xl font-semibold text-text-primary transition-colors active:bg-bg-warm"
+              className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-text-primary/20 bg-bg-primary text-xl font-semibold text-text-primary transition-colors active:bg-bg-warm"
             >
               +
             </button>

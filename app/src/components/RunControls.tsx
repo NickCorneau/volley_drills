@@ -14,7 +14,7 @@ const btnBase =
 const btnPrimary = `${btnBase} min-h-[54px] w-full bg-accent text-white active:bg-accent-pressed`
 const btnOutline = `${btnBase} min-h-[54px] flex-1 border-2 border-text-secondary/30 text-text-primary`
 const btnSecondary =
-  'min-h-[44px] flex-1 rounded-[12px] border border-text-secondary/20 px-3 py-2 text-sm font-medium text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2'
+  'min-h-[54px] flex-1 rounded-[12px] border border-text-secondary/20 px-3 py-2 text-sm font-medium text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2'
 
 export function RunControls({
   isPaused,

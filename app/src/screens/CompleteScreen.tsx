@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { SafetyIcon } from '../components/SafetyIcon'
@@ -86,9 +86,19 @@ export function CompleteScreen() {
     }
   }, [executionLogId, navigate])
 
+  const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
+    if (redirectTimerRef.current) {
+      clearTimeout(redirectTimerRef.current)
+      redirectTimerRef.current = null
+    }
     if (executionLogId && bundle === null) {
-      navigate('/', { replace: true })
+      redirectTimerRef.current = setTimeout(() => {
+        navigate('/', { replace: true })
+      }, 1500)
+    }
+    return () => {
+      if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current)
     }
   }, [bundle, executionLogId, navigate])
 
@@ -105,7 +115,11 @@ export function CompleteScreen() {
   }
 
   if (bundle === null) {
-    return null
+    return (
+      <div className="mx-auto flex w-full max-w-[390px] flex-col items-center justify-center gap-3 py-24">
+        <p className="text-text-secondary">Redirecting…</p>
+      </div>
+    )
   }
 
   const { log, plan, review } = bundle

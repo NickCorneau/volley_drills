@@ -51,7 +51,7 @@ export function PainOverrideCard({
           type="button"
           onClick={() => setConfirming(true)}
           className={[
-            'min-h-[44px] w-full rounded-[16px] border border-text-secondary/30 px-4 py-2',
+            'min-h-[54px] w-full rounded-[16px] border border-text-secondary/30 px-4 py-2',
             'text-sm text-text-secondary transition-colors active:bg-bg-warm',
           ].join(' ')}
         >
@@ -66,7 +66,7 @@ export function PainOverrideCard({
             type="button"
             onClick={onOverride}
             className={[
-              'min-h-[44px] w-full rounded-[16px] border border-warning/40 px-4 py-2',
+              'min-h-[54px] w-full rounded-[16px] border border-warning/40 px-4 py-2',
               'text-sm font-medium text-warning transition-colors active:bg-warning-surface',
             ].join(' ')}
           >

@@ -1,15 +1,14 @@
 ---
-
-## id: deploy-cloudflare-pages
+id: deploy-cloudflare-pages
 title: Deploy to Cloudflare Pages
 status: active
-stage: planning
+stage: ops
 type: ops
 authority: deployment runbook for the Cloudflare Pages + Porkbun subdomain setup
 last_updated: 2026-04-12
 depends_on:
   - app/vite.config.ts
-  - app/public/_redirects
+---
 
 # Deploy to Cloudflare Pages
 

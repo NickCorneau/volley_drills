@@ -30,7 +30,7 @@ export function QuickTagChips({ selected, onChange }: QuickTagChipsProps) {
             aria-pressed={isOn}
             onClick={() => toggle(tag)}
             className={[
-              'min-h-[48px] rounded-full px-4 py-2 text-sm font-semibold transition-colors',
+              'min-h-[54px] rounded-full px-4 py-2 text-sm font-semibold transition-colors',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
               isOn ? 'bg-accent text-white' : 'bg-bg-warm text-text-primary',
             ].join(' ')}
