@@ -59,6 +59,16 @@ export const PRESETS: PresetDefinition[] = [
     totalMinutes: 12,
   },
   {
+    id: 'solo-serving',
+    name: 'Solo Serving Practice',
+    playerCount: 1,
+    archetypeId: 'solo_open',
+    environment: 'Solo · ~12 min · Net + balls',
+    description:
+      'Serve to zones — build placement and your routine.',
+    totalMinutes: 12,
+  },
+  {
     id: 'partner-pass',
     name: 'Partner Pass Workout',
     playerCount: 2,
@@ -66,6 +76,16 @@ export const PRESETS: PresetDefinition[] = [
     environment: 'Pair · ~15 min · Net + ball',
     description:
       'Partner passing at the net: warm-up tosses, partner pass main set, cool-down.',
+    totalMinutes: 15,
+  },
+  {
+    id: 'serve-receive',
+    name: 'Serve & Receive',
+    playerCount: 2,
+    archetypeId: 'pair_net',
+    environment: 'Pair · ~15 min · Net + balls',
+    description:
+      'One serves, one passes — trade roles and keep score.',
     totalMinutes: 15,
   },
 ];
@@ -142,6 +162,58 @@ const PRESET_BLOCK_BUILDERS: Record<string, () => PlannedBlock[]> = {
     ),
     plannedBlockFromVariant(
       'partner-pass-cooldown',
+      'wrap',
+      'd25',
+      'd25-solo',
+      3,
+      true,
+    ),
+  ],
+  'solo-serving': () => [
+    plannedBlockFromVariant(
+      'solo-serving-warmup',
+      'warmup',
+      'd01',
+      'd01-solo',
+      3,
+      true,
+    ),
+    plannedBlockFromVariant(
+      'solo-serving-main',
+      'main_skill',
+      'd22',
+      'd22-solo',
+      6,
+      false,
+    ),
+    plannedBlockFromVariant(
+      'solo-serving-cooldown',
+      'wrap',
+      'd25',
+      'd25-solo',
+      3,
+      true,
+    ),
+  ],
+  'serve-receive': () => [
+    plannedBlockFromVariant(
+      'serve-receive-warmup',
+      'warmup',
+      'd03',
+      'd03-pair',
+      3,
+      true,
+    ),
+    plannedBlockFromVariant(
+      'serve-receive-main',
+      'main_skill',
+      'd18',
+      'd18-pair',
+      9,
+      false,
+    ),
+    plannedBlockFromVariant(
+      'serve-receive-cooldown',
       'wrap',
       'd25',
       'd25-solo',

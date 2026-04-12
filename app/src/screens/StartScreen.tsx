@@ -17,8 +17,15 @@ const PRESETS: SessionPreset[] = [
   {
     id: 'open-sand',
     name: 'Open Sand Workout',
-    env: 'Solo · 12 min · Cones + ball',
+    env: 'Solo · 12 min · Ball + markers',
     desc: 'Self-toss passing on open sand',
+    playerCount: 1,
+  },
+  {
+    id: 'solo-serving',
+    name: 'Solo Serving Practice',
+    env: 'Solo · 12 min · Net + balls',
+    desc: 'Serve to zones — build placement and your routine',
     playerCount: 1,
   },
   {
@@ -26,6 +33,13 @@ const PRESETS: SessionPreset[] = [
     name: 'Partner Pass Workout',
     env: 'Pair · 15 min · Net + ball',
     desc: 'Pass back and forth across a net',
+    playerCount: 2,
+  },
+  {
+    id: 'serve-receive',
+    name: 'Serve & Receive',
+    env: 'Pair · 15 min · Net + balls',
+    desc: 'One serves, one passes — trade roles and keep score',
     playerCount: 2,
   },
 ]
