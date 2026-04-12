@@ -1,10 +1,10 @@
 ---
-title: "feat: Build v0a Runner Probe Prototype"
+
+## title: "feat: Build v0a Runner Probe Prototype"
 type: feat
 status: completed
 date: 2026-04-12
 origin: docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md
----
 
 # feat: Build v0a Runner Probe Prototype
 
@@ -59,7 +59,7 @@ The v0a Runner Probe is the fastest honest way to test whether this wedge is via
 - `app/src/data/archetypes.ts` — session archetypes with block layouts per time profile, `selectArchetype()`
 - `app/src/data/progressions.ts` — 7 progression chains
 - `app/package.json` — React 19, Vite 8, Dexie, react-router-dom already declared
-- `app/src/App.tsx` — currently Vite starter placeholder, needs complete replacement
+- `app/src/App.tsx` — React Router layout with 6 routes (Start, Safety, Run, Transition, Review, Complete)
 
 ### External References
 
@@ -121,7 +121,7 @@ Timer Architecture:
 
 ## Implementation Units
 
-- [ ] **Unit 1: Project Foundation — Tailwind, Router, PWA**
+- **Unit 1: Project Foundation — Tailwind, Router, PWA**
 
 **Goal:** Transform the placeholder app into a routable PWA with Tailwind styling and the D94 visual design language configured.
 
@@ -130,6 +130,7 @@ Timer Architecture:
 **Dependencies:** None
 
 **Files:**
+
 - Modify: `app/package.json`
 - Modify: `app/vite.config.ts`
 - Modify: `app/src/main.tsx`
@@ -139,6 +140,7 @@ Timer Architecture:
 - Modify: `app/src/App.tsx` (replace placeholder with router outlet)
 
 **Approach:**
+
 - Install tailwindcss, postcss, autoprefixer, vite-plugin-pwa
 - Configure Tailwind with D94 color palette: accent #E8732A, pressed #C55A1B, bg white/#F5F5F0, text #1A1A1A/#6B7280, success #059669, warning #DC2626
 - Set up font: Inter with system sans-serif fallback
@@ -147,20 +149,23 @@ Timer Architecture:
 - Set up base layout component with safe-area insets for mobile
 
 **Patterns to follow:**
+
 - Existing `app/vite.config.ts` structure for plugin additions
 - D94 Visual Design Language section in prototype ladder doc
 
 **Test scenarios:**
+
 - Happy path: `npm run dev` starts without errors, Tailwind classes compile, routes resolve
 - Happy path: `npm run build` produces PWA manifest and service worker
 - Edge case: accessing unknown route redirects to start screen
 
 **Verification:**
+
 - Dev server starts cleanly, Tailwind utility classes render, PWA manifest present in build output
 
 ---
 
-- [ ] **Unit 2: Dexie Database Schema & Persistence Layer**
+- **Unit 2: Dexie Database Schema & Persistence Layer**
 
 **Goal:** Create the relational local-first Dexie schema with separate stores for plans, execution, and reviews. Include the timer state ledger for PWA eviction defense.
 
@@ -169,6 +174,7 @@ Timer Architecture:
 **Dependencies:** Unit 1
 
 **Files:**
+
 - Create: `app/src/db/index.ts`
 - Create: `app/src/db/schema.ts`
 - Create: `app/src/db/types.ts`
@@ -176,6 +182,7 @@ Timer Architecture:
 - Test: `app/src/__tests__/db/schema.test.ts`
 
 **Approach:**
+
 - Define Dexie database with stores: sessionPlans, executionLogs, sessionReviews, timerState
 - Use client-generated string IDs (nanoid or crypto.randomUUID)
 - SessionPlan: preset ID, blocks array (locked snapshot), context, createdAt
@@ -185,10 +192,12 @@ Timer Architecture:
 - Request persistent storage via navigator.storage.persist()
 
 **Patterns to follow:**
+
 - Architecture constraints in prototype ladder design (relational schema, timer state ledger, plan/execution/review separation)
 - Canonical local-first contracts in PRD Foundation
 
 **Test scenarios:**
+
 - Happy path: create a session plan, verify it persists and reads back correctly
 - Happy path: create execution log linked to plan, update status through lifecycle
 - Happy path: timer ledger writes every 5s and reads back for cold-boot recovery
@@ -196,11 +205,12 @@ Timer Architecture:
 - Edge case: missing timer ledger on cold boot returns null (fresh start)
 
 **Verification:**
+
 - All Dexie operations succeed in Vitest with fake-indexeddb. Schema matches the relational separation contract.
 
 ---
 
-- [ ] **Unit 3: Preset Session Builder**
+- **Unit 3: Preset Session Builder**
 
 **Goal:** Create the three D95 preset sessions as structured SessionPlan objects using existing drill catalog data. Pure function that maps preset ID to a complete plan.
 
@@ -209,11 +219,13 @@ Timer Architecture:
 **Dependencies:** Unit 2
 
 **Files:**
+
 - Create: `app/src/domain/presets.ts`
 - Create: `app/src/domain/types.ts`
 - Test: `app/src/__tests__/domain/presets.test.ts`
 
 **Approach:**
+
 - Define preset configurations mapping to D95: Wall Pass Workout (solo+wall, ~12min), Open Sand Workout (solo+no wall, ~12min), Partner Pass Workout (pair+net, ~15min)
 - Each preset builds a SessionPlan with mandatory warm-up block, main drill block(s), and mandatory cool-down block
 - Select drills from existing `app/src/data/drills.ts` catalog matching environment and player constraints
@@ -222,11 +234,13 @@ Timer Architecture:
 - Pure function: (presetId, playerCount) => SessionPlan
 
 **Patterns to follow:**
+
 - `app/src/data/archetypes.ts` for block layout structure
 - `app/src/types/session.ts` for SessionContext and BlockSlot types
 - `app/src/data/drills.ts` for drill selection by environment flags
 
 **Test scenarios:**
+
 - Happy path: Wall Pass preset produces plan with warmup + wall drill block + cooldown, total ~12min
 - Happy path: Open Sand preset uses self-toss drill, no wall requirement
 - Happy path: Partner preset includes net-based drill for 2 players, total ~15min
@@ -234,11 +248,12 @@ Timer Architecture:
 - Edge case: block durations sum to session total within tolerance
 
 **Verification:**
+
 - Each preset generates a valid plan with correct drill selection, block structure, and duration totals matching D95.
 
 ---
 
-- [ ] **Unit 4: Start Screen — Preset Selection**
+- **Unit 4: Start Screen — Preset Selection**
 
 **Goal:** Build the entry screen where users pick player count (1 or 2) and select one of three prebuilt sessions, then tap Start.
 
@@ -247,11 +262,13 @@ Timer Architecture:
 **Dependencies:** Unit 1, Unit 3
 
 **Files:**
+
 - Create: `app/src/screens/StartScreen.tsx`
 - Create: `app/src/components/PresetCard.tsx`
 - Create: `app/src/components/PlayerToggle.tsx`
 
 **Approach:**
+
 - Player count as large-tap toggle cards: "Solo" (1) and "Partner" (2)
 - Filter visible presets by player count (solo shows Wall Pass + Open Sand; pair shows Partner Pass)
 - Preset cards show: name, environment, duration, block summary
@@ -260,21 +277,24 @@ Timer Architecture:
 - On Start: create SessionPlan in Dexie, navigate to /safety
 
 **Patterns to follow:**
+
 - D94 Visual Design Language (selection cards with descriptions, large tap cards for binary choices)
 - UX Interaction Constraints from prototype ladder
 
 **Test scenarios:**
+
 - Happy path: selecting Solo shows 2 presets (Wall, Open Sand); selecting Partner shows 1 preset (Partner Pass)
 - Happy path: tapping Start creates a SessionPlan in DB and navigates to safety screen
 - Edge case: default state is Solo (1 player) selected
 - Edge case: switching from Partner to Solo deselects any partner-only preset
 
 **Verification:**
+
 - Start screen renders with correct preset filtering by player count. Tapping Start persists a plan and navigates forward.
 
 ---
 
-- [ ] **Unit 5: Pre-Session Safety Check**
+- **Unit 5: Pre-Session Safety Check**
 
 **Goal:** Build the safety gate screen with pain flag, training recency, and contextual heat awareness CTA. Includes the pain override flow per the prototype ladder spec.
 
@@ -283,10 +303,12 @@ Timer Architecture:
 **Dependencies:** Unit 1, Unit 4
 
 **Files:**
+
 - Create: `app/src/screens/SafetyCheckScreen.tsx`
 - Create: `app/src/components/PainOverrideCard.tsx`
 
 **Approach:**
+
 - Pain flag: large-tap Yes/No cards ("Pain that changes how you move?")
 - Training recency: segmented control (Last trained: Today / Yesterday / 2+ days ago / First time)
 - Heat CTA: conditional inline card when relevant (contextual, not blocking)
@@ -296,11 +318,13 @@ Timer Architecture:
 - D94 styling with warning red #DC2626 on #FEE2E2 for pain surfaces
 
 **Patterns to follow:**
+
 - Pain-Override Flow section in prototype ladder design
 - Pre-Session Safety section in courtside run flow spec
 - D94 warning palette
 
 **Test scenarios:**
+
 - Happy path: No pain + recent training → navigates to run flow
 - Happy path: Pain = Yes → shows recovery warning with adjusted session details
 - Happy path: Pain override → shows confirmation, then proceeds with original session
@@ -308,11 +332,12 @@ Timer Architecture:
 - Error path: navigating to safety without a session plan redirects to start
 
 **Verification:**
+
 - Safety check correctly gates the session, pain override flow matches spec, and safety state persists.
 
 ---
 
-- [ ] **Unit 6: Core Run Flow — Timer, Blocks, Transitions**
+- **Unit 6: Core Run Flow — Timer, Blocks, Transitions**
 
 **Goal:** Build the core courtside run experience: block-by-block execution with timer, coaching cues, primary/secondary controls, between-block transitions, and mandatory warm-up/cool-down enforcement.
 
@@ -321,6 +346,7 @@ Timer Architecture:
 **Dependencies:** Unit 2, Unit 3, Unit 5
 
 **Files:**
+
 - Create: `app/src/screens/RunScreen.tsx`
 - Create: `app/src/screens/TransitionScreen.tsx`
 - Create: `app/src/components/BlockTimer.tsx`
@@ -333,6 +359,7 @@ Timer Architecture:
 - Test: `app/src/__tests__/hooks/useSessionRunner.test.ts`
 
 **Approach:**
+
 - RunScreen: displays current block with title, one coaching cue, large timer (56-64px), phase label (WORK/REST), progress indicator
 - Timer: requestAnimationFrame display loop + 5s persistence flush via timerLedger
 - Primary controls: Next (advance to next block) and Pause (54-60px touch targets)
@@ -347,11 +374,13 @@ Timer Architecture:
 **Execution note:** This is the core validation surface. Test timer accuracy and persistence recovery before polishing UI.
 
 **Patterns to follow:**
+
 - Courtside run flow spec control hierarchy
 - Timer State Ledger architecture constraint
 - D94 visual design, courtside UX requirements from PRD
 
 **Test scenarios:**
+
 - Happy path: start session → warm-up block runs → transition → main block → transition → cool-down → completes
 - Happy path: timer counts down accurately, displays remaining time in large digits
 - Happy path: Next advances to transition screen between blocks
@@ -364,11 +393,12 @@ Timer Architecture:
 - Integration: timer ledger flush every 5s survives app background
 
 **Verification:**
+
 - Full session can be run start-to-finish through all blocks. Timer is accurate. Persistence survives interruption. Control hierarchy matches spec.
 
 ---
 
-- [ ] **Unit 7: Quick Review Screen**
+- **Unit 7: Quick Review Screen**
 
 **Goal:** Build the post-session review screen: sRPE capture, binary pass metric with attempt count, optional incomplete reason, optional note, and submit.
 
@@ -377,12 +407,14 @@ Timer Architecture:
 **Dependencies:** Unit 2, Unit 6
 
 **Files:**
+
 - Create: `app/src/screens/ReviewScreen.tsx`
 - Create: `app/src/components/RpeSlider.tsx`
 - Create: `app/src/components/PassMetricInput.tsx`
 - Create: `app/src/components/IncompleteReasonChips.tsx`
 
 **Approach:**
+
 - Single-screen layout, field order: RPE → metric → incomplete reason → note → submit
 - sRPE: large 0-10 tap row or slider with descriptive labels at key points
 - Binary pass metric: "Good" / "Not Good" large-tap cards with attempt count stepper (large +/- buttons, no keyboard)
@@ -392,11 +424,13 @@ Timer Architecture:
 - Target: completable in under 60 seconds
 
 **Patterns to follow:**
+
 - Review micro-spec field order and tap-first requirement
 - UX Interaction Constraints: large-tap steppers for attemptCount, predefined chips for incompleteReason
 - D94 visual design
 
 **Test scenarios:**
+
 - Happy path: complete full review with RPE + Good + 10 attempts → saves review, navigates to complete
 - Happy path: partial session shows incomplete reason chips, selecting one saves it
 - Edge case: RPE 0 (rest/no effort) is valid
@@ -405,11 +439,12 @@ Timer Architecture:
 - Error path: navigating to review without completed execution redirects to start
 
 **Verification:**
+
 - Review completes in target time. All fields save correctly to Dexie. Navigation flows correctly from run end to review to complete.
 
 ---
 
-- [ ] **Unit 8: Session Complete Screen**
+- **Unit 8: Session Complete Screen**
 
 **Goal:** Build the summary screen showing session results and clear "Saved on device" confirmation.
 
@@ -418,9 +453,11 @@ Timer Architecture:
 **Dependencies:** Unit 7
 
 **Files:**
+
 - Create: `app/src/screens/CompleteScreen.tsx`
 
 **Approach:**
+
 - Display: session name, duration completed, blocks completed count, RPE given
 - Prominent "Saved on device" message with checkmark
 - Primary action: "Done" returns to start screen
@@ -428,20 +465,23 @@ Timer Architecture:
 - No next-session recommendation (v0a scope)
 
 **Patterns to follow:**
+
 - D94 visual design, success green #059669 for saved confirmation
 - Session Complete screen description in prototype ladder
 
 **Test scenarios:**
+
 - Happy path: shows correct session summary after review submit
 - Happy path: "Done" navigates back to start screen
 - Edge case: partial session shows adjusted stats (fewer blocks completed)
 
 **Verification:**
+
 - Complete screen displays accurate session data and "Saved on device" confirmation. Done returns to start.
 
 ---
 
-- [ ] **Unit 9: Resume & Interruption Recovery**
+- **Unit 9: Resume & Interruption Recovery**
 
 **Goal:** Implement timestamp-based resume after backgrounding, accidental close, or PWA eviction. On return, show explicit resume prompt with pause duration.
 
@@ -450,12 +490,14 @@ Timer Architecture:
 **Dependencies:** Unit 2, Unit 6
 
 **Files:**
+
 - Modify: `app/src/hooks/useSessionRunner.ts`
 - Modify: `app/src/screens/RunScreen.tsx`
 - Create: `app/src/components/ResumePrompt.tsx`
 - Test: `app/src/__tests__/hooks/useSessionRunner.test.ts` (extend)
 
 **Approach:**
+
 - On app mount: check for in-progress ExecutionLog in Dexie
 - If found: show ResumePrompt with session name, block paused at, time elapsed since interruption
 - Resume options: "Resume" (continues from where left off, adding pause duration) or "Discard" (marks as ended_early)
@@ -464,11 +506,13 @@ Timer Architecture:
 - Handle beforeunload to flush final state
 
 **Patterns to follow:**
+
 - Interruption recovery section in courtside run flow spec
 - Timer state ledger architecture constraint
 - v0a trust floor: no lost progress in normal run
 
 **Test scenarios:**
+
 - Happy path: background app during block → return → resume prompt shows correct elapsed time → resume continues
 - Happy path: kill app during block → reopen → resume prompt appears with session state
 - Edge case: resume after long interruption (hours) still shows correct data
@@ -476,11 +520,12 @@ Timer Architecture:
 - Integration: timer ledger read on cold boot produces accurate time reconstruction
 
 **Verification:**
+
 - Interruption at any point during a session can be recovered. Resume prompt displays correct state. No progress is lost in normal use.
 
 ---
 
-- [ ] **Unit 10: PWA Polish & Offline**
+- **Unit 10: PWA Polish & Offline**
 
 **Goal:** Ensure the app works as a proper PWA: service worker caching, offline support after first load, Add to Home Screen metadata, and no mid-session refresh.
 
@@ -489,12 +534,14 @@ Timer Architecture:
 **Dependencies:** Unit 1, Unit 6
 
 **Files:**
+
 - Modify: `app/vite.config.ts` (finalize PWA config)
 - Create: `app/public/manifest.json` (or configure via vite-plugin-pwa)
 - Create: `app/public/icons/` (app icons at required sizes)
 - Modify: `app/index.html` (meta tags for mobile, theme-color, apple-mobile-web-app)
 
 **Approach:**
+
 - Configure vite-plugin-pwa for precaching all app assets
 - Service worker: skip waiting only at safe boundaries (not mid-session)
 - Add to Home Screen: proper manifest with app name, icons, theme color (#E8732A), display: standalone
@@ -503,16 +550,19 @@ Timer Architecture:
 - Test offline: after first load, airplane mode should still work
 
 **Patterns to follow:**
+
 - PWA trust floor in prototype ladder: offline reuse after first load, no mid-session refresh
 - iOS 17+ baseline per M001
 
 **Test scenarios:**
+
 - Happy path: install PWA via Add to Home Screen, launch standalone, all screens work
 - Happy path: after first load, airplane mode → app loads from cache, session runs normally
 - Edge case: service worker update does not interrupt active session
 - Edge case: app icon and splash screen render correctly on iOS
 
 **Verification:**
+
 - PWA installs and runs standalone. Offline mode works after first load. No mid-session disruptions from service worker updates.
 
 ## System-Wide Impact
@@ -524,13 +574,15 @@ Timer Architecture:
 
 ## Risks & Dependencies
 
-| Risk | Mitigation |
-|------|------------|
-| iOS Safari PWA timer accuracy under backgrounding | Timestamp-based timer recovery, not tick-counting. Test on real iOS devices. |
-| Screen Wake Lock API not supported on all targets | Best-effort with graceful fallback. Timer recovery handles lock screen scenarios. |
-| navigator.storage.persist() may be rejected | Proceed without persistent storage guarantee. "Saved on device" copy remains accurate for current session. |
+
+| Risk                                                       | Mitigation                                                                                                     |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| iOS Safari PWA timer accuracy under backgrounding          | Timestamp-based timer recovery, not tick-counting. Test on real iOS devices.                                   |
+| Screen Wake Lock API not supported on all targets          | Best-effort with graceful fallback. Timer recovery handles lock screen scenarios.                              |
+| navigator.storage.persist() may be rejected                | Proceed without persistent storage guarantee. "Saved on device" copy remains accurate for current session.     |
 | Drill catalog may not have perfect matches for D95 presets | Select closest matches from existing 26 drills. Content quality is a validation concern, not a blocking issue. |
-| Tailwind + vite-plugin-pwa configuration conflicts | Standard well-documented stack. Resolve during Unit 1 setup. |
+| Tailwind + vite-plugin-pwa configuration conflicts         | Standard well-documented stack. Resolve during Unit 1 setup.                                                   |
+
 
 ## Documentation / Operational Notes
 
@@ -547,3 +599,4 @@ Timer Architecture:
 - Milestone: `docs/milestones/m001-solo-session-loop.md`
 - PRD: `docs/prd-foundation.md`
 - Decisions: D82-D88 (safety), D90-D96 (session context, visual design, presets)
+

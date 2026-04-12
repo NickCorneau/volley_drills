@@ -16,6 +16,7 @@ export function useSessionRunner(
 ) {
   const [execution, setExecution] = useState<ExecutionLog | null>(null);
   const [plan, setPlan] = useState<SessionPlan | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   const executionRef = useRef<ExecutionLog | null>(null);
   const planRef = useRef<SessionPlan | null>(null);
@@ -33,12 +34,14 @@ export function useSessionRunner(
       if (!exec) {
         setExecution(null);
         setPlan(null);
+        setLoaded(true);
         return;
       }
       const p = await db.sessionPlans.get(exec.planId);
       if (cancelled) return;
       setExecution(exec);
       setPlan(p ?? null);
+      setLoaded(true);
     }
     load();
     return () => {
@@ -81,7 +84,7 @@ export function useSessionRunner(
   }, [persistExecution]);
 
   const pauseBlock = useCallback(
-    async (accumulatedElapsed: number) => {
+    async (accumulatedElapsed: number, effectiveDurationSeconds?: number) => {
       const exec = executionRef.current;
       if (!exec) return;
 
@@ -95,6 +98,7 @@ export function useSessionRunner(
         blockIndex: exec.activeBlockIndex,
         startedAt: blockStart,
         accumulatedElapsed,
+        effectiveDurationSeconds,
         status: 'paused',
         lastFlushedAt: Date.now(),
       });
@@ -182,7 +186,7 @@ export function useSessionRunner(
   }, []);
 
   const flushTimer = useCallback(
-    async (accumulatedElapsed: number) => {
+    async (accumulatedElapsed: number, effectiveDurationSeconds?: number) => {
       const exec = executionRef.current;
       if (!exec) return;
 
@@ -194,6 +198,7 @@ export function useSessionRunner(
         blockIndex: exec.activeBlockIndex,
         startedAt: blockStart,
         accumulatedElapsed,
+        effectiveDurationSeconds,
         status: exec.status === 'paused' ? 'paused' : 'running',
         lastFlushedAt: Date.now(),
       });
@@ -211,7 +216,8 @@ export function useSessionRunner(
         saved.executionLogId === executionLogId &&
         saved.blockIndex === exec.activeBlockIndex
       ) {
-        return Math.max(0, blockDurationSeconds - saved.accumulatedElapsed);
+        const duration = saved.effectiveDurationSeconds ?? blockDurationSeconds;
+        return Math.max(0, duration - saved.accumulatedElapsed);
       }
       return null;
     },
@@ -254,6 +260,7 @@ export function useSessionRunner(
   return {
     plan,
     execution,
+    loaded,
     currentBlock,
     currentBlockIndex,
     totalBlocks,

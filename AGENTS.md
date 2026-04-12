@@ -1,8 +1,9 @@
 ---
-id: agents
+
+## id: agents
 title: Agent Orientation
 status: active
-stage: planning
+stage: validation
 type: agent-contract
 summary: "Lean repo entrypoint for agents: current state, source-of-truth order, cold-start routing, and repo-wide operating constraints."
 authority: agent read order, operating rules, learned preferences, repo-wide routing
@@ -12,7 +13,6 @@ depends_on:
   - docs/decisions.md
   - docs/ops/agent-runtime.md
   - docs/ops/agent-documentation-contract.md
----
 
 # Agent Orientation
 
@@ -60,13 +60,13 @@ Keep this file concise and pointer-oriented. If content becomes an exhaustive ta
 
 This file is the canonical prose repo contract. Companion surfaces split the rest of the job:
 
-- `docs/catalog.json` � exhaustive machine-readable doc index, routing rules, dependency graph, and context-budget metadata
-- `docs/README.md` � prose editorial index for doc families and ownership
-- `docs/ops/agent-documentation-contract.md` � canonical doc conventions, frontmatter expectations, and change-propagation rules
-- `agent-manifest.json` � compact JSON cold-start payload
-- `llms.txt` � lightweight navigational summary for generic LLM tooling
-- `docs/ops/agent-runtime.md` � bounded-runtime contract and unattended-work guidance
-- `ops/agent/README.md` � control-plane layout, task flow, and handoff mechanics
+- `docs/catalog.json` — exhaustive machine-readable doc index, routing rules, dependency graph, and context-budget metadata
+- `docs/README.md` — prose editorial index for doc families and ownership
+- `docs/ops/agent-documentation-contract.md` — canonical doc conventions, frontmatter expectations, and change-propagation rules
+- `agent-manifest.json` — compact JSON cold-start payload
+- `llms.txt` — lightweight navigational summary for generic LLM tooling
+- `docs/ops/agent-runtime.md` — bounded-runtime contract and unattended-work guidance
+- `ops/agent/README.md` — control-plane layout, task flow, and handoff mechanics
 
 Drift rule:
 
@@ -81,8 +81,8 @@ Drift rule:
 - **Active milestone**: `M001` Solo Session Loop
 - **v0a status**: runnable PWA under `app/` with 6 routes, Dexie persistence, preset sessions, safety gates, timer, review, and resume flow
 - **Blocking gate**: field-test evidence (D91) must pass before `M001` moves to full implementation
-- **Key open questions**: `O6`, `O7`, `O11`, `O12` in `docs/decisions.md`
-- **Prototype feedback**: `docs/research/2026-04-12-v0a-runner-probe-feedback.md` — living backlog of UX/QA findings
+- **Key open questions**: `O4`, `O5`, `O6`, `O7`, `O11`, `O12` in `docs/decisions.md`
+- **Prototype feedback**: `docs/research/2026-04-12-v0a-runner-probe-feedback.md` — **read this first for any prototype work.** Living backlog of UX/QA findings with stable IDs (FB-*, UX-*, DOC-*, HARD-*, V0B-*). Contains the current fix status, deferred items, and what still needs live verification.
 
 ## Cold-Start Protocol
 
@@ -93,7 +93,7 @@ When entering this repo cold, stop reading as soon as you have enough context fo
 3. Load the smallest relevant task pack:
   - Product direction: `docs/vision.md` -> `docs/decisions.md` -> `docs/prd-foundation.md`
   - Milestone or implementation planning: `docs/milestones/m001-solo-session-loop.md` -> relevant `docs/specs/` -> `app/README.md`
-  - Validation / prototype sequencing: `docs/discovery/phase-0-readiness-assessment.md` -> `docs/discovery/phase-0-wedge-validation.md` -> `docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md`
+  - Validation / prototype feedback: **start here →** `docs/research/2026-04-12-v0a-runner-probe-feedback.md` -> `docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md` -> `app/README.md`
   - Research: `docs/research/README.md` -> narrowest relevant note
   - Docs editing or entry-surface changes: `docs/README.md` -> `docs/ops/agent-documentation-contract.md`
   - Agent ops / control plane: `docs/ops/agent-runtime.md` -> `ops/agent/README.md`
@@ -103,10 +103,10 @@ When entering this repo cold, stop reading as soon as you have enough context fo
 
 When guidance conflicts, higher rank wins:
 
-1. `docs/vision.md` � product principles and strategic stance
-2. `docs/decisions.md` � decided, open, and ruled-out items
-3. `docs/prd-foundation.md` � scope, workflow, object model, MVP requirements
-4. `docs/roadmap.md` � phase sequencing and exit criteria
+1. `docs/vision.md` — product principles and strategic stance
+2. `docs/decisions.md` — decided, open, and ruled-out items
+3. `docs/prd-foundation.md` — scope, workflow, object model, MVP requirements
+4. `docs/roadmap.md` — phase sequencing and exit criteria
 5. `docs/milestones/` � thin-slice charter scope
 6. `docs/specs/` � milestone-level behavior details
 7. `docs/research/` � curated research inputs
@@ -124,11 +124,11 @@ Rules of thumb:
 
 Use stable IDs when citing enumerable items across docs:
 
-- `P`* � product principles in `docs/vision.md`
-- `D*` � decided items in `docs/decisions.md`
-- `O*` � open questions in `docs/decisions.md`
-- `M*` � milestones in `docs/milestones/`
-- `R*` � requirements in spec docs where used
+- `P`* — product principles in `docs/vision.md`
+- `D*` — decided items in `docs/decisions.md`
+- `O*` — open questions in `docs/decisions.md`
+- `M*` — milestones in `docs/milestones/`
+- `R*` — requirements in spec docs where used
 
 Durable doc conventions live in `docs/ops/agent-documentation-contract.md`. In practice:
 
@@ -140,7 +140,7 @@ Durable doc conventions live in `docs/ops/agent-documentation-contract.md`. In p
 ## Operational Constraints
 
 - This repo is Cursor-first. Shared agent behavior lives in `AGENTS.md`, `.cursor/rules/`, and `docs/ops/`.
-- Default to docs-first work until a milestone is explicitly approved for implementation.
+- Default to docs-first work for M001 scope beyond v0a until the field-test gate (D91) clears.
 - Keep autonomous work bounded: one task, explicit verification commands, explicit escalation triggers, and terminal state `done`, `blocked`, `failed`, or `budget_exhausted`.
 - Use `ops/agent/queue/` for task specs and `ops/agent/handoffs/` for curated handoffs. Keep volatile run or lock state out of git.
 - Keep recommendations aligned with courtside mobile use, low typing, structured workflows, and solo/pair fallback.
@@ -168,3 +168,4 @@ Durable doc conventions live in `docs/ops/agent-documentation-contract.md`. In p
 - A v0a session-loop prototype runs from `app/`; some entry and research docs may still read like scaffold-only or intermediate states—verify against code and `docs/catalog.json` when assessing drift.
 - Demoting or deleting docs should include updating `docs/catalog.json`, `agent-manifest.json`, `llms.txt`, and other cross-references required by `docs/ops/agent-documentation-contract.md` so machine routing stays consistent.
 - `bash scripts/validate-agent-docs.sh` enforces strict heading and structure checks; malformed YAML frontmatter, heading drift, or CRLF-related line-ending mismatches can fail validation on Windows-oriented checkouts—normalize entry docs and re-run the script after edits.
+

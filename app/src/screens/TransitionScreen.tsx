@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useSessionRunner } from '../hooks/useSessionRunner'
 import { SafetyIcon } from '../components/SafetyIcon'
 
@@ -13,7 +13,7 @@ export function TransitionScreen() {
   const executionLogId = searchParams.get('id') ?? ''
 
   const runner = useSessionRunner(executionLogId)
-  const { plan, execution, currentBlockIndex, totalBlocks } = runner
+  const { plan, execution, loaded, currentBlockIndex, totalBlocks } = runner
 
   const prevBlockIdx = currentBlockIndex - 1
   const prevBlock = plan?.blocks[prevBlockIdx] ?? null
@@ -29,14 +29,17 @@ export function TransitionScreen() {
   }, [execution, hasNextBlock, executionLogId, navigate])
 
   const handleStartNext = useCallback(() => {
+    if (navigator.vibrate) navigator.vibrate(100)
     navigate(`/run?id=${executionLogId}`)
   }, [navigate, executionLogId])
 
   const handleStartShortened = useCallback(() => {
+    if (navigator.vibrate) navigator.vibrate(100)
     navigate(`/run?id=${executionLogId}`, { state: { shortened: true } })
   }, [navigate, executionLogId])
 
   const handleSkip = useCallback(async () => {
+    if (navigator.vibrate) navigator.vibrate(100)
     const isLast = await runner.skipBlock()
     if (isLast) {
       navigate(`/review?id=${executionLogId}`, { replace: true })
@@ -44,6 +47,19 @@ export function TransitionScreen() {
   }, [runner, navigate, executionLogId])
 
   if (!plan || !execution || !nextBlock) {
+    if (loaded) {
+      return (
+        <div className="mx-auto flex w-full max-w-[390px] flex-col items-center justify-center gap-4 py-12 text-center">
+          <p className="text-text-primary">Session not found.</p>
+          <Link
+            to="/"
+            className="min-h-[54px] inline-flex items-center px-4 font-semibold text-accent underline-offset-2 hover:underline"
+          >
+            Back to start
+          </Link>
+        </div>
+      )
+    }
     return (
       <div className="flex min-h-[60dvh] items-center justify-center">
         <p className="text-text-secondary">Loading…</p>
@@ -59,7 +75,7 @@ export function TransitionScreen() {
           Transition
         </span>
         <span className="text-sm font-medium text-text-secondary">
-          {currentBlockIndex}/{totalBlocks}
+          Next: {currentBlockIndex + 1}/{totalBlocks}
         </span>
       </div>
 

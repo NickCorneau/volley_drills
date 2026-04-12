@@ -16,11 +16,15 @@
 
 ## Stage
 
-Planning / docs-first. No approved implementation yet. Active milestone: M001 Solo Session Loop.
+Phase 0 validation. A runnable v0a prototype exists under `app/` (6 routes, Dexie persistence, preset sessions, safety gates, timer, review, resume, PWA offline). M001 build gate remains closed pending field-test evidence (D91).
 
 ## Stack
 
 Vite + React + TypeScript + Tailwind + PWA + Dexie (IndexedDB). Local-first, no backend.
+
+## Quick start
+
+cd app && npm install && npm run dev  # http://localhost:5173
 
 ## Agent entry points
 
@@ -42,6 +46,7 @@ Vite + React + TypeScript + Tailwind + PWA + Dexie (IndexedDB). Local-first, no 
 
 ## Key docs
 
+- docs/research/2026-04-12-v0a-runner-probe-feedback.md: **Start here for any prototype work.** Living v0a feedback log with prioritized backlog, fix status, deferred items, and stable IDs (FB-*, UX-*, DOC-*, HARD-*, V0B-*)
 - docs/vision.md: Product principles (P1-P10), strategic stance, local-first doctrine
 - docs/decisions.md: All decisions (D*), open questions (O*), ruled-out items
 - docs/prd-foundation.md: Scope, workflow, object model, drill metadata, MVP requirements
@@ -52,7 +57,7 @@ Vite + React + TypeScript + Tailwind + PWA + Dexie (IndexedDB). Local-first, no 
 
 ## Discovery and validation
 
-- docs/discovery/phase-0-readiness-assessment.md: Validation readiness state, prototype build plan, gaps — READ FIRST for validation work
+- docs/discovery/phase-0-readiness-assessment.md: Historical pre-build gap analysis (superseded by v0a build)
 - docs/discovery/phase-0-wedge-validation.md: Scorecards, validation program, decision gate
 - docs/discovery/phase-0-interview-guide.md: Interview scripts, evidence capture
 
@@ -89,7 +94,7 @@ Vite + React + TypeScript + Tailwind + PWA + Dexie (IndexedDB). Local-first, no 
 
 ## Constraints
 
-- Docs-first until milestone approved for implementation
+- Docs-first for M001 scope beyond v0a; v0a prototype is the current validation artifact
 - Bounded agent autonomy: one task, explicit scope, verification commands, escalation triggers
 - Terminal states: done, blocked, failed, budget_exhausted
 - WSL-first workspace (bash, python3 for JSON manipulation)

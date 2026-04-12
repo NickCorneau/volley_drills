@@ -7,8 +7,8 @@
   "identity": {
     "name": "Volley Drills",
     "description": "Beach volleyball personal training app -- structured session planning, courtside run mode, and rules-based adaptation for self-coached amateurs.",
-    "stage": "planning",
-    "posture": "docs-first",
+    "stage": "validation",
+    "posture": "v0a prototype shipped; docs-first for M001 scope beyond v0a",
     "active_milestone": "M001",
     "stack": ["Vite", "React", "TypeScript", "Tailwind", "PWA", "Dexie"],
     "architecture": "local-first, no backend"
@@ -37,13 +37,14 @@
   "cold_start": {
     "description": "Read these files in order when entering the repo cold. Stop as soon as you have enough context for the task.",
     "read_order": [
-      { "path": "AGENTS.md",                                "role": "orientation",     "required": true,  "lines": 161 },
+      { "path": "AGENTS.md",                                "role": "orientation",     "required": true,  "lines": 171 },
       { "path": "docs/catalog.json",                        "role": "machine_index",   "required": true,  "lines": 806 },
       { "path": "docs/vision.md",                           "role": "principles",      "required": false, "read_if": "task touches product direction" },
       { "path": "docs/decisions.md",                        "role": "decisions",        "required": false, "read_if": "task touches product or technical choices", "lines": 154 },
       { "path": "docs/prd-foundation.md",                   "role": "scope",           "required": false, "read_if": "task touches features, object model, or data contracts", "lines": 271 },
       { "path": "docs/roadmap.md",                          "role": "sequencing",      "required": false, "read_if": "task touches milestones or phase gates", "lines": 270 },
       { "path": "docs/milestones/m001-solo-session-loop.md","role": "active_milestone","required": false, "read_if": "task is within M001 scope", "lines": 200 },
+      { "path": "docs/research/2026-04-12-v0a-runner-probe-feedback.md", "role": "prototype_feedback", "required": false, "read_if": "task touches v0a prototype, UX fixes, field testing, or validation work", "lines": 560 },
       { "path": "docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md","role":"prototype_ladder","required": false, "read_if":"task touches v0a/v0b stage naming, prototype boundaries, or validation-vs-build sequencing", "lines": 376 },
       { "path": "docs/research/README.md",                  "role": "research_router", "required": false, "read_if": "task needs domain evidence or implementation research" }
     ]
@@ -130,7 +131,7 @@
   },
 
   "constraints": [
-    "Docs-first until a milestone is explicitly approved for implementation",
+    "Docs-first for M001 scope beyond v0a; v0a prototype iterates under app/",
     "Bounded autonomy: one task, explicit scope, verification, escalation triggers",
     "Update docs/decisions.md first when a decision changes, then propagate",
     "Do not edit files in research-output/ (raw provenance)",

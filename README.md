@@ -33,14 +33,14 @@ npm run lint       # ESLint
 ## Repo layout
 
 
-| Folder             | Role                                                        | Start here                     |
-| ------------------ | ----------------------------------------------------------- | ------------------------------ |
-| `docs/`            | Product canon, specs, research, and ops                     | `docs/README.md`               |
-| `app/`             | v0a validation PWA (React + Dexie + vite-plugin-pwa)        | `app/README.md`                |
-| `ops/agent/`       | Agent control plane: task queue, handoffs, runs              | `ops/agent/README.md`          |
-| `scripts/`         | Supervisor, dispatch, verify, and notify scripts            | `scripts/agent-supervisor.sh`  |
-| `.cursor/`         | Cursor rules, hooks, and worktree config                    | `.cursor/rules/`               |
-| `research-output/` | Raw deep research (do not edit)                             | --                             |
+| Folder             | Role                                                 | Start here                    |
+| ------------------ | ---------------------------------------------------- | ----------------------------- |
+| `docs/`            | Product canon, specs, research, and ops              | `docs/README.md`              |
+| `app/`             | v0a validation PWA (React + Dexie + vite-plugin-pwa) | `app/README.md`               |
+| `ops/agent/`       | Agent control plane: task queue, handoffs, runs      | `ops/agent/README.md`         |
+| `scripts/`         | Supervisor, dispatch, verify, and notify scripts     | `scripts/agent-supervisor.sh` |
+| `.cursor/`         | Cursor rules, hooks, and worktree config             | `.cursor/rules/`              |
+| `research-output/` | Raw deep research (do not edit)                      | --                            |
 
 
 ## Agent quick path
@@ -53,14 +53,26 @@ When entering this repo cold, read in this order:
 4. `docs/decisions.md` -- what is decided, open, and ruled out
 5. `docs/milestones/m001-solo-session-loop.md` -- current thin-slice scope
 
+### Local Run Instructions
+
+To run the v0a prototype locally:
+
+```bash
+cd app
+npm install
+npm run dev
+# Expected URL: http://localhost:5173
+# Additional verification: npm run build && npm run lint
+```
+
 For implementation work, also read:
 
 - `docs/prd-foundation.md` -- object model, drill metadata, MVP scope
 - Relevant `docs/specs/` for milestone-level behavior
 
-For prototype feedback and field-test priorities:
+For prototype feedback and field-test priorities (**start here for any v0a work**):
 
-- `docs/research/2026-04-12-v0a-runner-probe-feedback.md` -- living UX/QA feedback log
+- `docs/research/2026-04-12-v0a-runner-probe-feedback.md` -- living UX/QA feedback log with prioritized backlog, fix status, and stable IDs (FB-*, UX-*, DOC-*, HARD-*, V0B-*)
 
 For agent control-plane work, also read:
 
@@ -70,13 +82,13 @@ For agent control-plane work, also read:
 ## Machine-readable entry points
 
 
-| File                  | Format   | Use when                                                          |
-| --------------------- | -------- | ----------------------------------------------------------------- |
-| `agent-manifest.json` | JSON     | Need pure-JSON cold-start payload without markdown parsing        |
-| `docs/catalog.json`   | JSON     | Need full doc index, dependency graph, routing rules, line counts |
-| `llms.txt`            | Text     | LLM/agent discovery convention -- lightweight project summary     |
+| File                                       | Format   | Use when                                                                   |
+| ------------------------------------------ | -------- | -------------------------------------------------------------------------- |
+| `agent-manifest.json`                      | JSON     | Need pure-JSON cold-start payload without markdown parsing                 |
+| `docs/catalog.json`                        | JSON     | Need full doc index, dependency graph, routing rules, line counts          |
+| `llms.txt`                                 | Text     | LLM/agent discovery convention -- lightweight project summary              |
 | `docs/ops/agent-documentation-contract.md` | Markdown | Need the canonical rules for machine-scannable docs and change propagation |
-| `AGENTS.md`           | Markdown | Human-readable orientation with operating contract                |
+| `AGENTS.md`                                | Markdown | Human-readable orientation with operating contract                         |
 
 
 ## Key links

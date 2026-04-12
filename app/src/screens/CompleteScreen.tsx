@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { SafetyIcon } from '../components/SafetyIcon'
@@ -86,22 +86,6 @@ export function CompleteScreen() {
     }
   }, [executionLogId, navigate])
 
-  const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => {
-    if (redirectTimerRef.current) {
-      clearTimeout(redirectTimerRef.current)
-      redirectTimerRef.current = null
-    }
-    if (executionLogId && bundle === null) {
-      redirectTimerRef.current = setTimeout(() => {
-        navigate('/', { replace: true })
-      }, 1500)
-    }
-    return () => {
-      if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current)
-    }
-  }, [bundle, executionLogId, navigate])
-
   if (!executionLogId) {
     return null
   }
@@ -116,8 +100,15 @@ export function CompleteScreen() {
 
   if (bundle === null) {
     return (
-      <div className="mx-auto flex w-full max-w-[390px] flex-col items-center justify-center gap-3 py-24">
-        <p className="text-text-secondary">Redirecting…</p>
+      <div className="mx-auto flex w-full max-w-[390px] flex-col items-center justify-center gap-4 py-24">
+        <p className="text-text-primary">Session not found.</p>
+        <button
+          type="button"
+          onClick={() => navigate('/', { replace: true })}
+          className="min-h-[54px] px-4 font-semibold text-accent"
+        >
+          Back to start
+        </button>
       </div>
     )
   }

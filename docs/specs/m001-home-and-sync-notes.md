@@ -29,7 +29,7 @@ decision_refs:
 
 Capture the first mobile home-state assumptions and the user-visible behavior under weak connectivity.
 
-The v0a validation prototype in `app/` currently implements a partial version of this spec. M001 full build remains gated by field testing.
+The v0a validation prototype in `app/` currently implements a partial version of this spec. M001 full build remains gated by field testing. See `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for as-built deviations.
 
 ## Default home state
 

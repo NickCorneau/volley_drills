@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Navigate, Routes, Route } from 'react-router-dom'
 import { CompleteScreen } from './screens/CompleteScreen'
 import { ReviewScreen } from './screens/ReviewScreen'
 import { RunScreen } from './screens/RunScreen'
@@ -26,6 +26,7 @@ export default function App() {
         <Route path="/run/transition" element={<TransitionScreen />} />
         <Route path="/review" element={<ReviewScreen />} />
         <Route path="/complete" element={<CompleteScreen />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
   )

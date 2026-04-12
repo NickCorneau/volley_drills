@@ -64,11 +64,7 @@ Define the first implementation-ready slice that lets one self-coached user:
 
 ## Current planning stance
 
-This is a planning-stage milestone charter, not an active build brief.
-
-Use it to lock the thin slice and the acceptance evidence before implementation planning begins.
-
-Roadmap language about "no code yet" still applies. This document defines what should get built once that gate clears; it does not mean implementation has started.
+A v0a validation prototype exists under `app/`; M001 full implementation remains gated on field validation (D91, O4-O7).
 
 ## Pre-build validation gate (2026-04-12)
 

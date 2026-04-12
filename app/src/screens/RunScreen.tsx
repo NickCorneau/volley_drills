@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { useTimer } from '../hooks/useTimer'
 import { useWakeLock } from '../hooks/useWakeLock'
 import { useSessionRunner } from '../hooks/useSessionRunner'
@@ -44,6 +44,7 @@ export function RunScreen() {
   const {
     plan,
     execution,
+    loaded,
     currentBlock,
     currentBlockIndex,
     totalBlocks,
@@ -58,13 +59,20 @@ export function RunScreen() {
     blockDurRef.current = blockDurationSeconds
   })
 
+  const [runError, setRunError] = useState<string | null>(null)
+
   const handleBlockComplete = useCallback(async () => {
-    if (navigator.vibrate) navigator.vibrate([100, 50, 100])
-    const isLast = await runner.completeBlock()
-    if (isLast) {
-      navigate(`/review?id=${executionLogId}`, { replace: true })
-    } else {
-      navigate(`/run/transition?id=${executionLogId}`)
+    try {
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100])
+      const isLast = await runner.completeBlock()
+      if (isLast) {
+        navigate(`/review?id=${executionLogId}`, { replace: true })
+      } else {
+        navigate(`/run/transition?id=${executionLogId}`)
+      }
+    } catch (err) {
+      console.error('Block complete failed:', err)
+      setRunError('Something went wrong. Try again or end session.')
     }
   }, [runner, navigate, executionLogId])
 
@@ -133,7 +141,7 @@ export function RunScreen() {
     if (!timer.isRunning || !currentBlock) return
     const interval = setInterval(() => {
       const elapsed = blockDurationSeconds - remainingRef.current
-      runner.flushTimer(elapsed)
+      runner.flushTimer(elapsed, blockDurationSeconds)
     }, 5000)
     return () => clearInterval(interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -150,8 +158,8 @@ export function RunScreen() {
 
   const handlePause = useCallback(() => {
     const elapsed = timer.pause()
-    runner.pauseBlock(elapsed)
-  }, [timer, runner])
+    runner.pauseBlock(elapsed, blockDurationSeconds)
+  }, [timer, runner, blockDurationSeconds])
 
   const handleResume = useCallback(() => {
     timer.resume()
@@ -159,24 +167,34 @@ export function RunScreen() {
   }, [timer, runner])
 
   const handleNext = useCallback(async () => {
-    timer.pause()
-    if (navigator.vibrate) navigator.vibrate(100)
-    const isLast = await runner.completeBlock()
-    if (isLast) {
-      navigate(`/review?id=${executionLogId}`, { replace: true })
-    } else {
-      navigate(`/run/transition?id=${executionLogId}`)
+    try {
+      timer.pause()
+      if (navigator.vibrate) navigator.vibrate(100)
+      const isLast = await runner.completeBlock()
+      if (isLast) {
+        navigate(`/review?id=${executionLogId}`, { replace: true })
+      } else {
+        navigate(`/run/transition?id=${executionLogId}`)
+      }
+    } catch (err) {
+      console.error('Next block failed:', err)
+      setRunError('Something went wrong. Try again or end session.')
     }
   }, [timer, runner, navigate, executionLogId])
 
   const handleSkip = useCallback(async () => {
-    timer.pause()
-    if (navigator.vibrate) navigator.vibrate(100)
-    const isLast = await runner.skipBlock()
-    if (isLast) {
-      navigate(`/review?id=${executionLogId}`, { replace: true })
-    } else {
-      navigate(`/run/transition?id=${executionLogId}`)
+    try {
+      timer.pause()
+      if (navigator.vibrate) navigator.vibrate(100)
+      const isLast = await runner.skipBlock()
+      if (isLast) {
+        navigate(`/review?id=${executionLogId}`, { replace: true })
+      } else {
+        navigate(`/run/transition?id=${executionLogId}`)
+      }
+    } catch (err) {
+      console.error('Skip block failed:', err)
+      setRunError('Something went wrong. Try again or end session.')
     }
   }, [timer, runner, navigate, executionLogId])
 
@@ -189,14 +207,19 @@ export function RunScreen() {
   const handleEndSessionRequest = useCallback(() => {
     if (timer.isRunning) {
       timer.pause()
-      runner.pauseBlock(blockDurRef.current - remainingRef.current)
+      runner.pauseBlock(blockDurRef.current - remainingRef.current, blockDurationSeconds)
     }
     setShowEndConfirm(true)
-  }, [timer, runner])
+  }, [timer, runner, blockDurationSeconds])
 
   const handleEndSessionConfirm = useCallback(async () => {
-    await runner.endSession()
-    navigate(`/review?id=${executionLogId}`, { replace: true })
+    try {
+      await runner.endSession()
+      navigate(`/review?id=${executionLogId}`, { replace: true })
+    } catch (err) {
+      console.error('End session failed:', err)
+      setRunError('Something went wrong ending the session. Try again.')
+    }
   }, [runner, navigate, executionLogId])
 
   const handleEndSessionCancel = useCallback(() => {
@@ -211,6 +234,19 @@ export function RunScreen() {
   }, [executionLogId, execution, plan, navigate])
 
   if (!plan || !execution || !currentBlock) {
+    if (loaded) {
+      return (
+        <div className="mx-auto flex w-full max-w-[390px] flex-col items-center justify-center gap-4 py-12 text-center">
+          <p className="text-text-primary">Session not found.</p>
+          <Link
+            to="/"
+            className="min-h-[54px] inline-flex items-center px-4 font-semibold text-accent underline-offset-2 hover:underline"
+          >
+            Back to start
+          </Link>
+        </div>
+      )
+    }
     return (
       <div className="flex min-h-[60dvh] items-center justify-center">
         <p className="text-text-secondary">Loading session…</p>
@@ -244,7 +280,7 @@ export function RunScreen() {
               <button
                 type="button"
                 onClick={toggleInstructions}
-                className="self-start text-xs font-medium text-accent"
+                className="min-h-[54px] self-start text-sm font-medium text-accent"
               >
                 Less
               </button>
@@ -253,7 +289,7 @@ export function RunScreen() {
             <button
               type="button"
               onClick={toggleInstructions}
-              className="self-start text-xs font-medium text-accent"
+              className="min-h-[54px] self-start text-sm font-medium text-accent"
             >
               More…
             </button>
@@ -278,9 +314,11 @@ export function RunScreen() {
         />
       )}
 
-      <p className="text-center text-sm text-text-secondary">
-        Block {currentBlockIndex + 1} of {totalBlocks}
-      </p>
+      {runError && (
+        <p className="rounded-[12px] bg-warning-surface px-4 py-3 text-center text-sm font-medium text-warning">
+          {runError}
+        </p>
+      )}
 
       {prerollCount == null && (
         <RunControls

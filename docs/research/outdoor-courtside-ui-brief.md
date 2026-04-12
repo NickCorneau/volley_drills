@@ -119,7 +119,7 @@ validate_later:
 - `docs/prd-foundation.md` should carry the product-level courtside UX contract.
 - `docs/specs/m001-courtside-run-flow.md` should stay strict about low information density during active blocks.
 - `docs/specs/m001-review-micro-spec.md` should stay tap-first and typing-light.
-- The current `app/` scaffold should not be treated as a design reference. When real UI work starts, remove generic template assumptions that imply dual-theme parity or small desktop-first controls.
+- The current `app/` v0a prototype is a validation tool, not a final M001 design reference. When M001 UI work starts, revisit prototype assumptions that may not match the final courtside design language.
 
 ## Agent Rules Of Thumb
 

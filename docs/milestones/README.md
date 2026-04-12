@@ -58,6 +58,6 @@ Suggested statuses:
 
 ## Planning-stage rule
 
-While this repo is still in planning / vision, milestone files should behave like charters and thin-slice specs, not implementation runbooks.
+While this repo is in Phase 0 validation, milestone files should behave like charters and thin-slice specs, not implementation runbooks.
 
 Use `docs/templates/milestone-charter.md` as the default starting point.

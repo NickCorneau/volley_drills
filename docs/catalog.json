@@ -18,8 +18,8 @@
     }
   },
   "repo_state": {
-    "stage": "planning",
-    "posture": "docs-first",
+    "stage": "validation",
+    "posture": "v0a prototype shipped; docs-first for M001 scope beyond v0a",
     "runtime": "cursor-first",
     "platform_bias": "wsl-first",
     "environment_contract": {
@@ -32,7 +32,8 @@
     },
     "active_milestone": "M001",
     "stack": "Vite + React + TypeScript + Tailwind + PWA + Dexie",
-    "blocking_gate": "M001 pre-build validation must pass before implementation",
+    "blocking_gate": "Field-test evidence (D91) must pass before M001 moves to full implementation",
+    "v0a_status": "Runnable validation PWA under app/ with 6 routes, Dexie persistence, preset sessions, safety gates, timer, review, and resume flow",
     "open_questions": ["O4", "O5", "O6", "O7"]
   },
   "entrypoints": [
@@ -269,8 +270,7 @@
       "docs/research/"
     ],
     "validation_prototype": [
-      "docs/discovery/phase-0-readiness-assessment.md",
-      "docs/discovery/phase-0-wedge-validation.md",
+      "docs/research/2026-04-12-v0a-runner-probe-feedback.md",
       "docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md",
       "docs/milestones/m001-solo-session-loop.md",
       "docs/prd-foundation.md",
@@ -660,9 +660,11 @@
       "path": "docs/research/2026-04-12-v0a-runner-probe-feedback.md",
       "focus": "v0a prototype feedback, retest evidence, and pre-field-test priorities",
       "use_when": [
+        "starting any v0a prototype work (read this first)",
         "checking current UX findings against the live prototype",
         "looking for reproducible browser-retest evidence or screenshot paths",
-        "triaging prioritized fixes before field testing or v0b planning"
+        "triaging prioritized fixes before field testing or v0b planning",
+        "understanding what has been fixed, what is deferred, and what needs live verification"
       ]
     },
     {
@@ -766,12 +768,12 @@
     { "id": "v0-prototype-ladder-design","path": "docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md","type":"spec","status":"draft","lines": 376 },
     { "id": "phase-0-wedge-validation",  "path": "docs/discovery/phase-0-wedge-validation.md",   "type": "discovery", "status": "draft",  "lines": 275 },
     { "id": "phase-0-interview-guide",   "path": "docs/discovery/phase-0-interview-guide.md",    "type": "discovery", "status": "draft",  "lines": 112 },
-    { "id": "phase-0-readiness-assessment","path":"docs/discovery/phase-0-readiness-assessment.md","type":"discovery", "status": "active", "lines": 228 },
+    { "id": "phase-0-readiness-assessment","path":"docs/discovery/phase-0-readiness-assessment.md","type":"discovery", "status": "superseded", "lines": 228 },
     { "id": "beach-training-resources",  "path": "docs/research/beach-training-resources.md",    "type": "research",  "status": "active", "lines": 617 },
     { "id": "local-first-pwa-constraints","path": "docs/research/local-first-pwa-constraints.md","type": "research",  "status": "active", "lines": 110 },
     { "id": "dexie-schema-and-architecture","path":"docs/research/dexie-schema-and-architecture.md","type":"research", "status": "active", "lines": 175 },
     { "id": "m001-testing-quality-strategy","path":"docs/research/m001-testing-quality-strategy.md","type":"research", "status": "active", "lines": 102 },
-    { "id": "v0a-runner-probe-feedback", "path": "docs/research/2026-04-12-v0a-runner-probe-feedback.md","type":"research","status":"actionable","lines": 465 },
+    { "id": "v0a-runner-probe-feedback", "path": "docs/research/2026-04-12-v0a-runner-probe-feedback.md","type":"research","status":"active","lines": 562 },
     { "id": "courtside-timer-patterns",  "path": "docs/research/courtside-timer-patterns.md",    "type": "research",  "status": "active", "lines": 44 },
     { "id": "outdoor-courtside-ui-brief","path": "docs/research/outdoor-courtside-ui-brief.md",  "type": "research",  "status": "active", "lines": 122 },
     { "id": "research-index",            "path": "docs/research/README.md",                      "type": "index",     "status": "active", "lines": 105 },

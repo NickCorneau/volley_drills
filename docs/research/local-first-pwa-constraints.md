@@ -2,7 +2,7 @@
 id: local-first-pwa-constraints
 title: Local-First PWA Constraints
 status: active
-stage: planning
+stage: validation
 type: research
 authority: iPhone/PWA platform constraints, storage durability, update safety, and degraded-capability defaults
 summary: "iPhone/PWA platform constraints, storage durability, and update safety for M001."
@@ -101,11 +101,12 @@ Sources: web.dev "Storage for the web", WebKit blog storage policy updates, MDN 
 - Given the Safari 7-day eviction finding, **Home Screen install should be actively encouraged**, not merely supported, but the prompt should follow first-session value rather than block it.
 - If Home Screen install unlocks better wake-lock behavior, that is a bonus on top of the storage durability benefit.
 
-### 7. Apply the research to the current codebase, not an imagined future one
+### 7. Apply the research to the current codebase
 
-- `app/` is currently a React/Vite scaffold with Dexie dependencies, not a shipped PWA shell.
-- There is no service worker or `vite-plugin-pwa` wiring yet.
-- That is acceptable at this stage; the main value of this research is to shape the implementation plan before the PWA layer lands.
+- `app/` contains a runnable v0a validation PWA with `vite-plugin-pwa`, Dexie persistence, and a service worker.
+- `requestPersistentStorage()` is called at startup in `main.tsx`.
+- The service worker currently uses `registerType: 'autoUpdate'` with `immediate: true` — a v0a exception to D41 safe-boundary updates that should be revisited before broader field testing.
+- The guidance in this note is actively applied in the current prototype.
 
 ## IndexedDB and Dexie failure modes on mobile
 

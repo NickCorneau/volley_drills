@@ -13,7 +13,7 @@ export interface SessionPlanBlock {
 
 export interface SessionPlanSafetyCheck {
   painFlag: boolean;
-  trainingRecency: string;
+  trainingRecency?: string;
   heatCta: boolean;
   painOverridden: boolean;
 }
@@ -82,6 +82,7 @@ export interface TimerState {
   blockIndex: number;
   startedAt: number;
   accumulatedElapsed: number;
+  effectiveDurationSeconds?: number;
   status: TimerRunStatus;
   lastFlushedAt: number;
 }

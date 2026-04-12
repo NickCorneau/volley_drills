@@ -25,7 +25,7 @@ decision_refs:
 
 Define the trust invariants, test layers, and minimum verification bar for the first implementation-ready M001 slice.
 
-The v0a validation prototype intentionally deferred automated testing (Vitest, RTL, Playwright) to prioritize speed-to-sand. Full M001 implementation must build this test stack.
+The v0a validation prototype intentionally deferred automated testing (Vitest, RTL, Playwright) to prioritize speed-to-sand. Full M001 implementation must build this test stack. See `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for as-built deviations.
 
 ## Quality priority
 

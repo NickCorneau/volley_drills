@@ -32,6 +32,7 @@ export function SafetyCheckScreen() {
   const [painFlag, setPainFlag] = useState<boolean | null>(null)
   const [recency, setRecency] = useState<TrainingRecency | null>(null)
   const [heatExpanded, setHeatExpanded] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
 
   const allBlocks = buildPresetBlocks(presetId)
   const recoveryBlocks = allBlocks.filter((b) => b.type !== 'main_skill')
@@ -46,6 +47,9 @@ export function SafetyCheckScreen() {
     useRecovery: boolean,
     painOverridden: boolean,
   ) {
+    if (isCreating) return
+    setIsCreating(true)
+
     const blocks = useRecovery ? recoveryBlocks : allBlocks
     const planId = crypto.randomUUID()
     const execId = crypto.randomUUID()
@@ -53,7 +57,7 @@ export function SafetyCheckScreen() {
 
     const safetyCheck: SessionPlanSafetyCheck = {
       painFlag: painFlag ?? false,
-      trainingRecency: recency ?? '0 days',
+      trainingRecency: recency ?? undefined,
       heatCta: heatExpanded,
       painOverridden,
     }
@@ -156,14 +160,15 @@ export function SafetyCheckScreen() {
       {painFlag === true && (
         <PainOverrideCard
           recoveryMinutes={recoveryMinutes}
-          onContinueRecovery={() => createSessionAndNavigate(true, false)}
-          onOverride={() => createSessionAndNavigate(false, true)}
+          disabled={isCreating}
+          onContinueRecovery={() => void createSessionAndNavigate(true, false)}
+          onOverride={() => void createSessionAndNavigate(false, true)}
         />
       )}
 
       <section className="flex flex-col gap-3">
         <h2 className="text-base font-semibold text-text-primary">
-          Trained in the last 7 days?
+          When did you last train?
         </h2>
         <div className="flex gap-2">
           {RECENCY_OPTIONS.map((opt) => {
@@ -226,8 +231,8 @@ export function SafetyCheckScreen() {
       {painFlag === false && (
         <button
           type="button"
-          onClick={() => createSessionAndNavigate(false, false)}
-          disabled={!canContinue}
+          onClick={() => void createSessionAndNavigate(false, false)}
+          disabled={!canContinue || isCreating}
           className={[
             'min-h-[54px] w-full rounded-[16px] px-4 py-3 text-base font-semibold text-white transition-colors',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
@@ -235,7 +240,7 @@ export function SafetyCheckScreen() {
             'bg-accent active:bg-accent-pressed',
           ].join(' ')}
         >
-          Continue
+          {isCreating ? 'Creating session…' : 'Continue'}
         </button>
       )}
     </div>

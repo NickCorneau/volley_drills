@@ -2,12 +2,14 @@ import { useState } from 'react'
 
 interface PainOverrideCardProps {
   recoveryMinutes: number
+  disabled?: boolean
   onContinueRecovery: () => void
   onOverride: () => void
 }
 
 export function PainOverrideCard({
   recoveryMinutes,
+  disabled,
   onContinueRecovery,
   onOverride,
 }: PainOverrideCardProps) {
@@ -37,13 +39,15 @@ export function PainOverrideCard({
       <button
         type="button"
         onClick={onContinueRecovery}
+        disabled={disabled}
         className={[
           'min-h-[54px] w-full rounded-[16px] bg-accent px-4 py-3',
           'text-base font-semibold text-white transition-colors active:bg-accent-pressed',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
+          'disabled:cursor-not-allowed disabled:opacity-50',
         ].join(' ')}
       >
-        Continue with Recovery Session
+        {disabled ? 'Creating session…' : 'Continue with Recovery Session'}
       </button>
 
       {!confirming ? (
@@ -65,12 +69,14 @@ export function PainOverrideCard({
           <button
             type="button"
             onClick={onOverride}
+            disabled={disabled}
             className={[
               'min-h-[54px] w-full rounded-[16px] border border-warning/40 px-4 py-2',
               'text-sm font-medium text-warning transition-colors active:bg-warning-surface',
+              'disabled:cursor-not-allowed disabled:opacity-50',
             ].join(' ')}
           >
-            Yes, use original session
+            {disabled ? 'Creating session…' : 'Yes, use original session'}
           </button>
         </div>
       )}

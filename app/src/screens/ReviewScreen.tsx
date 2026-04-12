@@ -99,19 +99,25 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
     setIsSubmitting(true)
     try {
       const reviewId = `review-${executionLogId}`
-      await db.sessionReviews.put({
+      const reviewData = {
         id: reviewId,
         executionLogId,
         sessionRpe,
-        goodPasses: good,
-        totalAttempts: total,
+        goodPasses: submitWasDiscarded ? 0 : good,
+        totalAttempts: submitWasDiscarded ? 0 : total,
         incompleteReason: submitNeedsReason ? incompleteReason ?? undefined : undefined,
         quickTags: quickTags.length > 0 ? quickTags : undefined,
         shortNote: shortNote.trim() || undefined,
         submittedAt: Date.now(),
-      })
+      }
+      await db.sessionReviews.put(reviewData)
 
-      navigate(`/complete?id=${encodeURIComponent(executionLogId)}`)
+      const saved = await db.sessionReviews.get(reviewId)
+      if (!saved) {
+        throw new Error('Review was not persisted after write')
+      }
+
+      navigate(`/complete?id=${encodeURIComponent(executionLogId)}`, { replace: true })
     } catch (err) {
       console.error('Review submit failed:', err)
       setSubmitError('Something went wrong saving your review. Please try again.')
@@ -172,20 +178,22 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
         <RpeSelector value={sessionRpe} onChange={setSessionRpe} />
       </section>
 
-      <section className="flex flex-col gap-3 rounded-[12px] bg-bg-warm p-4">
-        <div>
-          <h2 className="text-base font-semibold text-text-primary">Good passes</h2>
-          <p className="mt-1 text-sm text-text-secondary">
-            Ball reached target zone or next contact was playable
-          </p>
-        </div>
-        <PassMetricInput
-          good={good}
-          total={total}
-          onGoodChange={setGood}
-          onTotalChange={setTotal}
-        />
-      </section>
+      {!wasDiscarded && (
+        <section className="flex flex-col gap-3 rounded-[12px] bg-bg-warm p-4">
+          <div>
+            <h2 className="text-base font-semibold text-text-primary">Good passes</h2>
+            <p className="mt-1 text-sm text-text-secondary">
+              Ball reached target zone or next contact was playable
+            </p>
+          </div>
+          <PassMetricInput
+            good={good}
+            total={total}
+            onGoodChange={setGood}
+            onTotalChange={setTotal}
+          />
+        </section>
+      )}
 
       {needsIncompleteReason && (
         <section className="flex flex-col gap-3 rounded-[12px] bg-bg-warm p-4">

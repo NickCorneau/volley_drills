@@ -2,7 +2,7 @@
 id: docs-index
 title: Volley Drills Docs
 status: active
-stage: planning
+stage: validation
 type: index
 summary: "Editorial index into the docs system with authority hierarchy and update routing."
 authority: documentation structure, editorial workflow, and authority map
@@ -16,7 +16,7 @@ depends_on:
 
 This folder is the source of truth for product thinking, research, and requirements.
 
-The repo is in the planning / vision stage. Default to documentation and decision records before code or automation.
+The repo is in Phase 0 validation. A runnable v0a prototype exists under `app/`. M001 scope beyond v0a remains docs-first until the field-test gate (D91) clears.
 
 ## Purpose
 
@@ -75,17 +75,17 @@ Provide the prose editorial index for the docs system:
 
 | Path | Topic |
 |---|---|
+| **`research/2026-04-12-v0a-runner-probe-feedback.md`** | **Start here for any v0a work.** Living feedback log: prioritized backlog, fix status, deferred items, stable IDs (FB-\*, UX-\*, DOC-\*, HARD-\*, V0B-\*) |
 | `research/beach-training-resources.md` | Competitive landscape, periodization, injury prevention, metrics, example drills |
 | `research/outdoor-courtside-ui-brief.md` | Outdoor UI defaults: theme, contrast, type floor, touch targets |
 | `research/local-first-pwa-constraints.md` | iPhone/PWA constraints, storage eviction, install posture |
 | `research/dexie-schema-and-architecture.md` | Dexie schema shape, indexing, migration, state management |
 | `research/m001-testing-quality-strategy.md` | Test layers, trust risks, update safety, persistence |
-| `research/2026-04-12-v0a-runner-probe-feedback.md` | Living v0a runner-probe feedback log: UX findings, retest evidence, docs drift, and stable backlog IDs |
 
 ## Related folders
 
 - `research-output/` — Raw deep research artifacts (Parallel AI). Mined findings are consolidated into curated notes under `docs/research/`. Keep raw files as provenance; do not edit them directly.
-- `app/` — Validation-phase web shell (Vite + React + Dexie scaffold). See `app/README.md` for UI defaults.
+- `app/` — v0a validation PWA (Vite + React + Tailwind + Dexie + vite-plugin-pwa). See `app/README.md` for routes, stack, and known limitations.
 - `ops/agent/` — Agent control plane: task queue, handoffs, runs, and worker flow. See `ops/agent/README.md`.
 - `scripts/` — Supervisor, dispatch, verify, and notify scripts for agent work. Entry: `scripts/agent-supervisor.sh`.
 - `.cursor/rules/` — Cursor-specific rules for repo operating model, cold-start hints, docs workflow, and machine-scannable doc hygiene.

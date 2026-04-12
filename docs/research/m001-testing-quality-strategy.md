@@ -58,9 +58,9 @@ The right split for this stack is:
 
 Why this fits the current repo:
 
-- `app/` is already a Vite + React + TypeScript scaffold with Dexie dependencies
-- the repo does not yet have service-worker wiring or a browser-test harness
-- the best use of this research right now is to shape the implementation plan and quality contract before broad tooling lands
+- `app/` is a runnable v0a prototype with 6 screens, Dexie persistence, and vite-plugin-pwa service worker
+- Vitest and Playwright are not yet configured; the browser-test harness is still needed
+- the best use of this research right now is to shape the verification stack for the existing v0a code before M001 build
 
 ### 2. Treat browser-only PWA behavior as a real-browser concern
 
@@ -136,7 +136,7 @@ This research should change docs before code:
 - document the M001 trust invariants explicitly
 - document prompt-based update behavior in connectivity and run-flow notes
 - lock the minimum verification stack before implementation planning
-- avoid inflating the current `app/` scaffold with speculative tooling before the quality contract is clear
+- avoid adding speculative tooling to the v0a prototype before the quality contract is clear
 
 ## Source families in this research pass
 

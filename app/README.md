@@ -19,6 +19,8 @@ This folder holds the runnable Phase 0 validation prototype (v0a) for Volley Dri
 
 ## Current status
 
+> **Before making changes**, read `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for the prioritized backlog, fix status, and known issues with stable IDs.
+
 - The app is a runnable **v0a PWA prototype** used for physical field testing on sand.
 - **Routes**: `/` (Start), `/safety`, `/run`, `/run/transition`, `/review`, `/complete`.
 - **Dexie tables**: `sessionPlans`, `executionLogs`, `sessionReviews`, `timerState` (schema in `src/db/schema.ts`).

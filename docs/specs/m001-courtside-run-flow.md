@@ -37,7 +37,7 @@ Define the user-visible run flow for the first implementation-ready slice:
 - minimal taps
 - believable under beach conditions
 
-The v0a validation prototype in `app/` currently implements a partial version of this flow. M001 full build remains gated by field testing.
+The v0a validation prototype in `app/` currently implements a partial version of this flow. M001 full build remains gated by field testing. See `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for as-built deviations.
 
 ## Core principle
 

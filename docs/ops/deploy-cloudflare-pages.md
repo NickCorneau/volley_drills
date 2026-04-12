@@ -44,7 +44,7 @@ Cloudflare will `cd` into `app/`, install dependencies, run the build, and publi
 Before touching DNS, confirm the app works on the `*.pages.dev` URL:
 
 - Open the home route (`/`)
-- Navigate to `/safety`, `/run`, `/review` and refresh each to confirm SPA routing works (the `_redirects` file handles this)
+- Navigate to `/safety`, `/run`, `/run/transition`, `/review`, `/complete` and refresh each to confirm SPA routing works (Cloudflare Pages handles SPA fallback automatically for single-page apps; no `_redirects` file is needed)
 - Open DevTools > Application > Service Workers and confirm the SW registers over HTTPS
 
 ## 3. Add your custom subdomain via Porkbun DNS
@@ -96,9 +96,9 @@ To trigger a manual redeploy without pushing code, go to the Pages project in Cl
 
 **Build fails with "Could not read package.json" at `/opt/buildhome/repo/package.json`**: The Root directory is not set. Go to **Settings > Builds & deployments**, set **Root directory (path)** to `app`, and redeploy.
 
-**Build fails on dependency install**: Add environment variable `NPM_FLAGS` = `--legacy-peer-deps` in Pages project settings.
+**Build fails on dependency install**: The `app/package.json` already uses `overrides` to pin `vite-plugin-pwa`'s `vite` peer dep to the app's version. If the build still fails, add environment variable `NPM_FLAGS` = `--legacy-peer-deps` in Pages project settings as a fallback.
 
-**Deep links return 404**: Confirm `app/public/_redirects` contains `/* /index.html 200` and that `dist/_redirects` exists after build.
+**Deep links return 404**: Cloudflare Pages serves SPA fallback automatically. If deep links still fail, check that the project's **Root directory** is set to `app` and the **Build output directory** is `dist`. The service worker's `navigateFallback: '/index.html'` in `vite.config.ts` handles SPA routing for cached responses.
 
 **HTTPS not working on custom domain**: DNS propagation can take up to an hour. Check that the CNAME record in Porkbun points to the correct `*.pages.dev` value. Cloudflare provisions TLS automatically once DNS resolves.
 

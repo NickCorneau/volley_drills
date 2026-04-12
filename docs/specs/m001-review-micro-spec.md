@@ -24,7 +24,7 @@ decision_refs:
 
 Define the smallest post-session review that still creates real learning for the next session.
 
-The v0a validation prototype in `app/` currently implements a partial version of this spec. M001 full build remains gated by field testing.
+The v0a validation prototype in `app/` currently implements a partial version of this spec. M001 full build remains gated by field testing. See `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for as-built deviations.
 
 ## Time budget
 

@@ -21,7 +21,7 @@ Repo-local scaffolding may exist for future low-touch runs, but that scaffolding
 
 ## Current stage boundary
 
-The repository is still in the planning / vision stage.
+The repository is in Phase 0 validation. A v0a prototype exists under `app/`; M001 build gate remains closed pending field-test evidence.
 
 That means the immediate focus is:
 

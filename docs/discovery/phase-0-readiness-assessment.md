@@ -1,11 +1,11 @@
 ---
 id: phase-0-readiness-assessment
 title: "Phase 0 Readiness Assessment"
-status: active
-stage: planning
+status: superseded
+stage: validation
 type: discovery
-summary: "Gap analysis, readiness checklist, and build plan for the Phase 0 validation prototype. Read this first when starting validation work."
-authority: validation readiness state, prototype build plan, operational gaps
+summary: "Historical pre-build gap analysis for the Phase 0 validation prototype. Superseded by the v0a build — see app/README.md and docs/research/2026-04-12-v0a-runner-probe-feedback.md for current state."
+authority: historical validation readiness state (pre-build)
 last_updated: 2026-04-12
 depends_on:
   - docs/discovery/phase-0-wedge-validation.md
@@ -21,20 +21,20 @@ open_question_refs:
 
 # Phase 0 Readiness Assessment
 
+> **Superseded.** The v0a prototype has been built and is runnable under `app/`. The gap analysis below reflects the pre-build state and is kept for historical context. For current prototype status, see `app/README.md`. For UX/QA findings and the living fix backlog, see `docs/research/2026-04-12-v0a-runner-probe-feedback.md`.
+
 ## Purpose
 
-This document captures the current readiness state for starting Phase 0 validation. It lists what is ready, what is missing, and the concrete build plan to close the gaps. It is the recommended first read for any agent or human picking up validation work.
+This document captured the readiness state for starting Phase 0 validation before the v0a prototype was built. It listed what was ready, what was missing, and the build plan to close the gaps.
 
 ## Use this doc when
 
-- Starting any Phase 0 validation work
-- Picking up the prototype build
-- Checking what gaps remain before field testing
-- Onboarding a new agent session to the validation effort
+- Understanding the historical gap analysis that motivated the v0a build
+- Reviewing which pre-build assumptions were accurate
 
 ## Current state summary
 
-The project is at the **end of planning and the beginning of Phase 0 validation**. The M001 build is explicitly blocked until the validation gate clears (see `docs/milestones/m001-solo-session-loop.md` § Pre-build validation gate). The validation program is defined in `docs/discovery/phase-0-wedge-validation.md`.
+The v0a validation prototype has been built. The gaps described below (Gap 1: No testable UI, Gap 2: No prebuilt sessions) are closed. Gap 3 (expert safety review) and Gap 4 (field test logistics) remain human tasks. For the current prototype state, see `app/README.md`.
 
 ### Decision: validation vehicle is a working PWA
 
@@ -82,7 +82,7 @@ Recruitment is not a blocking gap for the initial alpha. Broader recruiting stay
 - Vite + React + TypeScript scaffold exists in `app/`.
 - Dexie and dexie-react-hooks are installed.
 - React Router is installed.
-- No UI screens, no Dexie database, no service worker, no PWA wiring yet.
+- The v0a prototype adds 6 screens (Start, Safety, Run, Transition, Review, Complete), Dexie persistence, vite-plugin-pwa service worker, timer recovery, and preset sessions. See `app/README.md`.
 
 ### Design artifacts (wireframes ready)
 
@@ -103,9 +103,9 @@ Recruitment is not a blocking gap for the initial alpha. Broader recruiting stay
 
 ### Gap 1: No testable prototype UI
 
-**Status**: Not started.
-**What exists**: App scaffold with placeholder content. Data layer is ready.
-**What is needed**: A bare-bones 4-screen PWA session runner.
+**Status**: Addressed by v0a (see `docs/research/2026-04-12-v0a-runner-probe-feedback.md`).
+**What exists**: Runnable v0a prototype with 6 screens (Start, Safety, Run, Transition, Review, Complete), Dexie persistence, vite-plugin-pwa, and timer recovery.
+**What was needed**: A bare-bones 4-screen PWA session runner.
 
 Screens required:
 
@@ -132,9 +132,9 @@ Courtside UX (from `docs/prd-foundation.md` and D48-D51):
 
 ### Gap 2: No prebuilt test sessions
 
-**Status**: Not started.
-**What exists**: Drill catalog with 11 M001 candidates, 4 archetypes with block layouts.
-**What is needed**: 3 concrete session instances wired into the prototype.
+**Status**: Addressed by v0a (see `docs/research/2026-04-12-v0a-runner-probe-feedback.md`).
+**What exists**: 3 preset sessions (Solo Wall Pass, Solo Open Sand, Partner Pass Workout) wired into the v0a prototype.
+**What was needed**: 3 concrete session instances wired into the prototype.
 
 | Session | Archetype | Time | Drills (from M001 set) |
 |---|---|---|---|
@@ -233,4 +233,4 @@ Per `docs/discovery/phase-0-wedge-validation.md`:
 - **Read this first** when picking up any Phase 0 validation or prototype build work.
 - **Edit when**: a gap is closed, the build plan changes, or validation begins.
 - **Related docs**: `docs/discovery/phase-0-wedge-validation.md` (validation program), `docs/milestones/m001-solo-session-loop.md` (M001 gate), `docs/decisions.md` (blocking open questions O4-O7).
-- **Next action**: Build the validation runner PWA (Gap 1) and assemble the test sessions (Gap 2).
+- **Next action**: Field-test the v0a prototype (Gaps 1-2 addressed); close Gap 3 (safety review) and Gap 4 (logistics).
