@@ -37,8 +37,8 @@
   "cold_start": {
     "description": "Read these files in order when entering the repo cold. Stop as soon as you have enough context for the task.",
     "read_order": [
-      { "path": "AGENTS.md",                                "role": "orientation",     "required": true,  "lines": 356 },
-      { "path": "docs/catalog.json",                        "role": "machine_index",   "required": true,  "lines": 805 },
+      { "path": "AGENTS.md",                                "role": "orientation",     "required": true,  "lines": 161 },
+      { "path": "docs/catalog.json",                        "role": "machine_index",   "required": true,  "lines": 806 },
       { "path": "docs/vision.md",                           "role": "principles",      "required": false, "read_if": "task touches product direction" },
       { "path": "docs/decisions.md",                        "role": "decisions",        "required": false, "read_if": "task touches product or technical choices", "lines": 154 },
       { "path": "docs/prd-foundation.md",                   "role": "scope",           "required": false, "read_if": "task touches features, object model, or data contracts", "lines": 271 },
@@ -49,7 +49,7 @@
     ]
   },
   "agent_surfaces": [
-    { "path": "AGENTS.md",                                "format": "markdown", "purpose": "Primary interactive repo contract with routing and operating constraints." },
+    { "path": "AGENTS.md",                                "format": "markdown", "purpose": "Primary interactive repo contract for orientation, routing, and operating constraints." },
     { "path": "docs/catalog.json",                        "format": "json",     "purpose": "Rich machine-readable index of docs, dependencies, routing, and task pointers." },
     { "path": "agent-manifest.json",                      "format": "json",     "purpose": "Compact cold-start payload for tooling that should not parse markdown first." },
     { "path": "llms.txt",                                 "format": "text",     "purpose": "Lightweight repo overview for generic LLM tooling." },

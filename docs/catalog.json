@@ -133,7 +133,7 @@
   "entrypoint_contracts": [
     {
       "path": "AGENTS.md",
-      "purpose": "Canonical prose repo contract for cold-start routing, source-of-truth order, vocabularies, and operating constraints.",
+      "purpose": "Canonical prose repo contract for cold-start routing, source-of-truth order, current state, and operating constraints.",
       "use_when": [
         "starting any session",
         "resolving source-of-truth conflicts",
@@ -147,7 +147,7 @@
       "update_when": [
         "cold-start protocol changes",
         "source-of-truth hierarchy changes",
-        "status vocabularies or frontmatter schema change",
+        "current phase, milestone, or blocking-gate change",
         "repo-wide agent operating constraints change"
       ],
       "machine_companions": ["docs/catalog.json", "agent-manifest.json", "llms.txt"]
@@ -488,6 +488,14 @@
       "summary": "Raw research feeding the M001 quality and testing spec."
     },
     {
+      "path": "docs/research/2026-04-12-v0a-runner-probe-feedback.md",
+      "id": "v0a-runner-probe-feedback",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "synthesized v0a prototype feedback, retest evidence, docs drift, and prioritized fix backlog",
+      "summary": "Living multi-persona feedback log covering UX findings, live browser retests, docs drift, and stable backlog IDs."
+    },
+    {
       "path": "docs/ops/agent-documentation-contract.md",
       "id": "agent-documentation-contract",
       "type": "ops",
@@ -523,7 +531,7 @@
   "agent_entry_points": [
     { "path": "agent-manifest.json", "format": "json",     "purpose": "Pure-JSON cold-start payload. No markdown parsing needed." },
     { "path": "llms.txt",            "format": "text",     "purpose": "LLM/agent discovery convention. Lightweight project summary." },
-    { "path": "AGENTS.md",           "format": "markdown", "purpose": "Human-readable orientation with full operating contract." },
+    { "path": "AGENTS.md",           "format": "markdown", "purpose": "Human-readable orientation with a concise repo contract." },
     { "path": "docs/catalog.json",   "format": "json",     "purpose": "Full doc index, dependency graph, routing rules, line counts." },
     { "path": "docs/ops/agent-documentation-contract.md", "format": "markdown", "purpose": "Canonical contract for machine-scannable docs and change propagation." }
   ],
@@ -649,6 +657,15 @@
       ]
     },
     {
+      "path": "docs/research/2026-04-12-v0a-runner-probe-feedback.md",
+      "focus": "v0a prototype feedback, retest evidence, and pre-field-test priorities",
+      "use_when": [
+        "checking current UX findings against the live prototype",
+        "looking for reproducible browser-retest evidence or screenshot paths",
+        "triaging prioritized fixes before field testing or v0b planning"
+      ]
+    },
+    {
       "path": "docs/research/dexie-schema-and-architecture.md",
       "focus": "Dexie schema and migration guidance",
       "use_when": [
@@ -737,7 +754,7 @@
     { "id": "prd-foundation",             "path": "docs/prd-foundation.md",                      "type": "core",      "status": "draft",  "lines": 271 },
     { "id": "roadmap",                    "path": "docs/roadmap.md",                             "type": "core",      "status": "draft",  "lines": 270 },
     { "id": "decisions",                  "path": "docs/decisions.md",                           "type": "core",      "status": "active", "lines": 154 },
-    { "id": "docs-index",                "path": "docs/README.md",                              "type": "index",     "status": "active", "lines": 175 },
+    { "id": "docs-index",                "path": "docs/README.md",                              "type": "index",     "status": "active", "lines": 177 },
     { "id": "M001",                       "path": "docs/milestones/m001-solo-session-loop.md",   "type": "milestone", "status": "draft",  "lines": 200 },
     { "id": "milestones-readme",          "path": "docs/milestones/README.md",                   "type": "ops",       "status": "active", "lines": 48 },
     { "id": "M001-courtside-run-flow",    "path": "docs/specs/m001-courtside-run-flow.md",       "type": "spec",      "status": "draft",  "lines": 391 },
@@ -754,10 +771,11 @@
     { "id": "local-first-pwa-constraints","path": "docs/research/local-first-pwa-constraints.md","type": "research",  "status": "active", "lines": 110 },
     { "id": "dexie-schema-and-architecture","path":"docs/research/dexie-schema-and-architecture.md","type":"research", "status": "active", "lines": 175 },
     { "id": "m001-testing-quality-strategy","path":"docs/research/m001-testing-quality-strategy.md","type":"research", "status": "active", "lines": 102 },
+    { "id": "v0a-runner-probe-feedback", "path": "docs/research/2026-04-12-v0a-runner-probe-feedback.md","type":"research","status":"actionable","lines": 406 },
     { "id": "courtside-timer-patterns",  "path": "docs/research/courtside-timer-patterns.md",    "type": "research",  "status": "active", "lines": 44 },
     { "id": "outdoor-courtside-ui-brief","path": "docs/research/outdoor-courtside-ui-brief.md",  "type": "research",  "status": "active", "lines": 122 },
-    { "id": "research-index",            "path": "docs/research/README.md",                      "type": "index",     "status": "active", "lines": 101 },
-    { "id": "agent-documentation-contract","path": "docs/ops/agent-documentation-contract.md",   "type": "ops",       "status": "active", "lines": 153 },
+    { "id": "research-index",            "path": "docs/research/README.md",                      "type": "index",     "status": "active", "lines": 105 },
+    { "id": "agent-documentation-contract","path": "docs/ops/agent-documentation-contract.md",   "type": "ops",       "status": "active", "lines": 158 },
     { "id": "autonomous-milestone-system","path": "docs/ops/autonomous-milestone-system.md",      "type": "ops",       "status": "active", "lines": 111 },
     { "id": "agent-runtime",             "path": "docs/ops/agent-runtime.md",                    "type": "ops",       "status": "active", "lines": 181 },
     { "id": "retro-template",            "path": "docs/templates/retro.md",                      "type": "template",  "status": "active", "lines": 21 },

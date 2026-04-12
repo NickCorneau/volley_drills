@@ -80,6 +80,7 @@ Provide the prose editorial index for the docs system:
 | `research/local-first-pwa-constraints.md` | iPhone/PWA constraints, storage eviction, install posture |
 | `research/dexie-schema-and-architecture.md` | Dexie schema shape, indexing, migration, state management |
 | `research/m001-testing-quality-strategy.md` | Test layers, trust risks, update safety, persistence |
+| `research/2026-04-12-v0a-runner-probe-feedback.md` | Living v0a runner-probe feedback log: UX findings, retest evidence, docs drift, and stable backlog IDs |
 
 ## Related folders
 
@@ -87,7 +88,7 @@ Provide the prose editorial index for the docs system:
 - `app/` — Validation-phase web shell (Vite + React + Dexie scaffold). See `app/README.md` for UI defaults.
 - `ops/agent/` — Agent control plane: task queue, handoffs, runs, and worker flow. See `ops/agent/README.md`.
 - `scripts/` — Supervisor, dispatch, verify, and notify scripts for agent work. Entry: `scripts/agent-supervisor.sh`.
-- `.cursor/rules/` — Cursor-specific rules: `repo-operating-model.mdc` (always-apply), `docs-editorial-workflow.mdc` (docs globs), `machine-scannable-docs.mdc` (always-apply docs hygiene reminder).
+- `.cursor/rules/` — Cursor-specific rules for repo operating model, cold-start hints, docs workflow, and machine-scannable doc hygiene.
 
 ## Agent Fast Path
 
@@ -127,7 +128,7 @@ Each doc's `authority` frontmatter field states what it is canonical for. Parse 
 
 ## Metadata contract
 
-All docs under `docs/` use YAML frontmatter. The canonical schema is defined in `AGENTS.md` (§ Frontmatter schema). Required keys: `id`, `title`, `status`, `stage`, `type`, `summary`, `authority`, `last_updated`, `depends_on`.
+All docs under `docs/` use YAML frontmatter. The canonical schema and durable-doc expectations live in `docs/ops/agent-documentation-contract.md` (§ Durable Doc Contract). Required keys here are `id`, `title`, `status`, `stage`, `type`, `summary`, `authority`, `last_updated`, and `depends_on`.
 
 - Frontmatter is the single source of truth for date and status. Do not duplicate these in the body text.
 - When changing a document's status or stage, update the frontmatter first.

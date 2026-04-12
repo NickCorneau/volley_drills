@@ -6,6 +6,7 @@ alwaysApply: true
 # Machine-Scannable Docs
 
 - Treat `AGENTS.md`, `docs/catalog.json`, `agent-manifest.json`, and `llms.txt` as the repo's agent entry surfaces. Keep them consistent when routing or repo guidance changes.
+- Keep `AGENTS.md` concise and pointer-oriented. Use `docs/catalog.json` for exhaustive machine indexes and `ops/agent/README.md` for control-plane inventories instead of duplicating them in `AGENTS.md`.
 - When adding or renaming canonical docs, update `docs/catalog.json` in the same pass. Update `agent-manifest.json`, `llms.txt`, `docs/README.md`, or `AGENTS.md` when their references or read paths change.
 - Durable docs under `docs/` should keep YAML frontmatter with at least `id`, `title`, `status`, `stage`, `type`, and `summary`.
 - For core, milestone, and spec docs, also keep `authority`, `last_updated`, and `depends_on` current.

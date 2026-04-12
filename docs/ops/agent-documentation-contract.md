@@ -64,6 +64,7 @@ These files work together. They should not drift.
 
 - `AGENTS.md`
   - Primary interactive repo contract for agents working inside the repo.
+  - Keep it concise and pointer-oriented. Exhaustive inventories, dependency graphs, line counts, and control-plane listings belong in `docs/catalog.json`, `docs/README.md`, or `ops/agent/README.md`.
 - `docs/catalog.json`
   - Richest machine-readable map of canonical docs, routing, dependencies, and task-contract pointers.
 - `agent-manifest.json`
@@ -113,6 +114,7 @@ Avoid:
 - burying constraints only in prose
 - duplicating the same decision in multiple docs when a cross-reference will do
 - ambiguous ownership of canonical concepts
+- turning `AGENTS.md` into the exhaustive doc index when a companion surface already owns that detail
 
 ## Change Propagation Rules
 

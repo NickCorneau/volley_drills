@@ -72,6 +72,8 @@ Research notes inform canon. They do not outrank `docs/decisions.md`, `docs/prd-
   - `docs/research/m001-testing-quality-strategy.md`
 - Need Dexie schema, persistence, migration, or IndexedDB project-structure guidance:
   - `docs/research/dexie-schema-and-architecture.md`
+- Need synthesized v0a prototype feedback, retest evidence, or prioritized pre-field-test backlog:
+  - `docs/research/2026-04-12-v0a-runner-probe-feedback.md`
 
 ## Selection Rules
 
@@ -90,6 +92,7 @@ Research notes inform canon. They do not outrank `docs/decisions.md`, `docs/prd-
 | `docs/research/courtside-timer-patterns.md` | countdown model, auto-advance, wake lock, interruption recovery | informs M001 run-flow behavior |
 | `docs/research/m001-testing-quality-strategy.md` | testing stack, trust invariants, update-safe verification strategy | informs implementation planning and quality expectations |
 | `docs/research/dexie-schema-and-architecture.md` | Dexie schema shape, migrations, persistence design, DB structure | informs implementation planning, persistence architecture, migration safety |
+| `docs/research/2026-04-12-v0a-runner-probe-feedback.md` | living synthesis of v0a runner-probe UX feedback, browser retest evidence, docs drift, and stable backlog IDs | informs pre-field-test fixes, doc hygiene, and v0b planning |
 
 ## AI-Native Conventions For Future Research Notes
 
