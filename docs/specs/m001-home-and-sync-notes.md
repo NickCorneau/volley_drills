@@ -1,25 +1,27 @@
 ---
-id: M001-home-sync
+
+## id: M001-home-sync
+
 title: M001 Home And Connectivity Notes
-status: draft
-stage: planning
+status: active
+stage: validation
 type: spec
 authority: home screen states, weak-connectivity behavior, sync copy principles
 summary: "Home screen states, first-run activation path, and weak-connectivity behavior."
 last_updated: 2026-04-12
 depends_on:
-  - docs/milestones/m001-solo-session-loop.md
-  - docs/prd-foundation.md
-  - docs/vision.md
+
+- docs/milestones/m001-solo-session-loop.md
+- docs/prd-foundation.md
+- docs/vision.md
 decision_refs:
-  - D27
-  - D28
-  - D39
-  - D41
-  - D57
-  - D58
-  - D70
----
+- D27
+- D28
+- D39
+- D41
+- D57
+- D58
+- D70
 
 # M001 Home And Connectivity Notes
 
@@ -27,7 +29,7 @@ decision_refs:
 
 Capture the first mobile home-state assumptions and the user-visible behavior under weak connectivity.
 
-This is a planning artifact for later implementation planning, not an instruction to start building now.
+The v0a validation prototype in `app/` currently implements a partial version of this spec. M001 full build remains gated by field testing.
 
 ## Default home state
 
@@ -204,15 +206,17 @@ Planning assumption:
 
 ### Allowed actions under weak connectivity
 
-| Action | Expected M001 behavior |
-| --- | --- |
-| Start a loaded session | Allowed |
-| Resume an interrupted local session | Allowed |
-| Advance blocks | Allowed |
-| Pause / resume | Allowed |
-| Finish session | Allowed |
-| Save review | Allowed; write locally first |
-| Pull a brand-new remote session | Not part of M001 |
+
+| Action                              | Expected M001 behavior       |
+| ----------------------------------- | ---------------------------- |
+| Start a loaded session              | Allowed                      |
+| Resume an interrupted local session | Allowed                      |
+| Advance blocks                      | Allowed                      |
+| Pause / resume                      | Allowed                      |
+| Finish session                      | Allowed                      |
+| Save review                         | Allowed; write locally first |
+| Pull a brand-new remote session     | Not part of M001             |
+
 
 ### Update-ready behavior
 
@@ -310,4 +314,3 @@ These belong in Phase 1.5+ implementation planning if the coach clipboard gate c
 - `docs/prd-foundation.md`
 - `docs/decisions.md`
 - `docs/specs/m001-quality-and-testing.md`
-

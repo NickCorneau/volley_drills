@@ -1,8 +1,8 @@
 ---
 id: M001-quality-testing
 title: M001 Quality And Testing
-status: draft
-stage: planning
+status: active
+stage: validation
 type: spec
 authority: trust invariants, test layers, minimum verification bar for M001
 summary: "Trust invariants, test layers, and minimum verification bar for M001."
@@ -25,7 +25,7 @@ decision_refs:
 
 Define the trust invariants, test layers, and minimum verification bar for the first implementation-ready M001 slice.
 
-This is a planning artifact for later implementation planning, not an instruction to start building now.
+The v0a validation prototype intentionally deferred automated testing (Vitest, RTL, Playwright) to prioritize speed-to-sand. Full M001 implementation must build this test stack.
 
 ## Quality priority
 

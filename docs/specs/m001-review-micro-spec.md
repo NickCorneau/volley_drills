@@ -1,8 +1,8 @@
 ---
 id: M001-review
 title: M001 Review Micro-Spec
-status: draft
-stage: planning
+status: active
+stage: validation
 type: spec
 date: 2026-04-11
 authority: post-session review payload, UX rules, completion definition, deferred/skipped behavior
@@ -24,7 +24,7 @@ decision_refs:
 
 Define the smallest post-session review that still creates real learning for the next session.
 
-This is a planning artifact for later implementation planning, not an instruction to start building now.
+The v0a validation prototype in `app/` currently implements a partial version of this spec. M001 full build remains gated by field testing.
 
 ## Time budget
 

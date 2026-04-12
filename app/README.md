@@ -1,10 +1,10 @@
 ---
 id: app-workspace
 title: App Workspace
-status: bootstrap
-stage: planning
+status: active
+stage: validation
 type: workspace-readme
-authority: current web app scaffold state and implementation guardrails
+authority: current web app prototype state and implementation guardrails
 last_updated: 2026-04-12
 depends_on:
   - docs/prd-foundation.md
@@ -15,24 +15,55 @@ depends_on:
 
 # App Workspace
 
-This folder holds the validation-phase web shell for Volley Drills.
+This folder holds the runnable Phase 0 validation prototype (v0a) for Volley Drills.
 
 ## Current status
 
-- `src/App.tsx` is still starter-template placeholder content.
-- Product direction lives in `docs/`; do not treat the current demo UI as a product design reference.
-- The first real UI target is the M001 solo session loop in `docs/milestones/m001-solo-session-loop.md`.
-- The current app scaffold includes Dexie dependencies, but there is no service worker or `vite-plugin-pwa` wiring yet.
+- The app is a runnable **v0a PWA prototype** used for physical field testing on sand.
+- **Routes**: `/` (Start), `/safety`, `/run`, `/run/transition`, `/review`, `/complete`.
+- **Dexie tables**: `sessionPlans`, `executionLogs`, `sessionReviews`, `timerState` (schema in `src/db/schema.ts`).
+- **PWA**: `vite-plugin-pwa` wired with `generateSW`, precache, `offline.html`, `requestPersistentStorage()` at startup.
+- **Timer**: timestamp-based with 5s flush to `timerState`, wake-lock during active blocks, 3-2-1 pre-roll countdown.
+- **Safety**: pain gate, recovery session override with confirmation, training recency check, heat tips.
+- Product direction lives in `docs/`; do not treat the prototype UI as final production design.
+- The M001 milestone implementation gate remains closed until field validation completes (D91).
 
-## UI defaults to inherit when implementation starts
+## Known limitations (v0a)
+
+- RPE uses 4 bands (Easy/Moderate/Hard/Max) instead of full 0-10 scale (deferred to v0b).
+- Pass metric counters are +/- only; no tap-to-type or +5/+10 steppers.
+- No session history on Start screen.
+- No landscape orientation handling.
+- `vite-plugin-pwa@1.2.0` declares peer support through Vite 7; app uses Vite 8 (builds clean but peer warning on install).
+- See `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for the full prioritized backlog.
+
+## Local Run Instructions
+
+To verify the app locally:
+
+```bash
+cd app
+npm install
+npm run dev
+```
+
+Expected running URL: `http://localhost:5173`
+
+For build and style verification:
+
+```bash
+cd app
+npm run build
+npm run lint
+```
+
+## UI defaults
 
 - one light, high-contrast theme for M001
 - large type and oversized timer / rep counts for outdoor glanceability
 - `54-60px` touch targets with generous spacing
 - minimal active-session chrome: current block, one cue, timer / reps, progress, `Next`, `Pause`
-- local-first behavior: session run and review must work on device without network dependency
-- service-worker updates must activate only at safe boundaries, never in the middle of an active session
-- wake lock and haptics are progressive enhancements, not trusted baseline capabilities
+- local-first behavior: session run and review work on device without network dependency
 
 ## Key docs
 
@@ -46,6 +77,5 @@ This folder holds the validation-phase web shell for Volley Drills.
 ## For agents
 
 - **This file is workspace status**, not product authority. Product direction lives in `docs/`.
-- **Edit when**: the scaffold state changes (new dependencies wired, service worker added, demo content replaced with real screens).
-- **Do not treat** the current demo UI as a product design reference. The specs and PRD define what should be built.
+- **Edit when**: the app architecture materially changes (e.g. sync layer added) or validation phase ends.
 - **Related milestone**: `M001` (`docs/milestones/m001-solo-session-loop.md`).

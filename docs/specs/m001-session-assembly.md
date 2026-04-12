@@ -1,8 +1,8 @@
 ---
 id: M001-session-assembly
 title: M001 Session Assembly
-status: draft
-stage: planning
+status: active
+stage: validation
 type: spec
 authority: deterministic session-assembly model, slot system, template structure
 summary: "Deterministic session assembly model with archetypes, slot system, and ranked fill."

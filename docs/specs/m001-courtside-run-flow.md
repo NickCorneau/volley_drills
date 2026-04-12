@@ -1,8 +1,8 @@
 ---
 id: M001-courtside-run-flow
 title: M001 Courtside Run Flow
-status: draft
-stage: planning
+status: active
+stage: validation
 type: spec
 authority: courtside run screen states, interaction contract, interruption handling
 summary: "Screen states, interaction contract, and interruption handling for the courtside run flow."
@@ -37,7 +37,7 @@ Define the user-visible run flow for the first implementation-ready slice:
 - minimal taps
 - believable under beach conditions
 
-This is a planning artifact for later implementation planning, not an instruction to start building now.
+The v0a validation prototype in `app/` currently implements a partial version of this flow. M001 full build remains gated by field testing.
 
 ## Core principle
 
@@ -49,8 +49,8 @@ For a new user, getting into that run flow should require only the minimum setup
 
 - Use one high-contrast light theme. Do not spend M001 budget on theme switching.
 - Use near-black text on white or slightly off-white surfaces, plus one vivid accent for primary actions and progress emphasis.
-- Use the system sans stack:
-  - `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`
+- Use the Inter font with a system sans fallback:
+  - `"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`
 - Keep type comfortably large:
   - body text `>=16px`
   - `18px` preferred for run-mode labels

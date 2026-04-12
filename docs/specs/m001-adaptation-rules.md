@@ -1,8 +1,8 @@
 ---
 id: M001-adaptation
 title: M001 Adaptation Rules
-status: draft
-stage: planning
+status: active
+stage: validation
 type: spec
 authority: pass-first progress/hold/deload thresholds and rules
 summary: "Rules-first progress/hold/deload thresholds for the pass-first loop."

@@ -33,7 +33,7 @@ open_question_refs:
 ## Agent Quick Scan
 
 - Use this doc when you need M001 scope, current gate status, acceptance evidence, or the smallest reliable statement of what belongs in the first build.
-- Status: planning only. M001 is still blocked on the pre-build validation gate.
+- Status: validation phase. A runnable v0a prototype exists under `app/`. Full M001 implementation is still blocked on the pre-build validation gate.
 - In scope: starter session assembly, courtside run flow, one-minute review, deterministic adaptation, and write-as-you-go local persistence.
 - Not for: implementation-level Dexie details, full sync architecture, or coach clipboard build work.
 - Primary blockers: `O4`, `O5`, `O6`, `O7` in `docs/decisions.md`.
