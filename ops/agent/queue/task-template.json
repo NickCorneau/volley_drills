@@ -1,0 +1,63 @@
+{
+  "id": "T000",
+  "title": "Describe the bounded task",
+  "status": "pending",
+  "kind": "docs",
+  "milestone": "M000",
+  "summary": "Describe what 'done' means in one sentence.",
+  "scope": {
+    "files": [
+      "docs/example.md"
+    ],
+    "out_of_scope": [
+      "Unrelated roadmap or milestone rewrites"
+    ]
+  },
+  "context": {
+    "required_reads": [
+      "AGENTS.md",
+      "docs/catalog.json",
+      "docs/README.md"
+    ],
+    "optional_reads": [
+      "docs/decisions.md"
+    ],
+    "estimated_input_lines": 830,
+    "decision_refs": [],
+    "open_question_refs": []
+  },
+  "output": {
+    "artifacts": [
+      "docs/example.md"
+    ],
+    "side_effects": [
+      "Update docs/catalog.json if a new doc was added"
+    ]
+  },
+  "verification": {
+    "commands": [
+      "bash scripts/validate-agent-control-plane.sh"
+    ],
+    "acceptance": [
+      "The scoped files are updated.",
+      "The verification commands pass.",
+      "No blocker or budget condition was hit."
+    ]
+  },
+  "handoff": {
+    "must_read": [
+      "AGENTS.md",
+      "docs/README.md"
+    ],
+    "notes": []
+  },
+  "escalate_if": [
+    "A change would alter milestone scope or product direction.",
+    "A required file or tool is missing.",
+    "Verification fails twice in a row."
+  ],
+  "worker": {
+    "preferred_surface": "cursor",
+    "unattended_surface": "claude"
+  }
+}

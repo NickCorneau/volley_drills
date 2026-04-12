@@ -1,0 +1,19 @@
+---
+description: Keep durable docs machine-scannable and agent-routable
+alwaysApply: true
+---
+
+# Machine-Scannable Docs
+
+- Treat `AGENTS.md`, `docs/catalog.json`, `agent-manifest.json`, and `llms.txt` as the repo's agent entry surfaces. Keep them consistent when routing or repo guidance changes.
+- When adding or renaming canonical docs, update `docs/catalog.json` in the same pass. Update `agent-manifest.json`, `llms.txt`, `docs/README.md`, or `AGENTS.md` when their references or read paths change.
+- Durable docs under `docs/` should keep YAML frontmatter with at least `id`, `title`, `status`, `stage`, `type`, and `summary`.
+- For core, milestone, and spec docs, also keep `authority`, `last_updated`, and `depends_on` current.
+- Add `decision_refs` and `open_question_refs` when stable IDs materially constrain the doc.
+- Prefer short scan-friendly sections near the top of canonical docs, such as `Purpose`, `Agent Quick Scan`, `Fast path`, `Use this doc when`, or `Not this doc for`.
+- For agent entrypoint docs, keep stable sections for `Purpose`, `Use This File When`, `Not For`, `Update When`, and `Machine Contract`.
+- Prefer stable IDs (`P*`, `D*`, `O*`, `M*`, `R*`) over copied prose when cross-referencing.
+- Valid frontmatter must be real YAML, not markdown-styled pseudo-frontmatter.
+- Keep contracts in flat lists, tables, JSON, or enumerated IDs. Do not bury critical constraints only in prose.
+- When entrypoints, routing rules, or machine summaries change, sync `docs/catalog.json`, `agent-manifest.json`, and `llms.txt` in the same pass when applicable.
+- Keep curated research in `docs/research/`; preserve `research-output/` as raw provenance.

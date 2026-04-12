@@ -1,0 +1,58 @@
+name: Agent Validation
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - ".cursor/**"
+      - "docs/**"
+      - "ops/agent/**"
+      - "scripts/**"
+      - ".gitignore"
+      - "README.md"
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - "agent-manifest.json"
+      - "llms.txt"
+  push:
+    paths:
+      - ".github/workflows/**"
+      - ".cursor/**"
+      - "docs/**"
+      - "ops/agent/**"
+      - "scripts/**"
+      - ".gitignore"
+      - "README.md"
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - "agent-manifest.json"
+      - "llms.txt"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-agent-surfaces:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Run validator regression harness
+        run: bash scripts/test-validate-agent-docs.sh
+
+      - name: Validate agent-facing docs
+        run: bash scripts/validate-agent-docs.sh
+
+      - name: Validate agent control plane
+        run: bash scripts/validate-agent-control-plane.sh

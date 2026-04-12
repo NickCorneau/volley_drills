@@ -1,0 +1,805 @@
+{
+  "schema_version": 3,
+  "repo_id": "volley_drills",
+  "last_updated": "2026-04-12",
+  "_meta": {
+    "description": "Machine-readable index of all docs, entrypoints, routing rules, and dependency graph. Agents should parse this file to find docs by topic, check authority, and plan context loading.",
+    "self_path": "docs/catalog.json",
+    "companion_files": {
+      "agent_manifest": "agent-manifest.json",
+      "llms_txt": "llms.txt",
+      "agents_md": "AGENTS.md",
+      "docs_contract": "docs/ops/agent-documentation-contract.md"
+    },
+    "conventions": {
+      "lines_field": "Approximate line count for context-window budgeting. Multiply by ~40 for rough token estimate.",
+      "depends_on_field": "Paths this doc must stay consistent with. Check before editing.",
+      "read_if_field": "Condition under which an agent should load this file. Skip if condition does not apply."
+    }
+  },
+  "repo_state": {
+    "stage": "planning",
+    "posture": "docs-first",
+    "runtime": "cursor-first",
+    "platform_bias": "wsl-first",
+    "environment_contract": {
+      "preferred_host": "wsl-or-linux",
+      "preferred_shell": "bash",
+      "control_plane_scripts": "scripts/*.sh",
+      "cursor_hooks": ".cursor/hooks/*.sh",
+      "python_requirement": "python3 for JSON-oriented helper commands and current script assumptions",
+      "notes": "The repo can be edited from Windows Cursor, but the bundled control-plane automation is written for bash/WSL."
+    },
+    "active_milestone": "M001",
+    "stack": "Vite + React + TypeScript + Tailwind + PWA + Dexie",
+    "blocking_gate": "M001 pre-build validation must pass before implementation",
+    "open_questions": ["O4", "O5", "O6", "O7"]
+  },
+  "entrypoints": [
+    {
+      "path": "AGENTS.md",
+      "kind": "repo_contract",
+      "always_read": true,
+      "use_when": [
+        "starting any session",
+        "changing repo policy",
+        "working docs-first"
+      ]
+    },
+    {
+      "path": "docs/catalog.json",
+      "kind": "machine_index",
+      "always_read": true,
+      "use_when": [
+        "need canonical doc map",
+        "need update routing",
+        "need task contract pointers",
+        "finding a doc by topic or frontmatter ID"
+      ]
+    },
+    {
+      "path": "docs/README.md",
+      "kind": "editorial_index",
+      "always_read": true,
+      "use_when": [
+        "routing documentation updates",
+        "understanding doc ownership"
+      ]
+    },
+    {
+      "path": "docs/ops/agent-documentation-contract.md",
+      "kind": "documentation_contract",
+      "always_read": false,
+      "use_when": [
+        "editing docs",
+        "changing agent entry surfaces",
+        "changing machine-scannable doc conventions"
+      ]
+    },
+    {
+      "path": "docs/research/README.md",
+      "kind": "research_index",
+      "always_read": false,
+      "use_when": [
+        "routing research reads",
+        "finding the narrowest research note"
+      ]
+    },
+    {
+      "path": "docs/ops/agent-runtime.md",
+      "kind": "runtime_contract",
+      "always_read": false,
+      "use_when": [
+        "working on agent control-plane files",
+        "running unattended or bounded agent tasks"
+      ]
+    },
+    {
+      "path": "ops/agent/README.md",
+      "kind": "control_plane_index",
+      "always_read": false,
+      "use_when": [
+        "working in ops/agent",
+        "reading task states or handoff flow"
+      ]
+    },
+    {
+      "path": "ops/agent/queue/task-template.json",
+      "kind": "task_schema_example",
+      "always_read": false,
+      "use_when": [
+        "creating or validating queued tasks"
+      ]
+    },
+    {
+      "path": "agent-manifest.json",
+      "kind": "json_manifest",
+      "always_read": false,
+      "use_when": [
+        "need a compact JSON cold-start payload",
+        "cannot rely on markdown parsing"
+      ]
+    },
+    {
+      "path": "llms.txt",
+      "kind": "lightweight_text_manifest",
+      "always_read": false,
+      "use_when": [
+        "need a terse repo overview",
+        "working with generic LLM tooling"
+      ]
+    }
+  ],
+  "entrypoint_contracts": [
+    {
+      "path": "AGENTS.md",
+      "purpose": "Canonical prose repo contract for cold-start routing, source-of-truth order, vocabularies, and operating constraints.",
+      "use_when": [
+        "starting any session",
+        "resolving source-of-truth conflicts",
+        "checking repo-wide agent rules or vocabularies"
+      ],
+      "not_for": [
+        "replacing product canon",
+        "serving as the exhaustive machine index",
+        "storing raw research detail"
+      ],
+      "update_when": [
+        "cold-start protocol changes",
+        "source-of-truth hierarchy changes",
+        "status vocabularies or frontmatter schema change",
+        "repo-wide agent operating constraints change"
+      ],
+      "machine_companions": ["docs/catalog.json", "agent-manifest.json", "llms.txt"]
+    },
+    {
+      "path": "docs/README.md",
+      "purpose": "Prose editorial index for the docs system and update routing.",
+      "use_when": [
+        "routing a docs update",
+        "deciding which doc owns a concept",
+        "checking editorial hierarchy"
+      ],
+      "not_for": [
+        "exhaustive machine-only routing",
+        "overriding product canon"
+      ],
+      "update_when": [
+        "doc inventory changes materially",
+        "doc ownership changes",
+        "agent fast-path read order changes",
+        "agent entry surfaces or docs-editing routes change"
+      ],
+      "machine_companions": ["docs/catalog.json", "docs/ops/agent-documentation-contract.md"]
+    },
+    {
+      "path": "docs/research/README.md",
+      "purpose": "Prose router for the curated research notes.",
+      "use_when": [
+        "choosing the narrowest research note",
+        "deciding whether a finding belongs in canon or research"
+      ],
+      "not_for": [
+        "replacing canon",
+        "mining raw provenance when curated notes already exist"
+      ],
+      "update_when": [
+        "a new curated research note is added",
+        "research note routing changes"
+      ],
+      "machine_companions": ["docs/catalog.json"]
+    },
+    {
+      "path": "docs/ops/agent-runtime.md",
+      "purpose": "Canonical prose runtime contract for bounded agent work.",
+      "use_when": [
+        "working on runtime or control-plane files",
+        "checking task lifecycle, worktree policy, or worker roles"
+      ],
+      "not_for": [
+        "replacing product canon",
+        "acting as the formal task schema"
+      ],
+      "update_when": [
+        "runtime stack changes",
+        "task lifecycle or worktree policy changes",
+        "control-plane layout changes"
+      ],
+      "machine_companions": ["docs/catalog.json", "ops/agent/queue/task-template.json", "ops/agent/schemas/task.schema.json"]
+    },
+    {
+      "path": "docs/ops/agent-documentation-contract.md",
+      "purpose": "Canonical prose contract for agent entry surfaces, machine-scannable docs, and change propagation.",
+      "use_when": [
+        "editing docs",
+        "changing agent entry surfaces",
+        "changing durable doc conventions"
+      ],
+      "not_for": [
+        "replacing product canon",
+        "acting as the exhaustive machine index"
+      ],
+      "update_when": [
+        "entry surfaces change",
+        "machine-scannable doc conventions change",
+        "change-propagation rules change"
+      ],
+      "machine_companions": ["docs/catalog.json", "AGENTS.md", "agent-manifest.json", "llms.txt"]
+    },
+    {
+      "path": "ops/agent/README.md",
+      "purpose": "Prose companion for the repo-local task queue, handoffs, schemas, and worker flow.",
+      "use_when": [
+        "working under ops/agent",
+        "checking task states, handoffs, or script entrypoints"
+      ],
+      "not_for": [
+        "product direction",
+        "replacing the formal task schema or enum files"
+      ],
+      "update_when": [
+        "queue layout changes",
+        "task-state vocabulary changes",
+        "script entrypoints change"
+      ],
+      "machine_companions": ["ops/agent/queue/task-template.json", "ops/agent/schemas/task.schema.json", "ops/agent/schemas/status-enums.json"]
+    }
+  ],
+  "read_packs": {
+    "cold_start_minimal": [
+      "AGENTS.md",
+      "docs/catalog.json"
+    ],
+    "product_direction": [
+      "docs/vision.md",
+      "docs/decisions.md",
+      "docs/prd-foundation.md"
+    ],
+    "milestone_m001": [
+      "docs/milestones/m001-solo-session-loop.md",
+      "docs/specs/"
+    ],
+    "prototype_ladder": [
+      "docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md",
+      "docs/milestones/m001-solo-session-loop.md",
+      "docs/specs/"
+    ],
+    "research_question": [
+      "docs/research/README.md",
+      "docs/research/"
+    ],
+    "validation_prototype": [
+      "docs/discovery/phase-0-readiness-assessment.md",
+      "docs/discovery/phase-0-wedge-validation.md",
+      "docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md",
+      "docs/milestones/m001-solo-session-loop.md",
+      "docs/prd-foundation.md",
+      "app/README.md"
+    ],
+    "docs_editing": [
+      "AGENTS.md",
+      "docs/catalog.json",
+      "docs/README.md",
+      "docs/ops/agent-documentation-contract.md"
+    ],
+    "agent_ops": [
+      "AGENTS.md",
+      "docs/catalog.json",
+      "docs/ops/agent-runtime.md",
+      "ops/agent/README.md",
+      "ops/agent/queue/task-template.json"
+    ]
+  },
+  "source_of_truth_order": [
+    {
+      "rank": 1,
+      "path": "docs/vision.md",
+      "owns": ["product principles", "strategic stance"]
+    },
+    {
+      "rank": 2,
+      "path": "docs/decisions.md",
+      "owns": ["decided items (D*)", "open questions (O*)", "ruled-out items"]
+    },
+    {
+      "rank": 3,
+      "path": "docs/prd-foundation.md",
+      "owns": ["product scope", "workflow", "object model", "local-first data ownership guarantees"]
+    },
+    {
+      "rank": 4,
+      "path": "docs/roadmap.md",
+      "owns": ["phase sequencing", "exit criteria", "local-first capability ladder"]
+    },
+    {
+      "rank": 5,
+      "path": "docs/milestones/",
+      "owns": ["thin-slice charter scope"]
+    },
+    {
+      "rank": 6,
+      "path": "docs/specs/",
+      "owns": ["milestone behavior details", "trust contracts", "quality expectations"]
+    },
+    {
+      "rank": 7,
+      "path": "docs/research/",
+      "owns": ["curated research inputs", "implementation-relevant synthesis"]
+    },
+    {
+      "rank": 8,
+      "path": "docs/ops/autonomous-milestone-system.md",
+      "owns": ["stage gates", "milestone operating model"]
+    },
+    {
+      "rank": 9,
+      "path": "docs/ops/agent-runtime.md",
+      "owns": ["runtime stack", "task contract", "control-plane layout"]
+    },
+    {
+      "rank": 10,
+      "path": "AGENTS.md",
+      "owns": ["repo-specific agent guidance", "working preferences"]
+    },
+    {
+      "rank": 11,
+      "path": "CLAUDE.md",
+      "owns": ["Claude-specific execution hints"]
+    }
+  ],
+  "docs": [
+    {
+      "path": "docs/vision.md",
+      "id": "vision",
+      "type": "core",
+      "status": "active",
+      "canonical_for": "product principles (P1-P10), strategic stance, local-first doctrine, non-goals",
+      "summary": "One-line vision, end goal, product principles (P1-P10 canonical), strategic guardrails, local-first doctrine."
+    },
+    {
+      "path": "docs/decisions.md",
+      "id": "decisions",
+      "type": "core",
+      "status": "active",
+      "canonical_for": "decision status (decided, open, ruled out)",
+      "summary": "All product and technical decisions with stable D* and O* identifiers, plus ruled-out items.",
+      "key_ids": ["D*", "O*"]
+    },
+    {
+      "path": "docs/prd-foundation.md",
+      "id": "prd-foundation",
+      "type": "core",
+      "status": "draft",
+      "canonical_for": "scope, workflow, object model, drill metadata, MVP requirements",
+      "summary": "Primary user, core jobs, object model, drill metadata contract, MVP scope, courtside UX requirements."
+    },
+    {
+      "path": "docs/roadmap.md",
+      "id": "roadmap",
+      "type": "core",
+      "status": "draft",
+      "canonical_for": "phase sequencing, exit criteria, local-first capability ladder",
+      "summary": "Phase 0-2 plan, shared backbone, validation experiments, prioritized backlog."
+    },
+    {
+      "path": "docs/milestones/m001-solo-session-loop.md",
+      "id": "M001",
+      "type": "milestone",
+      "status": "draft",
+      "canonical_for": "M001 scope, acceptance evidence, planning defaults",
+      "summary": "First thin-slice milestone. Solo-first session loop with pass/serve-receive focus."
+    },
+    {
+      "path": "docs/specs/m001-session-assembly.md",
+      "id": "M001-session-assembly",
+      "type": "spec",
+      "status": "draft",
+      "canonical_for": "deterministic session assembly model, archetypes, ranking rules, fallback policy",
+      "summary": "Hybrid archetype + ranked fill. Hard filters, soft scoring, drill families, spacing rules.",
+      "key_ids": ["D60", "D62", "D66", "D67", "D68"]
+    },
+    {
+      "path": "docs/specs/m001-adaptation-rules.md",
+      "id": "M001-adaptation",
+      "type": "spec",
+      "status": "draft",
+      "canonical_for": "progress/hold/deload rules, spacing rule, adaptation inputs",
+      "summary": "Rules-first adaptation with binary pass success, attempt count, sRPE-load, and conservative missing-data handling.",
+      "key_ids": ["D63", "D64", "D65"]
+    },
+    {
+      "path": "docs/specs/m001-courtside-run-flow.md",
+      "id": "M001-courtside-run-flow",
+      "type": "spec",
+      "status": "draft",
+      "canonical_for": "run-mode screens, controls, interruption states, visual defaults",
+      "summary": "Primary run flow, screen states, pair fallback, interruption recovery."
+    },
+    {
+      "path": "docs/specs/m001-review-micro-spec.md",
+      "id": "M001-review",
+      "type": "spec",
+      "status": "draft",
+      "canonical_for": "post-session review payload, UX rules, completion definition",
+      "summary": "60-second review. CR10-style sRPE plus one session-defined metric, with early-end reason required for partial sessions."
+    },
+    {
+      "path": "docs/specs/m001-home-and-sync-notes.md",
+      "id": "M001-home-sync",
+      "type": "spec",
+      "status": "draft",
+      "canonical_for": "home screen states, connectivity behavior, install posture, storage durability",
+      "summary": "Home state variants, weak-connectivity rules, local durability language, update-ready behavior."
+    },
+    {
+      "path": "docs/specs/m001-quality-and-testing.md",
+      "id": "M001-quality-testing",
+      "type": "spec",
+      "status": "draft",
+      "canonical_for": "trust invariants, test layers, verification bar",
+      "summary": "Vitest + RTL + fake-indexeddb + Playwright smoke. Domain tests, offline tests, migration safety.",
+      "key_ids": ["D57", "D58", "D59"]
+    },
+    {
+      "path": "docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md",
+      "id": "v0-prototype-ladder-design",
+      "type": "spec",
+      "status": "draft",
+      "canonical_for": "v0 stage naming, prototype boundaries, state coverage, and validation-to-build gate logic",
+      "summary": "Comparative EDD for the v0 ladder: v0a validation runner, v0b starter loop build target, and repeat loop."
+    },
+    {
+      "path": "docs/research/beach-training-resources.md",
+      "id": "beach-training-resources",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "curated training research, source links, competitive landscape, periodization, injury prevention",
+      "summary": "Design principles, session assembly synthesis, solo SR tension, drill families, courtside UX, periodization, injury protocol, metrics, example drills."
+    },
+    {
+      "path": "docs/research/local-first-pwa-constraints.md",
+      "id": "local-first-pwa-constraints",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "iPhone/PWA platform constraints, storage guardrails, courtside capability fallbacks",
+      "summary": "iOS Safari limitations, service worker constraints, storage quotas, wake lock behavior."
+    },
+    {
+      "path": "docs/research/dexie-schema-and-architecture.md",
+      "id": "dexie-schema-and-architecture",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "Dexie schema patterns, IndexedDB architecture, migration safety",
+      "summary": "Schema versioning, migration patterns, compound indexes, sync-safe ID strategies."
+    },
+    {
+      "path": "docs/research/courtside-timer-patterns.md",
+      "id": "courtside-timer-patterns",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "timer UX patterns, countdown vs count-up, interval app conventions",
+      "summary": "Timer model research. Countdown-first with auto-go. Timestamp-based recovery."
+    },
+    {
+      "path": "docs/research/m001-testing-quality-strategy.md",
+      "id": "m001-testing-quality-strategy",
+      "type": "research",
+      "status": "active",
+      "summary": "Raw research feeding the M001 quality and testing spec."
+    },
+    {
+      "path": "docs/ops/agent-documentation-contract.md",
+      "id": "agent-documentation-contract",
+      "type": "ops",
+      "status": "active",
+      "canonical_for": "agent entry surfaces, machine-scannable doc patterns, change-propagation rules",
+      "summary": "Canonical contract for agent-facing documentation surfaces and what must be updated when repo guidance changes."
+    },
+    {
+      "path": "docs/discovery/phase-0-wedge-validation.md",
+      "id": "phase-0-wedge-validation",
+      "type": "discovery",
+      "status": "draft",
+      "canonical_for": "validation scorecards, dual-wedge comparison framework",
+      "summary": "Self-coached vs coach-led scorecards, go/no-go criteria, evidence capture templates."
+    },
+    {
+      "path": "docs/discovery/phase-0-interview-guide.md",
+      "id": "phase-0-interview-guide",
+      "type": "discovery",
+      "status": "draft",
+      "canonical_for": "interview scripts, question banks",
+      "summary": "Shared-backbone interview guide for both wedges. Role-specific question sets."
+    },
+    {
+      "path": "docs/discovery/phase-0-readiness-assessment.md",
+      "id": "phase-0-readiness-assessment",
+      "type": "discovery",
+      "status": "active",
+      "canonical_for": "validation readiness state, prototype build plan, operational gaps",
+      "summary": "Gap analysis and build plan for Phase 0 validation prototype. Read first when starting validation work."
+    }
+  ],
+  "agent_entry_points": [
+    { "path": "agent-manifest.json", "format": "json",     "purpose": "Pure-JSON cold-start payload. No markdown parsing needed." },
+    { "path": "llms.txt",            "format": "text",     "purpose": "LLM/agent discovery convention. Lightweight project summary." },
+    { "path": "AGENTS.md",           "format": "markdown", "purpose": "Human-readable orientation with full operating contract." },
+    { "path": "docs/catalog.json",   "format": "json",     "purpose": "Full doc index, dependency graph, routing rules, line counts." },
+    { "path": "docs/ops/agent-documentation-contract.md", "format": "markdown", "purpose": "Canonical contract for machine-scannable docs and change propagation." }
+  ],
+
+  "raw_research": [
+    "research-output/beach-volleyball-self-coached-prd.md",
+    "research-output/beach-volleyball-wedge-choice.md",
+    "research-output/beach-volleyball-ai-safety.md",
+    "research-output/beach-volleyball-safety-guardrails.md",
+    "research-output/deterministic-session-assembly.md",
+    "research-output/drill-library-content-structure.md",
+    "research-output/m001-architecture-research.md",
+    "research-output/m001-pre-build-validation-research.md"
+  ],
+  "templates": [
+    "docs/templates/milestone-charter.md",
+    "docs/templates/milestone-review.md",
+    "docs/templates/retro.md",
+    "docs/templates/blocker-report.md"
+  ],
+  "update_routing": [
+    {
+      "trigger": "product or technical decision resolved",
+      "update": "docs/decisions.md"
+    },
+    {
+      "trigger": "scope, workflow, or object model changed",
+      "update": "docs/prd-foundation.md"
+    },
+    {
+      "trigger": "major principle or strategic stance changed",
+      "update": "docs/vision.md"
+    },
+    {
+      "trigger": "phase sequencing or exit criteria changed",
+      "update": "docs/roadmap.md"
+    },
+    {
+      "trigger": "milestone behavior needs sharper definition",
+      "update": "docs/specs/"
+    },
+    {
+      "trigger": "thin-slice status, scope, or acceptance evidence changed",
+      "update": "docs/milestones/"
+    },
+    {
+      "trigger": "operating model or control-plane behavior changed",
+      "update": "docs/ops/"
+    },
+    {
+      "trigger": "new curated research or synthesis added",
+      "update": "docs/research/"
+    },
+    {
+      "trigger": "agent entry surface, durable doc convention, or canonical doc routing changed",
+      "update": "docs/ops/agent-documentation-contract.md"
+    }
+  ],
+  "change_propagation": {
+    "canonical_doc_added_or_renamed": [
+      "docs/catalog.json",
+      "agent-manifest.json",
+      "docs/README.md",
+      "AGENTS.md",
+      "llms.txt"
+    ],
+    "agent_routing_or_read_order_changed": [
+      "AGENTS.md",
+      "docs/catalog.json",
+      "agent-manifest.json",
+      "llms.txt"
+    ],
+    "doc_conventions_changed": [
+      "docs/ops/agent-documentation-contract.md",
+      "docs/catalog.json",
+      ".cursor/rules/machine-scannable-docs.mdc"
+    ]
+  },
+  "research_routing": [
+    {
+      "path": "docs/research/beach-training-resources.md",
+      "focus": "broad product and training research",
+      "use_when": [
+        "need wedge-choice context",
+        "need drill, metrics, competitor, or periodization context",
+        "need broad beach-specific rationale"
+      ]
+    },
+    {
+      "path": "docs/research/outdoor-courtside-ui-brief.md",
+      "focus": "narrowed outdoor UI defaults",
+      "use_when": [
+        "reviewing theme or contrast choices",
+        "setting typography or touch-target defaults",
+        "judging active-screen information density"
+      ]
+    },
+    {
+      "path": "docs/research/local-first-pwa-constraints.md",
+      "focus": "iPhone and PWA platform constraints",
+      "use_when": [
+        "reasoning about storage durability",
+        "deciding install posture or update strategy",
+        "checking degraded-capability assumptions"
+      ]
+    },
+    {
+      "path": "docs/research/courtside-timer-patterns.md",
+      "focus": "timer and run-state behavior",
+      "use_when": [
+        "designing countdown or auto-advance behavior",
+        "handling interruptions and timer recovery",
+        "reasoning about wake lock, audio, or haptics"
+      ]
+    },
+    {
+      "path": "docs/research/m001-testing-quality-strategy.md",
+      "focus": "trust invariants and verification strategy",
+      "use_when": [
+        "choosing test layers",
+        "locking M001 quality expectations",
+        "protecting offline, update, and adaptation correctness"
+      ]
+    },
+    {
+      "path": "docs/research/dexie-schema-and-architecture.md",
+      "focus": "Dexie schema and migration guidance",
+      "use_when": [
+        "designing tables and persistence boundaries",
+        "planning migrations",
+        "reasoning about IndexedDB implementation details"
+      ]
+    }
+  ],
+  "task_contract": {
+    "task_template": "ops/agent/queue/task-template.json",
+    "task_schema": "ops/agent/schemas/task.schema.json",
+    "status_enums": "ops/agent/schemas/status-enums.json",
+    "default_read_order": [
+      "AGENTS.md",
+      "docs/catalog.json",
+      "docs/README.md",
+      "docs/ops/agent-runtime.md",
+      "ops/agent/README.md",
+      "task file",
+      "handoff file"
+    ],
+    "required_task_fields": [
+      "id", "title", "status", "kind", "milestone",
+      "summary", "scope", "verification", "escalate_if", "worker"
+    ],
+    "terminal_states": ["done", "blocked", "failed", "budget_exhausted"]
+  },
+  "control_plane": {
+    "tracked_paths": [
+      "ops/agent/queue/",
+      "ops/agent/handoffs/",
+      "docs/ops/"
+    ],
+    "local_only_paths": [
+      "ops/agent/runs/",
+      "ops/agent/state/",
+      ".cursor/hooks/state/"
+    ]
+  },
+  "status_vocabularies": {
+    "doc_status": {
+      "applies_to": "YAML frontmatter status field on all docs under docs/",
+      "values": ["draft", "active", "complete", "superseded"]
+    },
+    "milestone_status": {
+      "applies_to": "milestone charters in docs/milestones/",
+      "values": ["draft", "ready", "active", "blocked", "complete", "deferred"]
+    },
+    "queue_status": {
+      "applies_to": "task files in ops/agent/queue/",
+      "values": ["pending", "claimed", "done", "blocked", "failed", "budget_exhausted"]
+    },
+    "runtime_terminal": {
+      "applies_to": "session lifecycle outcomes in docs/ops/agent-runtime.md",
+      "values": ["done", "blocked", "failed", "budget_exhausted"]
+    }
+  },
+  "stable_id_conventions": {
+    "principles": "P1-P10 in docs/vision.md",
+    "decisions": "D* in docs/decisions.md",
+    "open_questions": "O* in docs/decisions.md",
+    "requirements": "R1, R2, ... in spec and PRD docs where used"
+  },
+  "doc_conventions": {
+    "frontmatter_keys": ["id", "title", "status", "stage", "type", "summary", "authority", "last_updated", "depends_on", "decision_refs", "open_question_refs", "related", "source_type"],
+    "frontmatter_guarantee": "All files under docs/ use YAML frontmatter with at least id, title, status, stage, type, and summary. research-output/ is raw provenance and does NOT guarantee frontmatter.",
+    "cross_ref_format": "Principles as P1, decisions as D27, open questions as O4, milestones as M001",
+    "preferred_patterns": [
+      "explicit purpose section",
+      "agent quick scan section on high-value docs",
+      "explicit use-when / not-for / update-when sections on routing docs",
+      "machine contract sections on agent entrypoint docs",
+      "use this note when section for focused research",
+      "update when section on routing-critical docs",
+      "stable section headings",
+      "flat lists for contracts",
+      "cross-references instead of duplication",
+      "freeze now and validate later sections for decision-shaping research",
+      "stable IDs on enumerable items for precise agent citation",
+      "sync prose entrypoints and machine indexes in the same pass when routing changes"
+    ]
+  },
+  "documents": [
+    { "id": "vision",                     "path": "docs/vision.md",                              "type": "core",      "status": "active", "lines": 54 },
+    { "id": "prd-foundation",             "path": "docs/prd-foundation.md",                      "type": "core",      "status": "draft",  "lines": 271 },
+    { "id": "roadmap",                    "path": "docs/roadmap.md",                             "type": "core",      "status": "draft",  "lines": 270 },
+    { "id": "decisions",                  "path": "docs/decisions.md",                           "type": "core",      "status": "active", "lines": 154 },
+    { "id": "docs-index",                "path": "docs/README.md",                              "type": "index",     "status": "active", "lines": 175 },
+    { "id": "M001",                       "path": "docs/milestones/m001-solo-session-loop.md",   "type": "milestone", "status": "draft",  "lines": 200 },
+    { "id": "milestones-readme",          "path": "docs/milestones/README.md",                   "type": "ops",       "status": "active", "lines": 48 },
+    { "id": "M001-courtside-run-flow",    "path": "docs/specs/m001-courtside-run-flow.md",       "type": "spec",      "status": "draft",  "lines": 391 },
+    { "id": "M001-review",               "path": "docs/specs/m001-review-micro-spec.md",         "type": "spec",      "status": "draft",  "lines": 199 },
+    { "id": "M001-home-sync",            "path": "docs/specs/m001-home-and-sync-notes.md",       "type": "spec",      "status": "draft",  "lines": 311 },
+    { "id": "M001-adaptation",           "path": "docs/specs/m001-adaptation-rules.md",          "type": "spec",      "status": "draft",  "lines": 354 },
+    { "id": "M001-session-assembly",     "path": "docs/specs/m001-session-assembly.md",          "type": "spec",      "status": "draft",  "lines": 243 },
+    { "id": "M001-quality-testing",      "path": "docs/specs/m001-quality-and-testing.md",       "type": "spec",      "status": "draft",  "lines": 138 },
+    { "id": "v0-prototype-ladder-design","path": "docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md","type":"spec","status":"draft","lines": 376 },
+    { "id": "phase-0-wedge-validation",  "path": "docs/discovery/phase-0-wedge-validation.md",   "type": "discovery", "status": "draft",  "lines": 275 },
+    { "id": "phase-0-interview-guide",   "path": "docs/discovery/phase-0-interview-guide.md",    "type": "discovery", "status": "draft",  "lines": 112 },
+    { "id": "phase-0-readiness-assessment","path":"docs/discovery/phase-0-readiness-assessment.md","type":"discovery", "status": "active", "lines": 228 },
+    { "id": "beach-training-resources",  "path": "docs/research/beach-training-resources.md",    "type": "research",  "status": "active", "lines": 617 },
+    { "id": "local-first-pwa-constraints","path": "docs/research/local-first-pwa-constraints.md","type": "research",  "status": "active", "lines": 110 },
+    { "id": "dexie-schema-and-architecture","path":"docs/research/dexie-schema-and-architecture.md","type":"research", "status": "active", "lines": 175 },
+    { "id": "m001-testing-quality-strategy","path":"docs/research/m001-testing-quality-strategy.md","type":"research", "status": "active", "lines": 102 },
+    { "id": "courtside-timer-patterns",  "path": "docs/research/courtside-timer-patterns.md",    "type": "research",  "status": "active", "lines": 44 },
+    { "id": "outdoor-courtside-ui-brief","path": "docs/research/outdoor-courtside-ui-brief.md",  "type": "research",  "status": "active", "lines": 122 },
+    { "id": "research-index",            "path": "docs/research/README.md",                      "type": "index",     "status": "active", "lines": 101 },
+    { "id": "agent-documentation-contract","path": "docs/ops/agent-documentation-contract.md",   "type": "ops",       "status": "active", "lines": 153 },
+    { "id": "autonomous-milestone-system","path": "docs/ops/autonomous-milestone-system.md",      "type": "ops",       "status": "active", "lines": 111 },
+    { "id": "agent-runtime",             "path": "docs/ops/agent-runtime.md",                    "type": "ops",       "status": "active", "lines": 181 },
+    { "id": "retro-template",            "path": "docs/templates/retro.md",                      "type": "template",  "status": "active", "lines": 21 },
+    { "id": "blocker-report-template",   "path": "docs/templates/blocker-report.md",             "type": "template",  "status": "active", "lines": 20 },
+    { "id": "milestone-review-template", "path": "docs/templates/milestone-review.md",           "type": "template",  "status": "active", "lines": 23 },
+    { "id": "M000",                       "path": "docs/templates/milestone-charter.md",          "type": "template",  "status": "draft",  "lines": 19 }
+  ],
+
+  "dependency_graph": {
+    "description": "Directed edges: source depends_on target. Check target before editing source.",
+    "edges": [
+      { "source": "prd-foundation",           "target": "vision",              "relation": "must_align" },
+      { "source": "prd-foundation",           "target": "decisions",           "relation": "must_align" },
+      { "source": "roadmap",                  "target": "vision",              "relation": "must_align" },
+      { "source": "roadmap",                  "target": "prd-foundation",      "relation": "must_align" },
+      { "source": "M001",                     "target": "prd-foundation",      "relation": "scoped_by" },
+      { "source": "M001",                     "target": "roadmap",             "relation": "sequenced_by" },
+      { "source": "M001",                     "target": "decisions",           "relation": "constrained_by" },
+      { "source": "M001-session-assembly",    "target": "M001",               "relation": "refines" },
+      { "source": "M001-session-assembly",    "target": "prd-foundation",     "relation": "must_align" },
+      { "source": "M001-session-assembly",    "target": "decisions",           "relation": "constrained_by" },
+      { "source": "M001-adaptation",          "target": "M001",               "relation": "refines" },
+      { "source": "M001-adaptation",          "target": "decisions",           "relation": "constrained_by" },
+      { "source": "M001-courtside-run-flow",  "target": "M001",               "relation": "refines" },
+      { "source": "M001-courtside-run-flow",  "target": "prd-foundation",     "relation": "must_align" },
+      { "source": "M001-review",              "target": "M001",               "relation": "refines" },
+      { "source": "M001-home-sync",           "target": "M001",               "relation": "refines" },
+      { "source": "M001-home-sync",           "target": "decisions",           "relation": "constrained_by" },
+      { "source": "M001-quality-testing",     "target": "M001",               "relation": "refines" },
+      { "source": "M001-quality-testing",     "target": "decisions",           "relation": "constrained_by" },
+      { "source": "phase-0-wedge-validation", "target": "vision",             "relation": "validates" },
+      { "source": "phase-0-wedge-validation", "target": "decisions",          "relation": "informs" },
+      { "source": "phase-0-readiness-assessment", "target": "phase-0-wedge-validation", "relation": "operationalizes" },
+      { "source": "phase-0-readiness-assessment", "target": "M001",            "relation": "gates" },
+      { "source": "phase-0-readiness-assessment", "target": "decisions",       "relation": "constrained_by" },
+      { "source": "v0-prototype-ladder-design", "target": "decisions",         "relation": "constrained_by" },
+      { "source": "v0-prototype-ladder-design", "target": "prd-foundation",    "relation": "must_align" },
+      { "source": "v0-prototype-ladder-design", "target": "roadmap",           "relation": "sequenced_by" },
+      { "source": "v0-prototype-ladder-design", "target": "M001",              "relation": "clarifies" },
+      { "source": "v0-prototype-ladder-design", "target": "phase-0-wedge-validation", "relation": "clarifies" },
+      { "source": "v0-prototype-ladder-design", "target": "phase-0-readiness-assessment", "relation": "clarifies" },
+      { "source": "agent-runtime",            "target": "autonomous-milestone-system", "relation": "implements" }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "bash .cursor/hooks/session-start.sh"
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "bash .cursor/hooks/guard-shell.sh",
+        "matcher": "git reset --hard|git checkout --|git clean -fd|rm -rf",
+        "failClosed": true
+      }
+    ],
+    "stop": [
+      {
+        "command": "bash .cursor/hooks/write-stop-summary.sh"
+      }
+    ]
+  }
+}

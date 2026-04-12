@@ -1,0 +1,6 @@
+.worktrees/
+ops/agent/state/
+ops/agent/runs/*
+!ops/agent/runs/README.md
+.cursor/hooks/state/
+.cursor/plans/

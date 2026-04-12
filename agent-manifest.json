@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "manifest_version": 1,
+  "repo_id": "volley_drills",
+  "generated": "2026-04-12",
+
+  "identity": {
+    "name": "Volley Drills",
+    "description": "Beach volleyball personal training app -- structured session planning, courtside run mode, and rules-based adaptation for self-coached amateurs.",
+    "stage": "planning",
+    "posture": "docs-first",
+    "active_milestone": "M001",
+    "stack": ["Vite", "React", "TypeScript", "Tailwind", "PWA", "Dexie"],
+    "architecture": "local-first, no backend"
+  },
+  "environment_contract": {
+    "preferred_host": "wsl-or-linux",
+    "preferred_shell": "bash",
+    "control_plane_scripts": "scripts/*.sh",
+    "cursor_hooks": ".cursor/hooks/*.sh",
+    "python_requirement": "python3 for JSON-oriented helper commands and current script assumptions",
+    "notes": "The repo can be edited from Windows Cursor, but the bundled control-plane automation is written for bash/WSL."
+  },
+  "machine_contract": {
+    "prose_repo_contract": "AGENTS.md",
+    "exhaustive_machine_index": "docs/catalog.json",
+    "compact_json_manifest": "agent-manifest.json",
+    "lightweight_text_summary": "llms.txt",
+    "docs_contract": "docs/ops/agent-documentation-contract.md",
+    "drift_rule": [
+      "If file listings, routing tables, summaries, or dependency details drift, prefer docs/catalog.json.",
+      "If prose policy, source-of-truth hierarchy, or operating constraints drift, prefer AGENTS.md.",
+      "When drift is discovered, update both machine and prose entrypoints in the same pass."
+    ]
+  },
+
+  "cold_start": {
+    "description": "Read these files in order when entering the repo cold. Stop as soon as you have enough context for the task.",
+    "read_order": [
+      { "path": "AGENTS.md",                                "role": "orientation",     "required": true,  "lines": 356 },
+      { "path": "docs/catalog.json",                        "role": "machine_index",   "required": true,  "lines": 805 },
+      { "path": "docs/vision.md",                           "role": "principles",      "required": false, "read_if": "task touches product direction" },
+      { "path": "docs/decisions.md",                        "role": "decisions",        "required": false, "read_if": "task touches product or technical choices", "lines": 154 },
+      { "path": "docs/prd-foundation.md",                   "role": "scope",           "required": false, "read_if": "task touches features, object model, or data contracts", "lines": 271 },
+      { "path": "docs/roadmap.md",                          "role": "sequencing",      "required": false, "read_if": "task touches milestones or phase gates", "lines": 270 },
+      { "path": "docs/milestones/m001-solo-session-loop.md","role": "active_milestone","required": false, "read_if": "task is within M001 scope", "lines": 200 },
+      { "path": "docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md","role":"prototype_ladder","required": false, "read_if":"task touches v0a/v0b stage naming, prototype boundaries, or validation-vs-build sequencing", "lines": 376 },
+      { "path": "docs/research/README.md",                  "role": "research_router", "required": false, "read_if": "task needs domain evidence or implementation research" }
+    ]
+  },
+  "agent_surfaces": [
+    { "path": "AGENTS.md",                                "format": "markdown", "purpose": "Primary interactive repo contract with routing and operating constraints." },
+    { "path": "docs/catalog.json",                        "format": "json",     "purpose": "Rich machine-readable index of docs, dependencies, routing, and task pointers." },
+    { "path": "agent-manifest.json",                      "format": "json",     "purpose": "Compact cold-start payload for tooling that should not parse markdown first." },
+    { "path": "llms.txt",                                 "format": "text",     "purpose": "Lightweight repo overview for generic LLM tooling." },
+    { "path": "docs/ops/agent-documentation-contract.md", "format": "markdown", "purpose": "Canonical contract for machine-scannable docs and change propagation." }
+  ],
+  "read_packs": {
+    "cold_start_minimal": ["AGENTS.md", "docs/catalog.json"],
+    "product_direction": ["docs/vision.md", "docs/decisions.md", "docs/prd-foundation.md"],
+    "milestone_m001": ["docs/milestones/m001-solo-session-loop.md", "docs/specs/"],
+    "prototype_ladder": ["docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md", "docs/milestones/m001-solo-session-loop.md", "docs/specs/"],
+    "research_question": ["docs/research/README.md", "docs/research/"],
+    "docs_editing": ["AGENTS.md", "docs/catalog.json", "docs/README.md", "docs/ops/agent-documentation-contract.md"],
+    "agent_ops": ["AGENTS.md", "docs/catalog.json", "docs/ops/agent-runtime.md", "ops/agent/README.md", "ops/agent/queue/task-template.json"]
+  },
+
+  "routing": {
+    "description": "Given a task category, read these files to get the right context.",
+    "routes": {
+      "validation_prototype":["docs/discovery/phase-0-readiness-assessment.md", "docs/discovery/phase-0-wedge-validation.md", "docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md", "docs/prd-foundation.md", "app/README.md"],
+      "product_direction":   ["docs/vision.md", "docs/decisions.md", "docs/prd-foundation.md"],
+      "milestone_work":      ["docs/milestones/m001-solo-session-loop.md", "docs/specs/"],
+      "prototype_ladder":    ["docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md", "docs/milestones/m001-solo-session-loop.md", "docs/specs/"],
+      "implementation":      ["docs/prd-foundation.md", "docs/specs/", "app/README.md"],
+      "research":            ["docs/research/README.md", "docs/research/"],
+      "agent_ops":           ["docs/ops/agent-runtime.md", "ops/agent/README.md", "ops/agent/queue/task-template.json"],
+      "control_plane":       ["scripts/agent-supervisor.sh", "ops/agent/README.md"],
+      "docs_editing":        ["docs/README.md", "docs/catalog.json", "docs/ops/agent-documentation-contract.md", ".cursor/rules/docs-editorial-workflow.mdc", ".cursor/rules/machine-scannable-docs.mdc"]
+    }
+  },
+
+  "source_of_truth": {
+    "description": "When guidance conflicts, higher rank wins.",
+    "ranked": [
+      { "rank": 1,  "path": "docs/vision.md",                          "owns": "product principles, strategic stance" },
+      { "rank": 2,  "path": "docs/decisions.md",                       "owns": "decided (D*), open (O*), ruled-out items" },
+      { "rank": 3,  "path": "docs/prd-foundation.md",                  "owns": "scope, workflow, object model, data contracts" },
+      { "rank": 4,  "path": "docs/roadmap.md",                         "owns": "phase sequencing, exit criteria" },
+      { "rank": 5,  "path": "docs/milestones/",                        "owns": "thin-slice charter scope" },
+      { "rank": 6,  "path": "docs/specs/",                             "owns": "milestone behavior details" },
+      { "rank": 7,  "path": "docs/research/",                          "owns": "curated research inputs" },
+      { "rank": 8,  "path": "docs/ops/",                               "owns": "operating model, stage gates" },
+      { "rank": 9,  "path": "AGENTS.md",                               "owns": "agent routing, working preferences" },
+      { "rank": 10, "path": "CLAUDE.md",                               "owns": "Claude-specific execution hints" }
+    ]
+  },
+
+  "capabilities": {
+    "description": "What agents can do in this repo and what tools are available.",
+    "scripts": [
+      { "path": "scripts/agent-supervisor.sh",             "purpose": "claim pending task, set up work area, launch worker", "shell": "bash" },
+      { "path": "scripts/agent-dispatch.sh",               "purpose": "dispatch specific task to worker surface",            "shell": "bash" },
+      { "path": "scripts/agent-verify.sh",                 "purpose": "run verification commands for active task",           "shell": "bash" },
+      { "path": "scripts/agent-notify.sh",                 "purpose": "send completion or escalation notification",          "shell": "bash" },
+      { "path": "scripts/validate-agent-docs.sh",          "purpose": "validate agent entry surfaces and machine-readable doc contracts", "shell": "bash" },
+      { "path": "scripts/validate-agent-control-plane.sh", "purpose": "validate queue, handoff, and state file integrity",   "shell": "bash" }
+    ],
+    "task_queue": "ops/agent/queue/",
+    "task_schema": "ops/agent/schemas/task.schema.json",
+    "handoff_dir": "ops/agent/handoffs/",
+    "status_enums": "ops/agent/schemas/status-enums.json"
+  },
+
+  "conventions": {
+    "frontmatter": {
+      "required_keys": ["id", "title", "status", "stage", "type", "summary"],
+      "optional_keys": ["authority", "last_updated", "depends_on", "decision_refs", "open_question_refs", "related", "source_type"],
+      "applies_to": "docs/**/*.md"
+    },
+    "stable_ids": {
+      "P1-P10":   "product principles in docs/vision.md",
+      "D*":       "decided items in docs/decisions.md",
+      "O*":       "open questions in docs/decisions.md",
+      "R*":       "requirements in spec docs",
+      "M*":       "milestones in docs/milestones/",
+      "T*":       "tasks in ops/agent/queue/"
+    },
+    "terminal_states": ["done", "blocked", "failed", "budget_exhausted"]
+  },
+
+  "constraints": [
+    "Docs-first until a milestone is explicitly approved for implementation",
+    "Bounded autonomy: one task, explicit scope, verification, escalation triggers",
+    "Update docs/decisions.md first when a decision changes, then propagate",
+    "Do not edit files in research-output/ (raw provenance)",
+    "Add or rename canonical docs in docs/catalog.json in the same pass, then sync agent-manifest.json and any affected routing hints",
+    "WSL-first workspace (bash, python3 required for JSON manipulation)"
+  ]
+}

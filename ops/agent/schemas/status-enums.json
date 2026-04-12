@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "status-enums.json",
+  "title": "Status Vocabularies",
+  "description": "Canonical enum definitions for all status fields in the repo. Do not mix vocabularies across contexts.",
+  "definitions": {
+    "doc_status": {
+      "description": "YAML frontmatter status field on docs under docs/.",
+      "type": "string",
+      "enum": ["draft", "active", "deprecated"]
+    },
+    "milestone_status": {
+      "description": "Milestone charters in docs/milestones/.",
+      "type": "string",
+      "enum": ["draft", "ready", "active", "blocked", "complete", "deferred"]
+    },
+    "queue_status": {
+      "description": "Task files in ops/agent/queue/.",
+      "type": "string",
+      "enum": ["pending", "claimed", "done", "blocked", "failed", "budget_exhausted"]
+    },
+    "runtime_terminal": {
+      "description": "Session lifecycle outcomes in docs/ops/agent-runtime.md.",
+      "type": "string",
+      "enum": ["done", "blocked", "failed", "budget_exhausted"]
+    },
+    "worker_surface": {
+      "description": "Allowed worker surface values for task assignment.",
+      "type": "string",
+      "enum": ["cursor", "claude"]
+    }
+  }
+}
