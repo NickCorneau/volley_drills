@@ -84,9 +84,17 @@ Recruitment is not a blocking gap for the initial alpha. Broader recruiting stay
 - React Router is installed.
 - No UI screens, no Dexie database, no service worker, no PWA wiring yet.
 
+### Design artifacts (wireframes ready)
+
+- 22 wireframe PNGs in `assets/` covering v0a flow (4 screens + flow overview), v0b flow (9 screens + flow overview), and edge states (resume, pause, end early, review pending, repeat home, pain override, transition skip vs mandatory).
+- Visual design language is locked: warm orange `#E8732A` accent, light high-contrast theme, Inter / system sans, vertical card selection patterns (D94).
+- v0a preset sessions are defined: Solo Wall Pass, Solo Open Sand, Partner Pass Workout (D95).
+- Review input patterns are decided: grouped sRPE segments, pre-populated pass counters (D96).
+
 ### Decisions (stable, no contradictions found)
 
-- 89 decided items (D1-D89) are logged. No unresolved contradictions blocking prototype work.
+- 96 decided items (D1-D96) are logged. No unresolved contradictions blocking prototype work.
+- D94-D96 were added on 2026-04-12 to resolve design language, v0a preset definitions, and review input patterns.
 - Open questions O4-O7 are explicitly things the validation itself is designed to answer.
 
 ---

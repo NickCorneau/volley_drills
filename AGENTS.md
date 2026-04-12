@@ -1,5 +1,6 @@
 ---
-id: agents
+
+## id: agents
 title: Agent Orientation
 status: active
 stage: planning
@@ -11,7 +12,6 @@ depends_on:
   - docs/vision.md
   - docs/decisions.md
   - docs/ops/agent-runtime.md
----
 
 # Agent Orientation
 
@@ -72,7 +72,95 @@ Drift rule:
 - **Phase**: 0 (discovery + validation)
 - **Active milestone**: M001 Solo Session Loop (planning, not building)
 - **Blocking gate**: pre-build validation must pass before M001 moves to implementation (see `docs/milestones/m001-solo-session-loop.md` § Pre-build validation gate)
-- **Key open questions**: O6, O7, O11, O12 in `docs/decisions.md` (phone courtside viability, pre-scaling safety reviews, first-run screens, self-scoring validation)
+- **Key open questions**: O4, O5, O6, O7, O11, O12 in `docs/decisions.md`
+- **Latest commit**: `v0.0.1-planning` / `edd-v1` — initial commit with full planning docs, EDD, and 22 wireframe assets
+- **Last session work**: Red-team review of EDD + wireframes; added D94-D96, v0a preset definitions, pain-override flow, mandatory block skip rules, persistent safety affordance, visual design language; generated 12 new wireframes covering v0a flow, edge states, and corrected screens
+- **Immediate next action**: Build the v0a validation runner PWA (see § Next steps below and `docs/discovery/phase-0-readiness-assessment.md`)
+
+## Next steps
+
+This section is the canonical "what to do next" for any agent entering the repo. Read this before starting work.
+
+### Step 1: Build the v0a validation runner PWA (IMMEDIATE — unblocked)
+
+This is the single most important next action. Everything else is blocked until v0a exists and is field-tested.
+
+**What to build**: A bare-bones 8-screen PWA session runner matching the v0a "Runner Probe" stage in `docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md`.
+
+**Screen flow** (wireframes exist in `assets/wireframe-v0a-*.png`):
+
+1. `Start` — preset picker with three sessions (D95): Solo Wall Pass, Solo Open Sand, Partner Pass. Player count toggle (1 or 2). Tap "Start Session."
+2. `Pre-Session Safety` — pain flag (yes/no), training recency (0/1/2+), contextual heat CTA link. If pain=yes, show recovery default with override (see `assets/wireframe-pain-override-flow.png`).
+3. `Warm-Up` — first block, same run UI as work blocks.
+4. `Run Block` — timer as dominant visual (56-64px digits), one coaching cue, `Next` and `Pause` as primary controls (54-60px targets), secondary actions in overflow/pause state. Persist state on every transition.
+5. `Between-Block Transition` — completed/next block, one cue, `Start Next Block` primary action. No "Skip block" on warm-up/cool-down (D85). Safety icon persistent.
+6. `Cool-Down` — last block, same run UI.
+7. `Quick Review` — grouped sRPE (Easy 0-3 / Moderate 4-6 / Hard 7-9 / Max 10), pre-populated pass counters with +/- adjust (D96), optional quick tags. NO "Finish later" in v0a — immediate review only.
+8. `Session Complete` — stats summary, "Done", "Saved on device". No adaptation output in v0a.
+
+**Key implementation requirements**:
+
+- Wire `selectArchetype()` from `app/src/data/archetypes.ts` to the three presets
+- Minimal ranked-fill to pick drills from `app/src/data/drills.ts` using hard filters
+- Dexie for local persistence (schema: `docs/research/dexie-schema-and-architecture.md`)
+- `vite-plugin-pwa` for Add to Home Screen + basic offline
+- Timestamp-based timer recovery (see `docs/research/courtside-timer-patterns.md`)
+- Warm orange `#E8732A` accent, light high-contrast theme, Inter / system sans (D94)
+- No account creation, no sign-up, no permission gates
+
+**Read order for this task**: `docs/discovery/phase-0-readiness-assessment.md` → `docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md` (Runner Probe section + Architecture Constraints) → `docs/specs/m001-courtside-run-flow.md` → `docs/research/courtside-timer-patterns.md` → `docs/research/dexie-schema-and-architecture.md` → `app/README.md`
+
+**Data layer already exists** (do NOT recreate):
+
+- `app/src/types/drill.ts` — full drill type contract (139 lines)
+- `app/src/types/session.ts` — session/archetype types (80 lines)
+- `app/src/data/drills.ts` — 26-drill catalog, 11 M001 candidates tagged (1497 lines)
+- `app/src/data/progressions.ts` — 6 progression chains (250 lines)
+- `app/src/data/archetypes.ts` — 4 archetypes with block layouts + `selectArchetype()` (231 lines)
+
+**Three preset sessions to assemble** (from `docs/discovery/phase-0-readiness-assessment.md`):
+
+| Preset | Archetype | Time | Drills |
+|---|---|---|---|
+| Solo Wall Pass | `solo_wall` | ~12 min | d01, d03, d05, d25, d26 |
+| Solo Open Sand | `solo_open` | ~12 min | d01, d09, d10, d25, d26 |
+| Partner Pass | `pair_net` | ~15 min | d05, d15, d18, d25, d26 |
+
+### Step 2: Smoke-test on a real iPhone (after Step 1)
+
+- Install via Add to Home Screen on iOS 18.4+
+- Run one full session in real conditions (sun, sand, sweat)
+- Check: timer readable? Controls tappable with sandy hands? State survives backgrounding? Review completable when tired?
+
+### Step 3: Field validation program (after Step 2)
+
+- Follow `docs/discovery/phase-0-wedge-validation.md` for the 14-day compressed program
+- D91 is the go/no-go bar: 5+ testers, 2+ sessions each, >50% review completion
+- Kill signal: fewer than 3 of 5 start a second session within 14 days
+- Expert safety review (Gap 3) can run in parallel with days 3-10
+
+### What is NOT the next step
+
+- Do NOT build v0b (Starter Loop) yet. v0a must field-test first.
+- Do NOT implement adaptation logic visible to users. v0a uses fixed presets with no visible adaptation output.
+- Do NOT build delayed review, "Finish later", or home/review-pending states. Those are v0b scope.
+- Do NOT build coach clipboard, sync, analytics, or multi-week planning.
+- Do NOT start M001 implementation until D91 gate passes.
+- Do NOT change decisions D1-D96 without reading `docs/decisions.md` in full first.
+
+### Open questions that v0a is designed to answer
+
+- **O4**: What does "solo" operationally mean? (the three presets test wall, open sand, pair)
+- **O6**: Will users actually use a phone courtside? (the whole point of v0a)
+- **O11**: What first-run screen count minimizes drop-off? (v0a tests the simplest: preset picker only)
+- **O12**: What minimum scored-contact threshold works? (v0a captures the data)
+
+### Open questions that do NOT need answering before v0a
+
+- **O1**: Coach premium model (Phase 1.5+)
+- **O2**: Multi-week planning opinionatedness (Phase 1.5+)
+- **O5**: Evidence threshold interpretation (comes after v0a data exists)
+- **O7**: Expert safety reviews (non-blocking for initial testers, needed before scaling)
 
 ## Cold-start protocol
 
@@ -81,7 +169,7 @@ When entering this repo cold, follow this protocol. Stop reading as soon as you 
 **Step 1 — Orient** (always):
 
 - Read `AGENTS.md` (this file, ~356 lines)
-- Read `docs/catalog.json` (~805 lines) — or `agent-manifest.json` (~137 lines) if you only need routing
+- Read `docs/catalog.json` (~~805 lines) — or `agent-manifest.json` (~~137 lines) if you only need routing
 
 **Step 2 — Load context by task type**:
 
@@ -163,19 +251,19 @@ Every doc has YAML frontmatter with at least `id`, `title`, `status`, `stage`, `
 ### Superpowers Specs
 
 
-| Path                                                           | Id                         | Authority                                                       |
-| -------------------------------------------------------------- | -------------------------- | --------------------------------------------------------------- |
+| Path                                                              | Id                         | Authority                                                         |
+| ----------------------------------------------------------------- | -------------------------- | ----------------------------------------------------------------- |
 | `docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md` | v0-prototype-ladder-design | v0 stage naming, prototype boundaries, state coverage, gate logic |
 
 
 ### Discovery
 
 
-| Path                                                  | Id                             | Authority                                                                          |
-| ----------------------------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------- |
-| `docs/discovery/phase-0-readiness-assessment.md`      | phase-0-readiness-assessment   | Validation readiness state, prototype build plan, gaps — **read first for validation work** |
-| `docs/discovery/phase-0-wedge-validation.md`          | phase-0-wedge-validation       | Scorecards, pre-build validation program, decision gate                            |
-| `docs/discovery/phase-0-interview-guide.md`           | phase-0-interview-guide        | Interview scripts, evidence capture                                                |
+| Path                                             | Id                           | Authority                                                                                   |
+| ------------------------------------------------ | ---------------------------- | ------------------------------------------------------------------------------------------- |
+| `docs/discovery/phase-0-readiness-assessment.md` | phase-0-readiness-assessment | Validation readiness state, prototype build plan, gaps — **read first for validation work** |
+| `docs/discovery/phase-0-wedge-validation.md`     | phase-0-wedge-validation     | Scorecards, pre-build validation program, decision gate                                     |
+| `docs/discovery/phase-0-interview-guide.md`      | phase-0-interview-guide      | Interview scripts, evidence capture                                                         |
 
 
 ### Research
@@ -195,11 +283,11 @@ Every doc has YAML frontmatter with at least `id`, `title`, `status`, `stage`, `
 ### Ops
 
 
-| Path                                      | Id                          | Authority                                     |
-| ----------------------------------------- | --------------------------- | --------------------------------------------- |
-| `docs/ops/autonomous-milestone-system.md` | autonomous-milestone-system | Milestone model, stage gates, stop conditions |
-| `docs/ops/agent-runtime.md`               | agent-runtime               | Runtime stack, control plane, task contract   |
-| `docs/ops/agent-documentation-contract.md`| agent-documentation-contract| Agent entry surfaces, durable doc rules       |
+| Path                                       | Id                           | Authority                                     |
+| ------------------------------------------ | ---------------------------- | --------------------------------------------- |
+| `docs/ops/autonomous-milestone-system.md`  | autonomous-milestone-system  | Milestone model, stage gates, stop conditions |
+| `docs/ops/agent-runtime.md`                | agent-runtime                | Runtime stack, control plane, task contract   |
+| `docs/ops/agent-documentation-contract.md` | agent-documentation-contract | Agent entry surfaces, durable doc rules       |
 
 
 ### Raw research (provenance — do not edit)
@@ -297,17 +385,19 @@ open_question_refs:          # optional stable open-question IDs still blocking 
 
 Several files repeat parts of the operating model. When wording drifts, these are the canonical homes:
 
-| Concern | Canonical file | Mirrors (kept in sync, not authoritative) |
-|---|---|---|
-| Source-of-truth hierarchy | `AGENTS.md` (this file) | `docs/ops/agent-runtime.md`, `docs/README.md`, `agent-manifest.json` |
-| Product principles | `docs/vision.md` | `docs/prd-foundation.md` (guardrails section) |
-| Decision status | `docs/decisions.md` | downstream specs that cite `D*` IDs |
-| Docs-first posture, bounded autonomy | `AGENTS.md` (this file) | `docs/ops/agent-runtime.md`, `.cursor/rules/repo-operating-model.mdc` |
-| Agent doc contract and frontmatter schema | `docs/ops/agent-documentation-contract.md` | `AGENTS.md`, `docs/catalog.json`, `.cursor/rules/machine-scannable-docs.mdc` |
-| Task shape and terminal states | `ops/agent/schemas/task.schema.json` | `ops/agent/queue/task-template.json`, `ops/agent/README.md`, `docs/ops/agent-runtime.md` |
-| Cold-start read order | `AGENTS.md` (this file) | `agent-manifest.json`, `llms.txt`, `README.md` |
-| Doc index and dependency graph | `docs/catalog.json` | `AGENTS.md` doc map tables, `docs/README.md` structure table |
-| Repo identity and stage | `README.md` | `llms.txt`, `agent-manifest.json` |
+
+| Concern                                   | Canonical file                             | Mirrors (kept in sync, not authoritative)                                                |
+| ----------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| Source-of-truth hierarchy                 | `AGENTS.md` (this file)                    | `docs/ops/agent-runtime.md`, `docs/README.md`, `agent-manifest.json`                     |
+| Product principles                        | `docs/vision.md`                           | `docs/prd-foundation.md` (guardrails section)                                            |
+| Decision status                           | `docs/decisions.md`                        | downstream specs that cite `D*` IDs                                                      |
+| Docs-first posture, bounded autonomy      | `AGENTS.md` (this file)                    | `docs/ops/agent-runtime.md`, `.cursor/rules/repo-operating-model.mdc`                    |
+| Agent doc contract and frontmatter schema | `docs/ops/agent-documentation-contract.md` | `AGENTS.md`, `docs/catalog.json`, `.cursor/rules/machine-scannable-docs.mdc`             |
+| Task shape and terminal states            | `ops/agent/schemas/task.schema.json`       | `ops/agent/queue/task-template.json`, `ops/agent/README.md`, `docs/ops/agent-runtime.md` |
+| Cold-start read order                     | `AGENTS.md` (this file)                    | `agent-manifest.json`, `llms.txt`, `README.md`                                           |
+| Doc index and dependency graph            | `docs/catalog.json`                        | `AGENTS.md` doc map tables, `docs/README.md` structure table                             |
+| Repo identity and stage                   | `README.md`                                | `llms.txt`, `agent-manifest.json`                                                        |
+
 
 When updating policy, edit the canonical file first, then propagate to mirrors.
 
@@ -324,17 +414,17 @@ When updating policy, edit the canonical file first, then propagate to mirrors.
 Available tools and scripts for agent work:
 
 
-| Script | Purpose | Shell |
-|---|---|---|
-| `scripts/agent-supervisor.sh` | Claim pending task, set up work area, launch worker | bash |
-| `scripts/agent-dispatch.sh` | Dispatch specific task to worker surface | bash |
-| `scripts/agent-verify.sh` | Run verification commands for active task | bash |
-| `scripts/agent-notify.sh` | Send completion or escalation notification | bash |
-| `scripts/validate-agent-docs.sh` | Validate agent entry surfaces and machine-readable doc contracts | bash |
-| `scripts/validate-agent-control-plane.sh` | Validate queue, handoff, and state file integrity | bash |
+| Script                                    | Purpose                                                          | Shell |
+| ----------------------------------------- | ---------------------------------------------------------------- | ----- |
+| `scripts/agent-supervisor.sh`             | Claim pending task, set up work area, launch worker              | bash  |
+| `scripts/agent-dispatch.sh`               | Dispatch specific task to worker surface                         | bash  |
+| `scripts/agent-verify.sh`                 | Run verification commands for active task                        | bash  |
+| `scripts/agent-notify.sh`                 | Send completion or escalation notification                       | bash  |
+| `scripts/validate-agent-docs.sh`          | Validate agent entry surfaces and machine-readable doc contracts | bash  |
+| `scripts/validate-agent-control-plane.sh` | Validate queue, handoff, and state file integrity                | bash  |
+
 
 Use `bash scripts/validate-agent-docs.sh` when a task changes `AGENTS.md`, `docs/catalog.json`, `agent-manifest.json`, `llms.txt`, or the stable agent-facing docs under `docs/`. Use `bash scripts/validate-agent-control-plane.sh` for the broader queue, handoff, schema, and state pass.
-
 
 Control plane layout:
 
