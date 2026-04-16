@@ -96,6 +96,29 @@ const soloWall: SessionArchetype = {
   },
 }
 
+const soloNet: SessionArchetype = {
+  id: 'solo_net',
+  name: 'Solo + Net',
+  description:
+    'Solo passing and serving practice with a net. Unlocks net-specific drills like catch-your-own-pass and solo serving.',
+  requiredContext: {
+    playerMode: 'solo',
+    netAvailable: true,
+  },
+  layouts: {
+    15: [warmup(2, 3), technique(4, 5), mainSkill(5, 6), wrap(3, 4)],
+    25: [warmup(3, 4), technique(5, 6), movementProxy(4, 5), mainSkill(6, 8), wrap(4, 5)],
+    40: [
+      warmup(4, 6),
+      technique(6, 8),
+      movementProxy(5, 6),
+      mainSkill(8, 10),
+      pressure(6, 8),
+      wrap(4, 6),
+    ],
+  },
+}
+
 const soloOpen: SessionArchetype = {
   id: 'solo_open',
   name: 'Solo + Open',
@@ -167,6 +190,7 @@ const pairOpen: SessionArchetype = {
 
 export const SESSION_ARCHETYPES: readonly SessionArchetype[] = [
   soloWall,
+  soloNet,
   soloOpen,
   pairNet,
   pairOpen,
@@ -184,5 +208,7 @@ export function selectArchetype(context: {
   if (context.playerMode === 'pair') {
     return context.netAvailable ? pairNet : pairOpen
   }
-  return context.wallAvailable ? soloWall : soloOpen
+  if (context.wallAvailable) return soloWall
+  if (context.netAvailable) return soloNet
+  return soloOpen
 }

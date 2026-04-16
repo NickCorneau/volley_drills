@@ -20,6 +20,16 @@ describe('sessionBuilder', () => {
       'solo_wall',
     ],
     [
+      'solo net',
+      {
+        playerMode: 'solo',
+        timeProfile: 15,
+        netAvailable: true,
+        wallAvailable: false,
+      } satisfies SetupContext,
+      'solo_net',
+    ],
+    [
       'solo open',
       {
         playerMode: 'solo',

@@ -184,7 +184,8 @@ export function RunScreen() {
   }, [timer.isRunning, wakeLock])
 
   const handlePause = useCallback(() => {
-    const elapsed = timer.pause()
+    timer.pause()
+    const elapsed = activeDuration - remainingRef.current
     pauseBlock(elapsed, activeDuration)
   }, [timer, pauseBlock, activeDuration])
 

@@ -73,5 +73,16 @@ export function useTimer(durationSeconds: number, onComplete: () => void) {
     return () => cancelAnimationFrame(rafRef.current)
   }, [])
 
-  return { remainingSeconds, isRunning, start, pause, resume, reset }
+  const adjustRemaining = useCallback((newRemaining: number) => {
+    const now = performance.now()
+    const currentElapsed = accumulatedRef.current + (now - startTsRef.current) / 1000
+    const currentRemaining = Math.max(0, durationRef.current - currentElapsed)
+    const diff = currentRemaining - newRemaining
+    if (diff > 0) {
+      accumulatedRef.current += diff
+      setRemainingSeconds(newRemaining)
+    }
+  }, [])
+
+  return { remainingSeconds, isRunning, start, pause, resume, reset, adjustRemaining }
 }

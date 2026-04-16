@@ -41,7 +41,7 @@ export type BlockSlotType =
   | 'pressure'
   | 'wrap'
 
-export type ArchetypeId = 'solo_wall' | 'solo_open' | 'pair_net' | 'pair_open'
+export type ArchetypeId = 'solo_wall' | 'solo_net' | 'solo_open' | 'pair_net' | 'pair_open'
 
 export type TimeProfile = 15 | 25 | 40
 

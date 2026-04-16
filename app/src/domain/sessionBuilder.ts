@@ -11,6 +11,15 @@ interface CandidateVariant {
   variant: DrillVariant
 }
 
+function shuffle<T>(arr: T[]): T[] {
+  const out = [...arr]
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[out[i], out[j]] = [out[j], out[i]]
+  }
+  return out
+}
+
 const DURATION_PRIORITY: readonly BlockSlotType[] = [
   'main_skill',
   'technique',
@@ -71,7 +80,7 @@ function pickForSlot(
   const candidates = findCandidates(slot, context)
 
   const unused = candidates.filter((c) => !usedDrillIds.has(c.drill.id))
-  const pool = unused.length > 0 ? unused : candidates
+  const pool = shuffle(unused.length > 0 ? unused : candidates)
 
   if (pool.length === 0) return undefined
 
