@@ -1,11 +1,10 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { useSessionRunner } from '../hooks/useSessionRunner'
 import { SafetyIcon } from '../components/SafetyIcon'
-
-function formatDuration(minutes: number): string {
-  return minutes === 1 ? '1 min' : `${minutes} min`
-}
+import { Button, StatusMessage } from '../components/ui'
+import { useSessionRunner } from '../hooks/useSessionRunner'
+import { formatDuration } from '../lib/format'
+import { routes } from '../routes'
 
 export function TransitionScreen() {
   const navigate = useNavigate()
@@ -24,47 +23,57 @@ export function TransitionScreen() {
   useEffect(() => {
     if (!execution) return
     if (execution.status === 'completed' || !hasNextBlock) {
-      navigate(`/review?id=${executionLogId}`, { replace: true })
+      navigate(routes.review(executionLogId), { replace: true })
     }
   }, [execution, hasNextBlock, executionLogId, navigate])
 
   const handleStartNext = useCallback(() => {
     if (navigator.vibrate) navigator.vibrate(100)
-    navigate(`/run?id=${executionLogId}`)
+    navigate(routes.run(executionLogId))
   }, [navigate, executionLogId])
 
   const handleStartShortened = useCallback(() => {
     if (navigator.vibrate) navigator.vibrate(100)
-    navigate(`/run?id=${executionLogId}`, { state: { shortened: true } })
+    navigate(routes.run(executionLogId), { state: { shortened: true } })
   }, [navigate, executionLogId])
 
+  const [isSkipping, setIsSkipping] = useState(false)
+  const [skipError, setSkipError] = useState<string | null>(null)
+
   const handleSkip = useCallback(async () => {
-    if (navigator.vibrate) navigator.vibrate(100)
-    const isLast = await runner.skipBlock()
-    if (isLast) {
-      navigate(`/review?id=${executionLogId}`, { replace: true })
+    if (isSkipping) return
+    setIsSkipping(true)
+    try {
+      if (navigator.vibrate) navigator.vibrate(100)
+      const isLast = await runner.skipBlock()
+      if (isLast) {
+        navigate(routes.review(executionLogId), { replace: true })
+      }
+    } catch (err) {
+      console.error('Skip block failed:', err)
+      setSkipError('Something went wrong. Try again.')
+      setIsSkipping(false)
     }
-  }, [runner, navigate, executionLogId])
+  }, [runner, navigate, executionLogId, isSkipping])
 
   if (!plan || !execution || !nextBlock) {
     if (loaded) {
       return (
-        <div className="mx-auto flex w-full max-w-[390px] flex-col items-center justify-center gap-4 py-12 text-center">
-          <p className="text-text-primary">Session not found.</p>
-          <Link
-            to="/"
-            className="min-h-[54px] inline-flex items-center px-4 font-semibold text-accent underline-offset-2 hover:underline"
-          >
-            Back to start
-          </Link>
-        </div>
+        <StatusMessage
+          variant="empty"
+          message="Session not found."
+          action={
+            <Link
+              to={routes.home()}
+              className="min-h-[54px] inline-flex items-center px-4 font-semibold text-accent underline-offset-2 hover:underline"
+            >
+              Back to start
+            </Link>
+          }
+        />
       )
     }
-    return (
-      <div className="flex min-h-[60dvh] items-center justify-center">
-        <p className="text-text-secondary">Loading…</p>
-      </div>
-    )
+    return <StatusMessage variant="loading" />
   }
 
   return (
@@ -83,17 +92,37 @@ export function TransitionScreen() {
         <div className="flex items-start gap-3 rounded-[12px] bg-bg-warm p-4">
           <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success text-white">
             {prevBlockStatus?.status === 'completed' ? (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             ) : (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
             )}
           </div>
           <div>
-            <p className="font-semibold text-text-primary">{prevBlock.drillName}</p>
+            <p className="font-semibold text-text-primary">
+              {prevBlock.drillName}
+            </p>
             <p className="text-sm text-success">
               {prevBlockStatus?.status === 'completed' ? 'Complete' : 'Skipped'}
             </p>
@@ -102,6 +131,8 @@ export function TransitionScreen() {
       )}
 
       <div className="border-t border-text-secondary/10" />
+
+      {skipError && <StatusMessage variant="error" message={skipError} />}
 
       <div className="flex flex-col gap-2">
         <p className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
@@ -118,34 +149,24 @@ export function TransitionScreen() {
         )}
       </div>
 
+      {skipError && <StatusMessage variant="error" message={skipError} />}
+
       <div className="mt-auto flex flex-col gap-3 pt-4">
-        <button
-          type="button"
-          onClick={handleStartNext}
-          className={[
-            'min-h-[54px] w-full rounded-[16px] px-4 py-3 text-base font-semibold text-white',
-            'bg-accent active:bg-accent-pressed transition-colors',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
-          ].join(' ')}
-        >
+        <Button variant="primary" fullWidth onClick={handleStartNext}>
           Start Next Block
-        </button>
+        </Button>
         <div className="flex items-center justify-center gap-6">
-          <button
-            type="button"
-            onClick={handleStartShortened}
-            className="min-h-[54px] px-4 text-sm font-medium text-accent"
-          >
+          <Button variant="ghost" onClick={handleStartShortened}>
             Shorten block
-          </button>
+          </Button>
           {!nextBlock.required && (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              className="text-text-secondary"
               onClick={handleSkip}
-              className="min-h-[54px] px-4 text-sm font-medium text-text-secondary"
             >
               Skip block
-            </button>
+            </Button>
           )}
         </div>
       </div>

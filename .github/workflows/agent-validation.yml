@@ -6,7 +6,8 @@ on:
       - ".github/workflows/**"
       - ".cursor/**"
       - "docs/**"
-      - "ops/agent/**"
+      - "archive/**"
+      - "research-output/**"
       - "scripts/**"
       - ".gitignore"
       - "README.md"
@@ -19,7 +20,8 @@ on:
       - ".github/workflows/**"
       - ".cursor/**"
       - "docs/**"
-      - "ops/agent/**"
+      - "archive/**"
+      - "research-output/**"
       - "scripts/**"
       - ".gitignore"
       - "README.md"
@@ -53,6 +55,3 @@ jobs:
 
       - name: Validate agent-facing docs
         run: bash scripts/validate-agent-docs.sh
-
-      - name: Validate agent control plane
-        run: bash scripts/validate-agent-control-plane.sh

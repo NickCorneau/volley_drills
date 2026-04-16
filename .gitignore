@@ -1,6 +1,6 @@
 .worktrees/
+# Historical local artifacts from the retired queued-task control plane.
 ops/agent/state/
 ops/agent/runs/*
-!ops/agent/runs/README.md
 .cursor/hooks/state/
 .cursor/plans/

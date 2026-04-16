@@ -11,8 +11,7 @@ export function PassMetricInput({
   onGoodChange,
   onTotalChange,
 }: PassMetricInputProps) {
-  const rate =
-    total > 0 ? Math.round((good / total) * 100) : null
+  const rate = total > 0 ? Math.round((good / total) * 100) : null
 
   const decGood = () => onGoodChange(Math.max(0, good - 1))
   const incGood = () => {
@@ -29,9 +28,7 @@ export function PassMetricInput({
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col items-center gap-2">
           <span className="text-sm font-medium text-text-primary">Good</span>
-          <span className="text-2xl font-bold tabular-nums text-text-primary">
-            {good}
-          </span>
+          <span className="text-2xl font-bold tabular-nums text-text-primary">{good}</span>
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -54,9 +51,7 @@ export function PassMetricInput({
         </div>
         <div className="flex flex-col items-center gap-2">
           <span className="text-sm font-medium text-text-primary">Total</span>
-          <span className="text-2xl font-bold tabular-nums text-text-primary">
-            {total}
-          </span>
+          <span className="text-2xl font-bold tabular-nums text-text-primary">{total}</span>
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -79,9 +74,7 @@ export function PassMetricInput({
         </div>
       </div>
       {rate != null && (
-        <p className="text-center text-base font-semibold text-accent">
-          {rate}% good pass rate
-        </p>
+        <p className="text-center text-base font-semibold text-accent">{rate}% good pass rate</p>
       )}
     </div>
   )

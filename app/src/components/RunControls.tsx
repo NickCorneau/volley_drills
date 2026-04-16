@@ -1,3 +1,5 @@
+import { Button } from './ui'
+
 type RunControlsProps = {
   isPaused: boolean
   isRequired: boolean
@@ -8,13 +10,6 @@ type RunControlsProps = {
   onShorten: () => void
   onEndSession: () => void
 }
-
-const btnBase =
-  'rounded-[16px] px-4 py-3 text-base font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2'
-const btnPrimary = `${btnBase} min-h-[54px] w-full bg-accent text-white active:bg-accent-pressed`
-const btnOutline = `${btnBase} min-h-[54px] flex-1 border-2 border-text-secondary/30 text-text-primary`
-const btnSecondary =
-  'min-h-[54px] flex-1 rounded-[12px] border border-text-secondary/20 px-3 py-2 text-sm font-medium text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2'
 
 export function RunControls({
   isPaused,
@@ -29,25 +24,25 @@ export function RunControls({
   if (isPaused) {
     return (
       <div className="flex flex-col gap-3">
-        <button type="button" onClick={onResume} className={btnPrimary}>
+        <Button variant="primary" fullWidth onClick={onResume}>
           Resume
-        </button>
+        </Button>
         <div className="flex gap-3">
-          <button type="button" onClick={onShorten} className={btnSecondary}>
+          <Button variant="secondary" className="flex-1" onClick={onShorten}>
             Shorten
-          </button>
+          </Button>
           {!isRequired && (
-            <button type="button" onClick={onSkip} className={btnSecondary}>
+            <Button variant="secondary" className="flex-1" onClick={onSkip}>
               Skip Block
-            </button>
+            </Button>
           )}
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            className="flex-1 border-warning/20 text-warning"
             onClick={onEndSession}
-            className={`${btnSecondary} border-warning/20 text-warning`}
           >
             End Session
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -55,16 +50,12 @@ export function RunControls({
 
   return (
     <div className="flex gap-3">
-      <button type="button" onClick={onPause} className={btnOutline}>
+      <Button variant="outline" className="flex-1" onClick={onPause}>
         Pause
-      </button>
-      <button
-        type="button"
-        onClick={onNext}
-        className={`${btnBase} min-h-[54px] flex-1 bg-accent text-white active:bg-accent-pressed`}
-      >
+      </Button>
+      <Button variant="primary" className="flex-1" onClick={onNext}>
         Next
-      </button>
+      </Button>
     </div>
   )
 }

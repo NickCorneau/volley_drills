@@ -1,261 +1,191 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { db, flushTimerState, clearTimerState, readTimerState } from '../db';
-import type {
-  ExecutionLog,
-  SessionPlan,
-  SessionPlanBlock,
-} from '../db';
+import { useCallback, useEffect, useRef, useState } from 'react'
+import type { ExecutionLog, SessionPlan, SessionPlanBlock } from '../db'
+import {
+  buildAdvancedBlock,
+  buildEndedSession,
+  buildPausedExecution,
+  buildResumedExecution,
+  buildStartedBlock,
+  loadSession,
+  saveExecution,
+} from '../services/session'
+import { clearTimerState, flushTimerForBlock, recoverTimer } from '../services/timer'
 
 export type SessionRunnerOptions = {
-  getAccumulatedElapsed?: () => number;
-};
+  getAccumulatedElapsed?: () => number
+}
 
 export function useSessionRunner(
   executionLogId: string,
   options?: SessionRunnerOptions,
 ) {
-  const [execution, setExecution] = useState<ExecutionLog | null>(null);
-  const [plan, setPlan] = useState<SessionPlan | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const [execution, setExecution] = useState<ExecutionLog | null>(null)
+  const [plan, setPlan] = useState<SessionPlan | null>(null)
+  const [loaded, setLoaded] = useState(false)
 
-  const executionRef = useRef<ExecutionLog | null>(null);
-  const planRef = useRef<SessionPlan | null>(null);
-
-  useEffect(() => {
-    executionRef.current = execution;
-    planRef.current = plan;
-  });
+  const executionRef = useRef<ExecutionLog | null>(null)
+  const planRef = useRef<SessionPlan | null>(null)
 
   useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      const exec = await db.executionLogs.get(executionLogId);
-      if (cancelled) return;
-      if (!exec) {
-        setExecution(null);
-        setPlan(null);
-        setLoaded(true);
-        return;
+    executionRef.current = execution
+    planRef.current = plan
+  })
+
+  useEffect(() => {
+    let cancelled = false
+    loadSession(executionLogId).then((result) => {
+      if (cancelled) return
+      if (!result) {
+        setExecution(null)
+        setPlan(null)
+      } else {
+        setExecution(result.execution)
+        setPlan(result.plan)
       }
-      const p = await db.sessionPlans.get(exec.planId);
-      if (cancelled) return;
-      setExecution(exec);
-      setPlan(p ?? null);
-      setLoaded(true);
-    }
-    load();
+      setLoaded(true)
+    })
     return () => {
-      cancelled = true;
-    };
-  }, [executionLogId]);
+      cancelled = true
+    }
+  }, [executionLogId])
 
-  const currentBlockIndex = execution?.activeBlockIndex ?? 0;
+  const currentBlockIndex = execution?.activeBlockIndex ?? 0
   const currentBlock: SessionPlanBlock | null =
-    plan?.blocks[currentBlockIndex] ?? null;
-  const totalBlocks = plan?.blocks.length ?? 0;
-  const isPaused = execution?.status === 'paused';
+    plan?.blocks[currentBlockIndex] ?? null
+  const totalBlocks = plan?.blocks.length ?? 0
+  const isPaused = execution?.status === 'paused'
 
-  const persistExecution = useCallback(async (updated: ExecutionLog) => {
-    await db.executionLogs.put(updated);
-    setExecution(updated);
-  }, []);
+  const persist = useCallback(async (updated: ExecutionLog) => {
+    await saveExecution(updated)
+    setExecution(updated)
+  }, [])
 
   const startBlock = useCallback(async () => {
-    const exec = executionRef.current;
-    const p = planRef.current;
-    if (!exec || !p) return;
-    const idx = exec.activeBlockIndex;
-    if (idx >= p.blocks.length) return;
-
-    const blockStatus = exec.blockStatuses[idx];
-    if (blockStatus?.status === 'in_progress') return;
-
-    const now = Date.now();
-    const blockStatuses = [...exec.blockStatuses];
-    blockStatuses[idx] = { ...blockStatuses[idx], status: 'in_progress', startedAt: now };
-
-    await persistExecution({
-      ...exec,
-      status: 'in_progress',
-      blockStatuses,
-      startedAt: exec.startedAt || now,
-      pausedAt: undefined,
-    });
-  }, [persistExecution]);
+    const exec = executionRef.current
+    const p = planRef.current
+    if (!exec || !p) return
+    const updated = buildStartedBlock(exec, p)
+    if (!updated) return
+    await persist(updated)
+  }, [persist])
 
   const pauseBlock = useCallback(
-    async (accumulatedElapsed: number, effectiveDurationSeconds?: number) => {
-      const exec = executionRef.current;
-      if (!exec) return;
-
-      await persistExecution({ ...exec, status: 'paused', pausedAt: Date.now() });
-
-      const blockStart =
-        exec.blockStatuses[exec.activeBlockIndex]?.startedAt ?? Date.now();
-      await flushTimerState({
-        id: 'active',
-        executionLogId,
-        blockIndex: exec.activeBlockIndex,
-        startedAt: blockStart,
+    async (
+      accumulatedElapsed: number,
+      effectiveDurationSeconds?: number,
+    ) => {
+      const exec = executionRef.current
+      if (!exec) return
+      const updated = buildPausedExecution(exec)
+      await persist(updated)
+      await flushTimerForBlock(
+        exec,
         accumulatedElapsed,
         effectiveDurationSeconds,
-        status: 'paused',
-        lastFlushedAt: Date.now(),
-      });
+        'paused',
+      )
     },
-    [executionLogId, persistExecution],
-  );
+    [persist],
+  )
 
   const resumeBlock = useCallback(async () => {
-    const exec = executionRef.current;
-    if (!exec) return;
-    await persistExecution({ ...exec, status: 'in_progress', pausedAt: undefined });
-  }, [persistExecution]);
+    const exec = executionRef.current
+    if (!exec) return
+    await persist(buildResumedExecution(exec))
+  }, [persist])
 
   const advanceBlock = useCallback(
     async (status: 'completed' | 'skipped'): Promise<boolean> => {
-      const exec = executionRef.current;
-      const p = planRef.current;
-      if (!exec || !p) return false;
-
-      const idx = exec.activeBlockIndex;
-      const now = Date.now();
-      const blockStatuses = [...exec.blockStatuses];
-      blockStatuses[idx] = { ...blockStatuses[idx], status, completedAt: now };
-
-      const nextIdx = idx + 1;
-      const isLast = nextIdx >= p.blocks.length;
-
-      await persistExecution({
-        ...exec,
-        activeBlockIndex: nextIdx,
-        blockStatuses,
-        status: isLast ? 'completed' : exec.status,
-        completedAt: isLast ? now : undefined,
-      });
-      await clearTimerState();
-      return isLast;
+      const exec = executionRef.current
+      const p = planRef.current
+      if (!exec || !p) return false
+      const { execution: updated, isLast } = buildAdvancedBlock(exec, p, status)
+      await persist(updated)
+      await clearTimerState()
+      return isLast
     },
-    [persistExecution],
-  );
+    [persist],
+  )
 
   const completeBlock = useCallback(
     () => advanceBlock('completed'),
     [advanceBlock],
-  );
+  )
 
   const skipBlock = useCallback(
     () => advanceBlock('skipped'),
     [advanceBlock],
-  );
+  )
 
   const endSession = useCallback(
     async (reason?: string) => {
-      const exec = executionRef.current;
-      if (!exec) return;
-      const now = Date.now();
-
-      const blockStatuses = exec.blockStatuses.map((bs, i) => {
-        if (i === exec.activeBlockIndex && bs.status === 'in_progress') {
-          return { ...bs, status: 'skipped' as const, completedAt: now };
-        }
-        if (i >= exec.activeBlockIndex && bs.status === 'planned') {
-          return { ...bs, status: 'skipped' as const };
-        }
-        return bs;
-      });
-
-      await persistExecution({
-        ...exec,
-        status: 'ended_early',
-        blockStatuses,
-        completedAt: now,
-        endedEarlyReason: reason,
-      });
-      await clearTimerState();
+      const exec = executionRef.current
+      if (!exec) return
+      await persist(buildEndedSession(exec, reason))
+      await clearTimerState()
     },
-    [persistExecution],
-  );
-
-  const shortenBlock = useCallback((): number => {
-    const p = planRef.current;
-    const exec = executionRef.current;
-    if (!p || !exec) return 0;
-    const block = p.blocks[exec.activeBlockIndex];
-    return block ? Math.max(10, (block.durationMinutes * 60) / 2) : 0;
-  }, []);
+    [persist],
+  )
 
   const flushTimer = useCallback(
-    async (accumulatedElapsed: number, effectiveDurationSeconds?: number) => {
-      const exec = executionRef.current;
-      if (!exec) return;
-
-      const blockStart =
-        exec.blockStatuses[exec.activeBlockIndex]?.startedAt ?? Date.now();
-      await flushTimerState({
-        id: 'active',
-        executionLogId,
-        blockIndex: exec.activeBlockIndex,
-        startedAt: blockStart,
-        accumulatedElapsed,
-        effectiveDurationSeconds,
-        status: exec.status === 'paused' ? 'paused' : 'running',
-        lastFlushedAt: Date.now(),
-      });
+    async (
+      accumulatedElapsed: number,
+      effectiveDurationSeconds?: number,
+    ) => {
+      const exec = executionRef.current
+      if (!exec) return
+      await flushTimerForBlock(exec, accumulatedElapsed, effectiveDurationSeconds)
     },
-    [executionLogId],
-  );
+    [],
+  )
 
   const recoverTimerState = useCallback(
-    async (blockDurationSeconds: number): Promise<number | null> => {
-      const exec = executionRef.current;
-      if (!exec) return null;
-      const saved = await readTimerState();
-      if (
-        saved &&
-        saved.executionLogId === executionLogId &&
-        saved.blockIndex === exec.activeBlockIndex
-      ) {
-        const duration = saved.effectiveDurationSeconds ?? blockDurationSeconds;
-        return Math.max(0, duration - saved.accumulatedElapsed);
-      }
-      return null;
+    async (
+      blockDurationSeconds: number,
+    ): Promise<{
+      remaining: number
+      effectiveDurationSeconds: number
+    } | null> => {
+      const exec = executionRef.current
+      if (!exec) return null
+      return recoverTimer(
+        exec.id,
+        exec.activeBlockIndex,
+        blockDurationSeconds,
+      )
     },
-    [executionLogId],
-  );
+    [],
+  )
 
-  const getAccumulatedElapsedRef = useRef(options?.getAccumulatedElapsed);
+  const getAccumulatedElapsedRef = useRef(options?.getAccumulatedElapsed)
   useEffect(() => {
-    getAccumulatedElapsedRef.current = options?.getAccumulatedElapsed;
-  });
+    getAccumulatedElapsedRef.current = options?.getAccumulatedElapsed
+  })
 
   useEffect(() => {
     const flushFromLifecycle = () => {
-      const getElapsed = getAccumulatedElapsedRef.current;
-      if (!getElapsed) return;
-      const exec = executionRef.current;
-      if (!exec) return;
-      if (exec.status !== 'in_progress' && exec.status !== 'paused') return;
-      const bs = exec.blockStatuses[exec.activeBlockIndex];
-      if (bs?.status !== 'in_progress') return;
-      void flushTimer(getElapsed());
-    };
+      const getElapsed = getAccumulatedElapsedRef.current
+      if (!getElapsed) return
+      const exec = executionRef.current
+      if (!exec) return
+      if (exec.status !== 'in_progress' && exec.status !== 'paused') return
+      const bs = exec.blockStatuses[exec.activeBlockIndex]
+      if (bs?.status !== 'in_progress') return
+      void flushTimer(getElapsed())
+    }
 
     const onVisibility = () => {
-      if (document.visibilityState === 'hidden') flushFromLifecycle();
-    };
+      if (document.visibilityState === 'hidden') flushFromLifecycle()
+    }
+    const onBeforeUnload = () => flushFromLifecycle()
 
-    const onBeforeUnload = () => {
-      flushFromLifecycle();
-    };
-
-    document.addEventListener('visibilitychange', onVisibility);
-    window.addEventListener('beforeunload', onBeforeUnload);
+    document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('beforeunload', onBeforeUnload)
     return () => {
-      document.removeEventListener('visibilitychange', onVisibility);
-      window.removeEventListener('beforeunload', onBeforeUnload);
-    };
-  }, [flushTimer]);
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('beforeunload', onBeforeUnload)
+    }
+  }, [flushTimer])
 
   return {
     plan,
@@ -270,10 +200,8 @@ export function useSessionRunner(
     resumeBlock,
     completeBlock,
     skipBlock,
-    shortenBlock,
-    nextBlock: startBlock,
     endSession,
     flushTimer,
     recoverTimerState,
-  };
+  }
 }

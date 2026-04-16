@@ -23,14 +23,14 @@ export const PassGrade = {
   OutOfSystem: 1,
   Playable: 2,
   Perfect: 3,
-} as const;
+} as const
 
-export type PassGradeValue = (typeof PassGrade)[keyof typeof PassGrade];
+export type PassGradeValue = (typeof PassGrade)[keyof typeof PassGrade]
 
-export type BinaryPassScore = 'good' | 'not-good';
+export type BinaryPassScore = 'good' | 'not-good'
 
 export function toBinary(grade: PassGradeValue): BinaryPassScore {
-  return grade >= PassGrade.Playable ? 'good' : 'not-good';
+  return grade >= PassGrade.Playable ? 'good' : 'not-good'
 }
 
 export type BlockSlotType =
@@ -39,41 +39,41 @@ export type BlockSlotType =
   | 'movement_proxy'
   | 'main_skill'
   | 'pressure'
-  | 'wrap';
+  | 'wrap'
 
-export type ArchetypeId = 'solo_wall' | 'solo_open' | 'pair_net' | 'pair_open';
+export type ArchetypeId = 'solo_wall' | 'solo_open' | 'pair_net' | 'pair_open'
 
-export type TimeProfile = 15 | 25 | 40;
+export type TimeProfile = 15 | 25 | 40
 
-export type WindLevel = 'calm' | 'breezy' | 'windy';
+export type WindLevel = 'calm' | 'breezy' | 'windy'
 
-export type PlayerMode = 'solo' | 'pair';
+export type PlayerMode = 'solo' | 'pair'
 
 /** Hard-filter context captured before assembly. All tap-based, no typing. */
 export interface SessionContext {
-  playerMode: PlayerMode;
-  timeProfile: TimeProfile;
-  netAvailable: boolean;
-  wallAvailable: boolean;
-  balls: 1 | 'many';
-  markers: 'none' | 'improvised' | 'cones';
-  wind: WindLevel;
-  painOrFatigue: 'none' | 'some';
+  playerMode: PlayerMode
+  timeProfile: TimeProfile
+  netAvailable: boolean
+  wallAvailable: boolean
+  balls: 1 | 'many'
+  markers: 'none' | 'improvised' | 'cones'
+  wind: WindLevel
+  painOrFatigue: 'none' | 'some'
 }
 
 export interface BlockSlot {
-  type: BlockSlotType;
-  durationMinMinutes: number;
-  durationMaxMinutes: number;
-  intent: string;
-  required: boolean;
-  skillTags?: string[];
+  type: BlockSlotType
+  durationMinMinutes: number
+  durationMaxMinutes: number
+  intent: string
+  required: boolean
+  skillTags?: string[]
 }
 
 export interface SessionArchetype {
-  id: ArchetypeId;
-  name: string;
-  description: string;
-  requiredContext: Partial<SessionContext>;
-  layouts: Partial<Record<TimeProfile, BlockSlot[]>>;
+  id: ArchetypeId
+  name: string
+  description: string
+  requiredContext: Partial<SessionContext>
+  layouts: Partial<Record<TimeProfile, BlockSlot[]>>
 }

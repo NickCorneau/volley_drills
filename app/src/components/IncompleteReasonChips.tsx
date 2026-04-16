@@ -12,16 +12,9 @@ type IncompleteReasonChipsProps = {
   onChange: (next: IncompleteReason | null) => void
 }
 
-export function IncompleteReasonChips({
-  value,
-  onChange,
-}: IncompleteReasonChipsProps) {
+export function IncompleteReasonChips({ value, onChange }: IncompleteReasonChipsProps) {
   return (
-    <div
-      className="flex flex-wrap gap-2"
-      role="radiogroup"
-      aria-label="Why did you end early?"
-    >
+    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Why did you end early?">
       {OPTIONS.map((opt) => {
         const selected = value === opt.value
         return (
@@ -34,9 +27,7 @@ export function IncompleteReasonChips({
             className={[
               'min-h-[54px] rounded-full px-4 py-2 text-sm font-semibold transition-colors',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning focus-visible:ring-offset-2',
-              selected
-                ? 'bg-warning text-white'
-                : 'bg-bg-warm text-text-primary',
+              selected ? 'bg-warning text-white' : 'bg-bg-warm text-text-primary',
             ].join(' ')}
           >
             {opt.label}

@@ -6,7 +6,7 @@ stage: planning
 type: milestone
 authority: M001 thin-slice scope, acceptance evidence, pre-build validation gate
 summary: "Thinnest believable end-to-end solo session loop for pass / serve-receive."
-last_updated: 2026-04-12
+last_updated: 2026-04-15
 depends_on:
   - docs/prd-foundation.md
   - docs/decisions.md
@@ -110,6 +110,7 @@ M001 should not move to active build until the following are validated through a
 
 ## Explicitly out of scope
 
+- 3+ player session assembly and drill selection (tracked as D101 for post-M001; real training groups are fluid but M001 handles 1-2 players only)
 - Multi-week skill tracks as part of the first implementation slice
 - Coach-to-client workflow as a first-slice requirement
 - Full coach-organizer tooling
@@ -174,6 +175,18 @@ The post-M001 ordering is no longer open. See `docs/roadmap.md` Phase 1.5 and `d
 - **Self-coached longitudinal layer (always ships):** a shallow one-week shape or next 2-6 sessions queue, plus a minimal weekly receipt (planned-vs-completed, one load proxy, one skill proxy). This is a retention feature, not an analytics dashboard.
 - **Coach clipboard (gated):** assign a structured session, see whether it happened, get a tiny outcome signal, adjust the next one. Development should not begin until M001 shows strong repeat usage (multiple sessions per user across weeks) and review completion above 50 percent.
 - **If the gate does not clear:** focus entirely on hardening the self-coached loop and data ownership before extending to any coach workflow.
+
+## v0b implementation decisions (2026-04-15)
+
+The following decisions constrain the first v0b implementation slice that builds on v0a:
+
+- **D97**: Singleton `SessionDraft` — one current pre-start draft at a time, not multi-draft.
+- **D98**: Constrained starter-template builder — context → archetype + time profile → fixed layout → curated drill mapping. Not full ranked-fill yet.
+- **D99**: ~~Superseded~~ — pain/fatigue stays exclusively in SafetyCheck (D83). No Setup-level pain input.
+- **D100**: Minimal `review_pending` home state — detect unreviewed executions and surface "Finish review" CTA.
+- **D101**: 3+ player support tracked for post-M001; M001/v0b handles 1-2 players only.
+
+v0b flow is `Home -> Setup (4 taps) -> Safety (with session summary) -> Run`. No Session Prep screen, no wind input, no pain-in-Setup. See the v0b trimmed plan for details.
 
 ## Open questions carried forward
 

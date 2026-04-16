@@ -1,3 +1,5 @@
+import { Button } from './ui'
+
 type ResumePromptProps = {
   sessionName: string
   blockDrillName: string
@@ -35,38 +37,27 @@ export function ResumePrompt({
           <p className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
             Paused at
           </p>
-          <p className="mt-1 font-semibold text-text-primary">{blockDrillName}</p>
-          <p className="mt-0.5 text-sm text-text-secondary">{blockPositionLabel}</p>
+          <p className="mt-1 font-semibold text-text-primary">
+            {blockDrillName}
+          </p>
+          <p className="mt-0.5 text-sm text-text-secondary">
+            {blockPositionLabel}
+          </p>
           <p className="mt-3 text-sm text-text-secondary">
             Interrupted{' '}
-            <span className="font-medium text-text-primary">{interruptedAgo}</span>
+            <span className="font-medium text-text-primary">
+              {interruptedAgo}
+            </span>
           </p>
         </div>
 
         <div className="mt-6 flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={onResume}
-            className={[
-              'min-h-[54px] w-full rounded-[16px] px-4 py-3 text-base font-semibold text-white',
-              'bg-accent transition-colors active:bg-accent-pressed',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
-            ].join(' ')}
-          >
+          <Button variant="primary" fullWidth onClick={onResume}>
             Reopen Session
-          </button>
-          <button
-            type="button"
-            onClick={onDiscard}
-            className={[
-              'min-h-[54px] w-full rounded-[16px] border-2 border-text-secondary/25',
-              'bg-transparent px-4 py-3 text-base font-semibold text-text-primary',
-              'transition-colors hover:bg-bg-warm',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
-            ].join(' ')}
-          >
+          </Button>
+          <Button variant="outline" fullWidth onClick={onDiscard}>
             Discard
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -1,0 +1,28 @@
+---
+description: Data access layer conventions — screens and hooks never touch db directly
+globs:
+  - "app/src/**"
+alwaysApply: false
+---
+
+# Data Access
+
+## Layer rules
+
+- **Screens** and **components** never import from `db/schema` or call Dexie APIs directly.
+- All database reads and writes go through **service functions** in `services/`.
+- **Hooks** may call service functions and manage React state from their return values.
+- `db/` contains only the Dexie schema class and TypeScript type definitions.
+- Types can be imported from `db/types` or from the `db/` barrel export.
+
+## Service modules
+
+| Module | Responsibility |
+|--------|---------------|
+| `services/session.ts` | Session CRUD, block state builders, resume/discard logic |
+| `services/review.ts` | Review submission, session bundle loading |
+| `services/timer.ts` | Timer flush/recover/clear for block persistence |
+
+## Pure state builders
+
+`services/session.ts` exports pure functions prefixed with `build*` (e.g., `buildStartedBlock`, `buildPausedExecution`) that compute the next ExecutionLog state without side effects. Hooks call these, then persist via `saveExecution()`.

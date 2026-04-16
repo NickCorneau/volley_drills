@@ -6,7 +6,7 @@ stage: planning
 type: core
 authority: product scope, workflow, object model, MVP requirements, courtside UX requirements, drill metadata spec
 summary: "PRD: user, workflow, object model, MVP scope, activation posture, and courtside UX requirements."
-last_updated: 2026-04-12
+last_updated: 2026-04-15
 depends_on:
   - docs/vision.md
   - docs/decisions.md
@@ -27,7 +27,7 @@ A personal-first beach volleyball training OS that helps self-coached users asse
 
 ## Primary user (v1)
 
-Self-coached amateur beach player training 1-3 times per week without consistent access to a certified coach. Solo use is the lead activation path; pair mode is a supported extension, not the default assumption.
+Self-coached amateur beach player training 1-3 times per week without consistent access to a certified coach. Real training groups are fluid — solo one day, a regular partner the next, sometimes 3-4 people at the net. Solo use is the lead activation path; pair mode is a supported extension; 3+ player support is a tracked future requirement (see D101).
 
 This is the chosen primary direction for the first build. Coach-led workflows should still be validated as shared-backbone extensions using the approach described in `docs/roadmap.md`.
 
@@ -184,6 +184,7 @@ The MVP envelope is broader than the first implementation-ready slice. Use `docs
 
 ### Not now
 
+- 3+ player session assembly and drill selection (tracked as D101 for post-M001; the system should eventually handle whoever shows up, but M001 scope is 1-2 players)
 - Social/community feed or community challenges
 - Recruiting/tournament tooling
 - Heavy team administration suite

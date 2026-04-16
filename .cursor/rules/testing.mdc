@@ -1,0 +1,41 @@
+---
+description: Testing conventions — every new service/hook gets a test
+globs:
+  - "app/src/**/*.test.*"
+  - "app/src/services/**"
+  - "app/src/hooks/**"
+alwaysApply: false
+---
+
+# Testing
+
+## Stack
+
+- **Vitest** with `globals: true` — do not import `describe`, `it`, `expect`, `vi`, `beforeEach` etc. from vitest; they are injected globally.
+- **@testing-library/react** for component and hook tests (`render`, `screen`, `renderHook`, `act`).
+- **@testing-library/user-event** for user interaction simulation.
+- **fake-indexeddb** auto-loaded in `test-setup.ts` for Dexie tests.
+
+## Test location
+
+Place tests in a `__tests__/` directory next to the module:
+
+```
+services/__tests__/timer.test.ts
+hooks/__tests__/useTimer.test.ts
+components/ui/__tests__/Button.test.tsx
+```
+
+## When to write tests
+
+- Every new service module gets at least one test covering the primary read/write path.
+- Every new hook gets a test covering initialization and key state transitions.
+- UI primitives in `components/ui/` get render + interaction tests.
+- Screen-level integration tests are optional but encouraged for critical flows.
+
+## Running tests
+
+```bash
+npm test          # single run
+npm run test:watch  # watch mode
+```

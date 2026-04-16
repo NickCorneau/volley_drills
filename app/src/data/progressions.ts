@@ -8,7 +8,7 @@
  * Schema: app/src/types/drill.ts (ProgressionChain, ProgressionLink)
  */
 
-import type { ProgressionChain } from '../types/drill';
+import type { ProgressionChain } from '../types/drill'
 
 const chain1: ProgressionChain = {
   id: 'chain-1-platform',
@@ -29,7 +29,8 @@ const chain1: ProgressionChain = {
       toDrillId: 'd03',
       direction: 'progression',
       gatingCriteria: '≥ 70% passes graded 2+ in d02',
-      description: 'Posture stable → add kneel-to-stand progression for platform under positional change.',
+      description:
+        'Posture stable → add kneel-to-stand progression for platform under positional change.',
     },
     {
       fromDrillId: 'd03',
@@ -45,7 +46,7 @@ const chain1: ProgressionChain = {
       description: 'If posture breaks under partner toss, return to solo platform work.',
     },
   ],
-};
+}
 
 const chain2: ProgressionChain = {
   id: 'chain-2-direction',
@@ -59,7 +60,8 @@ const chain2: ProgressionChain = {
       toDrillId: 'd06',
       direction: 'progression',
       gatingCriteria: '≥ 70% passes graded 2+ in d05',
-      description: 'Directional control established → overlay pass-grade scoring on platform drill.',
+      description:
+        'Directional control established → overlay pass-grade scoring on platform drill.',
     },
     {
       fromDrillId: 'd06',
@@ -82,7 +84,7 @@ const chain2: ProgressionChain = {
       description: 'If decision-making degrades passing, strip back to solo accuracy work.',
     },
   ],
-};
+}
 
 const chain3: ProgressionChain = {
   id: 'chain-3-movement',
@@ -133,7 +135,7 @@ const chain3: ProgressionChain = {
       description: 'If net-based movement breaks quality, return to simpler footwork drill.',
     },
   ],
-};
+}
 
 const chain4: ProgressionChain = {
   id: 'chain-4-serve-receive',
@@ -153,7 +155,8 @@ const chain4: ProgressionChain = {
       fromDrillId: 'd16',
       toDrillId: 'd17',
       direction: 'lateral',
-      description: 'Diamond passing + seam responsibility drill. Can run in parallel, not strictly sequential.',
+      description:
+        'Diamond passing + seam responsibility drill. Can run in parallel, not strictly sequential.',
     },
     {
       fromDrillId: 'd15',
@@ -169,7 +172,7 @@ const chain4: ProgressionChain = {
       description: 'If ladder pressure breaks quality, return to controlled short/deep work.',
     },
   ],
-};
+}
 
 const chain5: ProgressionChain = {
   id: 'chain-5-group-addons',
@@ -192,7 +195,7 @@ const chain5: ProgressionChain = {
       description: 'Alternative engagement: scoring game instead of structured multi-ball.',
     },
   ],
-};
+}
 
 const chain6: ProgressionChain = {
   id: 'chain-6-serving',
@@ -221,7 +224,7 @@ const chain6: ProgressionChain = {
       description: 'No net available → fall back to wall-based passing proxy.',
     },
   ],
-};
+}
 
 const chainCooldown: ProgressionChain = {
   id: 'chain-cooldown',
@@ -237,7 +240,7 @@ const chainCooldown: ProgressionChain = {
       description: 'Walk cool-down → add stretching sequence. Both should run in every session.',
     },
   ],
-};
+}
 
 export const PROGRESSION_CHAINS: readonly ProgressionChain[] = [
   chain1,
@@ -247,4 +250,4 @@ export const PROGRESSION_CHAINS: readonly ProgressionChain[] = [
   chain5,
   chain6,
   chainCooldown,
-] as const;
+] as const

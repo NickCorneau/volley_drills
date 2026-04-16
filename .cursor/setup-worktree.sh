@@ -17,5 +17,4 @@ for path in "${required_files[@]}"; do
   fi
 done
 
-mkdir -p "ops/agent/state"
 echo "Docs-first worktree setup complete."

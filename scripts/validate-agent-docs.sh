@@ -15,14 +15,23 @@ errors=()
 
 required_paths=(
   "AGENTS.md"
-  "agent-manifest.json"
+  "README.md"
+  "CLAUDE.md"
   "llms.txt"
+  "agent-manifest.json"
   "docs/README.md"
   "docs/catalog.json"
   "docs/research/README.md"
-  "docs/ops/agent-runtime.md"
+  "docs/ops/agent-operations.md"
   "docs/ops/agent-documentation-contract.md"
-  "ops/agent/README.md"
+)
+
+entry_docs=(
+  "AGENTS.md"
+  "docs/README.md"
+  "docs/research/README.md"
+  "docs/ops/agent-operations.md"
+  "docs/ops/agent-documentation-contract.md"
 )
 
 required_sections=(
@@ -33,25 +42,17 @@ required_sections=(
   "## Machine Contract"
 )
 
-entry_docs=(
-  "AGENTS.md"
-  "docs/README.md"
-  "docs/research/README.md"
-  "docs/ops/agent-runtime.md"
-  "docs/ops/agent-documentation-contract.md"
-  "ops/agent/README.md"
-)
-
 catalog_entrypoints=(
   "AGENTS.md"
+  "README.md"
   "docs/catalog.json"
-  "agent-manifest.json"
-  "llms.txt"
   "docs/README.md"
   "docs/research/README.md"
-  "docs/ops/agent-runtime.md"
+  "docs/ops/agent-operations.md"
   "docs/ops/agent-documentation-contract.md"
-  "ops/agent/README.md"
+  "CLAUDE.md"
+  "llms.txt"
+  "agent-manifest.json"
 )
 
 require_path() {
@@ -109,41 +110,6 @@ sys.exit(0 if '$rel_path' in paths else 1)
   fi
 }
 
-manifest_must_match_machine_contract() {
-  local key="$1"
-  local expected_value="$2"
-  local manifest_path="$REPO_ROOT/agent-manifest.json"
-
-  if [[ -f "$manifest_path" ]]; then
-    if ! python3 -c "
-import json, sys
-with open('$manifest_path', encoding='utf-8') as f:
-    data = json.load(f)
-actual = data.get('machine_contract', {}).get('$key')
-sys.exit(0 if actual == '$expected_value' else 1)
-" 2>/dev/null; then
-      errors+=("agent-manifest.json: machine_contract.$key must equal '$expected_value'")
-    fi
-  fi
-}
-
-manifest_must_include_script() {
-  local rel_path="$1"
-  local manifest_path="$REPO_ROOT/agent-manifest.json"
-
-  if [[ -f "$manifest_path" ]]; then
-    if ! python3 -c "
-import json, sys
-with open('$manifest_path', encoding='utf-8') as f:
-    data = json.load(f)
-scripts = [item.get('path') for item in data.get('capabilities', {}).get('scripts', [])]
-sys.exit(0 if '$rel_path' in scripts else 1)
-" 2>/dev/null; then
-      errors+=("agent-manifest.json: missing script capability '$rel_path'")
-    fi
-  fi
-}
-
 agents_frontmatter_must_be_valid() {
   local agents_path="$REPO_ROOT/AGENTS.md"
 
@@ -151,7 +117,6 @@ agents_frontmatter_must_be_valid() {
     local missing_keys
     missing_keys="$(python3 -c "
 from pathlib import Path
-import sys
 
 path = Path(r'$agents_path')
 lines = path.read_text(encoding='utf-8').splitlines()
@@ -178,12 +143,11 @@ for line in lines[1:closing_index]:
         continue
     if ':' not in stripped:
         continue
-    key = stripped.split(':', 1)[0].strip()
-    keys.add(key)
+    keys.add(stripped.split(':', 1)[0].strip())
 
 missing = sorted(required - keys)
 if missing:
-    print('\\n'.join(missing))
+    print('\n'.join(missing))
 " 2>/dev/null)" || true
 
     while IFS= read -r item; do
@@ -201,6 +165,54 @@ if missing:
       esac
     done <<< "$missing_keys"
   fi
+
+  return 0
+}
+
+manifest_must_point_to_canonical_surfaces() {
+  local manifest_path="$REPO_ROOT/agent-manifest.json"
+
+  if [[ -f "$manifest_path" ]]; then
+    if ! python3 -c "
+import json, sys
+with open('$manifest_path', encoding='utf-8') as f:
+    data = json.load(f)
+entrypoints = data.get('entrypoints', {})
+compatibility = entrypoints.get('compatibility', [])
+ok = (
+    entrypoints.get('prose') == 'AGENTS.md'
+    and entrypoints.get('machine') == 'docs/catalog.json'
+    and entrypoints.get('hub') == 'README.md'
+    and 'CLAUDE.md' in compatibility
+    and 'llms.txt' in compatibility
+)
+sys.exit(0 if ok else 1)
+" 2>/dev/null; then
+      errors+=("agent-manifest.json: entrypoints must point to AGENTS.md, docs/catalog.json, README.md, CLAUDE.md, and llms.txt")
+    fi
+  fi
+}
+
+catalog_must_have_keys() {
+  local catalog_path="$REPO_ROOT/docs/catalog.json"
+
+  if [[ -f "$catalog_path" ]]; then
+    local missing_keys
+    missing_keys="$(python3 -c "
+import json
+d = json.load(open('$catalog_path', encoding='utf-8'))
+required = ['schema_version', 'repo_state', 'entrypoints', 'read_packs', 'source_of_truth_order', 'docs', 'update_routing', 'research_routing', 'status_vocabularies', 'doc_conventions']
+missing = [k for k in required if k not in d]
+if missing:
+    print('\n'.join(missing))
+" 2>/dev/null)" || true
+
+    while IFS= read -r key; do
+      [[ -n "$key" ]] && errors+=("docs/catalog.json: missing required key '$key'")
+    done <<< "$missing_keys"
+  fi
+
+  return 0
 }
 
 for rel_path in "${required_paths[@]}"; do
@@ -209,8 +221,9 @@ done
 
 json_must_parse "docs/catalog.json"
 json_must_parse "agent-manifest.json"
-
 agents_frontmatter_must_be_valid
+manifest_must_point_to_canonical_surfaces
+catalog_must_have_keys
 
 for rel_path in "${entry_docs[@]}"; do
   for heading in "${required_sections[@]}"; do
@@ -222,20 +235,10 @@ for rel_path in "${catalog_entrypoints[@]}"; do
   catalog_must_include_entrypoint "$rel_path"
 done
 
-manifest_must_match_machine_contract "prose_repo_contract" "AGENTS.md"
-manifest_must_match_machine_contract "exhaustive_machine_index" "docs/catalog.json"
-manifest_must_match_machine_contract "compact_json_manifest" "agent-manifest.json"
-manifest_must_match_machine_contract "lightweight_text_summary" "llms.txt"
-manifest_must_match_machine_contract "docs_contract" "docs/ops/agent-documentation-contract.md"
-
-manifest_must_include_script "scripts/validate-agent-docs.sh"
-manifest_must_include_script "scripts/validate-agent-control-plane.sh"
-
-require_literal "AGENTS.md" "scripts/validate-agent-docs.sh"
-require_literal "ops/agent/README.md" "scripts/validate-agent-docs.sh"
-require_literal "docs/ops/agent-documentation-contract.md" "validate-agent-docs.sh"
+require_literal "CLAUDE.md" "AGENTS.md"
 require_literal "llms.txt" "AGENTS.md"
 require_literal "llms.txt" "docs/catalog.json"
+require_literal "AGENTS.md" "scripts/validate-agent-docs.sh"
 
 if [[ ${#errors[@]} -gt 0 ]]; then
   echo "Agent-doc validation failed:" >&2

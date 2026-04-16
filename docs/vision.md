@@ -6,7 +6,7 @@ stage: planning
 type: core
 authority: product principles, strategic stance, local-first doctrine, non-goals, product promise
 summary: "Product vision, principles, and strategic guardrails for the beach volleyball training OS."
-last_updated: 2026-04-12
+last_updated: 2026-04-15
 depends_on: []
 ---
 
@@ -24,7 +24,7 @@ Build the personal training operating system for beach volleyball: a self-coache
 
 ## End goal
 
-An amateur beach player or pair can choose a goal, get a believable weekly plan, execute practices without chaos, and improve targeted skills over 6-8 weeks without needing a certified coach or juggling spreadsheets, notes apps, and drill PDFs. Over time, the same system should extend cleanly to coach-to-client workflows, coach-organizers, and small-group practices.
+An amateur beach player can choose a goal, get a believable weekly plan, execute practices without chaos, and improve targeted skills over 6-8 weeks without needing a certified coach or juggling spreadsheets, notes apps, and drill PDFs — whether training solo, with a regular partner, or with whoever shows up that day. A persistent beach pair should be able to create a team identity, track team-level progress, and get recommendations that target their partnership's weaknesses. Over time, the same system should extend cleanly to coach-to-client workflows, coach-organizers, and small-group practices.
 
 ## Why this exists
 
@@ -32,10 +32,10 @@ Beach training often breaks down for non-pros because there is no real coach in 
 
 ## Strategic stance
 
-- Start personal-first for self-coached amateurs and pairs.
+- Start personal-first for self-coached amateurs; real training groups are fluid (solo, a partner, sometimes 3-4 people) and the system should handle whoever shows up.
 - Design so coach-to-client and coach-organizer workflows can layer on without changing the core loop.
 - Optimize for courtside mobile use and low-equipment fallback over desktop planning comfort.
-- Make constraints first-class: partner availability, balls, court access, time, weather, and goals.
+- Make constraints first-class: who showed up today, balls, court access, time, weather, and goals.
 - Keep the loop tight: set goal -> generate session -> run -> review -> adapt.
 - Keep measurement lightweight and high signal.
 - Generative AI is excluded from the critical path; session generation and load planning must be fully deterministic.

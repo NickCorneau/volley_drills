@@ -6,13 +6,12 @@ alwaysApply: true
 # Repo Operating Model
 
 - Start any session by reading `AGENTS.md` — it has the repo map, source-of-truth hierarchy, cold-start protocol, routing rules, and current project state.
-- For pure machine context without markdown parsing, read `agent-manifest.json` (JSON cold-start payload) or `llms.txt` (lightweight text summary).
-- `docs/catalog.json` is the machine-readable index of all docs. It includes dependency graph edges, line counts for context budgeting, and routing rules. Parse it to find files by type, status, or authority without scanning the file system.
-- Treat this repo as Cursor-first. Shared behavior lives in `AGENTS.md`, `.cursor/rules/`, `docs/ops/autonomous-milestone-system.md`, and `docs/ops/agent-runtime.md`.
-- `CLAUDE.md` is Claude-specific execution guidance only. Do not create a second source of truth there.
+- For compatibility-only machine context, `agent-manifest.json` and `llms.txt` exist as thin pointers back to `AGENTS.md` and `docs/catalog.json`.
+- `docs/catalog.json` is the machine-readable index of the docs tree and routing-critical surfaces.
+- Treat this repo as Cursor-first. Shared behavior lives in `AGENTS.md`, `.cursor/rules/`, `docs/ops/agent-operations.md`, and `docs/ops/agent-documentation-contract.md`.
+- `CLAUDE.md` is a compatibility surface only. Do not create a second source of truth there.
 - Default to docs-first work. Product changes must stay aligned with `docs/vision.md`, `docs/prd-foundation.md`, `docs/roadmap.md`, and `docs/decisions.md`.
-- All docs use YAML frontmatter. Parse `authority` and `depends_on` before editing to avoid conflicts with upstream docs. Check `docs/catalog.json` § `dependency_graph` for the full edge set.
+- All durable docs under `docs/` use YAML frontmatter. Parse `authority` and `depends_on` before editing to avoid conflicts with upstream docs.
 - Keep autonomous work bounded: one task, explicit verification commands, explicit escalation triggers, and a terminal state of `done`, `blocked`, `failed`, or `budget_exhausted`.
-- Use `ops/agent/queue/` for task specs and `ops/agent/handoffs/` for curated handoffs. Keep volatile run and lock state out of git.
-- Use Cursor as the human-facing orchestrator. Use Claude Code only as an optional unattended worker, not the owner of repo policy.
-- Before loading large files, check `docs/catalog.json` § `documents` for line counts. Multiply lines by ~40 for rough token estimates.
+- Use Cursor as the human-facing orchestrator. Use Claude Code only as an optional compatibility surface, not the owner of repo policy.
+- Repo automation expects `WSL` or Linux with `bash` and `python3`; editing from Windows Cursor is fine, but the repo scripts are not PowerShell-first.

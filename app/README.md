@@ -37,6 +37,7 @@ This folder holds the runnable Phase 0 validation prototype (v0a) for Volley Dri
 - No session history on Start screen.
 - No landscape orientation handling.
 - `vite-plugin-pwa@1.2.0` declares peer support through Vite 7; app uses Vite 8 (builds clean but peer warning on install).
+- Root-level `*.png` files in `app/` are captured validation screenshots, not runtime app assets.
 - See `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for the full prioritized backlog.
 
 ## Local Run Instructions

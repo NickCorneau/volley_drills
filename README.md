@@ -4,9 +4,9 @@ title: Volley Drills
 status: active
 stage: validation
 type: hub
-summary: "Repo entrypoint: layout, agent quick path, and key links for cold-start orientation."
-authority: repo layout, top-level orientation, and cold-start links into the docs system
-last_updated: 2026-04-12
+summary: "Repo hub: quick start, top-level layout, and links into the canonical docs."
+authority: repo layout and human-facing orientation
+last_updated: 2026-04-15
 depends_on:
   - AGENTS.md
   - docs/catalog.json
@@ -14,90 +14,57 @@ depends_on:
 
 # Volley Drills
 
-Beach volleyball personal training app -- structured session planning, courtside run mode, and rules-based adaptation for self-coached amateurs.
+Beach volleyball personal training app for self-coached amateurs: structured session planning, courtside run mode, and rules-based adaptation.
 
-**Stage**: Phase 0 validation. A runnable v0a prototype exists under `app/`. M001 build gate remains closed pending field-test evidence.
-**Active milestone**: M001 Solo Session Loop.
-**Stack**: Vite + React + TypeScript + Tailwind + PWA + Dexie (IndexedDB). Local-first, no backend.
+**Stage**: Phase 0 validation.  
+**Prototype**: runnable v0a PWA under `app/`.  
+**Gate**: M001 remains blocked on field-test evidence (`D91`).
 
-## Quick start (run the app locally)
-
-```bash
-cd app
-npm install
-npm run dev        # http://localhost:5173
-npm run build      # production build + PWA service worker
-npm run lint       # ESLint
-```
-
-## Repo layout
-
-
-| Folder             | Role                                                 | Start here                    |
-| ------------------ | ---------------------------------------------------- | ----------------------------- |
-| `docs/`            | Product canon, specs, research, and ops              | `docs/README.md`              |
-| `app/`             | v0a validation PWA (React + Dexie + vite-plugin-pwa) | `app/README.md`               |
-| `ops/agent/`       | Agent control plane: task queue, handoffs, runs      | `ops/agent/README.md`         |
-| `scripts/`         | Supervisor, dispatch, verify, and notify scripts     | `scripts/agent-supervisor.sh` |
-| `.cursor/`         | Cursor rules, hooks, and worktree config             | `.cursor/rules/`              |
-| `research-output/` | Raw deep research (do not edit)                      | --                            |
-
-
-## Agent quick path
-
-When entering this repo cold, read in this order:
-
-1. `AGENTS.md` -- orientation, operating contract, doc map, cold-start protocol
-2. `docs/catalog.json` -- machine-readable index with dependency graph, line counts, routing rules
-3. `docs/vision.md` -- product principles (canonical)
-4. `docs/decisions.md` -- what is decided, open, and ruled out
-5. `docs/milestones/m001-solo-session-loop.md` -- current thin-slice scope
-
-### Local Run Instructions
-
-To run the v0a prototype locally:
+## Quick Start
 
 ```bash
 cd app
 npm install
 npm run dev
-# Expected URL: http://localhost:5173
-# Additional verification: npm run build && npm run lint
 ```
 
-For implementation work, also read:
+Expected URL: `http://localhost:5173`
 
-- `docs/prd-foundation.md` -- object model, drill metadata, MVP scope
-- Relevant `docs/specs/` for milestone-level behavior
+## Start Here
 
-For prototype feedback and field-test priorities (**start here for any v0a work**):
+- `AGENTS.md` — canonical prose repo contract
+- `docs/catalog.json` — machine-readable doc map and routing
+- `docs/README.md` — editorial index for the docs tree
+- `app/README.md` — current prototype workspace status
 
-- `docs/research/2026-04-12-v0a-runner-probe-feedback.md` -- living UX/QA feedback log with prioritized backlog, fix status, and stable IDs (FB-*, UX-*, DOC-*, HARD-*, V0B-*)
+Compatibility surfaces:
 
-For agent control-plane work, also read:
+- `CLAUDE.md`
+- `llms.txt`
+- `agent-manifest.json`
 
-- `docs/ops/agent-runtime.md` -- runtime contract, source-of-truth hierarchy
-- `ops/agent/README.md` -- task queue, handoffs, worker flow
+These exist to point tools back to `AGENTS.md` and `docs/catalog.json`; they are intentionally thin.
 
-## Machine-readable entry points
+## Repo Layout
 
+| Path | Role | Start here |
+| --- | --- | --- |
+| `docs/` | product canon, milestones, specs, research, ops docs | `docs/README.md` |
+| `app/` | runnable validation prototype | `app/README.md` |
+| `scripts/` | validation and utility scripts (`bash`) | `scripts/validate-agent-docs.sh` |
+| `.cursor/` | repo rules, hooks, and worktree setup | `.cursor/rules/` |
+| `research-output/` | frozen provenance and raw research inputs | `research-output/README.md` |
+| `archive/` | retired repo scaffolding kept as historical reference | `archive/agent-control-plane/README.md` |
+| `test-screenshots/` | validation screenshots referenced by docs and QA notes | `test-screenshots/README.md` |
 
-| File                                       | Format   | Use when                                                                   |
-| ------------------------------------------ | -------- | -------------------------------------------------------------------------- |
-| `agent-manifest.json`                      | JSON     | Need pure-JSON cold-start payload without markdown parsing                 |
-| `docs/catalog.json`                        | JSON     | Need full doc index, dependency graph, routing rules, line counts          |
-| `llms.txt`                                 | Text     | LLM/agent discovery convention -- lightweight project summary              |
-| `docs/ops/agent-documentation-contract.md` | Markdown | Need the canonical rules for machine-scannable docs and change propagation |
-| `AGENTS.md`                                | Markdown | Human-readable orientation with operating contract                         |
+## Environment
 
+Repo automation expects **WSL or Linux + bash + python3**. Editing from Windows Cursor is fine, but the repo scripts are not PowerShell-first.
 
-## Key links
+## Key Links
 
 - Product principles: `docs/vision.md`
 - Decision log: `docs/decisions.md`
 - PRD and object model: `docs/prd-foundation.md`
-- Agent contract: `AGENTS.md`
-- Machine doc index: `docs/catalog.json`
-- Agent manifest: `agent-manifest.json`
-- Agent docs contract: `docs/ops/agent-documentation-contract.md`
-
+- Roadmap: `docs/roadmap.md`
+- Prototype feedback backlog: `docs/research/2026-04-12-v0a-runner-probe-feedback.md`

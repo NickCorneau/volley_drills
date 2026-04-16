@@ -1,13 +1,7 @@
-export type SessionPreset = {
-  id: string
-  name: string
-  env: string
-  desc: string
-  playerCount: 1 | 2
-}
+import type { PresetDefinition } from '../domain'
 
 type PresetCardProps = {
-  preset: SessionPreset
+  preset: PresetDefinition
   selected: boolean
   onSelect: () => void
 }
@@ -17,6 +11,7 @@ export function PresetCard({ preset, selected, onSelect }: PresetCardProps) {
     <button
       type="button"
       onClick={onSelect}
+      aria-pressed={selected}
       className={[
         'w-full min-h-[56px] rounded-[12px] bg-bg-warm px-4 py-3 text-left',
         'border-l-4 transition-colors',
@@ -25,8 +20,8 @@ export function PresetCard({ preset, selected, onSelect }: PresetCardProps) {
       ].join(' ')}
     >
       <div className="font-semibold text-text-primary">{preset.name}</div>
-      <div className="mt-0.5 text-sm text-text-secondary">{preset.env}</div>
-      <div className="mt-1 text-sm text-text-secondary">{preset.desc}</div>
+      <div className="mt-0.5 text-sm text-text-secondary">{preset.environment}</div>
+      <div className="mt-1 text-sm text-text-secondary">{preset.description}</div>
     </button>
   )
 }

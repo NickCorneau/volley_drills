@@ -1,0 +1,41 @@
+---
+description: Centralized routing — never hardcode route strings in screens
+globs:
+  - "app/src/screens/**"
+  - "app/src/App.tsx"
+alwaysApply: false
+---
+
+# Routing
+
+## Route builders
+
+All navigation URLs are built via typed helpers in `routes.ts`:
+
+```typescript
+import { routes } from '../routes'
+
+navigate(routes.run(execId))
+navigate(routes.review(execId), { replace: true })
+navigate(routes.safety(presetId, playerCount))
+navigate(routes.home())
+```
+
+Never interpolate route strings directly (`/run?id=${id}`). Use the `routes` object.
+
+## Route path constants
+
+Route definitions in `App.tsx` use `routePaths` from the same module:
+
+```typescript
+import { routePaths } from './routes'
+
+<Route path={routePaths.run} element={<RunScreen />} />
+```
+
+## Adding a new route
+
+1. Add the path to `routePaths` in `routes.ts`
+2. Add the URL builder to `routes` in `routes.ts`
+3. Add the `<Route>` in `App.tsx`
+4. Create the screen in `screens/`

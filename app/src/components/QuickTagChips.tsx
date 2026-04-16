@@ -1,9 +1,4 @@
-const QUICK_TAGS = [
-  'Too easy',
-  'About right',
-  'Too hard',
-  'Need partner',
-] as const
+const QUICK_TAGS = ['Too easy', 'About right', 'Too hard', 'Need partner'] as const
 
 type QuickTagChipsProps = {
   selected: string[]

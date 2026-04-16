@@ -1,0 +1,29 @@
+---
+description: UI component conventions for the app/ workspace
+globs:
+  - "app/src/components/**"
+  - "app/src/screens/**"
+alwaysApply: false
+---
+
+# Component Patterns
+
+## UI Primitives
+
+Use shared primitives from `components/ui/` for standard interactive elements:
+
+- `<Button variant="primary|outline|secondary|danger|ghost|soft">` for action buttons
+- `<Card>` for rounded content sections with warm background
+- `<StatusMessage variant="loading|error|empty">` for loading, error, and not-found states
+
+Never build inline Tailwind class-string arrays with `.join(' ')` for buttons. Use the Button component and pass layout-specific classes via the `className` prop (e.g., `className="flex-1"`).
+
+## Selection toggles are NOT Buttons
+
+Toggle/selection patterns (PlayerToggle, RpeSelector, chips) have selection-specific styling and should use inline Tailwind, not the Button primitive.
+
+## Screen structure
+
+Screens should be thin: read state from hooks, call services for mutations, render UI. Screens never import `db` directly.
+
+Wrap the outer container in `className="mx-auto flex w-full max-w-[390px] flex-col"` for consistent mobile layout.

@@ -19,11 +19,7 @@ type RpeSelectorProps = {
 
 export function RpeSelector({ value, onChange }: RpeSelectorProps) {
   return (
-    <div
-      className="grid grid-cols-4 gap-2"
-      role="radiogroup"
-      aria-labelledby="rpe-heading"
-    >
+    <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-labelledby="rpe-heading">
       {BANDS.map((band) => {
         const selected = value === band.value
         return (
@@ -36,9 +32,7 @@ export function RpeSelector({ value, onChange }: RpeSelectorProps) {
             className={[
               'flex min-h-[54px] flex-col items-center justify-center rounded-[12px] px-1 py-2 text-center transition-colors',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
-              selected
-                ? 'bg-accent text-white'
-                : 'bg-bg-warm text-text-primary',
+              selected ? 'bg-accent text-white' : 'bg-bg-warm text-text-primary',
             ].join(' ')}
           >
             <span className="text-sm font-semibold leading-tight">{band.label}</span>

@@ -1,22 +1,16 @@
-import { useEffect } from 'react'
-import { useLiveQuery } from 'dexie-react-hooks'
+import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { SafetyIcon } from '../components/SafetyIcon'
-import { clearTimerState, db } from '../db'
-import type { ExecutionLog, SessionPlan, SessionReview } from '../db'
+import { Button, Card, StatusMessage } from '../components/ui'
+import { effortLabel } from '../lib/format'
+import { routes } from '../routes'
+import { loadSessionBundle, type SessionBundle } from '../services/review'
+import { clearTimerState } from '../services/timer'
 
-type SessionBundle = {
-  log: ExecutionLog
-  plan: SessionPlan
-  review: SessionReview
-}
-
-function effortLabel(rpe: number): string {
-  if (rpe < 4) return 'Easy'
-  if (rpe < 7) return 'Moderate'
-  if (rpe < 10) return 'Hard'
-  return 'Max'
-}
+type BundleState =
+  | { status: 'loading' }
+  | { status: 'ready'; bundle: SessionBundle }
+  | { status: 'missing' }
 
 function SessionCompleteIcon() {
   return (
@@ -61,28 +55,33 @@ export function CompleteScreen() {
   const [searchParams] = useSearchParams()
   const executionLogId = searchParams.get('id')
 
+  const [bundleState, setBundleState] = useState<BundleState>({
+    status: 'loading',
+  })
+
   useEffect(() => {
     void clearTimerState()
   }, [])
 
-  const bundle = useLiveQuery(
-    async (): Promise<SessionBundle | null> => {
-      if (!executionLogId) return null
-      const log = await db.executionLogs.get(executionLogId)
-      if (!log) return null
-      const [plan, review] = await Promise.all([
-        db.sessionPlans.get(log.planId),
-        db.sessionReviews.where('executionLogId').equals(log.id).first(),
-      ])
-      if (!plan || !review) return null
-      return { log, plan, review }
-    },
-    [executionLogId],
-  )
+  useEffect(() => {
+    if (!executionLogId) return
+    let cancelled = false
+    loadSessionBundle(executionLogId).then((result) => {
+      if (cancelled) return
+      if (!result) {
+        setBundleState({ status: 'missing' })
+      } else {
+        setBundleState({ status: 'ready', bundle: result })
+      }
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [executionLogId])
 
   useEffect(() => {
     if (!executionLogId) {
-      navigate('/', { replace: true })
+      navigate(routes.home(), { replace: true })
     }
   }, [executionLogId, navigate])
 
@@ -90,34 +89,37 @@ export function CompleteScreen() {
     return null
   }
 
-  if (bundle === undefined) {
+  if (bundleState.status === 'loading') {
+    return <StatusMessage variant="loading" />
+  }
+
+  if (bundleState.status === 'missing') {
     return (
-      <div className="mx-auto flex w-full max-w-[390px] flex-col items-center justify-center gap-3 py-24">
-        <p className="text-text-secondary">Loading…</p>
-      </div>
+      <StatusMessage
+        variant="empty"
+        message="Session not found."
+        action={
+          <Button
+            variant="ghost"
+            onClick={() => navigate(routes.home(), { replace: true })}
+          >
+            Back to start
+          </Button>
+        }
+      />
     )
   }
 
-  if (bundle === null) {
-    return (
-      <div className="mx-auto flex w-full max-w-[390px] flex-col items-center justify-center gap-4 py-24">
-        <p className="text-text-primary">Session not found.</p>
-        <button
-          type="button"
-          onClick={() => navigate('/', { replace: true })}
-          className="min-h-[54px] px-4 font-semibold text-accent"
-        >
-          Back to start
-        </button>
-      </div>
-    )
-  }
-
-  const { log, plan, review } = bundle
-  const totalMinutes = plan.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
+  const { log, plan, review } = bundleState.bundle
+  const totalMinutes = plan.blocks.reduce(
+    (sum, b) => sum + b.durationMinutes,
+    0,
+  )
   const durationMinutesRounded = Math.max(0, Math.round(totalMinutes))
   const totalBlocks = plan.blocks.length
-  const completedBlocks = log.blockStatuses.filter((b) => b.status === 'completed').length
+  const completedBlocks = log.blockStatuses.filter(
+    (b) => b.status === 'completed',
+  ).length
   const goodPassRatePct =
     review.totalAttempts > 0
       ? Math.round((review.goodPasses / review.totalAttempts) * 100)
@@ -140,10 +142,7 @@ export function CompleteScreen() {
         </div>
       </div>
 
-      <div
-        className="w-full rounded-[length:var(--radius-card)] bg-bg-warm px-4 py-4"
-        aria-label="Session summary"
-      >
+      <Card className="w-full" aria-label="Session summary">
         <dl className="flex flex-col gap-3 text-sm">
           <div className="flex items-center justify-between gap-4">
             <dt className="text-text-secondary">Blocks completed</dt>
@@ -156,7 +155,7 @@ export function CompleteScreen() {
             <dd
               className={`font-medium tabular-nums ${goodPassRatePct !== null ? 'text-success' : 'text-text-secondary'}`}
             >
-              {goodPassRatePct !== null ? `${goodPassRatePct}%` : '—'}
+              {goodPassRatePct !== null ? `${goodPassRatePct}%` : '\u2014'}
             </dd>
           </div>
           <div className="flex items-center justify-between gap-4">
@@ -166,16 +165,16 @@ export function CompleteScreen() {
             </dd>
           </div>
         </dl>
-      </div>
+      </Card>
 
       <div className="flex w-full flex-col gap-4">
-        <button
-          type="button"
-          onClick={() => navigate('/')}
-          className="w-full rounded-[length:var(--radius-button)] bg-accent px-4 py-3.5 text-base font-semibold text-white transition-colors hover:bg-accent-pressed active:bg-accent-pressed"
+        <Button
+          variant="primary"
+          fullWidth
+          onClick={() => navigate(routes.home())}
         >
           Done
-        </button>
+        </Button>
         <p className="flex items-center justify-center gap-2 text-sm font-medium text-success">
           <SavedCheckIcon />
           Saved on device

@@ -34,14 +34,7 @@ make_fixture_root() {
   CURRENT_FIXTURE="$(mktemp -d)"
   mkdir -p \
     "$CURRENT_FIXTURE/docs/ops" \
-    "$CURRENT_FIXTURE/docs/research" \
-    "$CURRENT_FIXTURE/ops/agent/queue" \
-    "$CURRENT_FIXTURE/ops/agent/schemas" \
-    "$CURRENT_FIXTURE/ops/agent/handoffs" \
-    "$CURRENT_FIXTURE/ops/agent/runs" \
-    "$CURRENT_FIXTURE/scripts" \
-    "$CURRENT_FIXTURE/.cursor/rules" \
-    "$CURRENT_FIXTURE/.cursor/hooks"
+    "$CURRENT_FIXTURE/docs/research"
 }
 
 write_entry_doc() {
@@ -56,11 +49,11 @@ write_entry_doc() {
 id: $id
 title: $title
 status: active
-stage: planning
+stage: validation
 type: $type
 summary: "Fixture doc for validator tests."
 authority: $authority
-last_updated: 2026-04-12
+last_updated: 2026-04-15
 depends_on: []
 ---
 
@@ -94,11 +87,11 @@ write_agents_doc() {
 id: agents
 title: Agent Orientation
 status: active
-stage: planning
+stage: validation
 type: agent-contract
 summary: "Fixture repo contract."
 authority: fixture agent contract
-last_updated: 2026-04-12
+last_updated: 2026-04-15
 depends_on: []
 ---
 
@@ -133,11 +126,11 @@ write_agents_doc_missing_machine_contract() {
 id: agents
 title: Agent Orientation
 status: active
-stage: planning
+stage: validation
 type: agent-contract
 summary: "Fixture repo contract."
 authority: fixture agent contract
-last_updated: 2026-04-12
+last_updated: 2026-04-15
 depends_on: []
 ---
 
@@ -168,26 +161,23 @@ write_catalog_json() {
   "repo_state": {},
   "entrypoints": [
     { "path": "AGENTS.md" },
+    { "path": "README.md" },
     { "path": "docs/catalog.json" },
-    { "path": "agent-manifest.json" },
-    { "path": "llms.txt" },
     { "path": "docs/README.md" },
     { "path": "docs/research/README.md" },
-    { "path": "docs/ops/agent-runtime.md" },
+    { "path": "docs/ops/agent-operations.md" },
     { "path": "docs/ops/agent-documentation-contract.md" },
-    { "path": "ops/agent/README.md" }
+    { "path": "CLAUDE.md" },
+    { "path": "llms.txt" },
+    { "path": "agent-manifest.json" }
   ],
+  "read_packs": {},
   "source_of_truth_order": [],
   "docs": [],
+  "update_routing": [],
+  "research_routing": [],
   "status_vocabularies": {},
-  "doc_conventions": {},
-  "documents": [],
-  "capabilities": {
-    "scripts": [
-      { "path": "scripts/validate-agent-docs.sh" },
-      { "path": "scripts/validate-agent-control-plane.sh" }
-    ]
-  }
+  "doc_conventions": {}
 }
 EOF
 }
@@ -195,18 +185,11 @@ EOF
 write_manifest_json() {
   cat > "$CURRENT_FIXTURE/agent-manifest.json" <<'EOF'
 {
-  "machine_contract": {
-    "prose_repo_contract": "AGENTS.md",
-    "exhaustive_machine_index": "docs/catalog.json",
-    "compact_json_manifest": "agent-manifest.json",
-    "lightweight_text_summary": "llms.txt",
-    "docs_contract": "docs/ops/agent-documentation-contract.md"
-  },
-  "capabilities": {
-    "scripts": [
-      { "path": "scripts/validate-agent-docs.sh" },
-      { "path": "scripts/validate-agent-control-plane.sh" }
-    ]
+  "entrypoints": {
+    "prose": "AGENTS.md",
+    "machine": "docs/catalog.json",
+    "hub": "README.md",
+    "compatibility": ["CLAUDE.md", "llms.txt"]
   }
 }
 EOF
@@ -218,96 +201,20 @@ write_common_files() {
 EOF
 
   cat > "$CURRENT_FIXTURE/CLAUDE.md" <<'EOF'
-# Fixture Claude
+@AGENTS.md
 EOF
 
   cat > "$CURRENT_FIXTURE/llms.txt" <<'EOF'
-# Fixture Summary
-
 - AGENTS.md
 - docs/catalog.json
 EOF
 
-  cat > "$CURRENT_FIXTURE/.gitignore" <<'EOF'
-.worktrees/
-ops/agent/state/
-ops/agent/runs/*
-.cursor/hooks/state/
-.cursor/plans/
-EOF
+  write_entry_doc "$CURRENT_FIXTURE/docs/README.md" "docs-index" "Docs Index" "index" "fixture docs index"
+  write_entry_doc "$CURRENT_FIXTURE/docs/research/README.md" "research-index" "Research Index" "index" "fixture research index"
+  write_entry_doc "$CURRENT_FIXTURE/docs/ops/agent-operations.md" "agent-operations" "Agent Operations" "ops" "fixture runtime guide"
+  write_entry_doc "$CURRENT_FIXTURE/docs/ops/agent-documentation-contract.md" "agent-documentation-contract" "Agent Documentation Contract" "ops" "fixture docs contract"
 
-  cat > "$CURRENT_FIXTURE/.cursor/hooks.json" <<'EOF'
-{}
-EOF
-
-  cat > "$CURRENT_FIXTURE/.cursor/worktrees.json" <<'EOF'
-{}
-EOF
-
-  cat > "$CURRENT_FIXTURE/ops/agent/queue/task-template.json" <<'EOF'
-{}
-EOF
-
-  cat > "$CURRENT_FIXTURE/ops/agent/schemas/task.schema.json" <<'EOF'
-{}
-EOF
-
-  cat > "$CURRENT_FIXTURE/ops/agent/schemas/status-enums.json" <<'EOF'
-{}
-EOF
-
-  cat > "$CURRENT_FIXTURE/ops/agent/handoffs/HANDOFF_TEMPLATE.md" <<'EOF'
-# Fixture Handoff
-EOF
-
-  cat > "$CURRENT_FIXTURE/ops/agent/runs/README.md" <<'EOF'
-# Fixture Runs
-EOF
-
-  cat > "$CURRENT_FIXTURE/.cursor/rules/repo-operating-model.mdc" <<'EOF'
-rule
-EOF
-
-  cat > "$CURRENT_FIXTURE/.cursor/rules/docs-editorial-workflow.mdc" <<'EOF'
-rule
-EOF
-
-  cat > "$CURRENT_FIXTURE/.cursor/rules/machine-scannable-docs.mdc" <<'EOF'
-rule
-EOF
-
-  cat > "$CURRENT_FIXTURE/.cursor/hooks/session-start.sh" <<'EOF'
-#!/usr/bin/env bash
-EOF
-
-  cat > "$CURRENT_FIXTURE/.cursor/hooks/guard-shell.sh" <<'EOF'
-#!/usr/bin/env bash
-EOF
-
-  cat > "$CURRENT_FIXTURE/.cursor/hooks/write-stop-summary.sh" <<'EOF'
-#!/usr/bin/env bash
-EOF
-
-  cat > "$CURRENT_FIXTURE/.cursor/setup-worktree.sh" <<'EOF'
-#!/usr/bin/env bash
-EOF
-
-  cat > "$CURRENT_FIXTURE/scripts/agent-supervisor.sh" <<'EOF'
-#!/usr/bin/env bash
-EOF
-
-  cat > "$CURRENT_FIXTURE/scripts/agent-dispatch.sh" <<'EOF'
-#!/usr/bin/env bash
-EOF
-
-  cat > "$CURRENT_FIXTURE/scripts/agent-verify.sh" <<'EOF'
-#!/usr/bin/env bash
-EOF
-
-  cat > "$CURRENT_FIXTURE/scripts/agent-notify.sh" <<'EOF'
-#!/usr/bin/env bash
-EOF
-
+  mkdir -p "$CURRENT_FIXTURE/scripts"
   cat > "$CURRENT_FIXTURE/scripts/validate-agent-docs.sh" <<'EOF'
 #!/usr/bin/env bash
 exec bash "__REPO_ROOT__/scripts/validate-agent-docs.sh" "$@"
@@ -318,23 +225,6 @@ from pathlib import Path
 path = Path(r'$CURRENT_FIXTURE/scripts/validate-agent-docs.sh')
 path.write_text(path.read_text(encoding='utf-8').replace('__REPO_ROOT__', r'$REPO_ROOT'), encoding='utf-8')
 "
-
-  write_entry_doc "$CURRENT_FIXTURE/docs/README.md" "docs-index" "Docs Index" "index" "fixture docs index"
-  write_entry_doc "$CURRENT_FIXTURE/docs/research/README.md" "research-index" "Research Index" "index" "fixture research index"
-  write_entry_doc "$CURRENT_FIXTURE/docs/ops/agent-runtime.md" "agent-runtime" "Agent Runtime" "ops" "fixture runtime contract"
-  write_entry_doc "$CURRENT_FIXTURE/docs/ops/agent-documentation-contract.md" "agent-documentation-contract" "Agent Documentation Contract" "ops" "fixture docs contract"
-  write_entry_doc "$CURRENT_FIXTURE/docs/ops/autonomous-milestone-system.md" "autonomous-milestone-system" "Autonomous Milestone System" "ops" "fixture milestone system"
-  write_entry_doc "$CURRENT_FIXTURE/ops/agent/README.md" "agent-control-plane" "Agent Control Plane" "ops-index" "fixture control plane"
-
-  cat >> "$CURRENT_FIXTURE/docs/ops/agent-documentation-contract.md" <<'EOF'
-
-- run `bash scripts/validate-agent-docs.sh`
-EOF
-
-  cat >> "$CURRENT_FIXTURE/ops/agent/README.md" <<'EOF'
-
-| `scripts/validate-agent-docs.sh` | Validate agent entry surfaces and machine-readable doc contracts |
-EOF
 
   write_agents_doc
   write_catalog_json
@@ -381,17 +271,7 @@ test_direct_validator_fails_on_missing_required_heading() {
     bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
 }
 
-test_control_plane_validator_delegates_to_agent_doc_validation() {
-  make_fixture_root
-  write_common_files
-  write_agents_doc_missing_machine_contract
-  assert_command_fails \
-    "validate-agent-control-plane fails when agent-doc validation fails" \
-    bash "$REPO_ROOT/scripts/validate-agent-control-plane.sh" "$CURRENT_FIXTURE"
-}
-
 test_direct_validator_passes_on_valid_fixture
 test_direct_validator_fails_on_missing_required_heading
-test_control_plane_validator_delegates_to_agent_doc_validation
 
 echo "All validator tests passed."

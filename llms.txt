@@ -1,101 +1,17 @@
 # Volley Drills
 
-> Beach volleyball personal training app -- structured session planning, courtside run mode, and rules-based adaptation for self-coached amateurs.
+Beach volleyball training app for self-coached amateurs.
 
-## Use This Summary For
+Start here:
+- `AGENTS.md` for the prose repo contract
+- `docs/catalog.json` for machine-readable routing
+- `README.md` for the repo hub
 
-- ultra-fast repo orientation
-- cold starts when you want the smallest useful context set
-- discovering the canonical doc entrypoints before loading deeper files
+Current state:
+- Phase 0 validation
+- runnable v0a prototype under `app/`
+- M001 build gate remains blocked on field-test evidence (`D91`)
 
-## Not For
-
-- exhaustive machine routing or dependency traversal
-- replacing `docs/catalog.json` as the canonical machine index
-- replacing `AGENTS.md` as the prose repo contract
-
-## Stage
-
-Phase 0 validation. A runnable v0a prototype exists under `app/` (6 routes, Dexie persistence, preset sessions, safety gates, timer, review, resume, PWA offline). M001 build gate remains closed pending field-test evidence (D91).
-
-## Stack
-
-Vite + React + TypeScript + Tailwind + PWA + Dexie (IndexedDB). Local-first, no backend.
-
-## Quick start
-
-cd app && npm install && npm run dev  # http://localhost:5173
-
-## Agent entry points
-
-- AGENTS.md: Repo orientation, source-of-truth hierarchy, routing rules, operating contract
-- docs/catalog.json: Machine-readable index of all docs, update routing, research routing, task contract
-- agent-manifest.json: Pure JSON cold-start payload (no markdown parsing needed)
-- docs/ops/agent-documentation-contract.md: Canonical contract for agent-facing docs, machine-scannable patterns, and change propagation
-- llms.txt: This lightweight summary for fast orientation
-
-## Read order (cold start)
-
-1. AGENTS.md
-2. docs/catalog.json
-3. docs/vision.md (product principles P1-P10)
-4. docs/decisions.md (decided D*, open O*, ruled-out)
-5. docs/prd-foundation.md (scope, workflow, object model)
-6. docs/roadmap.md (phase sequencing, exit criteria)
-7. docs/research/README.md (research routing)
-
-## Key docs
-
-- docs/research/2026-04-12-v0a-runner-probe-feedback.md: **Start here for any prototype work.** Living v0a feedback log with prioritized backlog, fix status, deferred items, and stable IDs (FB-*, UX-*, DOC-*, HARD-*, V0B-*)
-- docs/vision.md: Product principles (P1-P10), strategic stance, local-first doctrine
-- docs/decisions.md: All decisions (D*), open questions (O*), ruled-out items
-- docs/prd-foundation.md: Scope, workflow, object model, drill metadata, MVP requirements
-- docs/roadmap.md: Phase sequencing, exit criteria, validation experiments
-- docs/milestones/m001-solo-session-loop.md: Current thin-slice scope
-- docs/specs/: Milestone-level behavior specs (session assembly, run flow, review, adaptation, home/sync, quality/testing)
-- docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md: V0 stage naming, prototype ladder, and gate logic for validation vs first build
-
-## Discovery and validation
-
-- docs/discovery/phase-0-readiness-assessment.md: Historical pre-build gap analysis (superseded by v0a build)
-- docs/discovery/phase-0-wedge-validation.md: Scorecards, validation program, decision gate
-- docs/discovery/phase-0-interview-guide.md: Interview scripts, evidence capture
-
-## Research
-
-- docs/research/beach-training-resources.md: Competitive landscape, periodization, drill families, metrics
-- docs/research/outdoor-courtside-ui-brief.md: Outdoor UI defaults, contrast, touch targets
-- docs/research/local-first-pwa-constraints.md: iPhone/PWA constraints, storage, service workers
-- docs/research/courtside-timer-patterns.md: Timer UX, countdown, interruption recovery
-- docs/research/dexie-schema-and-architecture.md: Dexie schema, migrations, IndexedDB
-- docs/research/m001-testing-quality-strategy.md: Test layers, trust invariants
-
-## Agent infrastructure
-
-- ops/agent/: Task queue, handoffs, schemas, run artifacts
-- ops/agent/schemas/task.schema.json: Task shape (JSON Schema)
-- ops/agent/schemas/status-enums.json: All status vocabularies
-- ops/agent/queue/task-template.json: Task template
-- scripts/: Supervisor, dispatch, verify, agent-doc validation, control-plane validation (bash)
-- .cursor/rules/: Cursor rules (repo-operating-model, docs-editorial-workflow, machine-scannable-docs)
-
-## Change propagation
-
-- Add or rename a canonical doc: update docs/catalog.json first, then sync agent-manifest.json and any affected route hints in AGENTS.md or llms.txt.
-- Change repo read order or agent entry surfaces: update AGENTS.md, docs/catalog.json, agent-manifest.json, llms.txt, and any affected Cursor rules in the same pass.
-- Change durable doc conventions: update docs/ops/agent-documentation-contract.md, docs/catalog.json, and .cursor/rules/machine-scannable-docs.mdc.
-
-## Conventions
-
-- All docs under docs/ use YAML frontmatter (id, title, status, stage, type, summary, authority, depends_on)
-- Stable IDs: P1-P10 (principles), D* (decisions), O* (open questions), R* (requirements)
-- Source-of-truth hierarchy: vision > decisions > PRD > roadmap > milestones > specs > research > ops
-- Raw research in research-output/ (provenance, do not edit); curated findings in docs/research/
-
-## Constraints
-
-- Docs-first for M001 scope beyond v0a; v0a prototype is the current validation artifact
-- Bounded agent autonomy: one task, explicit scope, verification commands, escalation triggers
-- Terminal states: done, blocked, failed, budget_exhausted
-- WSL-first workspace (bash, python3 for JSON manipulation)
-- Cursor-first orchestration; Claude Code as optional unattended worker
+Environment:
+- automation expects `WSL` or Linux with `bash` and `python3`
+- editing from Windows Cursor is fine

@@ -13,12 +13,12 @@ alwaysApply: false
 - `docs/decisions.md` owns decision status. Update it first when a decision changes, then propagate.
 - `docs/roadmap.md` owns sequencing and exit criteria.
 - `docs/milestones/` contains outcome-based charters, not implementation runbooks, unless a milestone has explicitly crossed into implementation.
-- `docs/ops/` explains how planning and low-touch execution should work; update it when the operating model changes.
+- `docs/ops/` explains how agent-facing docs and repo operations work; update it when the operating model changes.
 - `docs/catalog.json` is the machine-readable index of all docs. Update it when adding or removing docs.
-- `AGENTS.md` is the canonical prose repo contract. `agent-manifest.json` and `llms.txt` are machine-friendly companions and should stay aligned with it.
+- `AGENTS.md` is the canonical prose repo contract. `agent-manifest.json`, `llms.txt`, and `CLAUDE.md` are compatibility companions and should stay pointer-oriented.
 - Prefer cross-references over duplicating the same decision across multiple docs.
 - When referencing a decision, use the stable ID in parentheses, e.g., `(D60)`, so agents can grep from any doc back to `docs/decisions.md`.
 - Specs that implement or are governed by specific decisions should list them in a `## Governing decisions` section near the top.
 - Agent-routing and index docs should expose stable sections for purpose, use-when, not-for, update-when, and machine contract.
-- When routing guidance changes, update the prose entrypoint and the machine index in the same pass rather than leaving one stale.
-- Raw research goes to `research-output/` (do not edit existing files). Mined findings go to `docs/research/`.
+- When routing guidance changes, update the prose entrypoint, the machine index, any affected `.cursor/rules/*.mdc`, and then run `bash scripts/validate-agent-docs.sh`.
+- Raw provenance stays in `research-output/`. Mined findings go to `docs/research/`.

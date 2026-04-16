@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Button } from './ui'
 
 function ShieldSvg({ size = 20 }: { size?: number }) {
   return (
@@ -13,8 +14,8 @@ function ShieldSvg({ size = 20 }: { size?: number }) {
       strokeLinejoin="round"
     >
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      <path d="M12 8v4" />
-      <circle cx="12" cy="16" r="0.5" fill="currentColor" />
+      <circle cx="12" cy="10" r="0.5" fill="currentColor" />
+      <path d="M12 13v3" />
     </svg>
   )
 }
@@ -27,7 +28,7 @@ export function SafetyIcon() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-14 w-14 items-center justify-center rounded-full text-warning"
+        className="flex h-14 w-14 items-center justify-center rounded-full text-text-secondary"
         aria-label="Safety information"
       >
         <ShieldSvg />
@@ -57,13 +58,14 @@ export function SafetyIcon() {
                 If you feel dizzy, chest pain, or unusual shortness of breath,
                 stop immediately and seek help.
               </p>
-              <button
-                type="button"
+              <Button
+                variant="soft"
+                fullWidth
+                className="mt-2"
                 onClick={() => setOpen(false)}
-                className="mt-2 min-h-[54px] w-full rounded-[16px] bg-bg-warm px-4 py-3 text-sm font-semibold text-text-primary"
               >
                 Got it
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -12,7 +12,7 @@
  * triggers). See docs/research/beach-training-resources.md.
  */
 
-import type { Drill } from '../types/drill';
+import type { Drill } from '../types/drill'
 
 // ---------------------------------------------------------------------------
 // Helpers for concise flag objects
@@ -20,12 +20,12 @@ import type { Drill } from '../types/drill';
 
 const env = (
   overrides: Partial<{
-    needsNet: boolean;
-    needsWall: boolean;
-    needsLines: boolean;
-    needsCones: boolean;
-    windFriendly: boolean;
-    lowScreenTime: boolean;
+    needsNet: boolean
+    needsWall: boolean
+    needsLines: boolean
+    needsCones: boolean
+    windFriendly: boolean
+    lowScreenTime: boolean
   }> = {},
 ) => ({
   needsNet: false,
@@ -35,7 +35,7 @@ const env = (
   windFriendly: false,
   lowScreenTime: false,
   ...overrides,
-});
+})
 
 // ---------------------------------------------------------------------------
 // Chain 1: Platform quality and posture → stable contact
@@ -90,7 +90,7 @@ const d01: Drill = {
       ],
     },
   ],
-};
+}
 
 const d02: Drill = {
   id: 'd02',
@@ -107,8 +107,7 @@ const d02: Drill = {
     'Platform angle is the crucial part.',
     'Shoulders oriented to target.',
   ],
-  progressionDescription:
-    'Tosses become faster/flatter; receiver starts from deeper position.',
+  progressionDescription: 'Tosses become faster/flatter; receiver starts from deeper position.',
   regressionDescription: 'Easier, higher tosses; shorter distance.',
   variants: [
     {
@@ -140,7 +139,7 @@ const d02: Drill = {
       ],
     },
   ],
-};
+}
 
 const d03: Drill = {
   id: 'd03',
@@ -158,10 +157,8 @@ const d03: Drill = {
     'Pass high enough to be settable.',
     'Abs tucked.',
   ],
-  progressionDescription:
-    'Increase toss speed; add 1-step movement every rep.',
-  regressionDescription:
-    'Shorter distance; allow receiver to "freeze" before contact.',
+  progressionDescription: 'Increase toss speed; add 1-step movement every rep.',
+  regressionDescription: 'Shorter distance; allow receiver to "freeze" before contact.',
   variants: [
     {
       id: 'd03-pair',
@@ -193,7 +190,7 @@ const d03: Drill = {
       ],
     },
   ],
-};
+}
 
 const d04: Drill = {
   id: 'd04',
@@ -210,8 +207,7 @@ const d04: Drill = {
     'Target forward and slightly inward.',
     'Keep pass lower/closer than indoor.',
   ],
-  progressionDescription:
-    'Transition from toss → controlled serve → live serve.',
+  progressionDescription: 'Transition from toss → controlled serve → live serve.',
   regressionDescription: 'Use underhand toss from closer distance.',
   variants: [
     {
@@ -271,7 +267,7 @@ const d04: Drill = {
       ],
     },
   ],
-};
+}
 
 // ---------------------------------------------------------------------------
 // Chain 2: Directional control and angle management
@@ -294,10 +290,8 @@ const d05: Drill = {
     'Platform angle drives direction.',
     'Transfer weight to front foot.',
   ],
-  progressionDescription:
-    'Toss to left/right so you must move behind the ball.',
-  regressionDescription:
-    'Larger target zone; allow 1 catch-reset every 3 reps.',
+  progressionDescription: 'Toss to left/right so you must move behind the ball.',
+  regressionDescription: 'Larger target zone; allow 1 catch-reset every 3 reps.',
   variants: [
     {
       id: 'd05-solo',
@@ -329,7 +323,7 @@ const d05: Drill = {
       ],
     },
   ],
-};
+}
 
 const d06: Drill = {
   id: 'd06',
@@ -347,8 +341,7 @@ const d06: Drill = {
     'Space between body and ball.',
   ],
   progressionDescription: 'Add shuffle between contacts.',
-  regressionDescription:
-    'Reduce movement; grade only "in zone / out of zone".',
+  regressionDescription: 'Reduce movement; grade only "in zone / out of zone".',
   variants: [
     {
       id: 'd06-solo',
@@ -379,15 +372,14 @@ const d06: Drill = {
       ],
     },
   ],
-};
+}
 
 const d07: Drill = {
   id: 'd07',
   name: 'Pass & Look',
   shortName: 'Pass & Look',
   skillFocus: ['pass'],
-  objective:
-    'Stabilize platform + immediately look and decide (proto-game read).',
+  objective: 'Stabilize platform + immediately look and decide (proto-game read).',
   levelMin: 'intermediate',
   levelMax: 'intermediate',
   chainId: 'chain-2-direction',
@@ -397,10 +389,8 @@ const d07: Drill = {
     'Pass forward to keep vision.',
     'Do not drift under ball.',
   ],
-  progressionDescription:
-    'Flash becomes court-zone target (line vs angle) after pass.',
-  regressionDescription:
-    'Use toss instead of serve; reduce decision complexity.',
+  progressionDescription: 'Flash becomes court-zone target (line vs angle) after pass.',
+  regressionDescription: 'Use toss instead of serve; reduce decision complexity.',
   variants: [
     {
       id: 'd07-pair',
@@ -424,8 +414,7 @@ const d07: Drill = {
       },
       successMetric: {
         type: 'composite',
-        description:
-          'Passes graded 2+ AND correct number call after pass.',
+        description: 'Passes graded 2+ AND correct number call after pass.',
         target: '≥ 70% passes 2+ AND ≥ 80% correct calls',
       },
       courtsideInstructions:
@@ -437,7 +426,7 @@ const d07: Drill = {
       ],
     },
   ],
-};
+}
 
 const d08: Drill = {
   id: 'd08',
@@ -454,8 +443,7 @@ const d08: Drill = {
     'Shoulders to target.',
     'Move feet to ball early.',
   ],
-  progressionDescription:
-    'Server must target short/deep/line/seam (called).',
+  progressionDescription: 'Server must target short/deep/line/seam (called).',
   regressionDescription: 'Use underhand serves or tosses.',
   variants: [
     {
@@ -493,7 +481,7 @@ const d08: Drill = {
       ],
     },
   ],
-};
+}
 
 // ---------------------------------------------------------------------------
 // Chain 3: Movement patterns in sand → passing while moving
@@ -546,15 +534,14 @@ const d09: Drill = {
       ],
     },
   ],
-};
+}
 
 const d10: Drill = {
   id: 'd10',
   name: 'The 6-Legged Monster',
   shortName: '6-Leg Monster',
   skillFocus: ['pass', 'movement'],
-  objective:
-    'Shuffle mechanics + platform angling left/right + depth variation.',
+  objective: 'Shuffle mechanics + platform angling left/right + depth variation.',
   levelMin: 'beginner',
   levelMax: 'intermediate',
   chainId: 'chain-3-movement',
@@ -601,7 +588,7 @@ const d10: Drill = {
       ],
     },
   ],
-};
+}
 
 const d11: Drill = {
   id: 'd11',
@@ -618,8 +605,7 @@ const d11: Drill = {
     'Move through ball.',
     'Thumb up on arm closest to ball, down on opposite.',
   ],
-  progressionDescription:
-    'Wider/faster toss; add 1-step approach after pass.',
+  progressionDescription: 'Wider/faster toss; add 1-step approach after pass.',
   regressionDescription: 'Closer toss; allow two-arm pass sooner.',
   variants: [
     {
@@ -684,7 +670,7 @@ const d11: Drill = {
       ],
     },
   ],
-};
+}
 
 const d12: Drill = {
   id: 'd12',
@@ -701,8 +687,7 @@ const d12: Drill = {
     'Arms close to perpendicular to net for quick retreat.',
     'Keep eyes toward net while moving.',
   ],
-  progressionDescription:
-    'Tosses vary closer to antenna; add approach on final rep.',
+  progressionDescription: 'Tosses vary closer to antenna; add approach on final rep.',
   regressionDescription: 'Fewer reps (fatigue management).',
   variants: [
     {
@@ -739,7 +724,7 @@ const d12: Drill = {
       ],
     },
   ],
-};
+}
 
 const d13: Drill = {
   id: 'd13',
@@ -793,7 +778,7 @@ const d13: Drill = {
       ],
     },
   ],
-};
+}
 
 const d14: Drill = {
   id: 'd14',
@@ -842,7 +827,7 @@ const d14: Drill = {
       ],
     },
   ],
-};
+}
 
 // ---------------------------------------------------------------------------
 // Chain 4: Serve-receive variability → pressure → fatigue-aware caps
@@ -860,12 +845,11 @@ const d15: Drill = {
   m001Candidate: true,
   teachingPoints: [
     'Centered ready position enables quick forward/back.',
-    'Read ball early — off the server\'s hand.',
+    "Read ball early — off the server's hand.",
     'Hands apart while moving.',
   ],
   progressionDescription: 'More random (mix all); faster serves.',
-  regressionDescription:
-    'Coach tosses from midcourt if consistent serving is not possible.',
+  regressionDescription: 'Coach tosses from midcourt if consistent serving is not possible.',
   variants: [
     {
       id: 'd15-pair',
@@ -896,20 +880,19 @@ const d15: Drill = {
         'Server/coach delivers short or deep balls. Passer reads early, moves, passes to set window.',
       coachingCues: [
         'Centered ready position enables quick forward/back.',
-        'Read ball early — off the server\'s hand.',
+        "Read ball early — off the server's hand.",
         'Hands apart while moving.',
       ],
     },
   ],
-};
+}
 
 const d16: Drill = {
   id: 'd16',
   name: 'Diamond Passing',
   shortName: 'Diamond Pass',
   skillFocus: ['pass', 'movement'],
-  objective:
-    'Footwork + technique for short/deep/left/right with defined sequence.',
+  objective: 'Footwork + technique for short/deep/left/right with defined sequence.',
   levelMin: 'beginner',
   levelMax: 'intermediate',
   chainId: 'chain-4-serve-receive',
@@ -960,7 +943,7 @@ const d16: Drill = {
       ],
     },
   ],
-};
+}
 
 const d17: Drill = {
   id: 'd17',
@@ -978,8 +961,7 @@ const d17: Drill = {
     'Anticipate early if in your zone.',
     'Non-passer initiates movement quickly.',
   ],
-  progressionDescription:
-    'Serve faster/lower to reduce decision time.',
+  progressionDescription: 'Serve faster/lower to reduce decision time.',
   regressionDescription: 'Use tosses; exaggerate spacing.',
   variants: [
     {
@@ -999,8 +981,7 @@ const d17: Drill = {
       },
       successMetric: {
         type: 'composite',
-        description:
-          'No collision/hesitation errors AND passes graded 2+.',
+        description: 'No collision/hesitation errors AND passes graded 2+.',
         target: '0 collisions across 12 reps; ≥ 70% pass grade 2+',
       },
       courtsideInstructions:
@@ -1012,7 +993,7 @@ const d17: Drill = {
       ],
     },
   ],
-};
+}
 
 const d18: Drill = {
   id: 'd18',
@@ -1029,8 +1010,7 @@ const d18: Drill = {
     'Pass forward and slightly inward.',
     'Keep pass between you and partner.',
   ],
-  progressionDescription:
-    'Server targets seams/short/deep; passer starts deeper.',
+  progressionDescription: 'Server targets seams/short/deep; passer starts deeper.',
   regressionDescription: 'Underhand serves; smaller dose (6 serves each).',
   variants: [
     {
@@ -1067,7 +1047,7 @@ const d18: Drill = {
       ],
     },
   ],
-};
+}
 
 // ---------------------------------------------------------------------------
 // Chain 5: Session credibility add-ons + multi-skill motivation
@@ -1083,14 +1063,9 @@ const d19: Drill = {
   levelMax: 'beginner',
   chainId: 'chain-5-group-addons',
   m001Candidate: false,
-  teachingPoints: [
-    'Controlled toss/serve down the line.',
-    'Keep rhythm.',
-    'Do not rush rotation.',
-  ],
+  teachingPoints: ['Controlled toss/serve down the line.', 'Keep rhythm.', 'Do not rush rotation.'],
   progressionDescription: 'Add live setter/hitter; add live serve.',
-  regressionDescription:
-    'Smaller groups; passer can catch then set their pass.',
+  regressionDescription: 'Smaller groups; passer can catch then set their pass.',
   variants: [
     {
       id: 'd19-group',
@@ -1109,8 +1084,7 @@ const d19: Drill = {
       },
       successMetric: {
         type: 'reps-successful',
-        description:
-          'Group completes 20 controlled passes before live-serve progression.',
+        description: 'Group completes 20 controlled passes before live-serve progression.',
         target: '20 controlled passes',
       },
       courtsideInstructions:
@@ -1122,15 +1096,14 @@ const d19: Drill = {
       ],
     },
   ],
-};
+}
 
 const d20: Drill = {
   id: 'd20',
   name: '3 Serve Pass to Attack',
   shortName: '3-Ball Attack',
   skillFocus: ['pass', 'set'],
-  objective:
-    'Pass → set → attack continuity; rhythm under repeated entries.',
+  objective: 'Pass → set → attack continuity; rhythm under repeated entries.',
   levelMin: 'intermediate',
   levelMax: 'intermediate',
   chainId: 'chain-5-group-addons',
@@ -1140,8 +1113,7 @@ const d20: Drill = {
     'Initiate next ball quickly after catch.',
     'Target awareness for safety.',
   ],
-  progressionDescription:
-    'Tougher serves; reduce catch/stop, more live play.',
+  progressionDescription: 'Tougher serves; reduce catch/stop, more live play.',
   regressionDescription: 'Toss instead of serve; simplify to pass-set-catch.',
   variants: [
     {
@@ -1161,8 +1133,7 @@ const d20: Drill = {
       },
       successMetric: {
         type: 'composite',
-        description:
-          'Serve receives graded 2+ AND rally completion on live balls.',
+        description: 'Serve receives graded 2+ AND rally completion on live balls.',
         target: '≥ 70% receives 2+ over 15 serves AND ≥ 5 live rallies',
       },
       courtsideInstructions:
@@ -1174,28 +1145,21 @@ const d20: Drill = {
       ],
     },
   ],
-};
+}
 
 const d21: Drill = {
   id: 'd21',
   name: '500',
   shortName: '500 Game',
   skillFocus: ['pass', 'set'],
-  objective:
-    'Ball control with self-scoring; reading/anticipation; engagement.',
+  objective: 'Ball control with self-scoring; reading/anticipation; engagement.',
   levelMin: 'beginner',
   levelMax: 'intermediate',
   chainId: 'chain-5-group-addons',
   m001Candidate: false,
-  teachingPoints: [
-    'Tabletop passing.',
-    'Defined apex on every contact.',
-    'Square hips to target.',
-  ],
-  progressionDescription:
-    '"Hit to specific target" bonus points (back corners).',
-  regressionDescription:
-    'Reduce goal to 250; allow catch on second contact.',
+  teachingPoints: ['Tabletop passing.', 'Defined apex on every contact.', 'Square hips to target.'],
+  progressionDescription: '"Hit to specific target" bonus points (back corners).',
+  regressionDescription: 'Reduce goal to 250; allow catch on second contact.',
   variants: [
     {
       id: 'd21-group',
@@ -1214,8 +1178,7 @@ const d21: Drill = {
       },
       successMetric: {
         type: 'points-to-target',
-        description:
-          'Pass-only = 25 pts, pass+set = 50, pass+set+attack = 100. Race to 500.',
+        description: 'Pass-only = 25 pts, pass+set = 50, pass+set+attack = 100. Race to 500.',
         target: 'Reach 500 within cap time or improve vs last session',
       },
       courtsideInstructions:
@@ -1227,7 +1190,7 @@ const d21: Drill = {
       ],
     },
   ],
-};
+}
 
 // ---------------------------------------------------------------------------
 // Chain 6: Serving (because serve-receive needs serves)
@@ -1248,8 +1211,7 @@ const d22: Drill = {
     'Consistent hand contact.',
     'Adjust for wind movement.',
   ],
-  progressionDescription:
-    'Jump serve to spots instead of standing serve.',
+  progressionDescription: 'Jump serve to spots instead of standing serve.',
   regressionDescription: 'Bigger zones; count "in" serves only.',
   variants: [
     {
@@ -1273,8 +1235,7 @@ const d22: Drill = {
       },
       successMetric: {
         type: 'points-to-target',
-        description:
-          'Assign point values to zones; serve out loses a point.',
+        description: 'Assign point values to zones; serve out loses a point.',
         target: 'Reach 10 points with ≤ X errors (level-dependent)',
       },
       courtsideInstructions:
@@ -1286,7 +1247,7 @@ const d22: Drill = {
       ],
     },
   ],
-};
+}
 
 const d23: Drill = {
   id: 'd23',
@@ -1303,8 +1264,7 @@ const d23: Drill = {
     'Watch ball while moving.',
     'Treat as a pressure rep.',
   ],
-  progressionDescription:
-    'Alternate starting serve locations along end line.',
+  progressionDescription: 'Alternate starting serve locations along end line.',
   regressionDescription: 'Reduce sprint distance; reduce total reps.',
   variants: [
     {
@@ -1336,15 +1296,14 @@ const d23: Drill = {
       ],
     },
   ],
-};
+}
 
 const d24: Drill = {
   id: 'd24',
   name: 'Pass into a Corner',
   shortName: 'Corner Pass',
   skillFocus: ['pass'],
-  objective:
-    'Move to ball + pass to a "setter" corner target. Off-court fallback.',
+  objective: 'Move to ball + pass to a "setter" corner target. Off-court fallback.',
   levelMin: 'beginner',
   levelMax: 'intermediate',
   chainId: 'chain-6-serving',
@@ -1386,7 +1345,7 @@ const d24: Drill = {
       ],
     },
   ],
-};
+}
 
 // ---------------------------------------------------------------------------
 // Cool-down and recovery
@@ -1402,13 +1361,8 @@ const d25: Drill = {
   levelMax: 'advanced',
   chainId: 'chain-cooldown',
   m001Candidate: true,
-  teachingPoints: [
-    'Slow down gradually.',
-    'Do not stop abruptly.',
-    'Breathe steadily.',
-  ],
-  progressionDescription:
-    'Add a second 5-minute block on very hot days.',
+  teachingPoints: ['Slow down gradually.', 'Do not stop abruptly.', 'Breathe steadily.'],
+  progressionDescription: 'Add a second 5-minute block on very hot days.',
   regressionDescription: '2-minute walk only.',
   variants: [
     {
@@ -1432,14 +1386,10 @@ const d25: Drill = {
       },
       courtsideInstructions:
         'Slow walk 5 minutes (or easy shuffle if space limited). Then 6 slow breaths focusing on long exhale.',
-      coachingCues: [
-        'Slow down gradually.',
-        'Do not stop abruptly.',
-        'Breathe steadily.',
-      ],
+      coachingCues: ['Slow down gradually.', 'Do not stop abruptly.', 'Breathe steadily.'],
     },
   ],
-};
+}
 
 const d26: Drill = {
   id: 'd26',
@@ -1453,8 +1403,7 @@ const d26: Drill = {
   m001Candidate: true,
   teachingPoints: ['Breathe.', 'Avoid pain.', 'Hold steady.'],
   progressionDescription: '2 sets each stretch (time permitting).',
-  regressionDescription:
-    '3 stretches only (calf/hamstring/hip flexor).',
+  regressionDescription: '3 stretches only (calf/hamstring/hip flexor).',
   variants: [
     {
       id: 'd26-solo',
@@ -1480,18 +1429,41 @@ const d26: Drill = {
       coachingCues: ['Breathe.', 'Avoid pain.', 'Hold steady.'],
     },
   ],
-};
+}
 
 // ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
 
 export const DRILLS: readonly Drill[] = [
-  d01, d02, d03, d04, d05, d06, d07, d08, d09, d10,
-  d11, d12, d13, d14, d15, d16, d17, d18, d19, d20,
-  d21, d22, d23, d24, d25, d26,
-] as const;
+  d01,
+  d02,
+  d03,
+  d04,
+  d05,
+  d06,
+  d07,
+  d08,
+  d09,
+  d10,
+  d11,
+  d12,
+  d13,
+  d14,
+  d15,
+  d16,
+  d17,
+  d18,
+  d19,
+  d20,
+  d21,
+  d22,
+  d23,
+  d24,
+  d25,
+  d26,
+] as const
 
-export const M001_DRILL_IDS: readonly string[] = DRILLS
-  .filter((d) => d.m001Candidate)
-  .map((d) => d.id);
+export const M001_DRILL_IDS: readonly string[] = DRILLS.filter((d) => d.m001Candidate).map(
+  (d) => d.id,
+)

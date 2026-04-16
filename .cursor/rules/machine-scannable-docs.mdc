@@ -5,9 +5,11 @@ alwaysApply: true
 
 # Machine-Scannable Docs
 
-- Treat `AGENTS.md`, `docs/catalog.json`, `agent-manifest.json`, and `llms.txt` as the repo's agent entry surfaces. Keep them consistent when routing or repo guidance changes.
-- Keep `AGENTS.md` concise and pointer-oriented. Use `docs/catalog.json` for exhaustive machine indexes and `ops/agent/README.md` for control-plane inventories instead of duplicating them in `AGENTS.md`.
-- When adding or renaming canonical docs, update `docs/catalog.json` in the same pass. Update `agent-manifest.json`, `llms.txt`, `docs/README.md`, or `AGENTS.md` when their references or read paths change.
+- Treat `AGENTS.md` and `docs/catalog.json` as the canonical agent entry surfaces.
+- Treat `README.md` and `docs/README.md` as human/editorial hubs.
+- Treat `agent-manifest.json`, `llms.txt`, and `CLAUDE.md` as thin compatibility surfaces that should point back to the canonical files above.
+- Keep `AGENTS.md` concise and pointer-oriented. Use `docs/catalog.json` for the machine-readable doc map instead of duplicating inventories in `AGENTS.md`.
+- When adding or renaming canonical docs, update `docs/catalog.json` in the same pass. Update `docs/README.md`, `AGENTS.md`, and any affected compatibility surfaces when their routing or summary text changed.
 - Durable docs under `docs/` should keep YAML frontmatter with at least `id`, `title`, `status`, `stage`, `type`, and `summary`.
 - For core, milestone, and spec docs, also keep `authority`, `last_updated`, and `depends_on` current.
 - Add `decision_refs` and `open_question_refs` when stable IDs materially constrain the doc.
@@ -16,5 +18,6 @@ alwaysApply: true
 - Prefer stable IDs (`P*`, `D*`, `O*`, `M*`, `R*`) over copied prose when cross-referencing.
 - Valid frontmatter must be real YAML, not markdown-styled pseudo-frontmatter.
 - Keep contracts in flat lists, tables, JSON, or enumerated IDs. Do not bury critical constraints only in prose.
-- When entrypoints, routing rules, or machine summaries change, sync `docs/catalog.json`, `agent-manifest.json`, and `llms.txt` in the same pass when applicable.
-- Keep curated research in `docs/research/`; preserve `research-output/` as raw provenance.
+- When entrypoints or routing rules change, sync `docs/catalog.json`, `AGENTS.md`, relevant `.cursor/rules/*.mdc`, and any affected compatibility surfaces in the same pass.
+- After routing-critical changes, run `bash scripts/validate-agent-docs.sh`.
+- Keep curated research in `docs/research/`; preserve `research-output/` as frozen provenance.

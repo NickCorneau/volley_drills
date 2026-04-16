@@ -2,156 +2,103 @@
 id: agent-documentation-contract
 title: Agent Documentation Contract
 status: active
-stage: planning
+stage: validation
 type: ops
-authority: agent-facing documentation surfaces, machine-scannable doc patterns, change-propagation rules
-summary: "Canonical contract for agent entry surfaces, machine-scannable docs, and what must be updated when repo guidance changes."
-last_updated: 2026-04-12
+summary: "Conventions for agent-facing docs, compatibility surfaces, and change propagation."
+authority: doc-surface structure, machine-scannable patterns, and change propagation
+last_updated: 2026-04-15
 depends_on:
+  - AGENTS.md
   - docs/catalog.json
   - docs/README.md
-  - docs/ops/agent-runtime.md
 ---
 
 # Agent Documentation Contract
 
 ## Purpose
 
-Define how this repo should present itself to agents and how durable docs should stay machine-scannable over time.
-
-This doc is the canonical contract for:
-
-- agent entry surfaces
-- machine-readable documentation patterns
-- change-propagation rules when repo guidance changes
+Define how the repo should present itself to agents and how routing-critical docs should stay lightweight, explicit, and machine-scannable.
 
 ## Use This File When
 
-- editing `AGENTS.md`, `docs/catalog.json`, `agent-manifest.json`, or `llms.txt`
-- adding, renaming, or removing canonical docs under `docs/`
-- changing documentation conventions or agent-routing rules
-- deciding whether a new doc needs stronger machine-scannable structure
+- editing `AGENTS.md`, `docs/catalog.json`, `README.md`, `llms.txt`, `CLAUDE.md`, or `agent-manifest.json`
+- adding, renaming, or retiring a routing-critical doc
+- changing durable doc conventions
 
 ## Not For
 
-Do not use this doc as the source of truth for:
-
-- product principles (`docs/vision.md`)
-- decision status (`docs/decisions.md`)
-- product scope (`docs/prd-foundation.md`)
-- phase sequencing (`docs/roadmap.md`)
-- runtime task flow (`docs/ops/agent-runtime.md`)
+- product direction
+- milestone scope
+- app implementation detail
+- replacing `docs/ops/agent-operations.md` as the runtime guide
 
 ## Update When
 
-- an agent entry surface changes
+- a canonical entry surface changes
 - machine-scannable doc conventions change
-- the change-propagation rules change
-- a new durable companion file is introduced for agent routing
+- change-propagation rules change
 
 ## Machine Contract
 
-- `docs/catalog.json` is the exhaustive machine-readable index.
-- `agent-manifest.json` is the compact JSON cold-start payload.
-- `llms.txt` is the lightweight text summary.
 - `AGENTS.md` is the canonical prose repo contract.
-- This file defines what those surfaces must keep in sync and what must be updated together when repo guidance changes.
-- `bash scripts/validate-agent-docs.sh` is the focused verification entrypoint for agent-facing docs and machine-readable routing surfaces.
+- `docs/catalog.json` is the machine-readable routing map.
+- `README.md` is the human repo hub.
+- `docs/README.md` is the editorial docs index.
+- `agent-manifest.json`, `llms.txt`, and `CLAUDE.md` are compatibility surfaces and should stay thin.
 
-## Agent Entry Surfaces
+## Entry Surfaces
 
-These files work together. They should not drift.
+Canonical:
 
 - `AGENTS.md`
-  - Primary interactive repo contract for agents working inside the repo.
-  - Keep it concise and pointer-oriented. Exhaustive inventories, dependency graphs, line counts, and control-plane listings belong in `docs/catalog.json`, `docs/README.md`, or `ops/agent/README.md`.
 - `docs/catalog.json`
-  - Richest machine-readable map of canonical docs, routing, dependencies, and task-contract pointers.
+- `README.md`
+- `docs/README.md`
+- `docs/research/README.md`
+- `docs/ops/agent-operations.md`
+- `docs/ops/agent-documentation-contract.md`
+
+Compatibility-only:
+
 - `agent-manifest.json`
-  - Pure JSON cold-start payload for tooling that should not parse markdown first.
 - `llms.txt`
-  - Lightweight text overview for generic LLM tooling and quick cold starts.
-- `.cursor/rules/`
-  - Persistent working rules that shape agent behavior across sessions.
+- `CLAUDE.md`
+
+Compatibility surfaces should point back to the canonical files above instead of duplicating full routing logic.
 
 ## Durable Doc Contract
 
 For durable docs under `docs/`:
 
-- Use YAML frontmatter with at least:
-  - `id`
-  - `title`
-  - `status`
-  - `stage`
-  - `type`
-  - `summary`
-- Add `authority`, `last_updated`, `depends_on`, `decision_refs`, and `open_question_refs` when they materially help routing or consistency.
-- Keep section headings stable so agents can target known sections reliably.
-- Prefer short scan-friendly sections near the top of high-value docs:
+- keep YAML frontmatter with at least `id`, `title`, `status`, `stage`, `type`, and `summary`
+- add `authority`, `last_updated`, and `depends_on` when they materially help routing or consistency
+- keep stable headings for routing-critical docs
+- prefer short scan-friendly sections near the top:
   - `Purpose`
-  - `Agent Quick Scan`
-  - `Fast path`
-  - `Use this doc when`
-  - `Not this doc for`
-- Reference stable IDs instead of rephrasing canon:
-  - `P*` for principles
-  - `D*` for decided items
-  - `O*` for open questions
-  - `M*` for milestones
-  - `R*` for requirements where used
+  - `Use This File When`
+  - `Not For`
+  - `Update When`
+  - `Machine Contract`
+- prefer stable IDs (`P*`, `D*`, `O*`, `M*`, `R*`) over copied prose
 
-## Structure Preferences
+## Change Propagation
 
-Prefer structures that agents can mine quickly:
+When repo routing changes:
 
-- flat lists for contracts, defaults, and non-goals
-- explicit routing tables for topic-to-doc mapping
-- JSON or schema examples for durable task or data shapes
-- short summaries before long rationale
+- update `AGENTS.md`
+- update `docs/catalog.json`
+- update any affected compatibility surfaces
+- update relevant `.cursor/rules/*.mdc`
+- run `bash scripts/validate-agent-docs.sh`
 
-Avoid:
+When a canonical doc is added, removed, or renamed:
 
-- burying constraints only in prose
-- duplicating the same decision in multiple docs when a cross-reference will do
-- ambiguous ownership of canonical concepts
-- turning `AGENTS.md` into the exhaustive doc index when a companion surface already owns that detail
+- update `docs/catalog.json`
+- update `docs/README.md`
+- update `AGENTS.md` if read order or routing changed
 
-## Change Propagation Rules
+When documentation conventions change:
 
-### When a canonical doc is added or renamed
-
-Update in the same pass:
-
-- `docs/catalog.json`
-- `agent-manifest.json`
-- `docs/README.md`
-- `AGENTS.md` if the doc affects read order, topic routing, or source-of-truth guidance
-- `llms.txt` if the doc changes generic cold-start guidance
-
-### When repo guidance or read order changes
-
-Update in the same pass:
-
-- `AGENTS.md`
-- `docs/catalog.json`
-- `agent-manifest.json`
-- `llms.txt`
-- any affected `.cursor/rules/*.mdc`
-- re-run `bash scripts/validate-agent-docs.sh`
-
-### When documentation conventions change
-
-Update in the same pass:
-
-- this file
-- `docs/catalog.json` doc-conventions metadata
-- `.cursor/rules/machine-scannable-docs.mdc`
-- re-run `bash scripts/validate-agent-docs.sh`
-
-## Related Docs
-
-- `AGENTS.md`
-- `docs/README.md`
-- `docs/catalog.json`
-- `docs/ops/agent-runtime.md`
-- `.cursor/rules/repo-operating-model.mdc`
+- update this file
+- update `docs/catalog.json`
+- update `.cursor/rules/machine-scannable-docs.mdc`

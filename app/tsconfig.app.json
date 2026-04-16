@@ -4,8 +4,8 @@
     "target": "es2023",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "esnext",
-    "types": ["vite/client", "vite-plugin-pwa/client"],
-    "skipLibCheck": true,
+    "types": ["vite/client", "vite-plugin-pwa/client", "vitest/globals"],
+    "strict": true,
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -14,6 +14,11 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+
+    /* Path aliases */
+    "paths": {
+      "@/*": ["./src/*"]
+    },
 
     /* Linting */
     "noUnusedLocals": true,

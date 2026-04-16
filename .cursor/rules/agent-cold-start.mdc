@@ -1,7 +1,7 @@
 ---
 description: Agent cold-start protocol for entering the repo
 alwaysApply: false
-globs: AGENTS.md,agent-manifest.json,llms.txt,docs/catalog.json
+globs: AGENTS.md,agent-manifest.json,llms.txt,CLAUDE.md,docs/catalog.json
 ---
 
 # Agent Cold-Start Protocol
@@ -9,9 +9,7 @@ globs: AGENTS.md,agent-manifest.json,llms.txt,docs/catalog.json
 When entering this repo for the first time in a session:
 
 1. Read `AGENTS.md` for orientation, source-of-truth hierarchy, and operating contract.
-2. Read `docs/catalog.json` for the machine-readable doc index, dependency graph, and routing rules.
-3. If you only need routing without full context, `agent-manifest.json` has a minimal JSON cold-start payload.
-4. Use the `cold_start.read_order` in `agent-manifest.json` or the § Cold-start protocol in `AGENTS.md` to load context incrementally by task type.
-5. Check line counts in `docs/catalog.json` § `documents` before loading large files. Multiply lines by ~40 for rough token estimate.
-6. Use `docs/catalog.json` § `dependency_graph` to understand which docs must stay consistent with each other before editing.
-7. Use `docs/catalog.json` § `research_routing` to find the narrowest research note for a topic instead of reading everything.
+2. Read `docs/catalog.json` for the machine-readable doc index and routing rules.
+3. If you only need minimal compatibility context, `agent-manifest.json`, `llms.txt`, and `CLAUDE.md` point back to the canonical surfaces.
+4. Use the § Cold-start protocol in `AGENTS.md` plus `docs/catalog.json` § `read_packs` to load context incrementally by task type.
+5. Use `docs/catalog.json` § `research_routing` to find the narrowest research note for a topic instead of reading everything.

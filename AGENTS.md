@@ -4,168 +4,136 @@ title: Agent Orientation
 status: active
 stage: validation
 type: agent-contract
-summary: "Lean repo entrypoint for agents: current state, source-of-truth order, cold-start routing, and repo-wide operating constraints."
-authority: agent read order, operating rules, learned preferences, repo-wide routing
-last_updated: 2026-04-12
+summary: "Canonical prose repo contract: current state, read order, source-of-truth order, and repo-wide working constraints."
+authority: repo-wide routing, working constraints, and agent-facing orientation
+last_updated: 2026-04-15
 depends_on:
+  - docs/catalog.json
   - docs/vision.md
   - docs/decisions.md
-  - docs/ops/agent-runtime.md
-  - docs/ops/agent-documentation-contract.md
+  - docs/ops/agent-operations.md
 ---
 
 # Agent Orientation
 
 ## Identity
 
-Beach volleyball training workflow app for self-coached amateurs. A runnable v0a validation prototype exists under `app/` (React + Dexie + PWA). M001 build gate remains closed pending field-test evidence (D91).
+Beach volleyball training workflow app for self-coached amateurs. A runnable v0a validation prototype exists under `app/` (React + Dexie + PWA). M001 remains blocked on field-test evidence (`D91`).
 
 ## Purpose
 
-Give agents one durable, human-readable repo contract for:
-
-- cold-start orientation
-- source-of-truth order
-- current repo state and gating conditions
-- repo-wide constraints that should not be rediscovered each session
-- routes to deeper docs without turning this file into the full index
-
-Keep this file concise and pointer-oriented. If content becomes an exhaustive table, dependency graph, file inventory, or schema dump, move that detail to the appropriate companion surface and link to it from here.
+Give agents one durable, concise repo contract for current state, read order, source-of-truth order, and repo-wide working constraints.
 
 ## Use This File When
 
 - entering the repo cold
-- resolving source-of-truth conflicts
 - deciding what to read next
-- checking repo-wide constraints, preferences, or current project state
-- updating agent-facing repo guidance
+- resolving source-of-truth conflicts
+- checking repo-wide constraints or current project posture
+- updating agent-facing guidance
 
 ## Not For
 
 - replacing canonical product docs such as `docs/vision.md`, `docs/decisions.md`, or `docs/prd-foundation.md`
-- acting as the exhaustive doc index, dependency graph, or line-count registry
-- storing raw research detail or mirrored file inventories
-- encoding file-scoped behavior that belongs in `.cursor/rules/` or closer local docs
-- replacing `ops/agent/README.md` as the control-plane layout reference
+- acting as the exhaustive machine index
+- storing raw research detail or implementation history
+- duplicating deep control-plane or archive detail that belongs elsewhere
 
 ## Update When
 
-- cold-start routing changes
-- the source-of-truth hierarchy changes
-- repo-wide operating constraints or learned preferences materially change
-- current phase, active milestone, or blocking gates materially change
-- the set of agent entry surfaces changes
+- the repo-wide read order changes
+- source-of-truth order changes
+- current phase, milestone, or blocking gate changes
+- repo-wide automation expectations materially change
+- canonical entry surfaces change
 
 ## Machine Contract
 
-This file is the canonical prose repo contract. Companion surfaces split the rest of the job:
-
-- `docs/catalog.json` — exhaustive machine-readable doc index, routing rules, dependency graph, and context-budget metadata
-- `docs/README.md` — prose editorial index for doc families and ownership
-- `docs/ops/agent-documentation-contract.md` — canonical doc conventions, frontmatter expectations, and change-propagation rules
-- `agent-manifest.json` — compact JSON cold-start payload
-- `llms.txt` — lightweight navigational summary for generic LLM tooling
-- `docs/ops/agent-runtime.md` — bounded-runtime contract and unattended-work guidance
-- `ops/agent/README.md` — control-plane layout, task flow, and handoff mechanics
-
-Drift rule:
-
-- if the disagreement is about inventories, routing tables, dependency edges, or line counts, prefer `docs/catalog.json`
-- if the disagreement is about prose policy, source-of-truth order, or repo-wide operating constraints, prefer `AGENTS.md`
-- when changing agent entry surfaces or repo guidance, update all affected companion files in the same pass
+- `AGENTS.md` is the canonical prose repo contract.
+- `docs/catalog.json` is the machine-readable doc map and routing table.
+- `README.md` is the human repo hub.
+- `docs/README.md` is the prose editorial index for `docs/`.
+- `docs/ops/agent-operations.md` is the current runtime/operations guide.
+- `docs/ops/agent-documentation-contract.md` owns doc-surface conventions and change propagation.
+- `CLAUDE.md`, `llms.txt`, and `agent-manifest.json` are thin compatibility surfaces only.
 
 ## Current State
 
-- **Phase**: 0 (discovery + validation)
-- **Posture**: v0a validation prototype shipped; docs-first for M001 scope beyond v0a
+- **Phase**: 0 (validation)
+- **Posture**: runnable v0a prototype shipped; docs-first for M001 scope beyond v0a
 - **Active milestone**: `M001` Solo Session Loop
-- **v0a status**: runnable PWA under `app/` with 6 routes, Dexie persistence, preset sessions, safety gates, timer, review, and resume flow
-- **Blocking gate**: field-test evidence (D91) must pass before `M001` moves to full implementation
+- **Blocking gate**: field-test evidence (`D91`) must pass before M001 moves into the full build
+- **Prototype feedback**: start with `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for any prototype work
 - **Key open questions**: `O4`, `O5`, `O6`, `O7`, `O11`, `O12` in `docs/decisions.md`
-- **Prototype feedback**: `docs/research/2026-04-12-v0a-runner-probe-feedback.md` — **read this first for any prototype work.** Living backlog of UX/QA findings with stable IDs (FB-*, UX-*, DOC-*, HARD-*, V0B-*). Contains the current fix status, deferred items, and what still needs live verification.
 
 ## Cold-Start Protocol
 
-When entering this repo cold, stop reading as soon as you have enough context for the task.
+Read only as much as the task needs.
 
-1. Read `AGENTS.md`.
-2. Read `docs/catalog.json` if you need machine routing, dependency edges, or context-budget details. Read `agent-manifest.json` instead if you only need the compact JSON version.
-3. Load the smallest relevant task pack:
-  - Product direction: `docs/vision.md` -> `docs/decisions.md` -> `docs/prd-foundation.md`
-  - Milestone or implementation planning: `docs/milestones/m001-solo-session-loop.md` -> relevant `docs/specs/` -> `app/README.md`
-  - Validation / prototype feedback: **start here →** `docs/research/2026-04-12-v0a-runner-probe-feedback.md` -> `docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md` -> `app/README.md`
-  - Research: `docs/research/README.md` -> narrowest relevant note
-  - Docs editing or entry-surface changes: `docs/README.md` -> `docs/ops/agent-documentation-contract.md`
-  - Agent ops / control plane: `docs/ops/agent-runtime.md` -> `ops/agent/README.md`
-4. Before changing product scope or implementation direction, check `docs/decisions.md` for blocking open questions and confirm the milestone stage allows the work.
+1. `AGENTS.md`
+2. `docs/catalog.json`
+3. Load the smallest relevant pack:
+   - Product direction: `docs/vision.md` -> `docs/decisions.md` -> `docs/prd-foundation.md`
+   - Milestone/spec work: `docs/milestones/m001-solo-session-loop.md` -> relevant `docs/specs/`
+   - Prototype work: `docs/research/2026-04-12-v0a-runner-probe-feedback.md` -> `app/README.md`
+   - Research: `docs/research/README.md` -> narrowest relevant note
+   - Docs editing: `docs/README.md` -> `docs/ops/agent-documentation-contract.md`
+   - Agent/runtime guidance: `docs/ops/agent-operations.md`
 
-## Source-of-Truth Hierarchy
+## Source-of-Truth Order
 
 When guidance conflicts, higher rank wins:
 
-1. `docs/vision.md` — product principles and strategic stance
-2. `docs/decisions.md` — decided, open, and ruled-out items
-3. `docs/prd-foundation.md` — scope, workflow, object model, MVP requirements
-4. `docs/roadmap.md` — phase sequencing and exit criteria
-5. `docs/milestones/` � thin-slice charter scope
-6. `docs/specs/` � milestone-level behavior details
-7. `docs/research/` � curated research inputs
-8. `docs/ops/` � operating model, runtime, and documentation contract
-9. `AGENTS.md` � repo-wide agent routing and working guidance
-10. `CLAUDE.md` � tool-specific execution hints only
+1. `docs/vision.md`
+2. `docs/decisions.md`
+3. `docs/prd-foundation.md`
+4. `docs/roadmap.md`
+5. `docs/milestones/`
+6. `docs/specs/`
+7. `docs/research/`
+8. `docs/ops/`
+9. `AGENTS.md`
+10. `CLAUDE.md`
 
 Rules of thumb:
 
 - `docs/decisions.md` is the first stop for anything that sounds decided, open, or ruled out.
 - Research informs canon; it does not silently override canon.
-- `CLAUDE.md` should never become a second source of truth for repo policy.
+- Compatibility surfaces stay pointer-oriented and should not become second sources of truth.
 
-## Stable IDs and Doc Conventions
+## Stable IDs And Doc Conventions
 
-Use stable IDs when citing enumerable items across docs:
-
-- `P`* — product principles in `docs/vision.md`
-- `D*` — decided items in `docs/decisions.md`
+- `P*` — principles in `docs/vision.md`
+- `D*` — decisions in `docs/decisions.md`
 - `O*` — open questions in `docs/decisions.md`
 - `M*` — milestones in `docs/milestones/`
-- `R*` — requirements in spec docs where used
+- `R*` — requirements in specs where used
 
-Durable doc conventions live in `docs/ops/agent-documentation-contract.md`. In practice:
-
-- docs under `docs/` should keep YAML frontmatter
-- parse `authority` and `depends_on` before editing
-- prefer cross-references to canonical docs over duplicated prose
-- keep agent-facing docs scan-friendly with stable headings and flat lists
+Durable docs under `docs/` should keep YAML frontmatter and explicit ownership. Prefer cross-references over copying canon into multiple places.
 
 ## Operational Constraints
 
-- This repo is Cursor-first. Shared agent behavior lives in `AGENTS.md`, `.cursor/rules/`, and `docs/ops/`.
-- Default to docs-first work for M001 scope beyond v0a until the field-test gate (D91) clears.
-- Keep autonomous work bounded: one task, explicit verification commands, explicit escalation triggers, and terminal state `done`, `blocked`, `failed`, or `budget_exhausted`.
-- Use `ops/agent/queue/` for task specs and `ops/agent/handoffs/` for curated handoffs. Keep volatile run or lock state out of git.
-- Keep recommendations aligned with courtside mobile use, low typing, structured workflows, and solo/pair fallback.
-- Prefer repo docs, plans, and agent-control surfaces to be AI-native, agent-first, and machine-scannable.
-- New research should be synthesized into canonical docs: keep provenance in `research-output/`, then mine durable findings into `docs/research/beach-training-resources.md` or the narrowest relevant canonical doc.
-- The product is local-first by principle (`D27`-`D29`): device is the primary copy, cloud is a supporting peer.
-- Environment bias is WSL/bash-first; control-plane automation expects `bash` and `python3`.
+- This repo is Cursor-first.
+- Automation expects **WSL or Linux + bash + python3**. Editing from Windows Cursor is fine, but repo scripts are not PowerShell-first.
+- Keep autonomous work bounded: one task, explicit verification, explicit escalation triggers.
+- The older queued-task control plane is archived; do not assume `ops/agent/` is an active workflow surface.
+- Keep recommendations aligned with courtside mobile use, low typing, and local-first behavior.
+- New durable findings should move into canonical docs; `research-output/` remains frozen provenance.
 
 ## Verification Hints
 
-- Agent-facing doc or entrypoint changes: run `bash scripts/validate-agent-docs.sh`
-- Queue, handoff, schema, or control-plane changes: run `bash scripts/validate-agent-control-plane.sh`
-- If a change crosses multiple entry surfaces, update companions named in `docs/ops/agent-documentation-contract.md` in the same pass
+- Agent/doc surface changes: `bash scripts/validate-agent-docs.sh`
+- App changes: run the narrowest relevant `app/` verification commands
 
 ## Learned User Preferences
 
 - Prefer product clarity and the smallest useful MVP over premature feature expansion.
-- Favor structured objects and workflows over chat-first UX.
+- Favor structured workflows over chat-first UX.
 - Optimize for fast, low-typing, readable courtside interaction.
-- When the runnable app and documentation disagree, fix docs and machine-readable entry surfaces first; do not leave stale narrative in place where it can be mistaken for current truth.
-- Prefer actively demoting or removing stale documentation over leaving misleading material discoverable at the same tier as canonical docs.
+- Prefer deleting or demoting stale documentation rather than leaving misleading material at canonical tiers.
 
 ## Learned Workspace Facts
 
-- A v0a session-loop prototype runs from `app/`; some entry and research docs may still read like scaffold-only or intermediate states—verify against code and `docs/catalog.json` when assessing drift.
-- Demoting or deleting docs should include updating `docs/catalog.json`, `agent-manifest.json`, `llms.txt`, and other cross-references required by `docs/ops/agent-documentation-contract.md` so machine routing stays consistent.
-- `bash scripts/validate-agent-docs.sh` enforces strict heading and structure checks; malformed YAML frontmatter, heading drift, or CRLF-related line-ending mismatches can fail validation on Windows-oriented checkouts—normalize entry docs and re-run the script after edits.
-
+- The prototype under `app/` is real and runnable; older planning docs may describe a pre-build state.
+- The active automation environment is WSL/bash-friendly.
+- Historical control-plane scaffolding now lives in `archive/agent-control-plane/`.

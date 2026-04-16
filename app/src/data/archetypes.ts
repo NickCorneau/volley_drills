@@ -9,7 +9,7 @@
  * Schema: app/src/types/session.ts
  */
 
-import type { SessionArchetype, BlockSlot } from '../types/session';
+import type { SessionArchetype, BlockSlot } from '../types/session'
 
 // ---------------------------------------------------------------------------
 // Shared block definitions
@@ -21,8 +21,8 @@ const warmup = (min: number, max: number): BlockSlot => ({
   durationMaxMinutes: max,
   intent: 'Raise temperature, establish easy success, screen for obvious pain.',
   required: true,
-  skillTags: ['pass', 'movement', 'recovery'],
-});
+  skillTags: ['pass', 'movement'],
+})
 
 const technique = (min: number, max: number): BlockSlot => ({
   type: 'technique',
@@ -31,7 +31,7 @@ const technique = (min: number, max: number): BlockSlot => ({
   intent: 'Platform shape, angle control, repeatable quality.',
   required: true,
   skillTags: ['pass'],
-});
+})
 
 const movementProxy = (min: number, max: number): BlockSlot => ({
   type: 'movement_proxy',
@@ -40,7 +40,7 @@ const movementProxy = (min: number, max: number): BlockSlot => ({
   intent: 'Footwork, first-step movement, or reading proxies before harder block.',
   required: false,
   skillTags: ['pass', 'movement'],
-});
+})
 
 const mainSkill = (min: number, max: number): BlockSlot => ({
   type: 'main_skill',
@@ -49,7 +49,7 @@ const mainSkill = (min: number, max: number): BlockSlot => ({
   intent: 'Highest-trust drill available for the current archetype.',
   required: true,
   skillTags: ['pass', 'serve'],
-});
+})
 
 const pressure = (min: number, max: number): BlockSlot => ({
   type: 'pressure',
@@ -58,7 +58,7 @@ const pressure = (min: number, max: number): BlockSlot => ({
   intent: 'Scoring, variability, or simple constraints. Not full randomization.',
   required: false,
   skillTags: ['pass', 'serve'],
-});
+})
 
 const wrap = (min: number, max: number): BlockSlot => ({
   type: 'wrap',
@@ -67,7 +67,7 @@ const wrap = (min: number, max: number): BlockSlot => ({
   intent: 'End cleanly, cool-down, prep review.',
   required: true,
   skillTags: ['recovery'],
-});
+})
 
 // ---------------------------------------------------------------------------
 // Archetypes
@@ -83,19 +83,8 @@ const soloWall: SessionArchetype = {
     wallAvailable: true,
   },
   layouts: {
-    15: [
-      warmup(2, 3),
-      technique(4, 5),
-      mainSkill(5, 6),
-      wrap(3, 4),
-    ],
-    25: [
-      warmup(3, 4),
-      technique(5, 6),
-      movementProxy(4, 5),
-      mainSkill(6, 8),
-      wrap(4, 5),
-    ],
+    15: [warmup(2, 3), technique(4, 5), mainSkill(5, 6), wrap(3, 4)],
+    25: [warmup(3, 4), technique(5, 6), movementProxy(4, 5), mainSkill(6, 8), wrap(4, 5)],
     40: [
       warmup(4, 6),
       technique(6, 8),
@@ -105,7 +94,7 @@ const soloWall: SessionArchetype = {
       wrap(4, 6),
     ],
   },
-};
+}
 
 const soloOpen: SessionArchetype = {
   id: 'solo_open',
@@ -117,19 +106,8 @@ const soloOpen: SessionArchetype = {
     wallAvailable: false,
   },
   layouts: {
-    15: [
-      warmup(2, 3),
-      technique(4, 5),
-      mainSkill(5, 6),
-      wrap(3, 4),
-    ],
-    25: [
-      warmup(3, 4),
-      technique(5, 7),
-      movementProxy(4, 5),
-      mainSkill(6, 7),
-      wrap(4, 5),
-    ],
+    15: [warmup(2, 3), technique(4, 5), mainSkill(5, 6), wrap(3, 4)],
+    25: [warmup(3, 4), technique(5, 7), movementProxy(4, 5), mainSkill(6, 7), wrap(4, 5)],
     40: [
       warmup(4, 6),
       technique(6, 8),
@@ -139,7 +117,7 @@ const soloOpen: SessionArchetype = {
       wrap(4, 6),
     ],
   },
-};
+}
 
 const pairNet: SessionArchetype = {
   id: 'pair_net',
@@ -151,19 +129,8 @@ const pairNet: SessionArchetype = {
     netAvailable: true,
   },
   layouts: {
-    15: [
-      warmup(2, 3),
-      technique(4, 5),
-      mainSkill(5, 6),
-      wrap(3, 4),
-    ],
-    25: [
-      warmup(3, 4),
-      technique(5, 6),
-      movementProxy(4, 5),
-      mainSkill(6, 8),
-      wrap(4, 5),
-    ],
+    15: [warmup(2, 3), technique(4, 5), mainSkill(5, 6), wrap(3, 4)],
+    25: [warmup(3, 4), technique(5, 6), movementProxy(4, 5), mainSkill(6, 8), wrap(4, 5)],
     40: [
       warmup(4, 6),
       technique(5, 7),
@@ -173,7 +140,7 @@ const pairNet: SessionArchetype = {
       wrap(4, 6),
     ],
   },
-};
+}
 
 const pairOpen: SessionArchetype = {
   id: 'pair_open',
@@ -185,19 +152,8 @@ const pairOpen: SessionArchetype = {
     netAvailable: false,
   },
   layouts: {
-    15: [
-      warmup(2, 3),
-      technique(4, 5),
-      mainSkill(5, 6),
-      wrap(3, 4),
-    ],
-    25: [
-      warmup(3, 4),
-      technique(5, 7),
-      movementProxy(4, 5),
-      mainSkill(6, 7),
-      wrap(4, 5),
-    ],
+    15: [warmup(2, 3), technique(4, 5), mainSkill(5, 6), wrap(3, 4)],
+    25: [warmup(3, 4), technique(5, 7), movementProxy(4, 5), mainSkill(6, 7), wrap(4, 5)],
     40: [
       warmup(4, 6),
       technique(6, 8),
@@ -207,24 +163,26 @@ const pairOpen: SessionArchetype = {
       wrap(4, 6),
     ],
   },
-};
+}
 
 export const SESSION_ARCHETYPES: readonly SessionArchetype[] = [
   soloWall,
   soloOpen,
   pairNet,
   pairOpen,
-] as const;
+] as const
 
 /**
  * Select the best archetype for a given context.
  * Returns the first match where all requiredContext fields agree.
  */
-export function selectArchetype(
-  context: { playerMode: string; netAvailable: boolean; wallAvailable: boolean },
-): SessionArchetype | undefined {
+export function selectArchetype(context: {
+  playerMode: string
+  netAvailable: boolean
+  wallAvailable: boolean
+}): SessionArchetype | undefined {
   if (context.playerMode === 'pair') {
-    return context.netAvailable ? pairNet : pairOpen;
+    return context.netAvailable ? pairNet : pairOpen
   }
-  return context.wallAvailable ? soloWall : soloOpen;
+  return context.wallAvailable ? soloWall : soloOpen
 }
