@@ -230,9 +230,8 @@ export function RunScreen() {
     const newRemaining = Math.max(10, remainingRef.current / 2)
     const newDuration = activeDuration - remainingRef.current + newRemaining
     setActiveDuration(newDuration)
-    timer.start(newRemaining)
-    resumeBlock()
-  }, [timer, resumeBlock, activeDuration])
+    timer.reset(newRemaining)
+  }, [timer, activeDuration])
 
   const [wasRunning, setWasRunning] = useState(false)
 
@@ -349,11 +348,11 @@ export function RunScreen() {
           </p>
         </div>
       ) : (
-        <BlockTimer
-          remainingSeconds={timer.remainingSeconds}
-          totalSeconds={activeDuration}
-          isPaused={isPaused}
-        />
+      <BlockTimer
+        remainingSeconds={timer.remainingSeconds}
+        totalSeconds={activeDuration}
+        isPaused={isPaused}
+      />
       )}
 
       {runError && <StatusMessage variant="error" message={runError} />}
