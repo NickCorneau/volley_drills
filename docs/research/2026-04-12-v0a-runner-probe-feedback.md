@@ -102,6 +102,7 @@ These items were the original backlog before the first fix pass. See the latest 
 - **Session History:** The `CompleteScreen` says "Done", but returning to the Start screen shows no record of the completed session. v0b will need the `Home/LastComplete` state to prove the data was actually saved and utilized.
 - **Audio/Haptic Cues:** End users noted that a silent timer ending is easy to miss on the beach. Audio or haptic feedback at block transitions should be evaluated in v0b.
 - **Pass Metric Scaling:** If users are logging 50+ attempts, tapping a `+` button 50 times is excessive friction. v0b should consider a `+5` or `+10` stepper option, or a swipe-to-increment gesture.
+- **Binary-score progression gate (2026-04-16):** v0b ships the first user-facing surfaces that could claim or imply progression (`Session summary`, `review`, future `weekly receipt`). `D104` now requires a 50-scored-contact minimum combined with a Bayesian posterior rule (`P(p_corrected ≥ 0.70) ≥ 0.80` → `38/50` corrected, `41/50` raw pre-calibration proxy, `42/50` for injury-sensitive) and hysteresis on the downside, on top of `D80`'s 70% latent target. v0b backlog items V0B-11..V0B-15 scope the session-summary no-signal floor (cap at `hold` below N=50), drill-variant review grain, N-alongside-% UI rule, set-window marker setup step, and raw review-records JSON export. None of them add a progression engine (that is M001-build scope), but together they keep v0b honest about the data and give `O12` field testing something to resolve against. See `docs/plans/2026-04-12-v0a-to-v0b-transition.md` ("D104 scoping notes") and `docs/research/binary-scoring-progression.md`.
 
 ---
 
@@ -251,6 +252,11 @@ Merging the earlier review's P1/P2 items with this session's findings. Items fro
 - **V0B-07**: Session history on Start screen (`Home/LastComplete` state)
 - **V0B-08**: Audio/haptic cues at block endings
 - **V0B-09**: `+5` / `+10` stepper or swipe-to-increment for pass metric
+- **V0B-11**: Session summary caps outcome at `hold` whenever aggregated drill-variant `attemptCount < 50` — `D104` no-signal floor. Prevents v0b from shipping "progress" moments that canon now says are luck at low N. See `docs/plans/2026-04-12-v0a-to-v0b-transition.md` and `docs/research/binary-scoring-progression.md`.
+- **V0B-12**: Persist `goodPasses` + `attemptCount` at drill-variant grain inside each `SessionReview` (verify current shape; tighten if session-level only). Enables `D104` window aggregation across sessions and post-hoc `O12` analysis at rolling N = 20/50/80/100.
+- **V0B-13**: Always show `N` alongside any `%` on review, summary, and future weekly-receipt surfaces (e.g., `72% (18 passes)`). Low-N honesty rule; consistent with `D89`.
+- **V0B-14**: Set-window marker becomes a visible one-tap setup step in v0b Today's Setup / Session Prep with "placed" / "skipped on purpose" acknowledgments persisted into the review record. Highest-leverage v0b change for `D104` because the `+5` pp generic / `+8` pp injury-sensitive bias priors presume the marker is placed and the forced-criterion success rule has something physical to anchor on.
+- **V0B-15**: Raw review-records JSON export (Dexie -> JSON blob -> download). Scopes `D28` into v0b so the researcher can replay tester data at rolling N per drill-variant to resolve `O12`.
 
 ### D94 Visual Compliance Matrix
 
@@ -475,7 +481,7 @@ After implementing all P1 and P2 fixes from Rounds 1-2, four parallel code revie
 | HARD-02   | D41 safe-boundary tension with `autoUpdate` + `immediate` SW registration | P2       | **Accepted for v0a**: no data-in-flight during SW swap; revisit in v0b |
 | HARD-03   | `vite-plugin-pwa@1.2.0` vs Vite 8 peer mismatch                           | P2       | Known limitation — `npm install` succeeds with warnings; document      |
 | DOC-01–05 | Documentation drift items                                                 | P0       | **Addressed 2026-04-12**: app/README.md, AGENTS.md, agent-manifest.json, llms.txt, docs/README.md, phase-0-readiness-assessment.md, local-first-pwa-constraints.md all updated |
-| V0B-01–09 | All v0b deferred items                                                    | P3       | Deferred                                                               |
+| V0B-01–15 | All v0b deferred items (V0B-11..V0B-15 added 2026-04-16 from `D104`)      | P3       | Deferred                                                               |
 
 
 ### Build verification
@@ -778,7 +784,7 @@ All remaining open P1 and P2 items from Rounds 4 and the final retest were fixed
 | UX-16 | No session-level progress indicator | P3 | Deferred |
 | UX-17 | Review "Back to start" link touch target | P3 | Deferred |
 | FB-11 | Review submit | P1 | Hardened — needs manual device verification to fully close |
-| V0B-01–09 | All v0b deferred items | P3 | Deferred |
+| V0B-01–15 | All v0b deferred items (V0B-11..V0B-15 = `D104` scoping: no-signal floor, drill-variant grain, N-alongside-%, set-window marker step, raw review export) | P3 | Deferred |
 
 ### Assessment
 

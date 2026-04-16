@@ -59,7 +59,7 @@ export function phaseLabel(type: BlockSlotType): string {
     case 'warmup':
       return 'WARM UP'
     case 'wrap':
-      return 'COOL DOWN'
+      return 'DOWNSHIFT'
     case 'technique':
     case 'movement_proxy':
     case 'main_skill':

@@ -2,19 +2,24 @@ import { renderHook, act, waitFor } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import type { ExecutionLog, SessionPlan, SessionPlanBlock } from '../db'
 
-vi.mock('../services/session', () => ({
-  loadSession: vi.fn(),
-  buildStartedBlock: vi.fn(),
-  buildPausedExecution: vi.fn(),
-  buildResumedExecution: vi.fn(),
-  buildAdvancedBlock: vi.fn(),
-  buildEndedSession: vi.fn(),
-  saveExecution: vi.fn(),
-}))
+vi.mock('../services/session', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../services/session')>()
+  return {
+    loadSession: vi.fn(),
+    buildStartedBlock: vi.fn(),
+    buildPausedExecution: vi.fn(),
+    buildResumedExecution: vi.fn(),
+    buildAdvancedBlock: vi.fn(),
+    buildEndedSession: vi.fn(),
+    saveExecution: vi.fn(),
+    computeActualDurationMinutes: actual.computeActualDurationMinutes,
+  }
+})
 
 vi.mock('../services/timer', () => ({
   clearTimerState: vi.fn(),
   flushTimerForBlock: vi.fn(),
+  readTimerState: vi.fn(),
   recoverTimer: vi.fn(),
 }))
 
@@ -84,6 +89,7 @@ beforeEach(() => {
   vi.mocked(sessionService.saveExecution).mockResolvedValue(undefined)
   vi.mocked(timerService.clearTimerState).mockResolvedValue(undefined)
   vi.mocked(timerService.flushTimerForBlock).mockResolvedValue(undefined)
+  vi.mocked(timerService.readTimerState).mockResolvedValue(undefined)
   vi.mocked(timerService.recoverTimer).mockResolvedValue(null)
 })
 
@@ -292,5 +298,180 @@ describe('useSessionRunner', () => {
 
     expect(recovered?.remaining).toBe(55)
     expect(timerService.recoverTimer).toHaveBeenCalledWith('exec-1', 0, 180)
+  })
+
+  it('sets actualDurationMinutes when completing the last block', async () => {
+    const completed = makeExec({
+      status: 'completed',
+      activeBlockIndex: 2,
+      blockStatuses: [
+        { blockId: 'block-1', status: 'completed', completedAt: Date.now() },
+        { blockId: 'block-2', status: 'completed', completedAt: Date.now() },
+      ],
+      completedAt: Date.now(),
+    })
+    vi.mocked(sessionService.buildAdvancedBlock).mockReturnValue({
+      execution: completed,
+      isLast: true,
+    })
+
+    const { result } = renderHook(() => useSessionRunner('exec-1'))
+    await waitFor(() => expect(result.current.loaded).toBe(true))
+
+    await act(async () => {
+      await result.current.completeBlock()
+    })
+
+    const saved = vi.mocked(sessionService.saveExecution).mock.calls[0][0]
+    expect(saved.actualDurationMinutes).toBe(11)
+  })
+
+  it('sets actualDurationMinutes when ending session early with partial timer', async () => {
+    const inProgressExec = makeExec({
+      status: 'in_progress',
+      activeBlockIndex: 1,
+      blockStatuses: [
+        { blockId: 'block-1', status: 'completed', completedAt: Date.now() },
+        { blockId: 'block-2', status: 'in_progress', startedAt: Date.now() },
+      ],
+    })
+    vi.mocked(sessionService.loadSession).mockResolvedValue({
+      execution: inProgressExec,
+      plan,
+    })
+
+    const ended = makeExec({
+      status: 'ended_early',
+      activeBlockIndex: 1,
+      blockStatuses: [
+        { blockId: 'block-1', status: 'completed', completedAt: Date.now() },
+        { blockId: 'block-2', status: 'skipped', completedAt: Date.now() },
+      ],
+      completedAt: Date.now(),
+      endedEarlyReason: 'user_quit',
+    })
+    vi.mocked(sessionService.buildEndedSession).mockReturnValue(ended)
+    vi.mocked(timerService.readTimerState).mockResolvedValue({
+      id: 'active',
+      executionLogId: 'exec-1',
+      blockIndex: 1,
+      startedAt: Date.now(),
+      accumulatedElapsed: 120,
+      status: 'running',
+      lastFlushedAt: Date.now(),
+    })
+
+    const { result } = renderHook(() => useSessionRunner('exec-1'))
+    await waitFor(() => expect(result.current.loaded).toBe(true))
+
+    await act(async () => {
+      await result.current.endSession('user_quit')
+    })
+
+    const saved = vi.mocked(sessionService.saveExecution).mock.calls[0][0]
+    expect(saved.actualDurationMinutes).toBe(5)
+  })
+
+  // Red-team RT-4: advanceBlock('skipped') on last block with a non-zero
+  // timer must include the partial time. Previous test mocked readTimerState
+  // to undefined so the branch was never exercised.
+  it('sets actualDurationMinutes when skipping the last block with a non-zero timer', async () => {
+    const inProgressExec = makeExec({
+      status: 'in_progress',
+      activeBlockIndex: 1,
+      blockStatuses: [
+        { blockId: 'block-1', status: 'completed', completedAt: Date.now() },
+        { blockId: 'block-2', status: 'in_progress', startedAt: Date.now() },
+      ],
+    })
+    vi.mocked(sessionService.loadSession).mockResolvedValue({
+      execution: inProgressExec,
+      plan,
+    })
+
+    const skipped = makeExec({
+      status: 'completed',
+      activeBlockIndex: 2,
+      blockStatuses: [
+        { blockId: 'block-1', status: 'completed', completedAt: Date.now() },
+        { blockId: 'block-2', status: 'skipped', completedAt: Date.now() },
+      ],
+      completedAt: Date.now(),
+    })
+    vi.mocked(sessionService.buildAdvancedBlock).mockReturnValue({
+      execution: skipped,
+      isLast: true,
+    })
+    vi.mocked(timerService.readTimerState).mockResolvedValue({
+      id: 'active',
+      executionLogId: 'exec-1',
+      blockIndex: 1,
+      startedAt: Date.now(),
+      accumulatedElapsed: 120,
+      status: 'running',
+      lastFlushedAt: Date.now(),
+    })
+
+    const { result } = renderHook(() => useSessionRunner('exec-1'))
+    await waitFor(() => expect(result.current.loaded).toBe(true))
+
+    await act(async () => {
+      await result.current.skipBlock()
+    })
+
+    const saved = vi.mocked(sessionService.saveExecution).mock.calls[0][0]
+    // block-1 completed (3 min) + 120s partial = 5 min
+    expect(saved.actualDurationMinutes).toBe(5)
+  })
+
+  // Red-team RT-4 corollary: a stale timer from a different execution must
+  // NOT contribute partial seconds to the current session's duration.
+  it('skipping the last block ignores a timer owned by a different execution', async () => {
+    const inProgressExec = makeExec({
+      status: 'in_progress',
+      activeBlockIndex: 1,
+      blockStatuses: [
+        { blockId: 'block-1', status: 'completed', completedAt: Date.now() },
+        { blockId: 'block-2', status: 'in_progress', startedAt: Date.now() },
+      ],
+    })
+    vi.mocked(sessionService.loadSession).mockResolvedValue({
+      execution: inProgressExec,
+      plan,
+    })
+
+    const skipped = makeExec({
+      status: 'completed',
+      activeBlockIndex: 2,
+      blockStatuses: [
+        { blockId: 'block-1', status: 'completed', completedAt: Date.now() },
+        { blockId: 'block-2', status: 'skipped', completedAt: Date.now() },
+      ],
+      completedAt: Date.now(),
+    })
+    vi.mocked(sessionService.buildAdvancedBlock).mockReturnValue({
+      execution: skipped,
+      isLast: true,
+    })
+    vi.mocked(timerService.readTimerState).mockResolvedValue({
+      id: 'active',
+      executionLogId: 'different-exec-id',
+      blockIndex: 1,
+      startedAt: Date.now(),
+      accumulatedElapsed: 120,
+      status: 'running',
+      lastFlushedAt: Date.now(),
+    })
+
+    const { result } = renderHook(() => useSessionRunner('exec-1'))
+    await waitFor(() => expect(result.current.loaded).toBe(true))
+
+    await act(async () => {
+      await result.current.skipBlock()
+    })
+
+    const saved = vi.mocked(sessionService.saveExecution).mock.calls[0][0]
+    // Stale timer's 120s must NOT be added; only block-1's 3 min counts.
+    expect(saved.actualDurationMinutes).toBe(3)
   })
 })

@@ -1,6 +1,7 @@
 export { db } from './schema'
 export type {
   DraftBlock,
+  DrillVariantScore,
   ExecutionBlockStatus,
   ExecutionLog,
   ExecutionLogBlockStatus,

@@ -6,7 +6,7 @@ stage: validation
 type: spec
 authority: deterministic session-assembly model, slot system, template structure
 summary: "Deterministic session assembly model with archetypes, slot system, and ranked fill."
-last_updated: 2026-04-12
+last_updated: 2026-04-16-b
 depends_on:
   - docs/milestones/m001-solo-session-loop.md
   - docs/prd-foundation.md
@@ -22,6 +22,10 @@ decision_refs:
   - D67
   - D68
   - D93
+  - D102
+  - D103
+  - D85
+  - D105
 ---
 
 # M001 Session Assembly
@@ -80,16 +84,42 @@ These fields are hard filters because they change feasibility, safety, or realis
 
 M001 should start with a small, explicit set:
 
-- `solo_wall`
-  - Best for platform reps, angle control, and touch volume.
-- `solo_open`
+- `solo_open` (**default solo archetype**)
   - Best for self-toss, movement, and no-infrastructure proxies.
+  - Used whenever the pre-session context does not explicitly indicate wall or net availability.
+- `solo_net`
+  - Best for solo work that benefits from the net (self-toss across the net, solo serving to zones).
+- `solo_wall`
+  - Best for platform reps, angle control, and touch volume when the user explicitly has a wall (home/garage/school wall/racquetball court).
+  - Treated as **conditional inventory**: wall-gated drills are filtered out unless the context explicitly sets `wallAvailable = true`.
 - `pair_net`
   - Best for live serve-receive transfer and pressure work.
 - `pair_open`
   - Best for toss-based pair work when a net is unavailable.
 
 Use `deload` as an overlay on top of any archetype rather than as a fully separate planner.
+
+### Environment defaults and selection priority
+
+Per `D102` and `D103`:
+
+- **Default solo archetype is `solo_open`.** When environment context is unknown, first-run, or ambiguous, assemble for open sand with ball only. This matches the federation facility picture and the beach-first product stance; wall access is a minority convenience, not a baseline assumption.
+- **Solo archetype selection priority:** `solo_net` > `solo_wall` > `solo_open`.
+  - Net toggled (with or without wall) → `solo_net`. A wall at a net-equipped facility is almost always incidental.
+  - Wall toggled without net → `solo_wall`. The classic home/garage/school-wall case.
+  - Neither toggled → `solo_open`. The default per `D102`.
+- **Pair priority is unchanged:** `pair_net` when a net is available, else `pair_open`.
+- **Wall-gated drills (any drill with `needsWall: true`) are conditional inventory.** They must not appear in a ranked candidate pool unless the session's hard-filter context includes `wall or fence available = yes`. As of 2026-04-16 only one drill (`d24 Pass into a Corner`) is wall-gated, and it is not an `m001Candidate`, so the default M001 rotation is already wall-free.
+- **Pre-session context (`D92`):** the wall toggle defaults to off on first run. Defaults for returning users reflect their last session's choice, matching the general context-capture persistence rule.
+
+Rationale and evidence: see `docs/research/solo-training-environments.md`. Expanded regional evidence (U.S., Northern Europe, Southern Europe, Brazil, Australia) and the content-budget parity rule for wall-only drill inventory are summarized in the same note; raw provenance in `research-output/training-environment-distribution.md`.
+
+Code alignment note (aligned 2026-04-16):
+
+- `selectArchetype()` in `app/src/data/archetypes.ts` now evaluates `netAvailable` before `wallAvailable` for solo contexts, matching `D103`. Wall is reached only when `wallAvailable && !netAvailable`. Direct unit tests for the four solo truth-table cells and the three pair cases live in `app/src/data/archetypes.test.ts`.
+- `PRESETS` in `app/src/domain/presets.ts` now orders solo presets Open Sand → Solo Serving → Wall Pass, so the first preset a solo tester sees matches the majority default environment (per the regional-mix evidence).
+- `solo-serving` preset is retagged from `archetypeId: 'solo_open'` to `solo_net` to match its "Net + balls" description and the serving-to-zones behavior it drills.
+- `sessionBuilder.test.ts` covers the `D103` tie-break case (solo with both net and wall toggled resolves to `solo_net`).
 
 ## Block layouts by time profile
 
@@ -105,7 +135,7 @@ Starter sessions can stay shorter and simpler, but trusted repeat-use sessions s
 Block intent:
 
 - `warmup`
-  - Raise temperature, establish easy success, and screen for obvious pain.
+  - Raise temperature, prime ankles (single-leg balance), activate shoulder and trunk, rehearse movement on sand. Screen for obvious pain. Default dose is `Beach Prep Three` (~3 min); `Beach Prep Five` (~5 min) is the opt-in longer version; `Beach Prep Two` (~2 min) is a compliance fallback only. See `D85`, `D105`, and `docs/research/warmup-cooldown-minimum-protocols.md`.
 - `technique`
   - Emphasize platform shape, angle control, and repeatable quality.
 - `movement_proxy`
@@ -115,7 +145,7 @@ Block intent:
 - `pressure`
   - Add scoring, variability, or simple constraints without turning the session random.
 - `wrap`
-  - End cleanly, prep review, and avoid dashboard sprawl.
+  - `Downshift` block (~2–3 min): easy walk, gentle calf/foot unload, hip flexor + trunk reach, optional shoulder reset, hydration and symptom check. Framed as transition and comfort, not as recovery or injury prevention. Stop/seek-help triggers (`D88`) stay reachable. End cleanly and prep review. See `D105` and `docs/research/warmup-cooldown-minimum-protocols.md`.
 
 ## Candidate ranking rules
 
@@ -222,8 +252,10 @@ Key decisions that constrain this spec (grep `docs/decisions.md` for full ration
 - D63 -- one-dimension-at-a-time adaptation
 - D65 -- default spacing rule (no same-slot repeat within 2 sessions unless Hold)
 - D66 -- fallback policy: downgrade realism before breaking feasibility
-- D67 -- session archetypes (solo_wall, solo_open, pair_net, pair_open)
+- D67 -- session archetypes (solo_wall, solo_net, solo_open, pair_net, pair_open)
 - D68 -- blended practice order (blocked early, variable later)
+- D102 -- solo default archetype is solo_open; wall-gated drills are conditional inventory
+- D103 -- solo archetype selection priority is solo_net > solo_wall > solo_open (net wins when toggled; wall only when explicitly toggled without net; open is the default)
 
 ## Related docs
 
@@ -232,6 +264,7 @@ Key decisions that constrain this spec (grep `docs/decisions.md` for full ration
 - `docs/specs/m001-adaptation-rules.md`
 - `docs/specs/m001-courtside-run-flow.md`
 - `docs/research/beach-training-resources.md` (session assembly model synthesis)
+- `docs/research/solo-training-environments.md` (operational definition of "solo" environment and wall-access posture)
 - `research-output/deterministic-session-assembly.md` (raw research)
 
 ## Machine-readable data

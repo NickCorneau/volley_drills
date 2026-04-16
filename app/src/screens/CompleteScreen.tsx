@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { SafetyIcon } from '../components/SafetyIcon'
+import { UpdatePrompt } from '../components/UpdatePrompt'
 import { Button, Card, StatusMessage } from '../components/ui'
+import { useInstallPosture } from '../hooks/useInstallPosture'
 import { effortLabel } from '../lib/format'
+import { getStorageCopy } from '../lib/storageCopy'
+import { useAppRegisterSW } from '../lib/pwa-register'
 import { routes } from '../routes'
 import { loadSessionBundle, type SessionBundle } from '../services/review'
 import { clearTimerState } from '../services/timer'
@@ -54,6 +58,9 @@ export function CompleteScreen() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const executionLogId = searchParams.get('id')
+  const { posture } = useInstallPosture()
+  const storageCopy = getStorageCopy(posture)
+  const { needRefresh, updateApp } = useAppRegisterSW()
 
   const [bundleState, setBundleState] = useState<BundleState>({
     status: 'loading',
@@ -175,15 +182,26 @@ export function CompleteScreen() {
         >
           Done
         </Button>
-        <p className="flex items-center justify-center gap-2 text-sm font-medium text-success">
-          <SavedCheckIcon />
-          Saved on device
-        </p>
+        <div
+          className="flex flex-col items-center gap-1"
+          data-testid="save-status"
+          data-posture={posture}
+        >
+          <p className="flex items-center justify-center gap-2 text-sm font-medium text-success">
+            <SavedCheckIcon />
+            {storageCopy.primary}
+          </p>
+          <p className="max-w-[320px] text-center text-xs text-text-secondary">
+            {storageCopy.secondary}
+          </p>
+        </div>
       </div>
 
       <p className="max-w-[320px] text-center text-sm text-text-secondary">
         Thanks for testing! Your feedback helps us improve.
       </p>
+
+      <UpdatePrompt needRefresh={needRefresh} onUpdate={updateApp} />
     </div>
   )
 }

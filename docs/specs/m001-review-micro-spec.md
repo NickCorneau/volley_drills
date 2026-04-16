@@ -7,7 +7,7 @@ type: spec
 date: 2026-04-11
 authority: post-session review payload, UX rules, completion definition, deferred/skipped behavior
 summary: "Post-session review payload, completion rules, and starter-metric defaults."
-last_updated: 2026-04-12
+last_updated: 2026-04-16
 depends_on:
   - docs/milestones/m001-solo-session-loop.md
   - docs/specs/m001-adaptation-rules.md
@@ -16,6 +16,8 @@ decision_refs:
   - D23
   - D47
   - D70
+  - D80
+  - D104
 ---
 
 # M001 Review Micro-Spec
@@ -61,10 +63,21 @@ Optional:
     - `goodPassRate`, derived from `goodPasses / attemptCount`, for scored pass drills
   - the session template should define which one metric is shown for that session; the user should not choose from multiple metric systems in M001
   - when pass quality is scored, define `Good` as `ball reached the target zone or left the intended next contact playable`
+  - the review surface must present this as a **forced-criterion prompt** with an explicit anti-generosity nudge: show the one-sentence success rule for that drill, and immediately follow with `If unsure, count it as Not Good.` Implements the first layer of the D104 three-layer self-scoring bias correction. Tracked as `V0B-20` in `docs/plans/2026-04-12-v0a-to-v0b-transition.md`.
   - avoid `setter options` wording in the first pass metric
   - do not use a full `0-3` pass-quality rubric as the default M001 metric
   - store `attemptCount` alongside the rate so adaptation can reject low-signal sessions
+  - **persist `goodPasses` and `attemptCount` at drill-variant grain inside the review payload**, not only as a session-level aggregate. Required so `D104` can aggregate a progression window across sessions per drill-variant, and so post-hoc `O12` analysis can replay rolling `N = 20/50/80/100`. Tracked as `V0B-12` in `docs/plans/2026-04-12-v0a-to-v0b-transition.md`.
+  - any UI that displays a percentage (review, session summary, future weekly receipt) must show `N` alongside it, e.g., `72% (18 passes)`. Low-N honesty rule per `D104` and `D89`; tracked as `V0B-13`.
   - if the user cannot reasonably capture it, they may choose `notCaptured` and still complete the review
+
+### Optional (schema-reserved; UI wired in M001)
+
+- `borderlineCount?: number`
+  - count of `goodPasses` the athlete considers borderline. Implements the third layer of the D104 three-layer self-scoring bias correction (10-second borderline review, triggered only when a drill-variant window lands in the raw `36`–`42 / 50` boundary zone).
+  - v0b reserves the field on the `SessionReview` Dexie record but **does not compute the near-boundary zone and does not prompt for this value**. v0b reviews leave it `undefined`. v0b JSON export (`V0B-15`) picks it up automatically once written.
+  - M001-build adds the boundary-trigger logic and the one-tap `0 / 1 / 2 / 3+` review step on top of the reserved field without a Dexie migration. Tracked as `V0B-21` in `docs/plans/2026-04-12-v0a-to-v0b-transition.md`.
+  - full three-layer correction rationale and the posterior rule that consumes this field live in `docs/research/binary-scoring-progression.md`.
 
 - `incompleteReason`
   - required when the session ended early

@@ -6,10 +6,11 @@ stage: validation
 type: spec
 authority: trust invariants, test layers, minimum verification bar for M001
 summary: "Trust invariants, test layers, and minimum verification bar for M001."
-last_updated: 2026-04-12
+last_updated: 2026-04-16
 depends_on:
   - docs/milestones/m001-solo-session-loop.md
   - docs/research/m001-testing-quality-strategy.md
+  - docs/research/minimum-viable-test-stack.md
 decision_refs:
   - D38
   - D39
@@ -17,6 +18,7 @@ decision_refs:
   - D69
   - D70
   - D71
+  - D94
 ---
 
 # M001 Quality And Testing
@@ -90,6 +92,48 @@ M001 should treat these as write points for local durability:
 
 The exact storage shape can wait for implementation planning, but the durability contract should not.
 
+## Depth of investment
+
+The stack is intentionally lopsided, not balanced. The trust claims are not evenly distributed across layers, and the tests should not be either. Source guidance: `docs/research/minimum-viable-test-stack.md`.
+
+| Layer | Investment | Owns | Does not own |
+|---|---|---|---|
+| Vitest domain | Heavy | verdict logic, edge cases, invariants, serialization, explanation-string selection | browser behavior, Dexie wiring, React rendering |
+| Vitest + `fake-indexeddb` | Focused | schema, indexes, transaction rollback, saved records, in-process migrations | quota, eviction, multi-tab blocking, install/update lifecycle |
+| React Testing Library + `user-event` | Thin | task-critical UI wiring, visible error states, form-to-domain mapping | component variations, snapshot churn, CSS fidelity |
+| Playwright Chromium (built app) | Thin but real | warm-offline + retained local state, service-worker control, update-flow smoke, multi-page upgrade smoke | full browser matrix, visual regression, device-cloud coverage |
+| `@axe-core/playwright` | Thin and strict | obvious WCAG 2.1 A/AA violations on visible routes and opened modals | meaning, task clarity, full keyboard / screen-reader UX |
+
+## Trust invariants -> owning layer
+
+| Trust claim | Owning layer |
+|---|---|
+| Session progress is durable before the session ends (invariant 1; D38, D70) | Vitest domain + Vitest + `fake-indexeddb`; real-browser confirmation via Playwright warm-reload smoke |
+| Review data is stored on device before any later sync (invariant 2; D39, D70) | Vitest + `fake-indexeddb`; real-browser confirmation via Playwright smoke |
+| Adaptation is deterministic and explainable (invariant 3) | Vitest domain, table-driven across the full decision table |
+| Offline use works after the first successful load (invariant 4) | Playwright Chromium smoke against a built app |
+| Updates activate only at safe boundaries (invariant 5; D41) | Playwright Chromium update-flow smoke (waiting / `skipWaiting` / `controllerchange`) |
+| Schema changes preserve prior data (invariant 6; D71) | Vitest + `fake-indexeddb` for the upgrade function; Playwright multi-page test for the `blocked` / `versionchange` path |
+| Visible critical screens have no obvious WCAG 2.1 A/AA defects (D94) | Playwright + Axe on visible routes and opened modals |
+| Safari/iOS quota, eviction, installability, and embedded-WebKit weirdness | Not CI. Short manual device pass before the cohort. |
+
+## The `fake-indexeddb` trust boundary
+
+`fake-indexeddb` is an in-memory Node implementation; its Web Platform Test pass rate trails real browsers. Use it for deterministic storage semantics; escalate to Playwright for anything else. See `docs/research/minimum-viable-test-stack.md` for the full boundary.
+
+- In scope: schema declarations, indexes, uniqueness constraints, query behavior, Dexie transaction rollback, idempotent writes, in-process version upgrades.
+- Out of scope: `QuotaExceededError`, eviction, browser shutdown aborting transactions, multi-tab `blocked` / `versionchange`, SW lifecycle, Safari private-browsing quotas, install prompt, iOS resume.
+
+## Test harness conventions
+
+These are the minimum conventions the M001 test harness must honor.
+
+1. **Per-test `IDBFactory` isolation.** The Vitest setup file installs a fresh `IDBFactory` on `globalThis.indexedDB` in `beforeEach` so Dexie state cannot leak across tests, then runs `@testing-library/react` `cleanup()` in `afterEach`. `fake-indexeddb/auto` alone is not sufficient.
+2. **Playwright runs against the built app.** `webServer.command` invokes `npm run build && npm run preview`, binds to `127.0.0.1:4173`, and `use.serviceWorkers: 'allow'` is set. Running e2e against `npm run dev` silently disables the service worker (vite-plugin-pwa `devOptions.enabled: false`) and invalidates the most important real-browser claims.
+3. **Chromium only in CI.** Playwright service-worker support is Chromium-based; `fullyParallel: false` and `workers: 1` under `CI`.
+4. **WCAG 2.1 A/AA tags only.** Axe runs with `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`. `best-practice` is advisory. Open dialogs, drawers, and menus before scanning; Axe skips hidden regions.
+5. **No coverage gate.** Collect coverage on `src/domain/**` and the persistence layer as a diagnostic; do not enforce a global threshold.
+
 ## Recommended test layers
 
 ### Domain tests
@@ -119,6 +163,16 @@ Use `React Testing Library` plus `user-event` for a small number of screen-level
 - interruption or pending-review states surface the correct next action
 
 These tests should stay flow-focused, not component-exhaustive.
+
+### Accessibility checks
+
+Use `Playwright` plus `@axe-core/playwright` to verify WCAG 2.1 AA compliance on each key screen state:
+
+- home, setup, safety check, run (active and paused), error states
+- checks run against `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` rule tags
+- tests live in `app/e2e/accessibility.spec.ts`
+
+This catches color-contrast failures, missing labels, and other machine-detectable violations. It does not replace manual outdoor testing for readability in direct sun.
 
 ### Real-browser smoke tests
 
@@ -166,6 +220,7 @@ This can be a persistence integration test instead of a Playwright test unless b
 - lint passes
 - domain and persistence integration tests pass
 - Playwright smoke tests pass
+- Playwright accessibility checks pass (WCAG 2.1 AA via axe-core)
 - production build succeeds with the chosen PWA configuration
 - one manual pass happens on at least one iPhone and one Android device, including an offline sanity check
 
@@ -175,7 +230,12 @@ This can be a persistence integration test instead of a Playwright test unless b
 - snapshot-heavy UI testing
 - a large component-test suite
 - full browser-matrix CI
+- visual regression (screenshot baselines)
+- unit tests against Workbox or vite-plugin-pwa internals
+- property-based testing beyond one or two crisp invariants on the verdict engine
 - network-mocking infrastructure before real network features exist
+- automated install-prompt gating (`beforeinstallprompt` availability varies)
+- simulated quota / eviction / OS-backgrounding scenarios inside the normal suite
 
 ## Decision links
 
@@ -185,6 +245,7 @@ This can be a persistence integration test instead of a Playwright test unless b
 - D69 -- Vitest + RTL + fake-indexeddb + Playwright smoke suite
 - D70 -- write-as-you-go persistence at meaningful boundaries
 - D71 -- Dexie schema changes require explicit versioned migrations
+- D94 -- accent color meets WCAG AA contrast; verified by axe-core in Playwright
 
 ## Related docs
 
@@ -194,4 +255,5 @@ This can be a persistence integration test instead of a Playwright test unless b
 - `docs/specs/m001-adaptation-rules.md`
 - `docs/decisions.md`
 - `docs/research/m001-testing-quality-strategy.md`
+- `docs/research/minimum-viable-test-stack.md`
 

@@ -40,6 +40,18 @@ describe('sessionBuilder', () => {
       'solo_open',
     ],
     [
+      // D103 tie-break: when solo has both net and wall toggled, net wins.
+      // A wall at a net-equipped facility is almost always incidental.
+      'solo net+wall (net wins per D103)',
+      {
+        playerMode: 'solo',
+        timeProfile: 15,
+        netAvailable: true,
+        wallAvailable: true,
+      } satisfies SetupContext,
+      'solo_net',
+    ],
+    [
       'pair net',
       {
         playerMode: 'pair',

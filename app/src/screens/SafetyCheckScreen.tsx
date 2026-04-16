@@ -112,7 +112,7 @@ export function SafetyCheckScreen() {
         if (useRecovery) {
           const recovery = buildRecoveryDraft(draft.context)
           if (!recovery) {
-            setCreateError('Could not build a recovery session. Try changing your setup.')
+            setCreateError('Could not build a lighter session. Try changing your setup.')
             return
           }
           sessionDraft = recovery

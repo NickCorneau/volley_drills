@@ -7,13 +7,14 @@ status: active
 stage: validation
 type: spec
 authority: home screen states, weak-connectivity behavior, sync copy principles
-summary: "Home screen states, first-run activation path, and weak-connectivity behavior."
-last_updated: 2026-04-12
+summary: "Home screen states, first-run activation path, weak-connectivity behavior, and the three-state save copy that matches the iPhone durability model."
+last_updated: 2026-04-16
 depends_on:
 
 - docs/milestones/m001-solo-session-loop.md
 - docs/prd-foundation.md
 - docs/vision.md
+- docs/research/local-first-pwa-constraints.md
 decision_refs:
 - D27
 - D28
@@ -22,6 +23,7 @@ decision_refs:
 - D57
 - D58
 - D70
+- D118
 
 # M001 Home And Connectivity Notes
 
@@ -197,12 +199,34 @@ Planning assumption:
 - If persistent storage is unavailable, do not block usage. Keep local-save copy honest and treat export or backup as a follow-on safeguard.
 - Local save success and any future backup or sync success are separate states.
 - Persist at meaningful boundaries such as session start, block transitions, pause/resume, early end, review draft change, and final review submit.
+- iPhone durability sits in a three-layer model (ITP 7-day timer, Home Screen carveout, quota-pressure eviction + heuristic persistent mode). Treat `persisted() === true` as the strongest observable state, not as a guarantee. See `D118` and `docs/research/local-first-pwa-constraints.md`.
 
 ### Local durability language
 
 - `Saved on device` means the session is stored locally on this device.
 - It does not mean the session is backed up remotely or available on another device.
 - Do not use `synced`, `backed up`, or equivalent copy unless that is actually true.
+- Save copy is **posture-sensitive**: the primary line and the secondary explanation both depend on install posture and `persisted()` result.
+
+#### Three-state save copy (per `D118`)
+
+The app detects three runtime states and picks a matching primary + secondary line. Until the detector ships, the safest default is State B language (installed, not persisted) rather than the unqualified `Saved on device` headline, which overpromises for Safari-tab users.
+
+- **State A — Browser tab, not installed** (`display-mode: browser` and `navigator.standalone !== true`)
+  - Primary: `Saved in this browser on this device`
+  - Secondary: *Available offline here, but iPhone Safari may remove browser data if the site is not used for a while or if browser data is cleared.*
+
+- **State B — Installed Home Screen web app, `persisted() === false`** (`display-mode: standalone` or `navigator.standalone === true`, with `persist()` not granted)
+  - Primary: `Saved on this device`
+  - Secondary: *Stored locally in the installed app. Not backed up unless you enable sync or export. iOS can still remove local data if site/app data is cleared, device storage is reclaimed, or a browser bug occurs.*
+
+- **State C — Installed Home Screen web app, `persisted() === true`**
+  - Primary: `Saved on this device`
+  - Secondary: *Stored locally with the strongest storage durability this browser currently exposes. Still not a backup. Use sync or export for recovery and moving to another device.*
+
+Detection precedence: if the app has not yet run `persist()` against a real user gesture, assume State B rather than State C for copy purposes. Re-evaluate on boot and after the first post-gesture `persist()`.
+
+Do not auto-escalate to `backed up` or `synced` language in any of the three states. Those are earned by a real cloud peer, not by persistent mode.
 
 ### Allowed actions under weak connectivity
 

@@ -19,7 +19,8 @@ const warmup = (min: number, max: number): BlockSlot => ({
   type: 'warmup',
   durationMinMinutes: min,
   durationMaxMinutes: max,
-  intent: 'Raise temperature, establish easy success, screen for obvious pain.',
+  intent:
+    'Build heat, prime ankles, activate shoulder and trunk, rehearse movement on sand. Screen for obvious pain.',
   required: true,
   skillTags: ['pass', 'movement'],
 })
@@ -64,7 +65,7 @@ const wrap = (min: number, max: number): BlockSlot => ({
   type: 'wrap',
   durationMinMinutes: min,
   durationMaxMinutes: max,
-  intent: 'End cleanly, cool-down, prep review.',
+  intent: 'Downshift: transition and comfort, prep review. Not an injury-prevention or recovery claim (D105).',
   required: true,
   skillTags: ['recovery'],
 })
@@ -83,7 +84,7 @@ const soloWall: SessionArchetype = {
     wallAvailable: true,
   },
   layouts: {
-    15: [warmup(2, 3), technique(4, 5), mainSkill(5, 6), wrap(3, 4)],
+    15: [warmup(3, 3), technique(4, 5), mainSkill(5, 6), wrap(3, 4)],
     25: [warmup(3, 4), technique(5, 6), movementProxy(4, 5), mainSkill(6, 8), wrap(4, 5)],
     40: [
       warmup(4, 6),
@@ -106,7 +107,7 @@ const soloNet: SessionArchetype = {
     netAvailable: true,
   },
   layouts: {
-    15: [warmup(2, 3), technique(4, 5), mainSkill(5, 6), wrap(3, 4)],
+    15: [warmup(3, 3), technique(4, 5), mainSkill(5, 6), wrap(3, 4)],
     25: [warmup(3, 4), technique(5, 6), movementProxy(4, 5), mainSkill(6, 8), wrap(4, 5)],
     40: [
       warmup(4, 6),
@@ -129,7 +130,7 @@ const soloOpen: SessionArchetype = {
     wallAvailable: false,
   },
   layouts: {
-    15: [warmup(2, 3), technique(4, 5), mainSkill(5, 6), wrap(3, 4)],
+    15: [warmup(3, 3), technique(4, 5), mainSkill(5, 6), wrap(3, 4)],
     25: [warmup(3, 4), technique(5, 7), movementProxy(4, 5), mainSkill(6, 7), wrap(4, 5)],
     40: [
       warmup(4, 6),
@@ -152,7 +153,7 @@ const pairNet: SessionArchetype = {
     netAvailable: true,
   },
   layouts: {
-    15: [warmup(2, 3), technique(4, 5), mainSkill(5, 6), wrap(3, 4)],
+    15: [warmup(3, 3), technique(4, 5), mainSkill(5, 6), wrap(3, 4)],
     25: [warmup(3, 4), technique(5, 6), movementProxy(4, 5), mainSkill(6, 8), wrap(4, 5)],
     40: [
       warmup(4, 6),
@@ -175,7 +176,7 @@ const pairOpen: SessionArchetype = {
     netAvailable: false,
   },
   layouts: {
-    15: [warmup(2, 3), technique(4, 5), mainSkill(5, 6), wrap(3, 4)],
+    15: [warmup(3, 3), technique(4, 5), mainSkill(5, 6), wrap(3, 4)],
     25: [warmup(3, 4), technique(5, 7), movementProxy(4, 5), mainSkill(6, 7), wrap(4, 5)],
     40: [
       warmup(4, 6),
@@ -198,7 +199,16 @@ export const SESSION_ARCHETYPES: readonly SessionArchetype[] = [
 
 /**
  * Select the best archetype for a given context.
- * Returns the first match where all requiredContext fields agree.
+ *
+ * Solo priority per D103: solo_net > solo_wall > solo_open.
+ * - net toggled (with or without wall)        -> solo_net (a wall at a
+ *   net-equipped facility is almost always incidental).
+ * - wall toggled without net                  -> solo_wall (the classic
+ *   home/garage/school-wall case; wall is conditional inventory per D102).
+ * - neither toggled                           -> solo_open (the default
+ *   per D102 for a beach-first product).
+ *
+ * Pair priority is net-first, then open.
  */
 export function selectArchetype(context: {
   playerMode: string
@@ -208,7 +218,7 @@ export function selectArchetype(context: {
   if (context.playerMode === 'pair') {
     return context.netAvailable ? pairNet : pairOpen
   }
-  if (context.wallAvailable) return soloWall
   if (context.netAvailable) return soloNet
+  if (context.wallAvailable) return soloWall
   return soloOpen
 }

@@ -1348,22 +1348,30 @@ const d24: Drill = {
 }
 
 // ---------------------------------------------------------------------------
-// Cool-down and recovery
+// Downshift (post-session transition; not a recovery or injury-prevention claim)
 // ---------------------------------------------------------------------------
 
+// d25 is the Downshift block (D105). Framed as transition and comfort, not recovery
+// or injury prevention — post-2015 active-cool-down literature does not support
+// those claims at this dose. See docs/research/warmup-cooldown-minimum-protocols.md.
 const d25: Drill = {
   id: 'd25',
-  name: 'Cool-down Walk + Breathing Reset',
-  shortName: 'Cool-down',
+  name: 'Downshift',
+  shortName: 'Downshift',
   skillFocus: ['recovery'],
-  objective: 'Downshift; reduce physiological load before leaving court.',
+  objective:
+    'Transition out of the session: slow the heart rate, unload the feet and hips, do a quick symptom/hydration check. Not an injury-prevention or recovery claim.',
   levelMin: 'beginner',
   levelMax: 'advanced',
   chainId: 'chain-cooldown',
   m001Candidate: true,
-  teachingPoints: ['Slow down gradually.', 'Do not stop abruptly.', 'Breathe steadily.'],
-  progressionDescription: 'Add a second 5-minute block on very hot days.',
-  regressionDescription: '2-minute walk only.',
+  teachingPoints: [
+    'Slow down gradually; long exhale.',
+    'Gentle tension only — do not crank any stretch.',
+    'Skip any movement that hurts today.',
+  ],
+  progressionDescription: 'Add an extra 30–60 seconds of easy walking on very hot days.',
+  regressionDescription: 'Easy walk only (60–90 seconds).',
   variants: [
     {
       id: 'd25-solo',
@@ -1374,8 +1382,8 @@ const d25: Drill = {
       environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 0 },
       workload: {
-        durationMinMinutes: 3,
-        durationMaxMinutes: 7,
+        durationMinMinutes: 2,
+        durationMaxMinutes: 5,
         rpeMin: 1,
         rpeMax: 2,
       },
@@ -1385,8 +1393,12 @@ const d25: Drill = {
         target: 'Completed',
       },
       courtsideInstructions:
-        'Slow walk 5 minutes (or easy shuffle if space limited). Then 6 slow breaths focusing on long exhale.',
-      coachingCues: ['Slow down gradually.', 'Do not stop abruptly.', 'Breathe steadily.'],
+        'Easy walk 60–90s (long exhale). Calf + foot unload 30s. Hip flexor + trunk reach 30s (split stance, overhead reach). Optional shoulder reset 30s (cross-body or lat reach, gentle tension only). Hydration and symptom check: if pain is rising, note it now.',
+      coachingCues: [
+        'Long exhale, let heart rate come down.',
+        'Gentle tension only.',
+        'Hot session? Rehydrate before you leave.',
+      ],
     },
   ],
 }

@@ -24,17 +24,17 @@ export function PainOverrideCard({
         </span>
         <div>
           <h3 className="font-semibold text-text-primary">
-            Session adjusted for recovery
+            Switched to a lighter session
           </h3>
           <p className="mt-1 text-sm leading-relaxed text-text-secondary">
-            Your session has been switched to recovery-only technique work. This
-            protects you while you're dealing with pain.
+            We&apos;ve switched you to lower-load technique work today. You can
+            also skip training if you prefer.
           </p>
         </div>
       </div>
 
       <div className="rounded-[8px] bg-white/60 px-3 py-2.5 text-sm font-medium text-text-primary">
-        Recovery Technique Session &middot; {recoveryMinutes} min &middot; Low
+        Lighter Technique Session &middot; {recoveryMinutes} min &middot; Low
         intensity
       </div>
 
@@ -44,7 +44,7 @@ export function PainOverrideCard({
         onClick={onContinueRecovery}
         disabled={disabled}
       >
-        {disabled ? 'Creating session\u2026' : 'Continue with Recovery Session'}
+        {disabled ? 'Creating session\u2026' : 'Continue with lighter session'}
       </Button>
 
       {!confirming ? (
@@ -59,7 +59,8 @@ export function PainOverrideCard({
       ) : (
         <div className="flex flex-col gap-3">
           <p className="text-center text-sm font-medium text-warning">
-            Training through pain risks further injury.
+            If pain is severe, new, worsening, or persistent, stop training and
+            consult a qualified clinician.
           </p>
           <Button
             variant="outline"

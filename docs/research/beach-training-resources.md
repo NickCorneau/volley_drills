@@ -6,7 +6,7 @@ stage: planning
 type: research
 authority: broad beach training, wedge choice, drill content, metrics, injury prevention, and competitor context
 summary: "Curated research: competitive landscape, periodization, injury prevention, UX, metrics, and drill examples."
-last_updated: 2026-04-12
+last_updated: 2026-04-16
 depends_on:
   - docs/vision.md
   - docs/decisions.md
@@ -63,6 +63,8 @@ Some players intentionally avoid phone use outdoors or during training. Glare, s
 ### Attrition and evidence bar
 
 Digital self-help products predictably suffer high discontinuation even when users initially intend to use them. The "law of attrition" (Eysenbach, JMIR) makes a strong case that "interest" signals — waitlists, stated repeat intent, compliments — are too weak to justify committing to a build. The evidence bar for green-lighting M001 should be actual second-session retention (a second session within ~7–10 days), not stated enthusiasm.
+
+For the narrow evidence base and interpretive framing of the `D91` go/no-go threshold specifically — including the kill-floor vs go-bar split, the small-cohort pilot band, fitness analog cases (Future, Strava, Freeletics, Whoop), PMF-framework alignment, and the novelty-effect literature that requires enrichment signals before calling a bare threshold pass "validated" — see `docs/research/d91-retention-gate-evidence.md`.
 
 ### Offline-first as testable requirement
 
@@ -431,9 +433,9 @@ Evidence: FIVB environment effects on beach training; session assembly constrain
 
 Volleyball Canada's development matrix uses 70% success as the threshold for progressing to the next stage. This provides a concrete, source-backed gating rule that fits a binary-scored pass model better than a self-graded `0-3` average.
 
-For drills using a binary success metric, 70% success across a block is the working threshold for moving to a harder variant. Treat this as a useful starting heuristic, not settled science for M001; it still needs field validation against real self-scored data and minimum-attempt rules.
+For drills using a binary success metric, 70% success is the working rate threshold for moving to a harder variant. The rate alone is not sufficient: a focused evidence review (2026-04-16) shows that Wilson/Agresti-Coull intervals at a 70% base rate only tighten inside ±10 pp around 88-100 attempts, and that self-scored amateurs are probably lenient on borderline calls by roughly +2 to +5 percentage points. The operational gate therefore layers a minimum-attempt window and a self-scoring confirmation rule on top of the 70% rate. The full synthesis, attempts-vs-interval table, bias discussion, and comparable-product analogues (Dr. Dish 70/100; USGA handicap 54-hole minimum; Arccos round minimums) live in `docs/research/binary-scoring-progression.md`; the operational policy lives in `D104` and `docs/specs/m001-adaptation-rules.md` "Drill-level progression gating." Field validation is still the outstanding question (`O12`).
 
-Evidence: Volleyball Canada Development Matrix. Confidence: **Medium** (needs in-product validation, but well-sourced as a starting default).
+Evidence: Volleyball Canada Development Matrix; Wilson/Agresti-Coull interval math; sports self-judgment and officiating-bias literature; product analogues above. Confidence: **Medium-High** for the operational policy; in-product validation is still required to move from planning default to proven threshold.
 
 ### Solo training honesty reinforced
 
@@ -517,6 +519,48 @@ This template fits the session-archetype model: "Solo + no wall (open sand/court
 - Progression order and rep dosing on sand (especially high-intensity movement + repeated serves).
 - Technique cues: confirm no illegal or unsafe first-contact habits (FIVB notes tomahawk technique and strict finger-pass constraints on serve receive).
 - Heat and hydration triggers appropriate for typical beach training contexts (NATA provides WBGT-based guidance; translating to a consumer app needs careful wording).
+
+## Skill acquisition principles synthesis (2026-04-16)
+
+This pass widens the evidence base behind our existing adaptation, practice-organization, and cueing decisions, and extracts the small set of refinements that survive the scope and phase guardrails for M001. The input was a fresh desk-research review of motor-learning, skill-acquisition, and feedback-scheduling literature (Ericsson revisit, Macnamara meta-analysis on deliberate practice in sports, Shea & Morgan and Brady on contextual interference, Otte PoST framework, Winstein & Schmidt reduced-frequency KR, Wulf external-focus body of work, implicit-learning-under-load research, whole-vs-part meta-analysis).
+
+The headline is that the literature validates, rather than overturns, the bulk of our current stance. The net-new product effect is a small group of editorial refinements plus two open questions; the big structural idea (PoST periodization) is parked for Phase 1.5 in `docs/research/periodization-post-framework.md`.
+
+### What it validates (no change, stronger evidence base)
+
+- **Blended practice order (`D68`).** Contextual-interference research reliably shows random/variable practice helps retention and transfer in laboratory settings, but the effect is smaller and more conditional in applied sport. Our "blocked early, variable later" stance matches the applied-sport reading of the evidence. Shea & Morgan and later meta-analyses are the anchor sources; recent sport-specific meta-analyses (Czyz 2024, Ammar 2023) remain the most relevant to beach volleyball.
+- **sRPE-load as the internal load primitive (`D84`) and rejection of ACWR scoring.** The practical-sport framing of load monitoring agrees: a simple, validated load proxy beats a contested ratio with statistical artifacts.
+- **One dimension at a time (`D63`) and deload reduces serving/jumping (`D64`).** Supported by the volleyball injury prevention literature (FIVB, Bahr & Reeser) and by the broader principle that legible cause-effect signals require isolated changes.
+- **Binary outcome scoring (`D47`) and 70% gating (`D80`).** Consistent with the self-assessment literature's finding that lower-skill self-reports are noisy and that simpler decisions produce more stable signals.
+- **Feed-type honesty (`D76`) and the "passing fundamentals" framing.** Reinforced by the fact that implicit skill, decision-making under load, and pre-contact reading are trained by preserving real perception-action information — something self-toss and wall drills structurally cannot do.
+- **Whole practice for organized perception-action chains.** The whole-vs-part meta-analytic literature favors whole practice for highly organized skills; beach volleyball skills (serve, receive, set, attack, block, defense) are organized chains. Our archetype structure (warm-up → skill → pressure → wrap) preserves the whole; isolated drill work returns quickly to the whole chain. Worth making explicit when serve and set tracks activate: an optional integrated "chain" block (receive-set-attack) per session, not just stacked isolation drills.
+- **Mandatory warm-up (`D85`).** The VolleyVeilig evidence and the broader injury-prevention literature are consistent; this decision does not need to move.
+
+### What it refines (small, in-scope changes applied in this pass)
+
+- **Teaching-points style: external/outcome focus.** The Wulf attentional-focus literature consistently finds external focus (target, ball, environment, outcome) improves retention and transfer over internal focus (body part, joint, muscle) once a basic pattern exists. Captured as an editorial rule in `docs/prd-foundation.md` drill metadata section. Applied as a cue-review pass on the seed catalog whenever drill content is next edited.
+- **Active cue budget: at most two cues per block.** The guidance hypothesis (Winstein & Schmidt and later work) shows high-frequency feedback improves practice performance but hurts retention; athletes become dependent on feedback rather than developing their own error detection. In a self-coached app, the app is effectively the coach, so cue cadence is a real design variable. `D51` already enforces one visible cue at a time; this synthesis adds the soft rule that the first two items in `teachingPoints` are "active cues" during the block and the rest are pre-block prep context. See `O14` for the validation question.
+- **Progression gate: different calendar days.** The retention-over-performance framing implies a trusted gate is not "twice in a row" but "twice on different days with slight contextual variation." Minimum change applied: `docs/specs/m001-adaptation-rules.md` Progress rule now reads "2 completed sessions on different calendar days" instead of "2 consecutive completed sessions." Broader contextual-variation retesting is a Phase 1.5 topic.
+- **Warm-up includes a "read today's conditions" element.** FIVB explicitly recommends beginners warm up to get a feel for wind and conditions, not only to prepare joints. The skill case for warm-up was previously implicit; `D85` content guidance now names environmental reading as a warm-up element, reinforcing `D93` (wind capture) with an actual practice behavior.
+
+### What it parks for Phase 1.5+ (captured as stubs, not implemented)
+
+- **PoST periodization framework.** Otte et al. propose **Coordination Training → Skill Adaptability Training → Performance Training** as stage-based session programming. This maps cleanly onto a future multi-week planner: Coordination phase stabilizes a movement solution per skill family, Skill Adaptability widens the solution set under realistic variability, Performance adds score/time/tactical pressure. The 3-state macro governor has the same shape as our existing `progress/hold/deload` micro governor, which makes it a natural fit when `O2` activates. Stub: `docs/research/periodization-post-framework.md`.
+- **Retention-and-transfer assessment cadence.** Periodic retest blocks under slightly varied constraints would tighten the retention signal beyond per-session scoring. Relevant to the Should-have baseline tests and to the `D74` weekly receipt. Not M001.
+- **Mental practice / imagery prompts and pre-session intention-setting.** Mental-representation and chunking literature suggests modest additive benefits when combined with physical practice. Potential Phase 1.5 review-surface additions; do not bolt onto the M001 60-second review budget (`D9`).
+- **Self-estimation before scoring.** Self-controlled-feedback research shows learning improves when feedback follows the learner's own error estimation. Cheap to prototype, non-trivial friction risk. See `O15`.
+
+### What we are explicitly not adopting
+
+- Fixed 12-week, 8-week, and weekly macro/meso/micro templates from the source synthesis. Our target user has not yet proven repeat-session retention (`D91`); shipping a 12-week program is the opposite of `P4` ("session flow and believable progression beat drill volume").
+- Synthesized per-session rep volumes (e.g., "30–50 serves/session"). Our fatigue caps (`D77`) are drill-sourced from FIVB with explicit reasoning. Do not overwrite drill-level caps with session-level aggregates.
+- Per-skill KPI bands (beginner/intermediate/advanced hit-rate tables) as product spec values. When the Should-have baseline tests activate, treat these bands as starter hypotheses to validate against tester data, not as norms.
+- "Small circles" (Waitzkin) as a structural programming framework. It is a useful coaching heuristic but not an evidence-based method; the source itself downgrades it to a heuristic.
+- High-frequency video review, demo clips, and gadget-based perceptual-cognitive training. `D25` already rules out demo clips/GIFs in M001. The perceptual-cognitive literature is clear that detached lab-style training transfers weakly; the product stance is to train perceptual-cognitive skill *within* the real drill rather than as a separate feature.
+
+### Source additions from this pass
+
+The "Sources" section below adds skill-acquisition and feedback-scheduling references used here. When future work pulls on this synthesis (Phase 1.5 planning, serve or set track activation, cue-cadence validation), start from those citations plus the prior contextual-interference and sRPE sources already in this doc.
 
 ## Key research takeaway
 
@@ -886,3 +930,20 @@ Captured for future reference; no monetization decisions are locked for v1.
 - [W3C WCAG — Understanding Target Size](https://www.w3.org/WAI/WCAG22/Understanding/) — accessibility framing for minimum target sizes
 - [WebAIM — Contrast guidance](https://webaim.org/resources/contrastchecker/) — practical contrast thresholds tied to WCAG
 - Deep research output: `research-output/m001-pre-build-validation-research.md`
+
+### Skill acquisition principles sources (2026-04-16)
+
+The citations below back the "Skill acquisition principles synthesis (2026-04-16)" section above. Full URLs and the exact desk-research provenance live alongside the source synthesis note; the annotations here record why each reference matters for this product rather than duplicating the original literature review.
+
+- Otte et al. — "Skill Training Periodization in 'Specialist' Sports Coaching — An Introduction of the 'PoST' Framework for Skill Development" (Frontiers in Sports and Active Living) — periodization vocabulary for Phase 1.5 multi-week planning; maps cleanly onto our existing `progress/hold/deload` governor. See also `docs/research/periodization-post-framework.md`.
+- Otte et al. — "When and How to Provide Feedback and Instructions to Athletes?" (Frontiers in Psychology) — practical bridge between ecological-dynamics design and feedback scheduling; supports the "fewer, better-placed cues" stance and the athlete-led reflection framing.
+- Macnamara, Moreau, Hambrick — "The Relationship Between Deliberate Practice and Performance in Sports" (meta-analysis, Perspectives on Psychological Science) — corrective against naive "10,000 hours" claims; supports deliberate practice as necessary but not sufficient, which is why our design blends it with representative, constraint-led work.
+- Macnamara / Hambrick — "The role of deliberate practice in expert performance: revisiting Ericsson, Krampe & Tesch-Römer" (Royal Society Open Science) — reinforces the same correction; used here to justify treating practice organization and feedback quality as first-class design variables, not just volume.
+- Shea & Morgan (1979) — "Contextual Interference Effects on the Acquisition, Retention, and Transfer of a Motor Skill" — foundational primary source for CI; relevant to `D68` blended-practice ordering.
+- Brady — "Contextual interference: a meta-analytic study" — paired reading with Shea & Morgan; confirms CI effects are strongest in simpler laboratory tasks and weaker in applied sport, justifying the conservative "blocked early, variable later" default.
+- Wightman & Lintern-lineage whole-vs-part literature, including the "Whole and Part Practice: A Meta-Analysis" tradition — supports whole practice for highly organized perception-action chains (beach volleyball skills) and part practice only when component complexity forbids the whole.
+- Winstein & Schmidt (1990) — "Reduced Frequency of Knowledge of Results Enhances Motor Skill Learning" — foundational guidance-hypothesis source; reduced-frequency feedback improves retention. Directly supports the "at most two cues per block" soft rule and frames `O14`.
+- Self-controlled-feedback literature (e.g., "Self-Controlled Feedback Is Effective if It Is Based on the Learner's Performance") — supports pre-estimation-before-scoring designs and frames `O15`.
+- Wulf and colleagues on attentional focus (reviews across 1998–2013) — external-focus cueing reliably improves retention and transfer once a basic pattern exists; supports the teaching-points style rule added to `docs/prd-foundation.md`.
+- Implicit-motor-learning literature (e.g., "Implicit Motor Learning and Complex Decision Making in Time-Constrained Environments") — implicitly learned control remains more stable under decision load and pressure; reinforces the preference for short external cues and constraint-led variants over dense technical checklists.
+- Perceptual-cognitive training reviews (e.g., Broadbent et al., Hadlow et al.) — transfer from detached lab/gadget training to actual game performance is smaller than transfer to lab-style tests; reinforces the stance that perceptual-cognitive skill should be trained within real drills, not as a separate product feature. Also supports `D25` (no demo clips in M001).

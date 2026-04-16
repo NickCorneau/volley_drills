@@ -23,7 +23,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       strategies: 'generateSW',
       includeAssets: ['favicon.svg', 'icon.svg', 'offline.html'],
       devOptions: {

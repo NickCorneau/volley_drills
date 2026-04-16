@@ -6,10 +6,11 @@ stage: validation
 type: spec
 authority: courtside run screen states, interaction contract, interruption handling
 summary: "Screen states, interaction contract, and interruption handling for the courtside run flow."
-last_updated: 2026-04-12
+last_updated: 2026-04-16
 depends_on:
   - docs/milestones/m001-solo-session-loop.md
   - docs/prd-foundation.md
+  - docs/research/onboarding-safety-gate-friction.md
 decision_refs:
   - D35
   - D37
@@ -149,6 +150,16 @@ Design rules:
 - Must not feel like a medical questionnaire. These are fast taps, not a form.
 - If both answers are "safe" (no pain, trained recently), the transition to warm-up should feel near-instant.
 - If the pain flag triggers a recovery session default, the user should see why and can override with one deliberate tap.
+- Prefer answer-first copy over question-first copy. "We'll avoid impact today because you reported knee pain" is better than a standalone pain checkbox with no visible payoff.
+
+Placement is an open question (`O16`):
+
+- M001 default is Variant A, the standalone screen documented above. Do not change the default until tester evidence exists.
+- Variant B folds the pain flag and recency chips into `Session Prep` / `Today's Setup` and branches to the richer safety flow only when a red flag fires.
+- Variant C compresses the pre-session ask to the minimum needed before Run (pain flag plus auto-derived or single-tap recency) and defers richer profile capture to a one-screen prompt on the next Home visit.
+- Any variant must preserve the hard requirements in `D82`, `D83`, and `D88`: binary pain flag, training-recency capture, contextual heat CTA on hot days, and offline-reachable stop/seek-help from any session state.
+
+See `docs/research/onboarding-safety-gate-friction.md` for the evidence base and the specific measurement plan.
 
 ### 2.6 Warm-Up Block
 
@@ -388,6 +399,7 @@ Key decisions that constrain this spec (grep `docs/decisions.md` for full ration
 - `docs/specs/m001-adaptation-rules.md` (safety contract, sRPE-load, pre-session check details)
 - `docs/specs/m001-quality-and-testing.md`
 - `docs/research/beach-training-resources.md` (safety/load evidence base)
+- `docs/research/onboarding-safety-gate-friction.md` (safety-gate placement and first-run screen-count evidence; `O11`, `O16`)
 - `docs/prd-foundation.md`
 - `docs/decisions.md`
 

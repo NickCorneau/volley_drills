@@ -1,15 +1,16 @@
 ---
-id: phase-0-interview-guide
+
+## id: phase-0-interview-guide
 title: Phase 0 Interview Guide
 status: draft
 stage: planning
 type: discovery
 authority: interview scripts, moderator rules, evidence capture template for both wedges
 summary: "Interview scripts and moderator rules for self-coached and coach-led wedge testing."
-last_updated: 2026-04-11
+last_updated: 2026-04-16
 depends_on:
   - docs/discovery/phase-0-wedge-validation.md
----
+  - docs/research/pre-telemetry-validation-protocol.md
 
 # Phase 0 Interview Guide
 
@@ -21,6 +22,10 @@ Use the same shared product backbone to test two wedges without mixing the story
 - coach clipboard (assign, see completion, tiny outcome signal, adjust next)
 
 Each interview should test a believable workflow, not generic interest.
+
+## Scope note
+
+This guide owns the **wedge-scored interview content** — shared opener, per-wedge scenarios, and the questions that feed the scorecards in `docs/discovery/phase-0-wedge-validation.md`. Cohort-management scripts that apply across both wedges (recruitment copy, verbatim kickoff / consent script, non-returner probe, per-session ledger schema, three-pulse check-in cadence, and the preregistered decision memo) live in `docs/research/pre-telemetry-validation-protocol.md`. Do not duplicate those scripts into this guide; extend the wedge-specific sections here instead.
 
 ## Moderator rules
 
@@ -119,7 +124,7 @@ Use for both wedges:
 - did the coach value compliance visibility, time saved, or planning quality most
 - did they immediately ask for features beyond the clipboard loop (messaging, video, roster, payments)
 - was the assign-complete-signal-adjust loop enough without heavy tooling
-- did they want direct coach-to-client clipboard, centralized experts, or neither
+- did they frame the right shape as BYOC-lite (their existing athlete brings them into the product) or as platform-sourced (expecting the product to supply athletes and matching); unprompted asks for centralized expert access should be captured as anomalous evidence, since it is explicitly not the default candidate (`D106`, `docs/research/coach-facing-business-models.md`)
 - would they use it for the next real athlete or event cycle
 
 ## Closing questions for both wedges
@@ -142,4 +147,3 @@ Use for both wedges:
 - WTP note:
 - Key quote:
 - Recommendation:
-

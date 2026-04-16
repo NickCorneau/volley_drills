@@ -6,12 +6,13 @@ stage: planning
 type: milestone
 authority: M001 thin-slice scope, acceptance evidence, pre-build validation gate
 summary: "Thinnest believable end-to-end solo session loop for pass / serve-receive."
-last_updated: 2026-04-15
+last_updated: 2026-04-16
 depends_on:
   - docs/prd-foundation.md
   - docs/decisions.md
   - docs/roadmap.md
   - docs/discovery/phase-0-wedge-validation.md
+  - docs/research/d91-retention-gate-evidence.md
 decision_refs:
   - D6
   - D21
@@ -33,7 +34,7 @@ open_question_refs:
 ## Agent Quick Scan
 
 - Use this doc when you need M001 scope, current gate status, acceptance evidence, or the smallest reliable statement of what belongs in the first build.
-- Status: validation phase. A runnable v0a prototype exists under `app/`. Full M001 implementation is still blocked on the pre-build validation gate.
+- Status: v0b build in progress. A runnable v0a prototype exists under `app/`; v0b is the field-test artifact (`D119`). Full M001 implementation is gated on D91 field-test evidence against v0b.
 - In scope: starter session assembly, courtside run flow, one-minute review, deterministic adaptation, and write-as-you-go local persistence.
 - Not for: implementation-level Dexie details, full sync architecture, or coach clipboard build work.
 - Primary blockers: `O4`, `O5`, `O6`, `O7` in `docs/decisions.md`.
@@ -64,18 +65,18 @@ Define the first implementation-ready slice that lets one self-coached user:
 
 ## Current planning stance
 
-A v0a validation prototype exists under `app/`; M001 full implementation remains gated on field validation (D91, O4-O7).
+A v0a validation prototype exists under `app/`; v0b build is in progress as the D91 field-test artifact (`D119`). M001 full implementation remains gated on D91 field validation against v0b (O4-O7).
 
 ## Pre-build validation gate (2026-04-12)
 
 Research evidence (see `docs/research/beach-training-resources.md` and `research-output/m001-pre-build-validation-research.md`) identifies behavioral and contextual unknowns that must be resolved before M001 moves to implementation. The core risk is not "can we assemble a passing session" — content is abundant — but whether the target user will complete a phone-mediated loop courtside and return next week.
 
-M001 should not move to active build until the following are validated through a thin prototype / concierge test (see `docs/discovery/phase-0-wedge-validation.md` for the concrete program):
+M001 should not move to full build until the following are validated through v0b field testing (`D119`; see `docs/discovery/phase-0-wedge-validation.md` for the concrete program):
 
 - **Phone courtside viability**: users actually pull out their phone on sand and follow a structured runner (vs. memory, printouts, or going tech-free).
 - **Solo feasibility**: the operational definition of "solo" works for users' real environments. Solo passing often depends on a wall or rebounder that many beaches lack; environment/equipment must be a first-class input.
 - **Review completion**: the <60s post-session review is actually completed when tired/sweaty, and its signals produce a believable next-session adaptation.
-- **Second-session retention**: the validation cohort meets the D91 repeat-use bar within 14 days. Stated interest or waitlists are not sufficient evidence.
+- **Second-session retention**: the validation cohort meets the D91 repeat-use bar within 14 days. Stated interest or waitlists are not sufficient evidence. A bare D91 pass is permission to keep testing, not proof of durable value; require at least one enrichment signal (unprompted return, >48h-gap second session, or third-session / concrete scheduling commitment) before treating the loop as validated. See `docs/research/d91-retention-gate-evidence.md`.
 - **Safety baseline**: initial sessions and deload logic have been reviewed by at least one coach or sports physio.
 
 ## Target user and mode
@@ -102,7 +103,7 @@ M001 should not move to active build until the following are validated through a
 - Duplicate/edit previous session as the first repeat-use mechanism
 - Rules-first next-session adjustment logic based on one session-defined metric and session load, with binary-scored pass success as the default pass metric and without changing both difficulty and volume at once
 - sRPE-load (RPE × duration) as the internal load primitive for between-session adaptation, with conservative change caps and no back-to-back hard sessions (D84)
-- Mandatory warm-up and cool-down blocks in every session; users can shorten but not remove them (D85)
+- Mandatory warm-up and Downshift blocks in every session; users can shorten but not remove them. Default warm-up is `Beach Prep Three` (~3 min); `Beach Prep Five` is the opt-in longer version; `Beach Prep Two` is a compliance fallback. Downshift is framed as transition and comfort, not recovery or injury prevention. (D85, D105)
 - Stop/seek-help triggers accessible offline from any session state (D88)
 - Conservative defaults when preparedness is unknown: new users, first sessions, and returning-after-gap users get scaled-down volume/intensity (D87)
 - General training support positioning with standard "not medical advice" copy (D86)
@@ -154,7 +155,7 @@ This milestone is ready to hand to implementation planning when:
 - the trust invariants for offline durability, update safety, migration safety, and deterministic adaptation are explicit enough to verify without guessing
 - the solo-first path still preserves believable pair fallback
 - the first-run flow does not require teaching a multi-bucket pass-quality rubric before one useful session is complete
-- the safety contract (pre-session check, sRPE-load, warm-up/cool-down, stop triggers, conservative defaults, regulatory positioning) is specified in the adaptation rules and run flow specs
+- the safety contract (pre-session check, sRPE-load, warm-up / Downshift, stop triggers, conservative defaults, regulatory positioning) is specified in the adaptation rules and run flow specs
 - `docs/roadmap.md`, `docs/prd-foundation.md`, and `docs/vision.md` no longer disagree on what belongs in the first slice
 
 ## Design artifacts that should exist before implementation
@@ -199,7 +200,7 @@ v0b flow is `Home -> Setup (4 taps) -> Safety (with session summary) -> Run`. No
 - Validation-phase stack: web-first PWA with local-first storage
 - Pass-first adaptation defaults live in `docs/specs/m001-adaptation-rules.md`
 - M001 review stays lightweight: sRPE plus one skill metric, without soreness or wellness fields (the binary pain flag is a pre-session safety gate, not a review input)
-- Safety contract: pre-session pain flag + training recency, sRPE-load as load primitive, mandatory warm-up/cool-down, stop/seek-help triggers, conservative defaults for unknown preparedness, general training support positioning (D82-D88)
+- Safety contract: pre-session pain flag + training recency, sRPE-load as load primitive, mandatory warm-up / Downshift, stop/seek-help triggers, conservative defaults for unknown preparedness, general training support positioning (D82-D88, D105)
 
 ## Review questions
 

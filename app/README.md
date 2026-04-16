@@ -5,7 +5,7 @@ status: active
 stage: validation
 type: workspace-readme
 authority: current web app prototype state and implementation guardrails
-last_updated: 2026-04-12
+last_updated: 2026-04-16
 depends_on:
   - docs/prd-foundation.md
   - docs/decisions.md
@@ -24,7 +24,7 @@ This folder holds the runnable Phase 0 validation prototype (v0a) for Volley Dri
 - The app is a runnable **v0a PWA prototype** used for physical field testing on sand.
 - **Routes**: `/` (Start), `/safety`, `/run`, `/run/transition`, `/review`, `/complete`.
 - **Dexie tables**: `sessionPlans`, `executionLogs`, `sessionReviews`, `timerState` (schema in `src/db/schema.ts`).
-- **PWA**: `vite-plugin-pwa` wired with `generateSW`, precache, `offline.html`, `requestPersistentStorage()` at startup.
+- **PWA**: `vite-plugin-pwa` wired with `generateSW`, precache, `offline.html`. `navigator.storage.persist()` is requested on a real user gesture at session-start (`services/session.ts`), not at module load — per `D118` / `V0B-25`, WebKit grants persistence heuristically and responds better to gesture-bound calls. Three-state posture-sensitive save copy on `CompleteScreen.tsx` via `hooks/useInstallPosture.ts` + `lib/storageCopy.ts` (`V0B-24`). See `docs/research/local-first-pwa-constraints.md`.
 - **Timer**: timestamp-based with 5s flush to `timerState`, wake-lock during active blocks, 3-2-1 pre-roll countdown.
 - **Safety**: pain gate, recovery session override with confirmation, training recency check, heat tips.
 - Product direction lives in `docs/`; do not treat the prototype UI as final production design.
@@ -59,6 +59,24 @@ cd app
 npm run build
 npm run lint
 ```
+
+## Tests
+
+Unit and component tests (Vitest + Testing Library + fake-indexeddb):
+
+```bash
+npm test
+npm run test:watch
+```
+
+End-to-end tests (Playwright, starts dev server automatically):
+
+```bash
+npm run test:e2e
+npm run test:e2e:headed
+```
+
+The E2E suite includes functional flow tests (`e2e/session-flow.spec.ts`, `e2e/edge-cases.spec.ts`) and WCAG 2.1 AA accessibility checks via `@axe-core/playwright` (`e2e/accessibility.spec.ts`).
 
 ## UI defaults
 

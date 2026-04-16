@@ -6,12 +6,14 @@ stage: planning
 type: discovery
 authority: wedge scorecards, evidence capture template, M001 pre-build validation program and decision gate
 summary: "Dual-wedge scorecards, evidence capture, and Phase 0 decision rules."
-last_updated: 2026-04-12
+last_updated: 2026-04-16-b
 depends_on:
   - docs/roadmap.md
   - docs/prd-foundation.md
   - docs/decisions.md
   - docs/research/beach-training-resources.md
+  - docs/research/d91-retention-gate-evidence.md
+  - docs/research/pre-telemetry-validation-protocol.md
 ---
 
 # Phase 0 Wedge Validation
@@ -160,7 +162,7 @@ By the end of Phase 0, we should have:
 - confirmed evidence for the self-coached primary path (repeat behavior, not just stated intent)
 - a go/no-go on the coach clipboard as the first extension, based on whether coaches find the assign-complete-signal-adjust loop compelling without roster/admin/payments/video
 - evidence on whether a weekly receipt and shallow next-N planning are enough to keep self-coached users coming back
-- a decision on whether premium coaching should be direct coach-to-client, centralized expert access, or deferred
+- a confirmation (or tester-driven revision) of the BYOC-lite coach clipboard as the first coach-facing extension and of athlete-side "coach-connected" monetization as the first pricing lever (`D106`, `D107`, `D108`); centralized expert access is not a default candidate (see `docs/research/coach-facing-business-models.md`)
 - a short memo explaining why
 - updates reflected in `docs/decisions.md`, `docs/prd-foundation.md`, and `docs/roadmap.md`
 
@@ -238,16 +240,64 @@ This founder/friend pilot is a **pre-gate filter**, not the full M001 evidence s
   - Who runs it only with reminders?
   - Who drops? (Treat this as expected attrition; quantify it.)
 
+### Cohort execution protocol (operational layer)
+
+The schedule above is the *what* and *when*. The *how* — recruitment copy, consent script, per-use micro-log schema, three signal-based pulses (not daily check-ins), the 72-hour non-returner probe, the preregistered one-page decision memo, role separation, and the 5-page evidence packet artifact — lives in `docs/research/pre-telemetry-validation-protocol.md`. Use it as the execution checklist when running a cohort under this program. Specifically:
+
+- **Three signal-based pulses** around days 3, 7, and 11 replace any implied daily-call pattern; daily prompts fatigue participants and manufacture accountability the product itself does not yet create.
+- **72-hour non-returner probe** (forced-choice + open text) is sent to any tester with no logged use `~72` hours after a realistic opportunity. Do not wait for the final debrief; silent non-return is the cleanest signal of weak pull this cohort can produce.
+- **Preregistered decision memo** (segment, core job, definitions of meaningful / repeat / complete use, disqualification rules, contact cadence, verdict thresholds, and the readout-ordering rule) is frozen before kickoff. Any later change is logged; unlogged changes are protocol failures.
+- **Readout ordering**: the final readout begins with disconfirming evidence — silent dropouts first, then failed completions, then enthusiastic cases. Reordering to lead with the positive is a preregistration violation.
+- **Role separation** where possible: moderator, note-taker, and verdict reviewer are ideally not the same person, and the verdict reviewer is the least emotionally attached party. The enforceable minimum for this repo's one-founder surface is that the readout starts with disconfirming evidence and the verdict memo is written against the preregistration before the founder narrates anything.
+- **Do not silently replace attriters.** Dropouts are evidence unless the participant was clearly misrecruited or never effectively entered the study.
+- **Per-session ledger schema** (including a confidence flag and a researcher-interpretation column kept separate from raw description) is defined in the protocol note and collapses the capture-per-tester list below into one row-level template.
+
 ### Decision gate
 
-Official threshold:
+Read `D91` in three layers, not two. Details, binomial CI math, and evidence base: `docs/research/d91-retention-gate-evidence.md`.
 
-- Founder would personally keep using the runner and wants the next session
-- `D91`: `5+` testers each complete `2+` sessions within `14` days with `>50%` review completion
-- Kill signal: fewer than `3` of `5` start a second session within `14` days
-- At least 2 users explicitly asking for the next session or inviting a partner remains useful supporting evidence, not the canonical threshold
+**Kill-floor (hard no-go screen):**
 
-If session-2 retention is missed: do not "build harder." Revisit the wedge — skill focus, solo definition, runner design, or even whether phone courtside is viable.
+- Fewer than `3` of `5` testers start a second session within `14` days → do not advance to the full M001 build. Revisit the wedge: skill focus, solo definition, runner design, or whether phone courtside is viable at all. Do not "build harder" past this signal.
+
+**Go-bar (permission to keep building and keep testing):**
+
+- Founder would personally keep using the runner and wants the next session.
+- `D91` quantitative pass: `5+` testers each complete `2+` sessions within `14` days.
+
+**Banded reading on the raw count (n=5 is statistically wide):**
+
+- `0-1/5` start a second session: strong negative. Trip the kill-floor and revisit the wedge.
+- `2/5`: ambiguous. Neither a clean kill nor a pass. Extend cohort or window before advancing.
+- `3/5`: weak pass of the floor. Read as `continue investigating`, not `go`. Enrichment signals and self-initiated returns carry most of the interpretive weight in this band.
+- `4-5/5`, with unprompted self-initiation and at least one third session: the first result that looks meaningfully strong on behavior alone.
+
+A bare go-bar pass is not yet evidence of durable value. The novelty-effect literature means a single return visit inside 14 days can still be curiosity, and at n=5 the exact 95% binomial CI on a `3/5` result spans ~15% to ~95%. Upgrade a bare pass with at least one of the following **enrichment signals** from the same cohort and window before calling the loop validated:
+
+- **Unprompted return.** At least one tester starts their second session without a human reminder or scheduled check-in.
+- **Out-of-novelty-window return.** At least one second session occurs **>48 hours after the first**, not as an immediate next-day impulse.
+- **Third-session or scheduling evidence.** At least one tester reaches a third session within `14` days, **or** makes a concrete scheduling commitment (booked court time, blocked calendar slot, invited a partner for a specific future session).
+
+Supporting but non-canonical signal: at least two users explicitly asking for the next session or inviting a partner.
+
+**Contamination controls (protect the signal from founder / concierge nudging):**
+
+- Classify every second-session start as `self-initiated` or `human-prompted`; when prompted, record the prompt surface (text, call, in-person, scheduled check-in).
+- Hold founder-to-tester contact cadence constant across the window; do not add extra nudging to testers who are drifting.
+- Treat a `3/5` pass with zero unprompted returns as failing the enrichment check, not passing the go-bar.
+
+**Capture per tester across the 14-day window** (cheap to log, directly feeds the banded reading and enrichment check; operationalized as a row-level ledger schema with separate researcher-interpretation and confidence-flag columns in `docs/research/pre-telemetry-validation-protocol.md`):
+
+- Was the second session `self-initiated` or `human-prompted`; prompt surface when prompted.
+- Elapsed hours between session 1 and session 2.
+- Any third session or explicit scheduling commitment inside the window.
+- Adherence dimensions: total active minutes per session; whether each session was completed fully or abandoned mid-flow; whether the tester engaged with the full intended flow (`Setup → Safety → Run → Review`) or only a narrow slice.
+- Context log for every completed **and missed** session: location, surface, weather, time-of-day, alone vs with others, and the exact blocker that prevented participation. Outdoor self-coached products are especially exposed to weather and access friction; without these notes the cohort will mis-classify "bad beach access on a windy day" as "product didn't resonate."
+- Post-qualification conviction check: once a tester has crossed the `2+` sessions in `14` days line, ask the Ellis / Superhuman **"how disappointed would you be if you could no longer use this?"** (very / somewhat / not) question and capture short open text on what benefit mattered most and what blocked deeper use. Two sessions in 14 days is the **minimum eligibility condition** for that survey, not a success bar on its own.
+
+`>50%` review completion is captured but read as an **interpretation aid**, not a pass/fail gating metric: three reviews on five testers diagnose *why* behavior looks the way it does; they do not rescue weak behavior or override strong behavior.
+
+If the go-bar passes without any enrichment signal, treat the result as "keep testing" rather than "green-light full build," and extend the cohort or window until at least one enrichment signal appears or the kill-floor trips.
 
 ### Expert safety review
 

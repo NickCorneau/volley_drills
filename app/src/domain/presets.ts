@@ -37,32 +37,35 @@ function plannedBlockFromVariant(
   }
 }
 
+// Solo preset ordering reflects D102: Open Sand is the default solo environment
+// for a beach-first product. Solo Serving follows (net-based). Wall Pass is the
+// conditional inventory option for the home/garage case and is surfaced last.
 export const PRESETS: PresetDefinition[] = [
-  {
-    id: 'wall-pass',
-    name: 'Wall Pass Workout',
-    playerCount: 1,
-    archetypeId: 'solo_wall',
-    environment: 'Solo · ~12 min · Wall + ball',
-    description: 'Wall rebound passing: easy warm-up, wall pass volume, then cool-down.',
-    totalMinutes: 12,
-  },
   {
     id: 'open-sand',
     name: 'Open Sand Workout',
     playerCount: 1,
     archetypeId: 'solo_open',
     environment: 'Solo · ~12 min · Ball + markers',
-    description: 'Open sand self-toss passing: warm-up, set-window self-toss reps, cool-down.',
+    description: 'Open sand self-toss passing: warm-up, set-window self-toss reps, downshift.',
     totalMinutes: 12,
   },
   {
     id: 'solo-serving',
     name: 'Solo Serving Practice',
     playerCount: 1,
-    archetypeId: 'solo_open',
+    archetypeId: 'solo_net',
     environment: 'Solo · ~12 min · Net + balls',
     description: 'Serve to zones — build placement and your routine.',
+    totalMinutes: 12,
+  },
+  {
+    id: 'wall-pass',
+    name: 'Wall Pass Workout',
+    playerCount: 1,
+    archetypeId: 'solo_wall',
+    environment: 'Solo · ~12 min · Wall + ball',
+    description: 'Wall rebound passing: easy warm-up, wall pass volume, then downshift.',
     totalMinutes: 12,
   },
   {
@@ -71,7 +74,7 @@ export const PRESETS: PresetDefinition[] = [
     playerCount: 2,
     archetypeId: 'pair_net',
     environment: 'Pair · ~15 min · Net + ball',
-    description: 'Partner passing at the net: warm-up tosses, partner pass main set, cool-down.',
+    description: 'Partner passing at the net: warm-up tosses, partner pass main set, downshift.',
     totalMinutes: 15,
   },
   {

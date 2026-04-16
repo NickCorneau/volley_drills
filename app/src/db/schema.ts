@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie'
+import { emitSchemaBlocked } from '../lib/schema-blocked'
 import type {
   ExecutionLog,
   SessionDraft,
@@ -50,3 +51,18 @@ export class VolleyDrillsDB extends Dexie {
 }
 
 export const db = new VolleyDrillsDB()
+
+// D41 / V0B-22: handle cross-tab schema upgrade hazards.
+// `versionchange` fires on the OLD connection when ANOTHER tab tries to open a
+// higher schema version. Close our connection and prompt the user to reload so
+// the new-version tab can proceed.
+db.on('versionchange', () => {
+  db.close()
+  emitSchemaBlocked()
+})
+
+// `blocked` fires on the NEW-version tab when another tab is holding the old
+// version open and prevents the upgrade. Same user-facing prompt.
+db.on('blocked', () => {
+  emitSchemaBlocked()
+})

@@ -6,7 +6,7 @@ stage: planning
 type: index
 authority: milestone conventions, status vocabulary, charter requirements
 summary: "How milestones work, status vocabulary, and charter requirements."
-last_updated: "2026-04-12"
+last_updated: "2026-04-16"
 depends_on:
   - docs/vision.md
   - docs/prd-foundation.md
@@ -58,6 +58,6 @@ Suggested statuses:
 
 ## Planning-stage rule
 
-While this repo is in Phase 0 validation, milestone files should behave like charters and thin-slice specs, not implementation runbooks.
+A runnable v0a prototype exists under `app/`. v0b build is in progress as the D91 field-test artifact (`D119`). Milestone files should still behave like charters and thin-slice specs until their build phase is explicitly active.
 
 Use `docs/templates/milestone-charter.md` as the default starting point.

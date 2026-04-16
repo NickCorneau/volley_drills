@@ -1,5 +1,6 @@
 import { Navigate, Routes, Route } from 'react-router-dom'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { SchemaBlockedOverlay } from './components/SchemaBlockedOverlay'
 import { CompleteScreen } from './screens/CompleteScreen'
 import { HomeScreen } from './screens/HomeScreen'
 import { ReviewScreen } from './screens/ReviewScreen'
@@ -20,6 +21,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <ErrorBoundary>
+      <SchemaBlockedOverlay />
       <Layout>
         <Routes>
           <Route path={routePaths.home} element={<HomeScreen />} />

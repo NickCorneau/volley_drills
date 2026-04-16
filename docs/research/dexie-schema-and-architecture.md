@@ -13,6 +13,7 @@ depends_on:
 related:
   - docs/research/README.md
   - docs/research/m001-testing-quality-strategy.md
+  - docs/research/persistent-team-identity.md
 ---
 
 # Dexie Schema and Architecture Guidance
@@ -69,6 +70,8 @@ Design principle: embed blocks/steps in the Session plan (simple, single-read fo
 - `context` snapshot (wind/conditions, solo/pair, time budget)
 - `plan` (embedded blocks/steps with local IDs)
 - `provenance` (template IDs used, human edits flag, rationale text snippets)
+
+> **Forward-compatible note (2026-04-16).** Today's `sessions.context` carries `playerCount: 1 | 2` and no partner identity; that is intentional for M001/v0b. Per `D114`/`D115`, when a future slice first needs to store a partner name, side, role, or future `teamId`, the session shape MUST grow a `SessionParticipant[]` rather than ad-hoc partner-name fields. See `docs/research/persistent-team-identity.md` for the mandatory row shape and consent posture. `PlayerProfile`, `Team`, and `TeamConsent` tables are not introduced until the slices that need them; see also `D117` (graduation gate before a first-class `Team` ships).
 
 **`sessionRuns`** (durable checkpointing for an in-progress session)
 - `sessionId` (PK = sessionId)

@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
-import type { SessionPlan } from '../../db'
+import type { ExecutionLog, SessionPlan } from '../../db'
 import { buildDraft } from '../../domain/sessionBuilder'
 import {
+  computeActualDurationMinutes,
   createSessionFromDraft,
   findPendingReview,
   findResumableSession,
@@ -147,5 +148,169 @@ describe('v0b session services', () => {
     await skipReview('exec-new')
     const nextPending = await findPendingReview()
     expect(nextPending?.executionId).toBe('exec-old')
+  })
+})
+
+describe('computeActualDurationMinutes', () => {
+  const makePlan = (durations: number[]): SessionPlan => ({
+    id: 'plan-1',
+    presetId: 'preset-1',
+    presetName: 'Test',
+    playerCount: 1,
+    blocks: durations.map((d, i) => ({
+      id: `block-${i}`,
+      type: 'main_skill' as const,
+      drillName: `Drill ${i}`,
+      shortName: `D${i}`,
+      durationMinutes: d,
+      coachingCue: '',
+      courtsideInstructions: '',
+      required: true,
+    })),
+    safetyCheck: { painFlag: false, heatCta: false, painOverridden: false },
+    createdAt: 1,
+  })
+
+  const makeExec = (overrides: Partial<ExecutionLog>): ExecutionLog => ({
+    id: 'exec-1',
+    planId: 'plan-1',
+    status: 'completed',
+    activeBlockIndex: 0,
+    blockStatuses: [],
+    startedAt: 1,
+    ...overrides,
+  })
+
+  it('sums planned durations for all completed blocks', () => {
+    const plan = makePlan([3, 8, 5])
+    const exec = makeExec({
+      activeBlockIndex: 3,
+      status: 'completed',
+      blockStatuses: [
+        { blockId: 'block-0', status: 'completed' },
+        { blockId: 'block-1', status: 'completed' },
+        { blockId: 'block-2', status: 'completed' },
+      ],
+    })
+
+    expect(computeActualDurationMinutes(exec, plan)).toBe(16)
+  })
+
+  it('adds partial block elapsed for end-early', () => {
+    const plan = makePlan([3, 8])
+    const exec = makeExec({
+      activeBlockIndex: 1,
+      status: 'ended_early',
+      blockStatuses: [
+        { blockId: 'block-0', status: 'completed' },
+        { blockId: 'block-1', status: 'skipped' },
+      ],
+    })
+
+    const result = computeActualDurationMinutes(exec, plan, 90)
+    expect(result).toBe(4.5)
+  })
+
+  it('returns 0 when no blocks completed and no timer', () => {
+    const plan = makePlan([3, 8])
+    const exec = makeExec({
+      status: 'ended_early',
+      blockStatuses: [
+        { blockId: 'block-0', status: 'skipped' },
+        { blockId: 'block-1', status: 'skipped' },
+      ],
+    })
+
+    expect(computeActualDurationMinutes(exec, plan)).toBe(0)
+  })
+
+  it('returns 0 when all blocks skipped', () => {
+    const plan = makePlan([5, 10])
+    const exec = makeExec({
+      status: 'ended_early',
+      blockStatuses: [
+        { blockId: 'block-0', status: 'skipped' },
+        { blockId: 'block-1', status: 'skipped' },
+      ],
+    })
+
+    expect(computeActualDurationMinutes(exec, plan)).toBe(0)
+  })
+
+  it('rounds to 0.1 minute granularity', () => {
+    const plan = makePlan([3])
+    const exec = makeExec({
+      status: 'ended_early',
+      blockStatuses: [{ blockId: 'block-0', status: 'skipped' }],
+    })
+
+    const result = computeActualDurationMinutes(exec, plan, 45)
+    expect(result).toBe(0.8)
+  })
+
+  // Red-team RT-5: input validation on currentBlockElapsedSeconds.
+  it('ignores NaN currentBlockElapsedSeconds', () => {
+    const plan = makePlan([3, 8])
+    const exec = makeExec({
+      activeBlockIndex: 1,
+      status: 'ended_early',
+      blockStatuses: [
+        { blockId: 'block-0', status: 'completed' },
+        { blockId: 'block-1', status: 'skipped' },
+      ],
+    })
+
+    const result = computeActualDurationMinutes(exec, plan, Number.NaN)
+    expect(result).toBe(3)
+    expect(Number.isNaN(result)).toBe(false)
+  })
+
+  it('ignores negative currentBlockElapsedSeconds', () => {
+    const plan = makePlan([3, 8])
+    const exec = makeExec({
+      activeBlockIndex: 1,
+      status: 'ended_early',
+      blockStatuses: [
+        { blockId: 'block-0', status: 'completed' },
+        { blockId: 'block-1', status: 'skipped' },
+      ],
+    })
+
+    expect(computeActualDurationMinutes(exec, plan, -120)).toBe(3)
+  })
+
+  it('caps partial elapsed at the active block planned duration', () => {
+    // If a stale timer from a different block somehow passes through, we should
+    // never add more than one block's worth of partial time.
+    const plan = makePlan([3, 8])
+    const exec = makeExec({
+      activeBlockIndex: 1,
+      status: 'ended_early',
+      blockStatuses: [
+        { blockId: 'block-0', status: 'completed' },
+        { blockId: 'block-1', status: 'skipped' },
+      ],
+    })
+
+    // 99999 seconds would add absurd minutes; should be capped at block-1's 8*60=480s.
+    const result = computeActualDurationMinutes(exec, plan, 99999)
+    expect(result).toBe(3 + 8)
+  })
+
+  it('clamps when blockStatuses has more entries than plan.blocks', () => {
+    const plan = makePlan([3, 8])
+    const exec = makeExec({
+      activeBlockIndex: 2,
+      status: 'completed',
+      blockStatuses: [
+        { blockId: 'block-0', status: 'completed' },
+        { blockId: 'block-1', status: 'completed' },
+        { blockId: 'block-phantom', status: 'completed' },
+      ],
+    })
+
+    // Only the first two entries have a corresponding plan block; the phantom
+    // status must not contribute (it would crash otherwise without the clamp).
+    expect(computeActualDurationMinutes(exec, plan)).toBe(11)
   })
 })

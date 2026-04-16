@@ -6,13 +6,22 @@ import {
   buildPausedExecution,
   buildResumedExecution,
   buildStartedBlock,
+  computeActualDurationMinutes,
   loadSession,
   saveExecution,
 } from '../services/session'
-import { clearTimerState, flushTimerForBlock, recoverTimer } from '../services/timer'
+import { clearTimerState, flushTimerForBlock, readTimerState, recoverTimer } from '../services/timer'
 
 export type SessionRunnerOptions = {
   getAccumulatedElapsed?: () => number
+  /**
+   * Returns the current effective block duration in seconds (i.e. the value
+   * a Shorten action landed on, or the default block duration otherwise).
+   * Used by the visibility / beforeunload flush paths so a shortened timer
+   * is not silently reverted when the user backgrounds the tab before the
+   * 5s interval writes.
+   */
+  getEffectiveDurationSeconds?: () => number | undefined
 }
 
 export function useSessionRunner(
@@ -99,7 +108,19 @@ export function useSessionRunner(
       const exec = executionRef.current
       const p = planRef.current
       if (!exec || !p) return false
+      const onLastBlock = exec.activeBlockIndex >= p.blocks.length - 1
+      const timer =
+        onLastBlock && status === 'skipped'
+          ? await readTimerState()
+          : undefined
       const { execution: updated, isLast } = buildAdvancedBlock(exec, p, status)
+      if (isLast) {
+        const partialSeconds =
+          timer?.executionLogId === exec.id
+            ? timer.accumulatedElapsed
+            : undefined
+        updated.actualDurationMinutes = computeActualDurationMinutes(updated, p, partialSeconds)
+      }
       await persist(updated)
       await clearTimerState()
       return isLast
@@ -120,8 +141,18 @@ export function useSessionRunner(
   const endSession = useCallback(
     async (reason?: string) => {
       const exec = executionRef.current
-      if (!exec) return
-      await persist(buildEndedSession(exec, reason))
+      const p = planRef.current
+      if (!exec || !p) return
+      const timer = await readTimerState()
+      const ended = buildEndedSession(exec, reason)
+      const ownedElapsed =
+        timer?.executionLogId === exec.id ? timer.accumulatedElapsed : undefined
+      ended.actualDurationMinutes = computeActualDurationMinutes(
+        ended,
+        p,
+        ownedElapsed,
+      )
+      await persist(ended)
       await clearTimerState()
     },
     [persist],
@@ -158,8 +189,10 @@ export function useSessionRunner(
   )
 
   const getAccumulatedElapsedRef = useRef(options?.getAccumulatedElapsed)
+  const getEffectiveDurationRef = useRef(options?.getEffectiveDurationSeconds)
   useEffect(() => {
     getAccumulatedElapsedRef.current = options?.getAccumulatedElapsed
+    getEffectiveDurationRef.current = options?.getEffectiveDurationSeconds
   })
 
   useEffect(() => {
@@ -171,7 +204,10 @@ export function useSessionRunner(
       if (exec.status !== 'in_progress' && exec.status !== 'paused') return
       const bs = exec.blockStatuses[exec.activeBlockIndex]
       if (bs?.status !== 'in_progress') return
-      void flushTimer(getElapsed())
+      // Pass the effective duration so a shortened block is not reverted when
+      // the user backgrounds or closes the tab before the 5s interval tick.
+      const effectiveDuration = getEffectiveDurationRef.current?.()
+      void flushTimer(getElapsed(), effectiveDuration)
     }
 
     const onVisibility = () => {

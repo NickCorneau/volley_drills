@@ -1,10 +1,25 @@
 /**
  * Progression chains — ordered drill sequences with gating criteria.
  *
- * Default gating: 70% success on the drill's success metric (D80,
- * Volleyball Canada development matrix).
+ * `defaultGatingThreshold: 0.7` is the **latent** true-rate target (D80,
+ * Volleyball Canada development matrix). It is NOT the raw observed gate.
+ * The operational progression gate (D104, specified in
+ * docs/specs/m001-adaptation-rules.md) is:
+ *   - minimum 50 scored contacts in the same drill-variant + success-rule
+ *     + stable-fatigue context (no progression signal below that);
+ *   - a Bayesian posterior rule: progress only when
+ *     P(p_corrected >= 0.70 | x_corrected, n) >= 0.80 under a Jeffreys
+ *     beta-binomial prior, which at n=50 resolves to >= 38 corrected
+ *     "Good" reps (boundary ~76% corrected);
+ *   - a pre-calibration raw proxy of 41/50 (general) or 42/50
+ *     (injury-sensitive) until personal bias calibration exists.
  *
- * Source: research-output/drill-library-content-structure.md
+ * The progression engine that applies this rule is M001-build scope.
+ * v0b surfaces only show informational feedback below the gate and
+ * cap outcome at `hold` when N < 50 (see V0B-11).
+ *
+ * Source: research-output/drill-library-content-structure.md,
+ * docs/research/binary-scoring-progression.md
  * Schema: app/src/types/drill.ts (ProgressionChain, ProgressionLink)
  */
 
@@ -226,10 +241,13 @@ const chain6: ProgressionChain = {
   ],
 }
 
+// chainCooldown is the Downshift chain (D105). Framed as transition/comfort, not
+// recovery or injury prevention. Stretching is optional and sits inside the
+// Downshift block rather than claiming recovery benefit.
 const chainCooldown: ProgressionChain = {
   id: 'chain-cooldown',
-  name: 'Cool-down and Recovery',
-  focus: 'Post-session downshift. Mandatory; cannot be removed from session.',
+  name: 'Downshift',
+  focus: 'Post-session transition and comfort (D105). Mandatory block; cannot be removed.',
   drillIds: ['d25', 'd26'],
   defaultGatingThreshold: 1.0,
   links: [
@@ -237,7 +255,8 @@ const chainCooldown: ProgressionChain = {
       fromDrillId: 'd25',
       toDrillId: 'd26',
       direction: 'progression',
-      description: 'Walk cool-down → add stretching sequence. Both should run in every session.',
+      description:
+        'Downshift walk → add optional light stretching. Both fit inside the 2–3 minute wrap block.',
     },
   ],
 }

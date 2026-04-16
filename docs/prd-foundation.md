@@ -6,7 +6,7 @@ stage: planning
 type: core
 authority: product scope, workflow, object model, MVP requirements, courtside UX requirements, drill metadata spec
 summary: "PRD: user, workflow, object model, MVP scope, activation posture, and courtside UX requirements."
-last_updated: 2026-04-15
+last_updated: 2026-04-16
 depends_on:
   - docs/vision.md
   - docs/decisions.md
@@ -76,7 +76,7 @@ Once the user edits a session, asks for a fresh one, or returns for repeat use, 
 
 - time profile (`15`, `25`, `40+`)
 - net available (`yes`, `no`)
-- wall or fence available (`yes`, `no`)
+- wall or fence available (`yes`, `no`) — defaults to `no` for a beach-first product; wall is a minority environment for amateur beach users and wall-gated drills are conditional inventory (see D102 and `docs/research/solo-training-environments.md`)
 - balls (`1`, `many`)
 - markers (`none`, `improvised`, `cones`)
 - wind (`calm`, `light wind`, `strong wind`)
@@ -108,6 +108,10 @@ Later objects:
 - `Program`
 - `ProgressionRule`
 - `CoachShare`
+- `SessionParticipant` — UUID-addressed participant row with `sideIndex`, `slotIndex`, `role`, `source`, nullable `localProfileId`, nullable `teamId`, and `displayNameSnapshot`; introduced when session records grow beyond `playerCount: 1 | 2`. Per `D115`, this is the mandatory shape when partner identity first lands; no ad-hoc partner-name fields on `Session`.
+- `PlayerProfile` — optional durable local person identity (aliases, contact hints, discoverable flag, merged-into pointer, archive timestamp); no account layer, discoverability off by default.
+- `Team` — first-class two-member durable object; only ships after the four `D117` graduation conditions are met (measurable recurrent-pair behavior, indirect team-affordance demand, healthy trust metrics, selection-bias-resistant uplift evidence). See `O13` and `docs/research/persistent-team-identity.md`.
+- `TeamConsent` — append-only ledger of separate, independently revocable grants per scope (`link_identity`, `share_session_history`, `share_progression`, `share_recommendations`) with `status`, `scope`, `validFrom`, and `validTo`; required before any Team-adjacent sharing ships per `D116`.
 
 ## Canonical local-first contracts
 
@@ -143,6 +147,18 @@ Every drill family must carry generator-ready metadata for reliable selection, v
 - variant parameter knobs (the dimensions that change between variants within a family): target size, distance, constraint type, rep count, rest ratio, wind adaptation. These create perceived variety and progression without inventing new drills.
 
 This expands the original 12-field contract with feed type, structured environment flags, and an explicit fatigue cap — all required for safe swapping, honest solo-framing, and technique-protective load management. The variant-knob model is consistent with coaching-standard drill definitions (FIVB drillbook) and is the primary mechanism for session freshness in a small library.
+
+### Teaching-points style
+
+Teaching points prefer external, outcome-focused cues (target, ball behavior, set-window placement, environmental read) over internal body-part cues. Attentional-focus research (Wulf and colleagues) consistently finds external focus produces better retention and transfer once a basic movement pattern exists, which describes our self-coached amateur user after the first session. Body-part language belongs in warm-up content where joint preparation is the point (e.g., "load both ankles before landing"), not in skill drill cues.
+
+Applied to `Drill.teachingPoints`:
+
+- Prefer: "send the ball to the set-window marker", "pass lower and tighter in wind", "watch the ball land on the target", "serve at the seam".
+- Avoid as primary cues: "rotate your shoulder", "keep your elbow here", "bend your knees more" unless the drill is explicitly a technique-isolation block.
+- Treat the first two items in `teachingPoints` as active in-drill cues; remaining items are pre-block prep-screen context. This aligns with `D51` (one visible cue at a time) and respects the guidance hypothesis (fewer, better-placed cues beat constant correction).
+
+See `docs/research/beach-training-resources.md` "Skill acquisition principles synthesis (2026-04-16)" for the evidence base and `O14` for the open question about cue cadence and fading.
 
 The machine-readable source of truth for this contract is `app/src/types/drill.ts`. The structured drill catalog is `app/src/data/drills.ts` (26 drills with full metadata). Progression chains are `app/src/data/progressions.ts`. Session archetypes and block layouts are `app/src/data/archetypes.ts` with types in `app/src/types/session.ts`.
 
@@ -188,6 +204,7 @@ The MVP envelope is broader than the first implementation-ready slice. Use `docs
 - Social/community feed or community challenges
 - Recruiting/tournament tooling
 - Heavy team administration suite
+- Persistent partner / team identity layer (durable `Team` object, shared progression, tagging / sharing / invite / visibility UI) — tracked as `O13`; gated on all four `D117` conditions and on the forward-compatible hooks in `D115`/`D116`. M001 and v0b stay on `playerCount: 1 | 2` with no partner identity. See `docs/research/persistent-team-identity.md`.
 - Full video analytics or computer vision stack
 - Autonomous AI coaching decisions
 - Open-ended AI coach chat as primary UX
@@ -240,6 +257,7 @@ These were previously open. Answers are drawn from research and product discussi
 - **Which skill tracks ship first?** The first implementation-ready slice stays in the pass / serve-receive family. For M001, solo sessions should be framed as passing fundamentals and pair + net sessions should carry the highest-trust serve-receive transfer work. Serve and set are near-following tracks, but they are not required for the thinnest initial milestone.
 - **What minimum drill metadata is required?** See drill metadata section above. The contract stays at 12 required fields, but several of those fields must be structured objects so deterministic assembly can reason about goal tags, environment sensitivities, load flags, difficulty tier, and transfer realism.
 - **Solo vs pair optimization?** Solo-first with pair-compatible variants. Drills should have solo variants wherever possible, be clearly marked when pair-only, and treat partner + net sessions as the primary route to true serve-receive transfer.
+- **What environment does "solo" assume?** Default to **open sand with a ball** (archetype `solo_open`), not wall access. Wall-dependent drills are conditional inventory, available only when the user explicitly indicates a wall in the pre-session context. The solo archetype priority is `solo_net` > `solo_wall` > `solo_open` per D103: net wins when toggled, wall is reached only when explicitly toggled without net, and open is the default. See D102 and `docs/research/solo-training-environments.md`.
 - **What adaptation logic ships first?** Rules-first. Transparent rule-based progression and deload logic is the only acceptable baseline.
 - **What AI assistance belongs in Phase 1?** None in the critical path. It may only be used for optional, copy-only explanation of deterministic 'why' logic or rephrasing cues.
 - **What are the first planning defaults for adaptation?** Use explicit pass-first `progress / hold / deload` rules. See `docs/specs/m001-adaptation-rules.md`.
@@ -257,7 +275,7 @@ These were previously open. Answers are drawn from research and product discussi
 
 ## Open questions
 
-- What exact coach premium model should follow the shared backbone: direct coach-to-client workflow, centralized expert access, or both?
+- What exact coach premium model should follow the shared backbone? **Directional lean 2026-04-16**: BYOC-lite coach clipboard with athlete-side monetization first (`D106`, `D107`); centralized expert / Future-style access is explicitly not a default candidate. Open details are the pricing shape of the "coach-connected" athlete tier and the threshold of coach-side usage that would justify adding a coach seat SKU (see `D108` and `docs/research/coach-facing-business-models.md`).
 - How opinionated should the first multi-week planning surface be for self-guided users versus coaches?
 - What is the smallest useful weekly progress surface that supports multi-week plans without turning the product into a dashboard?
 - What exact sRPE-load change caps and deload thresholds are appropriate for amateur beach sessions? (Needs sports scientist/S&C review)

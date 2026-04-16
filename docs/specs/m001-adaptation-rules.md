@@ -6,10 +6,12 @@ stage: validation
 type: spec
 authority: pass-first progress/hold/deload thresholds and rules
 summary: "Rules-first progress/hold/deload thresholds for the pass-first loop."
-last_updated: 2026-04-12
+last_updated: 2026-04-16
 depends_on:
   - docs/milestones/m001-solo-session-loop.md
   - docs/specs/m001-review-micro-spec.md
+  - docs/research/regulatory-boundary-pain-gated-training-apps.md
+  - docs/research/srpe-load-adaptation-rules.md
 decision_refs:
   - D11
   - D18
@@ -18,19 +20,24 @@ decision_refs:
   - D63
   - D64
   - D65
+  - D80
+  - D84
+  - D86
+  - D104
+  - D113
 ---
 
 # M001 Adaptation Rules
 
 ## Governing decisions
 
-D11 (rules-first adaptation), D63 (one dimension at a time), D64 (deload reduces serving/jumping), D65 (spacing rule).
+D11 (rules-first adaptation), D63 (one dimension at a time), D64 (deload reduces serving/jumping), D65 (spacing rule), D84 (sRPE-load is the internal-load primitive), D113 (sharpened sRPE-load operating bands, `baseline3` + `peak30` + rolling-14d, minimum-history phases).
 
 ## Purpose
 
 Define the first rules-first adaptation model for the passing-fundamentals / serve-receive loop, including the minimum safety contract that gates and shapes every session.
 
-This is a planning default for M001, not a claim that the thresholds are perfect forever. Exact progression/deload thresholds and sRPE-load change caps need expert review before public launch.
+This is a planning default for M001, not a claim that the thresholds are perfect forever. The sRPE-load change caps are no longer placeholders: `D113` sharpens them against the post-ACWR literature (see `docs/research/srpe-load-adaptation-rules.md`), but the band widths and tester acceptance still need field validation per `D91`.
 
 Favor trust and safety over sensitivity. A conservative system that explains itself is better than a "smart" system reacting to noisy self-report data.
 
@@ -42,14 +49,25 @@ Safety in M001 is enforced by workflow structure — structured fast taps that g
 
 The product is general training support, not medical advice. It does not diagnose injury, treat conditions, or claim to reduce injury risk through personalized risk scoring.
 
+Cross-jurisdiction framing, feature-by-feature mapping, the avoid-phrase list, and copy banks live in `docs/research/regulatory-boundary-pain-gated-training-apps.md`. That note is authoritative for how `D86` is operationalized in surfaces and copy. Until target launch markets are chosen, the default posture is the **strictest credible interpretation** across US / EU / UK / Canada / Australia.
+
 The product will **not**:
 
 - diagnose or name specific injuries
 - provide return-to-play guidance for specific conditions
 - compute or display injury-risk scores (no ACWR "danger zone" messaging)
 - claim to prevent injury through personalization
+- present the pain-triggered session alternative as rehab, recovery from injury, or a pain-relief protocol
+- generate interpreted alerts that infer a specific medical condition from user-specific data
 
-Visible copy: "This is training guidance, not medical advice. You are responsible for your choices."
+Avoid-phrase list (applies to every user-visible surface, feature name, release note, marketing or app-store copy): `prescribe`, `dose`, `therapy`, `rehab / rehabilitation`, `treat pain`, `alleviate pain`, `pain relief`, `recover your injury`, `manage your injury`, `injury recovery plan`, `return-to-play / return-to-sport protocol`, `medically safe progression`, `clinical grade`, `clinically proven`, `detect / screen / red flag` (in the symptom-interpretation sense), `prevent injury`, `reduce injury risk`, `manage a condition`, `monitor your condition`, `our algorithm knows when you should seek care`. Preferred wellness vocabulary for pain-triggered alternatives: `lighter`, `lower-load`, `lower-impact`, `skip today`. The word `recovery` is only acceptable when it unambiguously refers to post-exercise physiological recovery (cool-down, rest day, sleep), not injury recovery.
+
+Visible copy:
+
+- "This is training guidance, not medical advice. You are responsible for your choices."
+- Pain-gate body (re-routed session): "We've switched you to lower-load technique work today. You can also skip training if you prefer."
+- Pain-gate override warning: "If pain is severe, new, worsening, or persistent, stop training and consult a qualified clinician."
+- Stop/seek-help: fixed, generic symptom list as specified below; not interpreted per-user.
 
 ### Pre-session safety check
 
@@ -90,7 +108,7 @@ Copy: "Stop training. If symptoms are severe or don't resolve quickly, call emer
 
 Every session must include:
 
-- **Warm-up block** — cannot be removed; can be shortened to a minimum version. Content: ankle/landing preparation, shoulder activation, gradual intensity ramp.
+- **Warm-up block** — cannot be removed; can be shortened to a minimum version. Content: ankle/landing preparation, shoulder activation, gradual intensity ramp, plus one short "read today's conditions" element (track a lofted ball in the wind, feel the sand, note the sun angle) so the session starts with environmental calibration rather than cold technique. The reading element reinforces the wind capture from `D93` with a practice behavior, not just a metadata tag.
 - **Main work blocks**
 - **Cool-down block** — cannot be removed; can be shortened to a minimum version. Content: gentle movement and light stretching.
 
@@ -150,22 +168,99 @@ Safety note:
 
 ## sRPE-load as the internal load primitive
 
-Compute: `sRPE-load = sessionRpe × sessionDurationMinutes`
+Compute: `sRPE-load = sessionRpe × sessionDurationMinutes` (abbreviated `session_load`, units **AU**).
 
 This is the minimum viable internal load signal. It is well-validated across multiple sports, requires no wearables, and combines intensity and duration into a single number. It replaces raw RPE alone as the primary load signal for between-session adaptation.
 
 Use sRPE-load for:
 
 - Detecting back-to-back hard sessions
-- Enforcing conservative week-to-week change caps
-- Triggering automatic deload after high-load sessions
+- Enforcing conservative change caps against the athlete's own recent baseline
+- Triggering automatic deload after high-load or novelty-peak sessions
 - Scaling down sessions when returning from a gap
 
-Planning defaults (exact thresholds need expert calibration):
+### Derived variables (engine contract)
 
-- If last session sRPE-load was in the top quartile of the user's recent history, default the next session to hold or deload
-- Week-to-week sRPE-load should not increase by more than ~20-30% (placeholder pending expert review)
-- No back-to-back sessions where both exceed the user's recent median sRPE-load unless the user explicitly overrides
+| Variable | Deterministic definition |
+|---|---|
+| `session_load` | `sessionRpe × sessionDurationMinutes` |
+| `eligible_session` | non-missing sRPE and minutes, completed, no symptom-driven stop, no moderate/worsening pain flag, review present |
+| `baseline3` | median of the last 3 **eligible** sessions within the prior 42 days |
+| `peak30` | maximum of all completed `session_load` values in the prior 30 days |
+| `curr14` | sum of completed `session_load` values in the rolling 14-day window including the current session |
+| `prev14` | sum of completed `session_load` values in the immediately preceding 14-day window |
+| `trusted_history` | at least 5 eligible sessions and at least 28 days of coverage |
+| `emerging_history` | 3-4 eligible sessions over at least 14 days |
+
+Rolling 14-day windows (not calendar weeks) are used because target users train 1-3 times per week, so ISO-week buckets are too sparse and jittery. See `docs/research/srpe-load-adaptation-rules.md` for the literature synthesis.
+
+### Absolute session envelope (product guardrail)
+
+The app's own 10-20 minute at RPE 3-8 design implies a **30-160 AU** envelope. Product-envelope bands, **not** universal sport-science injury thresholds:
+
+- **30-45 AU** — very light
+- **45-100 AU** — usual
+- **100-130 AU** — high for this product
+- **>130 AU** — atypically high; never auto-Progress from this band
+
+These bands matter mainly when individual history is sparse and the engine does not yet have a trustworthy `baseline3`.
+
+### Change-band defaults (sharpened)
+
+For this 1-3 sessions/week amateur skill-dominant population:
+
+- **0% to +10% above `baseline3`** — default Progress zone
+- **+10% to +15%** — conditional Progress only (no prior Progress in the last 3 eligible sessions; `session_load ≤ 1.10 × peak30`)
+- **+15% to +20%** — Hold (single-session overshoot; do not progress from it)
+- **>+20% short-term increase** (via `curr14 / prev14`) — Deload
+- **>+10% above `peak30`** (single-session novelty spike) — Deload
+
+Rationale: the post-ACWR literature supports individualized baselines and novelty-spike avoidance better than any single ratio; a 2025 5,205-runner cohort found that single sessions above +10% of the prior 30-day peak increased injury rates while ACWR and naïve weekly ratios did not. See `docs/research/srpe-load-adaptation-rules.md` and `D113`.
+
+### Back-to-back and top-quartile hints
+
+- Do not stack two sessions both above `baseline3` on consecutive calendar days without an override.
+- If two **Progress** verdicts occurred in the last 3 eligible sessions, force one **Hold** before another upward step (rule 13 in the precedence table below).
+
+## Precedence-ordered rule table
+
+When several rows match, the **highest row wins** (rule 1 beats rule 15). This table is the authoritative decision spec for the sRPE-load engine; the prose `Progress` / `Hold` / `Deload` sections below remain correct but must not contradict this table.
+
+| Rank | Condition | Verdict |
+|---|---|---|
+| 1 | Session stopped early for pain, injury, dizziness, or illness | **Deload** |
+| 2 | Pain flag is more than mild, worsening, or still present the next day | **Deload** |
+| 3 | Mild/transient pain flag only, no symptom-driven stop | **Hold** (load counts in `curr14`; session is **not** `eligible`) |
+| 4 | Missing sRPE **or** missing minutes | **Hold** (exclude from rolling load and baseline; do not impute) |
+| 5 | Review missing but sRPE and minutes present | **Hold** (load counts in `curr14`; session is **not** `eligible`) |
+| 6 | Fewer than 3 eligible sessions in the prior 42 days | **Hold** (conservative mode; never auto-Progress) |
+| 7 | `session_load > 1.10 × peak30` | **Deload** (novel peak exposure) |
+| 8 | `session_load > 1.15 × baseline3` | **Deload** (single-session overshoot) |
+| 9 | `curr14 > 1.20 × prev14`, with ≥2 completed sessions in each window | **Deload** |
+| 10 | `1.05 × baseline3 < session_load ≤ 1.10 × baseline3`, no flags, last 2 eligible sessions symptom-free | **Progress** (default progress band) |
+| 11 | `1.10 × baseline3 < session_load ≤ 1.15 × baseline3`, no flags, `session_load ≤ 1.10 × peak30`, and the **prior eligible verdict was Hold** | **Progress** (conditional; step-up-then-repeat shape) |
+| 12 | `0.90 × baseline3 ≤ session_load ≤ 1.05 × baseline3` | **Hold** (baseline consolidation) |
+| 13 | Two **Progress** verdicts in the last 3 eligible sessions | **Hold** (force one consolidation session) |
+| 14 | Three consecutive eligible sessions each `< 0.85 × baseline3`, **or** `curr14 < 0.80 × prev14` with no pain/gap flags | **Progress** (under-stimulation) |
+| 15 | `session_load > 130 AU` (high absolute band) | **Hold** by default; **Deload** if any other red flag also matches |
+
+Engineering notes:
+
+- Sessions that fall in rules 1, 3, 4, 5 add to recent exposure (`curr14`) but are **excluded** from `eligible_session` and therefore from `baseline3`.
+- Rule 14 is an "under-stim drift-up" rule; it protects against an engine that defaults to Hold forever after a light stretch. It never fires when any red flag or gap condition is active.
+- The drill-level binary progression gate (`D104`) sits in front of rule 10 / 11: even if sRPE-load qualifies for **Progress**, the drill's scored-contact window must also meet the D104 minimum before a difficulty or volume step is applied.
+
+## Minimum-history phases
+
+| Phase | Criterion | Allowed verdicts |
+|---|---|---|
+| Conservative bootstrap | 0-2 eligible sessions, or less than 14 days of coverage | **Hold** or **Deload** only; never auto-Progress |
+| Emerging baseline | 3-4 eligible sessions over ≥14 days | Progress only in the +5% to +10% band, only with 2 clean prior eligible sessions |
+| Trusted baseline | ≥5 eligible sessions and ≥28 days of coverage | Full rule table active (rules 10, 11, 14 all available) |
+| Re-entry after short gap | More than 14 but fewer than 28 days since last eligible session | Drop back one phase for the next 2 eligible sessions |
+| Re-entry after long gap | ≥28 days since last eligible session | Treat as new user until 3 fresh eligible sessions are logged |
+
+Engineering one-liner: **the engine should not trust its own progression signal until it has at least 3 eligible sessions spanning at least 14 days, and it should not fully trust it until 5 eligible sessions spanning at least 28 days.**
 
 ## Scoring stance
 
@@ -203,6 +298,8 @@ The full 0–3 scale (3 = within ~1 step, 2 = within 2–3 steps, 1 = outside 2�
 
 ## Rules
 
+Authority note: the **Precedence-ordered rule table** above (with `baseline3`, `peak30`, and `curr14 / prev14`) is the authoritative decision surface for the sRPE-load gate. The prose `Progress` / `Hold` / `Deload` sections below describe the per-drill skill-metric gate (D80 / D104) and copy intent. When the two surfaces disagree numerically, the precedence table wins; the drill-level skill gate still sits in front of any `Progress` verdict that qualifies on sRPE-load grounds.
+
 ### Starter-session bootstrap
 
 For first-run starter sessions or drills that do not yet use pass scoring:
@@ -221,7 +318,7 @@ Move the next session slightly harder only if:
 - `attemptCount` meets the session minimum required to trust the signal, or the starter metric clearly met its target
 - `goodPassRate` meets or exceeds the session's pass target when pass scoring is in play
 - `sessionRpe` is in a moderate range such as `4-6`
-- the same result happens in `2` consecutive completed sessions
+- the same result happens in `2` completed sessions on different calendar days (not two sessions on the same day)
 - the review is complete; missing data never triggers progress
 
 Allowed progression changes (pick **one**, not multiple):
@@ -309,16 +406,45 @@ When `hold` is the outcome:
 
 ## Drill-level progression gating
 
-When a drill uses a binary success metric (Good / Not Good), 70% success across a block is the working threshold for advancing to a harder variant (D80). This is consistent with the session-level progression rules (which require `goodPassRate` to meet or exceed the session's pass target) and provides a concrete default when exact per-drill targets have not been calibrated.
+When a drill uses a binary success metric (Good / Not Good), 70% success is the **latent** rate target for advancing to a harder variant (D80). The raw observed rate is **not** the gate: because a self-scored `goodPassRate` is a noisy, directionally-biased proxy, progression is gated by a minimum-attempt window plus a **Bayesian posterior rule** with explicit pre-calibration proxy numbers (D104). Full evidence base, math, and source citations live in `docs/research/binary-scoring-progression.md`.
+
+Rules:
+
+- **Minimum scored contacts**
+  - fewer than `50` scored contacts in the window: **no progression signal**; default to `hold`
+  - `50+` scored contacts in the same drill-variant + success-rule + stable-fatigue context is the minimum gate-eligible window; smaller blocks of `15`–`20` attempts remain legitimate for in-session coaching feedback but never open the gate
+- **Bayesian posterior rule** (self-scored, with personal bias correction):
+  - progress only when `P(p_true_corrected >= 0.70 | x_corrected, n) >= 0.80` under a Jeffreys beta-binomial prior
+  - at `n = 50`, this means **`goodPassesCorrected >= 38`** (boundary ≈ `76%` corrected)
+  - `x_corrected = round(goodPassRateRaw · attemptCount) - borderlineSubtraction - personalBiasSubtraction`, where `personalBiasSubtraction` comes from the periodic 20-attempt calibration anchor block (shrunk toward the `+5` pp generic / `+8` pp injury-sensitive prior and EWMA-updated across anchor blocks)
+- **Pre-calibration raw proxy** (before personal bias calibration exists):
+  - general drill families: **`>= 41` raw `Good` out of `50`** (≈ 82% raw)
+  - injury-sensitive drill families (serving, jumping, high-load attacking): **`>= 42` raw `Good` out of `50`** (≈ 84% raw)
+- **Coach-, app-, or video-scored progression** keeps the 70% latent target and the same 50-attempt posterior rule, without the self-score bias correction (no `personalBiasSubtraction`, no borderline-review step)
+- **Hysteresis on the downside** (cost asymmetry):
+  - a near-miss gate session (raw `36`–`42` / `50` or corrected below the 38 / 50 line) defaults to `hold`, not `deload`
+  - deload requires stronger evidence — two consecutive corrected windows below `60%`, an independent readiness/pain signal, or ended-early for `fatigue` or `pain`
+- Attempt counts aggregate across consecutive completed sessions for the same drill-variant context; sessions ended early for `fatigue` or `pain` do not contribute toward the minimum
+- The session-level progression rules (moderate `sessionRpe`, review complete, two-day confirmation) still apply on top of the drill-level gate; meeting the drill gate is necessary but not sufficient
+
+The framing is decision-theoretic: the question at the gate is not "did the athlete hit 70%?" (a raw observed 70% leaves `P(true p ≥ 0.70)` near `0.49` at any sample size), but "is `P(true rate ≥ 70%)` at least `0.80`?" That 0.80 threshold corresponds to false progression being ~4× more costly than false hold, which is defensible for a self-coached, load-aware beach app.
+
+### Bias correction at score time
+
+Three layers make the self-score worth gating on.
+
+- **Every rep (forced-criterion prompt).** Do not ask "Was that good?" Ask the drill's observable success rule as one sentence, and instruct: **"If you are unsure, score Not Good."**
+- **Periodic calibration anchor (every few weeks or every few gate-eligible windows).** A 20-attempt block in which the athlete self-scores and an expert / trusted video audit also scores the same attempts. Raw `b = selfRate - expertRate` is shrunk toward the `+5` pp / `+8` pp prior and EWMA-updated; the result is the user's current `personalBiasSubtraction`.
+- **10-second borderline review (only near the boundary).** When the window's raw count lands in the `36`–`42 / 50` boundary zone, re-show the success rule and ask: **"How many of the reps you marked Good were borderline?"** (`0 / 1 / 2 / 3+`). Subtract that count before computing the posterior. When video is available, replace the question with two fast expert-scored anchor clips followed by the same tap.
 
 ## What still needs validation
 
-- minimum `attemptCount` needed before `goodPassRate` is stable enough to trust
+- whether the D104 50-attempt posterior rule (`38 / 50` corrected, `41 / 50` raw pre-calibration proxy, `42 / 50` for injury-sensitive) agrees with tester behavior, and whether the `+5` pp generic / `+8` pp injury-sensitive bias priors actually bracket what self-scores do against partner or video review on beach passing; the reasoning and comparable-product analogues are in `docs/research/binary-scoring-progression.md`, but the field signal for beach amateurs is still outstanding (`O12`)
 - exact pass-rate targets by drill family and level (70% is a working default from Volleyball Canada, not a proven threshold for this product)
 - delayed `sessionRpe` compliance versus immediate capture
 - whether two-session confirmation feels fair rather than slow
 - whether self-scored `Good` / `Not Good` agrees closely enough with partner or video review
-- exact sRPE-load change caps for amateur beach sessions (sports scientist / S&C review)
+- field validation of the sharpened sRPE-load bands (`D113`): whether the +5% to +10% default progress band, the +10% to +15% conditional band, the `peak30 × 1.10` novelty spike, and the `curr14 / prev14 > 1.20` cap feel fair and safe for the 1-3 sessions/week beach amateur cohort; derivation and source synthesis in `docs/research/srpe-load-adaptation-rules.md`
 - warm-up and cool-down content and minimum duration (volleyball coach review)
 - pain flag phrasing: whether "pain that changes how you move" is correctly interpreted by users (prototype testing)
 - courtside friction of pre-session safety taps in bright sun with sand/sweat
@@ -350,5 +476,7 @@ This keeps the cause-effect relationship between session changes and outcomes le
 - `docs/decisions.md`
 - `docs/specs/m001-review-micro-spec.md`
 - `docs/specs/m001-courtside-run-flow.md`
+- `docs/specs/m001-session-assembly.md` (environment defaults and solo archetype priority per `D102`/`D103`)
 - `docs/research/beach-training-resources.md`
+- `docs/research/solo-training-environments.md` (why wall access is not a safe default; what "solo" operationally means)
 

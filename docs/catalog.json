@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
   "repo_id": "volley_drills",
-  "last_updated": "2026-04-15",
+  "last_updated": "2026-04-16-j",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -11,7 +11,7 @@
   },
   "repo_state": {
     "stage": "validation",
-    "posture": "v0a prototype shipped; docs-first for M001 scope beyond v0a",
+    "posture": "v0a prototype shipped; v0b build in progress as D91 field-test artifact (D119)",
     "runtime": "cursor-first",
     "platform_bias": "wsl-first",
     "environment_contract": {
@@ -22,7 +22,7 @@
     },
     "active_milestone": "M001",
     "stack": "Vite + React + TypeScript + PWA + Dexie",
-    "blocking_gate": "Field-test evidence (D91) must pass before M001 moves into the full build",
+    "blocking_gate": "D91 field-test evidence against v0b (D119) must pass before M001 moves into the full build",
     "prototype_feedback": "docs/research/2026-04-12-v0a-runner-probe-feedback.md"
   },
   "entrypoints": [
@@ -383,10 +383,98 @@
       "status": "active"
     },
     {
+      "id": "minimum-viable-test-stack",
+      "path": "docs/research/minimum-viable-test-stack.md",
+      "type": "research",
+      "status": "active"
+    },
+    {
       "id": "v0a-runner-probe-feedback",
       "path": "docs/research/2026-04-12-v0a-runner-probe-feedback.md",
       "type": "research",
       "status": "active"
+    },
+    {
+      "id": "periodization-post-framework",
+      "path": "docs/research/periodization-post-framework.md",
+      "type": "research",
+      "status": "draft"
+    },
+    {
+      "id": "d91-retention-gate-evidence",
+      "path": "docs/research/d91-retention-gate-evidence.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "evidence base and interpretive framing for the D91 M001 go/no-go retention gate"
+    },
+    {
+      "id": "solo-training-environments",
+      "path": "docs/research/solo-training-environments.md",
+      "type": "research",
+      "status": "active"
+    },
+    {
+      "id": "binary-scoring-progression",
+      "path": "docs/research/binary-scoring-progression.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "minimum scored-contact threshold, self-scoring bias guardrails, and product policy shape for the binary Good/Not Good progression gate"
+    },
+    {
+      "id": "onboarding-safety-gate-friction",
+      "path": "docs/research/onboarding-safety-gate-friction.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "evidence base for first-run screen count, standalone vs folded safety-gate placement, and progressive profiling (sharpens O11; seeds O16)"
+    },
+    {
+      "id": "regulatory-boundary-pain-gated-training-apps",
+      "path": "docs/research/regulatory-boundary-pain-gated-training-apps.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "cross-jurisdiction regulatory posture (US/EU/UK/Canada/Australia) for the pain-gate + deterministic load rule + stop/seek-help bundle; avoid-phrases list and copy-audit findings supporting D86"
+    },
+    {
+      "id": "warmup-cooldown-minimum-protocols",
+      "path": "docs/research/warmup-cooldown-minimum-protocols.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "evidence base and ship-ready defaults for the mandatory warm-up and cool-down blocks in short (10–25 min) beach sessions (sharpens D85; seeds D105)"
+    },
+    {
+      "id": "coach-facing-business-models",
+      "path": "docs/research/coach-facing-business-models.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "evidence base for the coach-facing extension shape and the paid coach premium model question (flips O1 lean; seeds D106, D107, D108; adds centralized-marketplace to ruled-out)"
+    },
+    {
+      "id": "prescriptive-default-bounded-flex",
+      "path": "docs/research/prescriptive-default-bounded-flex.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "evidence base for the 'opinionated default + bounded escape hatches' posture, the six structured-feedback patterns, and AI-as-explainer wiring (reinforces D6/D11/D20/D21/D37/D43-D46/D74/D98; sharpens V0B-11; seeds O17)"
+    },
+    {
+      "id": "srpe-load-adaptation-rules",
+      "path": "docs/research/srpe-load-adaptation-rules.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "post-ACWR literature synthesis for the deterministic sRPE-load engine: baseline3 + peak30 + rolling-14-day variables, precedence-ordered rule table, minimum-history phases, and the +5-10% / +10-15% / +20% bands tuned for amateur 1-3 sessions/week skill-dominant use (sharpens D84; seeds D113)"
+    },
+    {
+      "id": "persistent-team-identity",
+      "path": "docs/research/persistent-team-identity.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "operational posture on O13 (persistent team identity for beach pairs); forward-compatible participant/profile/consent schema; graduation gate before a first-class Team object ships (resolves O13; seeds D114, D115, D116, D117)"
+    },
+    {
+      "id": "pre-telemetry-validation-protocol",
+      "path": "docs/research/pre-telemetry-validation-protocol.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "operational protocol for the M001 14-day validation cohort (recruitment / consent scripts, per-use micro-log and session-ledger schema with confidence flag and separate researcher-interpretation column, three signal-based pulses at days 3/7/11, 72-hour non-returner probe, preregistered one-page decision memo, role separation and readout-ordering rules, and the 5-page evidence packet); operationalizes D91's banded reading without changing thresholds"
     },
     {
       "id": "agent-documentation-contract",
@@ -518,7 +606,7 @@
     },
     {
       "path": "docs/research/local-first-pwa-constraints.md",
-      "focus": "iPhone and PWA platform constraints"
+      "focus": "iPhone/PWA platform constraints, the 2026 three-layer storage-durability model (ITP 7-day timer / Home Screen carveout / quota-pressure eviction + heuristic persistent mode), iOS 17.4-style IndexedDB regression risk, three-state save copy, and the real-device test protocol (sharpens D57; seeds D118 and O18)"
     },
     {
       "path": "docs/research/courtside-timer-patterns.md",
@@ -529,12 +617,64 @@
       "focus": "trust invariants and verification strategy"
     },
     {
+      "path": "docs/research/minimum-viable-test-stack.md",
+      "focus": "per-layer depth of investment, fake-indexeddb trust boundary, and deliberate under-investment list for the pre-field test stack"
+    },
+    {
       "path": "docs/research/dexie-schema-and-architecture.md",
       "focus": "Dexie schema and migration guidance"
     },
     {
       "path": "docs/research/2026-04-12-v0a-runner-probe-feedback.md",
       "focus": "prototype feedback, retest evidence, and pre-field-test priorities"
+    },
+    {
+      "path": "docs/research/periodization-post-framework.md",
+      "focus": "Phase 1.5 periodization vocabulary stub (PoST framework) for O2 multi-week planning"
+    },
+    {
+      "path": "docs/research/solo-training-environments.md",
+      "focus": "operational definition of 'solo' environment; default solo archetype and wall-access posture (resolves O4)"
+    },
+    {
+      "path": "docs/research/binary-scoring-progression.md",
+      "focus": "minimum scored-contact thresholds, self-scoring bias guardrails, and comparable-product analogues for the binary progression gate (sharpens D80 via D104; keeps O12 open)"
+    },
+    {
+      "path": "docs/research/d91-retention-gate-evidence.md",
+      "focus": "evidence base and interpretive framing for the D91 M001 go/no-go retention gate (kill-floor vs go-bar; novelty-effect enrichment signals)"
+    },
+    {
+      "path": "docs/research/onboarding-safety-gate-friction.md",
+      "focus": "public evidence on first-run screen count, standalone vs folded safety-gate placement, and progressive profiling (sharpens O11; seeds O16)"
+    },
+    {
+      "path": "docs/research/regulatory-boundary-pain-gated-training-apps.md",
+      "focus": "cross-jurisdiction regulatory posture for the pain-gate + deterministic load rule + stop/seek-help bundle; avoid-phrases list and copy-audit findings supporting D86"
+    },
+    {
+      "path": "docs/research/warmup-cooldown-minimum-protocols.md",
+      "focus": "evidence base and ship-ready defaults for the mandatory warm-up and cool-down blocks in short (10–25 min) beach sessions (Beach Prep Two/Three/Five, Downshift framing); sharpens D85, seeds D105"
+    },
+    {
+      "path": "docs/research/prescriptive-default-bounded-flex.md",
+      "focus": "opinionated default + bounded escape hatches vs locked plans vs empty scaffolding; six structured-feedback patterns; AI-as-explainer with deterministic reason trace (reinforces D6/D11/D20/D21/D37/D43-D46/D74/D98; sharpens V0B-11; seeds O17)"
+    },
+    {
+      "path": "docs/research/coach-facing-business-models.md",
+      "focus": "comparative coach-facing business models (coach-first SaaS, BYOC-lite, centralized expert, hybrid marketplace, institution); flips O1 lean to BYOC-lite; seeds D106, D107, D108; reshapes Phase 1.5 coach clipboard scope and Phase 2 posture"
+    },
+    {
+      "path": "docs/research/srpe-load-adaptation-rules.md",
+      "focus": "post-ACWR literature synthesis for the deterministic sRPE-load engine: baseline3 + peak30 + rolling-14-day variables, precedence-ordered rule table, minimum-history phases, and the +5-10% / +10-15% / +20% bands for amateur 1-3 sessions/week skill-dominant use (sharpens D84; seeds D113)"
+    },
+    {
+      "path": "docs/research/persistent-team-identity.md",
+      "focus": "persistent team identity posture for beach pairs (stay session-first with forward-compatible participant/consent hooks; no durable Team object now); comparative pair-sport consumer-app patterns; HCI and fitness-adherence evidence; local-first Automerge/Keyhive consent model; resolves O13 operationally and seeds D114, D115, D116, D117"
+    },
+    {
+      "path": "docs/research/pre-telemetry-validation-protocol.md",
+      "focus": "operational protocol for the M001 14-day validation cohort (recruitment / consent scripts, per-use micro-log and session-ledger schema, three signal-based pulses at days 3/7/11, 72-hour non-returner probe, preregistered one-page decision memo, role separation and readout-ordering rules, 5-page evidence packet); operationalizes D91's banded reading without changing thresholds"
     }
   ],
   "status_vocabularies": {

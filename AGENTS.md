@@ -6,7 +6,7 @@ stage: validation
 type: agent-contract
 summary: "Canonical prose repo contract: current state, read order, source-of-truth order, and repo-wide working constraints."
 authority: repo-wide routing, working constraints, and agent-facing orientation
-last_updated: 2026-04-15
+last_updated: 2026-04-16
 depends_on:
   - docs/catalog.json
   - docs/vision.md
@@ -18,7 +18,7 @@ depends_on:
 
 ## Identity
 
-Beach volleyball training workflow app for self-coached amateurs. A runnable v0a validation prototype exists under `app/` (React + Dexie + PWA). M001 remains blocked on field-test evidence (`D91`).
+Beach volleyball training workflow app for self-coached amateurs. A runnable v0a validation prototype exists under `app/` (React + Dexie + PWA); v0b build is in progress as the D91 field-test artifact (`D119`). M001 full build remains gated on D91 evidence against v0b.
 
 ## Purpose
 
@@ -60,11 +60,11 @@ Give agents one durable, concise repo contract for current state, read order, so
 ## Current State
 
 - **Phase**: 0 (validation)
-- **Posture**: runnable v0a prototype shipped; docs-first for M001 scope beyond v0a
+- **Posture**: v0a prototype shipped; v0b build in progress as D91 field-test artifact (`D119`)
 - **Active milestone**: `M001` Solo Session Loop
-- **Blocking gate**: field-test evidence (`D91`) must pass before M001 moves into the full build
+- **Blocking gate**: D91 field-test evidence against v0b (`D119`) must pass before M001 moves into the full build
 - **Prototype feedback**: start with `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for any prototype work
-- **Key open questions**: `O4`, `O5`, `O6`, `O7`, `O11`, `O12` in `docs/decisions.md`
+- **Key open questions**: `O4`, `O5`, `O6`, `O7`, `O11`, `O12`, `O14`, `O15`, `O16` in `docs/decisions.md`
 
 ## Cold-Start Protocol
 

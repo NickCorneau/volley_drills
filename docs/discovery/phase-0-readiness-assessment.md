@@ -221,7 +221,7 @@ Per `docs/discovery/phase-0-wedge-validation.md`:
 
 - Founder self-test and founder/friend pilot are **pre-gate filters**, not the full M001 evidence standard.
 - If the founder would not personally keep using it, stop and fix that before broader recruiting.
-- Official M001 go/no-go follows `D91`: `5+` testers each complete `2+` sessions within `14` days with `>50%` review completion; kill signal if fewer than `3` of `5` start a second session within `14` days.
+- Official M001 go/no-go follows `D91`: `5+` testers each complete `2+` sessions within `14` days; kill signal if fewer than `3` of `5` start a second session within `14` days. Read in bands (`0-1/5` strong negative, `2/5` ambiguous, `3/5` weak pass of floor, `4-5/5` first genuinely encouraging), require at least one enrichment signal, classify every second session as self-initiated vs human-prompted, and log context for completed **and missed** sessions. `>50%` review completion is an interpretation aid, not an independent gate. See `docs/research/d91-retention-gate-evidence.md`.
 - Signals like users explicitly asking for the next session or inviting a partner remain useful supporting evidence, but they do not override `D91`.
 - If session-2 retention misses the D91 bar: revisit the wedge, do not "build harder"
 

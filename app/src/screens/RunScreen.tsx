@@ -31,6 +31,9 @@ export function RunScreen() {
     getAccumulatedElapsed: useCallback(() => {
       return Math.max(0, blockDurRef.current - remainingRef.current)
     }, []),
+    getEffectiveDurationSeconds: useCallback(() => {
+      return blockDurRef.current > 0 ? blockDurRef.current : undefined
+    }, []),
   })
   const {
     plan,
@@ -378,7 +381,7 @@ export function RunScreen() {
             </h2>
             <p className="mt-2 text-sm text-text-secondary">
               {currentBlock.type === 'wrap'
-                ? 'You\u2019re in your cool-down. Skipping it may affect your recovery. Your progress will be saved.'
+                ? 'You\u2019re in your downshift. Two or three minutes of easy walking before you leave is an honest finish. Your progress will be saved.'
                 : 'You still have blocks remaining. Your progress will be saved and you can review what you completed.'}
             </p>
             <div className="mt-6 flex flex-col gap-3">

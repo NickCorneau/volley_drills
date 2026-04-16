@@ -8,6 +8,7 @@ import { SafetyIcon } from '../components/SafetyIcon'
 import { Button, Card, StatusMessage } from '../components/ui'
 import type { ExecutionLog, IncompleteReason, SessionPlan } from '../db'
 import { formatDurationLine, statusLabel } from '../lib/format'
+import { isSchemaBlocked } from '../lib/schema-blocked'
 import { routes } from '../routes'
 import { submitReview } from '../services/review'
 import { loadSession } from '../services/session'
@@ -80,6 +81,11 @@ function ReviewSessionContent({
       })
       navigate(routes.complete(executionLogId), { replace: true })
     } catch (err) {
+      // When another tab has triggered a schema upgrade, `db.close()` rejects
+      // the in-flight put. The `SchemaBlockedOverlay` is already taking over
+      // the UI, so suppress our own error state to avoid a flash of
+      // "Something went wrong" behind the overlay. Matches HomeScreen.
+      if (isSchemaBlocked()) return
       console.error('Review submit failed:', err)
       setSubmitError(
         'Something went wrong saving your review. Please try again.',
@@ -156,7 +162,13 @@ function ReviewSessionContent({
               Good passes
             </h2>
             <p className="mt-1 text-sm text-text-secondary">
-              Ball reached target zone or next contact was playable
+              <span className="font-medium text-text-primary">
+                Success rule:
+              </span>{' '}
+              ball reached the target zone or the next contact was playable.{' '}
+              <span className="font-medium text-text-primary">
+                If unsure, count it as Not Good.
+              </span>
             </p>
           </div>
           <PassMetricInput

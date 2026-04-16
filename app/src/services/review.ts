@@ -1,12 +1,15 @@
 import { db } from '../db/schema'
-import type { ExecutionLog, SessionPlan, SessionReview } from '../db/types'
+import type { DrillVariantScore, ExecutionLog, IncompleteReason, SessionPlan, SessionReview } from '../db/types'
 
 export interface SubmitReviewData {
   executionLogId: string
   sessionRpe: number
   goodPasses: number
   totalAttempts: number
-  incompleteReason?: 'time' | 'fatigue' | 'pain' | 'other'
+  drillScores?: DrillVariantScore[]
+  /** Optional pass-through for D104 / V0B-29; v0b does not prompt for this. */
+  borderlineCount?: number
+  incompleteReason?: IncompleteReason
   quickTags?: string[]
   shortNote?: string
 }
@@ -19,6 +22,8 @@ export async function submitReview(data: SubmitReviewData): Promise<void> {
     sessionRpe: data.sessionRpe,
     goodPasses: data.goodPasses,
     totalAttempts: data.totalAttempts,
+    drillScores: data.drillScores,
+    borderlineCount: data.borderlineCount,
     incompleteReason: data.incompleteReason,
     quickTags: data.quickTags,
     shortNote: data.shortNote,

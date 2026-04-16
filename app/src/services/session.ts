@@ -1,4 +1,4 @@
-import { db } from '../db'
+import { db, requestPersistentStorage } from '../db'
 import type {
   ExecutionLog,
   SessionDraft,
@@ -7,6 +7,17 @@ import type {
 } from '../db'
 import { buildPresetBlocks, PRESETS } from '../domain/presets'
 import { clearTimerState, readTimerState } from './timer'
+
+// V0B-25 / D118: request persistent storage on a real user-gesture save
+// boundary instead of at module load. WebKit grants persistence heuristically
+// and responds better to gesture-bound calls; session creation is the first
+// meaningful save boundary and always runs once per session. Fire-and-forget
+// because `requestPersistentStorage` already wraps errors and returns `false`
+// when the API is missing or rejected. See
+// `docs/research/local-first-pwa-constraints.md`.
+function requestPersistentStorageOnGesture(): void {
+  void requestPersistentStorage()
+}
 
 // --- Query / load ---
 
@@ -93,7 +104,7 @@ export async function createSession(
     id: planId,
     presetId: params.presetId,
     presetName: params.useRecovery
-      ? 'Recovery Technique Session'
+      ? 'Lighter Technique Session'
       : (preset?.name ?? 'Session'),
     playerCount: params.playerCount,
     blocks: blocks.map((b) => ({
@@ -126,6 +137,7 @@ export async function createSession(
     await db.sessionPlans.put(plan)
     await db.executionLogs.put(execution)
   })
+  requestPersistentStorageOnGesture()
   return execId
 }
 
@@ -197,6 +209,7 @@ export async function createSessionFromDraft(
       await db.sessionDrafts.delete('current')
     },
   )
+  requestPersistentStorageOnGesture()
   return execId
 }
 
@@ -284,6 +297,40 @@ export async function discardSession(exec: ExecutionLog): Promise<void> {
 
 export async function saveExecution(updated: ExecutionLog): Promise<void> {
   await db.executionLogs.put(updated)
+}
+
+// --- Duration computation ---
+
+export function computeActualDurationMinutes(
+  exec: ExecutionLog,
+  plan: SessionPlan,
+  currentBlockElapsedSeconds?: number,
+): number {
+  let totalSeconds = 0
+  const len = Math.min(exec.blockStatuses.length, plan.blocks.length)
+  for (let i = 0; i < len; i++) {
+    if (exec.blockStatuses[i].status === 'completed') {
+      totalSeconds += plan.blocks[i].durationMinutes * 60
+    }
+  }
+  // Guard against non-finite, negative, or absurdly large timer inputs that
+  // would otherwise persist NaN / bogus minutes on ExecutionLog.actualDurationMinutes
+  // and corrupt downstream adaptation-rules load math (docs/specs/m001-adaptation-rules.md).
+  if (
+    currentBlockElapsedSeconds !== undefined &&
+    Number.isFinite(currentBlockElapsedSeconds) &&
+    currentBlockElapsedSeconds > 0
+  ) {
+    const activeIdx = exec.activeBlockIndex
+    const activePlannedSeconds =
+      activeIdx >= 0 && activeIdx < plan.blocks.length
+        ? plan.blocks[activeIdx].durationMinutes * 60
+        : Infinity
+    // Cap partial time at the active block's planned duration so a stale or
+    // runaway timer can never inflate the session total beyond one full block.
+    totalSeconds += Math.min(currentBlockElapsedSeconds, activePlannedSeconds)
+  }
+  return Math.round((totalSeconds / 60) * 10) / 10
 }
 
 // --- Pure state builders (no DB, no side effects) ---

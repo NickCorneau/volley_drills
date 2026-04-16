@@ -2,9 +2,9 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './index.css'
+import './lib/pwa-register'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import { requestPersistentStorage } from './db'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -16,12 +16,13 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
-requestPersistentStorage().catch((err: unknown) => {
-  console.warn('Persistent storage request failed:', err)
-})
+// Note (V0B-25 / D118): `navigator.storage.persist()` is no longer called at
+// module load. WebKit grants persistence heuristically and responds better to a
+// real user-gesture save boundary; the call moved into `createSession` /
+// `createSessionFromDraft` (see `services/session.ts`). See
+// `docs/research/local-first-pwa-constraints.md`.
 
-if ('serviceWorker' in navigator) {
-  import('virtual:pwa-register').then(({ registerSW }) => {
-    registerSW({ immediate: true })
-  })
-}
+// Service worker registration is performed once at module load by the
+// side-effect import of `./lib/pwa-register` above. The hook exposed there
+// (`useAppRegisterSW`) is subscribed from `HomeScreen` / `CompleteScreen` to
+// surface an explicit update prompt at safe boundaries per D41.

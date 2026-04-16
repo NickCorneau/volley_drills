@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ResumePrompt } from '../components/ResumePrompt'
+import { UpdatePrompt } from '../components/UpdatePrompt'
 import { Button } from '../components/ui'
 import { formatInterruptedAgo } from '../lib/format'
+import { useAppRegisterSW } from '../lib/pwa-register'
+import { isSchemaBlocked } from '../lib/schema-blocked'
 import { routes } from '../routes'
 import {
   findPendingReview,
@@ -24,6 +27,7 @@ export function HomeScreen() {
   const navigate = useNavigate()
   const [state, setState] = useState<HomeState>({ kind: 'loading' })
   const acting = useRef(false)
+  const { needRefresh, updateApp } = useAppRegisterSW()
 
   const resolve = useCallback(async () => {
     try {
@@ -43,6 +47,12 @@ export function HomeScreen() {
       const count = await db.sessionPlans.count()
       setState({ kind: 'ready', hasHistory: count > 0 })
     } catch {
+      // When another tab has triggered a schema upgrade, `db.close()` in the
+      // `versionchange` handler will reject any in-flight reads with
+      // `DatabaseClosedError`. The `SchemaBlockedOverlay` already owns the UI
+      // in that case, so suppress our own error state to avoid a flash of
+      // "Something went wrong" behind the overlay.
+      if (isSchemaBlocked()) return
       setState({ kind: 'error' })
     }
   }, [])
@@ -129,6 +139,8 @@ export function HomeScreen() {
           Volley Drills
         </h1>
       </header>
+
+      <UpdatePrompt needRefresh={needRefresh} onUpdate={updateApp} />
 
       {state.kind === 'resume' && (
         <ResumePrompt

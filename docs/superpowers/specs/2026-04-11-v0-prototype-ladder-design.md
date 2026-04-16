@@ -43,6 +43,8 @@ open_question_refs:
 
 ## Agent Quick Scan
 
+> **Partially superseded (2026-04-16).** This doc predates `D97`-`D98` (no Session Prep screen in v0b), `D119` (v0b is the D91 field-test artifact, not a post-gate build), and the D94 palette update in `docs/decisions.md`. Where it disagrees with `docs/plans/2026-04-12-v0a-to-v0b-transition.md` or `docs/milestones/m001-solo-session-loop.md`, those docs win. The state coverage matrix and ladder concept remain useful context.
+
 - Use this doc for `v0a` vs `v0b`, prototype boundaries, and the shared state coverage matrix.
 - This doc reconciles newer decision-log canon against older PRD and discovery wording.
 - This is not the implementation plan. It tells us what to build first and what can stay stubbed.
@@ -147,8 +149,11 @@ For the current v0 scope, surface `1` and `2` players in the starter flow. That 
 The canonical M001 gate is `D91`:
 
 - `5+` testers each complete `2+` sessions within `14` days
-- `>50%` review completion
 - kill signal if fewer than `3` of `5` start a second session within `14` days
+- banded reading on the raw count (`0-1/5` strong negative, `2/5` ambiguous, `3/5` weak pass of floor, `4-5/5` first genuinely encouraging), at least one enrichment signal required, self-initiated vs human-prompted returns tracked explicitly
+- `>50%` review completion is an interpretation aid, not an independent gate
+
+See `docs/research/d91-retention-gate-evidence.md` for the binomial CI math, contamination mitigations, and full instrumentation list.
 
 ### `O4` / `O5`
 

@@ -79,9 +79,17 @@ export interface ExecutionLog {
   pausedAt?: number
   completedAt?: number
   endedEarlyReason?: string
+  actualDurationMinutes?: number
 }
 
 export type IncompleteReason = 'time' | 'fatigue' | 'pain' | 'other'
+
+export interface DrillVariantScore {
+  drillId: string
+  variantId: string
+  goodPasses: number
+  totalAttempts: number
+}
 
 export interface SessionReview {
   id: string
@@ -89,6 +97,17 @@ export interface SessionReview {
   sessionRpe: number
   goodPasses: number
   totalAttempts: number
+  drillScores?: DrillVariantScore[]
+  /**
+   * Schema-reserved for the three-layer self-scoring bias correction in
+   * D104 / docs/research/binary-scoring-progression.md. Captures how many
+   * of the `goodPasses` the athlete considers borderline. v0b does not
+   * compute the near-boundary zone or prompt for this value; leave
+   * `undefined`. M001-build will wire the 10-second borderline-review UI
+   * and the corrected-Bayesian posterior on top without a migration.
+   * Tracked as V0B-29.
+   */
+  borderlineCount?: number
   incompleteReason?: IncompleteReason
   quickTags?: string[]
   shortNote?: string
