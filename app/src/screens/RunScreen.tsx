@@ -383,7 +383,15 @@ export function RunScreen() {
     <div className="mx-auto flex w-full max-w-[390px] flex-col gap-6 pb-8">
       <div className="flex items-center justify-between pt-2">
         <SafetyIcon />
-        <span className="text-sm font-bold uppercase tracking-wider text-accent">
+        {/* Phase F8 (2026-04-19): phase label was `text-sm font-bold
+            uppercase tracking-wider` paired with all-caps source
+            strings ('WARM UP' / 'WORK' / 'DOWNSHIFT'). The audit
+            (`canvases/typography-review.canvas.tsx`) flagged the
+            uppercase-eyebrow voice as the app's single biggest
+            "SaaS tell"; `phaseLabel()` now returns sentence case and
+            the pill carries emphasis through accent color plus
+            `font-semibold` instead of through case + letter-spacing. */}
+        <span className="text-sm font-semibold text-accent">
           {phaseLabel(currentBlock.type)}
         </span>
         <span className="text-sm font-medium text-text-secondary">
@@ -392,7 +400,10 @@ export function RunScreen() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-text-primary">
+        {/* Phase F8 (2026-04-19): added `tracking-tight` to match the
+            Review / prep-screen display-heading treatment. Drill title
+            is the focal element when the timer isn't yet running. */}
+        <h1 className="text-2xl font-bold tracking-tight text-text-primary">
           {currentBlock.drillName}
         </h1>
         {currentBlock.courtsideInstructions && (

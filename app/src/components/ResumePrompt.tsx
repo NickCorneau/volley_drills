@@ -40,7 +40,12 @@ export function ResumePrompt({
         <p className="mt-1 text-sm text-text-secondary">{sessionName}</p>
 
         <div className="mt-5 rounded-[12px] bg-bg-warm p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
+          {/* Phase F8 (2026-04-19): was `text-xs font-semibold uppercase
+              tracking-wider`. Dropped the dashboard-eyebrow voice to
+              sentence-case `font-medium` supporting copy so the block
+              name beneath it (drill title) carries the visual weight.
+              See `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
+          <p className="text-xs font-medium text-text-secondary">
             Paused at
           </p>
           <p className="mt-1 font-semibold text-text-primary">

@@ -80,7 +80,12 @@ export function TransitionScreen() {
     <div className="mx-auto flex w-full max-w-[390px] flex-col gap-6 pb-8">
       <div className="flex items-center justify-between pt-2">
         <SafetyIcon />
-        <span className="text-sm font-bold uppercase tracking-wider text-text-secondary">
+        {/* Phase F8 (2026-04-19): was `text-sm font-bold uppercase
+            tracking-wider`. Dropped the dashboard-eyebrow voice to
+            `text-sm font-medium` sentence case; the "Transition"
+            label is a calm status marker, not a hero. See
+            `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
+        <span className="text-sm font-medium text-text-secondary">
           Transition
         </span>
         <span className="text-sm font-medium text-text-secondary">
@@ -135,10 +140,15 @@ export function TransitionScreen() {
       {skipError && <StatusMessage variant="error" message={skipError} />}
 
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
-          Up Next
+        {/* Phase F8 (2026-04-19): was `text-xs font-semibold uppercase
+            tracking-wider` eyebrow. Dropped to sentence-case `text-xs
+            font-medium` so the next-block h1 below carries the focal
+            weight. Drill-title h1 gained `tracking-tight` to match the
+            Review / prep-screen display-heading treatment. */}
+        <p className="text-xs font-medium text-text-secondary">
+          Up next
         </p>
-        <h1 className="text-2xl font-bold text-text-primary">
+        <h1 className="text-2xl font-bold tracking-tight text-text-primary">
           {nextBlock.drillName}
         </h1>
         <p className="text-sm text-text-secondary">

@@ -180,9 +180,15 @@ export function CompleteScreen() {
         aria-labelledby="summary-verdict"
         className="flex w-full flex-col items-center gap-3 text-center"
       >
-        <p className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
+        {/* Phase F8 (2026-04-19): was a `<p>` rendering `{summary.header}`
+            at `text-sm font-semibold uppercase tracking-wider`. Promoted
+            to `<h1>` so the page has a valid heading outline (was h2-only
+            before) and dropped the uppercase-eyebrow voice. The verdict
+            `<h2>` below is unchanged — still the focal sub-heading. See
+            `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
+        <h1 className="text-sm font-medium text-text-secondary">
           {summary.header}
-        </p>
+        </h1>
         {/* Verdict icon is a neutral steady-state glyph, not a warning.
             D86 compliance: no red, no warning iconography.
             The verdict word (aria-live polite below) carries the meaning
@@ -205,7 +211,10 @@ export function CompleteScreen() {
       </section>
 
       <Card className="w-full" aria-label="Session recap">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-text-secondary">
+        {/* Phase F8 (2026-04-19): dropped `uppercase tracking-wider` and
+            bumped weight from `semibold` to `medium`. Same restraint move
+            as the verdict header and the HomePrimaryCard eyebrows. */}
+        <p className="mb-3 text-sm font-medium text-text-secondary">
           Session recap
         </p>
         <dl className="flex flex-col gap-3 text-sm">

@@ -45,6 +45,18 @@ import { ResumePrompt } from './ResumePrompt'
  *   as the one thing on screen to attend to. See
  *   `docs/plans/2026-04-19-feat-phase-f1-home-calm-pass-plan.md` and
  *   `docs/research/japanese-inspired-visual-direction.md`.
+ *
+ * Phase F8 (2026-04-19) — Typography foundation:
+ * - All four primary-card eyebrows (`Ready for your first session?`,
+ *   `Review your last session`, `Today's suggestion`, `Your last
+ *   session`) dropped the `uppercase tracking-wider` utilities and
+ *   moved from `font-semibold` to `font-medium`. Pre-F8 they rendered
+ *   as uppercase dashboard-style labels that outweighed the content
+ *   line beneath them on Home — a direct hierarchy inversion flagged
+ *   by the 2026-04-19 typography audit (see
+ *   `canvases/typography-review.canvas.tsx` and
+ *   `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`).
+ *   Shibui restraint puts weight on the content, not the label.
  */
 
 // Phase F1 / F2: shared focal-zone surface for the four card variants.
@@ -167,7 +179,7 @@ function NewUserCard({ onStart }: { onStart: () => void }) {
       className={PRIMARY_CARD_CLASS}
     >
       <div>
-        <p className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
+        <p className="text-sm font-medium text-text-secondary">
           Ready for your first session?
         </p>
         <p className="mt-2 text-sm text-text-secondary">
@@ -203,7 +215,7 @@ function ReviewPendingCard({
       className={PRIMARY_CARD_CLASS}
     >
       <div>
-        <p className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
+        <p className="text-sm font-medium text-text-secondary">
           Review your last session
         </p>
         <p className="mt-1 text-base font-medium text-text-primary">
@@ -264,7 +276,7 @@ function DraftCard({
       className={PRIMARY_CARD_CLASS}
     >
       <div>
-        <p className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
+        <p className="text-sm font-medium text-text-secondary">
           Today&rsquo;s suggestion
         </p>
         <p className="mt-1 text-base font-medium text-text-primary">
@@ -325,7 +337,7 @@ function LastCompleteCard({
       className={PRIMARY_CARD_CLASS}
     >
       <div>
-        <p className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
+        <p className="text-sm font-medium text-text-secondary">
           Your last session
         </p>
         <p className="mt-1 text-base font-medium text-text-primary">

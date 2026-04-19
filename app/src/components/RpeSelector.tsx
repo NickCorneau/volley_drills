@@ -101,11 +101,18 @@ export function RpeSelector({
                   across the row. `\u00A0` (non-breaking space) reserves
                   the label height for chips without an anchor. `aria-
                   hidden` keeps the button's `aria-label` the sole
-                  accessible name — the anchor text is decorative here. */}
+                  accessible name — the anchor text is decorative here.
+                  Phase F8 (2026-04-19): anchor size lifted from
+                  `text-[10px]` to `text-xs` (12 px). The outdoor brief
+                  (`docs/research/outdoor-courtside-ui-brief.md`) freezes
+                  a 16 px body floor; 12 px is the principled minimum
+                  for decorative captions inside large tap targets,
+                  10 px is not. See
+                  `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
               <span
                 aria-hidden="true"
                 className={[
-                  'mt-0.5 text-[10px] uppercase tracking-wide',
+                  'mt-0.5 text-xs uppercase tracking-wide',
                   selected ? 'text-white/90' : 'text-text-secondary',
                 ].join(' ')}
               >
