@@ -17,8 +17,9 @@ depends_on:
 Volleyball personal training app for self-coached amateurs: structured session planning, courtside run mode, and rules-based adaptation. Beach-first in scope for M001 (see `docs/decisions.md` `D125` for the product-name rationale and beach-first / volleyball-inclusive positioning).
 
 **Stage**: Phase 0 validation.  
-**Prototype**: runnable v0a PWA under `app/`.  
-**Gate**: M001 remains blocked on field-test evidence (`D91`).
+**Build**: v0b Starter Loop is **feature-complete** as the D91 field-test artifact (`D119`) — Phases A, B, C (C-0 → C-5), E, and F (F1 – F12) all landed.  
+**Live**: https://volleydrills.nicholascorneau.workers.dev  
+**Gate**: M001 remains blocked on D91 field-test evidence against v0b. Remaining pre-field items are non-code (tester recruitment, founder replay spot-check, the cohort protocol in `docs/research/pre-telemetry-validation-protocol.md`).
 
 ## Quick Start
 
@@ -77,4 +78,5 @@ npm run deploy
 - Decision log: `docs/decisions.md`
 - PRD and object model: `docs/prd-foundation.md`
 - Roadmap: `docs/roadmap.md`
-- Prototype feedback backlog: `docs/research/2026-04-12-v0a-runner-probe-feedback.md`
+- v0b status registry (what's landed, what's deferred): `docs/plans/2026-04-16-003-rest-of-v0b-plan.md`
+- v0a retrospective feedback backlog: `docs/research/2026-04-12-v0a-runner-probe-feedback.md`

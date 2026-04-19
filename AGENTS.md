@@ -6,7 +6,7 @@ stage: validation
 type: agent-contract
 summary: "Canonical prose repo contract: current state, read order, source-of-truth order, and repo-wide working constraints."
 authority: repo-wide routing, working constraints, and agent-facing orientation
-last_updated: 2026-04-19-b
+last_updated: 2026-04-19-c
 depends_on:
   - docs/catalog.json
   - docs/vision.md
@@ -18,7 +18,7 @@ depends_on:
 
 ## Identity
 
-**Volleycraft** — volleyball training workflow app for self-coached amateurs. Beach-first in M001 scope; volleyball-inclusive long-run (see `D125` in `docs/decisions.md` and `docs/research/product-naming.md` for the naming rationale, the 13-test rubric, and the rename-scope guardrails — including which identifiers were deliberately not renamed). A runnable v0a validation prototype exists under `app/` (React + Dexie + PWA); v0b build is in progress as the D91 field-test artifact (`D119`). M001 full build remains gated on D91 evidence against v0b.
+**Volleycraft** — volleyball training workflow app for self-coached amateurs. Beach-first in M001 scope; volleyball-inclusive long-run (see `D125` in `docs/decisions.md` and `docs/research/product-naming.md` for the naming rationale, the 13-test rubric, and the rename-scope guardrails — including which identifiers were deliberately not renamed). The v0b Starter Loop (React + Dexie + PWA) is **feature-complete** under `app/` as the D91 field-test artifact (`D119`); Phases A/B/C/E/F all landed 2026-04-17 → 2026-04-19. M001 full build remains gated on D91 field-test evidence against v0b.
 
 ## Purpose
 
@@ -60,12 +60,12 @@ Give agents one durable, concise repo contract for current state, read order, so
 ## Current State
 
 - **Phase**: 0 (validation)
-- **Posture**: v0a prototype shipped; v0b build in progress as D91 field-test artifact (`D119`)
+- **Posture**: v0b Starter Loop **feature-complete** as the D91 field-test artifact (`D119`); Phases A, B, C (C-0 → C-5), E, and F (F1 – F12) all landed. Live at https://volleydrills.nicholascorneau.workers.dev.
 - **Active milestone**: `M001` Solo Session Loop
-- **Next milestone in queue**: `M002` Weekly Confidence Loop (post-M001 self-coached follow-on)
-- **Blocking gate**: D91 field-test evidence against v0b (`D119`) must pass before M001 moves into the full build
-- **Prototype feedback**: start with `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for any prototype work
-- **Key open questions**: `O4`, `O5`, `O6`, `O7`, `O11`, `O12`, `O14`, `O15`, `O16` in `docs/decisions.md`
+- **Next milestone in queue**: `M002` Weekly Confidence Loop (post-M001 self-coached follow-on, per `D124`)
+- **Blocking gate**: D91 field-test evidence against v0b (`D119`) must pass before M001 moves into the full build. Remaining pre-field items are **non-code**: tester recruitment (5+ testers), a founder replay spot-check against a dogfeed export, and the operational cohort protocol in `docs/research/pre-telemetry-validation-protocol.md`.
+- **Prototype feedback**: start with `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for any retrospective work against v0a; current v0b execution status lives in `docs/plans/2026-04-16-003-rest-of-v0b-plan.md`.
+- **Key open questions**: `O4`, `O5`, `O6`, `O7`, `O11`, `O12`, `O14`, `O15`, `O16`, `O18`, `O19` in `docs/decisions.md`.
 
 ## Cold-Start Protocol
 
@@ -136,6 +136,6 @@ Durable docs under `docs/` should keep YAML frontmatter and explicit ownership. 
 
 ## Learned Workspace Facts
 
-- The prototype under `app/` is real and runnable; older planning docs may describe a pre-build state.
+- The v0b Starter Loop under `app/` is real, runnable, and deployed; older planning docs may describe v0a or pre-build state. Treat `docs/plans/2026-04-16-003-rest-of-v0b-plan.md` §1 and §6 as the canonical "what landed" registry.
 - The active automation environment is WSL/bash-friendly.
 - Historical control-plane scaffolding now lives in `archive/agent-control-plane/`.

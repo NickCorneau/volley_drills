@@ -15,6 +15,11 @@ import { SkillLevelScreen } from '../SkillLevelScreen'
  * `storageMeta.onboarding.step = 'todays_setup'` before navigating to
  * `/onboarding/todays-setup`. No back arrow (first-open = no prior
  * screen per H9 / C-3 plan).
+ *
+ * D128 (2026-04-19 follow-on to Phase F Unit 2): cold-state default is
+ * **solo voice** ("Where are you today?"), not pair voice. Pair voice
+ * only shows when `storageMeta.lastPlayerMode === 'pair'`. See the
+ * voice-aware tests at the bottom of this file.
  */
 
 async function clearDb() {
@@ -50,14 +55,22 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
     await clearDb()
   })
 
-  it("renders the welcome preamble + pair-first heading + 'You can change this later.'", async () => {
+  it("renders the welcome preamble + solo-voice cold-state heading + 'You can change this later.' (D128)", async () => {
     renderScreen()
     expect(
       await screen.findByText(/welcome\. let.?s get you started\./i),
     ).toBeInTheDocument()
+    // D128: cold-state default is solo voice. The returning-pair path
+    // below covers the flip to pair voice.
     expect(
-      screen.getByRole('heading', { level: 1, name: /where.?s the pair today\?/i }),
+      await screen.findByRole('heading', {
+        level: 1,
+        name: /where are you today\?/i,
+      }),
     ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: /where.?s the pair today\?/i }),
+    ).not.toBeInTheDocument()
     expect(screen.getByText(/you can change this later/i)).toBeInTheDocument()
   })
 
@@ -218,13 +231,15 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
     ).not.toBeInTheDocument()
   })
 
-  // Phase F Unit 2 (2026-04-19) — voice-aware header copy.
+  // Phase F Unit 2 (2026-04-19) + D128 — voice-aware header copy.
   //
-  // Cold state (no prior session) reads as pair voice — covered by the
-  // "renders the welcome preamble + pair-first heading" test above. The
-  // two tests below cover the returning-solo-tester + returning-pair-tester
-  // paths: `storageMeta.lastPlayerMode` flips the heading copy without
-  // touching the D121 taxonomy.
+  // Cold state (no prior session) reads as **solo voice** per D128 —
+  // covered by the cold-state heading test above. The two tests below
+  // cover the returning-solo-tester + returning-pair-tester paths:
+  // `storageMeta.lastPlayerMode` flips the heading copy without
+  // touching the D121 taxonomy. The returning-pair case is the only
+  // path that now shows "Where's the pair today?" — pair voice is no
+  // longer the cold-state default.
 
   it('Phase F Unit 2: returning solo tester sees solo-voice heading', async () => {
     await db.storageMeta.put({

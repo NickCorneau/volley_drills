@@ -143,8 +143,9 @@ test.describe('Phase C-3 onboarding first-open flow', () => {
     await expect(
       page.getByText(/welcome\. let.?s get you started\./i),
     ).toBeVisible({ timeout: 10_000 })
+    // D128: cold-state heading is solo voice ("Where are you today?").
     await expect(
-      page.getByRole('heading', { level: 1, name: /where.?s the pair today\?/i }),
+      page.getByRole('heading', { level: 1, name: /where are you today\?/i }),
     ).toBeVisible()
 
     // Pick a band -> /onboarding/todays-setup

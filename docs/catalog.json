@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
   "repo_id": "volley_drills",
-  "last_updated": "2026-04-19-d",
+  "last_updated": "2026-04-19-e",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -11,7 +11,7 @@
   },
   "repo_state": {
     "stage": "validation",
-    "posture": "v0a prototype shipped; v0b build in progress as D91 field-test artifact (D119)",
+    "posture": "v0b Starter Loop feature-complete as D91 field-test artifact (D119); Phases A/B/C/E/F all landed through 2026-04-19; awaiting D91 cohort kickoff",
     "runtime": "cursor-first",
     "platform_bias": "wsl-first",
     "environment_contract": {
@@ -22,8 +22,9 @@
     },
     "active_milestone": "M001",
     "stack": "Vite + React + TypeScript + PWA + Dexie",
-    "blocking_gate": "D91 field-test evidence against v0b (D119) must pass before M001 moves into the full build",
-    "prototype_feedback": "docs/research/2026-04-12-v0a-runner-probe-feedback.md"
+    "blocking_gate": "D91 field-test evidence against v0b (D119) must pass before M001 moves into the full build; remaining pre-field items are non-code (tester recruitment, founder replay spot-check, operational cohort protocol)",
+    "prototype_feedback": "docs/research/2026-04-12-v0a-runner-probe-feedback.md",
+    "v0b_status_registry": "docs/plans/2026-04-16-003-rest-of-v0b-plan.md"
   },
   "entrypoints": [
     {

@@ -37,7 +37,7 @@ open_question_refs:
 ## Agent Quick Scan
 
 - Use this doc when you need M001 scope, current gate status, acceptance evidence, or the smallest reliable statement of what belongs in the first build.
-- Status: v0b build in progress. A runnable v0a prototype exists under `app/`; v0b is the field-test artifact (`D119`). Full M001 implementation is gated on D91 field-test evidence against v0b.
+- Status: v0b Starter Loop is **feature-complete** as the D91 field-test artifact (`D119`); Phases A, B, C (C-0 → C-5), E, and F (F1 – F12) all landed through 2026-04-19. Full M001 implementation remains gated on D91 field-test evidence against v0b. Remaining pre-field items are non-code (see `## Pre-field launch checklist` below).
 - In scope: starter session assembly, courtside run flow, one-minute review, deterministic adaptation, and write-as-you-go local persistence.
 - This doc distinguishes **D91 artifact compromises** from the intended M001 product contract so v0b cuts are not mistaken for long-term product rejection.
 - Not for: implementation-level Dexie details, full sync architecture, or coach clipboard build work.
@@ -70,7 +70,7 @@ Define the first implementation-ready slice that lets one self-coached user:
 
 ## Current planning stance
 
-A v0a validation prototype exists under `app/`; v0b build is in progress as the D91 field-test artifact (`D119`). M001 full implementation remains gated on D91 field validation against v0b (O4-O7).
+The v0b Starter Loop under `app/` is **feature-complete** as the D91 field-test artifact (`D119`). Phase A (schema), Phase B (test infra + SW safety), Phase C (schema → review contract → summary → onboarding → home priority → repeat path, plus red-team hardening and post-landing polish), Phase E (icons, JSON export, regulatory-copy audit, Brandmark), and Phase F (D91-validity hardening, Home CTA cleanup, Japanese-inspired calm pass, typography foundation, button + hover hygiene, brand hero + Inter self-host, UX consistency sweep) all landed 2026-04-17 → 2026-04-19. M001 full implementation remains gated on D91 field validation against v0b (O4 – O7). The v0b status registry lives in `docs/plans/2026-04-16-003-rest-of-v0b-plan.md` §1 and §6.
 
 ## D91 artifact vs M001 product contract
 
@@ -89,6 +89,19 @@ v0b is intentionally smaller and quieter than the intended product so the D91 fi
 - visible deterministic reasoning where it helps trust
 - review and summary that leave a clear next step
 - a named post-M001 self-coached follow-on focused on weekly confidence before coach-connected work (`D124`)
+
+## Pre-field launch checklist (v0b is code-complete; these remain)
+
+Feature work on v0b is done. Before the D91 cohort kickoff the following non-code items still need to happen:
+
+- Recruit the 5+ tester cohort per the operational protocol in `docs/research/pre-telemetry-validation-protocol.md` (recruitment script, consent, preregistered one-page decision memo frozen before kickoff).
+- Founder replay spot-check against a real dogfeed export using the V0B-15 JSON export flow (`/settings → Export`) to confirm the D91 / D104 / D113 replay fields are present and well-formed in tester data.
+- iOS 26 tinted/clear PWA icon spot-check on a real device (deferred from V0B-06 acceptance).
+- Freeze the `docs/discovery/phase-0-wedge-validation.md` per-tester capture sheet and confirm which fields are in-app (auto-persisted) vs founder-tracked (out-of-band).
+- Confirm the "Add to Home Screen" install instructions for the cohort on the current public iOS line at test time (the primary tested posture per `D57`).
+- App-store submission is **not required** — this is a PWA distributed via the Cloudflare Worker origin.
+
+If any of these surface a real code bug (e.g., a broken export, a regression on current iOS), treat the fix as a v0b hotfix rather than a new phase.
 
 ## Pre-build validation gate (2026-04-12)
 

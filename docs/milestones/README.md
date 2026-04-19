@@ -58,6 +58,6 @@ Suggested statuses:
 
 ## Planning-stage rule
 
-A runnable v0a prototype exists under `app/`. v0b build is in progress as the D91 field-test artifact (`D119`). Milestone files should still behave like charters and thin-slice specs until their build phase is explicitly active.
+The v0b Starter Loop under `app/` is **feature-complete** as the D91 field-test artifact (`D119`); Phases A, B, C (C-0 → C-5), E, and F (F1 – F12) landed through 2026-04-19. M001 implementation work beyond v0b stays gated on D91 evidence. Milestone files should still behave like charters and thin-slice specs until their build phase is explicitly active (M001 full build and M002 Weekly Confidence Loop are both still charter-stage).
 
 Use `docs/templates/milestone-charter.md` as the default starting point.

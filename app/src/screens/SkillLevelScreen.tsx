@@ -29,19 +29,26 @@ import { setStorageMetaMany } from '../services/storageMeta'
  *   the primary rail four-tall.
  * - No back arrow — first-open = no prior screen (H9).
  *
- * Phase F Unit 2 (2026-04-19) amendment:
- * - Voice swaps from pair to solo when `storageMeta.lastPlayerMode ===
- *   'solo'` (written on every `createSessionFromDraft` call). A
- *   returning tester with a prior solo session sees "Where are you
- *   today?" and solo-pronoun descriptors; first-open cold state
- *   defaults to pair voice.
+ * Phase F Unit 2 (2026-04-19) amendment, revised 2026-04-19 (D128):
+ * - Voice is `storageMeta.lastPlayerMode`-driven when a signal exists
+ *   (written on every `createSessionFromDraft` call). A returning
+ *   tester's prior mode is what they see next time.
+ * - **Cold-state default is solo voice** ("Where are you today?"),
+ *   aligning screen one with `D5` (solo is the lead activation path).
+ *   The original Phase F cut defaulted to pair and let solo voice
+ *   light up only for returning solo testers; D128 flips that because
+ *   pair-voice-on-cold-open misframes the lead audience on their very
+ *   first screen ("Where's the pair today?" reads as "not for me" to a
+ *   solo user). Returning pair testers still see pair voice because
+ *   `lastPlayerMode === 'pair'` overrides the default.
  * - Taxonomy enum (`SkillLevel`) is **unchanged** — only the rendered
  *   copy differs. Persisted `storageMeta.onboarding.skillLevel` stays
  *   identical across voices so the M001-build adaptation engine sees
  *   one taxonomy regardless of how the onboarding copy read on the
  *   day.
  *
- * See `docs/decisions.md` D-C4 Phase F amendment + D122.
+ * See `docs/decisions.md` D-C4 Phase F amendment, D122 bullet 3, and
+ * D128 (cold-state voice default follow-on).
  */
 
 interface Copy {
@@ -88,14 +95,17 @@ const BANDS = SKILL_LEVELS.filter(
 export function SkillLevelScreen() {
   const navigate = useNavigate()
   const acting = useRef(false)
-  // Phase F Unit 2: render pair-voice copy until the async voice read
-  // resolves. On the cold-state first-open this is the final value;
-  // on a returning solo tester the copy flips once `loadVoiceFromStorage`
-  // resolves (single Dexie read, <5 ms in practice). The flicker is
-  // acceptable because the first-open case is a single render and the
-  // returning-solo-tester case only happens after at least one prior
-  // session completed — no regression on the thesis-critical first open.
-  const [voice, setVoice] = useState<Voice>('pair')
+  // D128 (2026-04-19): render solo-voice copy until the async voice
+  // read resolves. On the cold-state first-open this is the final
+  // value (aligns screen one with D5: solo is the lead activation
+  // path). On a returning pair tester, the copy flips to pair voice
+  // once `loadVoiceFromStorage` resolves (single Dexie read, <5 ms
+  // in practice). The brief flicker is acceptable because (a) first
+  // open is a single render with no flip, and (b) the returning-pair
+  // case only happens after at least one pair session completed — the
+  // user has already been onboarded once and the flicker is not their
+  // first impression.
+  const [voice, setVoice] = useState<Voice>('solo')
 
   useEffect(() => {
     let cancelled = false

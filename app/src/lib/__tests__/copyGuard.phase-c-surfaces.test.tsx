@@ -317,7 +317,10 @@ describe('V0B-18 D86 per-surface regression scan', () => {
         <SkillLevelScreen />
       </MemoryRouter>,
     )
-    await screen.findByRole('heading', { name: /where.*pair today/i })
+    // D128: cold-state heading is solo voice ("Where are you today?"),
+    // not pair voice. The copy-guard scan runs on the rendered body,
+    // so this just anchors the wait — the scan itself is voice-agnostic.
+    await screen.findByRole('heading', { name: /where are you today/i })
     assertClean(container, 'SkillLevelScreen')
   })
 

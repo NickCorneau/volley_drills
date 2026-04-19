@@ -52,7 +52,7 @@ This document is phase-level. It should guide sequencing and validation, but exe
 
 Phases are not 2-week sprints. Milestones are outcome-based slices that can complete, block, or be deferred independently.
 
-A runnable v0a validation prototype exists under `app/`. The D91 field-test gate now targets v0b (see `D119` in `docs/decisions.md`); v0b build is in progress. Milestone charters and explicit gates still govern sequencing.
+The v0b Starter Loop under `app/` is **feature-complete** as the D91 field-test artifact (see `D119` in `docs/decisions.md`); Phases A, B, C, E, and F all landed through 2026-04-19. The D91 field-test gate is now the blocking next step for M001. Milestone charters and explicit gates still govern sequencing.
 
 ## D91 artifact note
 

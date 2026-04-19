@@ -21,8 +21,9 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
   })
 
   test('onboarding – skill level (first-run)', async ({ page }) => {
+    // D128: cold-state heading is solo voice.
     await expect(
-      page.getByRole('heading', { name: /where.*pair today/i }),
+      page.getByRole('heading', { name: /where are you today/i }),
     ).toBeVisible()
     await checkA11y(page, 'onboarding – skill level')
   })

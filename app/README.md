@@ -5,40 +5,38 @@ status: active
 stage: validation
 type: workspace-readme
 authority: current web app prototype state and implementation guardrails
-last_updated: 2026-04-19
+last_updated: 2026-04-19-b
 depends_on:
   - docs/prd-foundation.md
   - docs/decisions.md
   - docs/specs/m001-courtside-run-flow.md
   - docs/specs/m001-home-and-sync-notes.md
+  - docs/plans/2026-04-16-003-rest-of-v0b-plan.md
 ---
 
 # App Workspace
 
-This folder holds the runnable Phase 0 validation prototype (v0a) for Volleycraft.
+This folder holds the runnable Phase 0 validation prototype for Volleycraft. It is the v0b Starter Loop, which is **feature-complete** as the D91 field-test artifact (`D119`).
 
 ## Current status
 
-> **Before making changes**, read `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for the prioritized backlog, fix status, and known issues with stable IDs.
+> **Before making changes**, read `docs/plans/2026-04-16-003-rest-of-v0b-plan.md` for the v0b status registry (what landed, what was cut, what was deferred post-D91). The older v0a feedback log at `docs/research/2026-04-12-v0a-runner-probe-feedback.md` is retrospective only.
 
-- The app is a runnable **v0a PWA prototype** used for physical field testing on sand.
-- **Routes**: `/` (Start), `/safety`, `/run`, `/run/transition`, `/review`, `/complete`.
-- **Dexie tables**: `sessionPlans`, `executionLogs`, `sessionReviews`, `timerState` (schema in `src/db/schema.ts`).
-- **PWA**: `vite-plugin-pwa` wired with `generateSW`, precache, `offline.html`. `navigator.storage.persist()` is requested on a real user gesture at session-start (`services/session.ts`), not at module load — per `D118` / `V0B-25`, WebKit grants persistence heuristically and responds better to gesture-bound calls. Three-state posture-sensitive save copy on `CompleteScreen.tsx` via `hooks/useInstallPosture.ts` + `lib/storageCopy.ts` (`V0B-24`). See `docs/research/local-first-pwa-constraints.md`.
-- **Timer**: timestamp-based with 5s flush to `timerState`, wake-lock during active blocks, 3-2-1 pre-roll countdown.
-- **Safety**: pain gate, recovery session override with confirmation, training recency check, heat tips.
+- The app is the **v0b Starter Loop PWA**, feature-complete as of 2026-04-19 and deployed at https://volleydrills.nicholascorneau.workers.dev. It runs the full Home → Onboarding → Setup → Safety → Run → Review → Complete loop with deterministic session assembly, a 0–10 RPE chip grid, tap-to-type pass counters, a three-case honest session summary, the full Finish-Later review contract (2h cap), a flat 4-row Home priority model with a soft-block review modal, a Repeat path from LastComplete, a JSON data export, block-end audio cues, and a Swap action on RunScreen.
+- **Routes**: `/` (Home), `/onboarding/skill-level`, `/onboarding/todays-setup`, `/setup`, `/safety`, `/run`, `/run/transition`, `/review`, `/complete/:execId`, `/settings`.
+- **Dexie schema (v4)**: `sessionPlans`, `sessionDrafts` (singleton), `executionLogs`, `sessionReviews` (with `status: 'submitted' | 'skipped' | 'draft'` + capture-window fields per `V0B-30`), `timerState`, `storageMeta` (key-value: onboarding progress, UX flags, last player mode). Schema in `src/db/schema.ts`. Migrations backfill `status` and `onboarding.completedAt`. The Dexie database name stays `volley-drills` to preserve any pre-rename tester data (see `D125`).
+- **PWA**: `vite-plugin-pwa` with `registerType: 'prompt'` (safe-boundary updates via `useRegisterSW`, per `D41` / `V0B-20`). `navigator.storage.persist()` fires on the session-start user gesture (`V0B-25`). Three-state posture-sensitive save copy on `CompleteScreen.tsx` via `hooks/useInstallPosture.ts` + `lib/storageCopy.ts` (`V0B-24`). See `docs/research/local-first-pwa-constraints.md`.
+- **Timer**: timestamp-based with 5s flush to `timerState`, wake-lock during active blocks, 3-2-1 pre-roll with audio tick, block-end beep via `lib/audio.ts` (foreground `AudioContext`; narrow slice of `V0B-08`).
+- **Safety**: binary pain gate + training recency + heat CTA, answer-first consequence copy (`V0B-16`), lighter-session override with confirmation, regulatory-posture copy audit landed (`V0B-18`, `D86`).
 - Product direction lives in `docs/`; do not treat the prototype UI as final production design.
-- The M001 milestone implementation gate remains closed until field validation completes (D91).
+- The M001 milestone implementation gate remains closed until D91 field validation against v0b completes.
 
-## Known limitations (v0a)
+## v0b posture notes
 
-- RPE uses 4 bands (Easy/Moderate/Hard/Max) instead of full 0-10 scale (deferred to v0b).
-- Pass metric counters are +/- only; no tap-to-type or +5/+10 steppers.
-- No session history on Start screen.
-- No landscape orientation handling.
-- `vite-plugin-pwa@1.2.0` declares peer support through Vite 7; app uses Vite 8 (builds clean but peer warning on install).
-- Root-level `*.png` files in `app/` are captured validation screenshots, not runtime app assets.
-- See `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for the full prioritized backlog.
+- **Feature-complete, not production-polish.** v0b is the D91 field-test artifact. Cuts listed in `docs/plans/2026-04-16-003-rest-of-v0b-plan.md` §2 (full reason-trace engine, session history surface, weekly receipt, etc.) are intentional and return in the post-D91 self-coached follow-on (`D124`).
+- **Body-scale shift and Run-screen content density are deferred pending D91 evidence** per `D127`. `--text-body` / `--text-body-secondary` tokens are scaffolded in `src/index.css` so the eventual migration is a one-line retune.
+- Known build note: `vite-plugin-pwa@1.2.0` declares peer support through Vite 7; app uses Vite 8 (builds clean but peer warning on install).
+- Root-level `*.png` files in `app/` are captured validation screenshots from the v0a era, not runtime app assets.
 
 ## Local Run Instructions
 
@@ -110,5 +108,6 @@ Automated deploys (one-time setup): the committed workflow `.github/workflows/de
 ## For agents
 
 - **This file is workspace status**, not product authority. Product direction lives in `docs/`.
-- **Edit when**: the app architecture materially changes (e.g. sync layer added) or validation phase ends.
+- **Edit when**: the app architecture materially changes (e.g. sync layer added), a new Dexie version ships, or validation phase ends.
 - **Related milestone**: `M001` (`docs/milestones/m001-solo-session-loop.md`).
+- **v0b status registry**: `docs/plans/2026-04-16-003-rest-of-v0b-plan.md` §1 (what landed) and §6 (full V0B-XX item master status).

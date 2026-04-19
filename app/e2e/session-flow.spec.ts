@@ -54,8 +54,9 @@ test.describe('v0b session flow', () => {
   })
 
   test('new user can build and start a session', async ({ page }) => {
+    // D128: cold-state heading is solo voice.
     await expect(
-      page.getByRole('heading', { name: /where.*pair today/i }),
+      page.getByRole('heading', { name: /where are you today/i }),
     ).toBeVisible()
     await setupAndStart(page)
     await expect(page.getByText(/Solo \+ Open/)).toBeVisible()

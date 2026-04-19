@@ -9,8 +9,9 @@ Start here:
 
 Current state:
 - Phase 0 validation
-- runnable v0a prototype under `app/`
-- M001 build gate remains blocked on field-test evidence (`D91`)
+- v0b Starter Loop feature-complete under `app/` (Phases A/B/C/E/F landed); live at https://volleydrills.nicholascorneau.workers.dev
+- M001 build gate remains blocked on D91 field-test evidence against v0b (`D119`)
+- remaining pre-field items are non-code: tester recruitment, founder replay spot-check, operational cohort protocol
 
 Environment:
 - automation expects `WSL` or Linux with `bash` and `python3`
