@@ -15,8 +15,16 @@ import { TransitionScreen } from './screens/TransitionScreen'
 import { routePaths } from './routes'
 
 function Layout({ children }: { children: React.ReactNode }) {
+  // Phase F3 (2026-04-19): page field uses `bg-surface-calm` — a warm
+  // off-white — so white `bg-bg-primary` focal cards (`<Card
+  // variant="focal">`, HomePrimaryCard, HomeScreen secondary list,
+  // SettingsScreen export block, SkillLevelScreen option buttons)
+  // stand out as deliberate content blocks against a calmer field.
+  // Still "slightly off-white" per the outdoor readability contract
+  // in `docs/research/outdoor-courtside-ui-brief.md`, so RunScreen +
+  // TransitionScreen stay readable courtside.
   return (
-    <div className="min-h-[100dvh] flex flex-col font-sans bg-bg-primary pb-[env(safe-area-inset-bottom)]">
+    <div className="min-h-[100dvh] flex flex-col font-sans bg-surface-calm pb-[env(safe-area-inset-bottom)]">
       <main className="flex-1 px-4 pt-[env(safe-area-inset-top)]">{children}</main>
     </div>
   )

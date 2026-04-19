@@ -5,6 +5,18 @@
   --color-accent-pressed: #92400e;
   --color-bg-primary: #ffffff;
   --color-bg-warm: #f5f5f0;
+  /*
+   * Phase F3 (2026-04-19): warmer page-field surface. Subtle warm
+   * off-white used behind focal cards so the white `bg-bg-primary`
+   * cards pop slightly against it. Kept deliberately close to white
+   * so the outdoor readability contract in
+   * docs/research/outdoor-courtside-ui-brief.md is preserved on
+   * RunScreen and TransitionScreen (near-black text still sits on
+   * "slightly off-white" per the brief). Also distinct enough from
+   * `bg-warm` (#f5f5f0) that chips, Card variant="soft" surfaces, and
+   * outline-button hover/active states remain visibly differentiated.
+   */
+  --color-surface-calm: #fcfaf5;
   --color-text-primary: #1a1a1a;
   --color-text-secondary: #6b7280;
   --color-success: #059669;
@@ -20,7 +32,7 @@
 
 body {
   margin: 0;
-  background: var(--color-bg-primary);
+  background: var(--color-surface-calm);
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
