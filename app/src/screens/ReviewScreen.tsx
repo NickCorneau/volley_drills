@@ -552,14 +552,13 @@ function ReviewSessionContent({
       >
         {isSubmitting ? 'Saving\u2026' : 'Submit Review'}
       </Button>
-      <button
-        type="button"
+      <Button
+        variant="link"
         onClick={() => void handleFinishLater()}
         disabled={isSubmitting}
-        className="mx-auto min-h-[44px] px-3 text-sm font-medium text-text-secondary underline-offset-2 hover:underline disabled:opacity-50"
       >
         Finish later
-      </button>
+      </Button>
       <p className="-mt-2 text-center text-xs text-text-secondary">
         {`This session ${formatFinishLaterWindow(log, nowMs)}, then it won\u2019t affect planning.`}
       </p>

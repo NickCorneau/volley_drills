@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Card, StatusMessage } from '../components/ui'
+import { BackButton, Button, Card, StatusMessage } from '../components/ui'
 import { downloadExport } from '../services/export'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { routes } from '../routes'
@@ -63,13 +63,7 @@ export function SettingsScreen() {
   return (
     <div className="mx-auto flex w-full max-w-[390px] flex-col gap-8 pb-12 pt-2">
       <header className="flex items-center gap-2 pt-2">
-        <button
-          type="button"
-          onClick={() => navigate(routes.home())}
-          className="min-h-[44px] px-2 text-sm text-accent"
-        >
-          &larr; Back
-        </button>
+        <BackButton label="Back" onClick={() => navigate(routes.home())} />
         <h1 className="flex-1 text-center text-xl font-bold tracking-tight text-text-primary">
           Settings
         </h1>

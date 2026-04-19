@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PainOverrideCard } from '../components/PainOverrideCard'
-import { Button, StatusMessage } from '../components/ui'
+import { BackButton, Button, StatusMessage } from '../components/ui'
 import type { SessionDraft } from '../db/types'
 import { buildRecoveryDraft } from '../domain/sessionBuilder'
 import { routes } from '../routes'
@@ -170,13 +170,7 @@ export function SafetyCheckScreen() {
        * (surfaces there as the Draft primary card per C-4 Surface 2).
        */}
       <header className="flex items-center gap-2 pt-2">
-        <button
-          type="button"
-          onClick={() => navigate(routes.home())}
-          className="min-h-[44px] px-2 text-sm text-accent"
-        >
-          &larr; Back
-        </button>
+        <BackButton label="Back" onClick={() => navigate(routes.home())} />
         <h1 className="flex-1 text-center text-xl font-bold tracking-tight text-text-primary">
           Before we start
         </h1>

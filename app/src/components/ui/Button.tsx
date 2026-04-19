@@ -8,6 +8,7 @@ export type ButtonVariant =
   | 'danger'
   | 'ghost'
   | 'soft'
+  | 'link'
 
 type ButtonProps = {
   variant?: ButtonVariant
@@ -65,6 +66,25 @@ const variantStyles: Record<ButtonVariant, string> = {
   soft: cx(
     'min-h-[54px] rounded-[16px] px-4 py-3 text-sm font-semibold',
     'bg-bg-warm text-text-primary',
+    focusRing,
+    'focus-visible:ring-accent',
+  ),
+  // Phase F9 (2026-04-19): tertiary text-link variant. Consolidates
+  // the five inline text-link buttons scattered across
+  // `HomePrimaryCard` (Skip review / Change setup / Start a
+  // different session), `SkillLevelScreen` (Not sure yet), and
+  // `ReviewScreen` (Finish later) onto a single shared treatment:
+  // 44 px tap target, content-width with `mx-auto`, muted
+  // text-secondary with a permanent underline at a comfortable
+  // offset, and `active:text-text-primary` for press feedback.
+  // Content-width (not full-width) signals tertiary intent against
+  // the full-width primary CTA that usually sits just above.
+  link: cx(
+    'min-h-[44px] mx-auto px-3',
+    'text-sm font-medium text-text-secondary',
+    'underline underline-offset-2',
+    'active:text-text-primary',
+    'disabled:opacity-50',
     focusRing,
     'focus-visible:ring-accent',
   ),

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Button } from '../components/ui'
 import { FOCAL_SURFACE_CLASS } from '../components/ui/Card'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import {
@@ -174,13 +175,9 @@ export function SkillLevelScreen() {
         ))}
       </ul>
 
-      <button
-        type="button"
-        onClick={() => void handlePick('unsure')}
-        className="mx-auto min-h-[44px] px-3 text-sm font-medium text-text-secondary underline underline-offset-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-      >
+      <Button variant="link" onClick={() => void handlePick('unsure')}>
         {SKILL_LEVEL_LABEL.unsure}
-      </button>
+      </Button>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { StaleContextBanner } from '../components/StaleContextBanner'
-import { Button } from '../components/ui'
+import { BackButton, Button } from '../components/ui'
 import type { PlayerMode, TimeProfile } from '../types/session'
 import type { SetupContext } from '../db/types'
 import { buildDraft } from '../domain/sessionBuilder'
@@ -211,21 +211,14 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   return (
     <div className="mx-auto flex w-full max-w-[390px] flex-col gap-6 pb-8">
       <header className="flex items-center gap-2 pt-2">
-        <button
-          type="button"
+        <BackButton
+          label={isOnboarding ? 'Skill level' : 'Home'}
           onClick={() =>
             navigate(
               isOnboarding ? routes.onboardingSkillLevel() : routes.home(),
             )
           }
-          className="text-sm text-accent"
-        >
-          {isOnboarding ? (
-            <>&larr; Skill level</>
-          ) : (
-            <>&larr; Home</>
-          )}
-        </button>
+        />
         <h1 className="flex-1 text-center text-xl font-bold tracking-tight text-text-primary">
           Today&apos;s Setup
         </h1>
@@ -236,8 +229,12 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         <StaleContextBanner dayName={formatDayName(lastCompletedAt)} />
       )}
 
+      {/* Phase F8 (2026-04-19): section h2s lifted from `text-sm` to
+          `text-base` to match Safety / Review / Settings (same
+          semantic role across the app). See
+          `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-text-primary">Players</h2>
+        <h2 className="text-base font-semibold text-text-primary">Players</h2>
         <div className="flex gap-2" role="radiogroup" aria-label="Player mode">
           <ToggleChip
             label="Solo"
@@ -253,7 +250,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-text-primary">Net available?</h2>
+        <h2 className="text-base font-semibold text-text-primary">Net available?</h2>
         <div className="flex gap-2" role="radiogroup" aria-label="Net available">
           <ToggleChip
             label="Yes"
@@ -269,7 +266,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-text-primary">Wall / fence?</h2>
+        <h2 className="text-base font-semibold text-text-primary">Wall / fence?</h2>
         <div className="flex gap-2" role="radiogroup" aria-label="Wall available">
           <ToggleChip
             label="Yes"
@@ -285,7 +282,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-text-primary">Time</h2>
+        <h2 className="text-base font-semibold text-text-primary">Time</h2>
         <div className="flex gap-2" role="radiogroup" aria-label="Time profile">
           {TIME_OPTIONS.map((t) => (
             <ToggleChip
@@ -299,7 +296,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-text-primary">Wind</h2>
+        <h2 className="text-base font-semibold text-text-primary">Wind</h2>
         <div className="flex gap-2" role="radiogroup" aria-label="Wind">
           <ToggleChip
             label="Calm"

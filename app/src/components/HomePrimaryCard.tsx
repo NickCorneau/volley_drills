@@ -56,19 +56,19 @@ import { ResumePrompt } from './ResumePrompt'
 // `flex flex-col gap-4 p-6` half is the F1 internal rhythm layered on
 // top of that surface for HomePrimaryCard's specific shape.
 //
-// Phase F6 (2026-04-19): subtle hover / press darkening layered on
-// top. The cards aren't individually clickable as a whole (each
-// variant has one primary CTA plus optional secondary text links
-// inside), but CSS `:active` fires on an ancestor during mousedown
-// on any child, so the whole card gets a brief tactile darkening
-// the moment the user presses any button inside. `hover:` also
-// fires when the cursor is over any part of the card, giving a
-// subtle pre-commit affordance on desktop. The wash is a 5–10%
-// near-black tint over the white card surface (translates to
-// roughly `#f3f3f3` on hover / `#e8e8e8` on press), matching the
-// restrained "shade darkening" posture in
-// `docs/research/japanese-inspired-visual-direction.md`.
-const PRIMARY_CARD_CLASS = `flex flex-col gap-4 p-6 ${FOCAL_SURFACE_CLASS} transition-colors hover:bg-text-primary/5 active:bg-text-primary/10`
+// Phase F6 (2026-04-19) + F9 rollback (2026-04-19): tactile press
+// feedback is layered on top. CSS `:active` fires on an ancestor
+// during mousedown on any child, so the whole card briefly darkens
+// while the user is pressing any button inside — genuine tactile
+// feedback for a real click, not a misleading affordance. `hover:`
+// was included in F6 but removed in F9 because the card itself is
+// not a click target (each variant has one primary CTA plus
+// optional tertiary links inside), so a whole-card hover state on
+// desktop implied clickability that does not exist. Press-only
+// (active-only) preserves the "shade darkening" posture from
+// `docs/research/japanese-inspired-visual-direction.md` without
+// the misleading affordance.
+const PRIMARY_CARD_CLASS = `flex flex-col gap-4 p-6 ${FOCAL_SURFACE_CLASS} transition-colors active:bg-text-primary/10`
 
 type HomePrimaryCardProps =
   | {
@@ -214,13 +214,9 @@ function ReviewPendingCard({
         Finish Review
       </Button>
       {!confirmingSkip ? (
-        <button
-          type="button"
-          onClick={onSkip}
-          className="min-h-[44px] text-center text-sm text-text-secondary underline"
-        >
+        <Button variant="link" onClick={onSkip}>
           Skip review
-        </button>
+        </Button>
       ) : (
         <div className="flex flex-col gap-2 rounded-[12px] bg-bg-warm p-3">
           <p className="text-center text-sm text-text-secondary">
@@ -283,13 +279,9 @@ function DraftCard({
       <Button variant="primary" fullWidth onClick={onStart}>
         Start session
       </Button>
-      <button
-        type="button"
-        onClick={onEdit}
-        className="min-h-[44px] text-center text-sm text-text-secondary underline"
-      >
+      <Button variant="link" onClick={onEdit}>
         Change setup
-      </button>
+      </Button>
     </section>
   )
 }
@@ -373,14 +365,14 @@ function LastCompleteCard({
        * the primary+outline button pair (ended-early case). Routes to
        * fresh `/setup` (no pre-fill, no banner) via HomeScreen's
        * `handleStartDifferentSession`.
+       *
+       * Phase F9 (2026-04-19): lifted to the shared `link` Button
+       * variant so all five tertiary text-links across the app draw
+       * from one treatment.
        */}
-      <button
-        type="button"
-        onClick={onStartDifferent}
-        className="mx-auto min-h-[44px] px-3 text-sm text-text-secondary underline"
-      >
+      <Button variant="link" onClick={onStartDifferent}>
         Start a different session
-      </button>
+      </Button>
     </section>
   )
 }
