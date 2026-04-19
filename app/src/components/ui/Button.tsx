@@ -35,6 +35,11 @@ const variantStyles: Record<ButtonVariant, string> = {
   secondary: cx(
     'min-h-[54px] rounded-[12px] px-3 py-2 text-sm font-medium',
     'border border-text-secondary/20 text-text-primary',
+    // Phase F7 (2026-04-19): press feedback to match `primary`,
+    // `outline`, and `danger` — secondary + ghost were the two
+    // variants with no tactile press state, so they felt dead
+    // compared to the rest of the button family.
+    'active:bg-bg-warm',
     focusRing,
     'focus-visible:ring-accent',
   ),
@@ -47,6 +52,13 @@ const variantStyles: Record<ButtonVariant, string> = {
   ),
   ghost: cx(
     'min-h-[54px] px-4 text-sm font-medium text-accent',
+    // Phase F7 (2026-04-19): press feedback. Ghost has no background
+    // to darken (by design — used inside HomeSecondaryRow and other
+    // list rows that own their own surface), so darkening the accent
+    // text color on press gives the tactile cue without adding a
+    // visual box. Matches the `primary` variant's `accent-pressed`
+    // convention.
+    'active:text-accent-pressed',
     focusRing,
     'focus-visible:ring-accent',
   ),

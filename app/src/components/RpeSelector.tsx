@@ -12,6 +12,14 @@
 // precedent (TrainingPeaks 10-point, Garmin 1-10, Fitbod discrete per-exercise)
 // supports discrete-grid over slider. See docs/specs/m001-review-micro-spec.md
 // and docs/plans/2026-04-12-v0a-to-v0b-transition.md (V0B-01).
+//
+// Phase F7 (2026-04-19): every chip always renders the anchor line (a
+// non-breaking space when there is no anchor) so all chips share the
+// same two-line internal structure. Pre-F7, anchored chips (0, 3, 5,
+// 7, 10) rendered two lines while unanchored chips (1, 2, 4, 6, 8, 9)
+// rendered one; with `justify-center` this made the anchored chips'
+// numbers sit slightly higher than the unanchored ones, so row
+// baselines did not line up across the grid. Manual-testing catch.
 
 const RPE_VALUES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const
 
@@ -88,16 +96,21 @@ export function RpeSelector({
               <span className="text-lg font-semibold leading-none tabular-nums">
                 {n}
               </span>
-              {anchor && (
-                <span
-                  className={[
-                    'mt-0.5 text-[10px] uppercase tracking-wide',
-                    selected ? 'text-white/90' : 'text-text-secondary',
-                  ].join(' ')}
-                >
-                  {anchor}
-                </span>
-              )}
+              {/* Phase F7: always render the anchor line so every chip has
+                  the same two-line structure and the numbers line up
+                  across the row. `\u00A0` (non-breaking space) reserves
+                  the label height for chips without an anchor. `aria-
+                  hidden` keeps the button's `aria-label` the sole
+                  accessible name — the anchor text is decorative here. */}
+              <span
+                aria-hidden="true"
+                className={[
+                  'mt-0.5 text-[10px] uppercase tracking-wide',
+                  selected ? 'text-white/90' : 'text-text-secondary',
+                ].join(' ')}
+              >
+                {anchor ?? '\u00A0'}
+              </span>
             </button>
           )
         })}

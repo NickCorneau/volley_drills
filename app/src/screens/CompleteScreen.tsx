@@ -216,7 +216,16 @@ export function CompleteScreen() {
             </dd>
           </div>
           <div className="flex items-center justify-between gap-4">
-            <dt className="text-text-secondary">Blocks completed</dt>
+            {/*
+              Phase F7 (2026-04-19): renamed from "Blocks completed" to
+              "Drills completed". In volleyball, "blocks" also means
+              defensive blocks at the net; rendering "Blocks: 4/4" right
+              above "Good passes" was genuinely confusing in
+              dogfeed testing. Each v0b session block contains exactly
+              one drill, so the numeric value is unchanged — only the
+              label changes for disambiguation.
+            */}
+            <dt className="text-text-secondary">Drills completed</dt>
             <dd className="font-medium tabular-nums text-text-primary">
               {completedBlocks}/{totalBlocks}
             </dd>
