@@ -78,6 +78,18 @@ npm run test:e2e:headed
 
 The E2E suite includes functional flow tests (`e2e/session-flow.spec.ts`, `e2e/edge-cases.spec.ts`) and WCAG 2.1 AA accessibility checks via `@axe-core/playwright` (`e2e/accessibility.spec.ts`).
 
+## Deploy
+
+Live Worker: https://volleydrills.nicholascorneau.workers.dev. Config in `wrangler.jsonc`, full runbook in `docs/ops/deploy-cloudflare-worker.md`.
+
+```bash
+npx wrangler login       # once per machine
+npm run deploy           # build + wrangler deploy
+npm run deploy:dry-run   # build + validate upload without publishing
+```
+
+Automated deploys (one-time setup): the committed workflow `.github/workflows/deploy-cloudflare.yml` deploys on push to `main` and on `v*` tags once `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are added to repo secrets. Alternatively, enable Cloudflare's Workers Builds Git integration in the dashboard (no secrets needed).
+
 ## UI defaults
 
 - one light, high-contrast theme for M001

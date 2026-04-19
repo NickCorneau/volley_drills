@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
   "repo_id": "volley_drills",
-  "last_updated": "2026-04-19-b",
+  "last_updated": "2026-04-19-c",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -513,10 +513,16 @@
       "status": "superseded"
     },
     {
+      "id": "deploy-cloudflare-worker",
+      "path": "docs/ops/deploy-cloudflare-worker.md",
+      "type": "ops",
+      "status": "active"
+    },
+    {
       "id": "deploy-cloudflare-pages",
       "path": "docs/ops/deploy-cloudflare-pages.md",
       "type": "ops",
-      "status": "active"
+      "status": "superseded"
     },
     {
       "id": "v0a-runner-probe-plan",

@@ -61,6 +61,16 @@ These exist to point tools back to `AGENTS.md` and `docs/catalog.json`; they are
 
 Repo automation expects **WSL or Linux + bash + python3**. Editing from Windows Cursor is fine, but the repo scripts are not PowerShell-first.
 
+## Deploy
+
+The prototype is live at https://volleydrills.nicholascorneau.workers.dev as a Cloudflare Worker. See `docs/ops/deploy-cloudflare-worker.md` for manual, Workers Builds, and GitHub Actions paths. Shortest path:
+
+```bash
+cd app
+npx wrangler login   # once per machine
+npm run deploy
+```
+
 ## Key Links
 
 - Product principles: `docs/vision.md`

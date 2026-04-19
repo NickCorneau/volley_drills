@@ -1,0 +1,67 @@
+name: Deploy Cloudflare Worker
+
+# Publishes the `app/` Vite build to the `volleydrills` Cloudflare Worker.
+#
+# Triggers:
+# - push to main         -> production deploy
+# - push of a `v*` tag   -> production deploy (tagged release)
+# - workflow_dispatch    -> manual deploy from any branch
+#
+# Requires two repository secrets:
+# - CLOUDFLARE_API_TOKEN  (scope: "Edit Cloudflare Workers" template)
+# - CLOUDFLARE_ACCOUNT_ID (dashboard -> Workers & Pages -> your account ID)
+#
+# See docs/ops/deploy-cloudflare-worker.md for setup and alternatives.
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+    paths:
+      - "app/**"
+      - ".github/workflows/deploy-cloudflare.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: deploy-cloudflare-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://volleydrills.nicholascorneau.workers.dev
+    defaults:
+      run:
+        shell: bash
+        working-directory: app
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: app
+          command: deploy
