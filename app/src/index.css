@@ -47,6 +47,31 @@
     SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
     'Courier New', monospace;
 
+  /*
+   * D127 (2026-04-19): reserved semantic text tokens. Tailwind v4
+   * surfaces these as `text-body` / `text-body-secondary` utilities
+   * (+ matching leading-*) but call-sites are NOT migrated yet —
+   * this is scaffolding for a future D91-evidence-driven retune,
+   * not a style change. Today's values mirror the current
+   * `text-sm (14px) / leading-5` UI voice exactly so turning these
+   * on has no visual effect, and no commit in the repo currently
+   * references them. When D91 field evidence arrives:
+   *   - if testers report legibility issues on a phone on a towel
+   *     at ~1–3 m (the D42 / D57 courtside posture), flip
+   *     `--text-body` to 1rem (16px) with `leading-6` (1.5rem) so
+   *     the D8 / D50 outdoor floor is met in one line change, and
+   *     migrate call-sites from `text-sm` to `text-body` in a
+   *     single sweep;
+   *   - if testers are fine at 14px, keep the current value and
+   *     let the tokens continue to be a reserved namespace.
+   * Not touching this without field evidence is the decision; see
+   * D127 rationale column in docs/decisions.md.
+   */
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.25rem;
+  --text-body-secondary: 0.875rem;
+  --text-body-secondary--line-height: 1.25rem;
+
   --radius-card: 12px;
   --radius-button: 16px;
 }
