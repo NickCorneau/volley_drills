@@ -82,12 +82,32 @@ export function composeSummary(input: SummaryInput): SummaryOutput {
   }
 }
 
+// Phase F4 (2026-04-19): forward-looking hook appended to the default
+// summary reason when no other forward-looking sentence is already
+// present. Turns the Complete screen from a flat verdict into a
+// "ready when you are" handoff, matching the joy / trust / investment
+// posture established in Phase F1 / F2 / F3. Copy chosen to:
+// - respect user agency (not "we'll see you next time", user decides)
+// - stay calm and action-anchored (Japanese-inspired direction)
+// - NOT overpromise adaptation (no "we'll tune" / "we'll progress" —
+//   those are M001-build engine behaviors, not v0b reality, and the
+//   D86 / copy-guard vocabulary explicitly rules out claims the engine
+//   cannot back up)
+// - pass the FORBIDDEN_RE copy-guard regex unchanged.
+//
+// Not appended to the low-N / bootstrap sub-case below because that
+// case already carries its own forward-looking line ("Just getting
+// started. I'll start tuning once you have a few more in the book."),
+// which explains what changes next in a way a generic "Ready when you
+// are." cannot.
+const FORWARD_HOOK = 'Ready when you are.'
+
 function composeDefaultReason(
   review: SessionReview,
   sessionCount: number,
 ): string {
   if (review.totalAttempts === 0) {
-    return `Session ${sessionCount}. One more in the book.`
+    return `Session ${sessionCount}. One more in the book. ${FORWARD_HOOK}`
   }
   const base = `Session ${sessionCount}. ${review.goodPasses} good passes today out of ${review.totalAttempts} attempts.`
   // Phase F Unit 5 (2026-04-19): forward-looking reframe of the low-N
@@ -100,5 +120,5 @@ function composeDefaultReason(
   if (review.totalAttempts < 50 && review.goodPasses > 0) {
     return `${base} Just getting started. I'll start tuning once you have a few more in the book.`
   }
-  return base
+  return `${base} ${FORWARD_HOOK}`
 }

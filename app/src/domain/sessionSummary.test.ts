@@ -98,7 +98,7 @@ describe('composeSummary: Case B (submitted + pain)', () => {
 })
 
 describe('composeSummary: Case C (default)', () => {
-  it('renders the canonical Session N line with good / total numbers (totalAttempts >= 50: no low-N suffix)', () => {
+  it('renders the canonical Session N line with good / total numbers + forward hook (totalAttempts >= 50: no low-N suffix, Phase F4 forward hook)', () => {
     const review = makeReview({
       status: 'submitted',
       sessionRpe: 6,
@@ -112,8 +112,11 @@ describe('composeSummary: Case C (default)', () => {
     })
     expect(out.case).toBe('default')
     expect(out.verdict).toBe('Keep building')
+    // Phase F4 (2026-04-19): default reason ends with "Ready when you
+    // are." so Complete reads as a handoff rather than a flat verdict.
+    // Low-N case keeps its own forward-looking suffix (tested below).
     expect(out.reason).toBe(
-      'Session 3. 40 good passes today out of 60 attempts.',
+      'Session 3. 40 good passes today out of 60 attempts. Ready when you are.',
     )
   })
 
@@ -138,7 +141,7 @@ describe('composeSummary: Case C (default)', () => {
     )
   })
 
-  it('does NOT append low-N floor when totalAttempts >= 50', () => {
+  it('does NOT append low-N floor when totalAttempts >= 50 (Phase F4: forward hook only)', () => {
     const review = makeReview({
       status: 'submitted',
       goodPasses: 30,
@@ -150,11 +153,11 @@ describe('composeSummary: Case C (default)', () => {
       sessionCount: 4,
     })
     expect(out.reason).toBe(
-      'Session 4. 30 good passes today out of 50 attempts.',
+      'Session 4. 30 good passes today out of 50 attempts. Ready when you are.',
     )
   })
 
-  it('does NOT append low-N floor when goodPasses === 0 (even if < 50 attempts)', () => {
+  it('does NOT append low-N floor when goodPasses === 0 (even if < 50 attempts); Phase F4 forward hook still appended', () => {
     const review = makeReview({
       status: 'submitted',
       goodPasses: 0,
@@ -166,11 +169,11 @@ describe('composeSummary: Case C (default)', () => {
       sessionCount: 2,
     })
     expect(out.reason).toBe(
-      'Session 2. 0 good passes today out of 10 attempts.',
+      'Session 2. 0 good passes today out of 10 attempts. Ready when you are.',
     )
   })
 
-  it("returns the notCaptured copy when totalAttempts === 0 ('one more in the book')", () => {
+  it("returns the notCaptured copy when totalAttempts === 0 ('one more in the book') + Phase F4 forward hook", () => {
     const review = makeReview({
       status: 'submitted',
       goodPasses: 0,
@@ -181,7 +184,9 @@ describe('composeSummary: Case C (default)', () => {
       plan: makePlan(1),
       sessionCount: 5,
     })
-    expect(out.reason).toBe('Session 5. One more in the book.')
+    expect(out.reason).toBe(
+      'Session 5. One more in the book. Ready when you are.',
+    )
   })
 })
 
