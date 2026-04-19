@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { FOCAL_SURFACE_CLASS } from '../components/ui/Card'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import {
   SKILL_LEVEL_LABEL,
@@ -134,7 +135,7 @@ export function SkillLevelScreen() {
   const copy = copyForVoice(voice)
 
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-col gap-5 pb-8 pt-8">
+    <div className="mx-auto flex w-full max-w-[390px] flex-col gap-6 pb-12 pt-8">
       <header className="flex flex-col gap-2">
         <p className="text-sm text-text-secondary">
           Welcome. Let&rsquo;s get you started.
@@ -145,8 +146,14 @@ export function SkillLevelScreen() {
         <p className="text-sm text-text-secondary">You can change this later.</p>
       </header>
 
+      {/* Phase F2 (2026-04-19): option cards now use the same calm
+          focal-surface language as HomePrimaryCard / SettingsScreen —
+          soft shadow + hairline ring instead of a hard `border-2`, a
+          touch more vertical breathing between options, and slightly
+          more internal padding so each option reads as a calm,
+          deliberate choice rather than a checkbox row. */}
       <ul
-        className="flex flex-col gap-3"
+        className="flex flex-col gap-4"
         aria-label="Skill level options"
       >
         {BANDS.map((level) => (
@@ -154,7 +161,7 @@ export function SkillLevelScreen() {
             <button
               type="button"
               onClick={() => void handlePick(level)}
-              className="flex min-h-[60px] w-full flex-col items-start gap-1 rounded-[16px] border-2 border-text-primary/10 bg-bg-primary px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:bg-bg-warm"
+              className={`flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:bg-bg-warm ${FOCAL_SURFACE_CLASS}`}
             >
               <span className="text-base font-semibold text-text-primary">
                 {SKILL_LEVEL_LABEL[level]}

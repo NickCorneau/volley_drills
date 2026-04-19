@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, StatusMessage } from '../components/ui'
+import { Button, Card, StatusMessage } from '../components/ui'
 import { downloadExport } from '../services/export'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { routes } from '../routes'
@@ -16,6 +16,11 @@ import { routes } from '../routes'
  *
  * Header matches the SafetyCheckScreen / SetupScreen pattern so the
  * back-to-home affordance lives in the same thumb zone across the app.
+ *
+ * Phase F2 (2026-04-19): the export block now uses the shared focal
+ * Card variant (same surface language as HomePrimaryCard post-F1) so
+ * Settings feels like part of the same design family as Home. Pure
+ * visual alignment — no behavior change.
  */
 
 type ExportState =
@@ -56,7 +61,7 @@ export function SettingsScreen() {
   }, [])
 
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-col gap-6 pb-8">
+    <div className="mx-auto flex w-full max-w-[390px] flex-col gap-8 pb-12 pt-2">
       <header className="flex items-center gap-2 pt-2">
         <button
           type="button"
@@ -71,7 +76,7 @@ export function SettingsScreen() {
         <div className="w-12" />
       </header>
 
-      <section className="flex flex-col gap-3 rounded-[16px] border border-text-primary/10 bg-bg-primary p-5">
+      <Card variant="focal">
         <div>
           <h2 className="text-base font-semibold text-text-primary">
             Export training records
@@ -102,7 +107,7 @@ export function SettingsScreen() {
         {state.kind === 'error' && (
           <StatusMessage variant="error" message={state.message} />
         )}
-      </section>
+      </Card>
 
       <p className="mt-auto text-center text-xs text-text-secondary">
         Your data stays on this device.

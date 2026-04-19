@@ -6,6 +6,7 @@ import type {
   ResumableSession,
 } from '../services/session'
 import { Button } from './ui'
+import { FOCAL_SURFACE_CLASS } from './ui/Card'
 import { ResumePrompt } from './ResumePrompt'
 
 /**
@@ -46,11 +47,15 @@ import { ResumePrompt } from './ResumePrompt'
  *   `docs/research/japanese-inspired-visual-direction.md`.
  */
 
-// Phase F1: shared focal-zone surface for the four card variants.
+// Phase F1 / F2: shared focal-zone surface for the four card variants.
 // Centralising the class keeps the four regions visually identical so
 // the "one focal zone" read never accidentally drifts per variant.
-const PRIMARY_CARD_CLASS =
-  'flex flex-col gap-4 rounded-[16px] bg-bg-primary p-6 shadow-sm ring-1 ring-text-primary/5'
+// The surface half (shadow + ring + rounded + bg) lives on the
+// exported `FOCAL_SURFACE_CLASS` token in `ui/Card.tsx` so every focal
+// card across the app draws from the same source of truth; the
+// `flex flex-col gap-4 p-6` half is the F1 internal rhythm layered on
+// top of that surface for HomePrimaryCard's specific shape.
+const PRIMARY_CARD_CLASS = `flex flex-col gap-4 p-6 ${FOCAL_SURFACE_CLASS}`
 
 type HomePrimaryCardProps =
   | {

@@ -6,6 +6,7 @@ import { HomeSecondaryRow } from '../components/HomeSecondaryRow'
 import { SoftBlockModal } from '../components/SoftBlockModal'
 import { UpdatePrompt } from '../components/UpdatePrompt'
 import { Button } from '../components/ui'
+import { FOCAL_SURFACE_CLASS } from '../components/ui/Card'
 import { selectPrimaryCard, selectSecondaryRows } from '../domain/homePriority'
 import type {
   PrimaryVariant,
@@ -391,7 +392,7 @@ export function HomeScreen() {
         <ul
           role="list"
           aria-label="Other active actions"
-          className="divide-y divide-text-primary/5 overflow-hidden rounded-[16px] bg-bg-primary shadow-sm ring-1 ring-text-primary/5"
+          className={`divide-y divide-text-primary/5 overflow-hidden ${FOCAL_SURFACE_CLASS}`}
         >
           {secondary.map((row) =>
             renderSecondary(row, flags, {
