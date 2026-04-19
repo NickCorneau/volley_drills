@@ -6,7 +6,7 @@ stage: planning
 type: index
 authority: research-note routing, note selection guidance, and AI-native research-note conventions
 summary: "Fast-path routing for research notes; selection rules and AI-native conventions."
-last_updated: 2026-04-19
+last_updated: 2026-04-19-b
 depends_on:
   - docs/README.md
   - docs/catalog.json
@@ -102,6 +102,8 @@ Research notes inform canon. They do not outrank `docs/decisions.md`, `docs/prd-
   - `docs/research/persistent-team-identity.md`
 - Need the operational protocol for running the M001 14-day validation cohort (recruitment / consent scripts, per-use micro-log and session-ledger schema, three signal-based pulses, 72-hour non-returner probe, preregistered decision memo, and the 5-page evidence packet):
   - `docs/research/pre-telemetry-validation-protocol.md`
+- Need the rationale for the product name *Volleycraft*, the 13-test naming rubric, rejected-alternative reasoning, or the rename-scope guardrails (supports `D125`):
+  - `docs/research/product-naming.md`
 
 ## Selection Rules
 
@@ -135,6 +137,7 @@ Research notes inform canon. They do not outrank `docs/decisions.md`, `docs/prd-
 | `docs/research/srpe-load-adaptation-rules.md` | post-ACWR literature synthesis for the deterministic sRPE-load engine: `baseline3` + `peak30` + rolling-14-day variables, precedence-ordered rule table, minimum-history phases, and the +5-10% / +10-15% / +20% bands tuned for amateur 1-3 sessions/week skill-dominant use | sharpens `D84`; seeds `D113`; retires the pre-2024 "~20-30% week-to-week cap" placeholder in `docs/specs/m001-adaptation-rules.md` |
 | `docs/research/persistent-team-identity.md` | comparative evidence on solo-first pair-sport consumer apps (SwingVision, PB Vision, UTR, PickleGo, Pickleball Stats Tracker, U-Stat) vs team-first apps (UltiAnalytics, The Rowing App, Balltime, Stat Together, Steazzi); HCI and adherence literature on shared accounts, breakup UX, and partner/team incentives; local-first collaboration literature (Kleppmann, Ink & Switch, Automerge, Keyhive); forward-compatible participant / profile / consent schema | resolves `O13` operationally; seeds `D114`, `D115`, `D116`, `D117`; reinforces `D19`, `D27`, `D29`, `D36`, `D72`, `D73`, `D75`, `D101` |
 | `docs/research/pre-telemetry-validation-protocol.md` | operational protocol for the M001 14-day validation cohort — recruitment / consent scripts, per-use micro-log and session-ledger schema (with confidence flag and separate researcher-interpretation column), three signal-based pulses (days 3/7/11), 72-hour non-returner probe, preregistered one-page decision memo, role separation and readout-ordering rules, and the 5-page evidence packet | operationalizes `D91`'s banded reading and enrichment-signal framework; cross-linked from `docs/discovery/phase-0-wedge-validation.md`; no D-number changes |
+| `docs/research/product-naming.md` | rationale for the product name *Volleycraft*, the 13-test naming rubric (product-semantic, brand-defensibility, linguistic/sonic, operational), rejected-alternative reasoning, and the rename-scope guardrails (what was and was not updated, and why) | supports `D125`; no other decision changes |
 
 ## AI-Native Conventions For Future Research Notes
 

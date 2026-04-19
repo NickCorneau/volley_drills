@@ -6,7 +6,7 @@ stage: planning
 type: research
 authority: experimental visual-language reference for calm, focused, restrained product design
 summary: "Practical notes for exploring a Japanese-inspired design direction without sacrificing outdoor readability or drifting into decorative cliché."
-last_updated: 2026-04-19
+last_updated: 2026-04-19-b
 depends_on:
   - docs/research/outdoor-courtside-ui-brief.md
   - docs/vision.md
@@ -20,7 +20,7 @@ related:
 
 ## Purpose
 
-Capture one promising design-direction experiment for Volley Drills: a Japanese-inspired visual language that feels simple, clean, focused, and calming while still supporting the product's courtside reality.
+Capture one promising design-direction experiment for Volleycraft: a Japanese-inspired visual language that feels simple, clean, focused, and calming while still supporting the product's courtside reality.
 
 This note is about **structural design behaviors**, not about decorating the app with "Japanese" motifs.
 
@@ -57,7 +57,7 @@ The useful lesson from Japanese design is not a theme. It is a set of product be
 - use restraint instead of spectacle
 - finish flows cleanly
 
-For Volley Drills, that maps well to the product ambition of feeling **light on the surface, serious underneath**.
+For Volleycraft, that maps well to the product ambition of feeling **light on the surface, serious underneath**.
 
 ## Practical principles
 
@@ -137,7 +137,7 @@ For this app:
 
 This is a useful rhythm model for reducing cognitive load without making the app flat.
 
-## Translate to Volley Drills
+## Translate to Volleycraft
 
 ### Home
 

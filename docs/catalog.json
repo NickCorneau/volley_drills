@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
   "repo_id": "volley_drills",
-  "last_updated": "2026-04-19-c",
+  "last_updated": "2026-04-19-d",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -371,6 +371,12 @@
       "status": "active"
     },
     {
+      "id": "product-naming",
+      "path": "docs/research/product-naming.md",
+      "type": "research",
+      "status": "active"
+    },
+    {
       "id": "local-first-pwa-constraints",
       "path": "docs/research/local-first-pwa-constraints.md",
       "type": "research",
@@ -625,6 +631,10 @@
     {
       "path": "docs/research/japanese-inspired-visual-direction.md",
       "focus": "experimental calm, restrained, Japanese-inspired visual direction for future UI work; hierarchy, spacing, pacing, and anti-cliche guardrails"
+    },
+    {
+      "path": "docs/research/product-naming.md",
+      "focus": "rationale for the product name Volleycraft, the 13-test naming rubric, rejected-alternative reasoning, and rename-scope guardrails (supports D125)"
     },
     {
       "path": "docs/research/local-first-pwa-constraints.md",

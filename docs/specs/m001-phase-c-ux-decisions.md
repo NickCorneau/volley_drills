@@ -7,7 +7,7 @@ stage: planning
 type: spec
 authority: Phase C surface behavior, state precedence, copy calls, cut/defer scope, schema additions required by Phase C surfaces
 summary: "Opinionated resolutions for the product + UX gaps surfaced by the pre-build review of v0b Phase C. Consolidates decisions that the existing specs leave ambiguous."
-last_updated: 2026-04-19
+last_updated: 2026-04-19-b
 depends_on:
   - docs/plans/2026-04-12-v0a-to-v0b-transition.md
   - docs/specs/m001-home-and-sync-notes.md
@@ -228,7 +228,7 @@ Each option is a full-width button ≥60px tall with a short label + one-sentenc
 
 ```
 ┌─────────────────────────────────┐
-│ 🏐  Volley Drills               │
+│ 🏐  Volleycraft                 │
 ├─────────────────────────────────┤
 │ [UPDATE READY banner if any]    │  ← V0B-20, safe-boundary only
 ├─────────────────────────────────┤

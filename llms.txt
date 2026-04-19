@@ -1,6 +1,6 @@
-# Volley Drills
+# Volleycraft
 
-Beach volleyball training app for self-coached amateurs.
+Volleyball training app for self-coached amateurs (beach-first in M001 scope).
 
 Start here:
 - `AGENTS.md` for the prose repo contract

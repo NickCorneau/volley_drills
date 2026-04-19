@@ -1,18 +1,18 @@
 ---
 id: docs-index
-title: Volley Drills Docs
+title: Volleycraft Docs
 status: active
 stage: validation
 type: index
 summary: "Editorial index for the docs tree: what each doc family owns and where to route changes."
 authority: documentation structure and editorial routing
-last_updated: 2026-04-15
+last_updated: 2026-04-19
 depends_on:
   - docs/catalog.json
   - docs/ops/agent-documentation-contract.md
 ---
 
-# Volley Drills Docs
+# Volleycraft Docs
 
 This folder is the source of truth for product thinking, requirements, research, and operating guidance.
 

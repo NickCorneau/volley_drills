@@ -1,20 +1,20 @@
 ---
 id: repo-root
-title: Volley Drills
+title: Volleycraft
 status: active
 stage: validation
 type: hub
 summary: "Repo hub: quick start, top-level layout, and links into the canonical docs."
 authority: repo layout and human-facing orientation
-last_updated: 2026-04-15
+last_updated: 2026-04-19
 depends_on:
   - AGENTS.md
   - docs/catalog.json
 ---
 
-# Volley Drills
+# Volleycraft
 
-Beach volleyball personal training app for self-coached amateurs: structured session planning, courtside run mode, and rules-based adaptation.
+Volleyball personal training app for self-coached amateurs: structured session planning, courtside run mode, and rules-based adaptation. Beach-first in scope for M001 (see `docs/decisions.md` `D125` for the product-name rationale and beach-first / volleyball-inclusive positioning).
 
 **Stage**: Phase 0 validation.  
 **Prototype**: runnable v0a PWA under `app/`.  
