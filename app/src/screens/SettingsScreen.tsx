@@ -82,9 +82,7 @@ export function SettingsScreen() {
             Export training records
           </h2>
           <p className="mt-1 text-sm text-text-secondary">
-            Downloads your session history as a JSON file you can share
-            with the founder. Nothing leaves your device until you share
-            the file.
+            Downloads your session history as a JSON file you can share.
           </p>
         </div>
         <Button

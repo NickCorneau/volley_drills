@@ -204,8 +204,8 @@ export function SafetyCheckScreen() {
             returning users so it matches the rendered chip set. */}
         <p className="text-sm text-text-secondary">
           {hasSessionHistory
-            ? '0 days -> shorter, lower-intensity start.'
-            : '0 days or First time -> shorter, lower-intensity start.'}
+            ? '0 days means a shorter, lower-intensity start.'
+            : '0 days or First time means a shorter, lower-intensity start.'}
         </p>
         <div className="flex gap-2">
           {visibleRecencyOptions.map((opt) => {

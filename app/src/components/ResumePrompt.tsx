@@ -73,8 +73,8 @@ export function ResumePrompt({
         ) : (
           <div className="mt-6 flex flex-col gap-3">
             <p className="text-sm text-text-secondary">
-              Discarding ends this session. Your progress will be saved to
-              history but can&rsquo;t be resumed.
+              Ends this session. Progress is saved to history but can&rsquo;t
+              be resumed.
             </p>
             <Button variant="danger" fullWidth onClick={onDiscard}>
               Yes, discard session

@@ -42,8 +42,7 @@ export function PainOverrideCard({
             Switched to a lighter session
           </h3>
           <p className="mt-1 text-sm leading-relaxed text-text-secondary">
-            We&apos;ve switched you to lower-load technique work today. You can
-            also skip training if you prefer.
+            Lower-load technique work today. You can also skip.
           </p>
         </div>
       </div>

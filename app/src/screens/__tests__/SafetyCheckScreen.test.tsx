@@ -15,7 +15,9 @@ import { SafetyCheckScreen } from '../SafetyCheckScreen'
  * no red).
  *
  * Pain consequence:  "We'll switch to a lighter session if yes."
- * Recency consequence: "0 days or First time \u2192 shorter, lower-intensity start."
+ * Recency consequence: "0 days or First time means a shorter, lower-intensity start."
+ * (Copy-polish pass 2026-04-19 replaced the `->` arrow with natural
+ * prose.)
  */
 
 async function clearDb() {
@@ -135,9 +137,11 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     expect(screen.getByRole('button', { name: /^1 day$/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^2\+$/i })).toBeInTheDocument()
     // Description drops the "or First time" clause so it matches the
-    // rendered chip set.
+    // rendered chip set. Copy-polish pass (2026-04-19) replaced the
+    // `->` arrow with natural prose (`means a ... start.`); regex
+    // stays flexible on the connecting phrase.
     expect(
-      screen.getByText(/0 days\s+->\s+shorter.*lower-intensity start/i),
+      screen.getByText(/0 days\s+.*shorter.*lower-intensity start/i),
     ).toBeInTheDocument()
     expect(
       screen.queryByText(/first time/i),
