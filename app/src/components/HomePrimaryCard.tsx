@@ -55,7 +55,20 @@ import { ResumePrompt } from './ResumePrompt'
 // card across the app draws from the same source of truth; the
 // `flex flex-col gap-4 p-6` half is the F1 internal rhythm layered on
 // top of that surface for HomePrimaryCard's specific shape.
-const PRIMARY_CARD_CLASS = `flex flex-col gap-4 p-6 ${FOCAL_SURFACE_CLASS}`
+//
+// Phase F6 (2026-04-19): subtle hover / press darkening layered on
+// top. The cards aren't individually clickable as a whole (each
+// variant has one primary CTA plus optional secondary text links
+// inside), but CSS `:active` fires on an ancestor during mousedown
+// on any child, so the whole card gets a brief tactile darkening
+// the moment the user presses any button inside. `hover:` also
+// fires when the cursor is over any part of the card, giving a
+// subtle pre-commit affordance on desktop. The wash is a 5–10%
+// near-black tint over the white card surface (translates to
+// roughly `#f3f3f3` on hover / `#e8e8e8` on press), matching the
+// restrained "shade darkening" posture in
+// `docs/research/japanese-inspired-visual-direction.md`.
+const PRIMARY_CARD_CLASS = `flex flex-col gap-4 p-6 ${FOCAL_SURFACE_CLASS} transition-colors hover:bg-text-primary/5 active:bg-text-primary/10`
 
 type HomePrimaryCardProps =
   | {

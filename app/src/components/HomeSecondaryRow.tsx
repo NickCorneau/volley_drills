@@ -27,11 +27,18 @@ import { Button } from './ui'
  *   `docs/plans/2026-04-19-feat-phase-f1-home-calm-pass-plan.md`.
  */
 
-// Phase F1: shared flat-row class. No border, no background, no
-// rounding — the parent ul carries the container surface; rows just
-// hold a label + CTA with comfortable padding.
+// Phase F1 / F6 (2026-04-19): shared flat-row class. No border, no
+// background, no rounding — the parent ul carries the container
+// surface; rows just hold a label + CTA with comfortable padding.
+// F6 adds a subtle hover / press darkening so each row feels
+// tactile when moused (desktop) or pressed (mobile / touch),
+// matching the whole-card behavior on `HomePrimaryCard`. CSS
+// `:active` on the `<li>` fires during mousedown on the inner
+// ghost-button CTA, so the whole row briefly darkens as tactile
+// feedback. 5–10% near-black tint over the white ul surface
+// (roughly `#f3f3f3` hover / `#e8e8e8` press).
 const SECONDARY_ROW_CLASS =
-  'flex items-center justify-between gap-3 px-4 py-3'
+  'flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-text-primary/5 active:bg-text-primary/10'
 
 type HomeSecondaryRowProps =
   | {
