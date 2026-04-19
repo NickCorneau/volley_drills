@@ -198,10 +198,21 @@ export function CompleteScreen() {
             built two-bar horizontal SVG. Same semantic, unambiguous
             rendering. */}
         <VerdictGlyph />
+        {/* Phase F11 (2026-04-19): verdict lifted from `text-3xl` to
+            `text-4xl` (30 → 36 px). The verdict is the single Jo-Ha-
+            Kyu "kyu" / clean-finish beat of the session loop and the
+            one place typography gets to carry the "investment"
+            principle from `docs/vision.md`. One step up inside the
+            native Tailwind scale — large enough to feel like a
+            moment, small enough to stay inside the shibui envelope
+            and fit the 390 px viewport without a wrap on any of the
+            three verdict strings ('Keep building', 'Lighter next',
+            'No change'). See
+            `docs/plans/2026-04-19-feat-phase-f11-brand-hero-typography-plan.md`. */}
         <h2
           id="summary-verdict"
           aria-live="polite"
-          className="text-3xl font-bold tracking-tight text-text-primary"
+          className="text-4xl font-bold tracking-tight text-text-primary"
         >
           {summary.verdict}
         </h2>

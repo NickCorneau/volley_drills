@@ -213,7 +213,7 @@ describe('HomeScreen: Start a different session (Phase F Unit 1)', () => {
     })
 
     renderHome()
-    await screen.findByRole('button', { name: 'Finish Review' })
+    await screen.findByRole('button', { name: 'Finish review' })
 
     // LastComplete moved to the secondary list: the Start-a-different
     // tertiary is a LastComplete-primary affordance only, so it's gone

@@ -59,7 +59,7 @@ test.describe('edge cases', () => {
   test('direct navigation to /safety without draft redirects to /setup', async ({ page }) => {
     await seedOnboardingAndOpenHome(page)
     await page.goto('/safety')
-    await expect(page.getByText("Today's Setup")).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText("Today's setup")).toBeVisible({ timeout: 5000 })
   })
 
   test('direct navigation to /review without session shows error', async ({ page }) => {

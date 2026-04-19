@@ -8,7 +8,7 @@ async function setupAndStart(
   const { net = false, wall = false, time = '15 min' } = opts
 
   await goToOnboardingTodaysSetup(page)
-  await expect(page.getByText("Today's Setup")).toBeVisible()
+  await expect(page.getByText("Today's setup")).toBeVisible()
 
   await page.getByRole('radio', { name: 'Solo' }).click()
   await page.getByLabel('Net available').getByRole('radio', { name: net ? 'Yes' : 'No' }).click()

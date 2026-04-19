@@ -223,7 +223,7 @@ function ReviewPendingCard({
         </p>
       </div>
       <Button variant="primary" fullWidth onClick={onFinish}>
-        Finish Review
+        Finish review
       </Button>
       {!confirmingSkip ? (
         <Button variant="link" onClick={onSkip}>

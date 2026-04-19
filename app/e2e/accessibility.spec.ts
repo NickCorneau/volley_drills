@@ -36,7 +36,7 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
   test('setup screen', async ({ page }) => {
     await seedOnboardingAndOpenHome(page)
     await page.getByRole('button', { name: /start.*workout/i }).click()
-    await expect(page.getByText("Today's Setup")).toBeVisible()
+    await expect(page.getByText("Today's setup")).toBeVisible()
     await checkA11y(page, 'setup')
   })
 

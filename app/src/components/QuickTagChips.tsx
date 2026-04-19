@@ -41,7 +41,16 @@ export function QuickTagChips({ selected, onChange }: QuickTagChipsProps) {
             className={[
               'min-h-[54px] rounded-full px-4 py-2 text-sm font-semibold transition-colors',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
-              isOn ? 'bg-accent text-white' : 'bg-bg-warm text-text-primary',
+              // Phase F11 (2026-04-19): both chip states are
+              // clickable (tap to toggle on / tap again to toggle
+              // off), so both gain hover + press feedback. Selected
+              // chips darken accent → accent-pressed; unselected
+              // chips use the `brightness-*` filter pair so the warm
+              // `bg-bg-warm` base tone is preserved on hover / press
+              // instead of being replaced by a cool dark overlay.
+              isOn
+                ? 'bg-accent text-white hover:bg-accent-pressed active:bg-accent-pressed'
+                : 'bg-bg-warm text-text-primary hover:brightness-95 active:brightness-90',
             ].join(' ')}
           >
             {tag}

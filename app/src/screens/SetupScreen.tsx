@@ -47,8 +47,15 @@ function ToggleChip({
       className={cx(
         'min-h-[48px] min-w-[48px] flex-1 rounded-[12px] px-3 py-2 text-base font-semibold transition-colors',
         active
-          ? 'bg-accent text-white'
-          : 'border border-text-secondary/20 bg-bg-primary text-text-primary',
+          // Phase F11 (2026-04-19): selected chip darkens to
+          // `accent-pressed` on hover/press — same pattern as the
+          // `primary` Button variant — so desktop pointers and
+          // finger-presses both get a tactile cue that the selected
+          // chip is still a clickable toggle.
+          ? 'bg-accent text-white hover:bg-accent-pressed active:bg-accent-pressed'
+          // Unselected gains the same `hover:bg-bg-warm active:bg-bg-warm`
+          // treatment as the Safety No/Yes and recency chips.
+          : 'border border-text-secondary/20 bg-bg-primary text-text-primary hover:bg-bg-warm active:bg-bg-warm',
       )}
     >
       {label}
@@ -219,8 +226,13 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
             )
           }
         />
+        {/* Phase F12 (2026-04-19): screen title sentence case (was
+            "Today's Setup" Title Case). Matches "Before we start",
+            "Settings", and the rest of the app per brand-ux
+            guidelines §1.4. See
+            `docs/plans/2026-04-19-feat-phase-f12-ux-consistency-plan.md`. */}
         <h1 className="flex-1 text-center text-xl font-bold tracking-tight text-text-primary">
-          Today&apos;s Setup
+          Today&apos;s setup
         </h1>
         <div className="w-12" />
       </header>
@@ -329,7 +341,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           disabled={!isComplete || isSaving}
           onClick={handleConfirm}
         >
-          {isSaving ? 'Building…' : 'Build Session'}
+          {isSaving ? 'Building…' : 'Build session'}
         </Button>
       </div>
     </div>

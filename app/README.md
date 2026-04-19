@@ -5,7 +5,7 @@ status: active
 stage: validation
 type: workspace-readme
 authority: current web app prototype state and implementation guardrails
-last_updated: 2026-04-16
+last_updated: 2026-04-19
 depends_on:
   - docs/prd-foundation.md
   - docs/decisions.md
@@ -15,7 +15,7 @@ depends_on:
 
 # App Workspace
 
-This folder holds the runnable Phase 0 validation prototype (v0a) for Volley Drills.
+This folder holds the runnable Phase 0 validation prototype (v0a) for Volleycraft.
 
 ## Current status
 

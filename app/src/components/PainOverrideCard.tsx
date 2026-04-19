@@ -34,9 +34,28 @@ export function PainOverrideCard({
   return (
     <div className="flex flex-col gap-4 rounded-[12px] bg-warning-surface p-4">
       <div className="flex items-start gap-3">
-        <span className="shrink-0 text-xl" aria-hidden>
-          ⚠️
-        </span>
+        {/* Phase F12 (2026-04-19): the old `⚠️` emoji was replaced
+            with an inline stroke SVG so the warning triangle inherits
+            `text-warning` and renders the same on every OS. Emoji in
+            UI chrome ties the brand to the host-OS glyph (see
+            `app/src/components/Brandmark.tsx` for the same rationale
+            applied to the volleyball logo). */}
+        <svg
+          aria-hidden="true"
+          className="mt-0.5 shrink-0 text-warning"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 3 2 21h20L12 3z" />
+          <line x1="12" y1="10" x2="12" y2="14" />
+          <line x1="12" y1="17.5" x2="12" y2="17.5" />
+        </svg>
         <div>
           <h3 className="font-semibold text-text-primary">
             Switched to a lighter session

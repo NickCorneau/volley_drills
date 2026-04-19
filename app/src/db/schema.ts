@@ -13,7 +13,7 @@ import type {
   TimerState,
 } from './types'
 
-export class VolleyDrillsDB extends Dexie {
+export class VolleycraftDB extends Dexie {
   sessionPlans!: Table<SessionPlan, string>
   executionLogs!: Table<ExecutionLog, string>
   sessionReviews!: Table<SessionReview, string>
@@ -22,6 +22,13 @@ export class VolleyDrillsDB extends Dexie {
   storageMeta!: Table<StorageMetaEntry, string>
 
   constructor() {
+    // NOTE: the IndexedDB database name `volley-drills` is intentionally
+    // preserved across the Volley Drills -> Volleycraft rename (D125). The
+    // TS class identifier was renamed, but changing the super() argument
+    // would orphan all existing D91-tester session data, which is higher
+    // cost than a mildly-stale internal string literal. If the product
+    // ever ships a data migration we can revisit; until then, this
+    // string is a historical identifier, not a brand surface.
     super('volley-drills')
 
     this.version(1).stores({
@@ -74,7 +81,7 @@ export class VolleyDrillsDB extends Dexie {
   }
 }
 
-export const db = new VolleyDrillsDB()
+export const db = new VolleycraftDB()
 
 // D41 / V0B-22: handle cross-tab schema upgrade hazards.
 // `versionchange` fires on the OLD connection when ANOTHER tab tries to open a

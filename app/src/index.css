@@ -24,7 +24,28 @@
   --color-warning-surface: #fee2e2;
   --color-info-surface: #fef3e8;
 
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  /*
+   * Phase F9 (2026-04-19): lead with 'Inter Variable' — the family
+   * name registered by @fontsource-variable/inter — with 'Inter'
+   * kept as a safety fallback for any legacy static-face install.
+   * The Fontsource variable woff2 is bundled by Vite and precached
+   * by the existing workbox woff2 glob, so first paint on a cold
+   * offline open renders Inter without a network roundtrip. See
+   * docs/plans/2026-04-19-feat-phase-f9-inter-self-host-plan.md.
+   */
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /*
+   * Phase F10 (2026-04-19): lead the mono token with 'JetBrains Mono
+   * Variable' so Tailwind's `font-mono` utility resolves to a
+   * deterministic, disambiguated display face on the BlockTimer and
+   * RunScreen preroll countdown. Fallbacks preserve a monospace
+   * rendering if the woff2 is ever missing (offline-first safety).
+   * See docs/plans/2026-04-19-feat-phase-f10-timer-display-face-plan.md.
+   */
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace,
+    SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
 
   --radius-card: 12px;
   --radius-button: 16px;
@@ -36,4 +57,16 @@ body {
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /*
+   * Phase F9 (2026-04-19): enable Inter's single-story `a` stylistic
+   * set (`cv11`). This is the refinement the Inter author (rsms.me)
+   * markets as the default "finished" body voice; it shifts the
+   * lowercase `a` from the double-story geometric shape to a humanist
+   * single-story variant that reads slightly calmer and more
+   * intentional — on-thesis with the shibui direction in
+   * `docs/research/japanese-inspired-visual-direction.md`. No
+   * additional features are enabled here; layering more stylistic
+   * sets is a later pass.
+   */
+  font-feature-settings: 'cv11' 1;
 }

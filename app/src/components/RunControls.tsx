@@ -50,7 +50,7 @@ export function RunControls({
           </Button>
           {!isRequired && (
             <Button variant="secondary" className="flex-1" onClick={onSkip}>
-              Skip Block
+              Skip block
             </Button>
           )}
           <Button
@@ -58,7 +58,7 @@ export function RunControls({
             className="flex-1 border-warning/20 text-warning"
             onClick={onEndSession}
           >
-            End Session
+            End session
           </Button>
         </div>
       </div>

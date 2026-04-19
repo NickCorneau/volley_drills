@@ -5,7 +5,7 @@ import { Brandmark } from '../Brandmark'
 describe('Brandmark', () => {
   it('renders an SVG with an accessible label', () => {
     render(<Brandmark />)
-    const mark = screen.getByRole('img', { name: /volley drills/i })
+    const mark = screen.getByRole('img', { name: /volleycraft/i })
     expect(mark).toBeInTheDocument()
   })
 

@@ -18,10 +18,21 @@ type ButtonProps = {
 const focusRing =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2'
 
+// Phase F11 (2026-04-19): hover states added to every clickable
+// variant. The Phase F9 rollback correctly removed hover darkening
+// from the whole-card `PRIMARY_CARD_CLASS` / `SECONDARY_ROW_CLASS`
+// (cards aren't click targets), but individual `Button`s ARE click
+// targets — so desktop-pointer users should get the same "yes, this
+// is clickable" affordance that the Phase F7 `active:` states already
+// give on press. Each variant pairs `hover:` with its existing
+// `active:` token so hover and press land on the same darker shade;
+// on mobile there is no hover pseudo-state, but `active:` still fires
+// during the press-but-not-release window (mousedown / touchstart)
+// and provides the tactile cue.
 const variantStyles: Record<ButtonVariant, string> = {
   primary: cx(
     'min-h-[56px] rounded-[16px] px-4 py-3 text-base font-semibold',
-    'bg-accent text-white active:bg-accent-pressed',
+    'bg-accent text-white hover:bg-accent-pressed active:bg-accent-pressed',
     'disabled:cursor-not-allowed disabled:opacity-50',
     focusRing,
     'focus-visible:ring-accent',
@@ -40,14 +51,16 @@ const variantStyles: Record<ButtonVariant, string> = {
     // `outline`, and `danger` — secondary + ghost were the two
     // variants with no tactile press state, so they felt dead
     // compared to the rest of the button family.
-    'active:bg-bg-warm',
+    // Phase F11 (2026-04-19): hover darkening mirrors the press
+    // state so desktop pointers get the same clickability cue.
+    'hover:bg-bg-warm active:bg-bg-warm',
     focusRing,
     'focus-visible:ring-accent',
   ),
   danger: cx(
     'min-h-[54px] rounded-[16px] px-4 py-3 text-base font-semibold',
     'border-2 border-warning/30 bg-warning-surface text-warning',
-    'active:bg-warning/10',
+    'hover:bg-warning/10 active:bg-warning/10',
     focusRing,
     'focus-visible:ring-warning',
   ),
@@ -59,13 +72,19 @@ const variantStyles: Record<ButtonVariant, string> = {
     // text color on press gives the tactile cue without adding a
     // visual box. Matches the `primary` variant's `accent-pressed`
     // convention.
-    'active:text-accent-pressed',
+    'hover:text-accent-pressed active:text-accent-pressed',
     focusRing,
     'focus-visible:ring-accent',
   ),
   soft: cx(
     'min-h-[54px] rounded-[16px] px-4 py-3 text-sm font-semibold',
     'bg-bg-warm text-text-primary',
+    // Phase F11 (2026-04-19): `soft` was the only Button variant with
+    // no hover or press feedback. Using the filter-based
+    // `brightness-*` pair preserves the warm base tone (which a
+    // `hover:bg-...` swap would replace) while still giving a
+    // perceivable darken on pointer hover and during press.
+    'hover:brightness-95 active:brightness-90',
     focusRing,
     'focus-visible:ring-accent',
   ),
@@ -79,11 +98,14 @@ const variantStyles: Record<ButtonVariant, string> = {
   // offset, and `active:text-text-primary` for press feedback.
   // Content-width (not full-width) signals tertiary intent against
   // the full-width primary CTA that usually sits just above.
+  // Phase F11 (2026-04-19): matching `hover:text-text-primary` so a
+  // desktop pointer gets the same "darken to primary" cue before the
+  // click, not only during the press.
   link: cx(
     'min-h-[44px] mx-auto px-3',
     'text-sm font-medium text-text-secondary',
     'underline underline-offset-2',
-    'active:text-text-primary',
+    'hover:text-text-primary active:text-text-primary',
     'disabled:opacity-50',
     focusRing,
     'focus-visible:ring-accent',

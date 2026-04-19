@@ -57,7 +57,11 @@ export function BackButton({
       aria-label={accessibleName}
       className={cx(
         'min-h-[44px] px-2 text-sm text-accent transition-colors',
-        'active:text-accent-pressed',
+        // Phase F11 (2026-04-19): hover matches the Phase F7 press
+        // state so desktop pointers get the same clickability cue —
+        // the accent text darkens to `accent-pressed` on hover, then
+        // stays at that shade during the press.
+        'hover:text-accent-pressed active:text-accent-pressed',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
         className,
       )}

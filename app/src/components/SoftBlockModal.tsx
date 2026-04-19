@@ -58,7 +58,7 @@ export function SoftBlockModal({
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center text-text-secondary"
+          className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-text-primary/5 hover:text-text-primary active:bg-text-primary/10 active:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           &times;
         </button>

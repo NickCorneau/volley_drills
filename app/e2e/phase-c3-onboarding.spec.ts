@@ -166,7 +166,7 @@ test.describe('Phase C-3 onboarding first-open flow', () => {
       .click()
     await page.getByRole('radio', { name: '15 min' }).click()
 
-    // Tap Build Session -> writes draft + onboarding.completedAt, routes
+    // Tap Build session -> writes draft + onboarding.completedAt, routes
     // to /safety.
     await page.getByRole('button', { name: /build session/i }).click()
     await expect(page).toHaveURL(/\/safety$/)
@@ -222,10 +222,10 @@ test.describe('Phase C-3 onboarding first-open flow', () => {
     await page.goto('/')
     await expect(page).toHaveURL(/\/$/)
 
-    // Home headline ("Volley Drills") renders, and there is NO Skill
+    // Home headline ("Volleycraft") renders, and there is NO Skill
     // Level welcome preamble.
     await expect(
-      page.getByRole('heading', { level: 1, name: /volley drills/i }),
+      page.getByRole('heading', { level: 1, name: /volleycraft/i }),
     ).toBeVisible({ timeout: 10_000 })
     await expect(
       page.getByText(/welcome\. let.?s get you started\./i),

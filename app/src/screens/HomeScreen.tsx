@@ -354,16 +354,16 @@ export function HomeScreen() {
   return (
     <div className="mx-auto flex w-full max-w-[390px] flex-col gap-8 pb-12 pt-2">
       {/* App-bar-scale brand row: inline icon + wordmark, subtle so the
-          primary card carries the visual weight. Pre-polish pass this
-          was a centered 4xl emoji + bold 2xl title that read like a
-          launch splash on every Home render — out of place once a
-          tester has seeded data and the primary card is the hero.
-          Phase F1 (2026-04-19): slightly more top padding so the
-          header doesn't feel crowded against the primary card below. */}
-      <header className="flex items-center gap-2 pt-4">
-        <Brandmark size={28} />
-        <h1 className="text-base font-semibold tracking-tight text-text-primary">
-          Volley Drills
+          primary card carries the visual weight. Optical balance: the
+          mark is a 24 px square with full ink; the wordmark sits at
+          `text-xl` semibold so cap height reads close to the ball
+          curves — avoids the “app icon dwarfing the title” effect from
+          pairing a 28 px mark with `text-lg` bold (F11). See
+          `docs/research/brand-ux-guidelines.md` §1 (type hierarchy). */}
+      <header className="flex items-center gap-2.5 pt-4">
+        <Brandmark size={24} className="shrink-0" />
+        <h1 className="text-xl font-semibold leading-none tracking-tight text-text-primary">
+          Volleycraft
         </h1>
       </header>
 
@@ -432,7 +432,10 @@ export function HomeScreen() {
         >
           Settings
         </Link>
-        <p>Your data stays on this device</p>
+        {/* Phase F12 (2026-04-19): added trailing period to match
+            SettingsScreen footer copy. Same sentence, same
+            punctuation. */}
+        <p>Your data stays on this device.</p>
       </footer>
     </div>
   )

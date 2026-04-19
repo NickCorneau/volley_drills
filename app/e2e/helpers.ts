@@ -65,5 +65,5 @@ export async function seedOnboardingAndOpenHome(page: Page) {
 export async function goToOnboardingTodaysSetup(page: Page) {
   await page.waitForURL(/\/onboarding\/skill-level/, { timeout: 15_000 })
   await page.getByRole('button', { name: /Foundations/i }).first().click()
-  await page.getByText("Today's Setup").waitFor({ state: 'visible', timeout: 10_000 })
+  await page.getByText("Today's setup").waitFor({ state: 'visible', timeout: 10_000 })
 }

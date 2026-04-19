@@ -1,6 +1,23 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
+// Phase F9 (2026-04-19): Inter is now bundled as a first-class build
+// asset via Fontsource instead of loaded from `fonts.googleapis.com`
+// at cold start. Side-effect import registers `@font-face` for the
+// full weight axis (100–900) with subset-split `unicode-range` so the
+// browser only fetches the Latin subset for an English UI. Precached
+// by the existing `workbox.globPatterns: ['**/*.woff2']` rule. See
+// `docs/plans/2026-04-19-feat-phase-f9-inter-self-host-plan.md` and
+// `docs/vision.md` P10 (local-first).
+import '@fontsource-variable/inter'
+// Phase F10 (2026-04-19): JetBrains Mono Variable as the timer
+// display face. Replaces the Tailwind `font-mono` system-font
+// lottery (Consolas on Windows, Menlo on macOS, DejaVu on Android)
+// on the BlockTimer and RunScreen preroll countdown — the two
+// surfaces the athlete stares at during a session. OFL-licensed,
+// bundled by Vite, precached by the same workbox glob as Inter. See
+// `docs/plans/2026-04-19-feat-phase-f10-timer-display-face-plan.md`.
+import '@fontsource-variable/jetbrains-mono'
 import './index.css'
 import './lib/pwa-register'
 import App from './App.tsx'

@@ -444,8 +444,10 @@ function ReviewSessionContent({
     <div className="mx-auto flex w-full max-w-[390px] flex-col gap-8 pb-8">
       <header className="flex items-start justify-between pt-2">
         <div>
+          {/* Phase F12 (2026-04-19): sentence case (was "Quick
+              Review" Title Case) per brand-ux guidelines §1.4. */}
           <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-            Quick Review
+            Quick review
           </h1>
           <p className="mt-1 text-sm text-text-secondary">
             {sessionTitle} &middot; {durationPart} &middot; {statusPart}
@@ -550,7 +552,7 @@ function ReviewSessionContent({
         onClick={() => void handleSubmit()}
         disabled={!canSubmit || isSubmitting}
       >
-        {isSubmitting ? 'Saving\u2026' : 'Submit Review'}
+        {isSubmitting ? 'Saving\u2026' : 'Submit review'}
       </Button>
       <Button
         variant="link"

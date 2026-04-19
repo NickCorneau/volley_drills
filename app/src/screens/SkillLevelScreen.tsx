@@ -162,7 +162,7 @@ export function SkillLevelScreen() {
             <button
               type="button"
               onClick={() => void handlePick(level)}
-              className={`flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:bg-bg-warm ${FOCAL_SURFACE_CLASS}`}
+              className={`flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent hover:bg-bg-warm active:bg-bg-warm ${FOCAL_SURFACE_CLASS}`}
             >
               <span className="text-base font-semibold text-text-primary">
                 {SKILL_LEVEL_LABEL[level]}

@@ -1,6 +1,6 @@
 /**
  * Brandmark: the inline SVG version of `public/icon.svg` (the
- * volleyball-in-rounded-square logo).
+ * volleyball-in-rounded-square Volleycraft logo).
  *
  * Replaces the 🏐 emoji that shipped during prototype pass — emoji ties
  * the brand to the host OS's glyph, which varies wildly (Apple's is
@@ -31,7 +31,7 @@ export function Brandmark({ size = 32, className }: BrandmarkProps) {
       width={size}
       height={size}
       role="img"
-      aria-label="Volley Drills"
+      aria-label="Volleycraft"
       className={className}
     >
       <rect width="512" height="512" rx="108" fill="#E8732A" />

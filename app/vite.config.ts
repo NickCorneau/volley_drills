@@ -5,8 +5,6 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-const ONE_YEAR = 60 * 60 * 24 * 365
-
 export default defineConfig({
   resolve: {
     alias: {
@@ -35,9 +33,9 @@ export default defineConfig({
         enabled: false,
       },
       manifest: {
-        name: 'Volley Drills',
-        short_name: 'Volley',
-        description: 'Volleyball drills practice companion',
+        name: 'Volleycraft',
+        short_name: 'Volleycraft',
+        description: 'Volleyball training companion: plan, run, review.',
         theme_color: '#E8732A',
         background_color: '#FFFFFF',
         display: 'standalone',
@@ -72,37 +70,13 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: '/index.html',
+        // Phase F9 (2026-04-19): `woff2` glob continues to precache the
+        // Vite-bundled Fontsource Inter variable file; the two
+        // `runtimeCaching` rules that used to target
+        // `fonts.googleapis.com` and `fonts.gstatic.com` were removed
+        // because the app no longer contacts those hosts. Self-hosted
+        // Inter means first paint renders the brand font offline.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-stylesheets',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: ONE_YEAR,
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-webfonts',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: ONE_YEAR,
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-        ],
       },
     }),
   ],

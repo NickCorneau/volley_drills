@@ -438,7 +438,19 @@ export function RunScreen() {
 
       {prerollCount != null ? (
         <div className="flex flex-col items-center gap-4 py-8">
-          <span className="text-[72px] font-bold tabular-nums leading-none text-accent">
+          {/* Phase F10 (2026-04-19): preroll countdown now shares the
+              BlockTimer's display face (JetBrains Mono Variable via
+              the `font-mono` utility + `--font-mono` token) so the
+              two timer surfaces read as one instrument at two
+              volumes. Accent color continues to signal "get ready"
+              vs the primary-colored live timer. The slashed-zero
+              feature matches BlockTimer for consistency even though
+              the preroll flips to the live timer before 0. See
+              `docs/plans/2026-04-19-feat-phase-f10-timer-display-face-plan.md`. */}
+          <span
+            className="font-mono text-[72px] font-bold tabular-nums leading-none text-accent"
+            style={{ fontFeatureSettings: '"zero" 1' }}
+          >
             {prerollCount}
           </span>
           <p className="text-base font-medium text-text-secondary">
@@ -493,7 +505,7 @@ export function RunScreen() {
                 ? 'You\u2019re in your downshift. Two or three minutes of easy walking before you leave is an honest finish. Your progress will be saved.'
                 : 'You still have blocks remaining. Your progress will be saved and you can review what you completed.'}
             </p>
-            {/* Safe-primary first, destructive below: keeps "Go Back" as the
+            {/* Safe-primary first, destructive below: keeps "Go back" as the
                 default thumb-target after the pause, mirrors the iOS/Android
                 action-sheet convention, and prevents an accidental end of
                 session from the paused-timer state. Red-team UX #6. */}
@@ -503,14 +515,14 @@ export function RunScreen() {
                 fullWidth
                 onClick={handleEndSessionCancel}
               >
-                Go Back
+                Go back
               </Button>
               <Button
                 variant="danger"
                 fullWidth
                 onClick={() => void handleEndSessionConfirm()}
               >
-                End Session
+                End session
               </Button>
             </div>
           </div>

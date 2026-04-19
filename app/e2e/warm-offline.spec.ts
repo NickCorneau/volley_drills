@@ -72,7 +72,7 @@ async function waitForServiceWorkerControl(page: import('@playwright/test').Page
 
 async function setupBuildAndEndEarly(page: import('@playwright/test').Page) {
   await goToOnboardingTodaysSetup(page)
-  await expect(page.getByText("Today's Setup")).toBeVisible()
+  await expect(page.getByText("Today's setup")).toBeVisible()
 
   await page.getByRole('radio', { name: 'Solo' }).click()
   await page.getByLabel('Net available').getByRole('radio', { name: 'No' }).click()
@@ -130,7 +130,7 @@ test.describe('warm-offline PWA shell (V0B-21)', () => {
     try {
       await page.reload()
 
-      await expect(page.getByText(/Volley Drills/i)).toBeVisible({ timeout: 10_000 })
+      await expect(page.getByText(/Volleycraft/i)).toBeVisible({ timeout: 10_000 })
       // C-4 (Surface 2): see note above — review-pending primary card
       // uses "Review your last session" + plan name.
       await expect(

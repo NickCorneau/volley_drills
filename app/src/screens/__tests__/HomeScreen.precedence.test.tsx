@@ -191,7 +191,7 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     await seedLastComplete('exec-lc')
     renderHome()
 
-    await screen.findByRole('button', { name: 'Finish Review' })
+    await screen.findByRole('button', { name: 'Finish review' })
     expect(screen.getByText(/pair \+ net/i)).toBeInTheDocument()
 
     const secondary = screen.getByRole('list', {
@@ -223,7 +223,7 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     renderHome()
 
     // review_pending is primary; Draft is in the secondary list.
-    await screen.findByRole('button', { name: 'Finish Review' })
+    await screen.findByRole('button', { name: 'Finish review' })
     const secondary = screen.getByRole('list', {
       name: /other active actions/i,
     })

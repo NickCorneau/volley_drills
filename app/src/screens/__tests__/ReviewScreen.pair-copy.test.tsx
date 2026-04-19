@@ -81,7 +81,7 @@ describe('ReviewScreen RPE prompt (V0B-32 / D120)', () => {
     expect(screen.getByText(/one rating per device/i)).toBeInTheDocument()
   })
 
-  it('exposes a Finish later escape-hatch link alongside Submit Review', async () => {
+  it('exposes a Finish later escape-hatch link alongside Submit review', async () => {
     await seed(1, 'exec-link', 'plan-link')
     renderAt('exec-link')
 

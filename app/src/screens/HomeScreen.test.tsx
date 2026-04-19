@@ -30,7 +30,7 @@ describe('HomeScreen chrome (Brandmark + Settings footer link)', () => {
 
     // A regression guard so a future change can't silently swap the
     // brand mark back out for an emoji or remove the app-bar identity.
-    const mark = await screen.findByRole('img', { name: /volley drills/i })
+    const mark = await screen.findByRole('img', { name: /volleycraft/i })
     expect(mark.tagName.toLowerCase()).toBe('svg')
   })
 
@@ -106,7 +106,7 @@ describe('HomeScreen', () => {
     ).toBeInTheDocument()
     expect(screen.getByText(/solo \+ wall/i)).toBeInTheDocument()
     expect(
-      screen.getByRole('button', { name: 'Finish Review' }),
+      screen.getByRole('button', { name: 'Finish review' }),
     ).toBeInTheDocument()
 
     // V0B / red-team #5: Skip review is a two-step confirm — the first tap
@@ -157,7 +157,7 @@ describe('HomeScreen', () => {
     await user.click(await screen.findByRole('button', { name: /^skip review$/i }))
     await user.click(await screen.findByRole('button', { name: /never mind/i }))
 
-    expect(await screen.findByRole('button', { name: 'Finish Review' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Finish review' })).toBeInTheDocument()
     expect(await db.sessionReviews.count()).toBe(0)
   })
 })

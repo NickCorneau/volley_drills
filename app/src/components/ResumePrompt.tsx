@@ -19,7 +19,7 @@ export function ResumePrompt({
   onDiscard,
 }: ResumePromptProps) {
   // Two-step confirm so a single misdirected tap on "Discard" (which sits
-  // directly below the primary Reopen Session button) can't destroy an
+  // directly below the primary Reopen session button) can't destroy an
   // in-progress session. Red-team bug #4.
   const [confirmingDiscard, setConfirmingDiscard] = useState(false)
 
@@ -65,7 +65,7 @@ export function ResumePrompt({
         {!confirmingDiscard ? (
           <div className="mt-6 flex flex-col gap-3">
             <Button variant="primary" fullWidth onClick={onResume}>
-              Reopen Session
+              Reopen session
             </Button>
             <Button
               variant="outline"

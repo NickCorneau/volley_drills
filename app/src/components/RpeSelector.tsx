@@ -88,9 +88,15 @@ export function RpeSelector({
               className={[
                 'flex min-h-[54px] flex-col items-center justify-center rounded-[12px] px-1 py-1 text-center transition-colors',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
+                // Phase F11 (2026-04-19): RPE chips are clickable in
+                // either state (tap to pick, tap a different chip to
+                // change). Mirrors `QuickTagChips`: selected chips
+                // darken via `accent-pressed`; unselected chips use
+                // `brightness-*` so the warm base tone survives the
+                // hover / press cue.
                 selected
-                  ? 'bg-accent text-white'
-                  : 'bg-bg-warm text-text-primary',
+                  ? 'bg-accent text-white hover:bg-accent-pressed active:bg-accent-pressed'
+                  : 'bg-bg-warm text-text-primary hover:brightness-95 active:brightness-90',
               ].join(' ')}
             >
               <span className="text-lg font-semibold leading-none tabular-nums">

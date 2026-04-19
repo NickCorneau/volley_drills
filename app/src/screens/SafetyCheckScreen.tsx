@@ -217,7 +217,7 @@ export function SafetyCheckScreen() {
                     ? 'border border-warning bg-warning-surface text-warning focus-visible:ring-warning'
                     : selected
                       ? 'border border-accent bg-info-surface text-accent focus-visible:ring-accent'
-                      : 'border border-gray-200 text-text-secondary active:bg-bg-warm focus-visible:ring-accent',
+                      : 'border border-gray-200 text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-accent',
                 ].join(' ')}
               >
                 {opt}
@@ -243,7 +243,7 @@ export function SafetyCheckScreen() {
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
               painFlag === false
                 ? 'bg-success text-white focus-visible:ring-success'
-                : 'border-2 border-gray-200 text-text-primary active:bg-bg-warm focus-visible:ring-success',
+                : 'border-2 border-gray-200 text-text-primary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-success',
             ].join(' ')}
           >
             No
@@ -256,7 +256,7 @@ export function SafetyCheckScreen() {
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
               painFlag === true
                 ? 'border border-warning bg-warning-surface text-warning focus-visible:ring-warning'
-                : 'border-2 border-gray-200 text-text-primary active:bg-bg-warm focus-visible:ring-warning',
+                : 'border-2 border-gray-200 text-text-primary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-warning',
             ].join(' ')}
           >
             Yes
@@ -278,9 +278,27 @@ export function SafetyCheckScreen() {
         <button
           type="button"
           onClick={() => setHeatExpanded((prev) => !prev)}
-          className="flex min-h-[54px] items-center gap-2 text-sm font-medium text-accent transition-colors active:text-accent-pressed"
+          className="flex min-h-[54px] items-center gap-2 text-sm font-medium text-accent transition-colors hover:text-accent-pressed active:text-accent-pressed"
         >
-          <span aria-hidden>🔥</span>
+          {/* Phase F12 (2026-04-19): the old `🔥` emoji was replaced
+              with an inline stroke SVG so the flame inherits the
+              accent text color and renders the same on every OS.
+              Emoji in UI chrome ties the brand to the host-OS glyph
+              (see `app/src/components/Brandmark.tsx` for the same
+              rationale applied to the volleyball logo). */}
+          <svg
+            aria-hidden="true"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 3c0 4-4 5-4 9a4 4 0 0 0 8 0c0-1.5-1-2.5-2-3 0 2-1 3-2 3 1-3 3-5 3-8-1 1-2 1-3-1z" />
+          </svg>
           Heat &amp; safety tips
           <span
             className={`transition-transform ${heatExpanded ? 'rotate-180' : ''}`}

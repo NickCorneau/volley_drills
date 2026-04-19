@@ -165,7 +165,7 @@ export function TransitionScreen() {
 
       <div className="mt-auto flex flex-col gap-3 pt-4">
         <Button variant="primary" fullWidth onClick={handleStartNext}>
-          Start Next Block
+          Start next block
         </Button>
         <div className="flex items-center justify-center gap-6">
           <Button variant="ghost" onClick={handleStartShortened}>

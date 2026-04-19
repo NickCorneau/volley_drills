@@ -1,5 +1,17 @@
 import { formatTime } from '../lib/format'
 
+/**
+ * Phase F10 (2026-04-19): the `font-mono` utility now resolves to
+ * JetBrains Mono Variable (see `--font-mono` in `src/index.css`)
+ * instead of the OS-default mono fallback. The inline
+ * `fontFeatureSettings: '"zero" 1'` opts into JetBrains Mono's
+ * slashed-zero variant so the digit `0` cannot be confused with `O`
+ * at a glance in bright sun — aligned with the outdoor-legibility
+ * contract in `docs/research/outdoor-courtside-ui-brief.md`. Every
+ * other class on the countdown div is unchanged from pre-F10; this
+ * is purely a display-face swap. See
+ * `docs/plans/2026-04-19-feat-phase-f10-timer-display-face-plan.md`.
+ */
 type BlockTimerProps = {
   remainingSeconds: number
   totalSeconds: number
@@ -11,7 +23,10 @@ export function BlockTimer({ remainingSeconds, totalSeconds, isPaused }: BlockTi
 
   return (
     <div className="flex flex-col items-center gap-3" role="timer" aria-live="polite">
-      <div className="font-mono text-[56px] font-bold leading-none text-text-primary tabular-nums">
+      <div
+        className="font-mono text-[56px] font-bold leading-none text-text-primary tabular-nums"
+        style={{ fontFeatureSettings: '"zero" 1' }}
+      >
         {formatTime(remainingSeconds)}
       </div>
       {isPaused && (

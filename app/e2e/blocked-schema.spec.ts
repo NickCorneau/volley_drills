@@ -43,7 +43,7 @@ test.describe('blocked-schema overlay (V0B-22)', () => {
     // HomeScreen's resolve() dynamically imports `../db/schema` and calls
     // `db.sessionPlans.count()`, so once the home UI renders Dexie has
     // opened its connection at the current version.
-    await expect(page.getByText(/volley drills/i).first()).toBeVisible({
+    await expect(page.getByText(/volleycraft/i).first()).toBeVisible({
       timeout: 10_000,
     })
 
