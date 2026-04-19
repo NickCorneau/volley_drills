@@ -6,7 +6,7 @@ stage: planning
 type: discovery
 authority: wedge scorecards, evidence capture template, M001 pre-build validation program and decision gate
 summary: "Dual-wedge scorecards, evidence capture, and Phase 0 decision rules."
-last_updated: 2026-04-16-b
+last_updated: 2026-04-19
 depends_on:
   - docs/roadmap.md
   - docs/prd-foundation.md
@@ -83,9 +83,11 @@ Capture the following for every participant:
 - actual solo setup available (wall/fence, net, balls, markers)
 - top pain moment
 - time-to-first-useful-session
+- did the user see a believable recommendation before the app felt like a form
 - did skill level plus today's player-count choice feel like enough first-run context
 - did the short starter session feel believable
 - did any goal / profile / sign-up ask feel premature
+- did the flow feel calm / enjoyable or like admin
 - was the first metric simple enough to tolerate
 - was the binary `Good` / `Not Good` pass standard clear enough to trust
 - would delayed sRPE capture actually get completed
@@ -94,10 +96,21 @@ Capture the following for every participant:
 - did early-end reason codes (`time`, `fatigue`, `pain`) feel fair
 - did purposeful drill repetition feel productive or stale
 - did `progress / hold / deload` labels make intuitive sense
+- did the user understand why today's session fit
+- did review feel worth it and leave a clear next step
 - trust level after first walkthrough
 - repeat intent
+- would the user use this instead of notes / PDFs / memory
 - willingness to pay
 - blockers
+
+## Interpretation lens
+
+Read the self-coached evidence through three lenses, not one:
+
+- **Joy**: did the flow create momentum, feel calm, and avoid turning into admin?
+- **Trust**: did the user believe the session, safety posture, and bounded explanations?
+- **Investment**: did the product feel worth returning to as a weekly training tool rather than a one-off helper?
 
 ## Scorecards
 
@@ -110,12 +123,15 @@ Score each criterion from `1` to `5`.
 | Problem frequency | User has this problem weekly, not occasionally |
 | Activation speed | User can get to a believable solo session fast |
 | First-session win | User feels they got real training value before the app asked for much back |
+| Joy / felt ease | User describes the flow as calm, easy, or enjoyable rather than like form-filling |
 | Training trust | User believes the plan is safe and useful without a coach, and accepts the solo work as honest rather than fake "full" serve receive |
+| Next-step confidence | User finishes knowing what they would do next and why |
 | Repetition trust | User accepts purposeful drill repetition when the next step is explained |
 | Repeat intent | User wants to use it again next week |
+| Main-tool pull | User would replace notes / PDFs / memory with this or would miss it if it disappeared |
 | Metric and context tolerance | User is willing to log binary-first skill metrics, answer delayed sRPE when prompted, and tolerate a small number of hard-filter toggles consistently |
 | Weekly receipt value | A simple planned-vs-completed summary plus one load and one skill proxy feels useful enough to prompt the next session, without needing a dashboard |
-| Shallow planning tolerance | A one-week shape or next 2-6 sessions queue feels like enough structure without feeling like a chore |
+| Shallow planning tolerance | A next 2-6 sessions queue feels like enough structure without feeling like a chore |
 | Willingness to pay | User would plausibly pay for continued improvement confidence |
 | Build simplicity | Product can solve this without heavy partner or coach infrastructure |
 
@@ -137,8 +153,9 @@ Score each criterion from `1` to `5`.
 Use Phase 0 to answer:
 
 1. Does the self-coached loop show strong repeat signal and trust as the primary path?
-2. Is the coach clipboard (assign, see completion, tiny outcome signal, adjust next) compelling enough for coaches to adopt without the usual bundle of messaging, scheduling, payments, and video?
+2. Is the coach clipboard (assign, see completion, tiny outcome signal, adjust next) compelling enough to remain the **candidate** first coach-facing extension without the usual bundle of messaging, scheduling, payments, and video?
 3. Does the clipboard reuse the shared backbone with minimal extra complexity?
+4. Does the self-coached path show enough joy / trust / investment to look like a future main training tool, not only a low-friction runner?
 
 Tie-breakers:
 
@@ -160,9 +177,10 @@ Tie-breakers:
 By the end of Phase 0, we should have:
 
 - confirmed evidence for the self-coached primary path (repeat behavior, not just stated intent)
-- a go/no-go on the coach clipboard as the first extension, based on whether coaches find the assign-complete-signal-adjust loop compelling without roster/admin/payments/video
+- a go/no-go on **keeping** the coach clipboard as the candidate first coach-facing extension, based on whether coaches find the assign-complete-signal-adjust loop compelling without roster/admin/payments/video
 - evidence on whether a weekly receipt and shallow next-N planning are enough to keep self-coached users coming back
-- a confirmation (or tester-driven revision) of the BYOC-lite coach clipboard as the first coach-facing extension and of athlete-side "coach-connected" monetization as the first pricing lever (`D106`, `D107`, `D108`); centralized expert access is not a default candidate (see `docs/research/coach-facing-business-models.md`)
+- a joy / trust / investment readout on whether the product feels like a main training tool or a one-off helper
+- a confirmation (or tester-driven revision) of the BYOC-lite coach clipboard as the **candidate** first coach-facing extension and of athlete-side "coach-connected" monetization as the first pricing lever (`D106`, `D107`, `D108`); centralized expert access is not a default candidate (see `docs/research/coach-facing-business-models.md`)
 - a short memo explaining why
 - updates reflected in `docs/decisions.md`, `docs/prd-foundation.md`, and `docs/roadmap.md`
 
@@ -227,7 +245,7 @@ This founder/friend pilot is a **pre-gate filter**, not the full M001 evidence s
 - Expand toward the broader `6–12` participant target only if the founder and friend pilot feels strong enough to justify it
 
 - For each concierge participant:
-  - Minimal context capture (≤30 seconds): today's player count, equipment chips, and optional wind tap
+  - Minimal context capture for the **current v0b artifact baseline**: run the shipped first-open flow (`Skill Level -> Today's Setup -> Safety`) and record any inputs beyond `skill level` + today's `player count` as pre-reveal friction against the intended recommendation-first contract
   - Deliver a passing session that matches their constraints
   - Have them run it within 3 days
   - Collect <60s review immediately after
@@ -279,6 +297,14 @@ A bare go-bar pass is not yet evidence of durable value. The novelty-effect lite
 - **Third-session or scheduling evidence.** At least one tester reaches a third session within `14` days, **or** makes a concrete scheduling commitment (booked court time, blocked calendar slot, invited a partner for a specific future session).
 
 Supporting but non-canonical signal: at least two users explicitly asking for the next session or inviting a partner.
+
+**Required interpretation alongside D91:**
+
+- **Joy:** did the product feel calm, pleasant, and low-admin, or merely tolerable?
+- **Trust:** did users understand why today's session fit and why the next one would change or hold?
+- **Investment:** did users treat the app like somewhere training could live, or like a helper they might use once?
+
+These are not separate numeric gates. They are the required lens for reading a D91 pass or miss honestly.
 
 **Contamination controls (protect the signal from founder / concierge nudging):**
 

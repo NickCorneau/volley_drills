@@ -6,14 +6,15 @@ export const routePaths = {
   transition: '/run/transition',
   review: '/review',
   complete: '/complete',
+  settings: '/settings',
+  onboardingSkillLevel: '/onboarding/skill-level',
+  onboardingTodaysSetup: '/onboarding/todays-setup',
 } as const
 
 export const routes = {
   home: () => routePaths.home,
   setup: () => routePaths.setup,
-  safety: (preset: string, players: number) =>
-    `${routePaths.safety}?preset=${encodeURIComponent(preset)}&players=${players}`,
-  safetyFromDraft: () => routePaths.safety,
+  safety: () => routePaths.safety,
   run: (execId: string) =>
     `${routePaths.run}?id=${encodeURIComponent(execId)}`,
   transition: (execId: string) =>
@@ -22,4 +23,7 @@ export const routes = {
     `${routePaths.review}?id=${encodeURIComponent(execId)}`,
   complete: (execId: string) =>
     `${routePaths.complete}?id=${encodeURIComponent(execId)}`,
+  settings: () => routePaths.settings,
+  onboardingSkillLevel: () => routePaths.onboardingSkillLevel,
+  onboardingTodaysSetup: () => routePaths.onboardingTodaysSetup,
 } as const

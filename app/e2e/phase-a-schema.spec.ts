@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { goToOnboardingTodaysSetup } from './helpers'
 
 /**
  * Phase A schema verification (V0B-12, V0B-23, V0B-29).
@@ -122,7 +123,7 @@ async function readSessionReview(
 }
 
 async function buildAndStartSoloOpen(page: import('@playwright/test').Page) {
-  await page.getByRole('button', { name: /start.*workout/i }).click()
+  await goToOnboardingTodaysSetup(page)
   await page.getByRole('radio', { name: 'Solo' }).click()
   await page.getByLabel('Net available').getByRole('radio', { name: 'No' }).click()
   await page.getByLabel('Wall available').getByRole('radio', { name: 'No' }).click()

@@ -1,16 +1,6 @@
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
-
-async function clearIndexedDB(page: import('@playwright/test').Page) {
-  await page.evaluate(() => {
-    const req = indexedDB.deleteDatabase('volley-drills')
-    return new Promise<void>((resolve, reject) => {
-      req.onsuccess = () => resolve()
-      req.onerror = () => reject(req.error)
-      req.onblocked = () => resolve()
-    })
-  })
-}
+import { clearIndexedDB, seedOnboardingAndOpenHome } from './helpers'
 
 async function checkA11y(page: import('@playwright/test').Page, label: string) {
   const results = await new AxeBuilder({ page })
@@ -30,18 +20,28 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
     await page.reload()
   })
 
-  test('home screen (new user)', async ({ page }) => {
+  test('onboarding – skill level (first-run)', async ({ page }) => {
+    await expect(
+      page.getByRole('heading', { name: /where.*pair today/i }),
+    ).toBeVisible()
+    await checkA11y(page, 'onboarding – skill level')
+  })
+
+  test('home screen (new user, onboarding complete)', async ({ page }) => {
+    await seedOnboardingAndOpenHome(page)
     await expect(page.getByRole('button', { name: /start first workout/i })).toBeVisible()
     await checkA11y(page, 'home – new user')
   })
 
   test('setup screen', async ({ page }) => {
+    await seedOnboardingAndOpenHome(page)
     await page.getByRole('button', { name: /start.*workout/i }).click()
     await expect(page.getByText("Today's Setup")).toBeVisible()
     await checkA11y(page, 'setup')
   })
 
   test('safety check screen', async ({ page }) => {
+    await seedOnboardingAndOpenHome(page)
     await page.getByRole('button', { name: /start.*workout/i }).click()
     await page.getByRole('radio', { name: 'Solo' }).click()
     await page.getByLabel('Net available').getByRole('radio', { name: 'No' }).click()
@@ -54,6 +54,7 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
   })
 
   test('run screen', async ({ page }) => {
+    await seedOnboardingAndOpenHome(page)
     await page.getByRole('button', { name: /start.*workout/i }).click()
     await page.getByRole('radio', { name: 'Solo' }).click()
     await page.getByLabel('Net available').getByRole('radio', { name: 'No' }).click()
@@ -78,6 +79,7 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
   })
 
   test('run screen – paused state', async ({ page }) => {
+    await seedOnboardingAndOpenHome(page)
     await page.getByRole('button', { name: /start.*workout/i }).click()
     await page.getByRole('radio', { name: 'Solo' }).click()
     await page.getByLabel('Net available').getByRole('radio', { name: 'No' }).click()

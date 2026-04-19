@@ -1,17 +1,19 @@
 ---
-id: prd-foundation
+
+## id: prd-foundation
+
 title: PRD Foundation
 status: draft
 stage: planning
 type: core
 authority: product scope, workflow, object model, MVP requirements, courtside UX requirements, drill metadata spec
 summary: "PRD: user, workflow, object model, MVP scope, activation posture, and courtside UX requirements."
-last_updated: 2026-04-16
+last_updated: 2026-04-19
 depends_on:
-  - docs/vision.md
-  - docs/decisions.md
-  - docs/research/beach-training-resources.md
----
+
+- docs/vision.md
+- docs/decisions.md
+- docs/research/beach-training-resources.md
 
 # PRD Foundation
 
@@ -23,7 +25,7 @@ depends_on:
 
 ## Product statement
 
-A personal-first beach volleyball training OS that helps self-coached users assemble, run, and improve structured practices under real on-court constraints using deterministic, explainable session rules.
+A personal-first beach volleyball training OS that feels light on the surface and serious underneath: it helps self-coached users assemble, run, trust, and invest in structured practices under real on-court constraints using deterministic, explainable session rules.
 
 ## Primary user (v1)
 
@@ -48,31 +50,45 @@ Non-expert beach players cannot reliably convert goals, limited equipment, incon
 - Run a smooth practice on sand or at home with minimal phone friction.
 - Capture one or two useful measures of progress without needing a coach.
 - Know what to do next week without rebuilding from scratch.
+- Understand why today's session fits and what the app will change next.
+- Replace notes, PDFs, and memory with one tool I trust enough to keep using.
 
 ## Indispensable workflow (v1)
 
-1. First run: capture only the minimum context that changes the starter session (`skill level` and today's player count)
+1. First run: capture only the minimum context that changes the starter recommendation (`skill level` and today's player count)
 2. Show a ready-to-run starter session immediately, with passing fundamentals for serve-receive improvement as the default first focus
-3. Refine the hard filters when the user edits, adjusts for today, or returns for repeat use
+3. Ask for extra setup only when it materially changes today's draft or the safety contract
 4. Edit quickly when needed (swap, reorder, duration, solo/pair variant)
 5. Run session courtside on mobile
 6. Capture quick review (sRPE, one skill metric, short note)
-7. Adapt the next session and, later, the broader weekly focus with explicit `progress / hold / deload` rules
+7. Adapt the next session and, later, the broader weekly focus with explicit `progress / hold / deload` rules and a visible why
 
 Deeper intake such as planning horizon, explicit goals, environment, equipment, and competition context still matters for the broader product, but it should be gathered progressively after the first useful session or when the user chooses to refine a plan.
 
 ## Activation posture (first run)
 
 - Time-to-first-useful action should be under `3` minutes.
+- Recommendation-first reveal: the user should see a believable session before the app feels like a form.
 - Mandatory first-run inputs: `skill level` and today's player count.
 - Default first focus: `passing fundamentals for serve receive`.
 - Default first-run session length: `10-15` minutes.
 - No mandatory account creation, sign-up, or permission prompts before the first starter session.
+- Any additional required question must visibly change today's draft or belong to the safety contract.
 - Do not require the `0-3` pass-quality scale in M001. When pass scoring appears, default to binary `Good` / `Not Good` against a target-zone or playable-next-contact standard.
+
+### First-run reveal contract
+
+This is the source-of-truth split for recommendation-first first-run behavior:
+
+- **Before reveal:** `skill level`, today's `player count`
+- **After reveal / refinement:** `time profile`, `net`, `wall or fence`, `balls`, `markers`, `wind`
+- **Safety interrupt:** `pain flag`, `training recency`, contextual heat CTA
+
+The D91 artifact may still package the reveal later to measure activation cost, but the long-term product contract should not change which inputs belong before the first believable session reveal.
 
 ## Trusted context refinement (after the first quick win)
 
-Once the user edits a session, asks for a fresh one, or returns for repeat use, M001 should capture the smallest extra set of hard filters needed for trustworthy assembly:
+Once the user edits a session, asks for a fresh one, or returns for repeat use, M001 should capture the smallest extra set of hard filters needed for trustworthy assembly. Treat these as **recommendation controls**, not profile completion:
 
 - time profile (`15`, `25`, `40+`)
 - net available (`yes`, `no`)
@@ -84,10 +100,21 @@ Once the user edits a session, asks for a fresh one, or returns for repeat use, 
 
 These are not all first-run mandatory, but they are required before the system claims a later draft is truly constraint-aware.
 
+## Visible reasoning and carry-forward
+
+The product contract is not only that the logic is deterministic, but that the user can feel that logic at the right moments.
+
+- Draft-level reason: one bounded line on why today's session fits this context.
+- Safety / change-of-plan reason: one bounded line when the app lightens, redirects, or narrows the plan for today.
+- Next-step reason: one bounded line on why the next session stayed the same, got lighter, or got harder.
+- Review and summary must end with a clear next step or next planning cue, not a dead-end confirmation.
+
+The D91 field-test artifact may ship a thinner slice of these surfaces to keep cognitive load low, but the product contract remains visible deterministic reasoning where it helps trust and repeated use.
+
 ## Core object model (v1-focused)
 
 - `SkillTrack` — multi-week focus area (e.g., "serve consistency" or "competition prep"); deferred until the single-session loop proves retention
-- `CyclePlan` — placeholder for longitudinal planning; Phase 1 implementation is limited to a one-week shape or next 2-6 sessions queue, not a full macro/meso/micro planner
+- `CyclePlan` — placeholder for longitudinal planning; the first Phase 1 implementation is a next 2-6 sessions queue, not a full macro/meso/micro planner
 - `TrainingContext` — constraints snapshot captured before planning: goal, level, current player count, time profile, environment access, equipment, wind, and condition notes
 - `SessionArchetype` — fixed block template selected from current hard filters before drill ranking begins
 - `Drill` — canonical drill family with structured participant, equipment, and environment requirements, objective, courtside steps, teaching points, and target metric
@@ -182,6 +209,8 @@ The MVP envelope is broader than the first implementation-ready slice. Use `docs
 - Session state contract: separate plan, execution, and review; lock the started plan snapshot; persist a durable active-block cursor and block statuses for resume
 - Reliable courtside run under weak connectivity and interruption; exact multi-device sync architecture is deferred to implementation planning, but durability and resume semantics are not
 - One-minute review (sRPE, one skill metric, short notes)
+- Visible deterministic reasoning where it matters: one line for why today's session fits and one line for why the next step stayed the same, got lighter, or got harder
+- Post-session handoff that leaves the athlete clearer about what to do next, not just that the session was saved
 - Duplicate and edit previous sessions
 - Trusted solo/pair fallback at the drill or session level before a plan is treated as usable
 - Session validation: block durations sum to session duration, drills match participant and equipment feasibility, and workload fits level
@@ -189,12 +218,13 @@ The MVP envelope is broader than the first implementation-ready slice. Use `docs
 
 ### Should-have
 
-- Shallow longitudinal layer: a one-week shape or next 2-6 sessions queue, not a full calendar or periodized season builder
-- Minimal weekly receipt: planned-vs-completed sessions, one load proxy (session RPE x minutes), one skill proxy; framed as a retention feature, not an analytics dashboard
+- Shallow longitudinal layer: a next 2-6 sessions queue, not a full calendar or periodized season builder
+- Minimal weekly receipt: planned-vs-completed sessions, one load proxy (session RPE x minutes), one skill proxy; framed as a confidence and investment layer, not an analytics dashboard
+- Lightweight accumulation / carry-forward surfaces that make "something is in the book" visible without turning the product into a dashboard
 - Constraint-aware swap recommendations for partner no-shows, weather, and time cuts
 - Simple baseline tests for serve, pass, and set tracks
 
-### Should-have (gated on M001 repeat-usage evidence)
+### Should-have (gated on post-M001 self-coached strength)
 
 - Coach clipboard on the shared backbone: assign a structured session, see whether it happened, get a tiny outcome signal, adjust the next session's progress/hold/deload — no roster admin, payments, or video
 
@@ -223,6 +253,8 @@ These are broader product hypotheses, not the literal go/no-go gate for Phase 1 
 - At least 60 percent of new users complete 2+ sessions in first 14 days
 - At least 50 percent of completed sessions include post-session review
 - At least 40 percent of active users log a skill metric in week 2
+- At least 30 percent of repeat users start another session from the app's suggested next-step path within 7 days without human prompting
+- At least 40 percent of repeat users report the app replaced or meaningfully reduced their use of notes, PDFs, or memory for training
 - Week-8 retention above 30 percent among users who completed 2+ sessions
 
 ## Courtside UX requirements
@@ -244,7 +276,9 @@ Canonical principles live in `docs/vision.md`. The following are implementation-
 
 - Human owns final plan; AI is excluded from the critical path and cannot affect session generation, volume, or progression logic.
 - Every recommendation is constraint-aware.
+- Setup questions are recommendation controls, not profile completion. If a question does not visibly change today's plan or satisfy safety, defer it.
 - Feedback feeds forward into the next planning cycle.
+- Review and summary must produce a visible carry-forward, not a dead-end confirmation screen.
 - Safety and load awareness are default behavior, not optional features. Safety is enforced by workflow structure (pre-session gates that shape defaults), not by copy-only disclaimers. The product must gate sessions on a binary pain flag and training recency, compute sRPE-load (RPE × duration) as its internal load primitive, enforce mandatory warm-up/cool-down blocks, and make stop/seek-help triggers accessible from any session state. See `docs/specs/m001-adaptation-rules.md` for the full safety contract.
 - The product is general training support, not medical advice. It does not diagnose injury, treat conditions, compute injury-risk scores, or provide return-to-play guidance. Copy follows standard fitness-industry "not medical advice" patterns. See D86.
 - Device-primary storage: the local copy is the source of truth. Any future cloud layer is a supporting peer for sync and backup, not an authority the app depends on to function.
@@ -261,7 +295,7 @@ These were previously open. Answers are drawn from research and product discussi
 - **What adaptation logic ships first?** Rules-first. Transparent rule-based progression and deload logic is the only acceptable baseline.
 - **What AI assistance belongs in Phase 1?** None in the critical path. It may only be used for optional, copy-only explanation of deterministic 'why' logic or rephrasing cues.
 - **What are the first planning defaults for adaptation?** Use explicit pass-first `progress / hold / deload` rules. See `docs/specs/m001-adaptation-rules.md`.
-- **What periodization depth belongs in the first build?** M001 stays focused on the single-session loop. The broader Phase 1 envelope may extend into a shallow week-shape or next 2-6 sessions queue once the run/review loop is trusted, but not a full calendar or periodized season builder. Richer multi-week planning and competition-prep structures are Phase 1.5+ concerns.
+- **What periodization depth belongs in the first build?** M001 stays focused on the single-session loop. The broader Phase 1 envelope may extend into a shallow next 2-6 sessions queue once the run/review loop is trusted, but not a full calendar or periodized season builder. Richer multi-week planning and competition-prep structures are Phase 1.5+ concerns.
 - **What review inputs ship first for safety and adaptation?** Start with sRPE plus one skill metric. Use a `0-10` CR10-style sRPE prompt with delayed capture preferred when practical. Soreness and wellness inputs can be added later if they prove low-friction and useful.
 - **What pass metric should M001 trust first?** Use binary `Good` / `Not Good` scoring with `attemptCount` for pass-scored sessions. Do not make the full `0-3` pass-quality rubric the default M001 metric.
 - **What belongs in first-run onboarding?** Only the inputs that materially change the starter session: skill level and today's player count. Default the first focus to passing fundamentals for serve receive and defer broader intake until after first-session value is proven.

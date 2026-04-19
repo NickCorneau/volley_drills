@@ -1,0 +1,194 @@
+/**
+ * Phase F Unit 3 (2026-04-19): foreground audio cues for the courtside
+ * run flow.
+ *
+ * `navigator.vibrate` is the only cue `RunScreen` fires on block-end
+ * and preroll tick today, and iOS Safari PWA does not support it (per
+ * `D54`, `D57`, and the 2026 WebKit record). With the phone set down
+ * on a towel 6 feet away, an iOS tester has NO reliable signal that a
+ * block ended — which breaks the `D91` "phone courtside viable for
+ * structured runner" hypothesis directly. This helper carves out the
+ * narrow "block-end beep + preroll tick" slice of the originally-
+ * deferred `V0B-08` layered cue stack; the full stack stays post-D91.
+ *
+ * Design:
+ * - Single module-level `AudioContext` instantiated lazily on first
+ *   gesture-bound call (RunScreen's `startWithPreroll` runs inside a
+ *   user-click handler, satisfying the autoplay policy).
+ * - Oscillator + gain envelope, not an `<audio>` element with an
+ *   `.mp3` asset: no asset bundling, no SW precache concerns, and no
+ *   iOS silent-switch bypass. A silent user is a user who asked for
+ *   silence — the silent switch honors the AudioContext path by
+ *   design.
+ * - Fire-and-forget: every `play*` function swallows every error path
+ *   so a missing `AudioContext`, a rejected autoplay policy, or a
+ *   transient iOS regression never fails the calling block-complete
+ *   transition. Logged once to aid post-D91 debugging.
+ *
+ * Compatibility with `D54`: `D54` rules out **background** audio and
+ * iPhone haptics. Foreground audio fired inside an active session
+ * while the app is in the foreground is a different category — the
+ * same way `D42` scopes wake-lock and haptics as best-effort foreground
+ * enhancements.
+ *
+ * See `docs/specs/m001-courtside-run-flow.md` §3 (Courtside action
+ * rule, Phase F audio carve-out) and `docs/decisions.md` D122.
+ */
+
+const BLOCK_END_FREQUENCY_HZ = 1000
+const BLOCK_END_DURATION_SECONDS = 0.25
+const PREROLL_TICK_FREQUENCY_HZ = 800
+const PREROLL_TICK_DURATION_SECONDS = 0.1
+
+/**
+ * Shared lazily-instantiated AudioContext. Module-scoped so subsequent
+ * plays reuse the same context rather than thrashing one per call.
+ * `undefined` before first attempt; `null` if the environment has no
+ * `AudioContext` at all (SSR / old browsers).
+ */
+let sharedContext: AudioContext | null | undefined = undefined
+
+/** Log each distinct failure mode once to aid post-D91 debugging. */
+let loggedMissingContext = false
+let loggedAutoplayBlocked = false
+let loggedGenericFailure = false
+
+type MaybeAudioContextCtor =
+  | typeof AudioContext
+  | undefined
+  | (new () => AudioContext)
+
+/**
+ * Resolve the AudioContext constructor across the two common names.
+ * Webkit-prefixed name survives on a few older iOS Safari builds; the
+ * standard name is the modern default.
+ */
+function resolveCtor(): MaybeAudioContextCtor {
+  if (typeof window === 'undefined') return undefined
+  const w = window as unknown as {
+    AudioContext?: typeof AudioContext
+    webkitAudioContext?: typeof AudioContext
+  }
+  return w.AudioContext ?? w.webkitAudioContext
+}
+
+function ensureAudioContext(): AudioContext | null {
+  if (sharedContext !== undefined) return sharedContext
+  const Ctor = resolveCtor()
+  if (!Ctor) {
+    sharedContext = null
+    if (!loggedMissingContext) {
+      loggedMissingContext = true
+      console.info(
+        'lib/audio: AudioContext not available in this environment; audio cues disabled',
+      )
+    }
+    return null
+  }
+  try {
+    sharedContext = new Ctor()
+  } catch (err) {
+    sharedContext = null
+    if (!loggedGenericFailure) {
+      loggedGenericFailure = true
+      console.warn('lib/audio: AudioContext construction failed', err)
+    }
+    return null
+  }
+  return sharedContext
+}
+
+/**
+ * Schedule a single-tone oscillator with a short fade-in / fade-out
+ * envelope. Called internally by `playBlockEndBeep` + `playPrerollTick`;
+ * not exported because the frequency / duration pair should be a
+ * deliberate change at the call-site level, not a parameter passed by
+ * callers.
+ */
+function playTone(frequencyHz: number, durationSeconds: number): void {
+  const ctx = ensureAudioContext()
+  if (!ctx) return
+
+  try {
+    // iOS / Chrome sometimes leave the context in 'suspended' state when
+    // created without a gesture; resume() is a no-op when already
+    // running. Fire-and-forget — the `.catch` is defensive over a
+    // browser regression (shouldn't reject on a gesture-bound call).
+    if (ctx.state === 'suspended') {
+      void ctx.resume().catch((err) => {
+        if (!loggedAutoplayBlocked) {
+          loggedAutoplayBlocked = true
+          console.info('lib/audio: autoplay resume rejected', err)
+        }
+      })
+    }
+
+    const now = ctx.currentTime
+    const endTime = now + durationSeconds
+
+    const oscillator = ctx.createOscillator()
+    oscillator.type = 'sine'
+    oscillator.frequency.setValueAtTime(frequencyHz, now)
+
+    const gain = ctx.createGain()
+    // 10 ms attack, 10 ms release — avoids click artifacts on the
+    // ramp edges without bloating the tone.
+    gain.gain.setValueAtTime(0, now)
+    gain.gain.linearRampToValueAtTime(0.25, now + 0.01)
+    gain.gain.setValueAtTime(0.25, endTime - 0.01)
+    gain.gain.linearRampToValueAtTime(0, endTime)
+
+    oscillator.connect(gain)
+    gain.connect(ctx.destination)
+    oscillator.start(now)
+    oscillator.stop(endTime)
+  } catch (err) {
+    if (!loggedGenericFailure) {
+      loggedGenericFailure = true
+      console.warn('lib/audio: oscillator scheduling failed', err)
+    }
+  }
+}
+
+/**
+ * Play the block-end cue. Called from `RunScreen.handleBlockComplete`
+ * alongside the existing `navigator.vibrate` call — vibrate stays for
+ * Android + desktop haptics; the beep covers iOS Safari PWA where
+ * vibrate is unsupported.
+ *
+ * Safe to call from any environment: SSR no-ops, missing
+ * `AudioContext` no-ops, rejected autoplay no-ops, never throws.
+ */
+export function playBlockEndBeep(): void {
+  playTone(BLOCK_END_FREQUENCY_HZ, BLOCK_END_DURATION_SECONDS)
+}
+
+/**
+ * Play a preroll tick. Called from `RunScreen.startWithPreroll` on each
+ * of the 3 / 2 / 1 countdown seconds so the tester doesn't have to
+ * watch the phone to catch the start.
+ *
+ * Safe to call from any environment: SSR no-ops, missing
+ * `AudioContext` no-ops, rejected autoplay no-ops, never throws.
+ */
+export function playPrerollTick(): void {
+  playTone(PREROLL_TICK_FREQUENCY_HZ, PREROLL_TICK_DURATION_SECONDS)
+}
+
+/**
+ * Testing-only reset hook. Clears the module-scoped singleton so
+ * individual vitest specs can swap the AudioContext mock between runs
+ * without cross-test leakage. Not exported for production code paths.
+ */
+export function __resetAudioContextForTesting(): void {
+  // Close the prior context (defensive — frees any audio resources).
+  try {
+    sharedContext?.close()
+  } catch {
+    /* ignore */
+  }
+  sharedContext = undefined
+  loggedMissingContext = false
+  loggedAutoplayBlocked = false
+  loggedGenericFailure = false
+}

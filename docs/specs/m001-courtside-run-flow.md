@@ -6,7 +6,7 @@ stage: validation
 type: spec
 authority: courtside run screen states, interaction contract, interruption handling
 summary: "Screen states, interaction contract, and interruption handling for the courtside run flow."
-last_updated: 2026-04-16
+last_updated: 2026-04-19
 depends_on:
   - docs/milestones/m001-solo-session-loop.md
   - docs/prd-foundation.md
@@ -70,13 +70,13 @@ flowchart TD
     warmup --> runBlock[Run Current Block]
     runBlock --> nextBlock{Next block?}
     nextBlock -->|yes| runBlock
-    nextBlock -->|no| cooldown[Cool-Down Block]
-    cooldown --> review[Quick Review]
+    nextBlock -->|no| downshift[Downshift Block]
+    downshift --> review[Quick Review]
     review --> summary[Session Summary]
     summary --> home
 ```
 
-Note: warm-up and cool-down are mandatory session blocks, not optional steps. The safety check gates and shapes the session before the warm-up begins. Stop/seek-help triggers are accessible from any screen during the session.
+Note: warm-up and Downshift are mandatory session blocks, not optional steps. The safety check gates and shapes the session before the warm-up begins. Stop/seek-help triggers are accessible from any screen during the session. ("Downshift" is the v0b-renamed cool-down block per `D105`; see `docs/specs/m001-session-assembly.md`.)
 
 ## Screen states
 
@@ -89,12 +89,13 @@ Default goal:
 
 New-user secondary actions:
 
-- `See why this session was chosen`
 - `Change level or today's player count`
+
+(The `See why this session was chosen` affordance is **not in v0b** per `H7` in the approved red-team fix plan; the `SessionDraft.rationale` schema field is reserved for M001-build UI.)
 
 Repeat-user secondary actions:
 
-- `Duplicate last`
+- `Repeat this session` (per `D-C5` — duplicate-and-edit is folded into Repeat)
 - `Adjust for today`
 
 ### 2. Session Prep
@@ -117,7 +118,7 @@ Actions:
 - `Start now`
 - `Swap drill`
 - `Shorten session`
-- `Switch to solo/pair fallback` when today’s reality does not match the saved assumption
+- Player mode changes: re-enter Setup via the Draft card's `Edit` secondary (per `D-C` / Phase C UX Surface 3 — no Session Prep screen in v0b).
 
 Start rule:
 
@@ -186,7 +187,8 @@ Allowed actions:
 - `Pause`
 - `+15s` (during rest)
 - `Skip Rest` (long-press, during rest)
-- `Swap`
+- `Swap` (live in v0b per Phase F 2026-04-19; cycles to next-ranked curated alternate within the same block slot; preserves durationMinutes / type / required; mutates ExecutionLog.plan only, never SessionPlan snapshot per D37; pauses timer; disabled on warmup / wrap)
+- `Shorten`
 - `Skip block`
 - `End session`
 
@@ -195,9 +197,11 @@ Courtside action rule:
 - keep `Next` and `Pause` (and rest controls) as the primary always-visible controls
 - give those controls the largest targets on screen (`54-60px` baseline with clear spacing)
 - make the timer or rep target the dominant visual element
-- place `Swap`, `Skip block`, and `End session` in a secondary overflow pattern or pause state
+- `Swap` is a first-class courtside action (visible in both active and paused states); lands in v0b per Phase F 2026-04-19 — previously deferred. Tap cycles the current block's drill to the next-ranked curated alternate within the same block slot, preserving `durationMinutes` / `type` / `required`. Swap mutates `ExecutionLog.plan.blocks[idx]` only; the original `SessionPlan` snapshot stays locked per `D37`. Swap pauses the timer (same semantics as `Shorten`); the user taps Resume to continue. Warm-up and wrap blocks are disabled for Swap per `D85` / `D105` (curated content that shouldn't be replaced mid-drill).
+- place `Skip block` and `End session` in a secondary overflow pattern or pause state
 - keep longer instruction text off the live screen; deeper cue lists belong before the block starts or while paused
 - use Auto-Go (auto-advance) by default, with a short "3-2-1" pre-roll transition cue before work phases
+- **foreground audio cue at block-end and on each preroll tick** (Phase F 2026-04-19, narrow slice of the originally-deferred `V0B-08` layered cue stack). Single-tone ~250 ms tone at block-complete; ~100 ms tick per preroll second. Fire-and-forget via `AudioContext` oscillator — best-effort, silent failure on autoplay-policy rejection or absent `AudioContext`. Honors iOS silent switch by default (by design — a silent user asked for silence). Compatible with `D54` (which scoped "no background audio / no iPhone haptics in M001" — foreground audio is a different carve-out). Required v0b baseline because `navigator.vibrate` is unsupported on iOS Safari PWA (`D57`), so without the beep a phone set down on a towel has no reliable block-end signal and the `phone courtside viable` D91 hypothesis cannot be honestly tested.
 - counter is a single tap during rest for a block-level marker (`Good` / `Not Good`), rather than per-rep tapping
 - attempt Screen Wake Lock to keep the screen awake during the session
 - persist run state locally at session start and every meaningful transition so the session can recover after reload, close, or interruption
@@ -224,13 +228,13 @@ Secondary actions:
 
 For the Phase 0 validation runner (`v0a`), a minimal version of this transition is required: next block label, duration, and one primary action. The full secondary actions and richer cue context start in the Starter Loop build target.
 
-### 3.6 Cool-Down Block
+### 3.6 Downshift Block (renamed from Cool-Down per `D105`)
 
-The last block of every session is a mandatory cool-down. The user can shorten it but cannot skip it entirely.
+The last block of every session is a mandatory Downshift block. The user can shorten it but cannot skip it entirely. The v0b-renamed name is "Downshift" — the prior "Cool-down" label implied a recovery claim the evidence does not support.
 
-Content should include gentle movement and light stretching. Exact content needs volleyball coach review.
+Content should include gentle movement and light stretching framed as transition and comfort, not as recovery or injury prevention. Exact content needs volleyball coach review.
 
-Cool-down uses the same run-block UI as other blocks.
+Downshift uses the same run-block UI as other blocks.
 
 ### 3.7 Stop/Seek-Help Reference
 
@@ -348,7 +352,8 @@ Fallback rule:
 
 - Treat visual controls, readable text cues, and resumable session state as the guaranteed baseline.
 - Screen wake lock is a best-effort enhancement, not a dependency. If the phone still locks, the user should be able to recover cleanly.
-- Haptics or vibration can supplement transitions on supporting devices, but no critical cue should rely on them.
+- Haptics or vibration can supplement transitions on supporting devices, but no critical cue should rely on them (iOS Safari PWA: unsupported).
+- **Foreground audio cues** (block-end beep, preroll tick) are best-effort and gated on `AudioContext` + user-gesture. They are the *primary* block-end signal for iOS Safari PWA testers (where vibrate is unsupported); failure paths silently fall back to the visual transition so the run loop never depends on sound. Honors the iOS silent switch by default. See Phase F 2026-04-19 (`V0B-08` narrow slice) and `D54` (which remains correct for background audio and iPhone haptics — foreground audio is a compatible carve-out).
 - Backgrounding may interrupt timer precision, so recovery beats pretending timing stayed perfect.
 - App updates should never interrupt an active session. Any refresh prompt belongs before start, after summary, or on next launch.
 
@@ -361,7 +366,7 @@ Fallback rule:
 - live chat or AI conversation during run
 - dense analytics on the run screen
 - lock-screen runner operation ("works with screen off")
-- dependable background audio coaching in iOS PWAs
+- dependable background audio coaching in iOS PWAs (foreground block-end beep is in scope per Phase F 2026-04-19; background coaching audio is not)
 - dependable iPhone haptics via standard web APIs (not supported in Safari iOS)
 
 ## Success bar

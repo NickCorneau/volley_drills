@@ -17,8 +17,8 @@ createRoot(document.getElementById('root')!).render(
 )
 
 // Note (V0B-25 / D118): `navigator.storage.persist()` is no longer called at
-// module load. WebKit grants persistence heuristically and responds better to a
-// real user-gesture save boundary; the call moved into `createSession` /
+// module load. WebKit grants persistence heuristically and responds better to
+// a real user-gesture save boundary; the call moved into
 // `createSessionFromDraft` (see `services/session.ts`). See
 // `docs/research/local-first-pwa-constraints.md`.
 

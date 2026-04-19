@@ -3,39 +3,28 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { SafetyIcon } from '../components/SafetyIcon'
 import { UpdatePrompt } from '../components/UpdatePrompt'
 import { Button, Card, StatusMessage } from '../components/ui'
+import { composeSummary, type SummaryOutput } from '../domain'
 import { useInstallPosture } from '../hooks/useInstallPosture'
-import { effortLabel } from '../lib/format'
+import { effortLabel, formatPassRateLine } from '../lib/format'
+import { isSchemaBlocked } from '../lib/schema-blocked'
 import { getStorageCopy } from '../lib/storageCopy'
 import { useAppRegisterSW } from '../lib/pwa-register'
 import { routes } from '../routes'
-import { loadSessionBundle, type SessionBundle } from '../services/review'
+import {
+  countSubmittedReviews,
+  loadSessionBundle,
+  type SessionBundle,
+} from '../services/review'
 import { clearTimerState } from '../services/timer'
 
 type BundleState =
   | { status: 'loading' }
-  | { status: 'ready'; bundle: SessionBundle }
+  | {
+      status: 'ready'
+      bundle: SessionBundle
+      summary: SummaryOutput
+    }
   | { status: 'missing' }
-
-function SessionCompleteIcon() {
-  return (
-    <div
-      className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-accent"
-      aria-hidden
-    >
-      <svg
-        className="h-8 w-8 text-white"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M20 6L9 17l-5-5" />
-      </svg>
-    </div>
-  )
-}
 
 function SavedCheckIcon() {
   return (
@@ -50,6 +39,40 @@ function SavedCheckIcon() {
       aria-hidden
     >
       <path d="M20 6L9 17l-5-5" />
+    </svg>
+  )
+}
+
+/**
+ * Phase F Unit 5 (2026-04-19): neutral steady-state verdict glyph.
+ *
+ * Replaces the literal `=` character rendered at `text-4xl`, which
+ * visually read as a typo or a placeholder at that size. The glyph's
+ * semantic meaning (holding steady / no change in direction; D86
+ * compliance: no warning iconography, no red) is the same; the
+ * rendering is now unambiguous.
+ *
+ * Screen readers skip it (`aria-hidden`) — the verdict word below
+ * (with `aria-live="polite"`) carries the meaning. See
+ * `docs/decisions.md` D86 and
+ * `docs/plans/2026-04-19-feat-phase-f-d91-validity-hardening-plan.md`
+ * Unit 5.
+ */
+function VerdictGlyph() {
+  return (
+    <svg
+      className="h-10 w-10 text-text-secondary"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      data-testid="verdict-glyph"
+    >
+      <line x1="5" y1="10" x2="19" y2="10" />
+      <line x1="5" y1="15" x2="19" y2="15" />
     </svg>
   )
 }
@@ -73,14 +96,37 @@ export function CompleteScreen() {
   useEffect(() => {
     if (!executionLogId) return
     let cancelled = false
-    loadSessionBundle(executionLogId).then((result) => {
-      if (cancelled) return
-      if (!result) {
+    ;(async () => {
+      try {
+        const [bundle, sessionCount] = await Promise.all([
+          loadSessionBundle(executionLogId),
+          countSubmittedReviews(),
+        ])
+        if (cancelled) return
+        if (!bundle) {
+          setBundleState({ status: 'missing' })
+          return
+        }
+        const summary = composeSummary({
+          review: bundle.review,
+          plan: bundle.plan,
+          sessionCount,
+        })
+        setBundleState({ status: 'ready', bundle, summary })
+      } catch (err) {
+        // Reliability finding rel-2: a rejected Dexie read here (quota,
+        // corruption, transient InvalidStateError) would otherwise strand
+        // the tester on the loading spinner indefinitely on the terminal
+        // post-session screen. When a schema upgrade is mid-flight,
+        // SchemaBlockedOverlay owns the UI so we suppress our own
+        // fallback. Otherwise drop into `missing` — the existing
+        // "Session not found" StatusMessage offers a Back-to-start escape.
+        if (cancelled) return
+        if (isSchemaBlocked()) return
+        console.error('CompleteScreen bundle load failed:', err)
         setBundleState({ status: 'missing' })
-      } else {
-        setBundleState({ status: 'ready', bundle: result })
       }
-    })
+    })()
     return () => {
       cancelled = true
     }
@@ -117,40 +163,58 @@ export function CompleteScreen() {
     )
   }
 
-  const { log, plan, review } = bundleState.bundle
-  const totalMinutes = plan.blocks.reduce(
-    (sum, b) => sum + b.durationMinutes,
-    0,
-  )
-  const durationMinutesRounded = Math.max(0, Math.round(totalMinutes))
+  const { bundle, summary } = bundleState
+  const { log, plan, review } = bundle
   const totalBlocks = plan.blocks.length
   const completedBlocks = log.blockStatuses.filter(
     (b) => b.status === 'completed',
   ).length
-  const goodPassRatePct =
-    review.totalAttempts > 0
-      ? Math.round((review.goodPasses / review.totalAttempts) * 100)
-      : null
 
   return (
     <div className="mx-auto flex w-full max-w-[390px] flex-col items-center gap-8 pb-10 pt-4">
       <div className="self-start">
         <SafetyIcon />
       </div>
-      <div className="flex flex-col items-center gap-4 text-center">
-        <SessionCompleteIcon />
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-            Session Complete
-          </h1>
-          <p className="mt-2 text-text-secondary">
-            {plan.presetName} · {durationMinutesRounded} min
-          </p>
-        </div>
-      </div>
 
-      <Card className="w-full" aria-label="Session summary">
+      <section
+        aria-labelledby="summary-verdict"
+        className="flex w-full flex-col items-center gap-3 text-center"
+      >
+        <p className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
+          {summary.header}
+        </p>
+        {/* Verdict icon is a neutral steady-state glyph, not a warning.
+            D86 compliance: no red, no warning iconography.
+            The verdict word (aria-live polite below) carries the meaning
+            for screen readers, so the icon is aria-hidden.
+            Phase F Unit 5 (2026-04-19): replaced the literal `=` char
+            (rendered at text-4xl, which read as a typo) with a purpose-
+            built two-bar horizontal SVG. Same semantic, unambiguous
+            rendering. */}
+        <VerdictGlyph />
+        <h2
+          id="summary-verdict"
+          aria-live="polite"
+          className="text-3xl font-bold tracking-tight text-text-primary"
+        >
+          {summary.verdict}
+        </h2>
+        <p className="max-w-[320px] text-sm leading-relaxed text-text-secondary">
+          {summary.reason}
+        </p>
+      </section>
+
+      <Card className="w-full" aria-label="Session recap">
+        <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-text-secondary">
+          Session recap
+        </p>
         <dl className="flex flex-col gap-3 text-sm">
+          <div className="flex items-center justify-between gap-4">
+            <dt className="text-text-secondary">Session</dt>
+            <dd className="font-medium text-text-primary">
+              {plan.presetName}
+            </dd>
+          </div>
           <div className="flex items-center justify-between gap-4">
             <dt className="text-text-secondary">Blocks completed</dt>
             <dd className="font-medium tabular-nums text-text-primary">
@@ -158,11 +222,11 @@ export function CompleteScreen() {
             </dd>
           </div>
           <div className="flex items-center justify-between gap-4">
-            <dt className="text-text-secondary">Good pass rate</dt>
+            <dt className="text-text-secondary">Good passes</dt>
             <dd
-              className={`font-medium tabular-nums ${goodPassRatePct !== null ? 'text-success' : 'text-text-secondary'}`}
+              className={`font-medium tabular-nums ${review.totalAttempts > 0 ? 'text-success' : 'text-text-secondary'}`}
             >
-              {goodPassRatePct !== null ? `${goodPassRatePct}%` : '\u2014'}
+              {formatPassRateLine(review.goodPasses, review.totalAttempts)}
             </dd>
           </div>
           <div className="flex items-center justify-between gap-4">
@@ -196,10 +260,6 @@ export function CompleteScreen() {
           </p>
         </div>
       </div>
-
-      <p className="max-w-[320px] text-center text-sm text-text-secondary">
-        Thanks for testing! Your feedback helps us improve.
-      </p>
 
       <UpdatePrompt needRefresh={needRefresh} onUpdate={updateApp} />
     </div>

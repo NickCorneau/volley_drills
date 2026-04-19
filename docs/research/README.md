@@ -6,7 +6,7 @@ stage: planning
 type: index
 authority: research-note routing, note selection guidance, and AI-native research-note conventions
 summary: "Fast-path routing for research notes; selection rules and AI-native conventions."
-last_updated: 2026-04-16-c-g
+last_updated: 2026-04-19
 depends_on:
   - docs/README.md
   - docs/catalog.json
@@ -64,6 +64,8 @@ Research notes inform canon. They do not outrank `docs/decisions.md`, `docs/prd-
   - `docs/research/beach-training-resources.md`
 - Need narrowed outdoor UI defaults for M001:
   - `docs/research/outdoor-courtside-ui-brief.md`
+- Need a calm, restrained, Japanese-inspired visual direction experiment for future UI work:
+  - `docs/research/japanese-inspired-visual-direction.md`
 - Need iPhone / PWA platform constraints, the 2026 three-layer storage-durability model, three-state save copy, the real-device test protocol, or update-safety guidance (sharpens `D57`; seeds `D118`, `O18`):
   - `docs/research/local-first-pwa-constraints.md`
 - Need timer, transition, or interruption-recovery patterns for run mode:
@@ -114,6 +116,7 @@ Research notes inform canon. They do not outrank `docs/decisions.md`, `docs/prd-
 |---|---|---|
 | `docs/research/beach-training-resources.md` | broad training/product research, wedge choice, metrics, competitors, drill references | informs vision, PRD, roadmap, decisions |
 | `docs/research/outdoor-courtside-ui-brief.md` | theme, contrast, type scale, touch targets, information density | informs decisions, PRD courtside UX, M001 run/review specs |
+| `docs/research/japanese-inspired-visual-direction.md` | calm, restrained, Japanese-inspired visual direction experiments; spacing, focal hierarchy, pacing, and anti-cliche guardrails | informs future UI experiments; does not override the outdoor readability contract |
 | `docs/research/local-first-pwa-constraints.md` | iPhone web constraints, install posture, update safety, three-layer storage-durability model (ITP 7-day timer / Home Screen carveout / quota-pressure eviction + heuristic persistent mode), three-state save copy, real-device test protocol | informs decisions, M001 connectivity/run behavior, milestone realism; sharpens `D57`; seeds `D118` and `O18` |
 | `docs/research/courtside-timer-patterns.md` | countdown model, auto-advance, wake lock, interruption recovery | informs M001 run-flow behavior |
 | `docs/research/m001-testing-quality-strategy.md` | testing stack, trust invariants, update-safe verification strategy | informs implementation planning and quality expectations |

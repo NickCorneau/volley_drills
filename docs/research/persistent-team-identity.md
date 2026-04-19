@@ -15,6 +15,7 @@ depends_on:
 related:
   - docs/research/README.md
   - docs/research/solo-training-environments.md
+  - docs/research/d91-retention-gate-evidence.md
   - research-output/persistent-team-identity-pair-sport-apps.md
 ---
 
@@ -84,6 +85,38 @@ See `research-output/persistent-team-identity-pair-sport-apps.md` for the full p
 
 Even where partnership is the sport, consumer apps prefer **persistent people + sessions + social discovery** over **persistent pairs**. That is strong external evidence against premature pair-as-entity modeling in our slice.
 
+### Reinforcing analogues (2026-04-16 supplementary pass)
+
+A later desk-research pass surfaced four additional product patterns that reinforce — and do not overturn — the posture above. Summarized here so downstream readers do not have to re-derive them:
+
+- **DUPR (pickleball ratings platform).** The clearest direct evidence that modern doubles systems do not make the pair the primary durable identity: each player has singles and doubles ratings, a doubles match's "team rating" is computed from the average of the two player ratings, and updates apply to each player individually after the match. All-player match-validation is an integrity layer, not a shared-entity layer. That is exactly the split the session-first posture assumes — shared session record, durable meaning lands on each body/account.
+- **Tennis Fit (solo-first → doubles).** App-store release notes explicitly add doubles tracking in response to user demand; the product extends to "track all four players and analyze team performance and the partnership" without introducing a durable team object. This is the evolutionary path our schema should be able to support: richer participant modeling and partnership analysis layered on a session model, not a reshape onto `Team`.
+- **SwingVision 2026 Family Sharing.** Adding Family Sharing shows that one-phone capture eventually needs to let value travel beyond the phone-holder — but even then the durable unit stays account/session owner plus tagged players, not a formal pair object. Confirms that pair salience belongs in tagging and sharing UX when the time comes, not in the object model ahead of time.
+- **Kitman Labs / Teamworks kiosk pattern.** Serious athlete-monitoring products solve "one device, many bodies" with **participant-aware capture** (each athlete taps their own photo and answers their own questions), not with a collective load number. When subjective load ever becomes dual-capture in this product, it should follow the same pattern: person-level fields on participant records, not a shared RPE on the pair.
+
+### Beach-specific product patterns
+
+Two beach-volleyball consumer products worth noting because they illustrate the other side of the split (coordination / event identity vs individual-level skill):
+
+- **BeachUp / Beach Volleyball App.** User reviews explicitly object to strictly solo-first creation semantics ("creating an entire event as solo player feels wrong") and praise badges that show individual experience. Reads as: in real beach-volleyball usage, the canonical social unit of **scheduling** is often pair or group, while the canonical unit of **skill/experience** still lives per person. Same split the session-first posture takes.
+- **VolleyTrain, PlayBeach.** Beach-specific training products that explicitly frame partner as a **training modality** ("solo or with a partner"), not a durable schema entity. Beach-specific evidence against over-indexing on partner permanence in the training layer.
+
+### Pair-native accountability (the Sweatmates reference)
+
+Sweatmates is the cleanest pair-native consumer analog, so it is worth spelling out what it models and what it does not:
+
+- Pair is the **habit contract**: couples, weekly shared goals, instant partner visibility on a raw check-in.
+- The check-in itself is still **person-specific** — one person logs a workout, the partner sees it — so the shared unit is accountability, the action is attributed to a body.
+- What survives in the review evidence is "literally 10 seconds" friction; the loudest negative reviews are about camera / paywall friction, not about the pair framing.
+
+Directional implications for this product:
+
+- Pair-native framing at the **workflow** level (mode fork, pair-addressed verdict, partner-named Complete copy) is supported by the evidence as a real retention lever.
+- That does **not** imply a durable Team object. It implies visible pair context within a session and low-friction capture.
+- Every extra input step in a motivationally-fragile early window is dangerous. When dual-capture RPE is ever considered, the Sweatmates reading is a caution against forcing it on day one; the Kitman Labs reading is what the shape should look like when it does land.
+
+None of these additions change `D114`–`D117`; they strengthen the same conclusion from different angles and give downstream product / plan docs a broader evidence base to cite without re-doing the research.
+
 ## What the retention and trust evidence says
 
 **No** credible public retention reporting was found from the surveyed pair-sport apps that breaks users into linked-team vs solo cohorts. That absence is itself a signal: even products shipping linked-team features do not publish evidence that the linking drives retention.
@@ -99,6 +132,8 @@ Broader fitness evidence:
 The most useful causal design for our decision is the Philadelphia six-month RCT on step incentives: **combined individual-and-team incentives** beat team-only and control; **team-only did not outperform control**. A separate RCT on social support + loss-framed incentives produced modest gains that faded post-intervention. A 2024 partner-based virtual exercise pilot showed excellent retention and adherence, but the sample was too small to generalize.
 
 Implication for our product: a durable pair construct is **likelier to help when it adds accountability, context, and coordination while preserving each individual's credits, controls, and exits.** Any future Team feature that submerges individual progress into a collective score is not supported by the evidence.
+
+For the D91 cohort readout specifically: the honest planning band for pair-vs-solo D14 retention is a **relative uplift of roughly +25% to +60%**, center-of-mass around **+40%**, or **+10–15 percentage points absolute** in an n=5-ish cohort, with a noise floor around +5 pp given the sample size. Pair testers returning as solo when coordination breaks is still evidence that pair framing is working, not failing — coordination drag should be logged separately rather than counted as pair retention failure. Full interpretive logic in `docs/research/d91-retention-gate-evidence.md` → *Pair-vs-solo stratified reading*.
 
 ## Where persistent linking goes wrong (four failure modes)
 
@@ -226,3 +261,4 @@ Audited against the repo as of 2026-04-16. No immediate code changes are require
 ## Change log
 
 - 2026-04-16 — note created from desk research on comparable pair-sport consumer products (SwingVision, PB Vision, UTR, PickleGo, UltiAnalytics, The Rowing App, Balltime, Stat Together, Steazzi, KAYA, The Topo, DancePartner, Danceflavors, U-Stat, Pickleball Stats Tracker), HCI research on shared accounts and post-breakup disentanglement, fitness adherence literature (JMIR, Nature Communications, Philadelphia RCT, step-incentive and loss-framing trials), Strava Flyby privacy history, PB Vision/DUPR trust-erosion evidence, and local-first collaboration literature (Kleppmann, Ink & Switch, Automerge, Keyhive). Raw provenance in `research-output/persistent-team-identity-pair-sport-apps.md`. Resolves `O13` operationally and seeds `D114`–`D117`.
+- 2026-04-16 — added reinforcing analogues (DUPR person-level durable identity, Tennis Fit solo→doubles evolution without a Team object, SwingVision 2026 Family Sharing, Kitman Labs / Teamworks kiosk participant-aware capture), beach-specific patterns (BeachUp / Beach Volleyball App scheduling-unit vs individual-skill split, VolleyTrain / PlayBeach partner-as-modality framing), and a Sweatmates subsection separating pair-native accountability from durable Team identity. Linked the D91 cohort readout to the pair-vs-solo stratified reading band in `docs/research/d91-retention-gate-evidence.md`. No decision changes; `D114`–`D117` and the v0b exclusion of persistent partner/team identity stand. This is evidence depth, not posture drift.

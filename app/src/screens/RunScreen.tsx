@@ -7,7 +7,10 @@ import { Button, StatusMessage } from '../components/ui'
 import { useTimer } from '../hooks/useTimer'
 import { useWakeLock } from '../hooks/useWakeLock'
 import { useSessionRunner } from '../hooks/useSessionRunner'
+import { findSwapAlternatives } from '../domain/sessionBuilder'
+import { playBlockEndBeep, playPrerollTick } from '../lib/audio'
 import { phaseLabel } from '../lib/format'
+import { computeShortened } from '../lib/shorten'
 import { routes } from '../routes'
 
 export function RunScreen() {
@@ -20,9 +23,14 @@ export function RunScreen() {
 
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [prerollCount, setPrerollCount] = useState<number | null>(null)
+  // Phase F Unit 5 (2026-04-19): coaching cues default to visible
+  // instead of hidden-behind-a-toggle. The drill catalog's editorial
+  // coaching points have real signal for a solo self-coached tester;
+  // defaulting them hidden meant a non-trivial fraction never saw them.
+  // The toggle stays so paranoid users can Hide them mid-block.
   const [showInstructions, toggleInstructions] = useReducer(
     (s: boolean) => !s,
-    false,
+    true,
   )
   const blockDurRef = useRef(0)
   const remainingRef = useRef(0)
@@ -48,6 +56,7 @@ export function RunScreen() {
     resumeBlock,
     completeBlock,
     skipBlock,
+    swapBlock,
     endSession,
     flushTimer,
     recoverTimerState,
@@ -58,11 +67,13 @@ export function RunScreen() {
     : 0
 
   const [activeDuration, setActiveDuration] = useState(defaultDuration)
-  const [prevBlockIndex, setPrevBlockIndex] = useState(currentBlockIndex)
+  const [prevBlockId, setPrevBlockId] = useState<string | null>(
+    currentBlock?.id ?? null,
+  )
 
-  if (currentBlockIndex !== prevBlockIndex) {
+  if (currentBlock && currentBlock.id !== prevBlockId) {
     setActiveDuration(defaultDuration)
-    setPrevBlockIndex(currentBlockIndex)
+    setPrevBlockId(currentBlock.id)
   }
 
   useEffect(() => {
@@ -73,6 +84,12 @@ export function RunScreen() {
 
   const handleBlockComplete = useCallback(async () => {
     try {
+      // Phase F Unit 3 (2026-04-19): foreground audio is the PRIMARY
+      // block-end cue for iOS Safari PWA testers (where vibrate is
+      // unsupported per D54/D57). Vibrate stays for Android + any
+      // desktop haptic surface. Both are best-effort; the core flow
+      // proceeds even if both fail silently.
+      playBlockEndBeep()
       if (navigator.vibrate) navigator.vibrate([100, 50, 100])
       const isLast = await completeBlock()
       if (isLast) {
@@ -97,6 +114,10 @@ export function RunScreen() {
 
   const startWithPreroll = useCallback(() => {
     setPrerollCount(3)
+    // Phase F Unit 3 (2026-04-19): first tick fires immediately on the
+    // "3" frame so the audio cue matches the visual; subsequent ticks
+    // (2, 1, go) fire inside the interval callback below.
+    playPrerollTick()
     let count = 3
     prerollTimerRef.current = setInterval(() => {
       count -= 1
@@ -104,6 +125,9 @@ export function RunScreen() {
         if (prerollTimerRef.current) clearInterval(prerollTimerRef.current)
         prerollTimerRef.current = null
         setPrerollCount(null)
+        // The "go" tick at count==0 — same beep as 2/1 so the tester
+        // gets a consistent sonic ramp into block start.
+        playPrerollTick()
         startBlock()
           .then(() => {
             timer.start(activeDuration)
@@ -116,6 +140,7 @@ export function RunScreen() {
         if (navigator.vibrate) navigator.vibrate(100)
       } else {
         setPrerollCount(count)
+        playPrerollTick()
       }
     }, 1000)
   }, [startBlock, timer, activeDuration, wakeLock, navigate])
@@ -200,6 +225,11 @@ export function RunScreen() {
   const handleNext = useCallback(async () => {
     try {
       timer.pause()
+      // Phase F Unit 3 (2026-04-19): manual Next fires the same
+      // block-end beep as auto-complete so the tester gets consistent
+      // courtside feedback regardless of whether the timer ran out or
+      // they tapped early.
+      playBlockEndBeep()
       if (navigator.vibrate) navigator.vibrate(100)
       const isLast = await completeBlock()
       if (isLast) {
@@ -216,6 +246,10 @@ export function RunScreen() {
   const handleSkip = useCallback(async () => {
     try {
       timer.pause()
+      // Phase F Unit 3: Skip also ends the block (just with a skipped
+      // status instead of completed); beep so the tester's audio cue
+      // matches the end-of-block transition.
+      playBlockEndBeep()
       if (navigator.vibrate) navigator.vibrate(100)
       const isLast = await skipBlock()
       if (isLast) {
@@ -230,11 +264,46 @@ export function RunScreen() {
   }, [timer, skipBlock, navigate, executionLogId])
 
   const handleShorten = useCallback(() => {
-    const newRemaining = Math.max(10, remainingRef.current / 2)
-    const newDuration = activeDuration - remainingRef.current + newRemaining
-    setActiveDuration(newDuration)
-    timer.reset(newRemaining)
+    // Pure math lives in `computeShortened` so the invariant "newRemaining
+    // never exceeds current remaining" is covered by direct unit tests.
+    // Red-team bug #2.
+    const { newRemainingSeconds, newDurationSeconds } = computeShortened(
+      activeDuration,
+      remainingRef.current,
+    )
+    setActiveDuration(newDurationSeconds)
+    timer.reset(newRemainingSeconds)
   }, [timer, activeDuration])
+
+  /**
+   * Phase F Unit 4 (2026-04-19): Swap drill mid-run.
+   *
+   * - Pauses the timer if running (same pattern as Shorten) so the
+   *   tester doesn't burn block time on a stale drill display.
+   * - Delegates the plan mutation + swapCount increment to
+   *   `useSessionRunner.swapBlock`, which goes through the atomic
+   *   `swapActiveBlock` transaction in services/session.ts.
+   * - On no-op (no alternates available for this block) surfaces a
+   *   subtle error message so the tester doesn't think their tap was
+   *   lost. Defensive — the UI hides the button when no alternates
+   *   exist, so this path is a belt-and-suspenders guard.
+   */
+  const handleSwap = useCallback(async () => {
+    try {
+      if (timer.isRunning) {
+        timer.pause()
+        const elapsed = activeDuration - remainingRef.current
+        pauseBlock(elapsed, activeDuration)
+      }
+      const ok = await swapBlock()
+      if (!ok) {
+        setRunError('No alternate drills available for this block.')
+      }
+    } catch (err) {
+      console.error('Swap failed:', err)
+      setRunError('Something went wrong. Try again or end session.')
+    }
+  }, [timer, pauseBlock, swapBlock, activeDuration])
 
   const [wasRunning, setWasRunning] = useState(false)
 
@@ -274,6 +343,19 @@ export function RunScreen() {
     if (!executionLogId) return
     if (execution && plan === null) {
       navigate(routes.home(), { replace: true })
+      return
+    }
+    // Redirect to Review when the opened session is already terminal. This
+    // covers deep links to a /run URL for a completed session and the
+    // multi-tab race where tab A discards while tab B is still parked on
+    // /run — without the guard, tab B would keep ticking and eventually
+    // overwrite the ended-early record via advanceBlock. Red-team pass 2.
+    if (
+      execution &&
+      (execution.status === 'completed' ||
+        execution.status === 'ended_early')
+    ) {
+      navigate(routes.review(executionLogId), { replace: true })
     }
   }, [executionLogId, execution, plan, navigate])
 
@@ -313,21 +395,23 @@ export function RunScreen() {
         <h1 className="text-2xl font-bold text-text-primary">
           {currentBlock.drillName}
         </h1>
-        <p className="text-sm font-medium text-accent">
-          {currentBlock.coachingCue}
-        </p>
-        {currentBlock.courtsideInstructions &&
+        {currentBlock.courtsideInstructions && (
+          <p className="text-sm leading-relaxed text-text-primary">
+            {currentBlock.courtsideInstructions}
+          </p>
+        )}
+        {currentBlock.coachingCue &&
           (showInstructions ? (
             <div className="flex flex-col gap-1">
-              <p className="text-sm leading-relaxed text-text-secondary">
-                {currentBlock.courtsideInstructions}
+              <p className="text-sm font-medium text-accent">
+                {currentBlock.coachingCue}
               </p>
               <button
                 type="button"
                 onClick={toggleInstructions}
                 className="min-h-[54px] self-start text-sm font-medium text-accent"
               >
-                Less
+                Hide cues
               </button>
             </div>
           ) : (
@@ -336,7 +420,7 @@ export function RunScreen() {
               onClick={toggleInstructions}
               className="min-h-[54px] self-start text-sm font-medium text-accent"
             >
-              More&hellip;
+              Show coaching cues
             </button>
           ))}
       </div>
@@ -370,6 +454,20 @@ export function RunScreen() {
           onSkip={handleSkip}
           onShorten={handleShorten}
           onEndSession={handleEndSessionRequest}
+          /**
+           * Phase F Unit 4: Swap is only available when the block has
+           * at least one curated alternate (warmup / wrap always
+           * empty per D85/D105; a context with a single candidate in
+           * the slot pool also empty). Recompute per render — cheap,
+           * deterministic, and keeps the button visibility in sync
+           * with the active plan mutation after a prior swap.
+           */
+          onSwap={
+            plan.context &&
+            findSwapAlternatives(currentBlock, plan.context).length > 0
+              ? () => void handleSwap()
+              : undefined
+          }
         />
       )}
 
@@ -384,20 +482,24 @@ export function RunScreen() {
                 ? 'You\u2019re in your downshift. Two or three minutes of easy walking before you leave is an honest finish. Your progress will be saved.'
                 : 'You still have blocks remaining. Your progress will be saved and you can review what you completed.'}
             </p>
+            {/* Safe-primary first, destructive below: keeps "Go Back" as the
+                default thumb-target after the pause, mirrors the iOS/Android
+                action-sheet convention, and prevents an accidental end of
+                session from the paused-timer state. Red-team UX #6. */}
             <div className="mt-6 flex flex-col gap-3">
-              <Button
-                variant="danger"
-                fullWidth
-                onClick={() => void handleEndSessionConfirm()}
-              >
-                End Session
-              </Button>
               <Button
                 variant="primary"
                 fullWidth
                 onClick={handleEndSessionCancel}
               >
                 Go Back
+              </Button>
+              <Button
+                variant="danger"
+                fullWidth
+                onClick={() => void handleEndSessionConfirm()}
+              >
+                End Session
               </Button>
             </div>
           </div>

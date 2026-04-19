@@ -6,7 +6,7 @@ stage: planning
 type: research
 authority: narrowed M001 outdoor legibility defaults, information-density guidance, and prototype validation focus
 summary: "Narrowed outdoor legibility defaults and information-density guidance for M001."
-last_updated: 2026-04-12
+last_updated: 2026-04-19
 depends_on:
   - docs/research/beach-training-resources.md
   - docs/decisions.md
@@ -15,6 +15,7 @@ related:
   - docs/specs/m001-courtside-run-flow.md
   - docs/specs/m001-review-micro-spec.md
   - docs/specs/m001-home-and-sync-notes.md
+  - docs/research/japanese-inspired-visual-direction.md
 ---
 
 # Outdoor Courtside UI Brief
@@ -112,6 +113,13 @@ validate_later:
 - Exact accent shades for primary actions, progress, and success / warning states.
 - Whether quick review inputs are fastest as large buttons, segmented controls, or a stepped slider.
 - Whether outdoor audio or haptic cues are noticeable enough to matter in wind and ambient court noise.
+- Whether a calmer, Japanese-inspired restraint / spacing direction improves focus and emotional tone without hurting glanceability.
+
+## Aesthetic Direction Experiments
+
+If the product explores a calmer, more restrained visual language, use `docs/research/japanese-inspired-visual-direction.md` as the inspiration note.
+
+That note does **not** override this brief. Outdoor readability, contrast, type size, and touch-target rules still win. Use the design-direction note to shape hierarchy, pacing, spacing, and restraint - not to justify lower contrast or decorative styling.
 
 ## Apply To Current Setup
 
@@ -146,3 +154,63 @@ validate_later:
 - touch-target size summaries from Apple / Android guidance and broader UX research
 - interval-timer product patterns, especially Tabata-style apps
 - outdoor-product UX guidance, including Adobe / RunGo-style simplification advice
+
+## Pair-Set-Down Legibility And Cue Posture
+
+Added 2026-04-16 after a cross-platform PWA cue-and-manifest review. This section sharpens the canonical courtside posture M001 is designed for, and locks the cue-stack invariants that `V0B-08` implements.
+
+### Canonical posture
+
+The phone is **set down on the bench at ∼1–3 m, screen up, awake, within pair reach**. This is the posture current-generation iPhone and Android web apps actually support well: visible, foreground, wake-lock-held. Solo arm's-length is a supported sub-mode but not the design center.
+
+Explicitly rejected postures for M001:
+
+- Phone in a pocket with the screen off. `navigator.vibrate()` is not a dependable channel for iPhone web apps (Safari or HSWA). Pocket mode is a native-app or wearable problem, not a PWA strength on iPhone.
+- Phone backgrounded mid-session. Hidden-state JS timing on iPhone is fragile across lock-screen transitions; Web Audio on iPhone obeys the mute switch and does not behave like background media playback.
+
+### Typography floor by viewing distance
+
+Legibility work frames text size in physical letter height, not CSS pixels. Rough targets on a current 6.1-inch iPhone-class panel:
+
+| Posture | Primary numeral (CSS px) | Secondary line (CSS px) | What's on screen |
+| --- | --- | --- | --- |
+| Solo arm's length (∼0.3 m) | 56–64 (v0a default, `D50`) | 16–18 | Block title, one cue, timer, phase label, progress, primary controls |
+| Pair bench at ∼1 m | 72–88 (raise timer digits) | 18–20 | Same layout, but timer digits are the dominant element |
+| Pair bench at ∼2 m | 112–144 (distance mode) | only if essential | One metric + one short secondary line |
+| Bench at ∼3 m (edge of useful) | metric-only | suppress | Show only the active countdown / state; no sentence-style copy |
+
+The v0b default keeps `D50`'s `56–64px` arm's-length floor. A distance-mode toggle on `TransitionScreen` / `RunScreen` is an optional Phase D follow-on to `V0B-08`, not required for the D91 field test. The principle to preserve: at the 3 m edge, sentence-style explanatory text cannot survive the distance at a usable letter height; the right answer is to show one dominant metric and the active countdown, and nothing else.
+
+### Cue-stack invariants
+
+These invariants are what `V0B-08` ships:
+
+- **Visual first, always.** A full-screen state change on `TransitionScreen` is the primary conveyor of block boundaries. It fires even when audio and vibrate no-op.
+- **Audio is reinforcement.** A short preloaded `<audio>` cue, unlocked by the same user gesture as session-start `persist()` (`V0B-25`), plays only when `document.visibilityState === 'visible'`. Prefer a preloaded `<audio>` element over pure Web Audio for cues; on iPhone, media playback has clearer platform guarantees than Web Audio does.
+- **Haptic is Android-only.** `navigator.vibrate(35)` fires only behind a `/android/i.test(navigator.userAgent)` check. Plain `'vibrate' in navigator` is not sufficient because WebKit ships the property and no-ops it, which is indistinguishable from a working haptic at runtime.
+- **No pocket / screen-off promise.** No surface in v0b tells the user their phone will buzz in a pocket, or cue them during a screen-off block. If Wake Lock is denied, the fallback is an oversized visible countdown and no nagging.
+- **Audio shape.** Short, bright, non-speech cue. Energy around 1.8–3.0 kHz; optionally two short bursts separated by a small gap. Phone speakers outdoors do badly with low frequencies, and alarm-audibility work puts usable signal-over-noise margins in the mid-kHz band. Do not use a low thump.
+- **Audio cannot be the only channel outdoors.** At phone-speaker-at-3 m on a windy beach, audio is reinforcement. The visual transition is the thing carrying the message.
+
+### Brightness posture
+
+Accept that the web has no robust cross-platform brightness control. Rely on device outdoor-brightness behavior. The product's contribution is contrast and type size, not brightness management. A one-time onboarding hint to raise brightness for outdoor sessions is acceptable; trying to solve sunlight with dark mode is not (and `D48` already commits to light-only for M001).
+
+### Input ergonomics (bench-handoff band)
+
+Capacitive touch degrades with sweat, water, and sand; `54–60px` targets (`D49`) clear platform minima but are near the lower edge of the NN/g "1 cm×1 cm" practical minimum. For the pair-set-down posture specifically:
+
+- Primary run-screen controls want ≥60 px (≈9.5 mm) with generous spacing. Current v0a already hits this; do not reduce it when adding new controls.
+- Avoid swipe as a primary commit gesture. Avoid press-and-hold for routine logging. Avoid double-tap confirm. Prefer undo over confirm. Swipes and holds depend on continuous contact quality and timing, which are exactly what degrade with moisture and handoffs.
+- Keep between-rep and between-block actions in a handoff-safe band in the bottom third of the screen. No tiny top-right controls on the run screen. No destructive action near OS edges. The pause affordance should be impossible to hit by accident.
+
+### Install-onboarding posture
+
+iOS 26 lets users install any site as a web app, with an "Open as Web App" choice in the install UI. `apple-touch-icon` is still prudent even though Safari 15.4+ honors manifest icons; see `V0B-06` for the concrete icon set. Do not chase translucent edge-to-edge status-bar treatment before field testing; iOS web-app safe-area behavior keeps shifting, so `apple-mobile-web-app-status-bar-style: default` is the conservative choice (`app/index.html`). Installed HSWA `start_url` must respond successfully offline; the service worker precache already covers this.
+
+### Freeze vs validate (updated 2026-04-16)
+
+Additions to the existing Freeze Now / Validate Later lists above:
+
+- **Freeze now:** bench-at-1–3 m as the canonical posture; visual-first cue stack; Android-only haptics; no pocket or screen-off promise; `apple-mobile-web-app-status-bar-style: default`.
+- **Validate later:** whether distance-mode typography (one giant metric, 112–144 px) is worth the Phase D cost; whether a bench-handoff band in the bottom third materially reduces accidental taps; whether the 1.8–3.0 kHz double-burst cue is outdoor-noticeable enough at 3 m or needs a different timbre.

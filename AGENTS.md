@@ -6,7 +6,7 @@ stage: validation
 type: agent-contract
 summary: "Canonical prose repo contract: current state, read order, source-of-truth order, and repo-wide working constraints."
 authority: repo-wide routing, working constraints, and agent-facing orientation
-last_updated: 2026-04-16
+last_updated: 2026-04-19
 depends_on:
   - docs/catalog.json
   - docs/vision.md
@@ -62,6 +62,7 @@ Give agents one durable, concise repo contract for current state, read order, so
 - **Phase**: 0 (validation)
 - **Posture**: v0a prototype shipped; v0b build in progress as D91 field-test artifact (`D119`)
 - **Active milestone**: `M001` Solo Session Loop
+- **Next milestone in queue**: `M002` Weekly Confidence Loop (post-M001 self-coached follow-on)
 - **Blocking gate**: D91 field-test evidence against v0b (`D119`) must pass before M001 moves into the full build
 - **Prototype feedback**: start with `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for any prototype work
 - **Key open questions**: `O4`, `O5`, `O6`, `O7`, `O11`, `O12`, `O14`, `O15`, `O16` in `docs/decisions.md`
@@ -130,6 +131,7 @@ Durable docs under `docs/` should keep YAML frontmatter and explicit ownership. 
 - Prefer product clarity and the smallest useful MVP over premature feature expansion.
 - Favor structured workflows over chat-first UX.
 - Optimize for fast, low-typing, readable courtside interaction.
+- Optimize for joy, trust, and investment together: the app should feel like a main training tool, not a data-entry form.
 - Prefer deleting or demoting stale documentation rather than leaving misleading material at canonical tiers.
 
 ## Learned Workspace Facts

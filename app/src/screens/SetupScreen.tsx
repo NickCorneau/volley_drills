@@ -1,14 +1,33 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { StaleContextBanner } from '../components/StaleContextBanner'
 import { Button } from '../components/ui'
 import type { PlayerMode, TimeProfile } from '../types/session'
 import type { SetupContext } from '../db/types'
 import { buildDraft } from '../domain/sessionBuilder'
-import { getLastContext, saveDraft } from '../services/session'
+import { formatDayName } from '../lib/format'
+import { isOnboardingStep } from '../lib/onboarding'
+import { isSchemaBlocked } from '../lib/schema-blocked'
+import {
+  getLastComplete,
+  getLastContext,
+  saveDraft,
+} from '../services/session'
+import { getStorageMeta, setStorageMeta } from '../services/storageMeta'
 import { routes } from '../routes'
 import { cx } from '../lib/cn'
 
 const TIME_OPTIONS: TimeProfile[] = [15, 25, 40]
+
+type WindChoice = 'calm' | 'light' | 'strong'
+
+const isTimestamp = (v: unknown): v is number =>
+  typeof v === 'number' && Number.isFinite(v) && v > 0
+
+export type SetupScreenProps = {
+  /** C-3: first-run Today's Setup — no last-session prefill, back → Skill Level, wind row, completes onboarding on Build. */
+  isOnboarding?: boolean
+}
 
 function ToggleChip({
   label,
@@ -37,35 +56,100 @@ function ToggleChip({
   )
 }
 
-export function SetupScreen() {
+export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  // C-5 Unit 1: `/setup?from=repeat` triggers the stale-context banner
+  // above the chip rows. The repeat path is read-only metadata — it
+  // doesn't change any pre-fill logic, which already runs on every
+  // non-onboarding mount via `getLastContext()`. Keeping the banner
+  // gated on the explicit query param avoids the banner flashing on a
+  // plain Home->Setup tap where nothing has changed.
+  const isFromRepeat = searchParams.get('from') === 'repeat'
 
   const [playerMode, setPlayerMode] = useState<PlayerMode | null>(null)
   const [netAvailable, setNetAvailable] = useState<boolean | null>(null)
   const [wallAvailable, setWallAvailable] = useState<boolean | null>(null)
   const [timeProfile, setTimeProfile] = useState<TimeProfile>(15)
+  const [wind, setWind] = useState<WindChoice>('calm')
   const [prefilled, setPrefilled] = useState(false)
+  const [lastCompletedAt, setLastCompletedAt] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
+    if (isOnboarding) {
+      setPrefilled(true)
+      return
+    }
     let cancelled = false
-    getLastContext()
-      .then((ctx) => {
+    ;(async () => {
+      try {
+        const completedAt = await getStorageMeta(
+          'onboarding.completedAt',
+          isTimestamp,
+        )
         if (cancelled) return
-        if (ctx) {
-          setPlayerMode(ctx.playerMode)
-          setNetAvailable(ctx.netAvailable)
-          setWallAvailable(ctx.wallAvailable)
-          setTimeProfile(ctx.timeProfile)
+        if (completedAt == null) {
+          const step = await getStorageMeta(
+            'onboarding.step',
+            isOnboardingStep,
+          )
+          if (cancelled) return
+          navigate(
+            step === 'todays_setup'
+              ? routes.onboardingTodaysSetup()
+              : routes.onboardingSkillLevel(),
+            { replace: true },
+          )
+          return
         }
-      })
-      .catch(() => {})
-      .finally(() => {
+      } catch {
+        if (cancelled || isSchemaBlocked()) return
+      }
+
+      try {
+        // Fetch the last complete bundle when arriving via the repeat
+        // path so the banner can name the day ("Tuesday"). Fall back to
+        // `getLastContext()` for the normal Home->Setup mount so we
+        // don't do the extra read unnecessarily.
+        if (isFromRepeat) {
+          const lc = await getLastComplete()
+          if (cancelled) return
+          if (lc) {
+            const { context } = lc.plan
+            if (context) {
+              setPlayerMode(context.playerMode)
+              setNetAvailable(context.netAvailable)
+              setWallAvailable(context.wallAvailable)
+              setTimeProfile(context.timeProfile)
+              if (context.wind === 'light' || context.wind === 'strong') {
+                setWind(context.wind)
+              }
+            }
+            setLastCompletedAt(lc.log.completedAt ?? lc.log.startedAt)
+          }
+        } else {
+          const ctx = await getLastContext()
+          if (cancelled) return
+          if (ctx) {
+            setPlayerMode(ctx.playerMode)
+            setNetAvailable(ctx.netAvailable)
+            setWallAvailable(ctx.wallAvailable)
+            setTimeProfile(ctx.timeProfile)
+            if (ctx.wind === 'light' || ctx.wind === 'strong') {
+              setWind(ctx.wind)
+            }
+          }
+        }
+      } catch {
+        // Prefill is best-effort; a failed read falls through to defaults.
+      } finally {
         if (!cancelled) setPrefilled(true)
-      })
+      }
+    })()
     return () => { cancelled = true }
-  }, [])
+  }, [isFromRepeat, isOnboarding, navigate])
 
   const isComplete =
     playerMode !== null && netAvailable !== null && wallAvailable !== null
@@ -85,6 +169,8 @@ export function SetupScreen() {
         netAvailable: netAvailable!,
         wallAvailable: wallAvailable!,
       }
+      if (wind === 'light') context.wind = 'light'
+      else if (wind === 'strong') context.wind = 'strong'
 
       const draft = buildDraft(context)
       if (!draft) {
@@ -93,14 +179,26 @@ export function SetupScreen() {
       }
 
       await saveDraft(draft)
-      navigate(routes.safetyFromDraft())
+      if (isOnboarding) {
+        await setStorageMeta('onboarding.completedAt', Date.now())
+      }
+      navigate(routes.safety())
     } catch {
       setError('Failed to save session. Please try again.')
     } finally {
       submitting.current = false
       setIsSaving(false)
     }
-  }, [isComplete, playerMode, timeProfile, netAvailable, wallAvailable, navigate])
+  }, [
+    isComplete,
+    playerMode,
+    timeProfile,
+    netAvailable,
+    wallAvailable,
+    wind,
+    isOnboarding,
+    navigate,
+  ])
 
   if (!prefilled) {
     return (
@@ -115,16 +213,28 @@ export function SetupScreen() {
       <header className="flex items-center gap-2 pt-2">
         <button
           type="button"
-          onClick={() => navigate(routes.home())}
+          onClick={() =>
+            navigate(
+              isOnboarding ? routes.onboardingSkillLevel() : routes.home(),
+            )
+          }
           className="text-sm text-accent"
         >
-          &larr; Home
+          {isOnboarding ? (
+            <>&larr; Skill level</>
+          ) : (
+            <>&larr; Home</>
+          )}
         </button>
         <h1 className="flex-1 text-center text-xl font-bold tracking-tight text-text-primary">
           Today&apos;s Setup
         </h1>
         <div className="w-12" />
       </header>
+
+      {isFromRepeat && lastCompletedAt != null && (
+        <StaleContextBanner dayName={formatDayName(lastCompletedAt)} />
+      )}
 
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-semibold text-text-primary">Players</h2>
@@ -185,6 +295,27 @@ export function SetupScreen() {
               onTap={() => setTimeProfile(t)}
             />
           ))}
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm font-semibold text-text-primary">Wind</h2>
+        <div className="flex gap-2" role="radiogroup" aria-label="Wind">
+          <ToggleChip
+            label="Calm"
+            active={wind === 'calm'}
+            onTap={() => setWind('calm')}
+          />
+          <ToggleChip
+            label="Light wind"
+            active={wind === 'light'}
+            onTap={() => setWind('light')}
+          />
+          <ToggleChip
+            label="Strong wind"
+            active={wind === 'strong'}
+            onTap={() => setWind('strong')}
+          />
         </div>
       </section>
 

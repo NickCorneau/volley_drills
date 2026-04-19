@@ -144,8 +144,10 @@ export function TransitionScreen() {
         <p className="text-sm text-text-secondary">
           {formatDuration(nextBlock.durationMinutes)}
         </p>
-        {nextBlock.coachingCue && (
-          <p className="text-sm text-text-secondary">{nextBlock.coachingCue}</p>
+        {nextBlock.courtsideInstructions && (
+          <p className="text-sm leading-relaxed text-text-primary">
+            {nextBlock.courtsideInstructions}
+          </p>
         )}
       </div>
 

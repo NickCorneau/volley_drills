@@ -6,7 +6,7 @@ stage: planning
 type: milestone
 authority: M001 thin-slice scope, acceptance evidence, pre-build validation gate
 summary: "Thinnest believable end-to-end solo session loop for pass / serve-receive."
-last_updated: 2026-04-16
+last_updated: 2026-04-19
 depends_on:
   - docs/prd-foundation.md
   - docs/decisions.md
@@ -24,7 +24,10 @@ decision_refs:
   - D71
   - D90
   - D91
+  - D123
+  - D124
 open_question_refs:
+  - O2
   - O6
   - O7
 ---
@@ -36,6 +39,7 @@ open_question_refs:
 - Use this doc when you need M001 scope, current gate status, acceptance evidence, or the smallest reliable statement of what belongs in the first build.
 - Status: v0b build in progress. A runnable v0a prototype exists under `app/`; v0b is the field-test artifact (`D119`). Full M001 implementation is gated on D91 field-test evidence against v0b.
 - In scope: starter session assembly, courtside run flow, one-minute review, deterministic adaptation, and write-as-you-go local persistence.
+- This doc distinguishes **D91 artifact compromises** from the intended M001 product contract so v0b cuts are not mistaken for long-term product rejection.
 - Not for: implementation-level Dexie details, full sync architecture, or coach clipboard build work.
 - Primary blockers: `O4`, `O5`, `O6`, `O7` in `docs/decisions.md`.
 
@@ -43,14 +47,14 @@ open_question_refs:
 
 The product promise is to help a self-coached beach player build and run a better practice in minutes, then make the next session smarter using what actually happened.
 
-Before any richer planning, coaching, or adaptation features matter, the product needs one believable end-to-end loop that works for a single user under real constraints.
+Before any richer planning, coaching, or adaptation features matter, the product needs one believable end-to-end loop that works for a single user under real constraints and feels good enough to want again.
 
 The latest planning synthesis narrows that further:
 
 - the lead activation path is solo-first
 - the first trusted skill track is passing fundamentals for serve receive
 - the first adaptation model must be purely rules-based and deterministic
-- the broader Phase 1 product may grow into a shallow week-shape or next-N sessions queue and a minimal weekly receipt, but this milestone still defines the thinnest believable loop; coach overlays are gated on M001 repeat-usage evidence
+- the broader Phase 1 product may grow into a shallow next-N sessions queue and a minimal weekly receipt, but this milestone still defines the thinnest believable loop; coach overlays stay downstream of the post-M001 self-coached follow-on
 
 ## Milestone goal
 
@@ -62,10 +66,29 @@ Define the first implementation-ready slice that lets one self-coached user:
 4. run it courtside on mobile
 5. capture a one-minute review
 6. return to the next session with minimal rebuild
+7. leave the user clearer about what to do next and willing to come back
 
 ## Current planning stance
 
 A v0a validation prototype exists under `app/`; v0b build is in progress as the D91 field-test artifact (`D119`). M001 full implementation remains gated on D91 field validation against v0b (O4-O7).
+
+## D91 artifact vs M001 product contract
+
+v0b is intentionally smaller and quieter than the intended product so the D91 field test can answer the behavioral question cleanly.
+
+**Treat these as D91 artifact simplifications, not long-term product rejection:**
+
+- no dedicated "See why this session was chosen" surface
+- minimum-honest summary copy instead of richer deterministic reasoning
+- no weekly receipt, minimal accumulation, and no session-history surface
+- first-run flow that still risks feeling more form-first than recommendation-first
+
+**The M001 product contract still includes:**
+
+- recommendation-first first-run and repeat-start posture (`D123`)
+- visible deterministic reasoning where it helps trust
+- review and summary that leave a clear next step
+- a named post-M001 self-coached follow-on focused on weekly confidence before coach-connected work (`D124`)
 
 ## Pre-build validation gate (2026-04-12)
 
@@ -77,6 +100,7 @@ M001 should not move to full build until the following are validated through v0b
 - **Solo feasibility**: the operational definition of "solo" works for users' real environments. Solo passing often depends on a wall or rebounder that many beaches lack; environment/equipment must be a first-class input.
 - **Review completion**: the <60s post-session review is actually completed when tired/sweaty, and its signals produce a believable next-session adaptation.
 - **Second-session retention**: the validation cohort meets the D91 repeat-use bar within 14 days. Stated interest or waitlists are not sufficient evidence. A bare D91 pass is permission to keep testing, not proof of durable value; require at least one enrichment signal (unprompted return, >48h-gap second session, or third-session / concrete scheduling commitment) before treating the loop as validated. See `docs/research/d91-retention-gate-evidence.md`.
+- **Main-tool pull**: at least one tester shows a clear conviction or replacement signal (`I would use this instead of notes/PDFs/memory`, `I want the next session`, `I would miss this if it disappeared`) rather than only a one-off completion.
 - **Safety baseline**: initial sessions and deload logic have been reviewed by at least one coach or sports physio.
 
 ## Target user and mode
@@ -139,7 +163,7 @@ M001 should not move to full build until the following are validated through v0b
 - Deload sessions explicitly reduce serving and jumping volume when those actions are present, not just generic difficulty reduction. (D64)
 - AI must not be used for session generation or load planning.
 - Treat weak-connectivity reliability as a user outcome to preserve, while deferring exact sync architecture to implementation planning.
-- Minimum context capture fields for session assembly use one structured tap step: current player count (current M001 scope: 1 or 2), time budget (15/25/40+ min), net available, wall/fence available, ball count (1 vs many), cones available, and wind level (calm / light wind / strong wind). These become hard-filter inputs for the assembly model.
+- Trusted repeat-use drafts use one structured tap step for the broader assembly context: current player count (current M001 scope: 1 or 2), time budget (15/25/40+ min), net available, wall/fence available, ball count (1 vs many), cones available, and wind level (calm / light wind / strong wind). These become hard-filter inputs for the assembly model after the first recommendation reveal; they are not the minimum before-value contract for a first-ever run.
 - Pre-session safety check (separate from context capture): binary pain flag + training recency + contextual heat CTA. These gate and shape the session, not the assembly filters.
 - Official iPhone support baseline for M001 is `iOS 17+`.
 - Treat `Add to Home Screen` on `iOS 18.4+` as the primary tested posture for repeat-use trust, while keeping first-run usable in Safari with no install gate.
@@ -155,7 +179,10 @@ This milestone is ready to hand to implementation planning when:
 - the trust invariants for offline durability, update safety, migration safety, and deterministic adaptation are explicit enough to verify without guessing
 - the solo-first path still preserves believable pair fallback
 - the first-run flow does not require teaching a multi-bucket pass-quality rubric before one useful session is complete
+- the first-run flow reveals a believable recommendation before it feels like a form
 - the safety contract (pre-session check, sRPE-load, warm-up / Downshift, stop triggers, conservative defaults, regulatory positioning) is specified in the adaptation rules and run flow specs
+- the user can understand why today's session fits and what the next step means without needing a dense dashboard
+- the post-session handoff leaves the user with a clear next move and a reason to return
 - `docs/roadmap.md`, `docs/prd-foundation.md`, and `docs/vision.md` no longer disagree on what belongs in the first slice
 
 ## Design artifacts that should exist before implementation
@@ -169,12 +196,12 @@ This milestone is ready to hand to implementation planning when:
 - A quality-and-testing note that makes M001 trust invariants and minimum verification explicit: `docs/specs/m001-quality-and-testing.md`
 - A validation scorecard and dual-wedge interview pack: `docs/discovery/phase-0-wedge-validation.md` and `docs/discovery/phase-0-interview-guide.md`
 
-## Post-M001 sequencing (decided 2026-04-12)
+## Post-M001 sequencing (updated 2026-04-19)
 
-The post-M001 ordering is no longer open. See `docs/roadmap.md` Phase 1.5 and `docs/decisions.md` D72-D75.
+The post-M001 ordering is no longer open. See `docs/roadmap.md`, `docs/decisions.md` `D124`, and the next milestone charter in `docs/milestones/m002-weekly-confidence-loop.md`.
 
-- **Self-coached longitudinal layer (always ships):** a shallow one-week shape or next 2-6 sessions queue, plus a minimal weekly receipt (planned-vs-completed, one load proxy, one skill proxy). This is a retention feature, not an analytics dashboard.
-- **Coach clipboard (gated):** assign a structured session, see whether it happened, get a tiny outcome signal, adjust the next one. Development should not begin until M001 shows strong repeat usage (multiple sessions per user across weeks) and review completion above 50 percent.
+- **M002 Weekly Confidence Loop (always first):** shallow next 2-6 session queue, minimal weekly receipt, visible carry-forward, and the smallest accumulation surfaces that make the app feel like the user's training home.
+- **Coach clipboard (gated after the self-coached layer is stronger):** assign a structured session, see whether it happened, get a tiny outcome signal, adjust the next one. Development should not begin until the self-coached loop shows strong repeat usage and main-tool pull.
 - **If the gate does not clear:** focus entirely on hardening the self-coached loop and data ownership before extending to any coach workflow.
 
 ## v0b implementation decisions (2026-04-15)
@@ -187,12 +214,12 @@ The following decisions constrain the first v0b implementation slice that builds
 - **D100**: Minimal `review_pending` home state — detect unreviewed executions and surface "Finish review" CTA.
 - **D101**: 3+ player support tracked for post-M001; M001/v0b handles 1-2 players only.
 
-v0b flow is `Home -> Setup (4 taps) -> Safety (with session summary) -> Run`. No Session Prep screen, no wind input, no pain-in-Setup. See the v0b trimmed plan for details.
+v0b flow is `Home -> Skill Level (first open only) -> Today's Setup -> Safety -> Run -> Review -> Complete`. No Session Prep screen, no dedicated rationale/preview surface, and no Session History surface. See the v0b trimmed plan for details.
 
 ## Open questions carried forward
 
 - What does "solo" operationally mean for passing fundamentals — on sand with only a ball, at-home with a wall, or near a rebounder/net? (See O4 in `docs/decisions.md`)
-- Should audio/haptic cues be part of the runner from day one to reduce phone-touch frequency? (Research suggests the runner should be resilient to the user ignoring it for minutes at a time.)
+- Beyond the minimal foreground audio cue now in v0b (`D122`), what cue stack is actually helpful without becoming noisy or overbearing? (Research suggests the runner should be resilient to the user ignoring it for minutes at a time.)
 
 ## Working defaults already decided
 

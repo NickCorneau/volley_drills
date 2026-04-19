@@ -1,4 +1,10 @@
-const QUICK_TAGS = ['Too easy', 'About right', 'Too hard', 'Need partner'] as const
+// Effort tags are a "how did that feel" pick-one signal — "Too easy" and
+// "Too hard" being selected together corrupts downstream summarisation.
+// Keep them mutually exclusive. Independent tags (e.g. "Need partner") are
+// additive context and stay multi-select. Red-team UX #11.
+const EFFORT_TAGS = ['Too easy', 'About right', 'Too hard'] as const
+const INDEPENDENT_TAGS = ['Need partner'] as const
+const QUICK_TAGS: readonly string[] = [...EFFORT_TAGS, ...INDEPENDENT_TAGS]
 
 type QuickTagChipsProps = {
   selected: string[]
@@ -7,11 +13,19 @@ type QuickTagChipsProps = {
 
 export function QuickTagChips({ selected, onChange }: QuickTagChipsProps) {
   const toggle = (tag: string) => {
+    const isEffort = (EFFORT_TAGS as readonly string[]).includes(tag)
     if (selected.includes(tag)) {
       onChange(selected.filter((t) => t !== tag))
-    } else {
-      onChange([...selected, tag])
+      return
     }
+    if (isEffort) {
+      const withoutEffort = selected.filter(
+        (t) => !(EFFORT_TAGS as readonly string[]).includes(t),
+      )
+      onChange([...withoutEffort, tag])
+      return
+    }
+    onChange([...selected, tag])
   }
 
   return (

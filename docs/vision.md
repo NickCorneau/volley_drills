@@ -6,7 +6,7 @@ stage: planning
 type: core
 authority: product principles, strategic stance, local-first doctrine, non-goals, product promise
 summary: "Product vision, principles, and strategic guardrails for the beach volleyball training OS."
-last_updated: 2026-04-15
+last_updated: 2026-04-19
 depends_on: []
 ---
 
@@ -20,23 +20,33 @@ depends_on: []
 
 ## One-line vision
 
-Build the personal training operating system for beach volleyball: a self-coached mobile workflow that turns real constraints into structured sessions, runs cleanly on court or at home, and improves week over week.
+Build the personal training operating system for beach volleyball: a self-coached mobile workflow that feels light on the surface, serious underneath, turns real constraints into structured sessions, runs cleanly on court or at home, and compounds week over week.
 
 ## End goal
 
-An amateur beach player can choose a goal, get a believable weekly plan, execute practices without chaos, and improve targeted skills over 6-8 weeks without needing a certified coach or juggling spreadsheets, notes apps, and drill PDFs — whether training solo, with a regular partner, or with whoever shows up that day. A persistent beach pair should be able to create a team identity, track team-level progress, and get recommendations that target their partnership's weaknesses. Over time, the same system should extend cleanly to coach-to-client workflows, coach-organizers, and small-group practices.
+An amateur beach player can open one calm, trustworthy tool, get a believable recommendation fast, execute practices without chaos, and improve targeted skills over 6-8 weeks without juggling spreadsheets, notes apps, and drill PDFs — whether training solo, with a regular partner, or with whoever shows up that day. A persistent beach pair should eventually be able to create a team identity, track team-level progress, and get recommendations that target their partnership's weaknesses. Over time, the same system should extend cleanly to coach-to-client workflows, coach-organizers, and small-group practices.
 
 ## Why this exists
 
 Beach training often breaks down for non-pros because there is no real coach in the loop: planning is vague, execution is brittle in real conditions (wind, glare, changing partners, limited gear), and post-session learning is inconsistent. The product exists to make self-directed beach training operationally dependable, then close the loop with lightweight evidence.
+
+## Experience posture
+
+The product should feel **light on the surface and serious underneath**.
+
+- **Joy** means opening the app creates momentum, not admin. The next useful action is obvious, the flow feels calm, and the athlete wants to come back.
+- **Trust** means the product makes bounded, deterministic recommendations, stays honest about what it knows, and shows the smallest believable "why" when that explanation matters.
+- **Investment** means each completed session leaves something in the book: a clear next step, a visible carry-forward, or a stronger sense that this is where training lives week to week.
 
 ## Strategic stance
 
 - Start personal-first for self-coached amateurs; real training groups are fluid (solo, a partner, sometimes 3-4 people) and the system should handle whoever shows up.
 - Design so coach-to-client and coach-organizer workflows can layer on without changing the core loop.
 - Optimize for courtside mobile use and low-equipment fallback over desktop planning comfort.
+- Recommend before interrogating. Ask only for inputs that materially change today's session or satisfy the safety contract.
 - Make constraints first-class: who showed up today, balls, court access, time, weather, and goals.
 - Keep the loop tight: set goal -> generate session -> run -> review -> adapt.
+- Optimize for joy, trust, and investment together. The app should become the athlete's main training tool, not a pre-training form.
 - Keep measurement lightweight and high signal.
 - Generative AI is excluded from the critical path; session generation and load planning must be fully deterministic.
 - Local-first by default: the user's device is the primary copy of their training data. Cloud services, when added, are supporting peers for sync and backup, not the source of truth.
@@ -53,8 +63,10 @@ These are the authoritative product principles. Other docs should reference this
 - **P6.** Every plan needs solo or pair fallback logic before it is trusted.
 - **P7.** Human owns the final plan; session generation is built on strict, deterministic rules without generative AI.
 - **P8.** Every recommendation is constraint-aware.
-- **P9.** Feedback feeds forward into the next planning cycle.
+- **P9.** Feedback feeds forward visibly into the next planning cycle.
 - **P10.** Your training data lives on your device first. Starting, running, and reviewing a session must never depend on a strong network connection.
+- **P11.** Recommend before you interrogate.
+- **P12.** Every key surface should deliver one clear action, one confidence signal, and one reason to come back.
 
 ## Non-goals (for now)
 
@@ -67,7 +79,7 @@ These are the authoritative product principles. Other docs should reference this
 
 ## Product promise
 
-Help me build and run better beach practices in minutes, then make the next session smarter using what actually happened. My training data stays on my device and belongs to me.
+Help me build and run better beach practices in minutes, understand why today's session fits, and leave each session clearer about what to do next. My training data stays on my device and belongs to me.
 
 ## For agents
 

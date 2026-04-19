@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { goToOnboardingTodaysSetup } from './helpers'
 
 /**
  * Warm-offline PWA shell smoke (V0B-21).
@@ -70,7 +71,7 @@ async function waitForServiceWorkerControl(page: import('@playwright/test').Page
 }
 
 async function setupBuildAndEndEarly(page: import('@playwright/test').Page) {
-  await page.getByRole('button', { name: /start.*workout/i }).click()
+  await goToOnboardingTodaysSetup(page)
   await expect(page.getByText("Today's Setup")).toBeVisible()
 
   await page.getByRole('radio', { name: 'Solo' }).click()
@@ -115,16 +116,29 @@ test.describe('warm-offline PWA shell (V0B-21)', () => {
     await setupBuildAndEndEarly(page)
 
     await page.goto('/')
-    await expect(page.getByText(/unreviewed session/i)).toBeVisible({ timeout: 5000 })
-    await expect(page.getByRole('button', { name: /finish review/i })).toBeVisible()
+    // C-4 (Surface 2): review-pending primary card renders "Review your
+    // last session" + plan name instead of the pre-C-4 "unreviewed
+    // session" sentence.
+    await expect(
+      page.getByText(/review your last session/i),
+    ).toBeVisible({ timeout: 5000 })
+    await expect(
+      page.getByRole('button', { name: /finish review/i }),
+    ).toBeVisible()
 
     await context.setOffline(true)
     try {
       await page.reload()
 
       await expect(page.getByText(/Volley Drills/i)).toBeVisible({ timeout: 10_000 })
-      await expect(page.getByText(/unreviewed session/i)).toBeVisible({ timeout: 5000 })
-      await expect(page.getByRole('button', { name: /finish review/i })).toBeVisible()
+      // C-4 (Surface 2): see note above — review-pending primary card
+      // uses "Review your last session" + plan name.
+      await expect(
+        page.getByText(/review your last session/i),
+      ).toBeVisible({ timeout: 5000 })
+      await expect(
+        page.getByRole('button', { name: /finish review/i }),
+      ).toBeVisible()
 
       const logs = await readAllExecutionLogs(page)
       expect(logs.length).toBeGreaterThanOrEqual(1)

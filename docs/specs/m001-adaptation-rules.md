@@ -110,9 +110,9 @@ Every session must include:
 
 - **Warm-up block** — cannot be removed; can be shortened to a minimum version. Content: ankle/landing preparation, shoulder activation, gradual intensity ramp, plus one short "read today's conditions" element (track a lofted ball in the wind, feel the sand, note the sun angle) so the session starts with environmental calibration rather than cold technique. The reading element reinforces the wind capture from `D93` with a practice behavior, not just a metadata tag.
 - **Main work blocks**
-- **Cool-down block** — cannot be removed; can be shortened to a minimum version. Content: gentle movement and light stretching.
+- **Downshift block** (renamed from Cool-down per `D105`; see `docs/specs/m001-session-assembly.md`) — cannot be removed; can be shortened to a minimum version. Content: gentle movement and light stretching framed as transition and comfort, not as recovery or injury prevention.
 
-Exact warm-up/cool-down content and minimum duration need volleyball coach review.
+Exact warm-up / Downshift content and minimum duration need volleyball coach review.
 
 ### Ankle history modifier
 
@@ -155,6 +155,7 @@ Use only lightweight, self-loggable inputs:
 - `reviewTiming`
   - `delayed` is preferred (`10-30` minutes after session end)
   - `immediate` is allowed as a fallback when delayed capture would likely be missed
+  - **v0b note (per C4 / v3 red-team fix plan):** `reviewTiming` is NOT persisted on `SessionReview`. Derive it at export/readout time from `submittedAt - ExecutionLog.completedAt`. The persisted timing field is `captureWindow` (V0B-30), which carries the bucketed RPE-capture semantics `immediate` / `same_session` / `same_day` / `next_day_plus` / `expired`. `reviewTiming` as a two-value `immediate` / `delayed` derivation is an engine-facing concept and is computed at consume-time, not stored.
 - `sessionCompletion`
   - `completed` or `ended_early`
 - `incompleteReason`
@@ -445,7 +446,7 @@ Three layers make the self-score worth gating on.
 - whether two-session confirmation feels fair rather than slow
 - whether self-scored `Good` / `Not Good` agrees closely enough with partner or video review
 - field validation of the sharpened sRPE-load bands (`D113`): whether the +5% to +10% default progress band, the +10% to +15% conditional band, the `peak30 × 1.10` novelty spike, and the `curr14 / prev14 > 1.20` cap feel fair and safe for the 1-3 sessions/week beach amateur cohort; derivation and source synthesis in `docs/research/srpe-load-adaptation-rules.md`
-- warm-up and cool-down content and minimum duration (volleyball coach review)
+- warm-up and Downshift content and minimum duration (volleyball coach review)
 - pain flag phrasing: whether "pain that changes how you move" is correctly interpreted by users (prototype testing)
 - courtside friction of pre-session safety taps in bright sun with sand/sweat
 - tolerance for conservative defaults: whether users feel patronized or appreciate the caution
@@ -469,6 +470,23 @@ Each adaptation step should change **one** dimension, not multiple:
 - `deload` reduces either difficulty **or** volume as the primary change; serving or jumping volume reduction is additive when those actions are present
 
 This keeps the cause-effect relationship between session changes and outcomes legible, and avoids compounding changes that make it hard to tell what helped or hurt.
+
+## Pair complexity ceiling (reserved)
+
+The engine does not yet consume pair-level skill — v0b persists the onboarding Skill Level band (`D-C4`, `D121`) but no code path gates on it. This section reserves the rule so when M001-build wires assembly and progression against skill level, the shape is already agreed.
+
+**Rule when activated:**
+
+- When `SessionPlan.playerCount === 2`, the pair's viable drill-variant complexity ceiling is **`lower-of-two`** over the individual bands of the two players — not their average, not their max.
+- When only one band is available (the device holder's), treat it as the pair band. v0b is in this state for the entire `D91` cohort.
+- When the optional pair-differential follow-up eventually ships ("about even / one a step newer / one a step stronger", deferred to M001-build per `D121`), a declared differential of "one newer" biases **rep allocation** toward the newer player (more attempts of the same variant, not a harder variant for the stronger player); a differential of "one stronger" biases **role difficulty within the same drill** (harder toss, wider movement start, tougher serve pressure) while keeping the shared variant's complexity capped at `lower-of-two`.
+- Onboarding "Not sure yet" (`unsure`) maps to `foundations` / `beginner` for assembly purposes per `skillLevelToDrillBand()` in `app/src/lib/skillLevel.ts`. **v0b does not call `skillLevelToDrillBand()`** (per D-C4 and H4): the onboarding enum is collected for D91 retention correlation, but no v0b assembly code gates on it. Consumption is deferred to M001-build.
+
+**Why `lower-of-two`, not average:** beach volleyball's core chain is partnered. If one player cannot yet stabilize first or second contact at the required speed, the pair's viable drill complexity is capped there no matter how strong the other player is. Averaging is the right rule for forecasting match outcome (DUPR's team rating is a defensible example) and the wrong rule for protecting the continuity of reps in a coupled skill chain. The engine question here is not "who wins this match" but "does the three-contact chain survive the rep density" — and that question has an `AND` gate, not a `MEAN` gate.
+
+**Explicitly not in v0b:** the pair-differential question itself, any rep-allocation bias, any role-difficulty split, any per-drill-variant pair-band lookup. v0b captures only the band; field evidence from the `D91` cohort should decide whether the differential question earns its screen time before M001-build commits to the UI.
+
+See `docs/decisions.md` `D121` for the rationale and the comparator-set evidence behind the rule.
 
 ## Related docs
 

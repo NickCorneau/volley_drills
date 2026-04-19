@@ -6,7 +6,7 @@ stage: validation
 type: spec
 authority: deterministic session-assembly model, slot system, template structure
 summary: "Deterministic session assembly model with archetypes, slot system, and ranked fill."
-last_updated: 2026-04-16-b
+last_updated: 2026-04-19
 depends_on:
   - docs/milestones/m001-solo-session-loop.md
   - docs/prd-foundation.md
@@ -215,12 +215,25 @@ When a block has fewer than `2` viable candidates:
 
 Never break safety or hard equipment constraints just to preserve a more "realistic" drill.
 
-## User-facing explanation
+## Explanation contract
 
-The system should always be able to explain the result in one sentence:
+The system should always be able to explain the result in one sentence.
 
-- Session-level example: `Built for solo wall work, 25 minutes, light wind conditions, and today's hold state.`
-- Block-level example: `Chosen because it fits platform-angle work and adds a small variation from last time.`
+**M001 product contract:**
+
+- Draft-level reason: why today's session fits this context.
+- Block-level reason: why this drill fits the slot and how it differs from last time.
+- Next-step reason: why the next session stayed the same, got lighter, or got harder.
+
+**v0b D91 artifact note:**
+
+- v0b intentionally cuts the dedicated `See why` affordance and richer next-step explanation surfaces to keep cognitive load low in the field test.
+- Those cuts are **not** a rejection of visible reasoning as a product stance. Post-D91 self-coached work should restore the smallest helpful version of these explanations.
+
+Examples:
+
+- Session-level: `Built for solo wall work, 25 minutes, light wind conditions, and today's hold state.`
+- Block-level: `Chosen because it fits platform-angle work and adds a small variation from last time.`
 
 Swaps should stay in the same goal family whenever possible.
 

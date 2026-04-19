@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Button } from './ui'
 
 type ResumePromptProps = {
@@ -17,6 +18,11 @@ export function ResumePrompt({
   onResume,
   onDiscard,
 }: ResumePromptProps) {
+  // Two-step confirm so a single misdirected tap on "Discard" (which sits
+  // directly below the primary Reopen Session button) can't destroy an
+  // in-progress session. Red-team bug #4.
+  const [confirmingDiscard, setConfirmingDiscard] = useState(false)
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
@@ -51,14 +57,37 @@ export function ResumePrompt({
           </p>
         </div>
 
-        <div className="mt-6 flex flex-col gap-3">
-          <Button variant="primary" fullWidth onClick={onResume}>
-            Reopen Session
-          </Button>
-          <Button variant="outline" fullWidth onClick={onDiscard}>
-            Discard
-          </Button>
-        </div>
+        {!confirmingDiscard ? (
+          <div className="mt-6 flex flex-col gap-3">
+            <Button variant="primary" fullWidth onClick={onResume}>
+              Reopen Session
+            </Button>
+            <Button
+              variant="outline"
+              fullWidth
+              onClick={() => setConfirmingDiscard(true)}
+            >
+              Discard
+            </Button>
+          </div>
+        ) : (
+          <div className="mt-6 flex flex-col gap-3">
+            <p className="text-sm text-text-secondary">
+              Discarding ends this session. Your progress will be saved to
+              history but can&rsquo;t be resumed.
+            </p>
+            <Button variant="danger" fullWidth onClick={onDiscard}>
+              Yes, discard session
+            </Button>
+            <Button
+              variant="ghost"
+              fullWidth
+              onClick={() => setConfirmingDiscard(false)}
+            >
+              Keep session
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   )

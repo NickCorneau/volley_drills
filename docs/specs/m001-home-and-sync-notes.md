@@ -8,7 +8,7 @@ stage: validation
 type: spec
 authority: home screen states, weak-connectivity behavior, sync copy principles
 summary: "Home screen states, first-run activation path, weak-connectivity behavior, and the three-state save copy that matches the iPhone durability model."
-last_updated: 2026-04-16
+last_updated: 2026-04-19
 depends_on:
 
 - docs/milestones/m001-solo-session-loop.md
@@ -26,6 +26,8 @@ decision_refs:
 - D118
 
 # M001 Home And Connectivity Notes
+
+> **Authority note (2026-04-16):** Home state CTA copy and multi-state precedence are owned by [`docs/specs/m001-phase-c-ux-decisions.md`](./m001-phase-c-ux-decisions.md) Surface 2 and the consolidated plan at [`docs/plans/2026-04-16-003-rest-of-v0b-plan.md`](../plans/2026-04-16-003-rest-of-v0b-plan.md). This spec remains authoritative for the three-state save copy (`D118`), weak-connectivity behavior, and install-posture principles. Where the two disagree, the Phase C UX spec wins for Home CTAs; this spec wins for durability and save copy.
 
 ## Purpose
 
@@ -47,23 +49,18 @@ It should also inherit the same outdoor-ready visual posture as run mode: one hi
 
 ### State 1: New user, before the first draft exists
 
-Primary action:
+**v3 change (H9):** There is no standalone Home/NewUser welcome screen. First-open routes directly to the Skill Level screen with a one-line preamble *"Welcome. Let's get you started."* Home never renders a separate NewUser card; the Home "Start first workout" CTA on an empty device simply routes to Skill Level.
 
-- `Start first workout`
+Primary action from an empty Home (no `onboarding.completedAt` yet):
 
-Supportive context:
+- `Start first workout` → routes to Skill Level (not to a separate welcome screen)
 
-- default first focus: `passing fundamentals for serve receive`
-- a one-line explanation that this will create a short starter session, not a long setup flow
+First-run intake captures only:
 
-First-run intake should capture only:
+- `skill level` (four pair-first functional bands + "Not sure yet" — D121 / D-C4)
+- today's player count + equipment chips + optional wind (Today's Setup)
 
-- `skill level`
-- today's player count
-
-Immediately after, one compact `Today's Setup` step per `D90`-`D93` captures equipment chips and optional wind with 2-4 taps. This is a single "today" moment, not a second onboarding screen. See `docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md` for the full first-run screen sequence.
-
-Defer time profile, broader environment filters, explicit goals, account creation, and permissions until after the first starter session or when the user chooses to edit.
+No second onboarding screen beyond Skill Level + Today's Setup. Defer time profile, broader environment filters, explicit goals, account creation, and permissions until after the first starter session or when the user chooses to edit.
 
 Do not ask for `Add to Home Screen` before the user can see a useful starter session.
 
@@ -75,28 +72,33 @@ Primary action:
 
 Secondary actions:
 
-- `Edit session`
-- `Switch to solo/pair fallback`
+- `Change setup` (re-enters Setup pre-filled with the current draft; overwrites on Build. Renamed from `Edit session` per Phase F 2026-04-19 for plainer user voice; behavior unchanged. Player-mode toggle lives inside Setup per `D-C`.)
 
 ### State 3: Review pending
 
 Primary action:
 
-- `Finish last review`
+- `Finish review`
 
 Secondary action:
 
-- `Review later`
+- `Skip review` (writes a terminal skipped stub per `D-C1`; not a "come back later" deferral)
+
+Window: this state is shown only while the session is **inside the 2-hour Finish Later cap** measured from `ExecutionLog.completedAt` (`V0B-31`, `D120`). Past the cap, the home priority falls through to `State 4` and the session reads `Saved too late for planning` in history. The review form is locked and cannot be edited; adaptation never consumes an expired record.
 
 ### State 4: Last session complete, no draft ready
 
 Primary action:
 
-- `Duplicate last`
+- `Repeat this session` (per `D-C5` — duplicate-and-edit is folded into Repeat; pre-fills Setup from the last session with the StaleContextBanner's "Adjust if today's different" nudge visible)
 
 Secondary action:
 
-- `Create new session`
+- `Start a different session` (routes to fresh `/setup` with no pre-fill and no banner — the "today is different" path)
+
+**Cut from v0b by Phase F (2026-04-19):** the `Same as last time` one-tap text link (was a narrow shortcut bypassing the StaleContextBanner) and the `Edit` text link (was redundant with Repeat — same `/setup?from=repeat` URL). See `docs/specs/m001-phase-c-ux-decisions.md` Surface 2 + Surface 6 for the post-Phase-F wireframes. Users certain nothing has changed still only need one tap on the pre-filled Setup's `Build Session` button.
+
+(Age-branch copy variant cut from v0b per `H11` / `C15`; flat precedence applies at all ages.)
 
 ## New user home after a first draft is generated
 
@@ -110,8 +112,9 @@ Show:
 
 Secondary actions:
 
-- `See why this session was chosen`
 - `Edit session`
+
+(The `See why` affordance was cut per `H7` in the approved red-team fix plan; the `SessionDraft.rationale` schema field stays for M001-build.)
 
 If the app is still running in Safari, this is an acceptable point to suggest `Add to Home Screen` with simple durability and repeat-use wording.
 
@@ -129,7 +132,7 @@ Preferred emphasis:
 
 Secondary actions:
 
-- `Duplicate last`
+- `Repeat this session` (per `D-C5`)
 - `Adjust for today`
 
 If the app is still running in Safari, repeat-user home is also an acceptable place to remind the user about `Add to Home Screen`.
@@ -144,15 +147,9 @@ If the app is still running in Safari, repeat-user home is also an acceptable pl
 
 ## Home-state priorities
 
-Highest priority:
+Canonical v0b precedence (per `D-C8` and the approved red-team fix plan v3): exactly one primary card at a time, with precedence `resume > review_pending > draft > last_complete > new_user`. Flat 4-row — no age branching. All other states render as compact secondary rows below the primary card, never as competing primary CTAs. All age-tier branches (`>7d` subtext, `>21d` demote, `>28d` Welcome back) are **not in v0b** — the 14-day D91 window makes them unreachable, and seasonal-returner concerns are M001-build scope (H11 / C5 / C15).
 
-1. resume an in-progress session
-2. finish a pending review
-3. start the current draft session
-4. see current focus
-5. understand next recommendation
-
-Lower priority:
+Lower priority (not in v0b):
 
 - browsing drills
 - inspecting history
@@ -173,7 +170,8 @@ Planning assumption:
 
 - `Saved on device`
 - `Resume session`
-- `Review pending`
+- `Review pending` (within the 2-hour Finish Later cap; `V0B-31`, `D120`)
+- `Saved too late for planning` (past the cap; read-only history entry)
 - `Update ready`
 
 ### Future-only states once a cloud peer exists

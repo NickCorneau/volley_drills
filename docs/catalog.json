@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
   "repo_id": "volley_drills",
-  "last_updated": "2026-04-16-j",
+  "last_updated": "2026-04-19-b",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -281,6 +281,12 @@
       "status": "draft"
     },
     {
+      "id": "M002",
+      "path": "docs/milestones/m002-weekly-confidence-loop.md",
+      "type": "milestone",
+      "status": "draft"
+    },
+    {
       "id": "M001-session-assembly",
       "path": "docs/specs/m001-session-assembly.md",
       "type": "spec",
@@ -355,6 +361,12 @@
     {
       "id": "outdoor-courtside-ui-brief",
       "path": "docs/research/outdoor-courtside-ui-brief.md",
+      "type": "research",
+      "status": "active"
+    },
+    {
+      "id": "japanese-inspired-visual-direction",
+      "path": "docs/research/japanese-inspired-visual-direction.md",
       "type": "research",
       "status": "active"
     },
@@ -603,6 +615,10 @@
     {
       "path": "docs/research/outdoor-courtside-ui-brief.md",
       "focus": "outdoor UI defaults"
+    },
+    {
+      "path": "docs/research/japanese-inspired-visual-direction.md",
+      "focus": "experimental calm, restrained, Japanese-inspired visual direction for future UI work; hierarchy, spacing, pacing, and anti-cliche guardrails"
     },
     {
       "path": "docs/research/local-first-pwa-constraints.md",

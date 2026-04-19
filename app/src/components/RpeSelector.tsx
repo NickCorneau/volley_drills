@@ -1,52 +1,113 @@
-export type RpeBand = 'easy' | 'moderate' | 'hard' | 'max'
+// V0B-01 / D120: Discrete 0-10 RPE chip grid.
+//
+// Replaces the v0a 4-band Easy/Moderate/Hard/Max collapse with an 11-chip
+// 0-10 tappable grid plus sparse Borg anchors (`0 rest / 3 easy /
+// 5 moderate / 7 hard / 10 max`). Single-tap selection; chips meet the
+// courtside 54-60 px touch-target baseline (D8, UX-01).
+//
+// Why discrete chips and not a slider: slider controls produce higher
+// nonresponse and lower mean scores than discrete buttons in survey
+// experiments, and one-handed mobile targets perform better when they are
+// big and discrete (NN/g ~1 cm minimum; Conradi 14x14 mm). Serious training
+// precedent (TrainingPeaks 10-point, Garmin 1-10, Fitbod discrete per-exercise)
+// supports discrete-grid over slider. See docs/specs/m001-review-micro-spec.md
+// and docs/plans/2026-04-12-v0a-to-v0b-transition.md (V0B-01).
 
-const BANDS: {
-  id: RpeBand
-  label: string
-  range: string
-  value: number
-}[] = [
-  { id: 'easy', label: 'Easy', range: '0–3', value: 2 },
-  { id: 'moderate', label: 'Moderate', range: '4–6', value: 5 },
-  { id: 'hard', label: 'Hard', range: '7–9', value: 8 },
-  { id: 'max', label: 'Max', range: '10', value: 10 },
-]
+const RPE_VALUES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const
+
+// Sparse Borg anchors displayed beneath the grid. Semantic labels keyed by
+// value so the control stays a primary numeric affordance and the anchors
+// are supportive captions, not replacement vocabulary.
+const ANCHORS: Record<number, string> = {
+  0: 'rest',
+  3: 'easy',
+  5: 'moderate',
+  7: 'hard',
+  10: 'max',
+}
+
+const SELECTED_HINT: Record<number, string> = {
+  0: 'No effort',
+  1: 'Very light',
+  2: 'Light',
+  3: 'Easy',
+  4: 'Moderate-easy',
+  5: 'Moderate',
+  6: 'Moderate-hard',
+  7: 'Hard',
+  8: 'Very hard',
+  9: 'Near max',
+  10: 'Max effort',
+}
 
 type RpeSelectorProps = {
   value: number | null
   onChange: (sessionRpe: number) => void
+  /**
+   * ID of the heading element labelling this control. Defaults to the
+   * ReviewScreen heading (`rpe-heading`) but is overridable so the
+   * component can be reused on other surfaces without silently losing its
+   * label when a second instance renders. Red-team UX #13.
+   */
+  ariaLabelledBy?: string
 }
 
-export function RpeSelector({ value, onChange }: RpeSelectorProps) {
+export function RpeSelector({
+  value,
+  onChange,
+  ariaLabelledBy = 'rpe-heading',
+}: RpeSelectorProps) {
   return (
-    <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-labelledby="rpe-heading">
-      {BANDS.map((band) => {
-        const selected = value === band.value
-        return (
-          <button
-            key={band.id}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            onClick={() => onChange(band.value)}
-            className={[
-              'flex min-h-[54px] flex-col items-center justify-center rounded-[12px] px-1 py-2 text-center transition-colors',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
-              selected ? 'bg-accent text-white' : 'bg-bg-warm text-text-primary',
-            ].join(' ')}
-          >
-            <span className="text-sm font-semibold leading-tight">{band.label}</span>
-            <span
+    <div className="flex flex-col gap-3">
+      <div
+        className="grid grid-cols-6 gap-2"
+        role="radiogroup"
+        aria-labelledby={ariaLabelledBy}
+      >
+        {RPE_VALUES.map((n) => {
+          const selected = value === n
+          const anchor = ANCHORS[n]
+          return (
+            <button
+              key={n}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              aria-label={
+                anchor ? `${n}, ${anchor}` : `${n}`
+              }
+              onClick={() => onChange(n)}
               className={[
-                'mt-0.5 text-xs',
-                selected ? 'text-white/90' : 'text-text-secondary',
+                'flex min-h-[54px] flex-col items-center justify-center rounded-[12px] px-1 py-1 text-center transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
+                selected
+                  ? 'bg-accent text-white'
+                  : 'bg-bg-warm text-text-primary',
               ].join(' ')}
             >
-              {band.range}
-            </span>
-          </button>
-        )
-      })}
+              <span className="text-lg font-semibold leading-none tabular-nums">
+                {n}
+              </span>
+              {anchor && (
+                <span
+                  className={[
+                    'mt-0.5 text-[10px] uppercase tracking-wide',
+                    selected ? 'text-white/90' : 'text-text-secondary',
+                  ].join(' ')}
+                >
+                  {anchor}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+      <p
+        className="min-h-[1.25rem] text-center text-xs text-text-secondary"
+        aria-live="polite"
+      >
+        {value !== null ? SELECTED_HINT[value] : 'Tap a number to rate effort'}
+      </p>
     </div>
   )
 }

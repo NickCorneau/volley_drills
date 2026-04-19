@@ -44,6 +44,7 @@ Give a narrow evidence base and a defensible interpretation for the `D91` M001 g
 - **Read n=5 in bands, not as a pass/fail binary.** Exact 95% binomial CIs mean `3/5` alone is compatible with a true return rate anywhere from ~15% to ~95%. Use a banded reading: `0-1/5` strong negative, `2/5` ambiguous, `3/5` weak pass of the floor, `4-5/5` the first genuinely encouraging outcome.
 - **Framing fix beats threshold-churn.** Keep `D91`'s numbers; treat the headline quantitative bar as a **sanity-check for initial behavioral pull**, and require at least one qualitative **enrichment signal** plus clean instrumentation (self-initiated vs nudged, adherence dimensions, context logging) before calling the loop validated.
 - **Contamination risk is founder-specific.** Concierge nudging during a validation cohort can manufacture accountability the product itself does not yet create. A 3-of-5 or 4-of-5 pass driven entirely by human prompting is noise; separate self-initiated from nudged returns explicitly in analysis.
+- **Stratify returns by `playerCount`.** Pair sessions and solo sessions answer different questions; the dyadic-exercise adherence literature predicts that pair testers will return at a higher rate than solo testers, and that signal is only legible if the cohort readout splits the two. See *Pair-vs-solo stratified reading* below; planning band is **+25–60% relative** / **roughly +10–15 pp absolute** pair-over-solo uplift in this cohort size, with coordination-drag caveats.
 
 ## Evidence base
 
@@ -145,6 +146,41 @@ To upgrade a bare "pass" into something closer to a validated loop, look for at 
 
 Any one of these materially reduces the novelty-effect objection. Absence of all three after a threshold pass means treat the result as "keep testing," not "green-light full build."
 
+## Pair-vs-solo stratified reading
+
+`D91` was designed before the session-first / forward-compatible-pair posture was locked in (`D114`–`D117`, `docs/research/persistent-team-identity.md`). It does not stratify returns by `playerCount`, and the headline bar treats five testers as a single pool. That collapses two different behavioral questions into one number. The dyadic-exercise adherence literature predicts the answers differ substantially, so the readout needs a stratified lens even though the thresholds do not change.
+
+### Why to stratify
+
+- A classic dyadic adherence study of married-pair vs married-individual enrolment in a fitness program found sharply lower dropout for the pair-enrolled arm over the programme window. A later spouse-based class study found involving a spouse improved adherence. Buddy-assisted interventions and family/social gamification studies keep finding the same directional effect.
+- The Philadelphia six-month step-incentive RCT cited earlier in this note is the sharpest causal design on the solo side of that split: combined individual-and-team incentives beat team-only and control, while team-only did not outperform control. The predictive signal for our n=5 cohort is therefore "relationships help people show up," not "a team construct by itself helps."
+- Pair-native consumer accountability products (Sweatmates: shared check-ins, instant partner visibility, "literally 10 seconds" completion friction) win early retention on the same mechanism: a named partner expects you to show up.
+- None of these are beach-volleyball-specific, and none are pre/post-launch retention reporting from a pair-sport app. Treat the band as a **directional planning prior**, not a benchmark.
+
+### Planning band
+
+Expect pair testers to return at a **higher rate than solo testers within the 14-day window**, with the following bands:
+
+- **Relative uplift:** roughly **+25% to +60%** (pair D14 rate vs solo D14 rate), center-of-mass around **+40%**.
+- **Absolute uplift in an n=5-ish cohort:** roughly **+10 to +15 percentage points**, not a miraculous doubling.
+- **Noise floor:** an observed gap smaller than about **+5 pp** in a cohort this small is not evidence on its own; it has to travel with qualitative pair-specific reads (partner named the session, partner mentioned as a return reason, pair retention co-occurs with a partner's own second session).
+- **Confidence:** low. No published beach-volleyball pair-app benchmark exists; the band is an inference from dyadic-exercise adherence evidence, social-accountability evidence in digital fitness, and pair-native consumer products. Use the band to read direction, not to declare a pass or fail.
+
+### Coordination drag (the caveat that matters)
+
+Pair-native framing carries a failure mode the solo framing does not: a partner cancels, and a pair user can miss the retention window even though product pull is real. A raw D14 number can therefore understate pair demand if the app does not gracefully support fallback solo use. So:
+
+- Do not only ask "did the tester return?"
+- Ask: **did a planned pair session convert into another pair session, a solo fallback session, or nothing?**
+- If pair users often come back as solo when coordination breaks, that is still evidence the pair-first framing is working — coordination drag, not product failure.
+
+### How to apply in the readout
+
+- Label every session's `playerCount` in the per-tester ledger; label every return either `pair→pair`, `pair→solo`, `solo→solo`, or `solo→pair`.
+- Report the D91 raw count both **overall** and **stratified by the tester's first-session `playerCount`**. With a cohort of five, each stratum may be one to three testers — the stratified reading is qualitative, but it is legible, and it is the only way to tell whether the pair hypothesis is doing work.
+- When reading the enrichment signals (unprompted return, out-of-novelty-window return, third-session evidence), note which ones occur in pair mode, which in solo mode, and which involve a named partner. Partner-attributed unprompted returns are the strongest pair-specific signal the cohort can produce.
+- Keep the headline `D91` thresholds unchanged. This is a reading lens on top of the existing gate, not a new gate.
+
 ## Secondary instrumentation (how to sharpen a weak gate)
 
 Because `D91` is necessarily weak at n=5, the surrounding instrumentation carries most of the interpretive weight. Three additions make the cohort readable beyond the raw return count:
@@ -164,8 +200,10 @@ Because `D91` is necessarily weak at n=5, the surrounding instrumentation carrie
   - **Return attribution:** was the second session self-initiated or human-prompted; if prompted, the exact prompt surface (text, call, in-person, scheduled check-in).
   - **Adherence dimensions:** elapsed hours between session 1 and session 2; whether a third session started before day 14 or a concrete scheduling commitment was made; total active minutes per session; whether the session was completed fully or abandoned mid-flow; whether the full intended flow (context → safety → run → review) was engaged.
   - **Context log per session (completed or missed):** location, surface, weather, time-of-day, alone vs with someone else, and the exact blocker when a session was missed.
+  - **Mode and mode transitions:** every session's `playerCount` (1 or 2); every return labeled as `pair→pair`, `pair→solo`, `solo→solo`, or `solo→pair`. When a tester names a partner for a pair session, log the partner name as free text in the ledger so recurring-partner behavior is legible in post-hoc review (this is ledger-side capture; no v0b code change is required — see `docs/research/persistent-team-identity.md` and the v0b exclusion bullet in `docs/plans/2026-04-12-v0a-to-v0b-transition.md`).
   - **Post-qualification conviction check:** once a tester has crossed the two-sessions-in-14-days line, ask the Ellis/Superhuman "how disappointed would you be?" question plus short open text on what mattered most and what blocked deeper use. Do not ask testers who never qualified — it contaminates the filter.
 - Hold founder-to-tester contact constant across the window. Do not add extra nudging to testers who are drifting; extra nudging invalidates the self-initiated-return count.
+- Report the D91 raw count overall **and** stratified by first-session `playerCount`. Apply the *Pair-vs-solo stratified reading* band (+25–60% relative / +10–15 pp absolute uplift, +5 pp noise floor) qualitatively; do not promote it into an independent gate.
 
 ## Open questions deferred
 
@@ -186,3 +224,4 @@ Both files preserve the inline citation markers from their respective research p
 
 - 2026-04-16 — note created from the first `d91-retention-gate-evidence.md` research pass. Keeps `D91` thresholds unchanged; introduces the kill-floor vs go-bar split and the enrichment-signal list as the durable interpretation.
 - 2026-04-16 — integrated the follow-up small-n-math research pass. Added the banded reading on the raw return count (with binomial CIs), the adherence-dimensions / context-logging / post-qualification conviction instrumentation framework, and the founder/concierge contamination risk. Sharpened the per-tester capture list in `Apply to current setup` accordingly. `D91` numbers remain unchanged.
+- 2026-04-16 — added the *Pair-vs-solo stratified reading* section: rationale from dyadic-exercise adherence evidence and pair-native consumer products (Sweatmates), planning band (+25–60% relative / +10–15 pp absolute / +5 pp noise floor), coordination-drag caveat (pair testers returning as solo still counts as pair framing working), and how to apply the lens in the cohort readout. Added mode and mode-transition fields plus partner-name free-text capture to the per-tester ledger. `D91` numbers and all existing thresholds unchanged; this is a reading lens layered on top of the gate.

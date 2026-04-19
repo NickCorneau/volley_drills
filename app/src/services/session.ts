@@ -3,9 +3,12 @@ import type {
   ExecutionLog,
   SessionDraft,
   SessionPlan,
+  SessionPlanBlock,
   SessionPlanSafetyCheck,
+  SessionReview,
 } from '../db'
-import { buildPresetBlocks, PRESETS } from '../domain/presets'
+import { expireReview, FINISH_LATER_CAP_MS } from './review'
+import { clearSoftBlockDismissed } from './softBlock'
 import { clearTimerState, readTimerState } from './timer'
 
 // V0B-25 / D118: request persistent storage on a real user-gesture save
@@ -69,78 +72,6 @@ export async function loadSession(
   return { execution, plan }
 }
 
-// --- Create / discard ---
-
-export interface CreateSessionParams {
-  presetId: string
-  playerCount: 1 | 2
-  useRecovery: boolean
-  painFlag: boolean
-  trainingRecency?: string
-  heatCta: boolean
-  painOverridden: boolean
-}
-
-export async function createSession(
-  params: CreateSessionParams,
-): Promise<string> {
-  const preset = PRESETS.find((p) => p.id === params.presetId)
-  const allBlocks = buildPresetBlocks(params.presetId)
-  const recoveryBlocks = allBlocks.filter((b) => b.type !== 'main_skill')
-  const blocks = params.useRecovery ? recoveryBlocks : allBlocks
-
-  const planId = crypto.randomUUID()
-  const execId = crypto.randomUUID()
-  const now = Date.now()
-
-  const safetyCheck: SessionPlanSafetyCheck = {
-    painFlag: params.painFlag,
-    trainingRecency: params.trainingRecency,
-    heatCta: params.heatCta,
-    painOverridden: params.painOverridden,
-  }
-
-  const plan: SessionPlan = {
-    id: planId,
-    presetId: params.presetId,
-    presetName: params.useRecovery
-      ? 'Lighter Technique Session'
-      : (preset?.name ?? 'Session'),
-    playerCount: params.playerCount,
-    blocks: blocks.map((b) => ({
-      id: b.id,
-      type: b.type,
-      drillName: b.drillName,
-      shortName: b.shortName,
-      durationMinutes: b.durationMinutes,
-      coachingCue: b.coachingCue,
-      courtsideInstructions: b.courtsideInstructions,
-      required: b.required,
-    })),
-    safetyCheck,
-    createdAt: now,
-  }
-
-  const execution: ExecutionLog = {
-    id: execId,
-    planId,
-    status: 'not_started',
-    activeBlockIndex: 0,
-    blockStatuses: blocks.map((b) => ({
-      blockId: b.id,
-      status: 'planned' as const,
-    })),
-    startedAt: now,
-  }
-
-  await db.transaction('rw', db.sessionPlans, db.executionLogs, async () => {
-    await db.sessionPlans.put(plan)
-    await db.executionLogs.put(execution)
-  })
-  requestPersistentStorageOnGesture()
-  return execId
-}
-
 // --- Draft-based session creation (v0b) ---
 
 export interface CreateSessionFromDraftParams {
@@ -198,15 +129,32 @@ export async function createSessionFromDraft(
     startedAt: now,
   }
 
+  // Phase F Unit 2 (2026-04-19): persist the voice signal alongside
+  // the plan + execution write so `SkillLevelScreen` can swap to solo
+  // copy on a returning tester's next onboarding pass. Atomically
+  // included in the session-create transaction so the signal cannot
+  // diverge from the plan's `playerCount`. See
+  // `docs/specs/m001-phase-c-ux-decisions.md` Surface 1 (D-C4 Phase F
+  // amendment) and `docs/decisions.md` D122.
+  const lastPlayerMode: 'solo' | 'pair' =
+    plan.playerCount === 1 ? 'solo' : 'pair'
+  const playerModeStamp = now
+
   await db.transaction(
     'rw',
     db.sessionPlans,
     db.executionLogs,
     db.sessionDrafts,
+    db.storageMeta,
     async () => {
       await db.sessionPlans.put(plan)
       await db.executionLogs.put(execution)
       await db.sessionDrafts.delete('current')
+      await db.storageMeta.put({
+        key: 'lastPlayerMode',
+        value: lastPlayerMode,
+        updatedAt: playerModeStamp,
+      })
     },
   )
   requestPersistentStorageOnGesture()
@@ -219,45 +167,234 @@ export interface PendingReview {
   executionId: string
   planName: string
   completedAt: number
+  /** ms remaining inside the 2 h Finish Later cap. Always > 0 here. */
+  deferralRemainingMs: number
 }
 
-export async function findPendingReview(): Promise<PendingReview | null> {
+/**
+ * Find the newest terminal (`completed | ended_early`) session that has no
+ * review and is still inside the 2 h Finish Later cap (V0B-31 / D120).
+ *
+ * Sessions past the cap are NOT returned; call `expireStaleReviews()` first
+ * to auto-finalize them so the home state falls through to `LastComplete`.
+ */
+export async function findPendingReview(
+  now: number = Date.now(),
+): Promise<PendingReview | null> {
   const logs = await db.executionLogs.toArray()
+  // A1 + A8: terminal, non-discarded-resume sessions only.
   const terminal = logs.filter(
-    (l) => l.status === 'completed' || l.status === 'ended_early',
+    (l) =>
+      (l.status === 'completed' || l.status === 'ended_early') &&
+      l.endedEarlyReason !== 'discarded_resume',
   )
 
+  // A1: build reviewedIds from TERMINAL reviews only. A draft review must
+  // not shadow the pending state — the log is still pending until the
+  // draft is finalized (submitted) or auto-expired (skipped).
   const reviewedIds = new Set(
-    (await db.sessionReviews.toArray()).map((r) => r.executionLogId),
+    (await db.sessionReviews.toArray())
+      .filter((r) => r.status !== 'draft')
+      .map((r) => r.executionLogId),
   )
 
   const unreviewed = terminal
     .filter((l) => !reviewedIds.has(l.id))
     .sort((a, b) => (b.completedAt ?? b.startedAt) - (a.completedAt ?? a.startedAt))
 
-  const exec = unreviewed[0]
-  if (!exec) return null
-
-  const plan = await db.sessionPlans.get(exec.planId)
-  return {
-    executionId: exec.id,
-    planName: plan?.presetName ?? 'Session',
-    completedAt: exec.completedAt ?? exec.startedAt,
+  for (const exec of unreviewed) {
+    const endAt = exec.completedAt ?? exec.startedAt
+    const elapsed = now - endAt
+    if (elapsed >= FINISH_LATER_CAP_MS) continue
+    const plan = await db.sessionPlans.get(exec.planId)
+    return {
+      executionId: exec.id,
+      planName: plan?.presetName ?? 'Session',
+      completedAt: endAt,
+      deferralRemainingMs: Math.max(0, FINISH_LATER_CAP_MS - elapsed),
+    }
   }
+  return null
 }
 
+// --- Last-complete query (C-4) ---
+
+/**
+ * Bundle returned by `getLastComplete` — everything the Home LastComplete
+ * primary card (C-4 Unit 3) needs to render without a follow-up fetch:
+ * the terminal execution log, its originating plan, and the finalized
+ * review (either submitted or skipped-via-expire/skip).
+ */
+export interface LastCompleteBundle {
+  log: ExecutionLog
+  plan: SessionPlan
+  review: SessionReview
+}
+
+/**
+ * Newest terminal, non-discarded-resume session whose review has been
+ * finalized (`status: 'submitted'` or `'skipped'`). Feeds the Home
+ * `LastComplete` primary card.
+ *
+ * A1 filter semantics: a `status: 'draft'` review is NOT terminal, so a
+ * log with only a draft review is excluded (the session is still the
+ * review-pending state). A8 also applies: `endedEarlyReason ===
+ * 'discarded_resume'` logs never appear here — the tester explicitly
+ * abandoned them, so offering Repeat on that session would be user-hostile.
+ *
+ * Returns `null` when no eligible record exists (fresh install, or every
+ * terminal log is either unreviewed, draft-reviewed, or discarded-resume).
+ */
+export async function getLastComplete(): Promise<LastCompleteBundle | null> {
+  const [logs, reviews] = await Promise.all([
+    db.executionLogs.toArray(),
+    db.sessionReviews.toArray(),
+  ])
+  const finalizedReviewByExec = new Map<string, SessionReview>()
+  for (const r of reviews) {
+    if (r.status !== 'submitted' && r.status !== 'skipped') continue
+    finalizedReviewByExec.set(r.executionLogId, r)
+  }
+
+  const candidates = logs.filter(
+    (l) =>
+      (l.status === 'completed' || l.status === 'ended_early') &&
+      l.endedEarlyReason !== 'discarded_resume' &&
+      finalizedReviewByExec.has(l.id),
+  )
+  if (candidates.length === 0) return null
+
+  candidates.sort(
+    (a, b) =>
+      (b.completedAt ?? b.startedAt) - (a.completedAt ?? a.startedAt),
+  )
+  const log = candidates[0]
+  const review = finalizedReviewByExec.get(log.id)!
+  const plan = await db.sessionPlans.get(log.planId)
+  if (!plan) return null
+  return { log, plan, review }
+}
+
+/**
+ * Has the tester ever created an ExecutionLog on this device?
+ *
+ * Gates the "First time" recency chip on `SafetyCheckScreen`: once the
+ * tester has engaged with the app for any session (even a discarded
+ * one, even a still-paused one), "First time" is no longer a
+ * meaningful answer to "When did you last train?" and the chip
+ * collapses out of the radio group. Returns `false` only for a truly
+ * fresh install where no `ExecutionLog` rows exist.
+ *
+ * Contract:
+ * - Counts completed, ended_early (including discarded-resume), and
+ *   in-progress / paused logs equally. Engagement is engagement; the
+ *   tester isn't a first-timer just because they bailed on their
+ *   first attempt.
+ * - Returns `true` the moment a single ExecutionLog row exists. We
+ *   short-circuit on count rather than scanning every row.
+ */
+export async function hasEverStartedSession(): Promise<boolean> {
+  return (await db.executionLogs.count()) > 0
+}
+
+/**
+ * Auto-finalize any terminal session whose 2 h Finish Later cap has elapsed
+ * without a review. Writes a terminal expired stub via `expireReview()` so
+ * the home priority falls through to `LastComplete` and the adaptation
+ * engine never consumes the record (V0B-31 / D120).
+ *
+ * Idempotent and cheap; safe to call on every home resolve.
+ */
+export async function expireStaleReviews(now: number = Date.now()): Promise<number> {
+  const logs = await db.executionLogs.toArray()
+  // A1 + A8: only consider terminal, non-discarded-resume logs.
+  const terminal = logs.filter(
+    (l) =>
+      (l.status === 'completed' || l.status === 'ended_early') &&
+      l.endedEarlyReason !== 'discarded_resume',
+  )
+  // A1: a `status: 'draft'` record does NOT block expiration. The expire
+  // path overwrites drafts with a terminal `status: 'skipped'` stub so
+  // stale drafts cannot linger past the 2 h cap.
+  const finalizedIds = new Set(
+    (await db.sessionReviews.toArray())
+      .filter((r) => r.status !== 'draft')
+      .map((r) => r.executionLogId),
+  )
+  let expired = 0
+  for (const exec of terminal) {
+    if (finalizedIds.has(exec.id)) continue
+    const endAt = exec.completedAt ?? exec.startedAt
+    if (now - endAt < FINISH_LATER_CAP_MS) continue
+    // Reliability finding rel-6: per-record try/catch so one corrupted
+    // record doesn't abort the whole sweep. Without this, every future
+    // Home resolve would re-hit the same bad record and leave the app
+    // stuck on the 'error' state. We tolerate the failure and let the
+    // next sweep retry; HomeScreen will still render correctly because
+    // the OTHER past-cap logs got their stubs.
+    try {
+      await expireReview({ executionLogId: exec.id, now })
+      expired += 1
+    } catch (err) {
+      console.error(
+        `expireStaleReviews: failed to expire ${exec.id}; continuing sweep`,
+        err,
+      )
+    }
+  }
+  return expired
+}
+
+/**
+ * User-initiated skip from the home pending-review prompt. Writes a terminal
+ * stub consistent with expire-path semantics: no usable RPE, not eligible
+ * for adaptation. Kept distinct from `expireReview` via the `quickTags` tag
+ * so exports can tell user skips apart from timeout expiries.
+ *
+ * A3 (red-team fix plan v3 §A3) + H17: intra-connection atomic
+ * read-decide-write. Terminal records are left untouched; a `draft`
+ * record is overwritten by this terminal stub.
+ */
 export async function skipReview(executionId: string): Promise<void> {
   const now = Date.now()
-  await db.sessionReviews.put({
-    id: crypto.randomUUID(),
+  const exec = await db.executionLogs.get(executionId)
+  const endAt = exec?.completedAt ?? exec?.startedAt ?? now
+  const captureDelaySeconds = Math.max(0, Math.round((now - endAt) / 1_000))
+  const stub: SessionReview = {
+    id: `review-${executionId}`,
     executionLogId: executionId,
-    sessionRpe: -1,
+    sessionRpe: null,
     goodPasses: 0,
     totalAttempts: 0,
     quickTags: ['skipped'],
     shortNote: 'Review skipped from home screen',
     submittedAt: now,
-  })
+    captureDelaySeconds,
+    captureWindow: 'expired',
+    eligibleForAdaptation: false,
+    status: 'skipped',
+  }
+
+  await db.transaction(
+    'rw',
+    db.sessionReviews,
+    db.storageMeta,
+    async (tx) => {
+      const reviews = tx.table<SessionReview, string>('sessionReviews')
+      const existing = await reviews
+        .where('executionLogId')
+        .equals(executionId)
+        .first()
+      if (
+        existing &&
+        (existing.status === 'submitted' || existing.status === 'skipped')
+      ) {
+        return
+      }
+      await reviews.put(stub)
+      await clearSoftBlockDismissed(executionId, tx)
+    },
+  )
 }
 
 // --- Draft persistence helpers ---
@@ -297,6 +434,45 @@ export async function discardSession(exec: ExecutionLog): Promise<void> {
 
 export async function saveExecution(updated: ExecutionLog): Promise<void> {
   await db.executionLogs.put(updated)
+}
+
+/**
+ * Phase F Unit 4 (2026-04-19): mid-run Swap divergence writer.
+ *
+ * Replaces `plan.blocks[activeBlockIndex]` with `nextBlock` and
+ * increments `execution.swapCount`. Both writes land in a single
+ * `rw` transaction so the UI never sees a state where the plan shows
+ * the new drill but the counter is stale (or vice versa).
+ *
+ * Caller contract (see `useSessionRunner.swapBlock`):
+ * - `nextBlock` MUST come from `findSwapAlternatives(currentBlock,
+ *   plan.context)` so the new drill is context-valid and the `id` /
+ *   `type` / `required` invariants are preserved.
+ * - `plan.blocks[execution.activeBlockIndex]` MUST point at the
+ *   current block — swap mutates the active slot, not a future one.
+ * - Timer pause is the caller's responsibility; this service only
+ *   writes data. Matches the Shorten convention.
+ *
+ * Returns the updated objects so the caller can setState without a
+ * second Dexie read.
+ */
+export async function swapActiveBlock(
+  execution: ExecutionLog,
+  plan: SessionPlan,
+  nextBlock: SessionPlanBlock,
+): Promise<{ updatedExecution: ExecutionLog; updatedPlan: SessionPlan }> {
+  const updatedBlocks = [...plan.blocks]
+  updatedBlocks[execution.activeBlockIndex] = nextBlock
+  const updatedPlan: SessionPlan = { ...plan, blocks: updatedBlocks }
+  const updatedExecution: ExecutionLog = {
+    ...execution,
+    swapCount: (execution.swapCount ?? 0) + 1,
+  }
+  await db.transaction('rw', db.sessionPlans, db.executionLogs, async () => {
+    await db.sessionPlans.put(updatedPlan)
+    await db.executionLogs.put(updatedExecution)
+  })
+  return { updatedExecution, updatedPlan }
 }
 
 // --- Duration computation ---

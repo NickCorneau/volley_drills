@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test'
+import { seedOnboardingAndOpenHome } from './helpers'
 
 /**
  * V0B-22: blocked-schema overlay smoke test (Phase B, Unit 4).
@@ -33,6 +34,7 @@ test.describe('blocked-schema overlay (V0B-22)', () => {
     await page.goto('/')
     await clearIndexedDB(page)
     await page.reload()
+    await seedOnboardingAndOpenHome(page)
   })
 
   test('versionchange from a second higher-version connection shows the overlay', async ({

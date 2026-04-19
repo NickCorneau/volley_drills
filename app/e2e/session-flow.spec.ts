@@ -1,15 +1,5 @@
 import { test, expect } from '@playwright/test'
-
-async function clearIndexedDB(page: import('@playwright/test').Page) {
-  await page.evaluate(() => {
-    const req = indexedDB.deleteDatabase('volley-drills')
-    return new Promise<void>((resolve, reject) => {
-      req.onsuccess = () => resolve()
-      req.onerror = () => reject(req.error)
-      req.onblocked = () => resolve()
-    })
-  })
-}
+import { clearIndexedDB, goToOnboardingTodaysSetup } from './helpers'
 
 async function setupAndStart(
   page: import('@playwright/test').Page,
@@ -17,7 +7,7 @@ async function setupAndStart(
 ) {
   const { net = false, wall = false, time = '15 min' } = opts
 
-  await page.getByRole('button', { name: /start.*workout/i }).click()
+  await goToOnboardingTodaysSetup(page)
   await expect(page.getByText("Today's Setup")).toBeVisible()
 
   await page.getByRole('radio', { name: 'Solo' }).click()
@@ -64,7 +54,9 @@ test.describe('v0b session flow', () => {
   })
 
   test('new user can build and start a session', async ({ page }) => {
-    await expect(page.getByRole('button', { name: /start first workout/i })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: /where.*pair today/i }),
+    ).toBeVisible()
     await setupAndStart(page)
     await expect(page.getByText(/Solo \+ Open/)).toBeVisible()
     await passSafety(page)
@@ -88,7 +80,14 @@ test.describe('v0b session flow', () => {
     await endSessionEarly(page)
 
     await page.goto('/')
-    await expect(page.getByText(/unreviewed session/i)).toBeVisible({ timeout: 5000 })
-    await expect(page.getByRole('button', { name: /finish review/i })).toBeVisible()
+    // C-4 (Surface 2): the review-pending primary card renders "Review
+    // your last session" + the plan name instead of the old "You have an
+    // unreviewed session" sentence.
+    await expect(
+      page.getByText(/review your last session/i),
+    ).toBeVisible({ timeout: 5000 })
+    await expect(
+      page.getByRole('button', { name: /finish review/i }),
+    ).toBeVisible()
   })
 })

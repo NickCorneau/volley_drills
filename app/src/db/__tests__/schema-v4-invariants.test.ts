@@ -1,0 +1,147 @@
+import { beforeEach, describe, expect, it } from 'vitest'
+import { db } from '../../db'
+import { expireReview, submitReview } from '../../services/review'
+import { skipReview } from '../../services/session'
+
+async function clearDb(): Promise<void> {
+  await Promise.all([
+    db.sessionPlans.clear(),
+    db.executionLogs.clear(),
+    db.sessionReviews.clear(),
+    db.timerState.clear(),
+    db.sessionDrafts.clear(),
+    db.storageMeta.clear(),
+  ])
+}
+
+async function seedTerminalExec(
+  executionLogId: string,
+  completedAt: number = Date.now(),
+): Promise<void> {
+  await db.sessionPlans.put({
+    id: `plan-${executionLogId}`,
+    presetId: 'solo_wall',
+    presetName: 'Solo + Wall',
+    playerCount: 1,
+    blocks: [],
+    safetyCheck: {
+      painFlag: false,
+      heatCta: false,
+      painOverridden: false,
+    },
+    createdAt: completedAt,
+  })
+  await db.executionLogs.put({
+    id: executionLogId,
+    planId: `plan-${executionLogId}`,
+    status: 'completed',
+    activeBlockIndex: 0,
+    blockStatuses: [],
+    startedAt: completedAt - 60_000,
+    completedAt,
+  })
+}
+
+beforeEach(async () => {
+  await clearDb()
+})
+
+describe("writer contract: status emission (A5 / D-C7)", () => {
+  it("submitReview writes status === 'submitted'", async () => {
+    await seedTerminalExec('exec-submit')
+
+    await submitReview({
+      executionLogId: 'exec-submit',
+      sessionRpe: 6,
+      goodPasses: 18,
+      totalAttempts: 25,
+    })
+
+    const review = await db.sessionReviews
+      .where('executionLogId')
+      .equals('exec-submit')
+      .first()
+    expect(review?.status).toBe('submitted')
+  })
+
+  it("expireReview writes status === 'skipped' AND quickTags === ['expired']", async () => {
+    await seedTerminalExec('exec-expire')
+
+    await expireReview({ executionLogId: 'exec-expire' })
+
+    const review = await db.sessionReviews
+      .where('executionLogId')
+      .equals('exec-expire')
+      .first()
+    expect(review?.status).toBe('skipped')
+    expect(review?.quickTags).toEqual(['expired'])
+  })
+
+  it("skipReview writes status === 'skipped' AND quickTags === ['skipped']", async () => {
+    await seedTerminalExec('exec-skip')
+
+    await skipReview('exec-skip')
+
+    const review = await db.sessionReviews
+      .where('executionLogId')
+      .equals('exec-skip')
+      .first()
+    expect(review?.status).toBe('skipped')
+    expect(review?.quickTags).toEqual(['skipped'])
+  })
+
+  it("writer-produced 'skipped' stubs carry goodPasses === 0 and totalAttempts === 0", async () => {
+    await seedTerminalExec('exec-stub-1')
+    await seedTerminalExec('exec-stub-2')
+
+    await expireReview({ executionLogId: 'exec-stub-1' })
+    await skipReview('exec-stub-2')
+
+    const stubs = await Promise.all([
+      db.sessionReviews.where('executionLogId').equals('exec-stub-1').first(),
+      db.sessionReviews.where('executionLogId').equals('exec-stub-2').first(),
+    ])
+
+    for (const stub of stubs) {
+      expect(stub?.status).toBe('skipped')
+      expect(stub?.goodPasses).toBe(0)
+      expect(stub?.totalAttempts).toBe(0)
+      expect(stub?.sessionRpe).toBeNull()
+    }
+  })
+})
+
+describe('fresh v4 DB shape', () => {
+  it('has an empty storageMeta table', async () => {
+    const count = await db.storageMeta.count()
+    expect(count).toBe(0)
+  })
+})
+
+describe('storageMeta round-trip across primitive + structured values', () => {
+  const cases: Array<{ label: string; value: unknown }> = [
+    { label: 'string', value: 'onboarding:foundations' },
+    { label: 'number', value: 1_700_000_000_000 },
+    { label: 'boolean true', value: true },
+    { label: 'boolean false', value: false },
+    { label: 'empty string', value: '' },
+    { label: 'zero', value: 0 },
+    {
+      label: 'nested object',
+      value: { a: 1, b: { c: 'two', d: [3, 4, 5] } },
+    },
+    { label: 'array', value: [1, 'two', true] },
+  ]
+
+  for (const { label, value } of cases) {
+    it(`round-trips ${label}`, async () => {
+      await db.storageMeta.put({
+        key: `case.${label}`,
+        value,
+        updatedAt: 0,
+      })
+      const row = await db.storageMeta.get(`case.${label}`)
+      expect(row?.value).toEqual(value)
+    })
+  }
+})

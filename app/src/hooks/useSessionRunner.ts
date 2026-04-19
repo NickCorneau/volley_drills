@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ExecutionLog, SessionPlan, SessionPlanBlock } from '../db'
+import { findSwapAlternatives } from '../domain/sessionBuilder'
 import {
   buildAdvancedBlock,
   buildEndedSession,
@@ -9,6 +10,7 @@ import {
   computeActualDurationMinutes,
   loadSession,
   saveExecution,
+  swapActiveBlock,
 } from '../services/session'
 import { clearTimerState, flushTimerForBlock, readTimerState, recoverTimer } from '../services/timer'
 
@@ -158,6 +160,42 @@ export function useSessionRunner(
     [persist],
   )
 
+  /**
+   * Phase F Unit 4 (2026-04-19): mid-run drill Swap.
+   *
+   * Picks the next-ranked alternate for the active block slot (via
+   * `findSwapAlternatives`) and persists the plan mutation + swap
+   * counter atomically through `swapActiveBlock`. Returns `false` in
+   * the no-op cases (no context, no alternates, warmup/wrap) so the
+   * caller can surface an error if the UI somehow let the tap through
+   * despite the no-alternates state.
+   *
+   * Timer pause is the CALLER's responsibility (matches the Shorten
+   * pattern). The caller (RunScreen.handleSwap) pauses before calling
+   * and lets the tester tap Resume to continue on the new drill.
+   */
+  const swapBlock = useCallback(async (): Promise<boolean> => {
+    const exec = executionRef.current
+    const p = planRef.current
+    if (!exec || !p) return false
+    if (!p.context) return false
+    const currentBlock = p.blocks[exec.activeBlockIndex]
+    if (!currentBlock) return false
+    const alternates = findSwapAlternatives(currentBlock, p.context)
+    if (alternates.length === 0) return false
+    const next = alternates[0]
+    const { updatedExecution, updatedPlan } = await swapActiveBlock(
+      exec,
+      p,
+      next,
+    )
+    executionRef.current = updatedExecution
+    planRef.current = updatedPlan
+    setExecution(updatedExecution)
+    setPlan(updatedPlan)
+    return true
+  }, [])
+
   const flushTimer = useCallback(
     async (
       accumulatedElapsed: number,
@@ -236,6 +274,7 @@ export function useSessionRunner(
     resumeBlock,
     completeBlock,
     skipBlock,
+    swapBlock,
     endSession,
     flushTimer,
     recoverTimerState,

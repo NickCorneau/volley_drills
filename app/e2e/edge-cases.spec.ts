@@ -1,18 +1,12 @@
 import { test, expect } from '@playwright/test'
-
-async function clearIndexedDB(page: import('@playwright/test').Page) {
-  await page.evaluate(() => {
-    const req = indexedDB.deleteDatabase('volley-drills')
-    return new Promise<void>((resolve, reject) => {
-      req.onsuccess = () => resolve()
-      req.onerror = () => reject(req.error)
-      req.onblocked = () => resolve()
-    })
-  })
-}
+import {
+  clearIndexedDB,
+  goToOnboardingTodaysSetup,
+  seedOnboardingAndOpenHome,
+} from './helpers'
 
 async function buildSoloOpenSession(page: import('@playwright/test').Page) {
-  await page.getByRole('button', { name: /start.*workout/i }).click()
+  await goToOnboardingTodaysSetup(page)
   await page.getByRole('radio', { name: 'Solo' }).click()
   await page.getByLabel('Net available').getByRole('radio', { name: 'No' }).click()
   await page.getByLabel('Wall available').getByRole('radio', { name: 'No' }).click()
@@ -63,6 +57,7 @@ test.describe('edge cases', () => {
   })
 
   test('direct navigation to /safety without draft redirects to /setup', async ({ page }) => {
+    await seedOnboardingAndOpenHome(page)
     await page.goto('/safety')
     await expect(page.getByText("Today's Setup")).toBeVisible({ timeout: 5000 })
   })
@@ -73,16 +68,16 @@ test.describe('edge cases', () => {
   })
 
   test('advance through all blocks reaches review', async ({ page }) => {
-    test.setTimeout(90_000)
+    test.setTimeout(120_000)
     await buildSoloOpenSession(page)
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 24; i++) {
       if (await page.getByText(/quick review/i).isVisible().catch(() => false)) break
 
       const startNext = page.getByRole('button', { name: /start next block/i })
       if (await startNext.isVisible().catch(() => false)) {
         await startNext.click({ timeout: 5000 }).catch(() => {})
-        await page.waitForTimeout(4500)
+        await page.waitForTimeout(5000)
         continue
       }
 
@@ -95,6 +90,6 @@ test.describe('edge cases', () => {
       await page.waitForTimeout(2000)
     }
 
-    await expect(page.getByText(/quick review/i)).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByText(/quick review/i)).toBeVisible({ timeout: 45_000 })
   })
 })

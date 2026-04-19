@@ -1,10 +1,15 @@
 import Dexie, { type Table } from 'dexie'
 import { emitSchemaBlocked } from '../lib/schema-blocked'
+import {
+  backfillOnboardingCompletedAt,
+  backfillSessionReviewStatus,
+} from './migrations/backfills'
 import type {
   ExecutionLog,
   SessionDraft,
   SessionPlan,
   SessionReview,
+  StorageMetaEntry,
   TimerState,
 } from './types'
 
@@ -14,6 +19,7 @@ export class VolleyDrillsDB extends Dexie {
   sessionReviews!: Table<SessionReview, string>
   timerState!: Table<TimerState, string>
   sessionDrafts!: Table<SessionDraft, string>
+  storageMeta!: Table<StorageMetaEntry, string>
 
   constructor() {
     super('volley-drills')
@@ -46,6 +52,24 @@ export class VolleyDrillsDB extends Dexie {
         // v3 adds sessionDrafts table and status index on executionLogs.
         // No data transforms needed: drafts didn't exist before, and the
         // new index on executionLogs.status is built automatically by Dexie.
+      })
+
+    // Phase C-0 (D-C7 / A5 / H15): adds storageMeta key-value table,
+    // backfills SessionReview.status from legacy sessionRpe, and backfills
+    // storageMeta.onboarding.completedAt for existing testers so they are
+    // not force-routed through C-3 onboarding if deployment sequencing slips.
+    this.version(4)
+      .stores({
+        sessionPlans: 'id',
+        executionLogs: 'id, planId, status',
+        sessionReviews: 'id, executionLogId',
+        timerState: 'id',
+        sessionDrafts: 'id',
+        storageMeta: 'key',
+      })
+      .upgrade(async (tx) => {
+        await backfillSessionReviewStatus(tx)
+        await backfillOnboardingCompletedAt(tx)
       })
   }
 }
