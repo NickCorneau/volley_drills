@@ -34,11 +34,23 @@ import { ResumePrompt } from './ResumePrompt'
  *   voice; the underlying handler prop stays `onEdit` for
  *   API-compatibility with C-4 callers.
  *
- * See `docs/specs/m001-phase-c-ux-decisions.md` Surface 2 + Surface 6
- * (D-C3 / D-C5 Phase F amendments) and
- * `docs/plans/2026-04-19-feat-phase-f-d91-validity-hardening-plan.md`
- * Unit 1 for the rationale trail.
+ * Phase F1 (2026-04-19) — Home calm pass:
+ * - All primary-card variants share the same focal-zone surface class
+ *   (`PRIMARY_CARD_CLASS` below). Hard 1 px border traded for a
+ *   softer `shadow-sm` + hairline `ring-1 ring-text-primary/5`, and
+ *   internal padding bumped from `p-5 gap-3` to `p-6 gap-4`. The
+ *   behavior contract (role, aria-label, CTAs, handler wiring) is
+ *   unchanged; this is a pure visual hierarchy pass so the card reads
+ *   as the one thing on screen to attend to. See
+ *   `docs/plans/2026-04-19-feat-phase-f1-home-calm-pass-plan.md` and
+ *   `docs/research/japanese-inspired-visual-direction.md`.
  */
+
+// Phase F1: shared focal-zone surface for the four card variants.
+// Centralising the class keeps the four regions visually identical so
+// the "one focal zone" read never accidentally drifts per variant.
+const PRIMARY_CARD_CLASS =
+  'flex flex-col gap-4 rounded-[16px] bg-bg-primary p-6 shadow-sm ring-1 ring-text-primary/5'
 
 type HomePrimaryCardProps =
   | {
@@ -134,7 +146,7 @@ function NewUserCard({ onStart }: { onStart: () => void }) {
     <section
       role="region"
       aria-label="Ready for your first session"
-      className="flex flex-col gap-3 rounded-[16px] border border-text-primary/10 bg-bg-primary p-5"
+      className={PRIMARY_CARD_CLASS}
     >
       <div>
         <p className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
@@ -170,7 +182,7 @@ function ReviewPendingCard({
     <section
       role="region"
       aria-label="Review pending"
-      className="flex flex-col gap-3 rounded-[16px] border border-text-primary/10 bg-bg-primary p-5"
+      className={PRIMARY_CARD_CLASS}
     >
       <div>
         <p className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
@@ -235,7 +247,7 @@ function DraftCard({
     <section
       role="region"
       aria-label="Today's suggestion (draft)"
-      className="flex flex-col gap-3 rounded-[16px] border border-text-primary/10 bg-bg-primary p-5"
+      className={PRIMARY_CARD_CLASS}
     >
       <div>
         <p className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
@@ -300,7 +312,7 @@ function LastCompleteCard({
     <section
       role="region"
       aria-label="Your last session"
-      className="flex flex-col gap-3 rounded-[16px] border border-text-primary/10 bg-bg-primary p-5"
+      className={PRIMARY_CARD_CLASS}
     >
       <div>
         <p className="text-sm font-semibold uppercase tracking-wider text-text-secondary">

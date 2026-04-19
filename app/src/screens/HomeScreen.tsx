@@ -351,13 +351,15 @@ export function HomeScreen() {
   const secondary: SecondaryRow[] = selectSecondaryRows(flagSummary)
 
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-col gap-6 pb-8">
+    <div className="mx-auto flex w-full max-w-[390px] flex-col gap-8 pb-12 pt-2">
       {/* App-bar-scale brand row: inline icon + wordmark, subtle so the
           primary card carries the visual weight. Pre-polish pass this
           was a centered 4xl emoji + bold 2xl title that read like a
           launch splash on every Home render — out of place once a
-          tester has seeded data and the primary card is the hero. */}
-      <header className="flex items-center gap-2 pt-3">
+          tester has seeded data and the primary card is the hero.
+          Phase F1 (2026-04-19): slightly more top padding so the
+          header doesn't feel crowded against the primary card below. */}
+      <header className="flex items-center gap-2 pt-4">
         <Brandmark size={28} />
         <h1 className="text-base font-semibold tracking-tight text-text-primary">
           Volley Drills
@@ -377,11 +379,19 @@ export function HomeScreen() {
         ...interceptedHandlers,
       })}
 
+      {/* Phase F1 (2026-04-19): secondary rows used to render as a
+          flex-col of independent bordered cards, which competed with
+          the primary card for visual weight. They now sit inside a
+          single calmer container grouped by a hairline divider, so
+          the Home screen reads as "one focal card, one supporting
+          cluster" instead of a flat stack of competing mini-cards.
+          Variant API unchanged; HomeSecondaryRow flattens its own
+          surface to match. */}
       {secondary.length > 0 && (
         <ul
           role="list"
           aria-label="Other active actions"
-          className="flex flex-col gap-2"
+          className="divide-y divide-text-primary/5 overflow-hidden rounded-[16px] bg-bg-primary shadow-sm ring-1 ring-text-primary/5"
         >
           {secondary.map((row) =>
             renderSecondary(row, flags, {

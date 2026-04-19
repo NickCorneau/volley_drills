@@ -16,7 +16,22 @@ import { Button } from './ui'
  *   on the 2 h cap)
  * - `draft`: Open CTA on Today's suggestion
  * - `last_complete`: Repeat CTA on the last finalized session
+ *
+ * Phase F1 (2026-04-19) — Home calm pass:
+ * - Rows used to be individual bordered white cards, which competed
+ *   with the primary card for visual weight. They now render as flat
+ *   rows inside a single parent container (owned by `HomeScreen`),
+ *   grouped by a hairline divider. Per-row padding bumps slightly so
+ *   tap targets stay comfortable. Keeps the same variant API; pure
+ *   visual-hierarchy pass. See
+ *   `docs/plans/2026-04-19-feat-phase-f1-home-calm-pass-plan.md`.
  */
+
+// Phase F1: shared flat-row class. No border, no background, no
+// rounding — the parent ul carries the container surface; rows just
+// hold a label + CTA with comfortable padding.
+const SECONDARY_ROW_CLASS =
+  'flex items-center justify-between gap-3 px-4 py-3'
 
 type HomeSecondaryRowProps =
   | {
@@ -39,7 +54,7 @@ export function HomeSecondaryRow(props: HomeSecondaryRowProps) {
   switch (props.variant) {
     case 'review_pending_advisory':
       return (
-        <li className="flex items-center justify-between gap-3 rounded-[12px] border border-text-primary/10 bg-bg-primary px-3 py-2">
+        <li className={SECONDARY_ROW_CLASS}>
           <span className="text-sm text-text-primary">
             Review pending &middot; {props.data.planName}
           </span>
@@ -50,7 +65,7 @@ export function HomeSecondaryRow(props: HomeSecondaryRowProps) {
       )
     case 'draft':
       return (
-        <li className="flex items-center justify-between gap-3 rounded-[12px] border border-text-primary/10 bg-bg-primary px-3 py-2">
+        <li className={SECONDARY_ROW_CLASS}>
           <span className="text-sm text-text-primary">
             Draft &middot; {props.data.archetypeName}
           </span>
@@ -61,7 +76,7 @@ export function HomeSecondaryRow(props: HomeSecondaryRowProps) {
       )
     case 'last_complete':
       return (
-        <li className="flex items-center justify-between gap-3 rounded-[12px] border border-text-primary/10 bg-bg-primary px-3 py-2">
+        <li className={SECONDARY_ROW_CLASS}>
           <span className="text-sm text-text-primary">
             Last: {props.data.plan.presetName}
           </span>
