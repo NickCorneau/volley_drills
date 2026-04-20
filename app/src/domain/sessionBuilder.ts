@@ -348,6 +348,18 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
  * `D85` / `D105`; mid-drill drill-swap doesn't make sense there). The
  * RunControls UI also disables Swap on those slots as a belt; this is
  * suspenders.
+ *
+ * Neighbor-aware exclusion (VB-FL-7, 2026-04-19 non-player field
+ * look): callers can pass `options.excludeDrillNames` to also strip
+ * candidates whose drill name matches a surrounding plan block —
+ * typically `plan.blocks[activeBlockIndex ± 1]`. That prevents the
+ * surprising case where a tester taps Swap and the new drill is
+ * identical to the drill they're about to do next (or just finished).
+ * If neighbor-exclusion would empty the candidate pool, we fall back
+ * to base exclusion only (current drill name) so a tight slot pool
+ * can't make the Swap button useless; landing on a neighbor is
+ * better than no-op. The current-drill exclusion is never relaxed —
+ * cycling past the same drill would defeat the Swap action entirely.
  */
 const SKILL_TAGS_BY_TYPE: Record<BlockSlotType, readonly string[]> = {
   warmup: ['pass', 'movement'],
@@ -358,9 +370,22 @@ const SKILL_TAGS_BY_TYPE: Record<BlockSlotType, readonly string[]> = {
   wrap: ['recovery'],
 }
 
+export type FindSwapAlternativesOptions = {
+  /**
+   * Additional drill names to exclude beyond the current block's drill.
+   * Typically the drill names of the immediately-previous and
+   * immediately-next plan blocks, so a Swap can't land adjacent to an
+   * identical drill. Exclusion is best-effort: if the filtered pool
+   * would be empty, the function falls back to excluding only the
+   * current drill (see function-level doc).
+   */
+  readonly excludeDrillNames?: readonly string[]
+}
+
 export function findSwapAlternatives(
   block: SessionPlanBlock,
   context: SetupContext,
+  options?: FindSwapAlternativesOptions,
 ): SessionPlanBlock[] {
   // Warmup / wrap are curated per D85 / D105. No swap alternates.
   if (block.type === 'warmup' || block.type === 'wrap') return []
@@ -375,15 +400,35 @@ export function findSwapAlternatives(
   }
   const candidates = findCandidates(slot, context)
 
-  // Exclude the currently-rendered drill by name; SessionPlanBlock
-  // doesn't carry drillId (that field is stripped when the plan is
-  // materialized from the draft — see createSessionFromDraft in
-  // services/session.ts), so name is the available identity.
-  //
+  // Base exclusion (always on): the drill currently in this slot.
+  // SessionPlanBlock doesn't carry drillId (that field is stripped
+  // when the plan is materialized from the draft — see
+  // createSessionFromDraft in services/session.ts), so name is the
+  // available identity.
+  const baseFiltered = candidates.filter(
+    (c) => c.drill.name !== block.drillName,
+  )
+
+  // Neighbor-aware exclusion (VB-FL-7): try to also drop any drill
+  // whose name matches a surrounding block. Keep the base filter as
+  // fallback so a tight pool (e.g., a context with only 2 eligible
+  // drills for a slot) can't collapse the Swap button to a no-op.
+  const extraExcludes = new Set(
+    options?.excludeDrillNames?.filter((n) => n !== block.drillName) ?? [],
+  )
+  let filtered = baseFiltered
+  if (extraExcludes.size > 0) {
+    const neighborFiltered = baseFiltered.filter(
+      (c) => !extraExcludes.has(c.drill.name),
+    )
+    if (neighborFiltered.length > 0) {
+      filtered = neighborFiltered
+    }
+  }
+
   // Sort by drill id for deterministic cycling — each tap picks
   // alternates[0], then re-derives with the NEW drillName excluded,
   // so successive taps walk the list in a stable order.
-  const filtered = candidates.filter((c) => c.drill.name !== block.drillName)
   filtered.sort((a, b) => a.drill.id.localeCompare(b.drill.id))
 
   return filtered.map((c) => ({

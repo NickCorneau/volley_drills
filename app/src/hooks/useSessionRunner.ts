@@ -173,6 +173,13 @@ export function useSessionRunner(
    * Timer pause is the CALLER's responsibility (matches the Shorten
    * pattern). The caller (RunScreen.handleSwap) pauses before calling
    * and lets the tester tap Resume to continue on the new drill.
+   *
+   * VB-FL-7 (2026-04-19 non-player field look): also pass the
+   * immediately-previous and immediately-next plan blocks' drill
+   * names so a Swap can't land on a drill identical to what the
+   * tester just finished or is about to do. `findSwapAlternatives`
+   * falls back to base exclusion when the neighbor-filtered pool
+   * would be empty, so this never starves the Swap button.
    */
   const swapBlock = useCallback(async (): Promise<boolean> => {
     const exec = executionRef.current
@@ -181,7 +188,13 @@ export function useSessionRunner(
     if (!p.context) return false
     const currentBlock = p.blocks[exec.activeBlockIndex]
     if (!currentBlock) return false
-    const alternates = findSwapAlternatives(currentBlock, p.context)
+    const neighborNames = [
+      p.blocks[exec.activeBlockIndex - 1]?.drillName,
+      p.blocks[exec.activeBlockIndex + 1]?.drillName,
+    ].filter((n): n is string => typeof n === 'string' && n.length > 0)
+    const alternates = findSwapAlternatives(currentBlock, p.context, {
+      excludeDrillNames: neighborNames,
+    })
     if (alternates.length === 0) return false
     const next = alternates[0]
     const { updatedExecution, updatedPlan } = await swapActiveBlock(

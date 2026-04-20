@@ -18,6 +18,11 @@ import { findSwapAlternatives } from '../sessionBuilder'
  * - Preserves `id`, `type`, `durationMinutes`, `required` from the
  *   input block — only drill identity (name / shortName / cue /
  *   instructions) changes.
+ * - VB-FL-7 (2026-04-19 non-player field look): `excludeDrillNames`
+ *   option strips additional drill names (typically neighbors) when
+ *   they would collide with adjacent plan blocks, with a fallback
+ *   to base-exclusion-only when the neighbor-filtered pool would
+ *   be empty. The current-drill exclusion is never relaxed.
  */
 
 function makeBlock(overrides: Partial<SessionPlanBlock> = {}): SessionPlanBlock {
@@ -135,5 +140,87 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
     }
     const b = findSwapAlternatives(block, makeContext())
     expect(b.every((x) => x.drillName !== 'MUTATED')).toBe(true)
+  })
+
+  /**
+   * VB-FL-7 (2026-04-19 non-player field look): neighbor-aware
+   * exclusion should strip candidates whose name matches a
+   * surrounding plan block, so Swap never lands on the drill
+   * coming up next (or just finished). Uses the real solo+wall
+   * main_skill pool — we pick a name from the baseline output to
+   * drive the exclusion test so we don't have to hard-code drill
+   * IDs that could drift if the catalog changes.
+   */
+  describe('neighbor-aware exclusion (VB-FL-7)', () => {
+    it('excludes additional drill names passed via excludeDrillNames', () => {
+      const block = makeBlock({ type: 'main_skill' })
+      const baseline = findSwapAlternatives(block, makeContext())
+      // Need at least 2 alternates so that excluding one still
+      // leaves a non-empty pool (otherwise fallback kicks in and
+      // the test doesn't exercise the exclusion branch).
+      expect(baseline.length).toBeGreaterThanOrEqual(2)
+
+      const neighborName = baseline[0].drillName
+      const withNeighbor = findSwapAlternatives(block, makeContext(), {
+        excludeDrillNames: [neighborName],
+      })
+
+      expect(withNeighbor.length).toBeGreaterThan(0)
+      expect(withNeighbor.every((b) => b.drillName !== neighborName)).toBe(true)
+      expect(withNeighbor.length).toBe(baseline.length - 1)
+    })
+
+    it('falls back to base exclusion when neighbor exclusion would empty the pool', () => {
+      const block = makeBlock({ type: 'main_skill' })
+      const baseline = findSwapAlternatives(block, makeContext())
+      expect(baseline.length).toBeGreaterThan(0)
+
+      // Excluding every baseline name would leave nothing; the
+      // fallback should kick in and return the baseline pool
+      // unchanged rather than emptying the Swap button.
+      const allBaselineNames = baseline.map((b) => b.drillName)
+      const withAllExcluded = findSwapAlternatives(block, makeContext(), {
+        excludeDrillNames: allBaselineNames,
+      })
+
+      expect(withAllExcluded.map((b) => b.drillName)).toEqual(allBaselineNames)
+    })
+
+    it('keeps current-drill exclusion even when the current drill is also in excludeDrillNames', () => {
+      const block = makeBlock({ type: 'main_skill' })
+      const baseline = findSwapAlternatives(block, makeContext())
+      expect(baseline.length).toBeGreaterThan(0)
+
+      const currentName = 'Does Not Exist' // matches makeBlock default drillName
+      const withCurrentInExcludes = findSwapAlternatives(block, makeContext(), {
+        excludeDrillNames: [currentName],
+      })
+
+      // Passing the current drill's name in excludeDrillNames must
+      // not cause the fallback to re-include it — the current
+      // drill exclusion is the one invariant that never relaxes.
+      expect(
+        withCurrentInExcludes.every((b) => b.drillName !== currentName),
+      ).toBe(true)
+      expect(withCurrentInExcludes.length).toBe(baseline.length)
+    })
+
+    it('empty excludeDrillNames behaves identically to no options', () => {
+      const block = makeBlock({ type: 'main_skill' })
+      const bare = findSwapAlternatives(block, makeContext())
+      const empty = findSwapAlternatives(block, makeContext(), {
+        excludeDrillNames: [],
+      })
+      expect(empty.map((b) => b.drillName)).toEqual(bare.map((b) => b.drillName))
+    })
+
+    it('undefined excludeDrillNames behaves identically to no options', () => {
+      const block = makeBlock({ type: 'main_skill' })
+      const bare = findSwapAlternatives(block, makeContext())
+      const withOpts = findSwapAlternatives(block, makeContext(), {})
+      expect(withOpts.map((b) => b.drillName)).toEqual(
+        bare.map((b) => b.drillName),
+      )
+    })
   })
 })
