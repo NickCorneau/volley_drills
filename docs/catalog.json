@@ -24,6 +24,7 @@
     "stack": "Vite + React + TypeScript + PWA + Dexie",
     "blocking_gate": "D91 field-test evidence against v0b (D119) must pass before M001 moves into the full build; remaining pre-field items are non-code (tester recruitment, founder replay spot-check, operational cohort protocol)",
     "prototype_feedback": "docs/research/2026-04-12-v0a-runner-probe-feedback.md",
+    "v0b_field_look_feedback": "docs/research/2026-04-19-v0b-starter-loop-feedback.md",
     "v0b_status_registry": "docs/plans/2026-04-16-003-rest-of-v0b-plan.md"
   },
   "entrypoints": [
@@ -135,6 +136,7 @@
     ],
     "prototype_work": [
       "docs/research/2026-04-12-v0a-runner-probe-feedback.md",
+      "docs/research/2026-04-19-v0b-starter-loop-feedback.md",
       "app/README.md"
     ],
     "research_question": [
@@ -414,6 +416,12 @@
       "status": "active"
     },
     {
+      "id": "v0b-starter-loop-feedback",
+      "path": "docs/research/2026-04-19-v0b-starter-loop-feedback.md",
+      "type": "research",
+      "status": "active"
+    },
+    {
       "id": "periodization-post-framework",
       "path": "docs/research/periodization-post-framework.md",
       "type": "research",
@@ -660,6 +668,10 @@
     {
       "path": "docs/research/2026-04-12-v0a-runner-probe-feedback.md",
       "focus": "prototype feedback, retest evidence, and pre-field-test priorities"
+    },
+    {
+      "path": "docs/research/2026-04-19-v0b-starter-loop-feedback.md",
+      "focus": "non-developer field-look feedback on the v0b Starter Loop build; stable VB-FL-NN IDs for findings between feature-complete and D91 cohort kickoff"
     },
     {
       "path": "docs/research/periodization-post-framework.md",

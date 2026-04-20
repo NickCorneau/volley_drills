@@ -30,7 +30,23 @@ export function BlockTimer({ remainingSeconds, totalSeconds, isPaused }: BlockTi
         {formatTime(remainingSeconds)}
       </div>
       {isPaused && (
-        <span className="text-sm font-semibold uppercase tracking-wide text-accent">Paused</span>
+        // 2026-04-19 non-player tester feedback: the "Paused" pill alone
+        // read as "the timer is broken" when the pause came from Swap
+        // (or Shorten) rather than from an explicit Pause tap — the
+        // tester didn't connect her Swap action to the stopped timer
+        // and had to trial-and-error Resume. The actionable subtitle
+        // makes the cause/effect legible without tracking pause-reason
+        // state: any paused state, regardless of trigger, now carries
+        // the same recovery instruction. See
+        // `docs/research/2026-04-19-v0b-starter-loop-feedback.md`.
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-sm font-semibold uppercase tracking-wide text-accent">
+            Paused
+          </span>
+          <span className="text-xs text-text-secondary">
+            Tap Resume to continue
+          </span>
+        </div>
       )}
       <div className="h-2 w-full overflow-hidden rounded-full bg-bg-warm">
         <div

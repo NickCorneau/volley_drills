@@ -78,6 +78,8 @@ Research notes inform canon. They do not outrank `docs/decisions.md`, `docs/prd-
   - `docs/research/dexie-schema-and-architecture.md`
 - Need synthesized v0a prototype feedback, retest evidence, or prioritized pre-field-test backlog:
   - `docs/research/2026-04-12-v0a-runner-probe-feedback.md`
+- Need non-developer field-look feedback on the v0b Starter Loop (post-rename, pre-`D91`), or the stable `VB-FL-NN` ID register:
+  - `docs/research/2026-04-19-v0b-starter-loop-feedback.md`
 - Need the Phase 1.5 periodization vocabulary stub (PoST framework) for multi-week planning (`O2`):
   - `docs/research/periodization-post-framework.md`
 - Need the minimum-attempt and self-scoring-bias evidence behind the binary-score progression gate (`D80`, `D104`, `O12`):
@@ -125,6 +127,7 @@ Research notes inform canon. They do not outrank `docs/decisions.md`, `docs/prd-
 | `docs/research/minimum-viable-test-stack.md` | per-layer depth of investment, `fake-indexeddb` trust boundary, trust-invariants -> owning-layer map, deliberate under-investment list | sharpens `docs/specs/m001-quality-and-testing.md`; flags two concrete config gaps (Playwright against built app; per-test `IDBFactory` isolation) |
 | `docs/research/dexie-schema-and-architecture.md` | Dexie schema shape, migrations, persistence design, DB structure | informs implementation planning, persistence architecture, migration safety |
 | `docs/research/2026-04-12-v0a-runner-probe-feedback.md` | living synthesis of v0a runner-probe UX feedback, browser retest evidence, docs drift, and stable backlog IDs | informs pre-field-test fixes, doc hygiene, and v0b planning |
+| `docs/research/2026-04-19-v0b-starter-loop-feedback.md` | living log of non-developer field-look reactions to the v0b Starter Loop between feature-complete (2026-04-17) and `D91` cohort kickoff; stable `VB-FL-NN` IDs | informs v0b copy / UX hotfix decisions and pre-`D91` control-group signal |
 | `docs/research/periodization-post-framework.md` | Phase 1.5 stub mapping Otte's PoST stages (Coordination -> Skill Adaptability -> Performance) onto our archetypes and adaptation rules | informs `O2` multi-week planning when activated; no M001 scope |
 | `docs/research/d91-retention-gate-evidence.md` | evidence base and interpretive framing for the `D91` M001 go/no-go retention gate; kill-floor vs go-bar split and novelty-effect enrichment signals | informs `D91` rationale, `O5`, and the Phase 0 wedge-validation decision gate |
 | `docs/research/solo-training-environments.md` | where amateur beach players actually do solo work, why wall access is not a safe default, and how that shapes archetype defaults and drill inventory | resolves `O4` operationally; seeds `D102` and `D103`; flags code corrections in archetype selector and presets |

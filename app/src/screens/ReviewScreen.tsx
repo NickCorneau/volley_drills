@@ -477,13 +477,26 @@ function ReviewSessionContent({
             <h2 className="text-base font-semibold text-text-primary">
               Good passes
             </h2>
+            {/* 2026-04-19 non-player tester note: the original phrasing
+                ("count it as Not Good") implied a phantom "Not Good"
+                control because the binary `good | not-good` vocabulary
+                lives in `BinaryPassScore` but never surfaces as a UI
+                button — the only controls here are the Good / Total
+                numeric cells. Reformulated to preserve the V0B-28
+                anti-generosity nudge (D104 layer-1 forced-criterion
+                correction) while matching the actual affordance. The
+                "Success rule: …" scaffold, the one-sentence rule, and
+                the follow-up anti-generosity clause are all still
+                present; only the clause's wording changed. See
+                `docs/research/2026-04-19-v0b-starter-loop-feedback.md`
+                and `docs/specs/m001-review-micro-spec.md` §Required. */}
             <p className="mt-1 text-sm text-text-secondary">
               <span className="font-medium text-text-primary">
                 Success rule:
               </span>{' '}
               ball reached the target zone or the next contact was playable.{' '}
               <span className="font-medium text-text-primary">
-                If unsure, count it as Not Good.
+                If unsure, don&rsquo;t count it as Good.
               </span>
             </p>
           </div>
