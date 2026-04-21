@@ -342,8 +342,109 @@ export function buildDraftFromCompletedBlocks(
 }
 
 /**
- * Build a recovery-only draft for when SafetyCheck flags pain.
- * Uses the same archetype but only warmup + wrap blocks.
+ * Slot types included when the user continues with a lighter (pain-flag)
+ * session: sand prep, low-load technique and movement work, and cooldown.
+ * Deliberately omits `main_skill` and `pressure` (higher-load blocks).
+ */
+const RECOVERY_BLOCK_SLOT_TYPES: readonly BlockSlotType[] = [
+  'warmup',
+  'technique',
+  'movement_proxy',
+  'wrap',
+]
+
+/**
+ * Total minutes for the lighter-session path (matches `buildRecoveryDraft`
+ * block list). Used by Safety UI before a plan exists.
+ *
+ * 2026-04-21: Recovery now respects the user's chosen `timeProfile`
+ * instead of the sum-of-mins of the kept slots. The pre-2026-04-21
+ * behaviour returned ~10 for a 15-min request and ~16 for 25, which
+ * silently cut the session short - testers read the result as
+ * "extended warmup then straight into cooldown" because the Work
+ * block was only 4 min flanked by 3-and-3. The lighter path lightens
+ * LOAD (drops `main_skill` + `pressure`), not DURATION; the reclaimed
+ * minutes fold into the Work block inside `buildRecoveryDraft` so the
+ * middle drill is clearly the session.
+ */
+export function estimateRecoverySessionMinutes(
+  context: SetupContext,
+): number | null {
+  const archetype = selectArchetype(context)
+  if (!archetype) return null
+
+  const layout = archetype.layouts[context.timeProfile]
+  if (!layout) return null
+
+  const recoveryLayout = layout.filter((s) =>
+    RECOVERY_BLOCK_SLOT_TYPES.includes(s.type),
+  )
+  if (recoveryLayout.length === 0) return null
+
+  return context.timeProfile
+}
+
+/**
+ * 2026-04-21: Recovery-specific duration allocator. Warmup and wrap
+ * stay pinned at their minimum (they're bookends, not the workout);
+ * the remaining minutes flow into the Work blocks (`technique` and
+ * `movement_proxy`) with a ~60/40 bias toward technique so the Work
+ * block dominates the session rather than reading as an intermission
+ * between warmup and wrap.
+ *
+ * Deliberately ignores each slot's `durationMaxMinutes`. Those maxes
+ * come from the full-session archetype layout where the cap reflects
+ * `main_skill` and `pressure` competing for the same minute budget.
+ * In a recovery session we've dropped those competitors, so stretching
+ * a technique block past its full-session max is correct - the max was
+ * never a clinical upper bound, it was a scheduling tradeoff.
+ */
+function allocateRecoveryDurations(
+  layout: BlockSlot[],
+  totalMinutes: number,
+): number[] | null {
+  const durations = layout.map((s) => s.durationMinMinutes)
+  const minTotal = durations.reduce((a, b) => a + b, 0)
+  if (totalMinutes < minTotal) return null
+
+  let remaining = totalMinutes - minTotal
+  if (remaining === 0) return durations
+
+  const techIdx = layout.findIndex((s) => s.type === 'technique')
+  const moveIdx = layout.findIndex((s) => s.type === 'movement_proxy')
+
+  if (techIdx >= 0 && moveIdx >= 0) {
+    // 60/40 bias toward technique. `Math.ceil` favors technique when
+    // the remainder is odd; movement_proxy gets the residue.
+    const techShare = Math.ceil(remaining * 0.6)
+    const moveShare = remaining - techShare
+    durations[techIdx] += techShare
+    durations[moveIdx] += moveShare
+    return durations
+  }
+
+  if (techIdx >= 0) {
+    durations[techIdx] += remaining
+    return durations
+  }
+
+  if (moveIdx >= 0) {
+    durations[moveIdx] += remaining
+    return durations
+  }
+
+  // No Work block present at all. This shouldn't happen for any
+  // authored archetype × timeProfile combination (every layout has at
+  // least a `technique` slot), but rather than construct a session
+  // that silently stretches warmup or wrap, fall through to the
+  // general allocator so the block structure stays honest.
+  return allocateDurations(layout, totalMinutes)
+}
+
+/**
+ * Build a recovery-oriented draft for when SafetyCheck flags pain.
+ * Uses the same archetype but drops main work and pressure — keeps
+ * warmup, technique, movement proxy (when the template has one), and wrap.
  */
 export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
   const archetype = selectArchetype(context)
@@ -352,14 +453,16 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
   const layout = archetype.layouts[context.timeProfile]
   if (!layout) return null
 
-  const recoverySlotTypes: BlockSlotType[] = ['warmup', 'wrap']
-  const recoveryLayout = layout.filter((s) => recoverySlotTypes.includes(s.type))
-  if (recoveryLayout.length === 0) return null
-  const recoveryTotal = recoveryLayout.reduce(
-    (sum, slot) => sum + slot.durationMinMinutes,
-    0,
+  const recoveryLayout = layout.filter((s) =>
+    RECOVERY_BLOCK_SLOT_TYPES.includes(s.type),
   )
-  const durations = allocateDurations(recoveryLayout, recoveryTotal)
+  if (recoveryLayout.length === 0) return null
+  // Target the user's chosen timeProfile, not the filtered layout's
+  // minimum total. The minutes that `main_skill` + `pressure` would
+  // have claimed in a full session fold into the Work block via
+  // `allocateRecoveryDurations` - see that function's JSDoc for why
+  // the Work block can legally exceed its full-session max here.
+  const durations = allocateRecoveryDurations(recoveryLayout, context.timeProfile)
   if (!durations) return null
 
   const usedDrillIds = new Set<string>()

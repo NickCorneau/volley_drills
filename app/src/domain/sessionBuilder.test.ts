@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { DRILLS } from '../data/drills'
-import { buildDraft, buildRecoveryDraft, deriveBlockRationale } from './sessionBuilder'
+import {
+  buildDraft,
+  buildRecoveryDraft,
+  deriveBlockRationale,
+  estimateRecoverySessionMinutes,
+} from './sessionBuilder'
 import type { SetupContext } from '../db/types'
 
 const variantById = new Map(
@@ -218,7 +223,7 @@ describe('sessionBuilder', () => {
     )
   })
 
-  it('buildRecoveryDraft returns only warmup and wrap blocks', () => {
+  it('buildRecoveryDraft keeps low-load slots and drops main_skill and pressure', () => {
     const recovery = buildRecoveryDraft({
       playerMode: 'pair',
       timeProfile: 25,
@@ -227,7 +232,136 @@ describe('sessionBuilder', () => {
     })
 
     expect(recovery).not.toBeNull()
-    expect(recovery!.blocks.length).toBeGreaterThan(0)
-    expect(recovery!.blocks.every((block) => block.type === 'warmup' || block.type === 'wrap')).toBe(true)
+    const types = recovery!.blocks.map((b) => b.type)
+    expect(types).toEqual(['warmup', 'technique', 'movement_proxy', 'wrap'])
+    expect(types.some((t) => t === 'main_skill' || t === 'pressure')).toBe(false)
+  })
+
+  it('buildRecoveryDraft for 15 min includes technique between warmup and wrap', () => {
+    const recovery = buildRecoveryDraft({
+      playerMode: 'pair',
+      timeProfile: 15,
+      netAvailable: false,
+      wallAvailable: false,
+    })
+    expect(recovery?.blocks.map((b) => b.type)).toEqual([
+      'warmup',
+      'technique',
+      'wrap',
+    ])
+  })
+
+  /**
+   * 2026-04-21: recovery respects the user's chosen `timeProfile`
+   * instead of the sum-of-mins of kept slots. Pre-2026-04-21, a
+   * 15-min request produced a 10-min session (3+4+3) and readers
+   * reported "just warmup then cooldown" because the 4-min Work
+   * block disappeared between the bookends. The fix folds the
+   * reclaimed main_skill/pressure minutes into the Work block so
+   * technique dominates the session. These tests pin that shape so a
+   * future edit to `allocateRecoveryDurations` can't silently
+   * re-shrink recovery back to the intermission pattern.
+   */
+  it('15-min recovery fills the full 15 minutes with technique as the dominant block', () => {
+    const recovery = buildRecoveryDraft({
+      playerMode: 'pair',
+      timeProfile: 15,
+      netAvailable: false,
+      wallAvailable: false,
+    })
+    expect(recovery).not.toBeNull()
+    const total = recovery!.blocks.reduce(
+      (sum, b) => sum + b.durationMinutes,
+      0,
+    )
+    expect(total).toBe(15)
+
+    const technique = recovery!.blocks.find((b) => b.type === 'technique')
+    const warmup = recovery!.blocks.find((b) => b.type === 'warmup')
+    const wrap = recovery!.blocks.find((b) => b.type === 'wrap')
+    expect(technique).toBeDefined()
+    expect(warmup).toBeDefined()
+    expect(wrap).toBeDefined()
+    // Technique is strictly longer than either bookend so the Work
+    // phase reads as the session, not an intermission.
+    expect(technique!.durationMinutes).toBeGreaterThan(
+      warmup!.durationMinutes,
+    )
+    expect(technique!.durationMinutes).toBeGreaterThan(
+      wrap!.durationMinutes,
+    )
+  })
+
+  it('25-min recovery fills 25 minutes with technique >= movement_proxy', () => {
+    const recovery = buildRecoveryDraft({
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+    })
+    expect(recovery).not.toBeNull()
+    const total = recovery!.blocks.reduce(
+      (sum, b) => sum + b.durationMinutes,
+      0,
+    )
+    expect(total).toBe(25)
+
+    const technique = recovery!.blocks.find((b) => b.type === 'technique')
+    const movement = recovery!.blocks.find((b) => b.type === 'movement_proxy')
+    expect(technique).toBeDefined()
+    expect(movement).toBeDefined()
+    // 60/40 bias toward technique. Ceiling-rounded so technique wins
+    // the odd-minute remainder on allocations like 18/2 → 11/7.
+    expect(technique!.durationMinutes).toBeGreaterThanOrEqual(
+      movement!.durationMinutes,
+    )
+  })
+
+  it('40-min recovery fills the full 40 minutes', () => {
+    const recovery = buildRecoveryDraft({
+      playerMode: 'pair',
+      timeProfile: 40,
+      netAvailable: false,
+      wallAvailable: false,
+    })
+    expect(recovery).not.toBeNull()
+    const total = recovery!.blocks.reduce(
+      (sum, b) => sum + b.durationMinutes,
+      0,
+    )
+    expect(total).toBe(40)
+  })
+
+  it('estimateRecoverySessionMinutes returns the requested timeProfile', () => {
+    // Pre-2026-04-21 this returned the sum-of-mins of kept slots
+    // (10 for 15, 16 for 25). The lighter path lightens LOAD, not
+    // DURATION - users who set a 15-min commitment still have 15
+    // minutes available.
+    expect(
+      estimateRecoverySessionMinutes({
+        playerMode: 'pair',
+        timeProfile: 15,
+        netAvailable: false,
+        wallAvailable: false,
+      }),
+    ).toBe(15)
+
+    expect(
+      estimateRecoverySessionMinutes({
+        playerMode: 'pair',
+        timeProfile: 25,
+        netAvailable: false,
+        wallAvailable: false,
+      }),
+    ).toBe(25)
+
+    expect(
+      estimateRecoverySessionMinutes({
+        playerMode: 'solo',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: true,
+      }),
+    ).toBe(40)
   })
 })

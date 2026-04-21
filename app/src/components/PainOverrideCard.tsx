@@ -66,8 +66,20 @@ export function PainOverrideCard({
         </div>
       </div>
 
+      {/* 2026-04-21: prior copy was "Lighter Technique Session · N min"
+          where N was the sum-of-mins of kept slots (10 for a 15-min
+          request, 16 for 25). Two problems in lockstep:
+          (a) "Technique" collided with the `technique` block type the
+              RunScreen phase pill already shows, so users parsed the
+              card as meta-marketing rather than a session label; and
+          (b) the shortened minute count made the lighter path read as
+              "extended warmup → cooldown" because the Work block was
+              only 4 min flanked by 3-and-3. Recovery now respects the
+              requested `timeProfile` (see
+              `estimateRecoverySessionMinutes`) and the title drops the
+              block-type collision. */}
       <div className="rounded-[8px] bg-white/60 px-3 py-2.5 text-sm font-medium text-text-primary">
-        Lighter Technique Session &middot; {recoveryMinutes} min
+        Lighter session &middot; {recoveryMinutes} min
       </div>
 
       <Button

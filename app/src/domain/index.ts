@@ -1,4 +1,8 @@
-export { buildDraft, buildRecoveryDraft } from './sessionBuilder'
+export {
+  buildDraft,
+  buildRecoveryDraft,
+  estimateRecoverySessionMinutes,
+} from './sessionBuilder'
 export { composeSummary } from './sessionSummary'
 export type {
   SummaryCase,

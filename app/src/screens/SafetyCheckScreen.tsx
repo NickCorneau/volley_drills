@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { PainOverrideCard } from '../components/PainOverrideCard'
 import { BackButton, Button, StatusMessage } from '../components/ui'
 import type { SessionDraft } from '../db/types'
-import { buildRecoveryDraft } from '../domain/sessionBuilder'
+import {
+  buildRecoveryDraft,
+  estimateRecoverySessionMinutes,
+} from '../domain/sessionBuilder'
 import { routes } from '../routes'
 import {
   createSessionFromDraft,
@@ -60,10 +63,6 @@ const HEAT_PREVENTION_TIPS = [
   'Take shade breaks between blocks if you feel overheated.',
   'Wear sunscreen and light-colored clothing.',
 ]
-
-function isRecoveryBlock(type: string): boolean {
-  return type === 'warmup' || type === 'wrap'
-}
 
 export function SafetyCheckScreen() {
   const navigate = useNavigate()
@@ -132,10 +131,9 @@ export function SafetyCheckScreen() {
     : (recency as PrimaryRecency | null)
   const recencyChosen = recency !== null && recency !== '2+'
 
-  const recoveryMinutes =
-    draft?.blocks
-      .filter((b) => isRecoveryBlock(b.type))
-      .reduce((sum, b) => sum + b.durationMinutes, 0) ?? 0
+  const recoveryMinutes = draft?.context
+    ? estimateRecoverySessionMinutes(draft.context) ?? 0
+    : 0
 
   const sessionSummary = draft
     ? `${draft.archetypeName} \u00b7 ${draft.blocks.reduce((s, b) => s + b.durationMinutes, 0)} min, ${draft.blocks.length} blocks`
