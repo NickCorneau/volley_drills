@@ -1,15 +1,28 @@
 /**
- * Seed drill catalog — 26 drills organized into 6 progression chains.
+ * Seed drill catalog — drills organized into progression chains.
  *
  * Source: research-output/drill-library-content-structure.md
  * Schema: app/src/types/drill.ts
  *
- * M001 minimum set (11 drills): d01, d03, d05, d09, d10, d11, d15, d18, d22,
- * d25, d26. Full pack ships post-validation (D81).
+ * M001 minimum set (Tier 1a): d01, d03, d05, d09, d10, d11, d15, d18, d22,
+ * d25, d26 (the pre-Tier-1a core), plus d28 (warmup) and d38/d39/d41
+ * (setting probe, Swap-only). Full pack ships post-validation (D81).
  *
  * Content status: needs expert coach review before treating as canonical
  * (set-window geometry, progression dosing, technique cue legality, heat
  * triggers). See docs/research/beach-training-resources.md.
+ *
+ * Vocabulary (Tier 1a Unit 3): drill copy uses BAB 2024 course
+ * vocabulary. Specialised terms get an inline parenthetical brief
+ * definition on first occurrence per drill (e.g. "Free Ball (easy
+ * arcing ball, pass-to-set ready)", "Down Ball (flat ball from a
+ * non-spiker)"). "toss" (not "throw") is the feed action; "spike"
+ * names the hard-hit technique, "attack" names the phase
+ * (serve → set → attack). Full glossary + source provenance:
+ * docs/research/bab-source-material.md. Drill `name` and `shortName`
+ * are stable identifiers (seen in founder sessions and in Dexie
+ * ExecutionLog.plan.blocks[].drillName) and are never renamed by this
+ * sweep.
  */
 
 import type { Drill } from '../types/drill'
@@ -770,7 +783,7 @@ const d13: Drill = {
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'Cones form a "W" path. Passer moves in/out between cones; feeder tosses; passer passes "up/down" and retreats. Attacking final rep optional.',
+        'Cones form a "W" path. Passer moves in/out between cones; feeder tosses; passer passes "up/down" and retreats. Spiking the final rep optional.',
       coachingCues: [
         'Outside leg forward at contact.',
         'Do not lose sight of the net.',
@@ -1088,7 +1101,7 @@ const d19: Drill = {
         target: '20 controlled passes',
       },
       courtsideInstructions:
-        'Tosser throws to passer; passer passes to target; target catches; rotate through spots. After 20 passes, progress to live serve.',
+        'Tosser tosses to passer; passer passes to target; target catches; rotate through spots. After 20 passes, progress to live serve.',
       coachingCues: [
         'Controlled toss/serve down the line.',
         'Keep rhythm.',
@@ -1182,7 +1195,7 @@ const d21: Drill = {
         target: 'Reach 500 within cap time or improve vs last session',
       },
       courtsideInstructions:
-        'Tosser initiates with skyball/freeball/downball. Points: pass-only (25), pass+set (50), pass+set+attack (100). Race to 500.',
+        'Tosser initiates with a Skyball (high lob), Free Ball (easy arcing ball, pass-to-set ready), or Down Ball (flat ball from a non-spiker). Points: pass-only (25), pass+set (50), pass+set+attack (100). Race to 500.',
       coachingCues: [
         'Tabletop passing.',
         'Defined apex on every contact.',
@@ -1337,7 +1350,7 @@ const d24: Drill = {
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'Throw ball off wall so it rebounds like a serve. Move and pass so the ball flies settable into a corner "target." Reset and repeat.',
+        'Toss the ball off the wall so it rebounds like a serve. Move and pass so the ball flies settable into a corner "target." Reset and repeat.',
       coachingCues: [
         'Avoid training non-game-like habits.',
         'Aim for settable flight.',
