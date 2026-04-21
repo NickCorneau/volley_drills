@@ -151,7 +151,9 @@ export function SkillLevelScreen() {
         <h1 className="text-xl font-bold tracking-tight text-text-primary">
           {copy.heading}
         </h1>
-        <p className="text-sm text-text-secondary">You can change this later.</p>
+        <p className="text-sm text-text-secondary">
+          Your rough current level — we size today&apos;s drills to match. Change anytime.
+        </p>
       </header>
 
       {/* Phase F2 (2026-04-19): option cards now use the same calm

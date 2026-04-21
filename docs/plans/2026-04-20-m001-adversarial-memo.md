@@ -1,6 +1,7 @@
 ---
 
 ## id: m001-adversarial-memo
+
 title: "M001 Adversarial Memo — Pre-Registered Falsification Conditions for D130"
 type: plan
 status: active
@@ -9,22 +10,23 @@ authority: "Pre-registers the falsification conditions, decision rule, and ritua
 summary: "Three pre-registered falsification conditions (solo-first, trust-surface deferral, partner behavioral return), an asymmetric default decision rule at the re-eval, a weekly 3-minute trigger review ritual, and an authoring budget tied to dogfooding — installed together so the founder-use mode authorised by D130 cannot quietly become permanent."
 last_updated: 2026-04-20
 depends_on:
-  - docs/vision.md
-  - docs/decisions.md
-  - docs/milestones/m001-solo-session-loop.md
-  - docs/plans/2026-04-20-m001-tier1-implementation.md
-  - docs/research/d91-retention-gate-evidence.md
-  - docs/research/founder-use-ledger.md
-  - docs/research/partner-walkthrough-script.md
+
+- docs/vision.md
+- docs/decisions.md
+- docs/milestones/m001-solo-session-loop.md
+- docs/plans/2026-04-20-m001-tier1-implementation.md
+- docs/research/d91-retention-gate-evidence.md
+- docs/research/founder-use-ledger.md
+- docs/research/partner-walkthrough-script.md
 related:
-  - docs/reviews/2026-04-20-m001-red-team.md
+- docs/reviews/2026-04-20-m001-red-team.md
 decision_refs:
-  - D91
-  - D123
-  - D130
-  - D131
+- D91
+- D123
+- D130
+- D131
 open_question_refs:
-  - O5
+- O5
 
 # M001 Adversarial Memo — Pre-Registered Falsification Conditions for D130
 
@@ -222,21 +224,28 @@ Meta-check: the memo itself has failure modes.
 
 Append one block per Monday during the 90-day window. The first entry is the week of 2026-04-20 itself.
 
+## 2026-04-20 (week 1 of 13)
 
-
-
-
-
+- Sessions logged this past week: 3 (founder: 0; partner-walkthrough: Seb ran 2 solo + 1 pair on 2026-04-21, captured in `docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md` and provenance-frozen at `research-output/partner-walkthrough-2026-04-21-seb-export.json`). Running total: 3 / 13-week target.
+- Solo share so far: 67% (2 of 3 walkthrough sessions solo). Founder-use ledger has not yet added post-Tier-1a founder sessions.
+- Focus breakdown so far: pass 3 / serve 0 / set 0. Set floor for Condition 1 (≥3 set-focused sessions across the 90-day window) is **not yet met** — on track if founder logs ≥3 set sessions in the remaining 12 weeks, off track if the solo_open default keeps auto-routing to pass content without any deliberate set steering.
+- Outside-app planning this week: **no.** Founder did not write down a session plan anywhere outside the app.
+- D130 early triggers check:
+  - (a) <5 sessions in 45 days: currently 0/5 founder sessions, 1 day elapsed — not tripped; 44 days remain for the founder floor.
+  - (b) 3-week silence: most recent founder session is pre-Tier-1a. First founder post-Tier-1a session is expected this week.
+  - (c) invited anyone outside partner: no. Seb is the named partner; no friends-of-friends invited.
+  - (d) Tier 1a + ≥10 sessions + no open P0: Tier 1a shipped; founder sessions 0/10; partner walkthrough landed with **0 P0**, 9 P1, 5 P2 → trigger (d) is on the clock but not firing yet (session count gates it).
+- Falsification conditions status:
+  - 1 (solo-first activation ≥40%, ≥3 set-focused sessions): **pending** — insufficient data. Solo share at 67% over 3 sessions is within the condition, but only 3 sessions is too few to call.
+  - 2 (no outside-app planning or history): **pass (week 1).** No notes-app fallback this week.
+  - 3 (partner behavioral return within 30 days): **pending** — 30-day clock started 2026-04-21, closes 2026-05-21. Quiet-window invariants being upheld (URL live, no partner prompting).
+- One-line note: Partner walkthrough landed with zero P0, a tight copy/vocabulary cluster, and one navigation seam; Bucket A fixes landed same week (Beach Prep, 6-Leg Monster, Set Window gloss, SkillLevelScreen subtitle). No plan re-sequencing required.
+- Partner-walkthrough delta (this week only): ledger filed; script amended (Task 2 no longer implies serving; Pass 2 Q4 wording fixed; Protocol deviations section added to ledger template).
+- Authoring-budget cap check: 0 new drill records authored this week. Current budget consumed: 0 / 10 until founder's 5th post-Tier-1a session.
 
 ## Amendment log
 
 Any edit that weakens a falsification condition, shifts a threshold, or changes the decision rule gets recorded here with date, what changed, the justification, and the co-signer.
-
-
-
-
-
-
 
 ## For agents
 

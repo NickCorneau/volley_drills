@@ -1,0 +1,104 @@
+---
+description: Voice, vocabulary, and screen-copy invariants for drill catalog + courtside UI
+globs:
+  - "app/src/data/drills.ts"
+  - "app/src/screens/**"
+  - "app/src/components/ui/**"
+alwaysApply: false
+---
+
+# Courtside Copy
+
+Durable copy invariants for the drill catalog and any user-visible surface the courtside reader sees at arm's length. Rooted in partner-walkthrough evidence — every rule below traces to at least one logged finding so it can be falsified, not just held as taste.
+
+## Origin evidence
+
+The first partner walkthrough (`docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md`) landed **9 P1 findings**, and 6 of the 9 were a single class of bug: an author's vocabulary leaking into courtside copy. Six authors (the founder + drill-library sources) all spoke fluent coach-speak; one rec-player reader did not. The reader is the source of truth.
+
+## Invariants (in priority order)
+
+### 1. Headline-as-question, not surface-label
+
+Every primary screen headline must read as a question the reader would ask themselves, not a label for the surface. Subtitles must state what the app does with the answer, not reassure alone.
+
+- **Good** — "Where are you today?" with subtitle "Your rough current level — we size today's drills to match. Change anytime."
+- **Bad (before 2026-04-21)** — "Where are you today?" with subtitle "You can change this later." — reassurance without anchoring what "this" is; `SkillLevelScreen` P1-1.
+- **Test assertion** — partner-walkthrough Q2 ("first reaction on opening — did you know what to do?") is the verification channel. Any screen whose partner answer to Q2 is "took me a second" on two consecutive walkthroughs is a headline failure, not a reader failure.
+
+### 2. Jargon gate (the "one-season rec player" test)
+
+Every drill record and every courtside string must pass the "one-season rec player" test: would a rec player who has played one beach season read this without stopping?
+
+When in doubt, use the gloss pattern:
+
+- Plain-language term first, jargon in parentheses — "drop the shoulder nearer the ball (inside shoulder)."
+- Or gloss the jargon inline — "pass to the set window (where the setter would stand, ~3 m off the net)."
+- Never leave a coach-vocabulary term unglossed on its first appearance in a drill's `courtsideInstructions`, `coachingCues`, or `teachingPoints`.
+
+Flagged vocabulary (non-exhaustive; extend as walkthroughs surface more):
+
+| Term | Gloss or rename |
+| ---- | --------------- |
+| `set window` | "where the setter would stand (~3 m off the net)" |
+| `pass window` | same as `set window` |
+| `drop-step` | "pivot-back start" or "pivot the inside foot, step back" |
+| `inside/outside shoulder` | "the shoulder nearer the ball / the far shoulder" |
+| `platform angle` | "arm angle that drives direction" |
+| `brake-step` | "plant to stop before contact" |
+| `sideout` | define inline on first use per-drill |
+| `tomahawk`, `pokey`, `cut shot`, `high line` | BAB vocabulary — define inline on first use per-drill (Tier 1a Unit 3) |
+
+Walkthrough partner quotes on this class of finding are the first-line evidence for adding a term to this table. Remove a term only after two consecutive walkthroughs passed without flagging it.
+
+### 3. No combinatoric descriptions
+
+Don't describe content as a product of axes. Enumerate.
+
+- **Bad** — "Toss to 6 locations: left/right × (in front / to side / slightly behind)." (6-Legged Monster; P1-7)
+- **Good** — "Six tosses total — one to each spot below: front-left, side-left, behind-left, front-right, side-right, behind-right."
+
+The combinatoric form assumes the reader's parser is loaded with algebra. The courtside reader's is loaded with sand, sun, and a ball about to be tossed.
+
+### 4. Cool-down / wrap copy gets equal review weight as main-skill copy
+
+The lowest-engagement block is where jargon hides most. Authors spend attention on the main skill and leave wrap/cooldown blocks under-authored. P1-8 (cool-down stretches named without demonstration) is a direct consequence.
+
+- Every wrap/cooldown `courtsideInstructions` must pass the same jargon gate as main-skill blocks.
+- Stretches named by anatomical target must either (a) include a one-sentence execution cue inline, or (b) link to a tappable per-stretch description once that component ships (Tier 1b).
+
+### 5. Timed sub-blocks need audible structure (shipping gap)
+
+This is documented here because it recurs in drill copy (warm-up 4×45s sub-blocks, cool-down 6×20–30s stretches, pair role-swap) and because the copy cannot compensate for the missing capability. Partner ask in P2-2.
+
+When authoring a drill with internal timed sub-segments:
+
+- Write the copy as though audible pacing exists — describe sub-segments in the order they should fire, not as a wall of instruction.
+- Add a comment on the variant (`// Timed sub-blocks: depends on pacing-audio infra, not yet shipped`) so the spec-gap stays visible in code.
+
+When pacing-audio infra ships, its spec owns the cross-drill invariant and this rule points to it.
+
+## Authoring checklist (paste into drill PRs)
+
+- [ ] Every term on the flagged-vocabulary table above is either renamed or glossed inline on first use in this drill.
+- [ ] The drill's `courtsideInstructions` passes the one-season rec player test (read aloud to yourself; if you stopped, fix it).
+- [ ] No combinatoric descriptions; enumerate.
+- [ ] Wrap/cooldown text has been read with the same attention as main-skill text.
+- [ ] Any timed sub-blocks are described in firing order and the variant carries the audio-gap comment (until audio ships).
+
+## What this rule is not
+
+- Not a style guide for marketing copy or documentation. Scope is drill catalog + courtside UI.
+- Not a taste test. Every rule traces to walkthrough evidence; when a rule stops being supported by evidence, remove it.
+- Not a replacement for D86 regulatory copy guard (`docs/research/regulatory-boundary-pain-gated-training-apps.md`) — that one runs automated via `lib/copyGuard` and catches a different class of bug.
+
+## Update when
+
+- A new partner walkthrough surfaces a novel copy-class finding that this rule doesn't cover.
+- A flagged term has passed two consecutive walkthroughs without being flagged — remove it.
+- Pacing-audio infra ships — replace the "shipping gap" section with a pointer to the spec.
+
+## Belongs elsewhere
+
+- Regulatory copy forbidden vocabulary — `docs/research/regulatory-boundary-pain-gated-training-apps.md` + `app/src/lib/copyGuard.ts`.
+- Visual/typography decisions (font size, outdoor contrast) — `docs/research/outdoor-courtside-ui-brief.md`.
+- Japanese-inspired visual direction — `docs/research/japanese-inspired-visual-direction.md`.

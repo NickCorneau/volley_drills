@@ -144,7 +144,7 @@ const d02: Drill = {
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'Receiver places towel across neck/upper back. Partner tosses left/right. Receiver passes to set window without dropping towel.',
+        'Receiver places towel across neck/upper back. Partner tosses left/right. Receiver passes to the set window (where the setter would stand, ~3 m off the net) without dropping towel.',
       coachingCues: [
         'Ribs tucked - do not over-arch.',
         'Platform angle is the crucial part.',
@@ -244,7 +244,7 @@ const d04: Drill = {
         target: '≥ 7/10',
       },
       courtsideInstructions:
-        'Feeder serves or tosses across. Passer passes up/down to set window and then catches their own pass (or partner catches).',
+        'Feeder serves or tosses across. Passer passes up/down to the set window (where the setter would stand, ~3 m off the net), then catches their own pass (or partner catches).',
       coachingCues: [
         'Move to pass in centerline.',
         'Target forward and slightly inward.',
@@ -272,7 +272,7 @@ const d04: Drill = {
         target: '≥ 7/10',
       },
       courtsideInstructions:
-        'Self-toss across the net. Pass up/down to set window and catch your own pass. Retrieve and repeat.',
+        'Self-toss across the net. Pass up/down to the set window (where the setter would stand, ~3 m off the net) and catch your own pass. Retrieve and repeat.',
       coachingCues: [
         'Move to pass in centerline.',
         'Target forward and slightly inward.',
@@ -327,7 +327,7 @@ const d05: Drill = {
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'Set a marker as your set window. Self-toss slightly in front; pass to land within set-window zone; retrieve quickly and repeat. Use 20 total reps.',
+        'Set a marker as your set window (where the setter would stand, ~3 m off the net). Self-toss slightly in front; pass to land within that zone; retrieve quickly and repeat. Use 20 total reps.',
       coachingCues: [
         'Get behind ball horizontally.',
         'Brake-step.',
@@ -377,7 +377,7 @@ const d06: Drill = {
         target: '≥ 2.0 average',
       },
       courtsideInstructions:
-        'Run D01 (Pass & Slap Hands) but now score each contact as 0–3 based on proximity/trajectory to your set window.',
+        'Run D01 (Pass & Slap Hands) but now score each contact as 0–3 based on proximity/trajectory to your set window (where the setter would stand, ~3 m off the net).',
       coachingCues: [
         'Platform set early.',
         'Arms parallel to ground for accuracy.',
@@ -486,7 +486,7 @@ const d08: Drill = {
         target: 'Win 2 rounds or pass average ≥ 2.0 across 15 serves',
       },
       courtsideInstructions:
-        'Passer receives serve; catcher stands near set window. +1 if catcher moves ≤ 1 big step or service error; −1 for bad pass or ace. First to +3.',
+        'Passer receives serve; catcher stands near the set window (where the setter would stand, ~3 m off the net). +1 if catcher moves ≤ 1 big step or service error; −1 for bad pass or ace. First to +3.',
       coachingCues: [
         'Aim pass off net enough to avoid trouble.',
         'Shoulders to target.',
@@ -561,7 +561,7 @@ const d10: Drill = {
   m001Candidate: true,
   teachingPoints: [
     'Point shoulders to target.',
-    'Lower inside shoulder and raise outside shoulder for wide balls.',
+    'Drop the shoulder nearest the ball and lift the far shoulder on wide passes.',
     'Ribs tucked.',
   ],
   progressionDescription: 'Faster/flatter tosses; add "short/deep" calls.',
@@ -593,10 +593,10 @@ const d10: Drill = {
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'Tosser at net (or ~2–3 m away). Toss to 6 locations: left/right × (in front / to side / slightly behind). Receiver passes to set window.',
+        'Tosser at net (or ~2–3 m away). Six tosses total — one to each spot below. Receiver passes each back to the set window (where the setter would stand, ~3 m off the net): front-left, side-left, behind-left, front-right, side-right, behind-right.',
       coachingCues: [
         'Point shoulders to target.',
-        'Lower inside shoulder, raise outside for wide balls.',
+        'Drop near shoulder, lift far shoulder on wide passes.',
         'Ribs tucked.',
       ],
     },
@@ -647,7 +647,7 @@ const d11: Drill = {
         target: '8/10 each side',
       },
       courtsideInstructions:
-        'Feeder tosses wide to sideline. Pass back using only inside arm; repeat, then opposite arm; then both arms.',
+        'Feeder tosses wide to sideline. Pass back using only your near arm (the one closer to the ball); repeat with the far arm; then both arms.',
       coachingCues: [
         'Arm behind ball.',
         'Move through ball.',
@@ -675,7 +675,7 @@ const d11: Drill = {
         target: '8/10 each side',
       },
       courtsideInstructions:
-        'Self-toss wide to left, then right. Pass using only inside arm; repeat opposite arm; then both arms.',
+        'Self-toss wide to left, then right. Pass using only your near arm (the one closer to the ball); repeat with the far arm; then both arms.',
       coachingCues: [
         'Arm behind ball.',
         'Move through ball.',
@@ -890,7 +890,7 @@ const d15: Drill = {
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'Server/coach delivers short or deep balls. Passer reads early, moves, passes to set window.',
+        'Server/coach delivers short or deep balls. Passer reads early, moves, passes to the set window (where the setter would stand, ~3 m off the net).',
       coachingCues: [
         'Centered ready position enables quick forward/back.',
         "Read ball early - off the server's hand.",
@@ -1052,7 +1052,7 @@ const d18: Drill = {
         target: '≥ 2.0 average or 7/10 graded 2+',
       },
       courtsideInstructions:
-        'Server gives 10 serves. Passer grades each (0–3) using set-window rule. Switch roles. Keep a "best streak of 2+" and "average pass grade."',
+        'Server gives 10 serves. Passer grades each (0–3) by how close the pass lands to the set window (where the setter would stand, ~3 m off the net). Switch roles. Keep a "best streak of 2+" and "average pass grade."',
       coachingCues: [
         'Play/let-go discipline matters.',
         'Pass forward and slightly inward.',
@@ -1387,6 +1387,11 @@ const d25: Drill = {
   regressionDescription: 'Easy walk only (60–90 seconds).',
   variants: [
     {
+      // Timed sub-blocks: 60-90 s walk + ~30 s each for 3-4 stretch/recovery
+      // segments. Copy is written in firing order. Pacing-audio infra (per-
+      // segment beeps) not yet shipped - see partner walkthrough P2-2 in
+      // docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md
+      // and the courtside-copy rule §Invariant 5.
       id: 'd25-solo',
       drillId: 'd25',
       label: 'Solo',
@@ -1406,7 +1411,7 @@ const d25: Drill = {
         target: 'Completed',
       },
       courtsideInstructions:
-        'Walk 60–90 s with long exhales. Unload calves and feet for 30 s. Open hips and reach overhead for 30 s. Optional shoulder stretch for 30 s. Hydrate and note any pain.',
+        'Walk 60–90 s with long exhales. Sit or lean for 30 s to rest calves and feet. Stretch hips: cross one ankle over opposite knee and lean forward, 30 s. Reach arms overhead with a gentle back-bend, 30 s. Optional shoulder stretch (one arm across chest, 30 s each). Hydrate and note any pain.',
       coachingCues: [
         'Long exhale, let heart rate come down.',
         'Gentle tension only.',
@@ -1431,6 +1436,12 @@ const d26: Drill = {
   regressionDescription: '3 stretches only (calf/hamstring/hip flexor).',
   variants: [
     {
+      // Timed sub-blocks: 6 x 20-30 s stretch segments. Courtside copy
+      // enumerates each stretch with an execution cue inline (partner
+      // walkthrough P1-8: "I got stuck figuring out what stretches may be").
+      // Per-stretch tap-to-expand demos are a Tier 1b candidate. Pacing-
+      // audio infra (per-segment beeps) not yet shipped - see courtside-
+      // copy rule §Invariant 5.
       id: 'd26-solo',
       drillId: 'd26',
       label: 'Solo',
@@ -1450,7 +1461,7 @@ const d26: Drill = {
         target: 'Completed',
       },
       courtsideInstructions:
-        'Six stretches, 20–30 s each: calf straight, calf bent, hamstring, hip flexor, glute, adductor. No bouncing. Strong tension, not painful.',
+        'Six stretches, 20–30 s each. No bouncing; strong tension, never painful. (1) Calf straight — back leg straight, heel down, lean forward into front knee. (2) Calf bent — same stance, bend back knee slightly, feel lower calf. (3) Hamstring — one leg forward, heel down, toes up; sit back into standing leg and reach toward toes. (4) Hip flexor — half-kneel on one knee, tuck pelvis, lean forward into front leg. (5) Glute — seated or lying, pull one knee toward opposite shoulder. (6) Adductor — wide stance, bend one knee, shift weight over it.',
       coachingCues: ['Breathe.', 'Avoid pain.', 'Hold steady.'],
     },
   ],
@@ -1666,6 +1677,12 @@ const d28: Drill = {
     'On hot days or short sessions, collapse the sand movement block to a single lap of A-skips + shuffles.',
   variants: [
     {
+      // Timed sub-blocks: 4 x ~45 s segments (jog/skip, ankle hops,
+      // shoulder+trunk, sand movement). Copy is written in firing order.
+      // Pacing-audio infra (per-segment beeps at ~45 s boundaries) not yet
+      // shipped - see partner walkthrough P2-2 in
+      // docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md
+      // and the courtside-copy rule §Invariant 5.
       id: 'd28-solo',
       drillId: 'd28',
       label: 'Solo',
@@ -1685,7 +1702,7 @@ const d28: Drill = {
         target: 'Completed',
       },
       courtsideInstructions:
-        'Four quick blocks, ~45 s each. 1) Jog or A-skip around your sand box. 2) Ankle hops + lateral shuffles. 3) Arm circles and trunk rotations. 4) Shuffle and drop-step at game pace. End warmer than you started.',
+        'Four quick blocks, ~45 s each. 1) Jog or A-skip around your sand box. 2) Ankle hops + lateral shuffles. 3) Arm circles and trunk rotations. 4) Quick side shuffles and pivot-back starts at game pace. End warmer than you started.',
       coachingCues: [
         'Short hops, loud feet.',
         'Full range on arm swings.',

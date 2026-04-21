@@ -1,0 +1,14 @@
+# Belt-and-suspenders alongside .vscode/settings.json: Prettier (and any
+# tool that respects .prettierignore) must NOT touch agent-routing
+# surfaces or canonical docs whose YAML frontmatter is load-bearing for
+# scripts/validate-agent-docs.sh. A user-global Markdown formatter was
+# observed mangling these files on save (id: -> ## id:, closing ---
+# removed, list indent collapsed). Left intact: app/**/*.ts[x] and other
+# app code remain formatter-eligible via app/.prettierrc.
+
+AGENTS.md
+CLAUDE.md
+llms.txt
+agent-manifest.json
+docs/**/*.md
+.cursor/rules/**/*.mdc

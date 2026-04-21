@@ -1,5 +1,6 @@
 ---
-id: agents
+
+## id: agents
 title: Agent Orientation
 status: active
 stage: validation
@@ -12,7 +13,6 @@ depends_on:
   - docs/vision.md
   - docs/decisions.md
   - docs/ops/agent-operations.md
----
 
 # Agent Orientation
 
@@ -60,7 +60,7 @@ Give agents one durable, concise repo contract for current state, read order, so
 ## Current State
 
 - **Phase**: 0 (validation)
-- **Posture**: v0b Starter Loop **feature-complete** as the D91 field-test artifact (`D119`); Phases A, B, C (C-0 → C-5), E, and F (F1 – F12) all landed. Live at https://volleydrills.nicholascorneau.workers.dev.
+- **Posture**: v0b Starter Loop **feature-complete** as the D91 field-test artifact (`D119`); Phases A, B, C (C-0 → C-5), E, and F (F1 – F12) all landed. Live at [https://volleydrills.nicholascorneau.workers.dev](https://volleydrills.nicholascorneau.workers.dev).
 - **Active milestone**: `M001` Solo Session Loop
 - **Next milestone in queue**: `M002` Weekly Confidence Loop (post-M001 self-coached follow-on, per `D124`)
 - **Blocking gate**: D91 field-test evidence against v0b (`D119`) must pass before M001 moves into the full build. Remaining pre-field items are **non-code**: tester recruitment (5+ testers), a founder replay spot-check against a dogfeed export, and the operational cohort protocol in `docs/research/pre-telemetry-validation-protocol.md`.
@@ -74,12 +74,12 @@ Read only as much as the task needs.
 1. `AGENTS.md`
 2. `docs/catalog.json`
 3. Load the smallest relevant pack:
-   - Product direction: `docs/vision.md` -> `docs/decisions.md` -> `docs/prd-foundation.md`
-   - Milestone/spec work: `docs/milestones/m001-solo-session-loop.md` -> relevant `docs/specs/`
-   - Prototype work: `docs/research/2026-04-12-v0a-runner-probe-feedback.md` -> `app/README.md`
-   - Research: `docs/research/README.md` -> narrowest relevant note
-   - Docs editing: `docs/README.md` -> `docs/ops/agent-documentation-contract.md`
-   - Agent/runtime guidance: `docs/ops/agent-operations.md`
+  - Product direction: `docs/vision.md` -> `docs/decisions.md` -> `docs/prd-foundation.md`
+  - Milestone/spec work: `docs/milestones/m001-solo-session-loop.md` -> relevant `docs/specs/`
+  - Prototype work: `docs/research/2026-04-12-v0a-runner-probe-feedback.md` -> `app/README.md`
+  - Research: `docs/research/README.md` -> narrowest relevant note
+  - Docs editing: `docs/README.md` -> `docs/ops/agent-documentation-contract.md`
+  - Agent/runtime guidance: `docs/ops/agent-operations.md`
 
 ## Source-of-Truth Order
 
@@ -104,7 +104,7 @@ Rules of thumb:
 
 ## Stable IDs And Doc Conventions
 
-- `P*` — principles in `docs/vision.md`
+- `P`* — principles in `docs/vision.md`
 - `D*` — decisions in `docs/decisions.md`
 - `O*` — open questions in `docs/decisions.md`
 - `M*` — milestones in `docs/milestones/`

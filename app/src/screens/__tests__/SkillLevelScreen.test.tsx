@@ -55,12 +55,20 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
     await clearDb()
   })
 
-  it("renders solo-voice cold-state heading + 'You can change this later.' (D128)", async () => {
+  it('renders solo-voice cold-state heading + skill-level clarifier subtitle (D128 / 2026-04-21 partner-walkthrough copy)', async () => {
     renderScreen()
     // D128: cold-state default is solo voice. The returning-pair path
     // below covers the flip to pair voice. The 2026-04-21 copy pass
     // dropped the "Welcome. Let's get you started." preamble - the
     // heading below is the landing sentinel now.
+    //
+    // 2026-04-21 partner-walkthrough amendment (Seb, P1-1 in
+    // docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md):
+    // the partner read the four bands as session-focus options rather
+    // than skill-level bands. The subtitle now states the question the
+    // screen is asking ("your rough current level") instead of the
+    // terser reassurance-only line ("You can change this later."),
+    // while still carrying the editability promise.
     expect(
       await screen.findByRole('heading', {
         level: 1,
@@ -70,7 +78,10 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
     expect(
       screen.queryByRole('heading', { name: /where.?s the pair today\?/i }),
     ).not.toBeInTheDocument()
-    expect(screen.getByText(/you can change this later/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/your rough current level/i),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/change anytime/i)).toBeInTheDocument()
   })
 
   it('renders five interactive elements: 4 band buttons + 1 Not-sure-yet link', async () => {

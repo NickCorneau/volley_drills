@@ -305,6 +305,15 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
             />
           ))}
         </div>
+        {/* 2026-04-21 partner-walkthrough P1-10: Seb expected 15 min to
+            mean 15 min of main/technique work, not "total session
+            including warm-up and cool-down." One-line clarifier below
+            the picker surfaces the framing without inflating the setup
+            funnel. See
+            docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md. */}
+        <p className="text-xs text-text-secondary">
+          Includes warm-up and cool-down.
+        </p>
       </section>
 
       <section className="flex flex-col gap-3">

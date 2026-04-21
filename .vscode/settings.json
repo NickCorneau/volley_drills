@@ -1,0 +1,9 @@
+{
+  "// workspace format-on-save guard (2026-04-21)": "A user-global Markdown formatter was mangling YAML frontmatter in AGENTS.md and CLAUDE.md on every save (id: -> ## id:, closing --- removed, list indent collapsed). Workspace-level setting below overrides user-global format-on-save for Markdown + frontmatter-sensitive files so the agent-doc validator stays green. Re-enable per-file with a format command if you need a formatter pass on a non-frontmatter .md file.",
+  "[markdown]": {
+    "editor.formatOnSave": false
+  },
+  "[yaml]": {
+    "editor.formatOnSave": false
+  }
+}

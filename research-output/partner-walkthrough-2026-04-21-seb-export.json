@@ -1,0 +1,402 @@
+{
+  "schemaVersion": 4,
+  "exportedAt": 1776807695738,
+  "sessionPlans": [
+    {
+      "id": "4f5a0d2e-9596-4660-9543-b96bf6dec4f6",
+      "presetId": "pair_open",
+      "presetName": "Pair + Open",
+      "playerCount": 2,
+      "blocks": [
+        {
+          "id": "block-0",
+          "type": "warmup",
+          "drillName": "Beach Prep Three",
+          "shortName": "Beach Prep",
+          "durationMinutes": 3,
+          "coachingCue": "Short hops, loud feet. · Full range on arm swings. · Move your feet - ankles first, then legs.",
+          "courtsideInstructions": "Four quick blocks, ~45 s each. 1) Jog or A-skip around your sand box. 2) Ankle hops + lateral shuffles. 3) Arm circles and trunk rotations. 4) Shuffle and drop-step at game pace. End warmer than you started.",
+          "required": true,
+          "rationale": "Chosen because: every session opens with a sand-specific warmup."
+        },
+        {
+          "id": "block-1",
+          "type": "technique",
+          "drillName": "One-Arm Passing Drill",
+          "shortName": "One-Arm Pass",
+          "durationMinutes": 6,
+          "coachingCue": "Arm behind ball. · Move through ball. · Thumb up on arm closest to ball, down on opposite.",
+          "courtsideInstructions": "Feeder tosses wide to sideline. Pass back using only inside arm; repeat, then opposite arm; then both arms.",
+          "required": true,
+          "rationale": "Chosen because: low-intensity passing rep to groove the pattern."
+        },
+        {
+          "id": "block-2",
+          "type": "movement_proxy",
+          "drillName": "Continuous Passing",
+          "shortName": "Continuous Pass",
+          "durationMinutes": 5,
+          "coachingCue": "Arms straight. · Shoulder shrug assist. · Pass high enough to be settable. · Abs tucked.",
+          "courtsideInstructions": "Start kneeling. Partner tosses; receiver passes back 10 reps. Then stand in serve-receive stance and repeat.",
+          "required": false,
+          "rationale": "Chosen because: sand movement rep tied to passing."
+        },
+        {
+          "id": "block-3",
+          "type": "main_skill",
+          "drillName": "The 6-Legged Monster",
+          "shortName": "6-Leg Monster",
+          "durationMinutes": 7,
+          "coachingCue": "Point shoulders to target. · Lower inside shoulder, raise outside for wide balls. · Ribs tucked.",
+          "courtsideInstructions": "Tosser at net (or ~2–3 m away). Toss to 6 locations: left/right × (in front / to side / slightly behind). Receiver passes to set window.",
+          "required": true,
+          "rationale": "Chosen because: today's main passing rep."
+        },
+        {
+          "id": "block-4",
+          "type": "wrap",
+          "drillName": "Downshift",
+          "shortName": "Downshift",
+          "durationMinutes": 4,
+          "coachingCue": "Long exhale, let heart rate come down. · Gentle tension only. · Hot session? Rehydrate before you leave.",
+          "courtsideInstructions": "Walk 60–90 s with long exhales. Unload calves and feet for 30 s. Open hips and reach overhead for 30 s. Optional shoulder stretch for 30 s. Hydrate and note any pain.",
+          "required": true,
+          "rationale": "Chosen because: every session closes with a cooldown downshift."
+        }
+      ],
+      "safetyCheck": {
+        "painFlag": false,
+        "trainingRecency": "0 days",
+        "heatCta": false,
+        "painOverridden": false
+      },
+      "context": {
+        "playerMode": "pair",
+        "timeProfile": 25,
+        "netAvailable": false,
+        "wallAvailable": false,
+        "wind": "light"
+      },
+      "createdAt": 1776805858259
+    },
+    {
+      "id": "8bb71919-274e-497e-a62a-058b3e7ff00b",
+      "presetId": "solo_open",
+      "presetName": "Solo + Open",
+      "playerCount": 1,
+      "blocks": [
+        {
+          "id": "block-0",
+          "type": "warmup",
+          "drillName": "Beach Prep Three",
+          "shortName": "Beach Prep",
+          "durationMinutes": 3,
+          "coachingCue": "Short hops, loud feet. · Full range on arm swings. · Move your feet - ankles first, then legs.",
+          "courtsideInstructions": "Four quick blocks, ~45 s each. 1) Jog or A-skip around your sand box. 2) Ankle hops + lateral shuffles. 3) Arm circles and trunk rotations. 4) Shuffle and drop-step at game pace. End warmer than you started.",
+          "required": true,
+          "rationale": "Chosen because: every session opens with a sand-specific warmup."
+        },
+        {
+          "id": "block-1",
+          "type": "technique",
+          "drillName": "Self-Toss Pass to Set Window",
+          "shortName": "Set Window Pass",
+          "durationMinutes": 4,
+          "coachingCue": "Get behind ball horizontally. · Brake-step. · Platform angle drives direction. · Transfer weight to front foot.",
+          "courtsideInstructions": "Set a marker as your set window. Self-toss slightly in front; pass to land within set-window zone; retrieve quickly and repeat. Use 20 total reps.",
+          "required": true,
+          "rationale": "Chosen because: low-intensity passing rep to groove the pattern."
+        },
+        {
+          "id": "block-2",
+          "type": "main_skill",
+          "drillName": "One-Arm Passing Drill",
+          "shortName": "One-Arm Pass",
+          "durationMinutes": 5,
+          "coachingCue": "Arm behind ball. · Move through ball. · Thumb up on arm closest to ball, down on opposite.",
+          "courtsideInstructions": "Self-toss wide to left, then right. Pass using only inside arm; repeat opposite arm; then both arms.",
+          "required": true,
+          "rationale": "Chosen because: today's main passing rep."
+        },
+        {
+          "id": "block-3",
+          "type": "wrap",
+          "drillName": "Lower-body Stretch Micro-sequence",
+          "shortName": "Stretch",
+          "durationMinutes": 3,
+          "coachingCue": "Breathe. · Avoid pain. · Hold steady.",
+          "courtsideInstructions": "Six stretches, 20–30 s each: calf straight, calf bent, hamstring, hip flexor, glute, adductor. No bouncing. Strong tension, not painful.",
+          "required": true,
+          "rationale": "Chosen because: every session closes with a cooldown downshift."
+        }
+      ],
+      "safetyCheck": {
+        "painFlag": false,
+        "trainingRecency": "0 days",
+        "heatCta": false,
+        "painOverridden": false
+      },
+      "context": {
+        "playerMode": "solo",
+        "timeProfile": 15,
+        "netAvailable": false,
+        "wallAvailable": false,
+        "wind": "light"
+      },
+      "createdAt": 1776804109715
+    },
+    {
+      "id": "f634f683-895e-46a8-9dad-e50915ef0a14",
+      "presetId": "solo_open",
+      "presetName": "Solo + Open",
+      "playerCount": 1,
+      "blocks": [
+        {
+          "id": "block-0",
+          "type": "warmup",
+          "drillName": "Beach Prep Three",
+          "shortName": "Beach Prep",
+          "durationMinutes": 3,
+          "coachingCue": "Short hops, loud feet. · Full range on arm swings. · Move your feet - ankles first, then legs.",
+          "courtsideInstructions": "Four quick blocks, ~45 s each. 1) Jog or A-skip around your sand box. 2) Ankle hops + lateral shuffles. 3) Arm circles and trunk rotations. 4) Shuffle and drop-step at game pace. End warmer than you started.",
+          "required": true,
+          "rationale": "Chosen because: every session opens with a sand-specific warmup."
+        },
+        {
+          "id": "block-1",
+          "type": "technique",
+          "drillName": "Self-Toss Pass to Set Window",
+          "shortName": "Set Window Pass",
+          "durationMinutes": 4,
+          "coachingCue": "Get behind ball horizontally. · Brake-step. · Platform angle drives direction. · Transfer weight to front foot.",
+          "courtsideInstructions": "Set a marker as your set window. Self-toss slightly in front; pass to land within set-window zone; retrieve quickly and repeat. Use 20 total reps.",
+          "required": true,
+          "rationale": "Chosen because: low-intensity passing rep to groove the pattern."
+        },
+        {
+          "id": "block-2",
+          "type": "main_skill",
+          "drillName": "Pass & Slap Hands",
+          "shortName": "Slap Hands",
+          "durationMinutes": 5,
+          "coachingCue": "Athletic posture. · Contact between wrists and elbows. · Keep space between body and platform. · Bend knees to keep platform stable.",
+          "courtsideInstructions": "Toss up, forearm-pass up to yourself. Between each contact, clap behind your back, then rebuild your platform. Mix low, medium, and high arcs.",
+          "required": true,
+          "rationale": "Chosen because: today's main passing rep."
+        },
+        {
+          "id": "block-3",
+          "type": "wrap",
+          "drillName": "Downshift",
+          "shortName": "Downshift",
+          "durationMinutes": 3,
+          "coachingCue": "Long exhale, let heart rate come down. · Gentle tension only. · Hot session? Rehydrate before you leave.",
+          "courtsideInstructions": "Walk 60–90 s with long exhales. Unload calves and feet for 30 s. Open hips and reach overhead for 30 s. Optional shoulder stretch for 30 s. Hydrate and note any pain.",
+          "required": true,
+          "rationale": "Chosen because: every session closes with a cooldown downshift."
+        }
+      ],
+      "safetyCheck": {
+        "painFlag": false,
+        "trainingRecency": "0 days",
+        "heatCta": false,
+        "painOverridden": false
+      },
+      "context": {
+        "playerMode": "solo",
+        "timeProfile": 15,
+        "netAvailable": false,
+        "wallAvailable": false,
+        "wind": "light"
+      },
+      "createdAt": 1776805183807
+    }
+  ],
+  "executionLogs": [
+    {
+      "id": "22aa9db7-37d5-48c3-8aa8-c22b6fde41c3",
+      "planId": "f634f683-895e-46a8-9dad-e50915ef0a14",
+      "status": "ended_early",
+      "activeBlockIndex": 2,
+      "blockStatuses": [
+        {
+          "blockId": "block-0",
+          "status": "completed",
+          "startedAt": 1776805186843,
+          "completedAt": 1776805187622
+        },
+        {
+          "blockId": "block-1",
+          "status": "completed",
+          "startedAt": 1776805200289,
+          "completedAt": 1776805246290
+        },
+        {
+          "blockId": "block-2",
+          "status": "skipped",
+          "startedAt": 1776805255313,
+          "completedAt": 1776805271490
+        },
+        {
+          "blockId": "block-3",
+          "status": "skipped"
+        }
+      ],
+      "startedAt": 1776805183807,
+      "pausedAt": 1776805264279,
+      "completedAt": 1776805271490,
+      "swapCount": 13,
+      "actualDurationMinutes": 7
+    },
+    {
+      "id": "3bc889c4-4dbb-42f0-b10c-980b1c5f8362",
+      "planId": "8bb71919-274e-497e-a62a-058b3e7ff00b",
+      "status": "completed",
+      "activeBlockIndex": 4,
+      "blockStatuses": [
+        {
+          "blockId": "block-0",
+          "status": "completed",
+          "startedAt": 1776804112754,
+          "completedAt": 1776804292782
+        },
+        {
+          "blockId": "block-1",
+          "status": "completed",
+          "startedAt": 1776804327875,
+          "completedAt": 1776804477203
+        },
+        {
+          "blockId": "block-2",
+          "status": "completed",
+          "startedAt": 1776804530490,
+          "completedAt": 1776804830516
+        },
+        {
+          "blockId": "block-3",
+          "status": "completed",
+          "startedAt": 1776804846389,
+          "completedAt": 1776805026420
+        }
+      ],
+      "startedAt": 1776804109715,
+      "completedAt": 1776805026420,
+      "actualDurationMinutes": 15
+    },
+    {
+      "id": "db6b7a28-30a9-45ed-964b-7316a716fc49",
+      "planId": "4f5a0d2e-9596-4660-9543-b96bf6dec4f6",
+      "status": "completed",
+      "activeBlockIndex": 5,
+      "blockStatuses": [
+        {
+          "blockId": "block-0",
+          "status": "completed",
+          "startedAt": 1776805861286,
+          "completedAt": 1776805864564
+        },
+        {
+          "blockId": "block-1",
+          "status": "completed",
+          "startedAt": 1776805869170,
+          "completedAt": 1776806299916
+        },
+        {
+          "blockId": "block-2",
+          "status": "completed",
+          "startedAt": 1776806320429,
+          "completedAt": 1776806620443
+        },
+        {
+          "blockId": "block-3",
+          "status": "completed",
+          "startedAt": 1776806695948,
+          "completedAt": 1776807151533
+        },
+        {
+          "blockId": "block-4",
+          "status": "completed",
+          "startedAt": 1776807166646,
+          "completedAt": 1776807406664
+        }
+      ],
+      "startedAt": 1776805858259,
+      "completedAt": 1776807406664,
+      "actualDurationMinutes": 25
+    }
+  ],
+  "sessionReviews": [
+    {
+      "id": "review-22aa9db7-37d5-48c3-8aa8-c22b6fde41c3",
+      "executionLogId": "22aa9db7-37d5-48c3-8aa8-c22b6fde41c3",
+      "sessionRpe": 0,
+      "goodPasses": 0,
+      "totalAttempts": 0,
+      "incompleteReason": "other",
+      "shortNote": "Did not meet Q&A done with creator",
+      "submittedAt": 1776805309598,
+      "capturedAt": 1776805309598,
+      "captureDelaySeconds": 38,
+      "captureWindow": "immediate",
+      "eligibleForAdaptation": true,
+      "status": "submitted"
+    },
+    {
+      "id": "review-3bc889c4-4dbb-42f0-b10c-980b1c5f8362",
+      "executionLogId": "3bc889c4-4dbb-42f0-b10c-980b1c5f8362",
+      "sessionRpe": 3,
+      "goodPasses": 12,
+      "totalAttempts": 20,
+      "quickTags": [
+        "About right"
+      ],
+      "shortNote": "Some confusion around what some of the drills were in the first block and some terms in the second block. Some stretch options for the cool down could have been helpful.",
+      "submittedAt": 1776805133505,
+      "capturedAt": 1776805133505,
+      "captureDelaySeconds": 107,
+      "captureWindow": "immediate",
+      "eligibleForAdaptation": true,
+      "status": "submitted"
+    },
+    {
+      "id": "review-db6b7a28-30a9-45ed-964b-7316a716fc49",
+      "executionLogId": "db6b7a28-30a9-45ed-964b-7316a716fc49",
+      "sessionRpe": 3,
+      "goodPasses": 0,
+      "totalAttempts": 0,
+      "quickTags": [
+        "notCaptured",
+        "About right"
+      ],
+      "shortNote": "Some unfamiliar terms for a brand new player",
+      "submittedAt": 1776807518657,
+      "capturedAt": 1776807518657,
+      "captureDelaySeconds": 112,
+      "captureWindow": "immediate",
+      "eligibleForAdaptation": true,
+      "status": "submitted"
+    }
+  ],
+  "storageMeta": [
+    {
+      "key": "lastPlayerMode",
+      "value": "pair",
+      "updatedAt": 1776805858259
+    },
+    {
+      "key": "onboarding.completedAt",
+      "value": 1776804100803,
+      "updatedAt": 1776804100803
+    },
+    {
+      "key": "onboarding.skillLevel",
+      "value": "unsure",
+      "updatedAt": 1776805530718
+    },
+    {
+      "key": "onboarding.step",
+      "value": "todays_setup",
+      "updatedAt": 1776805530718
+    }
+  ]
+}

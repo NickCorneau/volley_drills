@@ -275,12 +275,22 @@ export function CompleteScreen() {
       </Card>
 
       <div className="mt-auto flex w-full flex-col gap-4 pt-4">
+        {/* 2026-04-21 partner-walkthrough P1-2 fix: the CTA was "Done",
+            which carried the terminal meaning ("session complete") but
+            dropped the destination. Seb landed on Home and could not
+            tell he was home because his mental model of "home" was the
+            once-seen SkillLevelScreen. "Back to Home" names the
+            destination; the semantic is still terminal (session is
+            complete and save is confirmed by the SavedCheckIcon
+            below). See
+            docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md
+            P1-2 and the courtside-copy rule §Invariant 1. */}
         <Button
           variant="primary"
           fullWidth
           onClick={() => navigate(routes.home())}
         >
-          Done
+          Back to home
         </Button>
         <div
           className="flex flex-col items-center gap-1"
