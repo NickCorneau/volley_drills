@@ -18,6 +18,13 @@ import { SafetyCheckScreen } from '../SafetyCheckScreen'
  * Recency consequence: "0 days or First time means a shorter, lower-intensity start."
  * (Copy-polish pass 2026-04-19 replaced the `->` arrow with natural
  * prose.)
+ *
+ * 2026-04-20 physio-review copy refresh (`D129`): the pain question
+ * was reworded from "pain that changes how you move" to
+ * "Any pain that's sharp, localized, or makes you avoid a movement?"
+ * so DOMS is easier to self-sort. Heading matchers below use the
+ * distinctive "sharp" token — strong enough to fail a regression,
+ * loose enough to survive a subsequent copy tweak.
  */
 
 async function clearDb() {
@@ -65,8 +72,11 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     expect(
       await screen.findByRole('heading', {
         level: 2,
-        name: /pain that changes how you move/i,
+        name: /any pain.*sharp/i,
       }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/regular muscle soreness is fine/i),
     ).toBeInTheDocument()
     expect(
       screen.getByText(/we.?ll switch to a lighter session if yes/i),
@@ -90,7 +100,7 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     renderScreen()
     await screen.findByRole('heading', {
       level: 2,
-      name: /pain that changes how you move/i,
+      name: /any pain.*sharp/i,
     })
     const body = document.body.textContent ?? ''
     expect(body, `forbidden word in: ${body}`).not.toMatch(FORBIDDEN_RE)
@@ -164,7 +174,7 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     // pattern) and answers the "when did you last train" question — which
     // applies to every session regardless of pain status — first.
     expect(headings[0].textContent).toMatch(/when did you last train/i)
-    expect(headings[1].textContent).toMatch(/pain that changes how you move/i)
+    expect(headings[1].textContent).toMatch(/any pain.*sharp/i)
   })
 })
 

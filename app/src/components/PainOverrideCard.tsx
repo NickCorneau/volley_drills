@@ -112,9 +112,15 @@ export function PainOverrideCard({
           >
             Never mind
           </Button>
+          {/* 2026-04-20 physio-review: generic "severe, new, worsening,
+              or persistent" legalese reads past. Concrete consequence
+              language ("turn a minor issue into a long layoff") plus a
+              specific time cue ("more than a few days") does the
+              actual friction work a hard block couldn't. */}
           <p className="text-center text-xs font-medium text-warning">
-            If pain is severe, new, worsening, or persistent, stop training and
-            consult a qualified clinician.
+            Training through pain that&apos;s sharp, getting worse, or
+            lasting more than a few days can turn a minor issue into a
+            long layoff. If unsure, stop and see a qualified clinician.
           </p>
         </div>
       )}

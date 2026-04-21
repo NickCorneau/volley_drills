@@ -11,20 +11,54 @@ import {
   hasEverStartedSession,
 } from '../services/session'
 
-type TrainingRecency = '0 days' | '1 day' | '2+' | 'First time'
+// Primary recency chips. `2+` is an intermediate value — tapping it
+// reveals a sub-row of granular buckets (post-physio-review 2026-04-20),
+// and the persisted `trainingRecency` is the sub-bucket string, not the
+// literal `'2+'`. `canContinue` holds until a sub-bucket is picked.
+type PrimaryRecency = '0 days' | '1 day' | '2+' | 'First time'
+type LayoffBucket =
+  | '2-7 days'
+  | '1-4 weeks'
+  | '1-3 months'
+  | '3+ months'
+type TrainingRecency = PrimaryRecency | LayoffBucket
 
-// Full option set. `First time` is conditionally filtered out in the
-// render based on `hasEverStartedSession` — once the tester has any
-// ExecutionLog on device, the chip is hidden because it's no longer a
-// meaningful answer to "When did you last train?"
-const RECENCY_OPTIONS: TrainingRecency[] = ['0 days', '1 day', '2+', 'First time']
+const RECENCY_OPTIONS: PrimaryRecency[] = ['0 days', '1 day', '2+', 'First time']
+const LAYOFF_BUCKETS: LayoffBucket[] = [
+  '2-7 days',
+  '1-4 weeks',
+  '1-3 months',
+  '3+ months',
+]
+const LAYOFF_BUCKET_LABEL: Record<LayoffBucket, string> = {
+  '2-7 days': '2–7 days',
+  '1-4 weeks': '1–4 wks',
+  '1-3 months': '1–3 mo',
+  '3+ months': '3+ mo',
+}
 
-const HEAT_TIPS = [
+function isLayoffBucket(r: TrainingRecency | null): r is LayoffBucket {
+  return r !== null && (LAYOFF_BUCKETS as string[]).includes(r)
+}
+
+// 2026-04-20 physio-review restructure: warning signs live above the
+// prevention tips inside the expander. Heat illness is a minutes-matter
+// escalation — users need to see the "stop immediately" cues first, not
+// buried at the bottom of a bullet list. The short list below is scoped
+// to heat-stroke red flags (confusion, stopped sweating, severe headache,
+// vomiting, fainting); non-heat emergency guidance lives in SafetyIcon.
+const HEAT_WARNING_SIGNS = [
+  'Confusion or feeling "off"',
+  'Stopped sweating, or hot, dry skin',
+  'Severe headache or vomiting',
+  'Fainting or near-fainting',
+]
+
+const HEAT_PREVENTION_TIPS = [
   'Hydrate before, during, and after your session.',
   'Avoid peak sun hours (10 AM to 4 PM) when possible.',
   'Take shade breaks between blocks if you feel overheated.',
   'Wear sunscreen and light-colored clothing.',
-  'Stop immediately if you feel dizzy or nauseous.',
 ]
 
 function isRecoveryBlock(type: string): boolean {
@@ -78,13 +112,25 @@ export function SafetyCheckScreen() {
 
   // Returning users never see "First time" — the chip is only meaningful
   // on a genuinely fresh install.
-  const visibleRecencyOptions = useMemo<TrainingRecency[]>(
+  const visibleRecencyOptions = useMemo<PrimaryRecency[]>(
     () =>
       hasSessionHistory
         ? RECENCY_OPTIONS.filter((opt) => opt !== 'First time')
         : RECENCY_OPTIONS,
     [hasSessionHistory],
   )
+
+  // The `2+` chip is a disclosure trigger, not a submittable answer —
+  // tapping it reveals the layoff-bucket sub-row, and `canContinue`
+  // waits until one of those is selected. The primary row's selected
+  // visual stays on `2+` whenever a sub-bucket is picked, so the two
+  // rows read as a single nested question rather than two independent
+  // chip groups.
+  const showLayoffBuckets = recency === '2+' || isLayoffBucket(recency)
+  const primaryRowSelection: PrimaryRecency | null = isLayoffBucket(recency)
+    ? '2+'
+    : (recency as PrimaryRecency | null)
+  const recencyChosen = recency !== null && recency !== '2+'
 
   const recoveryMinutes =
     draft?.blocks
@@ -95,14 +141,14 @@ export function SafetyCheckScreen() {
     ? `${draft.archetypeName} \u00b7 ${draft.blocks.reduce((s, b) => s + b.durationMinutes, 0)} min, ${draft.blocks.length} blocks`
     : ''
 
-  const canContinue = painFlag === false && recency !== null
+  const canContinue = painFlag === false && recencyChosen
 
   async function handleCreateSession(
     useRecovery: boolean,
     painOverridden: boolean,
   ) {
     if (creating.current) return
-    if (painFlag === null || recency === null) return
+    if (painFlag === null || !recencyChosen) return
     if (!draft) return
     creating.current = true
     setIsCreating(true)
@@ -203,7 +249,7 @@ export function SafetyCheckScreen() {
         </p>
         <div className="flex gap-2">
           {visibleRecencyOptions.map((opt) => {
-            const selected = recency === opt
+            const selected = primaryRowSelection === opt
             const isWarning = opt === '0 days'
             return (
               <button
@@ -225,14 +271,62 @@ export function SafetyCheckScreen() {
             )
           })}
         </div>
+        {/* 2026-04-20 physio-review: detraining is not linear — bucketing
+            "2+" by weeks/months lets a 3+ month returner see a clinician
+            nudge without making short-gap users read extra copy. The
+            primary `2+` chip stays selected while a sub-bucket is active
+            so the two rows read as one nested question. */}
+        {showLayoffBuckets && (
+          <div className="flex flex-col gap-2 rounded-[12px] bg-bg-warm/60 p-3">
+            <p className="text-xs text-text-secondary">
+              Roughly how long off?
+            </p>
+            <div className="flex gap-2">
+              {LAYOFF_BUCKETS.map((bucket) => {
+                const selected = recency === bucket
+                return (
+                  <button
+                    key={bucket}
+                    type="button"
+                    onClick={() => setRecency(bucket)}
+                    className={[
+                      'min-h-[48px] flex-1 rounded-[12px] px-1 py-1 text-xs font-medium transition-colors',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
+                      selected
+                        ? 'border border-accent bg-info-surface text-accent focus-visible:ring-accent'
+                        : 'border border-gray-200 bg-bg-primary text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-accent',
+                    ].join(' ')}
+                  >
+                    {LAYOFF_BUCKET_LABEL[bucket]}
+                  </button>
+                )
+              })}
+            </div>
+            {recency === '3+ months' && (
+              <p className="text-xs leading-relaxed text-text-secondary">
+                Coming back from injury or illness? A check-in with a
+                clinician before stepping back up is worth considering.
+              </p>
+            )}
+          </div>
+        )}
       </section>
 
       <section className="flex flex-col gap-3">
         <h2 className="text-base font-semibold text-text-primary">
-          Any pain that changes how you move?
+          Any pain that&apos;s sharp, localized, or makes you avoid a
+          movement?
         </h2>
+        {/* 2026-04-20 physio-review: the original "pain that changes how
+            you move" read to most users as "am I visibly limping," but
+            the early warning sign is usually subtle guarding or
+            avoidance. The parenthetical gives permission to distinguish
+            DOMS from something that actually warrants a lighter
+            session, which most recreational athletes find hard to
+            self-sort. */}
         <p className="text-sm text-text-secondary">
-          We&apos;ll switch to a lighter session if yes.
+          Regular muscle soreness is fine. We&apos;ll switch to a lighter
+          session if yes.
         </p>
         <div className="flex gap-3">
           <button
@@ -268,7 +362,7 @@ export function SafetyCheckScreen() {
         <PainOverrideCard
           recoveryMinutes={recoveryMinutes}
           disabled={isCreating}
-          canAct={recency !== null}
+          canAct={recencyChosen}
           onContinueRecovery={() => void handleCreateSession(true, false)}
           onOverride={() => void handleCreateSession(false, true)}
         />
@@ -308,19 +402,49 @@ export function SafetyCheckScreen() {
           </span>
         </button>
         {heatExpanded && (
-          <ul className="mt-3 flex flex-col gap-2 rounded-[12px] bg-info-surface p-4">
-            {HEAT_TIPS.map((tip) => (
-              <li
-                key={tip}
-                className="flex items-start gap-2 text-sm leading-relaxed text-text-secondary"
-              >
-                <span className="shrink-0 text-accent" aria-hidden>
-                  •
-                </span>
-                {tip}
-              </li>
-            ))}
-          </ul>
+          <div className="mt-3 flex flex-col gap-3">
+            {/* 2026-04-20 physio-review: warning signs first, not mixed
+                into prevention bullets. Heat stroke is a
+                minutes-matter escalation — "stopped sweating" and
+                "confusion" belong above the list of things to do to
+                prevent it, not tucked at the bottom of a single bag
+                of tips. */}
+            <div className="rounded-[12px] border border-warning/30 bg-warning-surface p-4">
+              <h3 className="text-sm font-semibold text-warning">
+                Stop immediately if you notice:
+              </h3>
+              <ul className="mt-2 flex flex-col gap-1.5">
+                {HEAT_WARNING_SIGNS.map((sign) => (
+                  <li
+                    key={sign}
+                    className="flex items-start gap-2 text-sm leading-relaxed text-text-primary"
+                  >
+                    <span className="shrink-0 text-warning" aria-hidden>
+                      •
+                    </span>
+                    {sign}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-xs leading-relaxed text-text-secondary">
+                Move to shade, cool down with water, and call your local
+                emergency number (911 / 999 / 112) if severe.
+              </p>
+            </div>
+            <ul className="flex flex-col gap-2 rounded-[12px] bg-info-surface p-4">
+              {HEAT_PREVENTION_TIPS.map((tip) => (
+                <li
+                  key={tip}
+                  className="flex items-start gap-2 text-sm leading-relaxed text-text-secondary"
+                >
+                  <span className="shrink-0 text-accent" aria-hidden>
+                    •
+                  </span>
+                  {tip}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </section>
 

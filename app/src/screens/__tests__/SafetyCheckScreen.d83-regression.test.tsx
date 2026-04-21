@@ -122,7 +122,7 @@ describe('SafetyCheckScreen D83 regression (C-5 Unit 4)', () => {
     // those absences is a stable proxy for "form is in default state"
     // without coupling the test to className or aria-pressed details
     // that the screen doesn't currently emit.
-    await screen.findByText(/Any pain that changes how you move/i)
+    await screen.findByText(/any pain.*sharp/i)
     expect(
       screen.queryByRole('button', { name: /^continue$/i }),
     ).not.toBeInTheDocument()
@@ -213,7 +213,7 @@ describe('SafetyCheckScreen D83 regression (C-5 Unit 4)', () => {
       </MemoryRouter>,
     )
 
-    await screen.findByText(/Any pain that changes how you move/i)
+    await screen.findByText(/any pain.*sharp/i)
     // Same default-state proxy as the first test: the reveal-on-answer
     // UI (PainOverrideCard + Continue) is absent while both fields
     // default to null.

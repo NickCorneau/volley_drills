@@ -47,17 +47,50 @@ export function SafetyIcon() {
             aria-label="Safety warning"
           >
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-text-secondary/30" />
-            <div className="flex flex-col items-center gap-4 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning-surface text-warning">
-                <ShieldSvg size={24} />
+            {/* 2026-04-20 physio-review: the prior single sentence
+                ("dizzy, chest pain, or unusual shortness of breath")
+                conflated two actions — call emergency services vs see
+                a clinician — and gave no number. Split into (1) a
+                specific emergency list with a real number to dial,
+                (2) a head-impact line volleyball players need that
+                wasn't there at all, and (3) a non-emergency clinician
+                line. Kept tight enough to stay scannable; neuro flags
+                (one-sided weakness, sudden vision change) are
+                deliberately left for a longer surface to avoid
+                diluting the three red-flag anchors. */}
+            <div className="flex flex-col items-start gap-4 text-left">
+              <div className="flex w-full flex-col items-center gap-2 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning-surface text-warning">
+                  <ShieldSvg size={24} />
+                </div>
+                <h2 className="text-lg font-bold text-text-primary">
+                  Stop &amp; Seek Help
+                </h2>
               </div>
-              <h2 className="text-lg font-bold text-text-primary">
-                Stop &amp; Seek Help
-              </h2>
-              <p className="text-sm leading-relaxed text-text-secondary">
-                If you feel dizzy, chest pain, or unusual shortness of breath,
-                stop immediately and seek help.
-              </p>
+              <div className="flex flex-col gap-3 text-sm leading-relaxed text-text-secondary">
+                <div>
+                  <p className="font-semibold text-warning">
+                    Stop and call emergency services (911 / 999 / 112) for:
+                  </p>
+                  <ul className="mt-1 flex flex-col gap-1 pl-4">
+                    <li className="list-disc">
+                      Chest pain, fainting, or unusual breathlessness
+                    </li>
+                    <li className="list-disc">
+                      Heat emergency: confusion, stopped sweating,
+                      severe headache, or vomiting
+                    </li>
+                    <li className="list-disc">
+                      A hard hit to the head, or feeling confused or
+                      off-balance after one
+                    </li>
+                  </ul>
+                </div>
+                <p>
+                  For pain that is persistent, worsening, or you&apos;re
+                  unsure about, see a qualified clinician.
+                </p>
+              </div>
               <Button
                 variant="soft"
                 fullWidth
