@@ -160,6 +160,56 @@ This trigger exists because the three original D130 triggers all point down (und
 
 The `D91` preparation here means returning to the operational protocol in `docs/research/pre-telemetry-validation-protocol.md` and `docs/discovery/phase-0-wedge-validation.md`, not rejecting founder-use mode retrospectively. Founder-use mode was the right call for 2026-04-20; trigger (d) is the right condition to end it.
 
+## Dream-pass cadence and amendments (2026-04-20)
+
+A one-off "dreaming" pass was run over the full repo corpus (vision, decisions, roadmap, this memo, Tier 1a plan, red-team review, founder-use ledger, partner walkthrough script, safety components in active edit, and the founder ↔ agent authoring thread) on 2026-04-20. The pass followed the Day-Dreaming Loop (DDL) shape — recombination across distant memory chunks, noise injection on one contradiction, pruning of trivial associations — with a pruning step added because sleep is net subtractive and the original DDL template is net additive. Five Dream Fragments survived; three were discarded.
+
+Three of the surviving fragments landed consequences the memo should carry going forward. They are amendments that **add** constraints; they do not weaken any of the three falsification conditions, so the amendment-log rule that requires a non-founder co-signer for weakening edits does not apply here. The fourth item below is the cadence for re-running the dream pass at all, so future dream output has a legitimate home.
+
+### A1 — Fifth D130 trigger: agent-assisted open asymmetry
+
+`D130`'s four existing early triggers (`a` 5-in-45 under-use, `b` 3-week silence, `c` scope leak outside partner, `d` Tier 1a + ≥10 sessions + no open P0) are all about founder behavior *on the app*. None observe founder behavior *on the repo itself*. The gap matters because founder-use mode's single largest latent failure is the repo functioning as a conversation topic with a coding agent rather than as durable documentation the founder returns to unprompted.
+
+Add trigger (e) to the D130 watch list, codified here and referenced in `docs/decisions.md` D130 when next amended:
+
+> **(e) Agent-assisted open asymmetry.** Across any 14-day window during the founder-use window, if the founder has ≥5 agent-assisted repo opens (new Cursor chats initiated against this repo) AND ≤1 agent-free repo open (a git commit authored without an agent in the loop, or an explicit founder self-report in the ledger confirming agent-free work), **the re-eval must fire early**. Default consequence: ship the A3 ligament below (weekly agent-free memo re-read), then re-measure for a 14-day window. The agent-free check remains a soft self-report because the repo has no surface to measure it automatically, but self-reporting "I authored this without an agent" is cheap and legible.
+
+This trigger is asymmetric in the opposite direction from (a)/(b): (a) and (b) fire on *under-use*, (e) fires on *over-reliance*. Together they squeeze the founder-use posture from both sides.
+
+### A2 — Validation Posture String (three-state ladder, mirrors `D118`)
+
+`D118` refuses the word "synced" before a cloud peer exists and ladders local-durability copy across three states (Safari tab / HSWA / HSWA-persisted). The memo has no equivalent ladder for validation claims, so "validated," "working," "proven" drift in without a gate. Install the ladder now.
+
+Every Monday weekly-log entry and the 2026-07-20 re-eval memo MUST select exactly one of:
+
+- **L1 — "Tested on one device only."** The current state under `D130`. Permits founder-facing notes and internal planning; prohibits external claims of working or validated.
+- **L2 — "Tested with one partner, 30-day quiet-window outcome pending/observed."** Post-walkthrough, pre-stranger-cohort. Permits case-study framing with the partner's behavioral-return outcome explicitly named. Still prohibits any retention-percentage claim.
+- **L3 — "Tested with a stranger cohort, `D91` numeric bar met/not met."** Requires the `docs/research/pre-telemetry-validation-protocol.md` cohort to have run. Permits `D91`-style language with the specific tally.
+
+No external communication (marketing copy, README hero, README tagline, PR description body, a friend-of-founder answer to "how's the app going") may claim a higher posture than the current state permits. This converts `D118`'s copy-honesty discipline into validation-honesty discipline using machinery the founder already respects.
+
+### A3 — Beach Prep Three for the founder (pre-authoring ligament)
+
+Three scope-balloon incidents were the same bug at three layers: (i) `pickForSlot` filling the warmup slot with a passing drill because the system filled a container without specifying intent; (ii) SetupScreen formification adding toggles before earning a recommendation (P11 violation); (iii) Tier 1 scope-balloon filling "D130-unblocked capacity" without specifying what it must be *about* first. The fix at all three layers is the same: author the ligament first, then let everything else be shortenable-but-not-skippable.
+
+Install the planning-layer ligament now:
+
+> **Before any new file lands under `docs/plans/` or `docs/research/`** — or any substantive edit (>50 lines) to an existing plan or research file — the founder must have read this memo end-to-end within the preceding 7 days. "Read" means reading, not skimming to confirm the section you already know. Log the read-through as a one-line entry in this memo's Weekly Log with date and duration. If the most recent read-through is older than 7 days, stop, re-read, then edit. Agents authoring on the founder's behalf must surface the same check before proposing a new plan or research file.
+
+This ligament is three minutes and it is mandatory. Skipping it is visible because the Weekly Log will show the last read-through date. It is the only ritual whose skipping cannot be silently narrated around.
+
+### A4 — Dream-pass cadence (`scripts/dream.sh`)
+
+A one-off DDL pass produces a moment of insight; it does not produce the offline-consolidation function that makes dreaming *dreaming*. That function is a weekly rhythm that prunes at least as much as it generates. Install the cadence now:
+
+- `scripts/dream.sh` is the alarm clock. It assembles a populated DDL prompt from live repo state (recent commits, ledger tail, stale-doc candidates, open red-team flags) and writes it to `.cursor/state/dreams/dream-YYYY-MM-DD.md`. It does **not** call any LLM — synchronous LLM dreaming is the opposite of offline consolidation. The next agent session running in this repo reads the prompt, executes the dream pass by hand, and appends the Dream Fragments to this memo's Weekly Log under the current Monday's entry.
+- Cadence: the founder runs `bash scripts/dream.sh` once per Monday as the first step of the weekly ritual, before filling the trigger-review log. The dream's pruning output (doc-archive candidates) is read first; if nothing is pruned, the week's authoring budget is zero regardless of what the trigger review otherwise permits.
+- The DDL prompt the script emits includes a **pruning section** the original DDL template did not have: "list up to 3 docs under `docs/research/` or `docs/plans/` that could be archived or consolidated given the chunks above." This is the net-subtractive step. A dream pass that only generates and never prunes is the failure mode the red-team named as "content authoring as displacement activity."
+
+### Amendment log entry for A1–A4
+
+**2026-04-20 — Dream-pass amendments A1–A4.** Added fifth D130 trigger (agent-assisted open asymmetry), Validation Posture String ladder (L1/L2/L3), Beach Prep Three for the founder (pre-authoring memo re-read ligament), and dream-pass cadence via `scripts/dream.sh`. **Justification**: these amendments add constraints (new triggers, new copy gates, new pre-authoring checks, new weekly rhythm) without weakening any of the three falsification conditions or any existing D130 trigger. Co-signer requirement waived per the memo's amendment rule, which binds only on edits that weaken a condition. The amendments inherit their evidential warrant from a one-off dream pass over the full repo corpus run on 2026-04-20; the pass's five Dream Fragments are preserved in the agent transcript for the session that authored this amendment, and the three that landed here are the ones that produced concrete new constraints rather than rhetorical parallels.
+
 ## What falsifies *this memo*
 
 Meta-check: the memo itself has failure modes.
