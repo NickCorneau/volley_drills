@@ -279,6 +279,93 @@ export async function getLastComplete(): Promise<LastCompleteBundle | null> {
   return { log, plan, review }
 }
 
+// --- Recent sessions list (Tier 1a Unit 5) ---
+
+/**
+ * Tier 1a Unit 5: shape of a single row in the Home last-3-sessions
+ * list. Three render-ready primitives (timestamp, plan for focus
+ * inference, completion boolean). Kept deliberately narrow — richer
+ * context (RPE, drill list, swap count) is a Tier 2 concern.
+ */
+export interface RecentSessionEntry {
+  execId: string
+  endedAt: number
+  plan: SessionPlan
+  completed: boolean
+}
+
+/**
+ * Tier 1a Unit 5: the N most-recent terminal sessions in reverse
+ * chronological order, each joined with its originating plan.
+ *
+ * Filter semantics:
+ * - Includes `status: 'completed'` and `status: 'ended_early'`.
+ * - **Excludes** `endedEarlyReason === 'discarded_resume'` (A8):
+ *   discarding a stale resumable session is not a "session the
+ *   founder ran." It would be noise in the history list and would
+ *   contradict the adversarial-memo framing of Condition 2 (visible
+ *   history reduces the founder's reason to keep a parallel notes
+ *   app for real session history).
+ * - Excludes `in_progress` / `paused` / `not_started` — those surface
+ *   on the Resume primary card, not in history.
+ *
+ * Ordering: `completedAt ?? startedAt`, descending. Matches the
+ * ordering `getLastComplete` uses so the first item here will
+ * frequently be the same log backing the LastComplete primary card
+ * (by design — "what you did last" and "recent sessions" share a
+ * head).
+ *
+ * Unlike `getLastComplete`, this query does NOT require a finalized
+ * `SessionReview`. The list is a "what happened" surface, not a
+ * "what's actionable next" surface — a skipped review or an
+ * expired-stub record still counts as a session that happened.
+ *
+ * `completed: boolean` collapses ExecutionStatus to a Y/N column for
+ * the Home row: `status === 'completed'` → `true`; `ended_early` →
+ * `false`. Ended-early captures both explicit finish-later and
+ * D120-expired stubs — both read as "not completed" for the
+ * founder-facing row. Per-reason granularity is a Tier 2 concern.
+ *
+ * Plans missing from Dexie (orphaned after a plan-row deletion, very
+ * rare in practice) drop out of the list silently. We take the first
+ * `limit` records whose plan lookup succeeds — not the first `limit`
+ * records and then filter — so a broken plan record doesn't shorten
+ * the visible list below the caller's ask when there are later
+ * recoverable sessions available.
+ *
+ * See `docs/plans/2026-04-20-m001-tier1-implementation.md` Unit 5.
+ */
+export async function getRecentSessions(
+  limit: number = 3,
+): Promise<RecentSessionEntry[]> {
+  if (limit <= 0) return []
+  const logs = await db.executionLogs.toArray()
+  const terminal = logs
+    .filter(
+      (l) =>
+        (l.status === 'completed' || l.status === 'ended_early') &&
+        l.endedEarlyReason !== 'discarded_resume',
+    )
+    .sort(
+      (a, b) =>
+        (b.completedAt ?? b.startedAt) - (a.completedAt ?? a.startedAt),
+    )
+
+  const entries: RecentSessionEntry[] = []
+  for (const exec of terminal) {
+    if (entries.length >= limit) break
+    const plan = await db.sessionPlans.get(exec.planId)
+    if (!plan) continue
+    entries.push({
+      execId: exec.id,
+      endedAt: exec.completedAt ?? exec.startedAt,
+      plan,
+      completed: exec.status === 'completed',
+    })
+  }
+  return entries
+}
+
 /**
  * Has the tester ever created an ExecutionLog on this device?
  *

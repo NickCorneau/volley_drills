@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Brandmark } from '../components/Brandmark'
 import { HomePrimaryCard } from '../components/HomePrimaryCard'
 import { HomeSecondaryRow } from '../components/HomeSecondaryRow'
+import { RecentSessionsList } from '../components/RecentSessionsList'
 import { SoftBlockModal } from '../components/SoftBlockModal'
 import { UpdatePrompt } from '../components/UpdatePrompt'
 import { Button } from '../components/ui'
@@ -24,10 +25,12 @@ import {
   findResumableSession,
   getCurrentDraft,
   getLastComplete,
+  getRecentSessions,
   saveDraft,
   skipReview,
   type LastCompleteBundle,
   type PendingReview,
+  type RecentSessionEntry,
   type ResumableSession,
 } from '../services/session'
 import {
@@ -55,6 +58,15 @@ interface HomeFlags {
   reviewPending: PendingReview | null
   draft: SessionDraft | null
   lastComplete: LastCompleteBundle | null
+  /**
+   * Tier 1a Unit 5 (2026-04-20): last-3-sessions list. Read alongside
+   * the other Home flags; `[]` on a fresh install (RecentSessionsList
+   * renders nothing in that case). Not read on the Resume branch —
+   * the Resume card is the only allowed surface when a resumable
+   * session exists, so loading the recent list there would be work
+   * the user never sees.
+   */
+  recentSessions: readonly RecentSessionEntry[]
 }
 
 type HomeState =
@@ -96,6 +108,7 @@ export function HomeScreen() {
               reviewPending: null,
               draft: null,
               lastComplete: null,
+              recentSessions: [],
             },
           })
           return
@@ -107,16 +120,28 @@ export function HomeScreen() {
         await expireStaleReviews()
         if (cancelled) return
 
-        const [reviewPending, draft, lastComplete] = await Promise.all([
-          findPendingReview(),
-          getCurrentDraft(),
-          getLastComplete(),
-        ])
+        // Tier 1a Unit 5 (2026-04-20): `getRecentSessions` joins into
+        // the same Promise.all as the other flags. The three queries
+        // each hit Dexie once at minimum; batching the resolves keeps
+        // first paint flicker identical to pre-Unit-5 behavior.
+        const [reviewPending, draft, lastComplete, recentSessions] =
+          await Promise.all([
+            findPendingReview(),
+            getCurrentDraft(),
+            getLastComplete(),
+            getRecentSessions(3),
+          ])
         if (cancelled) return
 
         setState({
           kind: 'ready',
-          flags: { resume: null, reviewPending, draft, lastComplete },
+          flags: {
+            resume: null,
+            reviewPending,
+            draft,
+            lastComplete,
+            recentSessions,
+          },
         })
       } catch {
         if (cancelled) return
@@ -414,6 +439,19 @@ export function HomeScreen() {
             Start New Workout
           </Button>
         </section>
+      )}
+
+      {/* Tier 1a Unit 5 (2026-04-20): last-3-sessions trailer. Gated
+          on `!flags.resume` because the Resume primary card is the
+          only legal Home surface when a resumable session exists —
+          showing a history list below a "Resume your session" modal
+          would compete with that single-action framing. Also gated on
+          `recentSessions.length > 0` inside the component itself, so
+          a fresh install renders nothing here. Supports adversarial
+          memo Condition 2 (visible session history removes the
+          founder's reason to keep a parallel notes app). */}
+      {!flags.resume && (
+        <RecentSessionsList entries={flags.recentSessions} />
       )}
 
       {softBlockTarget && (
