@@ -216,7 +216,7 @@ const chain6: ProgressionChain = {
   id: 'chain-6-serving',
   name: 'Serving as the Enabling Skill',
   focus: 'Serve consistency, zone targeting, transition movement, and wall fallback.',
-  drillIds: ['d22', 'd23', 'd24'],
+  drillIds: ['d22', 'd23'],
   defaultGatingThreshold: 0.7,
   links: [
     {
@@ -225,18 +225,6 @@ const chain6: ProgressionChain = {
       direction: 'progression',
       gatingCriteria: 'Reach 10 points with acceptable error count in d22',
       description: 'Zone accuracy established → add serve-and-dash transition conditioning.',
-    },
-    {
-      fromDrillId: 'd24',
-      toDrillId: 'd22',
-      direction: 'progression',
-      description: 'Wall fallback → graduate to court-based serve accuracy when court available.',
-    },
-    {
-      fromDrillId: 'd22',
-      toDrillId: 'd24',
-      direction: 'regression',
-      description: 'No net available → fall back to wall-based passing proxy.',
     },
   ],
 }

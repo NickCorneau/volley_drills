@@ -1306,7 +1306,7 @@ const d24: Drill = {
   objective: 'Move to ball + pass to a "setter" corner target. Off-court fallback.',
   levelMin: 'beginner',
   levelMax: 'intermediate',
-  chainId: 'chain-6-serving',
+  chainId: 'chain-2-direction',
   m001Candidate: false,
   teachingPoints: [
     'Avoid training non-game-like habits.',

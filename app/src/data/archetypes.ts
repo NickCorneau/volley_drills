@@ -9,6 +9,48 @@
  * Schema: app/src/types/session.ts
  */
 
+// ---------------------------------------------------------------------------
+// Session-assembly invariants (content-authoring and maintenance reference)
+// ---------------------------------------------------------------------------
+//
+// 1. Single-focus-per-session invariant (BAB coaches guide; D105; M001 Tier 1).
+//    Every session targets ONE skill focus (pass / serve / set). The
+//    `main_skill` block populates from the chain matching that focus
+//    (chain-1..5 for pass, chain-6-serving for serve, chain-7-setting for set).
+//    Warmup and wrap blocks are focus-agnostic (they key off skillFocus
+//    'warmup' and 'recovery' respectively, not the session focus).
+//    Technique and movement_proxy blocks MAY support-focus — for example,
+//    a pass-focus session can use a movement_proxy block with
+//    `skillTags: ['pass', 'movement']`. Never author a session template
+//    that mixes two primary main-skill chains.
+//
+// 2. Serve-to-attack convertibility (BAB 2024 drill book intro).
+//    "All of the drills under the Serving header can be easily converted
+//    into attack drills." When the attack chain is authored (M001 Tier 3+
+//    or post-M001), many serving drills become attack-drill templates by
+//    replacing the serve with a coach-toss or self-toss into the same zone
+//    grid. Design new serving drills so `feedType: 'live-serve'` can be
+//    swapped to `'coach-toss'` or `'self-toss'` without reshaping the rest
+//    of the drill (same target zones, same success metric, same rep cap).
+//
+// 3. Warmup slot preference order (D105 + M001 Tier 1 Unit 1).
+//    The session builder prefers drills with `skillFocus: ['warmup']`
+//    (Beach Prep Two / Three / Five — see app/src/data/drills.ts).
+//    The builder falls back to the first non-recovery drill only when the
+//    Beach Prep set is absent; this fallback is defensive and should never
+//    be the normal path. NEVER author a pass/serve/set drill as content
+//    that ends up in the warmup slot — warmup content must declare
+//    `skillFocus: ['warmup']` as its primary focus.
+//
+// 4. Wrap slot preference (D105).
+//    The wrap block prefers `skillFocus: ['recovery']` (Downshift, Stretch).
+//    Framed as transition and comfort, NOT as a recovery or
+//    injury-prevention claim (post-2015 active-cool-down literature does
+//    not support those claims at this dose; see
+//    docs/research/warmup-cooldown-minimum-protocols.md).
+//
+// ---------------------------------------------------------------------------
+
 import type { SessionArchetype, BlockSlot } from '../types/session'
 
 // ---------------------------------------------------------------------------
