@@ -13,13 +13,18 @@
 // supports discrete-grid over slider. See docs/specs/m001-review-micro-spec.md
 // and docs/plans/2026-04-12-v0a-to-v0b-transition.md (V0B-01).
 //
-// Phase F7 (2026-04-19): every chip always renders the anchor line (a
-// non-breaking space when there is no anchor) so all chips share the
-// same two-line internal structure. Pre-F7, anchored chips (0, 3, 5,
-// 7, 10) rendered two lines while unanchored chips (1, 2, 4, 6, 8, 9)
-// rendered one; with `justify-center` this made the anchored chips'
-// numbers sit slightly higher than the unanchored ones, so row
-// baselines did not line up across the grid. Manual-testing catch.
+// Phase F11 (2026-04-19): anchor words moved out of the individual chips
+// into a single legend rail below the grid. Pre-F11, five of the eleven
+// chips (0, 3, 5, 7, 10) rendered a two-line anchor; the other six
+// reserved a blank line to keep baselines aligned (F7). That produced an
+// uneven visual rhythm — anchor words landed at irregular column
+// positions (1/4/6 on row one, 2/5 on row two) and made anchored chips
+// read heavier than unanchored ones, implying a tier the interaction
+// model doesn't have. "MODERATE" also routinely overflowed its cell at
+// the 54 px target width. The legend rail carries the full Borg scale
+// as a single-line caption so every chip can collapse to a clean
+// number, and the live `aria-label` on each button continues to carry
+// "3, easy" etc. for screen readers.
 
 const RPE_VALUES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const
 
@@ -81,12 +86,10 @@ export function RpeSelector({
               type="button"
               role="radio"
               aria-checked={selected}
-              aria-label={
-                anchor ? `${n}, ${anchor}` : `${n}`
-              }
+              aria-label={anchor ? `${n}, ${anchor}` : `${n}`}
               onClick={() => onChange(n)}
               className={[
-                'flex min-h-[54px] flex-col items-center justify-center rounded-[12px] px-1 py-1 text-center transition-colors',
+                'flex min-h-[54px] items-center justify-center rounded-[12px] px-1 py-1 text-center transition-colors',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
                 // Phase F11 (2026-04-19): RPE chips are clickable in
                 // either state (tap to pick, tap a different chip to
@@ -102,31 +105,40 @@ export function RpeSelector({
               <span className="text-lg font-semibold leading-none tabular-nums">
                 {n}
               </span>
-              {/* Phase F7: always render the anchor line so every chip has
-                  the same two-line structure and the numbers line up
-                  across the row. `\u00A0` (non-breaking space) reserves
-                  the label height for chips without an anchor. `aria-
-                  hidden` keeps the button's `aria-label` the sole
-                  accessible name — the anchor text is decorative here.
-                  Phase F8 (2026-04-19): anchor size lifted from
-                  `text-[10px]` to `text-xs` (12 px). The outdoor brief
-                  (`docs/research/outdoor-courtside-ui-brief.md`) freezes
-                  a 16 px body floor; 12 px is the principled minimum
-                  for decorative captions inside large tap targets,
-                  10 px is not. See
-                  `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
-              <span
-                aria-hidden="true"
-                className={[
-                  'mt-0.5 text-xs uppercase tracking-wide',
-                  selected ? 'text-white/90' : 'text-text-secondary',
-                ].join(' ')}
-              >
-                {anchor ?? '\u00A0'}
-              </span>
             </button>
           )
         })}
+      </div>
+      {/* Legend rail. `aria-hidden` keeps this decorative — the per-
+          button `aria-label` ("3, easy") is the sole accessible
+          carrier of Borg anchor meaning. `flex-wrap` degrades
+          gracefully on narrow screens: the rail breaks to a second
+          line rather than clipping. 12 px (`text-xs`) is the
+          principled minimum for decorative captions per the outdoor
+          brief (`docs/research/outdoor-courtside-ui-brief.md`). */}
+      <div
+        aria-hidden="true"
+        className="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 text-xs text-text-secondary"
+      >
+        {RPE_VALUES.filter((n) => ANCHORS[n] !== undefined).flatMap(
+          (n, i) => {
+            const entry = (
+              <span key={n} className="whitespace-nowrap">
+                <span className="font-semibold tabular-nums text-text-primary">
+                  {n}
+                </span>{' '}
+                {ANCHORS[n]}
+              </span>
+            )
+            if (i === 0) return [entry]
+            return [
+              <span key={`sep-${n}`} className="text-text-secondary/60">
+                &middot;
+              </span>,
+              entry,
+            ]
+          },
+        )}
       </div>
       <p
         className="min-h-[1.25rem] text-center text-xs text-text-secondary"
