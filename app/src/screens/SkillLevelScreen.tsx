@@ -148,9 +148,6 @@ export function SkillLevelScreen() {
   return (
     <div className="mx-auto flex w-full max-w-[390px] flex-col gap-6 pb-12 pt-8">
       <header className="flex flex-col gap-2">
-        <p className="text-sm text-text-secondary">
-          Welcome. Let&rsquo;s get you started.
-        </p>
         <h1 className="text-xl font-bold tracking-tight text-text-primary">
           {copy.heading}
         </h1>

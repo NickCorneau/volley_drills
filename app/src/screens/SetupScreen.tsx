@@ -262,7 +262,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold text-text-primary">Net available?</h2>
+        <h2 className="text-base font-semibold text-text-primary">Net</h2>
         <div className="flex gap-2" role="radiogroup" aria-label="Net available">
           <ToggleChip
             label="Yes"
@@ -278,7 +278,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold text-text-primary">Wall / fence?</h2>
+        <h2 className="text-base font-semibold text-text-primary">Wall or fence</h2>
         <div className="flex gap-2" role="radiogroup" aria-label="Wall available">
           <ToggleChip
             label="Yes"

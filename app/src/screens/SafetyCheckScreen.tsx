@@ -304,8 +304,8 @@ export function SafetyCheckScreen() {
             </div>
             {recency === '3+ months' && (
               <p className="text-xs leading-relaxed text-text-secondary">
-                Coming back from injury or illness? A check-in with a
-                clinician before stepping back up is worth considering.
+                Coming back from injury or illness? Consider a quick
+                check-in with a clinician before ramping up.
               </p>
             )}
           </div>
@@ -314,8 +314,7 @@ export function SafetyCheckScreen() {
 
       <section className="flex flex-col gap-3">
         <h2 className="text-base font-semibold text-text-primary">
-          Any pain that&apos;s sharp, localized, or makes you avoid a
-          movement?
+          Any pain that&apos;s sharp, or makes you guard a movement?
         </h2>
         {/* 2026-04-20 physio-review: the original "pain that changes how
             you move" read to most users as "am I visibly limping," but

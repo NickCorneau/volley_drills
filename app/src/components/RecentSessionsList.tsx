@@ -60,14 +60,9 @@ export function RecentSessionsList({ entries, now }: RecentSessionsListProps) {
       aria-label="Recent sessions"
       className="flex flex-col gap-2 px-1 pt-2"
     >
-      <div className="flex flex-col gap-0.5">
-        <h2 className="text-sm font-semibold text-text-primary">
-          Your recent workouts
-        </h2>
-        <p className="text-xs text-text-secondary">
-          Last {entries.length} {entries.length === 1 ? 'session' : 'sessions'} on this device.
-        </p>
-      </div>
+      <h2 className="text-sm font-semibold text-text-primary">
+        Your recent workouts
+      </h2>
       <ul role="list" className="divide-y divide-text-primary/5">
         {entries.map((entry) => {
           const focus = inferSessionFocus(entry.plan.blocks)

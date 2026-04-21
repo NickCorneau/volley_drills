@@ -27,17 +27,17 @@ export const STORAGE_COPY: Record<InstallPosture, StorageCopy> = {
   'browser-tab': {
     primary: 'Saved in this browser on this device',
     secondary:
-      'Available offline here, but iPhone Safari may remove browser data if the site is not used for a while or if browser data is cleared.',
+      'Works offline. iPhone Safari can remove browser data if the site sits unused for a while or if browser data is cleared.',
   },
   'installed-not-persisted': {
     primary: 'Saved on this device',
     secondary:
-      'Stored locally in the installed app. Not backed up unless you enable sync or export. iOS can still remove local data if site/app data is cleared, device storage is reclaimed, or a browser bug occurs.',
+      'Stored locally in the installed app. Not backed up. iOS can still remove local data if storage is reclaimed or app data is cleared.',
   },
   'installed-persisted': {
     primary: 'Saved on this device',
     secondary:
-      'Stored locally with the strongest storage durability this browser currently exposes. Still not a backup. Use sync or export for recovery and moving to another device.',
+      'Uses the strongest local durability this browser exposes. Still not a backup - use export or sync to move between devices.',
   },
 }
 

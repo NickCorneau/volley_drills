@@ -64,9 +64,11 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
       updatedAt: 1,
     })
     renderTree('/')
-    // SkillLevelScreen renders the welcome preamble on mount.
+    // SkillLevelScreen renders its voice-aware heading on mount. The
+    // 2026-04-21 copy pass dropped the "Welcome. Let's get you started."
+    // preamble - the heading below is the landing sentinel now.
     expect(
-      await screen.findByText(/welcome\. let.?s get you started\./i),
+      await screen.findByRole('heading', { level: 1, name: /today\?/i }),
     ).toBeInTheDocument()
   })
 
@@ -75,7 +77,7 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
 
     // First mount: fresh install, FirstOpenGate routes to Skill Level.
     const first = renderTree('/')
-    await screen.findByText(/welcome\. let.?s get you started\./i)
+    await screen.findByRole('heading', { level: 1, name: /today\?/i })
 
     // Pick a band - SkillLevelScreen writes skillLevel + step via
     // setStorageMetaMany before navigating. We're testing the RESUME
@@ -103,7 +105,7 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
     renderTree('/')
     expect(await screen.findByTestId('todays-setup')).toBeInTheDocument()
     expect(
-      screen.queryByText(/welcome\. let.?s get you started\./i),
+      screen.queryByRole('heading', { level: 1, name: /today\?/i }),
     ).not.toBeInTheDocument()
   })
 
@@ -114,7 +116,7 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
     // SkillLevelScreen's initial render.
     renderTree('/')
     expect(
-      await screen.findByText(/welcome\. let.?s get you started\./i),
+      await screen.findByRole('heading', { level: 1, name: /today\?/i }),
     ).toBeInTheDocument()
   })
 
@@ -140,7 +142,7 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
     renderTree('/')
     expect(await screen.findByTestId('home')).toBeInTheDocument()
     expect(
-      screen.queryByText(/welcome\. let.?s get you started\./i),
+      screen.queryByRole('heading', { level: 1, name: /today\?/i }),
     ).not.toBeInTheDocument()
   })
 })

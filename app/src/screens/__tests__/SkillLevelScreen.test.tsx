@@ -55,13 +55,12 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
     await clearDb()
   })
 
-  it("renders the welcome preamble + solo-voice cold-state heading + 'You can change this later.' (D128)", async () => {
+  it("renders solo-voice cold-state heading + 'You can change this later.' (D128)", async () => {
     renderScreen()
-    expect(
-      await screen.findByText(/welcome\. let.?s get you started\./i),
-    ).toBeInTheDocument()
     // D128: cold-state default is solo voice. The returning-pair path
-    // below covers the flip to pair voice.
+    // below covers the flip to pair voice. The 2026-04-21 copy pass
+    // dropped the "Welcome. Let's get you started." preamble - the
+    // heading below is the landing sentinel now.
     expect(
       await screen.findByRole('heading', {
         level: 1,
@@ -225,7 +224,7 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
 
   it('renders no back arrow (first-open = no prior screen per H9)', async () => {
     renderScreen()
-    await screen.findByText(/welcome\. let.?s get you started\./i)
+    await screen.findByRole('heading', { level: 1, name: /today\?/i })
     expect(
       screen.queryByRole('button', { name: /back/i }),
     ).not.toBeInTheDocument()

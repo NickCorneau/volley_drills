@@ -183,7 +183,7 @@ function NewUserCard({ onStart }: { onStart: () => void }) {
           Ready for your first session?
         </p>
         <p className="mt-2 text-sm text-text-secondary">
-          3 minutes of setup, then ~15 min on sand.
+          3 min setup, then ~15 min on sand.
         </p>
       </div>
       <Button variant="primary" fullWidth onClick={onStart}>
@@ -232,7 +232,7 @@ function ReviewPendingCard({
       ) : (
         <div className="flex flex-col gap-2 rounded-[12px] bg-bg-warm p-3">
           <p className="text-center text-sm text-text-secondary">
-            Skipping drops this session from your planning data.
+            Skipping leaves this session out of what comes next.
           </p>
           <div className="flex gap-2">
             <Button

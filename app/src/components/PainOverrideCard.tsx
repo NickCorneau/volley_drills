@@ -61,14 +61,13 @@ export function PainOverrideCard({
             Switched to a lighter session
           </h3>
           <p className="mt-1 text-sm leading-relaxed text-text-secondary">
-            Lower-load technique work today. You can also skip.
+            Lower-load technique work today.
           </p>
         </div>
       </div>
 
       <div className="rounded-[8px] bg-white/60 px-3 py-2.5 text-sm font-medium text-text-primary">
-        Lighter Technique Session &middot; {recoveryMinutes} min &middot; Low
-        intensity
+        Lighter Technique Session &middot; {recoveryMinutes} min
       </div>
 
       <Button
@@ -114,13 +113,13 @@ export function PainOverrideCard({
           </Button>
           {/* 2026-04-20 physio-review: generic "severe, new, worsening,
               or persistent" legalese reads past. Concrete consequence
-              language ("turn a minor issue into a long layoff") plus a
+              language ("turn a small issue into a long layoff") plus a
               specific time cue ("more than a few days") does the
               actual friction work a hard block couldn't. */}
           <p className="text-center text-xs font-medium text-warning">
             Training through pain that&apos;s sharp, getting worse, or
-            lasting more than a few days can turn a minor issue into a
-            long layoff. If unsure, stop and see a qualified clinician.
+            lasting more than a few days can turn a small issue into a
+            long layoff. If unsure, stop and see a clinician.
           </p>
         </div>
       )}

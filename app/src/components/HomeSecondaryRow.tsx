@@ -86,7 +86,7 @@ export function HomeSecondaryRow(props: HomeSecondaryRowProps) {
       return (
         <li className={SECONDARY_ROW_CLASS}>
           <span className="text-sm text-text-primary">
-            Last: {props.data.plan.presetName}
+            Last &middot; {props.data.plan.presetName}
           </span>
           <Button variant="ghost" onClick={props.onRepeat}>
             Repeat
