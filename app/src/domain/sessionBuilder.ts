@@ -370,12 +370,25 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
  * better than no-op. The current-drill exclusion is never relaxed —
  * cycling past the same drill would defeat the Swap action entirely.
  */
+// Tier 1a Unit 2 (Swap-pool expansion): `main_skill` and `pressure`
+// include `'set'` so user-initiated Swap reaches chain-7-setting drills
+// (d38 Bump Set, d39 Hand Set, d41 Partner Set B&F). `archetypes.ts`
+// block skillTags intentionally stay `['pass', 'serve']` — default
+// (non-Swap) session assembly preserves the single-focus-per-session
+// invariant; Swap is the user-initiated escape hatch that may cross
+// focus boundaries by intent. See
+// docs/plans/2026-04-20-m001-tier1-implementation.md Unit 2 ("Do NOT
+// modify archetypes.ts").
+//
+// Tier 1c unifies this map with a dynamic `context.sessionFocus`
+// override path in both `pickForSlot` and `findSwapAlternatives`. Until
+// then this map is the Swap-pool source of truth.
 const SKILL_TAGS_BY_TYPE: Record<BlockSlotType, readonly string[]> = {
   warmup: ['pass', 'movement'],
   technique: ['pass'],
   movement_proxy: ['pass', 'movement'],
-  main_skill: ['pass', 'serve'],
-  pressure: ['pass', 'serve'],
+  main_skill: ['pass', 'serve', 'set'],
+  pressure: ['pass', 'serve', 'set'],
   wrap: ['recovery'],
 }
 

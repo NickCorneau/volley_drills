@@ -223,4 +223,67 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
       )
     })
   })
+
+  /**
+   * Tier 1a Unit 2 (setting minimum probe): `SKILL_TAGS_BY_TYPE`
+   * widened `main_skill` and `pressure` to include `'set'` so
+   * user-initiated Swap can reach chain-7-setting drills. These
+   * tests pin the reachability so a future tag-set regression (or a
+   * misauthored drill that drops the `'set'` skillFocus) fails the
+   * Swap-path invariant loudly. `findSwapAlternatives` excludes the
+   * current block's drill by name, so the tests use a non-existent
+   * `drillName` to see the full pool.
+   */
+  describe('setting-drill reachability via Swap (Tier 1a Unit 2)', () => {
+    it('solo open main_skill Swap surfaces d38 Bump Set and d39 Hand Set', () => {
+      const block = makeBlock({ type: 'main_skill', drillName: 'Does Not Exist' })
+      const out = findSwapAlternatives(
+        block,
+        makeContext({
+          playerMode: 'solo',
+          timeProfile: 25,
+          netAvailable: false,
+          wallAvailable: false,
+        }),
+      )
+      const names = out.map((b) => b.drillName)
+      expect(names).toContain('Bump Set Fundamentals')
+      expect(names).toContain('Hand Set Fundamentals')
+    })
+
+    it('pair net main_skill Swap surfaces d41 Partner Set Back-and-Forth', () => {
+      const block = makeBlock({ type: 'main_skill', drillName: 'Does Not Exist' })
+      const out = findSwapAlternatives(
+        block,
+        makeContext({
+          playerMode: 'pair',
+          timeProfile: 25,
+          netAvailable: true,
+          wallAvailable: false,
+        }),
+      )
+      const names = out.map((b) => b.drillName)
+      expect(names).toContain('Partner Set Back-and-Forth')
+    })
+
+    it('solo open pressure Swap also surfaces setting drills', () => {
+      const block = makeBlock({ type: 'pressure', drillName: 'Does Not Exist' })
+      const out = findSwapAlternatives(
+        block,
+        makeContext({
+          playerMode: 'solo',
+          timeProfile: 25,
+          netAvailable: false,
+          wallAvailable: false,
+        }),
+      )
+      const names = out.map((b) => b.drillName)
+      // At least one of d38/d39 should surface — both are solo and have
+      // `skillFocus: ['set']`, matching `pressure: ['pass', 'serve', 'set']`.
+      expect(
+        names.includes('Bump Set Fundamentals') ||
+          names.includes('Hand Set Fundamentals'),
+      ).toBe(true)
+    })
+  })
 })

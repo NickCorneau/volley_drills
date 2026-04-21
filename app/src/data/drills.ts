@@ -1444,6 +1444,181 @@ const d26: Drill = {
 }
 
 // ---------------------------------------------------------------------------
+// Chain 7: Setting fundamentals (Tier 1a Unit 2 minimum probe)
+// ---------------------------------------------------------------------------
+//
+// Three drills authored as a minimum setting probe (BAB Beginner's Guide
+// Lesson 2). No progression links in Tier 1a — Bump Set and Hand Set are
+// fundamentals, not rungs gated on each other. Tier 1b adds links once
+// founder dogfood and the partner walkthrough surface which pairs chain
+// in practice. See
+// docs/plans/2026-04-20-m001-tier1-implementation.md Unit 2.
+//
+// Swap-only reachability: archetypes.ts main_skill / pressure block
+// skillTags stay at `['pass', 'serve']`, so default (non-Swap) session
+// assembly preserves the single-focus-per-session invariant (archetype
+// invariants header point 1). `SKILL_TAGS_BY_TYPE.main_skill` and
+// `.pressure` in sessionBuilder.ts widen to include 'set' so
+// user-initiated Swap can reach these drills.
+
+// BAB Beginner's Guide, Lesson 2 — Bump Set tutorial.
+const d38: Drill = {
+  id: 'd38',
+  name: 'Bump Set Fundamentals',
+  shortName: 'Bump Set',
+  skillFocus: ['set'],
+  objective: 'Controlled bump-set trajectory off self-toss; platform shape and aim with the arms.',
+  levelMin: 'beginner',
+  levelMax: 'intermediate',
+  chainId: 'chain-7-setting',
+  m001Candidate: true,
+  teachingPoints: [
+    'Platform stays square to the target.',
+    'Contact on the forearms, not the wrists.',
+    'Legs drive the set — the arms aim, the legs lift.',
+  ],
+  progressionDescription: 'Add a moving bump-set (one step in, one step back) between reps.',
+  regressionDescription: 'Shorten target distance and reduce height; catch-and-reset instead of continuous.',
+  variants: [
+    {
+      id: 'd38-solo',
+      drillId: 'd38',
+      label: 'Solo',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 4 },
+      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      equipment: { balls: 1 },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 10,
+        rpeMin: 3,
+        rpeMax: 5,
+        fatigueCap: { maxMinutes: 10 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Bump-sets reaching target height (~1.5 m above head) and landing within 1 m of start.',
+        target: '15 controlled sets',
+      },
+      courtsideInstructions:
+        'Self-toss to yourself ~1.5 m up. Bump-set the ball back up with platform angled at the sky — aim for a settable arc landing within a 1 m circle around you. Reset and repeat.',
+      coachingCues: [
+        'Platform square, not tilted.',
+        'Contact on the forearms.',
+        'Legs lift; arms aim.',
+      ],
+    },
+  ],
+}
+
+// BAB Beginner's Guide, Lesson 2 — Hand Set tutorial. Wall-optional: the
+// variant is authored as wall-independent (self-toss) because setting off
+// a wall rebound trains timing more than it trains hand shape. A wall
+// simply makes the drill rhythm-nicer; it's not a hard requirement.
+const d39: Drill = {
+  id: 'd39',
+  name: 'Hand Set Fundamentals',
+  shortName: 'Hand Set',
+  skillFocus: ['set'],
+  objective: 'Clean overhand hand-set off self-toss; symmetric hand shape and forehead contact.',
+  levelMin: 'beginner',
+  levelMax: 'intermediate',
+  chainId: 'chain-7-setting',
+  m001Candidate: true,
+  teachingPoints: [
+    'Contact above the forehead, not the chest.',
+    'Thumbs and forefingers form a window the ball passes through.',
+    'Wrists extend; the ball leaves off both hands simultaneously.',
+  ],
+  progressionDescription: 'Add a 90-degree pivot between sets (set, turn, set the other way).',
+  regressionDescription: 'Catch in the window shape and re-toss instead of continuous sets.',
+  variants: [
+    {
+      id: 'd39-solo',
+      drillId: 'd39',
+      label: 'Solo',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 4 },
+      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      equipment: { balls: 1 },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 10,
+        rpeMin: 3,
+        rpeMax: 5,
+        fatigueCap: { maxMinutes: 10 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Hand-sets with clean forehead contact and no throw (no carry, no double).',
+        target: '12 clean sets',
+      },
+      courtsideInstructions:
+        'Self-toss above your forehead. Hand-set the ball straight back up ~2 m. Ball should leave both hands at the same instant — if you hear a "slap" it was too low; if you feel it sitting, your hands carried.',
+      coachingCues: [
+        'Contact above the forehead.',
+        'Window between thumbs and forefingers.',
+        'Both hands release together.',
+      ],
+    },
+  ],
+}
+
+// BAB 2024 Drill Book — Plan 1 Drill 1, warm-up element "set back and
+// forth". Authored as the Tier 1a pair setting probe; the lightest-weight
+// pair setting rung (no triangle geometry, no window target). Chosen
+// over `d40 Footwork for Setting` so Tier 1a can exercise setting via
+// Swap in a pair 25-min partner-walkthrough context.
+const d41: Drill = {
+  id: 'd41',
+  name: 'Partner Set Back-and-Forth',
+  shortName: 'Set B&F',
+  skillFocus: ['set'],
+  objective: 'Continuous hand-setting with a partner; timing, target, and clean contact under rhythm.',
+  levelMin: 'beginner',
+  levelMax: 'intermediate',
+  chainId: 'chain-7-setting',
+  m001Candidate: true,
+  teachingPoints: [
+    'Set to a spot your partner does not have to move to — the ball is the message, the target is the apology.',
+    'Reset feet between sets; plant before you set.',
+    'Arc the ball ~1.5 m above reach height so your partner has time to square up.',
+  ],
+  progressionDescription: 'Add a lateral step between sets — set, shuffle one step, set again.',
+  regressionDescription: 'Catch and re-set (reset the rhythm) if the ball lands more than one step away.',
+  variants: [
+    {
+      id: 'd41-pair',
+      drillId: 'd41',
+      label: 'Pair',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2 },
+      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      equipment: { balls: 1 },
+      workload: {
+        durationMinMinutes: 4,
+        durationMaxMinutes: 8,
+        rpeMin: 3,
+        rpeMax: 5,
+        fatigueCap: { maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'streak',
+        description: 'Longest continuous rally of clean hand-sets between partners.',
+        target: '15-set rally',
+      },
+      courtsideInstructions:
+        'Stand 3 m apart. Toss to start; hand-set back and forth. Goal: unbroken rally. If it breaks, restart and count the new streak. Alternate who tosses after every break.',
+      coachingCues: [
+        'Set to your partner, not past them.',
+        'Plant feet between sets.',
+        'Arc above reach height.',
+      ],
+    },
+  ],
+}
+
+// ---------------------------------------------------------------------------
 // Chain warmup: Beach Prep (default warmup, D105 + BAB 2024)
 // ---------------------------------------------------------------------------
 //
@@ -1539,6 +1714,9 @@ export const DRILLS: readonly Drill[] = [
   d25,
   d26,
   d28,
+  d38,
+  d39,
+  d41,
 ] as const
 
 export const M001_DRILL_IDS: readonly string[] = DRILLS.filter((d) => d.m001Candidate).map(

@@ -99,6 +99,29 @@ describe('sessionBuilder', () => {
     }
   })
 
+  /**
+   * Tier 1a Unit 2 regression: Swap-pool expansion widened
+   * `SKILL_TAGS_BY_TYPE.main_skill` to include `'set'`, but
+   * `archetypes.ts` main_skill block skillTags stay `['pass', 'serve']`
+   * so default (non-Swap) session assembly preserves the
+   * single-focus-per-session invariant (archetype invariants header
+   * point 1). A setting drill must never surface in the main_skill
+   * slot of a default solo_wall 15-min build.
+   */
+  it('default solo_wall 15-min build does not pick a setting drill in main_skill (single-focus invariant)', () => {
+    const draft = buildDraft({
+      playerMode: 'solo',
+      timeProfile: 15,
+      netAvailable: false,
+      wallAvailable: true,
+    })
+    expect(draft).not.toBeNull()
+    const mainSkill = draft!.blocks.find((b) => b.type === 'main_skill')
+    if (mainSkill !== undefined) {
+      expect(['d38', 'd39', 'd41']).not.toContain(mainSkill.drillId)
+    }
+  })
+
   it('buildRecoveryDraft returns only warmup and wrap blocks', () => {
     const recovery = buildRecoveryDraft({
       playerMode: 'pair',

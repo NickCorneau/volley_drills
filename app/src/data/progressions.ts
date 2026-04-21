@@ -229,6 +229,22 @@ const chain6: ProgressionChain = {
   ],
 }
 
+// Tier 1a Unit 2: minimum probe — 3 rungs, no progression links. Tier 1b
+// adds links when dogfood surfaces which pairs actually chain. Bump Set
+// and Hand Set are intentionally both default-unlocked as fundamentals,
+// per BAB Beginner's Guide Lesson 2. See
+// docs/plans/2026-04-20-m001-tier1-implementation.md Unit 2.
+const chain7: ProgressionChain = {
+  id: 'chain-7-setting',
+  name: 'Setting Fundamentals',
+  focus: 'Bump-set shape, hand-set contact, partner rhythm. Minimum setting probe for Tier 1a.',
+  drillIds: ['d38', 'd39', 'd41'],
+  defaultGatingThreshold: 0.7,
+  // No forward progression links. No regression links. Tier 1b authors
+  // these once founder / partner data shows which pairs actually chain.
+  links: [],
+}
+
 // chainCooldown is the Downshift chain (D105). Framed as transition/comfort, not
 // recovery or injury prevention. Stretching is optional and sits inside the
 // Downshift block rather than claiming recovery benefit.
@@ -256,5 +272,6 @@ export const PROGRESSION_CHAINS: readonly ProgressionChain[] = [
   chain4,
   chain5,
   chain6,
+  chain7,
   chainCooldown,
 ] as const
