@@ -92,7 +92,16 @@ function pickForSlot(
   if (pool.length === 0) return undefined
 
   if (slot.type === 'warmup') {
-    const warmup = pool.find((c) => !c.drill.skillFocus.includes('recovery'))
+    // Tier 1a Unit 1 (D105 follow-up): prefer `skillFocus: ['warmup']`
+    // content (Beach Prep) over any other drill in the pool. The
+    // previous "first non-recovery drill" rule let a passing drill land
+    // in the warmup slot when Beach Prep content was absent; preferring
+    // the tag first and keeping non-recovery as a defensive fallback
+    // means future Beach Prep authoring (d27 Tier 1b, d29 Tier 1b)
+    // slots in without changing this branch.
+    const warmup =
+      pool.find((c) => c.drill.skillFocus.includes('warmup')) ??
+      pool.find((c) => !c.drill.skillFocus.includes('recovery'))
     if (warmup) return warmup
   }
 

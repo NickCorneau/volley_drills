@@ -78,7 +78,12 @@ describe('sessionBuilder', () => {
     expect(draft?.archetypeId).toBe(archetypeId)
     expect(draft?.blocks.length).toBeGreaterThan(0)
     expect(draft?.blocks[0]?.type).toBe('warmup')
-    expect(['d25', 'd26']).not.toContain(draft?.blocks[0]?.drillId)
+    // Tier 1a Unit 1: every archetype resolves the warmup slot to
+    // `d28 Beach Prep Three`. Previously this test only asserted the
+    // warmup wasn't a cooldown drill (d25/d26), which let passing drills
+    // silently fill the slot — the exact authoring bug Unit 1 fixed.
+    expect(draft?.blocks[0]?.drillId).toBe('d28')
+    expect(draft?.blocks[0]?.drillName).toBe('Beach Prep Three')
     expect(draft?.blocks.at(-1)?.type).toBe('wrap')
     expect(['d25', 'd26']).toContain(draft?.blocks.at(-1)?.drillId)
 

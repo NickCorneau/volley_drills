@@ -11,7 +11,19 @@
 /** How the ball is delivered — determines realism and skill-transfer claims. */
 export type FeedType = 'self-toss' | 'partner-toss' | 'live-serve' | 'wall-rebound' | 'coach-serve'
 
-export type SkillFocus = 'pass' | 'serve' | 'set' | 'movement' | 'conditioning' | 'recovery'
+// `'warmup'` is the Tier 1a (D105) tag for Beach Prep content. The session
+// builder's warmup slot prefers drills tagged `'warmup'` over the non-
+// `'recovery'` fallback; see the warmup-slot invariant in
+// `app/src/data/archetypes.ts` and `pickForSlot` in
+// `app/src/domain/sessionBuilder.ts`.
+export type SkillFocus =
+  | 'pass'
+  | 'serve'
+  | 'set'
+  | 'movement'
+  | 'conditioning'
+  | 'recovery'
+  | 'warmup'
 
 export type PlayerLevel = 'beginner' | 'intermediate' | 'advanced'
 

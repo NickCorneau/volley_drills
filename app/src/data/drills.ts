@@ -1444,6 +1444,70 @@ const d26: Drill = {
 }
 
 // ---------------------------------------------------------------------------
+// Chain warmup: Beach Prep (default warmup, D105 + BAB 2024)
+// ---------------------------------------------------------------------------
+//
+// Tier 1a Unit 1 ships only `d28` (Beach Prep Three, 3-min default). The
+// compliance-fallback `d27` (Beach Prep Two, ~2 min) and opt-in longer
+// `d29` (Beach Prep Five, ~5 min) are deferred to Tier 1b; neither has a
+// trigger to select it in Tier 1a (no compliance surface yet, no pair
+// opening-block archetype). See
+// docs/plans/2026-04-20-m001-tier1-implementation.md "Explicitly out of
+// scope" for the gating conditions.
+
+// D105 + BAB — Beach Prep Three, 3 min default warmup.
+const d28: Drill = {
+  id: 'd28',
+  name: 'Beach Prep Three',
+  shortName: 'Beach Prep',
+  skillFocus: ['warmup'],
+  objective:
+    'Whole-body ramp, ankle proprioception, shoulder + trunk activation, and sand movement rehearsal in 3 minutes.',
+  levelMin: 'beginner',
+  levelMax: 'advanced',
+  chainId: 'chain-warmup',
+  m001Candidate: true,
+  teachingPoints: [
+    'Move through full range before loading.',
+    'Ankles first — short hops and lateral shuffles wake proprioception faster than jogging on sand.',
+    'End warmer than you started; cold shoulders do not pass well.',
+  ],
+  progressionDescription:
+    'Add a second round of the shoulder/trunk sequence once 3 min feels undercooked on cold mornings.',
+  regressionDescription:
+    'On hot days or short sessions, collapse the sand movement block to a single lap of A-skips + shuffles.',
+  variants: [
+    {
+      id: 'd28-solo',
+      drillId: 'd28',
+      label: 'Solo',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 14 },
+      environmentFlags: env({ lowScreenTime: true, windFriendly: true }),
+      equipment: { balls: 0 },
+      workload: {
+        durationMinMinutes: 3,
+        durationMaxMinutes: 5,
+        rpeMin: 2,
+        rpeMax: 4,
+      },
+      successMetric: {
+        type: 'completion',
+        description: 'Completed all four components.',
+        target: 'Completed',
+      },
+      courtsideInstructions:
+        '(1) 30 s light jog / A-skips around your sand box. (2) 30 s ankle hops + lateral shuffles. (3) 45 s arm circles forward + back, cross-body swings, trunk rotations. (4) 45 s movement rehearsal — two forward shuffles, two lateral shuffles, one drop-step + sprint, repeat. End warmer than you started.',
+      coachingCues: [
+        'Short hops, loud feet.',
+        'Full range on arm swings.',
+        'Move your feet — ankles first, then legs.',
+      ],
+    },
+  ],
+}
+
+// ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
 
@@ -1474,6 +1538,7 @@ export const DRILLS: readonly Drill[] = [
   d24,
   d25,
   d26,
+  d28,
 ] as const
 
 export const M001_DRILL_IDS: readonly string[] = DRILLS.filter((d) => d.m001Candidate).map(

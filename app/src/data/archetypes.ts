@@ -64,7 +64,11 @@ const warmup = (min: number, max: number): BlockSlot => ({
   intent:
     'Build heat, prime ankles, activate shoulder and trunk, rehearse movement on sand. Screen for obvious pain.',
   required: true,
-  skillTags: ['pass', 'movement'],
+  // `'warmup'` added Tier 1a Unit 1 so Beach Prep drills (`skillFocus:
+  // ['warmup']`) are reachable from the warmup slot. `'pass'` and
+  // `'movement'` remain as defensive fallback so the slot still resolves
+  // if the Beach Prep set is absent from the catalog.
+  skillTags: ['warmup', 'pass', 'movement'],
 })
 
 const technique = (min: number, max: number): BlockSlot => ({
