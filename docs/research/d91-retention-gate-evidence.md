@@ -1,24 +1,39 @@
 ---
-id: d91-retention-gate-evidence
+
+## id: d91-retention-gate-evidence
+
 title: D91 Retention Gate Evidence
 status: active
 stage: validation
 type: research
 authority: evidence base and interpretive framing for the D91 M001 go/no-go threshold
 summary: "Triangulated evidence on whether D91 (5+ testers, 2+ sessions in 14 days; kill if <3 of 5 return) is too strict, calibrated, or too lax. Kill-floor holds; go-bar is slightly lax because of novelty effect and n=5 uncertainty, and needs a banded reading plus enrichment signals."
-last_updated: 2026-04-16
+last_updated: 2026-04-20
 depends_on:
-  - docs/decisions.md
-  - docs/discovery/phase-0-wedge-validation.md
-  - docs/milestones/m001-solo-session-loop.md
+
+- docs/decisions.md
+- docs/discovery/phase-0-wedge-validation.md
+- docs/milestones/m001-solo-session-loop.md
 related:
-  - docs/research/README.md
-  - docs/research/beach-training-resources.md
-  - research-output/d91-retention-gate-evidence.md
-  - research-output/d91-retention-gate-evidence-small-n-math.md
----
+- docs/research/README.md
+- docs/research/beach-training-resources.md
+- docs/research/founder-use-ledger.md
+- docs/plans/2026-04-20-m001-adversarial-memo.md
+- research-output/d91-retention-gate-evidence.md
+- research-output/d91-retention-gate-evidence-small-n-math.md
+decision_refs:
+- D91
+- D130
 
 # D91 Retention Gate Evidence
+
+## Status under D130 (2026-04-20)
+
+`D130` paused the D91 stranger-cohort run for M001 in favor of founder-use mode with a 2026-07-20 re-evaluation. **Every threshold, band, and interpretive frame in this file is preserved unchanged.** They remain the canonical reading for D91 when the gate re-opens — either at the scheduled re-eval, when a D130 early trigger fires (including trigger (d): Tier 1a shipped + ≥10 founder sessions + no open walkthrough P0), or when the adversarial memo's default decision rule selects D91 preparation.
+
+During the D130 window (2026-04-20 → 2026-07-20 or earlier), D91 evidence is **not being gathered** from stranger cohorts. Founder behavioral evidence and partner walkthrough observations are gathered instead, in `docs/research/founder-use-ledger.md` and `docs/research/partner-walkthrough-results/` respectively. Those files do not substitute for D91 — they answer different questions and are explicitly framed that way. When D91 preparation resumes, the kill-floor, go-bar, banded reading, enrichment signals, pair-vs-solo stratification, and per-tester instrumentation below apply as written. Do not read them as deprecated by founder-use mode; they are on pause, not retired.
+
+If a reader of this file during the D130 window is wondering whether the D91 numbers need updating because of something that happened in founder-use mode — the answer is no. The D91 numerical frame cannot be sharpened or loosened by n=1 founder data; that is exactly the gap founder-use mode can't close, and why the re-eval exists.
 
 ## Purpose
 
@@ -101,23 +116,25 @@ Direct implication for `D91`: a second session in 14 days is **necessary** evide
 
 Exact 95% binomial confidence intervals on a five-person cohort are wide by design, which is why the gate must be banded rather than treated as a single threshold. Observed return count → plausible true return rate:
 
-| Observed 2nd-session starts | Exact 95% CI for underlying rate | Reading |
-|---|---:|---|
-| 0/5 | 0.0% to 52.2% | strong negative |
-| 1/5 | 0.5% to 71.6% | concerning |
-| 2/5 | 5.3% to 85.3% | ambiguous |
-| 3/5 | 14.7% to 94.7% | weak pass of floor |
-| 4/5 | 28.4% to 99.5% | genuinely promising |
-| 5/5 | 47.8% to 100.0% | strong signal, still small-n |
 
-Detection power is also asymmetric. If the true second-session rate were 20%, the probability of seeing ≥3 of 5 returners is ~5.8%; at 30% it is ~16.3%; at 60% it is ~68.3%. So observing 3/5 is moderate evidence against a near-dead product (~20% true rate) but weak evidence of a genuinely good one (~60%+ true rate). Observing 0-1 of 5 has only an ~8.7% probability under a 60% true rate, which is why the kill-floor is a serious negative signal even though the sample is tiny.
+| Observed 2nd-session starts | Exact 95% CI for underlying rate | Reading                      |
+| --------------------------- | -------------------------------- | ---------------------------- |
+| 0/5                         | 0.0% to 52.2%                    | strong negative              |
+| 1/5                         | 0.5% to 71.6%                    | concerning                   |
+| 2/5                         | 5.3% to 85.3%                    | ambiguous                    |
+| 3/5                         | 14.7% to 94.7%                   | weak pass of floor           |
+| 4/5                         | 28.4% to 99.5%                   | genuinely promising          |
+| 5/5                         | 47.8% to 100.0%                  | strong signal, still small-n |
+
+
+Detection power is also asymmetric. If the true second-session rate were 20%, the probability of seeing ≥3 of 5 returners is ~~5.8%; at 30% it is ~16.3%; at 60% it is ~68.3%. So observing 3/5 is moderate evidence against a near-dead product (~~20% true rate) but weak evidence of a genuinely good one (~60%+ true rate). Observing 0-1 of 5 has only an ~8.7% probability under a 60% true rate, which is why the kill-floor is a serious negative signal even though the sample is tiny.
 
 Practical reading for `D91`:
 
-- **`0-1/5`**: strong negative; trip the kill-floor and revisit the wedge.
-- **`2/5`**: ambiguous; neither a clean kill nor a pass. Extend the cohort or the window before advancing.
-- **`3/5`**: weak pass of the floor; `continue investigating`, not `go`. Enrichment signals and self-initiated returns matter most in this band.
-- **`4-5/5`, especially with unprompted returns and at least one third session**: the first result that looks meaningfully strong on behavior alone.
+- `**0-1/5`**: strong negative; trip the kill-floor and revisit the wedge.
+- `**2/5`**: ambiguous; neither a clean kill nor a pass. Extend the cohort or the window before advancing.
+- `**3/5`**: weak pass of the floor; `continue investigating`, not `go`. Enrichment signals and self-initiated returns matter most in this band.
+- `**4-5/5`, especially with unprompted returns and at least one third session**: the first result that looks meaningfully strong on behavior alone.
 
 ### Contamination risk from founder / concierge nudging
 
@@ -225,3 +242,4 @@ Both files preserve the inline citation markers from their respective research p
 - 2026-04-16 — note created from the first `d91-retention-gate-evidence.md` research pass. Keeps `D91` thresholds unchanged; introduces the kill-floor vs go-bar split and the enrichment-signal list as the durable interpretation.
 - 2026-04-16 — integrated the follow-up small-n-math research pass. Added the banded reading on the raw return count (with binomial CIs), the adherence-dimensions / context-logging / post-qualification conviction instrumentation framework, and the founder/concierge contamination risk. Sharpened the per-tester capture list in `Apply to current setup` accordingly. `D91` numbers remain unchanged.
 - 2026-04-16 — added the *Pair-vs-solo stratified reading* section: rationale from dyadic-exercise adherence evidence and pair-native consumer products (Sweatmates), planning band (+25–60% relative / +10–15 pp absolute / +5 pp noise floor), coordination-drag caveat (pair testers returning as solo still counts as pair framing working), and how to apply the lens in the cohort readout. Added mode and mode-transition fields plus partner-name free-text capture to the per-tester ledger. `D91` numbers and all existing thresholds unchanged; this is a reading lens layered on top of the gate.
+- 2026-04-20 — added the *Status under D130* block at the top of the file. `D91` is paused during the 2026-04-20 → 2026-07-20 founder-use window (`D130`); numerical frame is preserved unchanged and re-opens at the re-eval, on an earlier D130 trigger, or when the `docs/plans/2026-04-20-m001-adversarial-memo.md` decision rule selects D91 preparation. Cross-linked `docs/research/founder-use-ledger.md` (founder behavioral log) and `docs/plans/2026-04-20-m001-adversarial-memo.md` (pre-registered falsification conditions). Added explicit `decision_refs` to frontmatter (`D91`, `D130`).

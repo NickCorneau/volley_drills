@@ -131,15 +131,16 @@ After the user taps `Start now` and before the warm-up block begins, show 2-3 fa
 
 **Pain flag (always shown):**
 
-- `Any pain that changes how you move?`
+- `Any pain that's sharp, localized, or makes you avoid a movement?` (post-physio-review 2026-04-20, see `D129`; supersedes the earlier "pain that changes how you move" phrasing which too often read as "am I visibly limping")
+- Secondary line under the heading: `Regular muscle soreness is fine. We'll switch to a lighter session if yes.`
 - `Yes` / `No`
-- If yes: the session defaults to a recovery/technique-only variant. The user sees a clear explanation and may override, but the default is conservative.
+- If yes: the session defaults to a recovery/technique-only variant. The user sees a clear explanation and may override, but the default is conservative, and the override-confirm line names a concrete consequence rather than generic legalese.
 
 **Training recency (shown when not auto-derivable from session history):**
 
-- `Trained in last 7 days?`
-- `0` / `1` / `2+`
-- If 0: session automatically scales down volume and intensity.
+- Primary: `When did you last train?` with chips `0 days / 1 day / 2+ / First time` (`First time` hidden once any `ExecutionLog` exists; `0 days` is warning-tinted).
+- Progressive disclosure (`D129`): tapping `2+` reveals a layoff sub-row `2–7 days / 1–4 wks / 1–3 mo / 3+ mo`; `3+ months` shows a soft clinician-check-in nudge (prompt, not gate).
+- If `0 days` / `First time` (or sub-bucket `1–3 months`+): session automatically scales down volume and intensity.
 
 **Heat awareness (contextual, shown once per session on hot days):**
 

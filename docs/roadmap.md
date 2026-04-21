@@ -1,20 +1,24 @@
 ---
-id: roadmap
+
+## id: roadmap
+
 title: Roadmap
 status: draft
 stage: planning
 type: core
 authority: phase sequencing, exit criteria, local-first capability ladder, validation experiments, risk mitigations
 summary: "Phased delivery plan with exit criteria, validation experiments, and local-first capability ladder."
-last_updated: 2026-04-19
+last_updated: 2026-04-20-d
 depends_on:
-  - docs/vision.md
-  - docs/prd-foundation.md
-  - docs/decisions.md
-  - docs/research/coach-facing-business-models.md
-  - docs/research/persistent-team-identity.md
-  - docs/research/srpe-load-adaptation-rules.md
----
+
+- docs/vision.md
+- docs/prd-foundation.md
+- docs/decisions.md
+- docs/milestones/m001-solo-session-loop.md
+- docs/plans/2026-04-20-m001-tier1-implementation.md
+- docs/research/coach-facing-business-models.md
+- docs/research/persistent-team-identity.md
+- docs/research/srpe-load-adaptation-rules.md
 
 # Roadmap
 
@@ -52,11 +56,11 @@ This document is phase-level. It should guide sequencing and validation, but exe
 
 Phases are not 2-week sprints. Milestones are outcome-based slices that can complete, block, or be deferred independently.
 
-The v0b Starter Loop under `app/` is **feature-complete** as the D91 field-test artifact (see `D119` in `docs/decisions.md`); Phases A, B, C, E, and F all landed through 2026-04-19. The D91 field-test gate is now the blocking next step for M001. Milestone charters and explicit gates still govern sequencing.
+The v0b Starter Loop under `app/` is **feature-complete** as the D91 field-test artifact (see `D119` in `docs/decisions.md`); Phases A, B, C, E, and F all landed through 2026-04-19. Under `D130` (2026-04-20) the **D91 field-test gate is deferred**, not removed; M001 build proceeds in founder-use mode against the full M001 product contract, and the D91 stranger-cohort question returns to the critical path at the 2026-07-20 re-eval (or earlier if a `D130` early trigger fires). Milestone charters and explicit gates still govern sequencing; the concrete tier breakdown lives in `docs/plans/2026-04-20-m001-tier1-implementation.md` and the `docs/milestones/m001-solo-session-loop.md` Tier plan section.
 
-## D91 artifact note
+## D91 artifact note (under `D130` founder-use mode)
 
-v0b is the **D91 field-test artifact**, not the full product contract. When v0b cuts or defers richer explanation surfaces, session history, or weekly-confidence layers to keep the field test clean, treat those as validation-time concessions rather than as long-term product rejection. The first post-D91 self-coached follow-on should restore the smallest versions that increase joy, trust, and investment without turning the app into a dashboard.
+v0b was the **D91 field-test artifact**, not the full product contract. Under `D130` (founder-use mode) the v0b simplifications — no "See why" surface, minimum-honest summary copy, no session history, first-run that risks feeling form-first — move from "preserved for later" to **Tier 2 scope** on the founder-use M001 build. The weekly receipt / minimal accumulation layer stays deferred to `M002` as before. The D91 gate itself is **preserved unchanged as the canonical bar for a future stranger launch** and returns at the 2026-07-20 re-eval; it is not rewritten, softened, or retired by `D130`.
 
 ## Shared product backbone
 
@@ -121,6 +125,16 @@ Goal: ship the smallest useful self-coached version that is trustworthy on one d
 Local-first focus: device-primary storage, zero server dependency for the core loop, and persistent browser storage where supported.
 
 Current planning default for the first implementation-ready milestone: solo-first flow with lightweight pair fallback and a passing-fundamentals-for-serve-receive first track. The broader MVP envelope may grow into a shallow next-N session queue and a minimal weekly receipt, but coach-led overlays remain downstream of **M002 Weekly Confidence Loop** and the coach gate in Roadmap intent. Inside Phase 1, **M001** proves the runner loop and **M002 Weekly Confidence Loop** makes the product feel worth returning to before any coach-connected build begins.
+
+**Under `D130` (2026-04-20), Phase 1's M001 is being built in tiers for founder + partner use. The tier structure was rescoped on 2026-04-20-d after the red-team review (`docs/reviews/2026-04-20-m001-red-team.md`) surfaced scope-ballooning, SetupScreen formification, and architectural breaks in the earlier single-Tier-1 plan.**
+
+- **Tier 1a (minimum shippable content + safety base)**: warm-up authoring bug fix (one drill `d28 Beach Prep Three`); setting minimum probe (3 drills — `d38`, `d39`, `d41` — `chain-7-setting` with no progression links in Tier 1a); vocabulary sweep with inline definitions; "Chosen because:" rationale on RunScreen; last-3-sessions row on Home. **No new SetupScreen toggles.** **No focus-routing architecture.** **No pair opening-block.** See `docs/plans/2026-04-20-m001-tier1-implementation.md`.
+- **Tier 1b (content expansion on logged demand)**: capped at ≤10 new drills total per `docs/plans/2026-04-20-m001-adversarial-memo.md` anti-displacement cap. Likely candidates: `d31`, `d33`, `d36` from serving; `d40`, `d42`, `d43` from setting. Progression links added here with pair-vs-solo branching on serving Rung 1 and parallel jump-float unlock. Pair opening-block (`d30` + `pair_long_warmup` archetype variant) ships here only if walkthrough returns the need.
+- **Tier 1c (focus-toggle architecture, evidence-gated)**: `sessionFocus` field on context, dynamic `slot.skillTags` override in `sessionBuilder.ts::pickForSlot` AND `findSwapAlternatives`, Swap-Focus button on the **draft screen** (not SetupScreen). Ships only when founder-use ledger or partner walkthrough shows behavioural evidence of focus-switching friction.
+- **Tier 2 (deferred-surfaces unblock)**: full "See why" modal, richer summary copy, full session history screen, recommendation-first first-run polish to `D123`. Gated on Tier 1a acceptance + adversarial-memo Condition 3 pass (partner unprompted open within 30 days of Tier 1a walkthrough) + two weeks of founder weekly use.
+- **M002 Weekly Confidence Loop** remains the gate to any coach-connected work; it is **not** part of M001 tiering.
+
+The 2026-07-20 re-eval decides whether the next move after Tier 2 is (a) extending to a friends-of-friends cohort under a looser bar, (b) formally reopening the `D91` stranger-launch gate against the Tier-1-plus-Tier-2 build, or (c) continuing founder + partner only.
 
 Scope:
 
@@ -224,6 +238,7 @@ Candidate scope:
 - Optional premium coach access if the model proves real demand
 - Optional video import hooks
 - Deeper analytics and benchmarking
+- Drill-content-as-data-artifact: decide whether to publish a durable derived catalog (`docs/catalog.json` or equivalent) from the TS content source, and whether that ever graduates to an externally-served data product. Narrower replacement for an earlier "operational ontology kernel" framing that conflated persistence, code hygiene, and data-product concerns. Gated on `O20`; see `docs/decisions.md` `O20` for the two sub-questions and trigger conditions.
 
 ## P0 - Must exist for early validation
 
@@ -316,3 +331,4 @@ Explicitly not a P2 candidate:
 - **Belongs elsewhere**: product scope and object model (`prd-foundation.md`), principles (`vision.md`), specific decisions (`decisions.md`), milestone-level scope (`docs/milestones/`).
 - **Outranked by**: `vision.md`, `decisions.md`, and `prd-foundation.md`.
 - **Key pattern**: phases use prose headers (`### Phase 0`, `### Phase 1`, etc.). Reference them as `Phase 0`, `Phase 1`, `Phase 1.5`, `Phase 2` when cross-linking.
+

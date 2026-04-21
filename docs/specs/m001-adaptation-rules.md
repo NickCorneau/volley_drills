@@ -75,16 +75,18 @@ Before every session, the user answers 2-3 fast taps. These gate and shape the s
 
 **Pain flag (mandatory):**
 
-- Question: `Any pain that changes how you move?`
+- Question (post-physio-review 2026-04-20, see `D129`): `Any pain that's sharp, localized, or makes you avoid a movement?`
+- Secondary line under the question: `Regular muscle soreness is fine. We'll switch to a lighter session if yes.`
 - Input: `yes / no`
-- If yes: default to a recovery/technique-only session. User may override, but the default is conservative.
-- This is a binary safety gate, not a soreness questionnaire. Normal post-exercise soreness (DOMS) is expected; pain that changes movement patterns is the safety-critical signal.
+- If yes: default to a recovery/technique-only session. User may override, but the default is conservative. Override-confirm copy names a concrete consequence ("can turn a minor issue into a long layoff") rather than generic legalese — friction via specificity, not a hard block.
+- This is a binary safety gate, not a soreness questionnaire. Normal post-exercise soreness (DOMS) is expected; the rewording makes the DOMS-vs-guarding distinction explicit because the prior phrasing ("changes how you move") read to most users as "am I visibly limping," while the early warning sign is subtle avoidance.
 
 **Training recency (mandatory):**
 
-- Question: `Trained in last 7 days?`
-- Input: `0 / 1 / 2+` (auto-derived from session history when available)
-- If 0: automatically scale down session volume and intensity. A "normal" session after a layoff violates the "too much too soon" consensus.
+- Primary question: `When did you last train?`
+- Primary input: `0 days / 1 day / 2+ / First time` (`First time` filtered out once any `ExecutionLog` exists on device). `0 days` is visually warning-tinted.
+- Post-physio-review 2026-04-20 (see `D129`): `2+` is a progressive-disclosure trigger, not a submittable answer. Tapping `2+` reveals a layoff sub-row (`2–7 days / 1–4 wks / 1–3 mo / 3+ mo`), and the persisted `trainingRecency` is the sub-bucket string. Selecting `3+ months` shows a soft inline nudge about a clinician check-in — prompt, not gate.
+- If `0 days` or `First time` (or sub-bucket `1–3 months`+): automatically scale down session volume and intensity. A "normal" session after a layoff violates the "too much too soon" consensus; granularity on longer layoffs exists so the D91 read-out can see whether long-gap returners behave differently.
 
 **Heat awareness (contextual, beach-specific):**
 

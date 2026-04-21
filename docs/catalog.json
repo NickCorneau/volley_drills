@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
   "repo_id": "volley_drills",
-  "last_updated": "2026-04-19-e",
+  "last_updated": "2026-04-20",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -380,6 +380,12 @@
       "status": "active"
     },
     {
+      "id": "ltd3-development-matrix-synthesis",
+      "path": "docs/research/ltd3-development-matrix-synthesis.md",
+      "type": "research",
+      "status": "active"
+    },
+    {
       "id": "local-first-pwa-constraints",
       "path": "docs/research/local-first-pwa-constraints.md",
       "type": "research",
@@ -502,6 +508,20 @@
       "type": "research",
       "status": "active",
       "canonical_for": "operational protocol for the M001 14-day validation cohort (recruitment / consent scripts, per-use micro-log and session-ledger schema with confidence flag and separate researcher-interpretation column, three signal-based pulses at days 3/7/11, 72-hour non-returner probe, preregistered one-page decision memo, role separation and readout-ordering rules, and the 5-page evidence packet); operationalizes D91's banded reading without changing thresholds"
+    },
+    {
+      "id": "vdm-development-matrix-takeaways",
+      "path": "docs/research/vdm-development-matrix-takeaways.md",
+      "type": "research",
+      "status": "draft",
+      "canonical_for": "curated mineable takeaways from the VDM (Volleyball Canada Development Matrix) primary source: 4-stage skill vocabulary (Initiation / Acquisition / Consolidation / Refinement), time-to-consolidate quote (~3 months at 2-3×/week), 3×/week development-minimum rule, Structural Tolerance framing, 0-10 pain scale with cumulative threshold, Adaptation Principle citation, and cue-reading/decision-making/execution demand taxonomy"
+    },
+    {
+      "id": "fivb-coaches-manual-crosscheck",
+      "path": "docs/research/fivb-coaches-manual-crosscheck.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "product-useful extractions from the indoor-biased FIVB Level I (2013) and Level II (2016) coaches manuals: Fitts and Posner three-stage motor-learning model, one-cue-at-a-time rule for beginners, 2-3-trials-between-feedback cadence, whole-practice bias and its four exceptions, federation-level drill measurement-mode vocabulary, four drill design types, Yakovlev supercompensation windows, injury-distribution context, and the ruled-out indoor/team-tactics list; indexes the secondary PDFs in docs/research/sources/reference-only/"
     },
     {
       "id": "agent-documentation-contract",
@@ -720,6 +740,18 @@
     {
       "path": "docs/research/pre-telemetry-validation-protocol.md",
       "focus": "operational protocol for the M001 14-day validation cohort (recruitment / consent scripts, per-use micro-log and session-ledger schema, three signal-based pulses at days 3/7/11, 72-hour non-returner probe, preregistered one-page decision memo, role separation and readout-ordering rules, 5-page evidence packet); operationalizes D91's banded reading without changing thresholds"
+    },
+    {
+      "path": "docs/research/vdm-development-matrix-takeaways.md",
+      "focus": "curated takeaways from the Volleyball Canada Development Matrix PDF with per-item disposition (Adopt / Candidate / Defer): 4-stage skill vocabulary, ~3-months-to-consolidate quote, 3×/week development minimum, Structural Tolerance framing, 0-10 pain scale with cumulative threshold, Adaptation Principle citation, cue-reading/decision-making/execution demand taxonomy"
+    },
+    {
+      "path": "docs/research/fivb-coaches-manual-crosscheck.md",
+      "focus": "product-useful extractions from the indoor-biased FIVB Level I (2013) and Level II (2016) coaches manuals: Fitts and Posner three-stage motor-learning model, one-cue-at-a-time rule for beginners, 2-3-trials-between-feedback cadence, whole-practice bias and its four exceptions, federation-level drill measurement-mode vocabulary, four drill design types, Yakovlev supercompensation windows, injury-distribution context, and the ruled-out indoor/team-tactics list; indexes docs/research/sources/reference-only/"
+    },
+    {
+      "path": "docs/research/ltd3-development-matrix-synthesis.md",
+      "focus": "LTD 3.0 framework overview, Active-for-Life target-user stage mapping with Train-to-Train content scope, Active-for-Life life phases (30s / 40-50s / 50-60s / 70+), Active-for-Life sleep row (do not train if fatigued or sleep deprived), practice-to-compete ratios from the four LTD stage one-pagers, and the Person Pillar Guidebook as a coaching-copy template (desired state / indicators / reinforcing comments / reflection questions); complementary to docs/research/vdm-development-matrix-takeaways.md which owns the narrow VDM items"
     }
   ],
   "status_vocabularies": {

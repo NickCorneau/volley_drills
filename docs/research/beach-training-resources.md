@@ -6,7 +6,7 @@ stage: planning
 type: research
 authority: broad beach training, wedge choice, drill content, metrics, injury prevention, and competitor context
 summary: "Curated research: competitive landscape, periodization, injury prevention, UX, metrics, and drill examples."
-last_updated: 2026-04-16
+last_updated: 2026-04-20
 depends_on:
   - docs/vision.md
   - docs/decisions.md
@@ -561,6 +561,65 @@ The headline is that the literature validates, rather than overturns, the bulk o
 ### Source additions from this pass
 
 The "Sources" section below adds skill-acquisition and feedback-scheduling references used here. When future work pulls on this synthesis (Phase 1.5 planning, serve or set track activation, cue-cadence validation), start from those citations plus the prior contextual-interference and sRPE sources already in this doc.
+
+## FIVB drill-book re-review (2026-04-20)
+
+A second pass over `docs/research/sources/FIVB_Beachvolley_Drill-Book_final.pdf` against everything already captured here and in `docs/milestones/m001-solo-session-loop.md`. The book was previously mined for the drill data model, Diamond-Passing fatigue cap, wind-adjusted trajectory, participant minimums, and the in-system/out-of-system frame. This pass surfaces items that were **not** yet captured and that have a plausible home in active M001 Tier 1 work or in the Tier 3 block/defense/attack backlog.
+
+> **Source archive**: for the full book structure (8-chapter / 104-drill TOC), the drill data-model schema, per-chapter teaching-framework prose verbatim, and the FIVB drill → our-drill-id cross-reference, see `docs/research/fivb-source-material.md`. The section below captures **findings**; the archive captures **what the book actually contains**.
+
+### Net-new coaching cues for Tier 1 authoring
+
+These are phrase-level candidates for `courtsideInstructions` and the Unit 5 skill-vocabulary audit. They are not drills; they are language the book uses consistently that strengthens our cue discipline.
+
+- "One training in the wind is worth three in the calm." Reframes wind from obstacle to training asset. Candidate coach-note on the Safety Check screen when the reported wind is `breezy` or `windy`, and a candidate tag on wind-friendly drills.
+- "Pass smaller, closer, lower" as the beach-vs-indoor transition rule for passing targets. Our current passing cues only say "lower in wind"; the book is explicit that beach targets are both smaller *and* closer than indoor "position 2.5."
+- "Squaring up" is defined in the book as "facing the target with feet and shoulders." Add to the Unit 5 glossary header in `archetypes.ts` and use uniformly in setting drills.
+- Serving-into-wind cues. The book is direct on two points we only implied: "serve into the wind, not with it — the trajectory is more predictable," and "to move the ball more in the wind, either serve deeper or start further back from the service line." Candidate cues for `d31`–`d37` when the session context is `wind-friendly`.
+- Deep-serve trajectory: "a deep serve must arc *high* to push the passer back; a low flat ball does not force retreat." Candidate cue on whichever rung of the serving ladder targets deep placement.
+- Defensive cue "keep arms up at shoulder height when retreating." Parked for Tier 3 defense chain.
+
+### In-system / out-of-system operational definition
+
+The book's operational definition of in-system vs out-of-system is cleaner than what we currently encode as a generic "set window" target: draw perpendicular lines forward from each passer's home position; inside those lines is in-system, outside is out-of-system. This gives the passer a mental target they can self-check without a coach. Candidate addition to the pass-quality rubric note that supports `D104` (binary pass scoring) — not as a new metric, but as a visual definition for what "Good" means when the user is unsure.
+
+### Serving drills — supplementary to the BAB ladder
+
+The Tier 1 serving ladder is authored from BAB under D130. A side-by-side of the FIVB serving drills confirms convergent design and flags three concepts not covered by the BAB ladder that are worth keeping in the Tier 2 / backlog pool:
+
+- **Serving Outside the Heart.** Beginner-tactical. Treat the middle-front of the receiving court as a no-serve zone shaped like a heart. Simpler than zone numbers and good for a first-rung variant if the BAB opening rung proves too abstract in courtside testing.
+- **Force Them Back.** Scoring rule: the setter must land inside a 2-ft-from-net strip (in-system) or a 10-ft-from-net strip (good-enough) after each serve. Translates passing quality into a serve outcome with a clean binary spec. Candidate Tier 2 "pressure serving" drill.
+- **Split the Passers.** "Husband-and-wife" serve, aimed at the seam between two passers. Partner-only, out of M001 scope, but worth naming for when partner mode lights up.
+
+FIVB's "First to 10" is effectively the same drill as our `d22` First to 10 Serving, and "Serve and Get Into Position" is effectively BAB Serve-and-Dash. We should not duplicate either.
+
+### Setting drills — two gaps worth flagging
+
+The Tier 1 setting chain is authored from VDM+BAB under D130. Two FIVB drills cover scenarios the current chain does not:
+
+- **4 Great Sets.** One perfect pass plus three off-quality passes (short, shallow, sideways); the setter must read and choose bump-set vs hand-set on each rep. This is a *variability* drill that directly trains the decision the real game asks for. Candidate substitution for a later rung of `chain-7-setting`, or a Tier 2 polish drill if the current seven rungs prove too drill-mechanical in testing.
+- **Setting Ball Out of the Net.** Bump-set recovery off the net tape. Situational skill that the current setting chain does not touch. Park as Tier 2 polish — not a gap worth widening Tier 1 scope for.
+
+### Tier 3 backlog: attack, block, defense content
+
+Not for M001, but the book is rich enough that we should not re-mine it later. Quick pointers so the future author does not start from zero:
+
+- **Blocking.** 10 drills (6.1–6.10). Hand-signal convention is standardized and worth encoding once if we ever ship a blocking chain: one finger = line, two fingers = angle, closed fist = power block through. Left hand signals the left-side attacker, right hand signals the right-side attacker.
+- **Defense.** 17 drills (7.1–7.17). Rich source for the eventual defense chain. Key cue already cited above: "arms up at shoulder height when retreating."
+- **Attack.** Two specific drill names — **Spike Exhaustion** and **Continuous Spiking** — are explicit high-volume shoulder-load drills. They belong in the fatigue-cap / shoulder-safety register the moment an attack track is scoped. Flag at author time against the existing `D77` fatigue-cap policy before copying them in.
+- **Modified Games.** 15 compact rule-variant games (Monarch of the Court, Double or Nothing, Over on 1, Modified Court 1-on-1, and others). These are one-line rule tweaks on a normal game rather than traditional drills. Candidate *shape* for how future "pressure blocks" in a session could be represented — templates with a rule delta rather than a full drill card. Not a decision; a design option to remember when the pressure-block question comes up.
+
+### Already fully captured, do not re-mine
+
+For future cold-start agents: the FIVB drill book has already been mined for all of the following, and the canonical record lives above in this doc and in `docs/milestones/m001-solo-session-loop.md`. Do not re-extract these.
+
+- Drill data model (objective / equipment / participants / teaching points / variations).
+- Participant minimums including the "1 athlete + coach" framing.
+- Diamond Passing fatigue cap ("2 sets of 4 serves; more than that and technique suffers").
+- Moving-triangle passing theory.
+- Wind-adjusted pass trajectory and bump-set-vs-hand-set-in-wind guidance.
+- Warm-up doubling as feel-for-conditions assessment.
+- Tomahawk technique for high balls.
 
 ## Key research takeaway
 
