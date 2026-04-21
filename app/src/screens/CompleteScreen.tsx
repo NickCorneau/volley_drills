@@ -156,7 +156,7 @@ export function CompleteScreen() {
             variant="ghost"
             onClick={() => navigate(routes.home(), { replace: true })}
           >
-            Back to start
+            Back to home
           </Button>
         }
       />

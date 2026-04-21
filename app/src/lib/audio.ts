@@ -54,6 +54,22 @@ const BLOCK_END_FREQUENCY_HZ = 1000
 const BLOCK_END_DURATION_SECONDS = 0.25
 const PREROLL_TICK_FREQUENCY_HZ = 800
 const PREROLL_TICK_DURATION_SECONDS = 0.1
+/**
+ * Pre-close 2026-04-21 (P2-2): sub-block pacing tick for timed internal
+ * segments (d28 Beach Prep's 4 x ~45s components, d26 Stretch Micro-
+ * sequence's 6 x ~30s stretches). Pitched ABOVE the preroll + block-end
+ * tones so it reads as a distinct "move to the next segment" pulse
+ * rather than being confused with the block-boundary cues. 1400 Hz
+ * sits inside the outdoor-UI brief's 1.8-3.0 kHz target band less
+ * conservatively than the existing tones but ahead of where the full
+ * audio retune can be justified; shorter envelope so it's subtle.
+ *
+ * See `.cursor/rules/courtside-copy.mdc` Invariant 5 and
+ * `docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md`
+ * P2-2.
+ */
+const SUB_BLOCK_TICK_FREQUENCY_HZ = 1400
+const SUB_BLOCK_TICK_DURATION_SECONDS = 0.06
 
 /**
  * Shared lazily-instantiated AudioContext. Module-scoped so subsequent
@@ -183,11 +199,32 @@ export function playBlockEndBeep(): void {
  * of the 3 / 2 / 1 countdown seconds so the tester doesn't have to
  * watch the phone to catch the start.
  *
+ * Pre-close 2026-04-21 (thought 3b): also reused for the block-end
+ * 3-sec countdown (3 / 2 / 1 ticks leading into the block-end beep)
+ * so start and end of every block share the same sonic entrance/exit
+ * ramp.
+ *
  * Safe to call from any environment: SSR no-ops, missing
  * `AudioContext` no-ops, rejected autoplay no-ops, never throws.
  */
 export function playPrerollTick(): void {
   playTone(PREROLL_TICK_FREQUENCY_HZ, PREROLL_TICK_DURATION_SECONDS)
+}
+
+/**
+ * Play a sub-block pacing tick. Called from `RunScreen` at every
+ * multiple of the active block's `subBlockIntervalSeconds` so drills
+ * with internal timed sub-segments get audible pacing without the
+ * tester needing to watch the phone.
+ *
+ * Pitched higher and briefer than the block-boundary cues so it is
+ * distinguishable from the 3-sec end-countdown and the block-end beep.
+ *
+ * Safe to call from any environment: SSR no-ops, missing
+ * `AudioContext` no-ops, rejected autoplay no-ops, never throws.
+ */
+export function playSubBlockTick(): void {
+  playTone(SUB_BLOCK_TICK_FREQUENCY_HZ, SUB_BLOCK_TICK_DURATION_SECONDS)
 }
 
 /**

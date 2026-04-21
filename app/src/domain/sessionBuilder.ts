@@ -249,6 +249,7 @@ export function buildDraft(context: SetupContext): SessionDraft | null {
       courtsideInstructions: pick.variant.courtsideInstructions,
       required: slot.required,
       rationale: deriveBlockRationale(slot.type, pick.drill, context),
+      subBlockIntervalSeconds: pick.variant.subBlockIntervalSeconds,
     })
   }
 
@@ -407,7 +408,7 @@ function allocateRecoveryDurations(
   const minTotal = durations.reduce((a, b) => a + b, 0)
   if (totalMinutes < minTotal) return null
 
-  let remaining = totalMinutes - minTotal
+  const remaining = totalMinutes - minTotal
   if (remaining === 0) return durations
 
   const techIdx = layout.findIndex((s) => s.type === 'technique')
@@ -491,6 +492,7 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
       courtsideInstructions: pick.variant.courtsideInstructions,
       required: slot.required,
       rationale: deriveBlockRationale(slot.type, pick.drill, context),
+      subBlockIntervalSeconds: pick.variant.subBlockIntervalSeconds,
     })
   }
 
@@ -652,5 +654,12 @@ export function findSwapAlternatives(
     // mid-run Swap. Without this, the rationale would keep reading
     // "pass focus" even after the user swapped to a serve drill.
     rationale: deriveBlockRationale(block.type, c.drill, context),
+    // Pre-close 2026-04-21 (P2-2): carry the swapped variant's sub-block
+    // pacing (if any) through the swap. In practice the Swap button is
+    // hidden on warmup/wrap per D85/D105 and the main_skill variants
+    // currently shipped have no sub-block pacing, so this is defensive -
+    // it keeps the type honest so future variants with sub-blocks on a
+    // Swap-eligible slot don't silently drop their pacing mid-swap.
+    subBlockIntervalSeconds: c.variant.subBlockIntervalSeconds,
   }))
 }

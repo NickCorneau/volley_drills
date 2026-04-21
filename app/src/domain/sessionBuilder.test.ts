@@ -364,4 +364,47 @@ describe('sessionBuilder', () => {
       }),
     ).toBe(40)
   })
+
+  /**
+   * Pre-close 2026-04-21 (partner walkthrough P2-2 + thought 3b in
+   * founder review): `subBlockIntervalSeconds` pipes from drill variant
+   * onto DraftBlock so `RunScreen` can fire sub-block pacing ticks. If
+   * any link in the plumbing drops it, d28 Beach Prep Three stops
+   * pacing at ~45 s and d26 Stretch Micro-sequence stops at ~30 s, and
+   * the partner's explicit "beep every 30 seconds during the cool down"
+   * ask is silently undone.
+   */
+  it('subBlockIntervalSeconds pipes through buildDraft onto warmup + wrap blocks', () => {
+    const draft = buildDraft({
+      playerMode: 'solo',
+      timeProfile: 15,
+      netAvailable: false,
+      wallAvailable: true,
+    })
+    expect(draft).not.toBeNull()
+
+    const warmup = draft!.blocks.find((b) => b.type === 'warmup')
+    expect(warmup?.drillId).toBe('d28')
+    expect(warmup?.subBlockIntervalSeconds).toBe(45)
+
+    const wrap = draft!.blocks.find((b) => b.type === 'wrap')
+    expect(['d25', 'd26']).toContain(wrap?.drillId)
+    if (wrap?.drillId === 'd26') {
+      expect(wrap.subBlockIntervalSeconds).toBe(30)
+    }
+  })
+
+  it('main_skill blocks without internal sub-segments leave subBlockIntervalSeconds undefined', () => {
+    const draft = buildDraft({
+      playerMode: 'solo',
+      timeProfile: 15,
+      netAvailable: false,
+      wallAvailable: true,
+    })
+    const mainSkill = draft!.blocks.find((b) => b.type === 'main_skill')
+    expect(mainSkill).toBeDefined()
+    // Current main_skill variants do not declare sub-block pacing;
+    // the field rides as undefined so RunScreen's pacing loop no-ops.
+    expect(mainSkill!.subBlockIntervalSeconds).toBeUndefined()
+  })
 })

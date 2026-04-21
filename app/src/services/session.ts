@@ -115,6 +115,12 @@ export async function createSessionFromDraft(
       // RunScreen's Chosen-because line has a surface to read from.
       // Left undefined for legacy draft paths that don't populate it.
       rationale: b.rationale,
+      // Pre-close 2026-04-21 (P2-2): sub-block pacing interval (seconds)
+      // rides from draft onto plan so RunScreen's sub-block tick loop
+      // can fire audible cues at each interval. Undefined on drills
+      // without internal sub-segments (most main_skill drills) and on
+      // legacy drafts that pre-date the field.
+      subBlockIntervalSeconds: b.subBlockIntervalSeconds,
     })),
     safetyCheck,
     context: draft.context,

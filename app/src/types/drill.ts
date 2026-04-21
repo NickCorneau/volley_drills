@@ -109,6 +109,24 @@ export interface DrillVariant {
   successMetric: SuccessMetric
   courtsideInstructions: string
   coachingCues: string[]
+  /**
+   * Pre-close 2026-04-21 (partner-walkthrough P2-2): drills authored
+   * with internal timed sub-blocks declare the tick cadence here. When
+   * set, `RunScreen` fires a subtle sub-block tick at every multiple
+   * of this interval during active execution so the courtside reader
+   * gets audible pacing for sub-segments the copy already enumerates
+   * (e.g. d28 Beach Prep Three's four ~45 s components, d26 Stretch
+   * Micro-sequence's six ~30 s stretches).
+   *
+   * Undefined on drills without internal sub-blocks (main_skill drills
+   * are generally continuous and do not want mid-block ticks).
+   *
+   * Units: seconds. Must be a positive integer if set. See
+   * `.cursor/rules/courtside-copy.mdc` §Invariant 5 for the authoring
+   * contract ("copy in firing order"); this field is the runtime side
+   * of that contract.
+   */
+  subBlockIntervalSeconds?: number
 }
 
 /** A drill family - the canonical concept with one or more execution variants. */

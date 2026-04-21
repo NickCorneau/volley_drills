@@ -216,6 +216,40 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
     expect(step).toBe('todays_setup')
   })
 
+  /**
+   * Pre-close 2026-04-21 (partner walkthrough P1-1): "Not sure yet"
+   * was previously rendered as a `variant="link"` text button below
+   * the four primary band cards; Seb didn't notice it on first scan.
+   * Fix: render it inside the same `<ul>` of focal-surface cards, with
+   * a recommend-first descriptor that states what "unsure" routes to.
+   * The taxonomy enum stays unchanged; this is a pure hierarchy +
+   * copy lift.
+   */
+  it('"Not sure yet" renders a descriptor explaining what the app does with that answer (P1-1 / P11)', async () => {
+    renderScreen()
+    const notSureYet = await screen.findByRole('button', {
+      name: /not sure yet/i,
+    })
+    // The descriptor states the recommend-first promise directly -
+    // not reassurance-only ("you can change this later") but what the
+    // app will do on behalf of the reader who can't self-classify.
+    expect(
+      within(notSureYet).getByText(/light starter/i),
+    ).toBeInTheDocument()
+  })
+
+  it('"Not sure yet" is in the same <ul> as the four bands (visual parity, P1-1)', async () => {
+    renderScreen()
+    const list = await screen.findByRole('list', {
+      name: /skill level options/i,
+    })
+    // Five <li> items inside the list: four bands + Not-sure-yet.
+    // Previous rendering put the escape outside the list as a text
+    // link, which is what Seb missed on first scan.
+    const items = within(list).getAllByRole('listitem')
+    expect(items).toHaveLength(5)
+  })
+
   it('writes skillLevel and step ATOMICALLY (multi-key transaction, not two separate writes)', async () => {
     const user = userEvent.setup()
     renderScreen()

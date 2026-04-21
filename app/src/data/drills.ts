@@ -1439,9 +1439,10 @@ const d26: Drill = {
       // Timed sub-blocks: 6 x 20-30 s stretch segments. Courtside copy
       // enumerates each stretch with an execution cue inline (partner
       // walkthrough P1-8: "I got stuck figuring out what stretches may be").
-      // Per-stretch tap-to-expand demos are a Tier 1b candidate. Pacing-
-      // audio infra (per-segment beeps) not yet shipped - see courtside-
-      // copy rule §Invariant 5.
+      // Per-stretch tap-to-expand demos are a Tier 1b candidate.
+      // Pre-close 2026-04-21 (P2-2): 30s pacing tick ships via
+      // `subBlockIntervalSeconds` - matches the partner's explicit ask
+      // ("A beep every 30 seconds during the cool down would help").
       id: 'd26-solo',
       drillId: 'd26',
       label: 'Solo',
@@ -1463,6 +1464,7 @@ const d26: Drill = {
       courtsideInstructions:
         'Six stretches, 20–30 s each. No bouncing; strong tension, never painful. (1) Calf straight — back leg straight, heel down, lean forward into front knee. (2) Calf bent — same stance, bend back knee slightly, feel lower calf. (3) Hamstring — one leg forward, heel down, toes up; sit back into standing leg and reach toward toes. (4) Hip flexor — half-kneel on one knee, tuck pelvis, lean forward into front leg. (5) Glute — seated or lying, pull one knee toward opposite shoulder. (6) Adductor — wide stance, bend one knee, shift weight over it.',
       coachingCues: ['Breathe.', 'Avoid pain.', 'Hold steady.'],
+      subBlockIntervalSeconds: 30,
     },
   ],
 }
@@ -1679,10 +1681,10 @@ const d28: Drill = {
     {
       // Timed sub-blocks: 4 x ~45 s segments (jog/skip, ankle hops,
       // shoulder+trunk, sand movement). Copy is written in firing order.
-      // Pacing-audio infra (per-segment beeps at ~45 s boundaries) not yet
-      // shipped - see partner walkthrough P2-2 in
-      // docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md
-      // and the courtside-copy rule §Invariant 5.
+      // Pre-close 2026-04-21 (P2-2): 45s pacing tick ships via
+      // `subBlockIntervalSeconds` - four segments each get a pacing
+      // pulse at their boundary so the tester doesn't need to watch
+      // the phone to know when to flip components.
       id: 'd28-solo',
       drillId: 'd28',
       label: 'Solo',
@@ -1708,6 +1710,7 @@ const d28: Drill = {
         'Full range on arm swings.',
         'Move your feet - ankles first, then legs.',
       ],
+      subBlockIntervalSeconds: 45,
     },
   ],
 }

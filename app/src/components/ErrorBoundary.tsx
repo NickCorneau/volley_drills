@@ -32,7 +32,7 @@ export class ErrorBoundary extends Component<Props, State> {
             }}
             className="min-h-[54px] rounded-[16px] bg-accent px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-accent-pressed active:bg-accent-pressed"
           >
-            Back to start
+            Back to home
           </button>
         </div>
       )

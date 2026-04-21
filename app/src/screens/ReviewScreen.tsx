@@ -6,6 +6,7 @@ import { QuickTagChips } from '../components/QuickTagChips'
 import { RpeSelector } from '../components/RpeSelector'
 import { SafetyIcon } from '../components/SafetyIcon'
 import { Button, Card, StatusMessage } from '../components/ui'
+import { DRILLS } from '../data/drills'
 import type { ExecutionLog, IncompleteReason, SessionPlan } from '../db'
 import { formatDurationLine, statusLabel } from '../lib/format'
 import { isSchemaBlocked } from '../lib/schema-blocked'
@@ -18,6 +19,54 @@ import {
   submitReview,
 } from '../services/review'
 import { loadSession } from '../services/session'
+import type { MetricType } from '../types/drill'
+
+/**
+ * Pre-close 2026-04-21 (thought 4 in founder pre-close review): the
+ * "Good passes" capture only makes sense when the main_skill drill's
+ * `successMetric.type` is a count-based metric the tester can tally
+ * courtside. The current drill catalog has many non-count shapes
+ * (`streak`, `points-to-target`, `pass-grade-avg`, `composite`,
+ * `completion`) where asking for good / total is a guess at best.
+ *
+ * Sub-fix: when the main_skill drill's type is NOT count-based,
+ * default the `notCaptured` quickTag to selected so the reviewer
+ * isn't guilt-tripped into inventing numbers. Can still toggle off
+ * if they did track something.
+ *
+ * The full drill-metadata-driven capture UI (hide the Good/Total
+ * card entirely for non-count drills; branch PassMetricInput on
+ * capture style) is Tier 1b; this is the pre-close approximation.
+ * See `docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md`
+ * P2-3 and the founder pre-close review thought 4.
+ */
+const COUNT_BASED_METRIC_TYPES: ReadonlySet<MetricType> = new Set([
+  'pass-rate-good',
+  'reps-successful',
+])
+
+function inferMainSkillMetricType(plan: SessionPlan | null): MetricType | null {
+  if (!plan) return null
+  const mainSkill = plan.blocks.find((b) => b.type === 'main_skill')
+  if (!mainSkill) return null
+  // SessionPlanBlock doesn't carry drillId (stripped at plan
+  // materialization per createSessionFromDraft). Drill names are the
+  // stable identifier that survives, per the Tier 1a Unit 3 vocab
+  // sweep: names are NOT renamed on existing drills precisely because
+  // historical session records reference them.
+  const drill = DRILLS.find((d) => d.name === mainSkill.drillName)
+  if (!drill) return null
+  // Prefer the variant whose participants bracket the plan's player
+  // count; fall back to the first variant if nothing brackets
+  // (defensive - shouldn't happen on a plan the builder produced).
+  const variant =
+    drill.variants.find(
+      (v) =>
+        v.participants.min <= plan.playerCount &&
+        plan.playerCount <= v.participants.max,
+    ) ?? drill.variants[0]
+  return variant?.successMetric.type ?? null
+}
 
 type LoadedSession =
   | { status: 'loading' }
@@ -161,6 +210,16 @@ function ReviewSessionContent({
           setIncompleteReason(draft.incompleteReason ?? null)
           setQuickTags(draft.quickTags ?? [])
           setShortNote(draft.shortNote ?? '')
+        } else {
+          // Pre-close 2026-04-21 (thought 4): no prior draft - if the
+          // main_skill drill isn't count-based, default `notCaptured`
+          // to selected so the tester doesn't feel obligated to
+          // invent a Good/Total pair. They can toggle off to record
+          // real numbers if they did track them.
+          const metricType = inferMainSkillMetricType(result.plan)
+          if (metricType != null && !COUNT_BASED_METRIC_TYPES.has(metricType)) {
+            setQuickTags(['notCaptured'])
+          }
         }
         setLoaded({
           status: 'ready',
@@ -330,7 +389,7 @@ function ReviewSessionContent({
             to={routes.home()}
             className="font-semibold text-accent underline-offset-2 hover:underline"
           >
-            Back to start
+            Back to home
           </Link>
         }
       />
@@ -595,7 +654,7 @@ export function ReviewScreen() {
             to={routes.home()}
             className="font-semibold text-accent underline-offset-2 hover:underline"
           >
-            Back to start
+            Back to home
           </Link>
         }
       />

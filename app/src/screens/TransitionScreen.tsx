@@ -67,7 +67,7 @@ export function TransitionScreen() {
               to={routes.home()}
               className="min-h-[54px] inline-flex items-center px-4 font-semibold text-accent underline-offset-2 hover:underline"
             >
-              Back to start
+              Back to home
             </Link>
           }
         />

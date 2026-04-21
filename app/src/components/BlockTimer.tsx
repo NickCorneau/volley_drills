@@ -11,6 +11,15 @@ import { formatTime } from '../lib/format'
  * other class on the countdown div is unchanged from pre-F10; this
  * is purely a display-face swap. See
  * `docs/plans/2026-04-19-feat-phase-f10-timer-display-face-plan.md`.
+ *
+ * Pre-close 2026-04-21 (thought 3b from founder pre-close review):
+ * when `remainingSeconds <= 3.5` the digits flip to accent color as
+ * the visible half of the block-end 3-sec countdown. The audio half
+ * (3 / 2 / 1 ticks + block-end beep) fires from `RunScreen`'s poll
+ * loop. Outdoor-UI brief cue-stack invariant: "Visual first, always.
+ * Audio is reinforcement." The `3.5` threshold (not `3`) ensures the
+ * flip lands when `ceil(remaining)` is 3 - i.e. on the same frame the
+ * audio tick for "3" fires - so visual and audio arrive together.
  */
 type BlockTimerProps = {
   remainingSeconds: number
@@ -20,12 +29,18 @@ type BlockTimerProps = {
 
 export function BlockTimer({ remainingSeconds, totalSeconds, isPaused }: BlockTimerProps) {
   const progress = totalSeconds > 0 ? 1 - remainingSeconds / totalSeconds : 0
+  const isCountingDown =
+    !isPaused && remainingSeconds > 0 && remainingSeconds <= 3.5
 
   return (
     <div className="flex flex-col items-center gap-3" role="timer" aria-live="polite">
       <div
-        className="font-mono text-[56px] font-bold leading-none text-text-primary tabular-nums"
+        className={`font-mono text-[56px] font-bold leading-none tabular-nums transition-colors ${
+          isCountingDown ? 'text-accent' : 'text-text-primary'
+        }`}
         style={{ fontFeatureSettings: '"zero" 1' }}
+        data-testid="block-timer-digits"
+        data-countdown={isCountingDown ? 'true' : 'false'}
       >
         {formatTime(remainingSeconds)}
       </div>

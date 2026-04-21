@@ -20,6 +20,15 @@ export interface SessionPlanBlock {
    * through a richer "See why this session was chosen" modal.
    */
   rationale?: string
+  /**
+   * Pre-close 2026-04-21 (partner-walkthrough P2-2): sub-block pacing
+   * interval in seconds. Copied from `DrillVariant.subBlockIntervalSeconds`
+   * during `createSessionFromDraft`. Consumed by `RunScreen` to fire
+   * audible ticks at each interval during active execution. Undefined
+   * on drills without internal sub-blocks, and on legacy plans that
+   * pre-date the field.
+   */
+  subBlockIntervalSeconds?: number
 }
 
 export interface SessionPlanSafetyCheck {
@@ -66,6 +75,8 @@ export interface DraftBlock {
   required: boolean
   /** Tier 1a Unit 4: see `SessionPlanBlock.rationale`. */
   rationale?: string
+  /** Pre-close 2026-04-21 (P2-2): see `SessionPlanBlock.subBlockIntervalSeconds`. */
+  subBlockIntervalSeconds?: number
 }
 
 export interface SessionDraft {

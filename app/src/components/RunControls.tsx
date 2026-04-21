@@ -18,6 +18,17 @@ type RunControlsProps = {
    * courtside action only when it can succeed. See
    * `docs/specs/m001-courtside-run-flow.md` §3 and the Phase F plan
    * Unit 4 requirements.
+   *
+   * 2026-04-21 (founder pre-close review): a preview label showing
+   * the next alternate's shortName (`Swap → {name}`) was prototyped
+   * and rolled back. Seb's Pass 1 Q7: "Right gesture, felt intuitive."
+   * The 13-swap frustration logged as P1-3 was script-induced (Task 2
+   * asked him to reach serving content `solo_open` doesn't carry),
+   * not a Swap-UX failure. Fixing the button on script-induced signal
+   * risked distorting a control the partner actively liked. The
+   * preview label, an undo toast, and a mid-run picker all stay
+   * parked until there's an actual Swap-UX signal in the founder-use
+   * ledger (swap-regret, "didn't know what it would do," or similar).
    */
   onSwap?: () => void
 }

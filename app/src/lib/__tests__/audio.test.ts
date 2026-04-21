@@ -3,6 +3,7 @@ import {
   __resetAudioContextForTesting,
   playBlockEndBeep,
   playPrerollTick,
+  playSubBlockTick,
 } from '../audio'
 
 /**
@@ -213,5 +214,41 @@ describe('lib/audio (Phase F Unit 3)', () => {
 
     playBlockEndBeep()
     expect(WebkitCtor).toHaveBeenCalledTimes(1)
+  })
+
+  /**
+   * Pre-close 2026-04-21 (partner walkthrough P2-2): sub-block pacing
+   * tick for drills with internal timed segments (d28 Beach Prep Three,
+   * d26 Stretch Micro-sequence). Pitched higher than the preroll tick
+   * (800 Hz) and the block-end beep (1000 Hz) so it reads as a distinct
+   * "move to next segment" pulse rather than a block boundary.
+   */
+  it('playSubBlockTick: schedules a 1400 Hz tone (distinct from preroll and block-end)', () => {
+    const fake = makeFakeContext()
+    const Ctor = makeCtorMock(() => fake)
+    stubAudioContextCtor(Ctor)
+
+    playSubBlockTick()
+
+    const osc = fake.createOscillator.mock.results[0].value as FakeOscillator
+    expect(osc.frequency.setValueAtTime).toHaveBeenCalledWith(1400, 0)
+  })
+
+  it('playSubBlockTick: safe to call when AudioContext is absent', () => {
+    vi.stubGlobal('AudioContext', undefined)
+    vi.stubGlobal('webkitAudioContext', undefined)
+
+    expect(() => playSubBlockTick()).not.toThrow()
+  })
+
+  it('playSubBlockTick: never throws when oscillator scheduling fails', () => {
+    const fake = makeFakeContext()
+    fake.createOscillator = vi.fn(() => {
+      throw new Error('simulated oscillator failure')
+    })
+    const Ctor = makeCtorMock(() => fake)
+    stubAudioContextCtor(Ctor)
+
+    expect(() => playSubBlockTick()).not.toThrow()
   })
 })

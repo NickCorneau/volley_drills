@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button } from '../components/ui'
 import { FOCAL_SURFACE_CLASS } from '../components/ui/Card'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import {
@@ -161,7 +160,20 @@ export function SkillLevelScreen() {
           soft shadow + hairline ring instead of a hard `border-2`, a
           touch more vertical breathing between options, and slightly
           more internal padding so each option reads as a calm,
-          deliberate choice rather than a checkbox row. */}
+          deliberate choice rather than a checkbox row.
+
+          Pre-close 2026-04-21 (P1-1 + P11): "Not sure yet" was a
+          `variant="link"` text button below the four primary bands,
+          and Seb reported he didn't notice it on first scan. Promoted
+          to a fifth focal-surface card rendered AFTER the four bands
+          so it doesn't compete with the primary typology, but carries
+          the same ink weight as the bands - which is what makes it
+          visible on a first scan under a glance. Copy adopts the
+          recommend-before-interrogate posture explicitly: the second
+          line says what the app does with "unsure" rather than
+          leaving the reader to guess. The taxonomy enum is unchanged
+          (still writes `skillLevel: 'unsure'` atomically via
+          `setStorageMetaMany`). */}
       <ul
         className="flex flex-col gap-4"
         aria-label="Skill level options"
@@ -182,11 +194,21 @@ export function SkillLevelScreen() {
             </button>
           </li>
         ))}
+        <li>
+          <button
+            type="button"
+            onClick={() => void handlePick('unsure')}
+            className={`flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent hover:bg-bg-warm active:bg-bg-warm ${FOCAL_SURFACE_CLASS}`}
+          >
+            <span className="text-base font-semibold text-text-primary">
+              {SKILL_LEVEL_LABEL.unsure}
+            </span>
+            <span className="text-sm text-text-secondary">
+              We'll size a light starter - you can change this after.
+            </span>
+          </button>
+        </li>
       </ul>
-
-      <Button variant="link" onClick={() => void handlePick('unsure')}>
-        {SKILL_LEVEL_LABEL.unsure}
-      </Button>
     </div>
   )
 }
