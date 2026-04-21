@@ -33,6 +33,18 @@
  *
  * See `docs/specs/m001-courtside-run-flow.md` §3 (Courtside action
  * rule, Phase F audio carve-out) and `docs/decisions.md` D122.
+ *
+ * Lock-screen presence: intentionally NOT implemented. A `MediaSession`
+ * route would surface block title + progress + play/pause on the iOS
+ * lock screen, but requires an actual `<audio>` element playing
+ * continuously (Web Audio oscillators do not drive MediaSession). The
+ * disqualifier is audio-focus conflict: beach rec players often train
+ * with Spotify running, and `MediaSession` either grabs the audio
+ * focus or sits as a second tile. Post-D91 backlog entry lives in
+ * `docs/plans/2026-04-16-003-rest-of-v0b-plan.md` §4 ("Lock-screen
+ * presence for the courtside timer") alongside the Web Push + native
+ * shell alternatives. Revisit once field evidence shows testers lock
+ * the phone mid-session and miss block-end cues.
  */
 
 const BLOCK_END_FREQUENCY_HZ = 1000
