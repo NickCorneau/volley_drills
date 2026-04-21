@@ -4,3 +4,4 @@ ops/agent/state/
 ops/agent/runs/*
 .cursor/hooks/state/
 .cursor/plans/
+.cursor/state/
