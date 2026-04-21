@@ -53,7 +53,7 @@ describe('chain-7-setting (Tier 1a Unit 2: minimum probe)', () => {
     expect(chain?.drillIds).toEqual(['d38', 'd39', 'd41'])
   })
 
-  it('has zero progression links (Tier 1a probe — Tier 1b authors links)', () => {
+  it('has zero progression links (Tier 1a probe - Tier 1b authors links)', () => {
     expect(chain?.links).toEqual([])
   })
 

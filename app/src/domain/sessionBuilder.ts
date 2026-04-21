@@ -115,46 +115,72 @@ function pickForSlot(
 
 /**
  * Tier 1a Unit 4: deterministic one-sentence rationale for why a block
- * landed in the session. The same (slot, drill, context) tuple always
- * produces the same sentence — no randomness, no LLM — so the partner
+ * landed in the session. The same (slot, drill) tuple always produces
+ * the same sentence - no randomness, no LLM - so the partner
  * walkthrough can tag the rationale as "nodded at" or "ignored as
  * noise" against a stable surface.
  *
- * Warmup and wrap get fixed boilerplate that cites D105 / D85, because
- * their *why* is curatorial ("every session starts/ends this way") not
- * context-derived. All other slot types read as
- * "{slot-type-label} block, {drill primary focus} focus,
- *  {playerMode} {timeProfile}-min."
+ * Feedback pass 2026-04-21: rationales used to cite internal decision
+ * IDs (D105/D85) and repeat the session's `playerMode timeProfile-min`
+ * trailer on every block. Testers read the decision IDs as noise and
+ * the pair-25/pair-40 trailer as redundant (it never changes inside a
+ * single session, so it added no signal per block). The new rationales
+ * are purpose-driven strings per slot type - what the block *does* for
+ * you - without internal IDs or timing.
  *
- * Not persisted to its own Dexie column — rides along inside the
+ * Not persisted to its own Dexie column - rides along inside the
  * `SessionPlanBlock` object once `createSessionFromDraft` carries it
- * from the draft onto the materialized plan. Tier 2 See-Why would
- * expand this into a richer modal surface; Tier 1a ships the single
- * sentence only.
+ * from the draft onto the materialized plan.
  */
-const SLOT_TYPE_LABEL: Record<BlockSlotType, string> = {
+const SKILL_FOCUS_LABEL: Record<string, string> = {
+  pass: 'passing',
+  set: 'setting',
+  serve: 'serving',
+  attack: 'attacking',
+  block: 'blocking',
+  dig: 'digging',
+  movement: 'movement',
   warmup: 'warmup',
-  technique: 'technique',
-  movement_proxy: 'movement-proxy',
-  main_skill: 'main-skill',
-  pressure: 'pressure',
-  wrap: 'wrap',
+  recovery: 'recovery',
+}
+
+function focusPhrase(drill: Pick<Drill, 'skillFocus'>): string {
+  const primary = drill.skillFocus[0]
+  if (!primary) return 'skill work'
+  return SKILL_FOCUS_LABEL[primary] ?? primary
 }
 
 export function deriveBlockRationale(
   slotType: BlockSlotType,
   drill: Pick<Drill, 'skillFocus'>,
+  // Context is kept in the signature for backwards compatibility with
+  // call sites, but the 2026-04-21 rewrite intentionally does not
+  // surface `playerMode`/`timeProfile` per block (same value across
+  // every block in a session = no signal). Keep the parameter so
+  // future rationale variants can re-derive from context without a
+  // call-site migration; `void` silences the unused-arg lint.
   context: SetupContext,
 ): string {
+  void context
   if (slotType === 'warmup') {
-    return 'Chosen because: every session starts with Beach Prep (D105).'
+    return 'Chosen because: every session opens with a sand-specific warmup.'
   }
   if (slotType === 'wrap') {
-    return 'Chosen because: every session ends with a downshift (D85).'
+    return 'Chosen because: every session closes with a cooldown downshift.'
   }
-  const focus = drill.skillFocus[0] ?? 'skill'
-  const slotLabel = SLOT_TYPE_LABEL[slotType]
-  return `Chosen because: ${slotLabel} block, ${focus} focus, ${context.playerMode} ${context.timeProfile}-min.`
+  const focus = focusPhrase(drill)
+  switch (slotType) {
+    case 'technique':
+      return `Chosen because: low-intensity ${focus} rep to groove the pattern.`
+    case 'movement_proxy':
+      return `Chosen because: sand movement rep tied to ${focus}.`
+    case 'main_skill':
+      return `Chosen because: today's main ${focus} rep.`
+    case 'pressure':
+      return `Chosen because: adds pressure to your ${focus} under fatigue.`
+    default:
+      return `Chosen because: ${focus} block.`
+  }
 }
 
 function allocateDurations(layout: BlockSlot[], totalMinutes: number): number[] | null {
@@ -250,10 +276,10 @@ export function buildDraft(context: SetupContext): SessionDraft | null {
  *   the plan has no persisted context (legacy v3 records), returns
  *   `null` so the caller can fall back to "Repeat full plan" /
  *   pre-filled Setup.
- * - Returns `null` when zero blocks are completed — the ended-early
+ * - Returns `null` when zero blocks are completed - the ended-early
  *   typical case has at least a warmup, but this is defensive; the
  *   caller should hide the secondary button in that case.
- * - Does NOT carry `SessionPlan.safetyCheck` values onto the draft —
+ * - Does NOT carry `SessionPlan.safetyCheck` values onto the draft -
  *   the draft doesn't encode safety (that happens on Safety screen
  *   mount), and D83 makes that a per-session decision anyway.
  * - `drillId` / `variantId` are left as empty strings: `SessionPlanBlock`
@@ -282,7 +308,7 @@ export function buildDraftFromCompletedBlocks(
     completedBlocks.push({
       id: planBlock.id,
       type: planBlock.type,
-      // Plan blocks don't carry drillId/variantId — they were stripped
+      // Plan blocks don't carry drillId/variantId - they were stripped
       // when the plan was materialized from the original draft. See
       // JSDoc above.
       drillId: '',
@@ -383,7 +409,7 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
  *
  * Given the currently-rendered `SessionPlanBlock` and the original
  * session context, return the ranked list of alternate drills that
- * would be a valid swap target — same block slot type, same
+ * would be a valid swap target - same block slot type, same
  * context-filtered candidate pool, different drill. The caller (the
  * `Swap` button on `RunControls`) picks `alternates[0]` to cycle
  * forward; each successive swap re-derives the list with the new
@@ -400,7 +426,7 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
  * catalog's internal structure.
  *
  * Deterministic ordering: sorted by `drill.id` so the cycle is stable
- * across renders / persistence roundtrips. No randomization — testers
+ * across renders / persistence roundtrips. No randomization - testers
  * should see the same "next" drill every time they tap Swap on the
  * same block.
  *
@@ -411,20 +437,20 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
  *
  * Neighbor-aware exclusion (VB-FL-7, 2026-04-19 non-player field
  * look): callers can pass `options.excludeDrillNames` to also strip
- * candidates whose drill name matches a surrounding plan block —
+ * candidates whose drill name matches a surrounding plan block -
  * typically `plan.blocks[activeBlockIndex ± 1]`. That prevents the
  * surprising case where a tester taps Swap and the new drill is
  * identical to the drill they're about to do next (or just finished).
  * If neighbor-exclusion would empty the candidate pool, we fall back
  * to base exclusion only (current drill name) so a tight slot pool
  * can't make the Swap button useless; landing on a neighbor is
- * better than no-op. The current-drill exclusion is never relaxed —
+ * better than no-op. The current-drill exclusion is never relaxed -
  * cycling past the same drill would defeat the Swap action entirely.
  */
 // Tier 1a Unit 2 (Swap-pool expansion): `main_skill` and `pressure`
 // include `'set'` so user-initiated Swap reaches chain-7-setting drills
 // (d38 Bump Set, d39 Hand Set, d41 Partner Set B&F). `archetypes.ts`
-// block skillTags intentionally stay `['pass', 'serve']` — default
+// block skillTags intentionally stay `['pass', 'serve']` - default
 // (non-Swap) session assembly preserves the single-focus-per-session
 // invariant; Swap is the user-initiated escape hatch that may cross
 // focus boundaries by intent. See
@@ -475,7 +501,7 @@ export function findSwapAlternatives(
 
   // Base exclusion (always on): the drill currently in this slot.
   // SessionPlanBlock doesn't carry drillId (that field is stripped
-  // when the plan is materialized from the draft — see
+  // when the plan is materialized from the draft - see
   // createSessionFromDraft in services/session.ts), so name is the
   // available identity.
   const baseFiltered = candidates.filter(
@@ -499,7 +525,7 @@ export function findSwapAlternatives(
     }
   }
 
-  // Sort by drill id for deterministic cycling — each tap picks
+  // Sort by drill id for deterministic cycling - each tap picks
   // alternates[0], then re-derives with the NEW drillName excluded,
   // so successive taps walk the list in a stable order.
   filtered.sort((a, b) => a.drill.id.localeCompare(b.drill.id))

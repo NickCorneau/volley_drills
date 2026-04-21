@@ -5,16 +5,17 @@ import { db } from '../../db'
 import { RunScreen } from '../RunScreen'
 
 /**
- * Phase F Unit 5 (2026-04-19): RunScreen defaults the coaching-cue
- * toggle to visible. Pre-Phase-F the `showInstructions` reducer started
- * at `false`, hiding the drill's teaching points behind a tap.
+ * Feedback pass 2026-04-21: RunScreen defaults the coaching-cue toggle
+ * to collapsed. Phase F Unit 5 (2026-04-19) had flipped the default to
+ * visible, but field testing showed the cue text crowds the run view;
+ * users preferred revealing cues on demand.
  *
  * Regression contract: on mount with a paused in-progress block whose
- * `coachingCue` is non-empty, the cue text is rendered AND the toggle
- * button reads "Hide cues" (not "Show coaching cues"). This is the
- * single source of truth for the Phase F default flip; the `Show`
- * label remains available post-toggle so paranoid users can still hide
- * the cue mid-block.
+ * `coachingCue` is non-empty, the cue text is NOT rendered AND the
+ * toggle button reads "Show coaching cues" (not "Hide cues"). This is
+ * the single source of truth for the 2026-04-21 default flip; the
+ * `Hide cues` label remains available post-toggle so users can collapse
+ * cues again mid-block.
  */
 
 async function clearDb() {
@@ -72,29 +73,27 @@ function renderAt(execId: string) {
   )
 }
 
-describe('RunScreen: coaching cues default visible (Phase F Unit 5)', () => {
+describe('RunScreen: coaching cues default collapsed (feedback 2026-04-21)', () => {
   beforeEach(async () => {
     await clearDb()
   })
 
-  it('on mount: coaching cue text is visible and toggle reads "Hide cues"', async () => {
+  it('on mount: cue text is hidden and toggle reads "Show coaching cues"', async () => {
     await seedPausedSession('exec-cue', 'plan-cue')
     renderAt('exec-cue')
 
-    // The cue string renders directly (no extra tap required).
+    // The toggle button reads "Show coaching cues" (default-collapsed)
+    // and the cue body text is NOT rendered.
     expect(
-      await screen.findByText(
+      await screen.findByRole('button', { name: /show coaching cues/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /^hide cues$/i }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(
         /athletic posture\. platform angle drives the ball\./i,
       ),
-    ).toBeInTheDocument()
-
-    // The toggle button reads "Hide cues" (default-visible state), not
-    // "Show coaching cues" (default-hidden pre-Phase-F state).
-    expect(
-      screen.getByRole('button', { name: /^hide cues$/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: /show coaching cues/i }),
     ).not.toBeInTheDocument()
   })
 })

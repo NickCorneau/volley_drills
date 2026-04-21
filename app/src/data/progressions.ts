@@ -1,5 +1,5 @@
 /**
- * Progression chains — ordered drill sequences with gating criteria.
+ * Progression chains - ordered drill sequences with gating criteria.
  *
  * `defaultGatingThreshold: 0.7` is the **latent** true-rate target (D80,
  * Volleyball Canada development matrix). It is NOT the raw observed gate.
@@ -229,7 +229,7 @@ const chain6: ProgressionChain = {
   ],
 }
 
-// Tier 1a Unit 2: minimum probe — 3 rungs, no progression links. Tier 1b
+// Tier 1a Unit 2: minimum probe - 3 rungs, no progression links. Tier 1b
 // adds links when dogfood surfaces which pairs actually chain. Bump Set
 // and Hand Set are intentionally both default-unlocked as fundamentals,
 // per BAB Beginner's Guide Lesson 2. See

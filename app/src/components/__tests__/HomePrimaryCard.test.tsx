@@ -88,7 +88,7 @@ const fakeResume: ResumableSession = {
   interruptedAt: 1_700_000_000_000,
 }
 
-describe('HomePrimaryCard (C-4 Unit 3) — variants', () => {
+describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
   it('new_user: renders Start CTA with region + aria-label', async () => {
     const user = userEvent.setup()
     const onStart = vi.fn()

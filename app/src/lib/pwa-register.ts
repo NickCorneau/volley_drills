@@ -9,7 +9,7 @@ import { registerSW } from 'virtual:pwa-register'
 // fixes that and shares a single `needRefresh` flag across all screens, so the
 // state survives navigation between Home and Complete.
 //
-// Importing this module anywhere in the React tree is enough — see
+// Importing this module anywhere in the React tree is enough - see
 // `src/main.tsx` for the side-effect import.
 
 type Listener = () => void
@@ -29,7 +29,7 @@ function setNeedRefresh(value: boolean): void {
   }
 }
 
-// `registerSW` from vite-plugin-pwa is safe to call unconditionally — it
+// `registerSW` from vite-plugin-pwa is safe to call unconditionally - it
 // internally checks for `'serviceWorker' in navigator` and becomes a no-op
 // when the API is unavailable. We keep this call at module scope so SW
 // registration happens on every page load regardless of which route the user

@@ -2,7 +2,7 @@
  * Brandmark: the inline SVG version of `public/icon.svg` (the
  * volleyball-in-rounded-square Volleycraft logo).
  *
- * Replaces the 🏐 emoji that shipped during prototype pass — emoji ties
+ * Replaces the 🏐 emoji that shipped during prototype pass - emoji ties
  * the brand to the host OS's glyph, which varies wildly (Apple's is
  * very different from Google's or Microsoft's) and reads "placeholder"
  * next to the actual installed app icon. The SVG stays crisp at any
@@ -12,7 +12,7 @@
  * Kept minimal on purpose: paths are copy-pasted from `icon.svg`. If
  * that source ever changes, re-run `npm run icons:generate` to update
  * the PNG raster set AND update this file by hand (no build-time
- * synthesis — the duplication keeps the component trivially
+ * synthesis - the duplication keeps the component trivially
  * tree-shakable and renderable in SSR / RTL without an SVG loader).
  */
 

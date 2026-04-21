@@ -22,7 +22,7 @@ const focusRing =
 // variant. The Phase F9 rollback correctly removed hover darkening
 // from the whole-card `PRIMARY_CARD_CLASS` / `SECONDARY_ROW_CLASS`
 // (cards aren't click targets), but individual `Button`s ARE click
-// targets — so desktop-pointer users should get the same "yes, this
+// targets - so desktop-pointer users should get the same "yes, this
 // is clickable" affordance that the Phase F7 `active:` states already
 // give on press. Each variant pairs `hover:` with its existing
 // `active:` token so hover and press land on the same darker shade;
@@ -48,7 +48,7 @@ const variantStyles: Record<ButtonVariant, string> = {
     'min-h-[54px] rounded-[12px] px-3 py-2 text-sm font-medium',
     'border border-text-secondary/20 text-text-primary',
     // Phase F7 (2026-04-19): press feedback to match `primary`,
-    // `outline`, and `danger` — secondary + ghost were the two
+    // `outline`, and `danger` - secondary + ghost were the two
     // variants with no tactile press state, so they felt dead
     // compared to the rest of the button family.
     // Phase F11 (2026-04-19): hover darkening mirrors the press
@@ -67,7 +67,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   ghost: cx(
     'min-h-[54px] px-4 text-sm font-medium text-accent',
     // Phase F7 (2026-04-19): press feedback. Ghost has no background
-    // to darken (by design — used inside HomeSecondaryRow and other
+    // to darken (by design - used inside HomeSecondaryRow and other
     // list rows that own their own surface), so darkening the accent
     // text color on press gives the tactile cue without adding a
     // visual box. Matches the `primary` variant's `accent-pressed`

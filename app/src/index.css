@@ -25,8 +25,8 @@
   --color-info-surface: #fef3e8;
 
   /*
-   * Phase F9 (2026-04-19): lead with 'Inter Variable' — the family
-   * name registered by @fontsource-variable/inter — with 'Inter'
+   * Phase F9 (2026-04-19): lead with 'Inter Variable' - the family
+   * name registered by @fontsource-variable/inter - with 'Inter'
    * kept as a safety fallback for any legacy static-face install.
    * The Fontsource variable woff2 is bundled by Vite and precached
    * by the existing workbox woff2 glob, so first paint on a cold
@@ -50,7 +50,7 @@
   /*
    * D127 (2026-04-19): reserved semantic text tokens. Tailwind v4
    * surfaces these as `text-body` / `text-body-secondary` utilities
-   * (+ matching leading-*) but call-sites are NOT migrated yet —
+   * (+ matching leading-*) but call-sites are NOT migrated yet -
    * this is scaffolding for a future D91-evidence-driven retune,
    * not a style change. Today's values mirror the current
    * `text-sm (14px) / leading-5` UI voice exactly so turning these
@@ -88,7 +88,7 @@ body {
    * markets as the default "finished" body voice; it shifts the
    * lowercase `a` from the double-story geometric shape to a humanist
    * single-story variant that reads slightly calmer and more
-   * intentional — on-thesis with the shibui direction in
+   * intentional - on-thesis with the shibui direction in
    * `docs/research/japanese-inspired-visual-direction.md`. No
    * additional features are enabled here; layering more stylistic
    * sets is a later pass.

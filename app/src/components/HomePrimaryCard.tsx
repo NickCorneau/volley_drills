@@ -10,7 +10,7 @@ import { FOCAL_SURFACE_CLASS } from './ui/Card'
 import { ResumePrompt } from './ResumePrompt'
 
 /**
- * C-4 Unit 3 / Phase F Unit 1 (2026-04-19): `HomePrimaryCard` —
+ * C-4 Unit 3 / Phase F Unit 1 (2026-04-19): `HomePrimaryCard` -
  * exactly-one-primary card rendered by HomeScreen per the Surface 2
  * precedence (resume > review_pending > draft > last_complete >
  * new_user).
@@ -18,7 +18,7 @@ import { ResumePrompt } from './ResumePrompt'
  * Each variant is a `<section role="region" aria-label="...">` so screen
  * readers land on an explicit state announcement. Resume delegates to
  * the existing `<ResumePrompt>` overlay (role="dialog") because resume
- * is modal behavior — the tester has to act on the paused session
+ * is modal behavior - the tester has to act on the paused session
  * before anything else can happen.
  *
  * Phase F amendments to the LastComplete + Draft variants:
@@ -26,7 +26,7 @@ import { ResumePrompt } from './ResumePrompt'
  *   StaleContextBanner's "Adjust if today's different" nudge; the one
  *   Setup confirm tap saved was not worth the data-quality regression).
  * - LastComplete `Edit` text link cut (routed to the same URL as
- *   `Repeat this session` — `/setup?from=repeat` — so it was a
+ *   `Repeat this session` - `/setup?from=repeat` - so it was a
  *   same-URL duplicate). Adjust-in-place now happens through the
  *   pre-filled Setup that Repeat already opens.
  * - LastComplete adds a `Start a different session` tertiary text link
@@ -35,7 +35,7 @@ import { ResumePrompt } from './ResumePrompt'
  *   voice; the underlying handler prop stays `onEdit` for
  *   API-compatibility with C-4 callers.
  *
- * Phase F1 (2026-04-19) — Home calm pass:
+ * Phase F1 (2026-04-19) - Home calm pass:
  * - All primary-card variants share the same focal-zone surface class
  *   (`PRIMARY_CARD_CLASS` below). Hard 1 px border traded for a
  *   softer `shadow-sm` + hairline `ring-1 ring-text-primary/5`, and
@@ -46,13 +46,13 @@ import { ResumePrompt } from './ResumePrompt'
  *   `docs/plans/2026-04-19-feat-phase-f1-home-calm-pass-plan.md` and
  *   `docs/research/japanese-inspired-visual-direction.md`.
  *
- * Phase F8 (2026-04-19) — Typography foundation:
+ * Phase F8 (2026-04-19) - Typography foundation:
  * - All four primary-card eyebrows (`Ready for your first session?`,
  *   `Review your last session`, `Today's suggestion`, `Your last
  *   session`) dropped the `uppercase tracking-wider` utilities and
  *   moved from `font-semibold` to `font-medium`. Pre-F8 they rendered
  *   as uppercase dashboard-style labels that outweighed the content
- *   line beneath them on Home — a direct hierarchy inversion flagged
+ *   line beneath them on Home - a direct hierarchy inversion flagged
  *   by the 2026-04-19 typography audit (see
  *   `canvases/typography-review.canvas.tsx` and
  *   `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`).
@@ -71,7 +71,7 @@ import { ResumePrompt } from './ResumePrompt'
 // Phase F6 (2026-04-19) + F9 rollback (2026-04-19): tactile press
 // feedback is layered on top. CSS `:active` fires on an ancestor
 // during mousedown on any child, so the whole card briefly darkens
-// while the user is pressing any button inside — genuine tactile
+// while the user is pressing any button inside - genuine tactile
 // feedback for a real click, not a misleading affordance. `hover:`
 // was included in F6 but removed in F9 because the card itself is
 // not a click target (each variant has one primary CTA plus
@@ -126,7 +126,7 @@ type HomePrimaryCardProps =
        * `data.log.status === 'ended_early'`. Rebuilds a draft from the
        * subset of plan blocks the tester actually completed and routes
        * to /safety. Parent hides it via `undefined` when no blocks were
-       * completed (defensive — typical ended-early has at least a
+       * completed (defensive - typical ended-early has at least a
        * warmup). Omit for the normal-case last_complete.
        */
       onRepeatWhatYouDid?: () => void
@@ -318,7 +318,7 @@ function LastCompleteCard({
   )
   const isEndedEarly = data.log.status === 'ended_early'
   // C-5 Unit 3: "Repeat what you did" label shows the actually-completed
-  // minutes — sum of plan block durations for blocks whose status
+  // minutes - sum of plan block durations for blocks whose status
   // recorded `completed`. Read directly from plan/log (no rounding) so
   // the label and the rebuilt draft always agree (risk row in plan).
   const completedMinutes = isEndedEarly

@@ -14,7 +14,7 @@ import {
  * - Construction throws: no-op, error logged once
  * - Oscillator throws: no-op, error logged once
  *
- * `playBlockEndBeep` and `playPrerollTick` must never throw — the
+ * `playBlockEndBeep` and `playPrerollTick` must never throw - the
  * calling RunScreen block-complete path should proceed even if audio
  * fails.
  *

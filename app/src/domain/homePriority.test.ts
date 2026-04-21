@@ -10,7 +10,7 @@ import {
 /**
  * C-4 Unit 2: pure precedence functions for the Home priority model.
  *
- * Precedence (flat, 4-row per H11 / C5 — no age tiers):
+ * Precedence (flat, 4-row per H11 / C5 - no age tiers):
  *   resume > review_pending > draft > last_complete > new_user
  *
  * Secondary row rules (per C-4 plan Unit 2):
@@ -69,7 +69,7 @@ function label(f: FlagSummary): string {
   return parts.length === 0 ? 'none' : parts.join('+')
 }
 
-describe('selectPrimaryCard (C-4 Unit 2) — all 16 flag combinations', () => {
+describe('selectPrimaryCard (C-4 Unit 2) - all 16 flag combinations', () => {
   for (const flags of ALL_COMBINATIONS) {
     it(`[${label(flags)}] -> ${expectedPrimary(flags)}`, () => {
       expect(selectPrimaryCard(flags)).toBe(expectedPrimary(flags))
@@ -77,7 +77,7 @@ describe('selectPrimaryCard (C-4 Unit 2) — all 16 flag combinations', () => {
   }
 })
 
-describe('selectSecondaryRows (C-4 Unit 2) — all 16 flag combinations', () => {
+describe('selectSecondaryRows (C-4 Unit 2) - all 16 flag combinations', () => {
   for (const flags of ALL_COMBINATIONS) {
     it(`[${label(flags)}] -> ${JSON.stringify(expectedSecondary(flags))}`, () => {
       expect(selectSecondaryRows(flags)).toEqual(expectedSecondary(flags))
@@ -85,7 +85,7 @@ describe('selectSecondaryRows (C-4 Unit 2) — all 16 flag combinations', () => 
   }
 })
 
-describe('selectPrimaryCard — precedence spot checks', () => {
+describe('selectPrimaryCard - precedence spot checks', () => {
   it('resume beats everything', () => {
     expect(
       selectPrimaryCard({
@@ -131,7 +131,7 @@ describe('selectPrimaryCard — precedence spot checks', () => {
   })
 })
 
-describe('selectSecondaryRows — intent checks', () => {
+describe('selectSecondaryRows - intent checks', () => {
   it('resume mutes all secondaries even when other flags are set', () => {
     expect(
       selectSecondaryRows({
@@ -188,7 +188,7 @@ describe('selectSecondaryRows — intent checks', () => {
   })
 })
 
-describe('selectPrimaryCard — invariant: always returns exactly one variant', () => {
+describe('selectPrimaryCard - invariant: always returns exactly one variant', () => {
   it('no flag combination ever returns undefined or an unknown variant', () => {
     const valid = new Set<PrimaryVariant>([
       'resume',

@@ -23,14 +23,13 @@ export function RunScreen() {
 
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [prerollCount, setPrerollCount] = useState<number | null>(null)
-  // Phase F Unit 5 (2026-04-19): coaching cues default to visible
-  // instead of hidden-behind-a-toggle. The drill catalog's editorial
-  // coaching points have real signal for a solo self-coached tester;
-  // defaulting them hidden meant a non-trivial fraction never saw them.
-  // The toggle stays so paranoid users can Hide them mid-block.
+  // Feedback pass 2026-04-21: coaching cues default collapsed so the
+  // run view stays quiet. Phase F Unit 5 opened them by default to
+  // ensure visibility, but field testing showed the extra chrome
+  // crowds the block and users prefer revealing cues on demand.
   const [showInstructions, toggleInstructions] = useReducer(
     (s: boolean) => !s,
-    true,
+    false,
   )
   const blockDurRef = useRef(0)
   const remainingRef = useRef(0)
@@ -125,7 +124,7 @@ export function RunScreen() {
         if (prerollTimerRef.current) clearInterval(prerollTimerRef.current)
         prerollTimerRef.current = null
         setPrerollCount(null)
-        // The "go" tick at count==0 — same beep as 2/1 so the tester
+        // The "go" tick at count==0 - same beep as 2/1 so the tester
         // gets a consistent sonic ramp into block start.
         playPrerollTick()
         startBlock()
@@ -285,7 +284,7 @@ export function RunScreen() {
    *   `swapActiveBlock` transaction in services/session.ts.
    * - On no-op (no alternates available for this block) surfaces a
    *   subtle error message so the tester doesn't think their tap was
-   *   lost. Defensive — the UI hides the button when no alternates
+   *   lost. Defensive - the UI hides the button when no alternates
    *   exist, so this path is a belt-and-suspenders guard.
    */
   const handleSwap = useCallback(async () => {
@@ -348,7 +347,7 @@ export function RunScreen() {
     // Redirect to Review when the opened session is already terminal. This
     // covers deep links to a /run URL for a completed session and the
     // multi-tab race where tab A discards while tab B is still parked on
-    // /run — without the guard, tab B would keep ticking and eventually
+    // /run - without the guard, tab B would keep ticking and eventually
     // overwrite the ended-early record via advanceBlock. Red-team pass 2.
     if (
       execution &&
@@ -492,7 +491,7 @@ export function RunScreen() {
            * Phase F Unit 4: Swap is only available when the block has
            * at least one curated alternate (warmup / wrap always
            * empty per D85/D105; a context with a single candidate in
-           * the slot pool also empty). Recompute per render — cheap,
+           * the slot pool also empty). Recompute per render - cheap,
            * deterministic, and keeps the button visibility in sync
            * with the active plan mutation after a prior swap.
            */

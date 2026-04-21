@@ -231,14 +231,14 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
     ).not.toBeInTheDocument()
   })
 
-  // Phase F Unit 2 (2026-04-19) + D128 — voice-aware header copy.
+  // Phase F Unit 2 (2026-04-19) + D128 - voice-aware header copy.
   //
-  // Cold state (no prior session) reads as **solo voice** per D128 —
+  // Cold state (no prior session) reads as **solo voice** per D128 -
   // covered by the cold-state heading test above. The two tests below
   // cover the returning-solo-tester + returning-pair-tester paths:
   // `storageMeta.lastPlayerMode` flips the heading copy without
   // touching the D121 taxonomy. The returning-pair case is the only
-  // path that now shows "Where's the pair today?" — pair voice is no
+  // path that now shows "Where's the pair today?" - pair voice is no
   // longer the cold-state default.
 
   it('Phase F Unit 2: returning solo tester sees solo-voice heading', async () => {
@@ -297,7 +297,7 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
       'onboarding.skillLevel',
       isSkillLevel,
     )
-    // Enum persisted is identical across voices — D121 taxonomy is
+    // Enum persisted is identical across voices - D121 taxonomy is
     // untouched by Phase F.
     expect(skillLevel).toBe('foundations')
   })

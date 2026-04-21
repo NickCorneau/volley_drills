@@ -122,7 +122,7 @@ function ReviewSessionContent({
         }
         // A9 (red-team fix plan v3 §A9 / H16): if the log is already past
         // the 2 h Finish Later cap at mount, write the expired stub here
-        // BEFORE routing — CompleteScreen's loadSessionBundle requires a
+        // BEFORE routing - CompleteScreen's loadSessionBundle requires a
         // review record to render. Relying on "the next Home-resolve sweep
         // will write it" is a dead-end race: a tester who lands on
         // `/review?id=X` directly (deep link, PWA resume, bookmark) never
@@ -174,7 +174,7 @@ function ReviewSessionContent({
         // the tester on the loading spinner indefinitely. When the schema
         // upgrade is mid-flight, SchemaBlockedOverlay already owns the
         // UI so we suppress our own fallback. Otherwise drop into the
-        // `missing` variant — same recoverable UX as "record not found",
+        // `missing` variant - same recoverable UX as "record not found",
         // with a Back-to-start escape hatch.
         if (cancelled) return
         if (isSchemaBlocked()) return
@@ -192,7 +192,7 @@ function ReviewSessionContent({
   // via `saveReviewDraft`). Gated on `hydrated` so we don't overwrite a
   // real draft with pre-load zeros. Fire-and-forget; `isSchemaBlocked`
   // is handled inside `saveReviewDraft`'s A3 transaction (which is a
-  // Dexie write and errors with `DatabaseClosedError` when blocked —
+  // Dexie write and errors with `DatabaseClosedError` when blocked -
   // we swallow the error here because the overlay owns the UI). C-1 R7.
   useEffect(() => {
     if (!hydrated) return
@@ -399,7 +399,7 @@ function ReviewSessionContent({
 
   const handleFinishLater = async () => {
     if (isSubmitting) return
-    // C-1 Unit 8: belt-and-suspenders over the auto-save effect — flush
+    // C-1 Unit 8: belt-and-suspenders over the auto-save effect - flush
     // the latest form state to the draft before navigating away. A3
     // semantics: this is a no-op if a terminal record somehow already
     // exists on this execId (Unit 7's `saveReviewDraft`).
@@ -423,7 +423,7 @@ function ReviewSessionContent({
         })
       } catch (err) {
         // Reliability finding rel-4: silent-navigate on save failure
-        // violates the Finish-Later contract — tester believes the draft
+        // violates the Finish-Later contract - tester believes the draft
         // was persisted, comes back to a blank form. When the schema is
         // upgrading, SchemaBlockedOverlay owns the UI (let it through).
         // Otherwise stay on the screen and surface the error so the
@@ -481,7 +481,7 @@ function ReviewSessionContent({
                 ("count it as Not Good") implied a phantom "Not Good"
                 control because the binary `good | not-good` vocabulary
                 lives in `BinaryPassScore` but never surfaces as a UI
-                button — the only controls here are the Good / Total
+                button - the only controls here are the Good / Total
                 numeric cells. Reformulated to preserve the V0B-28
                 anti-generosity nudge (D104 layer-1 forced-criterion
                 correction) while matching the actual affordance. The

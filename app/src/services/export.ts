@@ -18,11 +18,11 @@ import { db } from '../db'
  *
  * Shape decisions (see `docs/plans/2026-04-17-feat-phase-e-content-tooling-plan.md`
  * Unit 2, Key Decisions):
- * - `sessionDrafts` excluded — transient pre-session state, deleted
+ * - `sessionDrafts` excluded - transient pre-session state, deleted
  *   after session creation. Not historically interesting.
- * - `timerState` excluded — single-row runtime state. Not replay
+ * - `timerState` excluded - single-row runtime state. Not replay
  *   material.
- * - `storageMeta` included — tiny, surfaces onboarding-completion
+ * - `storageMeta` included - tiny, surfaces onboarding-completion
  *   timing + A7 soft-block dismissal traces that help debug field
  *   issues.
  * - `storageHealthEvents` NOT a table (V0B-26 cut per H5). Nothing to

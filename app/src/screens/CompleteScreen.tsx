@@ -52,7 +52,7 @@ function SavedCheckIcon() {
  * compliance: no warning iconography, no red) is the same; the
  * rendering is now unambiguous.
  *
- * Screen readers skip it (`aria-hidden`) — the verdict word below
+ * Screen readers skip it (`aria-hidden`) - the verdict word below
  * (with `aria-live="polite"`) carries the meaning. See
  * `docs/decisions.md` D86 and
  * `docs/plans/2026-04-19-feat-phase-f-d91-validity-hardening-plan.md`
@@ -119,7 +119,7 @@ export function CompleteScreen() {
         // the tester on the loading spinner indefinitely on the terminal
         // post-session screen. When a schema upgrade is mid-flight,
         // SchemaBlockedOverlay owns the UI so we suppress our own
-        // fallback. Otherwise drop into `missing` — the existing
+        // fallback. Otherwise drop into `missing` - the existing
         // "Session not found" StatusMessage offers a Back-to-start escape.
         if (cancelled) return
         if (isSchemaBlocked()) return
@@ -170,21 +170,28 @@ export function CompleteScreen() {
     (b) => b.status === 'completed',
   ).length
 
+  // Field-test feedback 2026-04-21: the terminal verdict screen read as
+  // "weirdly dense / compact" because the previous layout stacked every
+  // section with a flat `gap-8` and floated the cluster inside the main
+  // field. Top-align explicitly with `justify-start`, give the hero
+  // (verdict glyph + word + reason) the most air, and hold the button +
+  // save-status to the bottom rail so every Home-bound exit lands in a
+  // consistent thumb zone.
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-col items-center gap-8 pb-10 pt-4">
+    <div className="mx-auto flex min-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-full max-w-[390px] flex-col items-center justify-start gap-10 pb-10 pt-6">
       <div className="self-start">
         <SafetyIcon />
       </div>
 
       <section
         aria-labelledby="summary-verdict"
-        className="flex w-full flex-col items-center gap-3 text-center"
+        className="flex w-full flex-col items-center gap-4 pt-2 text-center"
       >
         {/* Phase F8 (2026-04-19): was a `<p>` rendering `{summary.header}`
             at `text-sm font-semibold uppercase tracking-wider`. Promoted
             to `<h1>` so the page has a valid heading outline (was h2-only
             before) and dropped the uppercase-eyebrow voice. The verdict
-            `<h2>` below is unchanged — still the focal sub-heading. See
+            `<h2>` below is unchanged - still the focal sub-heading. See
             `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
         <h1 className="text-sm font-medium text-text-secondary">
           {summary.header}
@@ -203,7 +210,7 @@ export function CompleteScreen() {
             Kyu "kyu" / clean-finish beat of the session loop and the
             one place typography gets to carry the "investment"
             principle from `docs/vision.md`. One step up inside the
-            native Tailwind scale — large enough to feel like a
+            native Tailwind scale - large enough to feel like a
             moment, small enough to stay inside the shibui envelope
             and fit the 390 px viewport without a wrap on any of the
             three verdict strings ('Keep building', 'Lighter next',
@@ -242,7 +249,7 @@ export function CompleteScreen() {
               defensive blocks at the net; rendering "Blocks: 4/4" right
               above "Good passes" was genuinely confusing in
               dogfeed testing. Each v0b session block contains exactly
-              one drill, so the numeric value is unchanged — only the
+              one drill, so the numeric value is unchanged - only the
               label changes for disambiguation.
             */}
             <dt className="text-text-secondary">Drills completed</dt>
@@ -267,7 +274,7 @@ export function CompleteScreen() {
         </dl>
       </Card>
 
-      <div className="flex w-full flex-col gap-4">
+      <div className="mt-auto flex w-full flex-col gap-4 pt-4">
         <Button
           variant="primary"
           fullWidth

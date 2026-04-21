@@ -1,5 +1,5 @@
 // Pure math for the "Shorten block" action. Lives outside RunScreen so it
-// can be unit-tested directly — red-team bug #2 regressed on a subtle
+// can be unit-tested directly - red-team bug #2 regressed on a subtle
 // condition (clamping newRemaining below the 10 s floor silently extending
 // the block) and the screen itself is hard to reach from vitest.
 //

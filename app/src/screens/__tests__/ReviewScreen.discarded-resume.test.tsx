@@ -5,7 +5,7 @@ import { db } from '../../db'
 import { ReviewScreen } from '../ReviewScreen'
 
 /**
- * A8 (red-team fix plan v3) belt — ReviewScreen auto-routes discarded
+ * A8 (red-team fix plan v3) belt - ReviewScreen auto-routes discarded
  * resume sessions to Home. The service-layer A1/A8 filters (Unit 1) keep
  * these out of `findPendingReview` / `expireStaleReviews` in the first
  * place; this belt catches any stale URL tap that reaches /review for

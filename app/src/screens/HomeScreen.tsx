@@ -61,7 +61,7 @@ interface HomeFlags {
   /**
    * Tier 1a Unit 5 (2026-04-20): last-3-sessions list. Read alongside
    * the other Home flags; `[]` on a fresh install (RecentSessionsList
-   * renders nothing in that case). Not read on the Resume branch —
+   * renders nothing in that case). Not read on the Resume branch -
    * the Resume card is the only allowed surface when a resumable
    * session exists, so loading the recent list there would be work
    * the user never sees.
@@ -226,7 +226,7 @@ export function HomeScreen() {
   // when a review is pending AND the tester hasn't already dismissed it
   // for this execId. We memoize the intercepted handlers as a bundle so
   // React only rebuilds them when `state` (flags) or `navigate`
-  // actually change — this also keeps `react-hooks/refs` happy (the
+  // actually change - this also keeps `react-hooks/refs` happy (the
   // intercept factory closes over state, so calling it during render
   // inline triggers that rule).
   //
@@ -277,8 +277,8 @@ export function HomeScreen() {
       handleRepeat: intercept(() =>
         navigate(`${routes.setup()}?from=repeat`),
       ),
-      // Phase F Unit 1: LastComplete's sole secondary. Fresh setup —
-      // no `?from=repeat`, no pre-fill, no banner — for the tester
+      // Phase F Unit 1: LastComplete's sole secondary. Fresh setup -
+      // no `?from=repeat`, no pre-fill, no banner - for the tester
       // whose answer to "same as last time?" is *no*. The intercept
       // ensures review_pending still fires the soft-block modal.
       handleStartDifferentSession: intercept(() =>
@@ -296,7 +296,7 @@ export function HomeScreen() {
             state.flags.lastComplete.plan,
           )
           if (!draft) {
-            // Nothing worth repeating — defensive fallback to the
+            // Nothing worth repeating - defensive fallback to the
             // pre-filled Setup path so the tester can adjust.
             navigate(`${routes.setup()}?from=repeat`)
             return
@@ -382,7 +382,7 @@ export function HomeScreen() {
           primary card carries the visual weight. Optical balance: the
           mark is a 24 px square with full ink; the wordmark sits at
           `text-xl` semibold so cap height reads close to the ball
-          curves — avoids the “app icon dwarfing the title” effect from
+          curves - avoids the “app icon dwarfing the title” effect from
           pairing a 28 px mark with `text-lg` bold (F11). See
           `docs/research/brand-ux-guidelines.md` §1 (type hierarchy). */}
       <header className="flex items-center gap-2.5 pt-4">
@@ -443,7 +443,7 @@ export function HomeScreen() {
 
       {/* Tier 1a Unit 5 (2026-04-20): last-3-sessions trailer. Gated
           on `!flags.resume` because the Resume primary card is the
-          only legal Home surface when a resumable session exists —
+          only legal Home surface when a resumable session exists -
           showing a history list below a "Resume your session" modal
           would compete with that single-action framing. Also gated on
           `recentSessions.length > 0` inside the component itself, so
@@ -496,7 +496,7 @@ interface PrimaryHandlers {
   /**
    * Phase F Unit 1 (2026-04-19): replaces the pre-Phase-F
    * `handleSameAsLast` + `handleLastCompleteEdit` pair. Routes to fresh
-   * `/setup` (no pre-fill, no banner) — the "today is different" path
+   * `/setup` (no pre-fill, no banner) - the "today is different" path
    * on the LastComplete card.
    */
   handleStartDifferentSession: () => void

@@ -14,7 +14,7 @@ import { HomeScreen } from '../HomeScreen'
  * Contract pinned by this suite:
  * - LastComplete primary renders the "Start a different session"
  *   tertiary link.
- * - Tap navigates to `/setup` exactly — not `/setup?from=repeat`.
+ * - Tap navigates to `/setup` exactly - not `/setup?from=repeat`.
  * - Nothing is written to `sessionDrafts` along the way (the fresh
  *   Setup's Build is the lock boundary, not this tap).
  * - The soft-block modal intercepts the tap when a review is pending.
@@ -139,7 +139,7 @@ describe('HomeScreen: Start a different session (Phase F Unit 1)', () => {
     })
     await user.click(startDifferent)
 
-    // Lands on /setup, NOT /setup?from=repeat — the distinction between
+    // Lands on /setup, NOT /setup?from=repeat - the distinction between
     // "continue from last" (Repeat) and "today is different"
     // (Start a different session) is the whole point of the Phase F
     // cleanup.
@@ -170,7 +170,7 @@ describe('HomeScreen: Start a different session (Phase F Unit 1)', () => {
   it('review pending: Start a different session fires the soft-block modal', async () => {
     const user = userEvent.setup()
     await seedLastComplete()
-    // Add a pending review — LastComplete moves to the secondary list
+    // Add a pending review - LastComplete moves to the secondary list
     // in the flat 4-row precedence. The Start-a-different-session
     // tertiary ONLY renders on the LastComplete primary card, so with
     // review pending it's absent AND the soft-block modal is the
@@ -178,7 +178,7 @@ describe('HomeScreen: Start a different session (Phase F Unit 1)', () => {
     //
     // This test seeds review pending + last_complete and proves the
     // link is gone, then proves the underlying intercepted CTA still
-    // fires the modal by tapping the NewUser-style primary — which
+    // fires the modal by tapping the NewUser-style primary - which
     // we can't seed here (new_user is mutually exclusive with
     // review_pending). Instead: assert the modal contract indirectly
     // by tapping the Finish Review CTA and confirming the modal does

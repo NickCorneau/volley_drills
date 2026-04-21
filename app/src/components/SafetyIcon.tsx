@@ -49,8 +49,8 @@ export function SafetyIcon() {
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-text-secondary/30" />
             {/* 2026-04-20 physio-review: the prior single sentence
                 ("dizzy, chest pain, or unusual shortness of breath")
-                conflated two actions — call emergency services vs see
-                a clinician — and gave no number. Split into (1) a
+                conflated two actions - call emergency services vs see
+                a clinician - and gave no number. Split into (1) a
                 specific emergency list with a real number to dial,
                 (2) a head-impact line volleyball players need that
                 wasn't there at all, and (3) a non-emergency clinician

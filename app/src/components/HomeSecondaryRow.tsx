@@ -6,7 +6,7 @@ import type {
 import { Button } from './ui'
 
 /**
- * C-4 Unit 3: `HomeSecondaryRow` — compact `<li>` for non-primary
+ * C-4 Unit 3: `HomeSecondaryRow` - compact `<li>` for non-primary
  * active Home states. Rendered inside the `<ul role="list">` that sits
  * below the primary card on HomeScreen (Surface 2). Exactly one CTA per
  * row; no two-step confirmations (those belong to the primary card).
@@ -17,7 +17,7 @@ import { Button } from './ui'
  * - `draft`: Open CTA on Today's suggestion
  * - `last_complete`: Repeat CTA on the last finalized session
  *
- * Phase F1 (2026-04-19) — Home calm pass:
+ * Phase F1 (2026-04-19) - Home calm pass:
  * - Rows used to be individual bordered white cards, which competed
  *   with the primary card for visual weight. They now render as flat
  *   rows inside a single parent container (owned by `HomeScreen`),
@@ -28,7 +28,7 @@ import { Button } from './ui'
  */
 
 // Phase F1 / F6 / F9 (2026-04-19): shared flat-row class. No border,
-// no background, no rounding — the parent ul carries the container
+// no background, no rounding - the parent ul carries the container
 // surface; rows just hold a label + CTA with comfortable padding.
 // The whole-row `:active` darkening fires during mousedown on the
 // inner ghost-button CTA (CSS `:active` propagates to ancestors),

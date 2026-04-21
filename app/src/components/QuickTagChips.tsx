@@ -1,4 +1,4 @@
-// Effort tags are a "how did that feel" pick-one signal — "Too easy" and
+// Effort tags are a "how did that feel" pick-one signal - "Too easy" and
 // "Too hard" being selected together corrupts downstream summarisation.
 // Keep them mutually exclusive. Independent tags (e.g. "Need partner") are
 // additive context and stay multi-select. Red-team UX #11.

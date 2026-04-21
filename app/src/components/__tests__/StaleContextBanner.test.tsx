@@ -25,7 +25,7 @@ describe('StaleContextBanner (C-5 Unit 1)', () => {
 
   it('nudges the tester to review without being pushy', () => {
     render(<StaleContextBanner dayName="Tuesday" />)
-    // Copy contract: "Adjust if today's different." — per the C-5 plan
+    // Copy contract: "Adjust if today's different." - per the C-5 plan
     // this language is intentionally gentle; a regression that makes it
     // more insistent should flip this test.
     expect(

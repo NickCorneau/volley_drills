@@ -2,10 +2,10 @@
 // See docs/specs/m001-home-and-sync-notes.md "Three-state save copy (per D118)"
 // and docs/research/local-first-pwa-constraints.md for the evidence base.
 //
-// State A: browser tab, not installed — seven-day-risky under Safari ITP.
-// State B: installed Home Screen web app, persisted() === false — exempt from
+// State A: browser tab, not installed - seven-day-risky under Safari ITP.
+// State B: installed Home Screen web app, persisted() === false - exempt from
 //          the ITP timer but still best-effort under quota/pressure eviction.
-// State C: installed Home Screen web app, persisted() === true — the strongest
+// State C: installed Home Screen web app, persisted() === true - the strongest
 //          local-only durability state WebKit publicly exposes. Still not a
 //          backup.
 //

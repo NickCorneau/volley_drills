@@ -81,7 +81,7 @@ describe('sessionBuilder', () => {
     // Tier 1a Unit 1: every archetype resolves the warmup slot to
     // `d28 Beach Prep Three`. Previously this test only asserted the
     // warmup wasn't a cooldown drill (d25/d26), which let passing drills
-    // silently fill the slot — the exact authoring bug Unit 1 fixed.
+    // silently fill the slot - the exact authoring bug Unit 1 fixed.
     expect(draft?.blocks[0]?.drillId).toBe('d28')
     expect(draft?.blocks[0]?.drillName).toBe('Beach Prep Three')
     expect(draft?.blocks.at(-1)?.type).toBe('wrap')
@@ -124,11 +124,16 @@ describe('sessionBuilder', () => {
 
   /**
    * Tier 1a Unit 4 (Chosen-because rationale): every block on a default
-   * buildDraft result carries a one-sentence rationale, warmup/wrap get
-   * the fixed D105/D85 copy, other slots get the deterministic
-   * `{slot-label} block, {focus} focus, {playerMode} {time}-min.`
-   * sentence. Determinism is the contract that supports partner
-   * walkthrough "nodded / ignored" tagging.
+   * buildDraft result carries a one-sentence rationale.
+   *
+   * Feedback pass 2026-04-21: the rationale no longer cites internal
+   * decision IDs (D105/D85) and no longer trails with the redundant
+   * `{playerMode} {timeProfile}-min` suffix - that suffix was the same
+   * on every block in a session, so it read as noise. Warmup/wrap are
+   * fixed purpose-driven sentences; technique/movement/main/pressure
+   * describe what the block does for you by focus. Determinism is
+   * still the contract that supports partner walkthrough "nodded /
+   * ignored" tagging.
    */
   it('every block on a default buildDraft carries a non-empty rationale', () => {
     const draft = buildDraft({
@@ -141,10 +146,14 @@ describe('sessionBuilder', () => {
     for (const block of draft!.blocks) {
       expect(block.rationale, `${block.type} block missing rationale`).toBeTruthy()
       expect(block.rationale).toMatch(/^Chosen because: /)
+      // Regression: no internal decision IDs in user-facing rationale.
+      expect(block.rationale).not.toMatch(/D\d{2,}/)
+      // Regression: no redundant `{playerMode} {time}-min` trailer.
+      expect(block.rationale).not.toMatch(/\b(solo|pair)\s\d+-min/)
     }
   })
 
-  it('warmup rationale is the fixed D105 sentence', () => {
+  it('warmup rationale is the fixed purpose-driven sentence', () => {
     const draft = buildDraft({
       playerMode: 'solo',
       timeProfile: 25,
@@ -153,11 +162,11 @@ describe('sessionBuilder', () => {
     })
     const warmup = draft!.blocks.find((b) => b.type === 'warmup')
     expect(warmup?.rationale).toBe(
-      'Chosen because: every session starts with Beach Prep (D105).',
+      'Chosen because: every session opens with a sand-specific warmup.',
     )
   })
 
-  it('wrap rationale is the fixed D85 sentence', () => {
+  it('wrap rationale is the fixed purpose-driven sentence', () => {
     const draft = buildDraft({
       playerMode: 'pair',
       timeProfile: 25,
@@ -167,7 +176,7 @@ describe('sessionBuilder', () => {
     const wrap = draft!.blocks.at(-1)
     expect(wrap?.type).toBe('wrap')
     expect(wrap?.rationale).toBe(
-      'Chosen because: every session ends with a downshift (D85).',
+      'Chosen because: every session closes with a cooldown downshift.',
     )
   })
 
@@ -183,7 +192,7 @@ describe('sessionBuilder', () => {
     const second = deriveBlockRationale('main_skill', drill, context)
     expect(first).toBe(second)
     expect(first).toBe(
-      'Chosen because: main-skill block, pass focus, solo 15-min.',
+      "Chosen because: today's main passing rep.",
     )
   })
 

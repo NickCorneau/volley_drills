@@ -15,8 +15,8 @@ import { TransitionScreen } from './screens/TransitionScreen'
 import { routePaths } from './routes'
 
 function Layout({ children }: { children: React.ReactNode }) {
-  // Phase F3 (2026-04-19): page field uses `bg-surface-calm` — a warm
-  // off-white — so white `bg-bg-primary` focal cards (`<Card
+  // Phase F3 (2026-04-19): page field uses `bg-surface-calm` - a warm
+  // off-white - so white `bg-bg-primary` focal cards (`<Card
   // variant="focal">`, HomePrimaryCard, HomeScreen secondary list,
   // SettingsScreen export block, SkillLevelScreen option buttons)
   // stand out as deliberate content blocks against a calmer field.

@@ -13,7 +13,7 @@ import '@fontsource-variable/inter'
 // Phase F10 (2026-04-19): JetBrains Mono Variable as the timer
 // display face. Replaces the Tailwind `font-mono` system-font
 // lottery (Consolas on Windows, Menlo on macOS, DejaVu on Android)
-// on the BlockTimer and RunScreen preroll countdown — the two
+// on the BlockTimer and RunScreen preroll countdown - the two
 // surfaces the athlete stares at during a session. OFL-licensed,
 // bundled by Vite, precached by the same workbox glob as Inter. See
 // `docs/plans/2026-04-19-feat-phase-f10-timer-display-face-plan.md`.

@@ -19,7 +19,7 @@ import type { SessionPlan, SessionReview } from '../db'
  * collective verdict stance).
  *
  * No LLM. No template engine. Template composition from the fixed
- * copy table below — any move to dynamic phrasing is a spec violation
+ * copy table below - any move to dynamic phrasing is a spec violation
  * per the Surface 5 AI-slop rule.
  */
 
@@ -89,7 +89,7 @@ export function composeSummary(input: SummaryInput): SummaryOutput {
 // posture established in Phase F1 / F2 / F3. Copy chosen to:
 // - respect user agency (not "we'll see you next time", user decides)
 // - stay calm and action-anchored (Japanese-inspired direction)
-// - NOT overpromise adaptation (no "we'll tune" / "we'll progress" —
+// - NOT overpromise adaptation (no "we'll tune" / "we'll progress" -
 //   those are M001-build engine behaviors, not v0b reality, and the
 //   D86 / copy-guard vocabulary explicitly rules out claims the engine
 //   cannot back up)
@@ -112,7 +112,7 @@ function composeDefaultReason(
   const base = `Session ${sessionCount}. ${review.goodPasses} good passes today out of ${review.totalAttempts} attempts.`
   // Phase F Unit 5 (2026-04-19): forward-looking reframe of the low-N
   // qualifier. The pre-Phase-F "Not enough reps yet to trust the rate"
-  // was honest but emotionally flat — a first-few-sessions tester
+  // was honest but emotionally flat - a first-few-sessions tester
   // reads it as "the app can't tell you anything useful." The
   // replacement keeps the evidentiary honesty (we're NOT claiming the
   // rate yet) but frames it forward-looking. The D86 copy-guard

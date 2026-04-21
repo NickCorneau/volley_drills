@@ -11,7 +11,7 @@ import {
   hasEverStartedSession,
 } from '../services/session'
 
-// Primary recency chips. `2+` is an intermediate value — tapping it
+// Primary recency chips. `2+` is an intermediate value - tapping it
 // reveals a sub-row of granular buckets (post-physio-review 2026-04-20),
 // and the persisted `trainingRecency` is the sub-bucket string, not the
 // literal `'2+'`. `canContinue` holds until a sub-bucket is picked.
@@ -43,7 +43,7 @@ function isLayoffBucket(r: TrainingRecency | null): r is LayoffBucket {
 
 // 2026-04-20 physio-review restructure: warning signs live above the
 // prevention tips inside the expander. Heat illness is a minutes-matter
-// escalation — users need to see the "stop immediately" cues first, not
+// escalation - users need to see the "stop immediately" cues first, not
 // buried at the bottom of a bullet list. The short list below is scoped
 // to heat-stroke red flags (confusion, stopped sweating, severe headache,
 // vomiting, fainting); non-heat emergency guidance lives in SafetyIcon.
@@ -79,7 +79,7 @@ export function SafetyCheckScreen() {
   const [createError, setCreateError] = useState<string | null>(null)
   // Gates the "First time" recency chip (2026-04-19 dogfeed). Default
   // `true` so the chip stays hidden on mount until we've confirmed
-  // there's no session history — otherwise the chip would flash in for
+  // there's no session history - otherwise the chip would flash in for
   // one frame on every Safety visit for returning users.
   const [hasSessionHistory, setHasSessionHistory] = useState(true)
 
@@ -87,7 +87,7 @@ export function SafetyCheckScreen() {
     let cancelled = false
     ;(async () => {
       try {
-        // Parallelize the two reads — they're independent.
+        // Parallelize the two reads - they're independent.
         const [d, hasHistory] = await Promise.all([
           getCurrentDraft(),
           hasEverStartedSession(),
@@ -110,7 +110,7 @@ export function SafetyCheckScreen() {
     return () => { cancelled = true }
   }, [navigate])
 
-  // Returning users never see "First time" — the chip is only meaningful
+  // Returning users never see "First time" - the chip is only meaningful
   // on a genuinely fresh install.
   const visibleRecencyOptions = useMemo<PrimaryRecency[]>(
     () =>
@@ -120,7 +120,7 @@ export function SafetyCheckScreen() {
     [hasSessionHistory],
   )
 
-  // The `2+` chip is a disclosure trigger, not a submittable answer —
+  // The `2+` chip is a disclosure trigger, not a submittable answer -
   // tapping it reveals the layoff-bucket sub-row, and `canContinue`
   // waits until one of those is selected. The primary row's selected
   // visual stays on `2+` whenever a sub-bucket is picked, so the two
@@ -210,8 +210,8 @@ export function SafetyCheckScreen() {
        * Three-column header (Back | centered title | spacer) mirrors
        * SetupScreen so the "tap to escape" affordance lives in the same
        * thumb zone across the pre-run flow. Leaving SafetyCheck does
-       * NOT mutate the persisted draft — SafetyCheckScreen only reads
-       * the draft and writes safety answers inline on Continue — so a
+       * NOT mutate the persisted draft - SafetyCheckScreen only reads
+       * the draft and writes safety answers inline on Continue - so a
        * Back tap returns the user to Home with their draft intact
        * (surfaces there as the Draft primary card per C-4 Surface 2).
        */}
@@ -271,7 +271,7 @@ export function SafetyCheckScreen() {
             )
           })}
         </div>
-        {/* 2026-04-20 physio-review: detraining is not linear — bucketing
+        {/* 2026-04-20 physio-review: detraining is not linear - bucketing
             "2+" by weeks/months lets a 3+ month returner see a clinician
             nudge without making short-gap users read extra copy. The
             primary `2+` chip stays selected while a sub-bucket is active
@@ -328,16 +328,26 @@ export function SafetyCheckScreen() {
           Regular muscle soreness is fine. We&apos;ll switch to a lighter
           session if yes.
         </p>
-        <div className="flex gap-3">
+        {/* Field-test feedback 2026-04-21: the No / Yes buttons read
+            visually heavier than the recency chips above (text-base
+            font-semibold + px-4/py-3 vs the recency row's text-sm
+            font-medium + px-2/py-2), so the two mutex rows looked like
+            different families of controls. Harmonize: same weight, same
+            radius, same padding, same font-size as the recency chips so
+            "Before we start" reads as one consistent form. The
+            unselected-Yes still swaps to a single hairline border to
+            match the selected-state stroke width of the recency warning
+            chip and keep the two rows visually equivalent. */}
+        <div className="flex gap-2">
           <button
             type="button"
             onClick={() => setPainFlag(false)}
             className={[
-              'min-h-[54px] flex-1 rounded-[16px] px-4 py-3 text-base font-semibold transition-colors',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+              'min-h-[54px] flex-1 rounded-[16px] px-2 py-2 text-sm font-medium transition-colors',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
               painFlag === false
-                ? 'bg-success text-white focus-visible:ring-success'
-                : 'border-2 border-gray-200 text-text-primary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-success',
+                ? 'border border-success bg-success text-white focus-visible:ring-success'
+                : 'border border-gray-200 text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-success',
             ].join(' ')}
           >
             No
@@ -346,11 +356,11 @@ export function SafetyCheckScreen() {
             type="button"
             onClick={() => setPainFlag(true)}
             className={[
-              'min-h-[54px] flex-1 rounded-[16px] px-4 py-3 text-base font-semibold transition-colors',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+              'min-h-[54px] flex-1 rounded-[16px] px-2 py-2 text-sm font-medium transition-colors',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
               painFlag === true
                 ? 'border border-warning bg-warning-surface text-warning focus-visible:ring-warning'
-                : 'border-2 border-gray-200 text-text-primary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-warning',
+                : 'border border-gray-200 text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-warning',
             ].join(' ')}
           >
             Yes
@@ -405,7 +415,7 @@ export function SafetyCheckScreen() {
           <div className="mt-3 flex flex-col gap-3">
             {/* 2026-04-20 physio-review: warning signs first, not mixed
                 into prevention bullets. Heat stroke is a
-                minutes-matter escalation — "stopped sweating" and
+                minutes-matter escalation - "stopped sweating" and
                 "confusion" belong above the list of things to do to
                 prevent it, not tucked at the bottom of a single bag
                 of tips. */}

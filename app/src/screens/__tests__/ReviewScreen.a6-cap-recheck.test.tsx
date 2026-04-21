@@ -16,7 +16,7 @@ import { ReviewScreen } from '../ReviewScreen'
 /**
  * A6: ReviewScreen.handleSubmit re-checks `isPastDeferralCap(log, now())`
  * before calling submitReview. If past, routes to /complete/{execId}
- * without writing a submitted review — any write would lose validity
+ * without writing a submitted review - any write would lose validity
  * against the 2 h cap per D120.
  */
 
@@ -80,7 +80,7 @@ describe('ReviewScreen A6 submit-time cap re-check', () => {
 
   it('inside the cap: normal submit writes a submitted review and routes to /complete', async () => {
     const user = userEvent.setup()
-    // Completed 10 min ago — well inside the 2 h cap.
+    // Completed 10 min ago - well inside the 2 h cap.
     const completedAt = Date.now() - 10 * 60_000
     await seedWithCompletion('exec-inside', completedAt)
 
@@ -129,7 +129,7 @@ describe('ReviewScreen A6 submit-time cap re-check', () => {
       .equals('exec-crosscap')
       .first()
     // Terminal markers: the record is expired and NOT eligible for
-    // adaptation, so the engine ignores it — exactly the correctness bar
+    // adaptation, so the engine ignores it - exactly the correctness bar
     // A6 was designed to enforce.
     expect(stored?.status).toBe('skipped')
     expect(stored?.captureWindow).toBe('expired')

@@ -133,7 +133,7 @@ describe('composeSummary: Case C (default)', () => {
       sessionCount: 1,
     })
     // Phase F Unit 5 (2026-04-19): pre-Phase-F read
-    // "Not enough reps yet to trust the rate." — flat and backward-
+    // "Not enough reps yet to trust the rate." - flat and backward-
     // looking. Reframe preserves the evidentiary honesty (we are NOT
     // claiming the rate yet) while carrying forward-looking valence.
     expect(out.reason).toBe(
@@ -216,8 +216,8 @@ describe('composeSummary: defensive behavior', () => {
   it('treats a leaked draft status as default Case C', () => {
     // `'draft'` is a valid `SessionReviewStatus` but should never reach
     // CompleteScreen (A1 filter + A9 route). The composer still handles
-    // it gracefully — defaults to Case C "Keep building" rather than
-    // throwing — so a stale record does not break the summary surface.
+    // it gracefully - defaults to Case C "Keep building" rather than
+    // throwing - so a stale record does not break the summary surface.
     const review = makeReview({
       status: 'draft',
       goodPasses: 5,

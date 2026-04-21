@@ -122,7 +122,7 @@ describe('SetupScreen (C-3)', () => {
 
   it('C-5 Unit 1: /setup?from=repeat renders the stale-context banner with the last-session day name', async () => {
     // Seed a completed session 3 days ago (must be Tuesday if today is
-    // Friday etc — the test asserts a weekday match rather than a
+    // Friday etc - the test asserts a weekday match rather than a
     // specific one so it's stable across CI run days).
     const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000
     const completedAt = Date.now() - THREE_DAYS_MS
@@ -284,7 +284,7 @@ describe('SetupScreen (C-3)', () => {
 
     expect(await screen.findByText('safety')).toBeInTheDocument()
 
-    // Non-onboarding Build must NOT mutate the sentinel — updatedAt
+    // Non-onboarding Build must NOT mutate the sentinel - updatedAt
     // unchanged from the seed, value unchanged.
     const row = await db.storageMeta.get('onboarding.completedAt')
     expect(row?.value).toBe(existingCompletedAt)

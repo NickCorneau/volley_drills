@@ -6,7 +6,7 @@ import type { RecentSessionEntry } from '../services/session'
  * Tier 1a Unit 5: last-three-sessions row on Home.
  *
  * Three columns per row: date (left), inferred focus (middle),
- * completion Y/N (right). Plain text — no borders, no chrome, no
+ * completion status (right). Plain text - no borders, no chrome, no
  * tappable affordance. A calm "what you've done lately" trailer that
  * sits below the primary Home cluster.
  *
@@ -18,25 +18,30 @@ import type { RecentSessionEntry } from '../services/session'
  *   full history screen.
  * - No tap targets in Tier 1a: tapping a row would set an expectation
  *   (detail screen, re-run) that Tier 1a has no surface to deliver.
- *   Passive read-only is honest about the scope.
+ *   Passive read-only is honest about the scope. Field-test feedback
+ *   2026-04-21 noted the trailer read as unclear - the copy tightening
+ *   below (descriptive heading, "Done"/"Partial" vs "Yes"/"No") is the
+ *   Tier 1a compromise; a tappable detail view is Tier 2.
  * - No empty state: when `entries` is empty the component renders
  *   nothing. The primary card (NewUser / Draft / LastComplete /
- *   Resume) is already the call to action — a second "you have no
+ *   Resume) is already the call to action - a second "you have no
  *   sessions yet" copy block would duplicate that work.
  *
  * Date column uses `formatDayName` (Today / Yesterday / weekday /
  * short date) for readability. Session-entry `endedAt` is
- * `completedAt ?? startedAt` — good enough for "when did this
+ * `completedAt ?? startedAt` - good enough for "when did this
  * happen" display; a few seconds off on a mid-block abort is
  * invisible to a day-granularity label.
  *
- * Completion column uses a plain `Yes` / `No` so the label stays
- * legible in the Home type hierarchy. A checkmark + cross glyph pair
- * was rejected: glyphs read as decorative; text reads as a record.
+ * Completion column uses plain `Done` / `Partial` so the label tells
+ * the tester what the column means without a header. "Yes" / "No"
+ * (pre-2026-04-21) forced the tester to infer the question; the new
+ * wording is self-describing. A checkmark + cross glyph pair was
+ * rejected: glyphs read as decorative; text reads as a record.
  *
  * Three-column grid is enforced with `grid-cols-[auto_1fr_auto]` so
  * the date hugs the left edge, focus fills the middle, and
- * completion hugs the right — matching how a spreadsheet reader
+ * completion hugs the right - matching how a spreadsheet reader
  * would scan the list.
  *
  * See `docs/plans/2026-04-20-m001-tier1-implementation.md` Unit 5.
@@ -55,9 +60,14 @@ export function RecentSessionsList({ entries, now }: RecentSessionsListProps) {
       aria-label="Recent sessions"
       className="flex flex-col gap-2 px-1 pt-2"
     >
-      <h2 className="text-xs font-medium uppercase tracking-wider text-text-secondary">
-        Recent
-      </h2>
+      <div className="flex flex-col gap-0.5">
+        <h2 className="text-sm font-semibold text-text-primary">
+          Your recent workouts
+        </h2>
+        <p className="text-xs text-text-secondary">
+          Last {entries.length} {entries.length === 1 ? 'session' : 'sessions'} on this device.
+        </p>
+      </div>
       <ul role="list" className="divide-y divide-text-primary/5">
         {entries.map((entry) => {
           const focus = inferSessionFocus(entry.plan.blocks)
@@ -71,7 +81,7 @@ export function RecentSessionsList({ entries, now }: RecentSessionsListProps) {
               </span>
               <span>{focusLabel(focus)}</span>
               <span className="text-text-secondary">
-                {entry.completed ? 'Yes' : 'No'}
+                {entry.completed ? 'Done' : 'Partial'}
               </span>
             </li>
           )

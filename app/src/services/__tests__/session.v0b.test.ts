@@ -348,7 +348,7 @@ describe('v0b session services', () => {
   //
   // Semantic: has the tester ever created an ExecutionLog in this app
   // install? Any terminal or in-progress log counts. A discarded-resume
-  // log still counts — the tester engaged with the app even if they
+  // log still counts - the tester engaged with the app even if they
   // bailed. Returns `false` only for a truly fresh install where no
   // ExecutionLog rows exist at all.
   it('hasEverStartedSession returns false on an empty DB (genuine first install)', async () => {
@@ -545,7 +545,7 @@ describe('v0b session services', () => {
     })
     // Even if somehow a submitted review is attached, the log's
     // discarded-resume status means the LastComplete card should never
-    // offer a Repeat of that session — the user explicitly abandoned it.
+    // offer a Repeat of that session - the user explicitly abandoned it.
     await db.sessionReviews.put({
       id: 'review-exec-discarded-lc',
       executionLogId: 'exec-discarded-lc',
@@ -868,7 +868,7 @@ describe('createSessionFromDraft: lastPlayerMode write (Phase F Unit 2)', () => 
     expect(plans).toHaveLength(1)
     expect(row).toBeDefined()
     // Both writes capture the same `Date.now()` snapshot inside the
-    // transaction — proves the atomic co-write rather than two
+    // transaction - proves the atomic co-write rather than two
     // independent IDB ops that could race.
     expect(row!.updatedAt).toBe(plans[0].createdAt)
   })

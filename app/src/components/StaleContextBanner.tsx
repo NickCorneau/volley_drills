@@ -9,7 +9,7 @@
  * without stealing focus.
  *
  * The language ("Adjust if today's different") is deliberately gentle
- * per the C-5 plan's Key Technical Decision #3 — no age threshold,
+ * per the C-5 plan's Key Technical Decision #3 - no age threshold,
  * no urgency. Rendering it consistently is easier to reason about than
  * threshold logic.
  */

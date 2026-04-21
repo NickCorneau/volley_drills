@@ -77,7 +77,7 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
     const first = renderTree('/')
     await screen.findByText(/welcome\. let.?s get you started\./i)
 
-    // Pick a band — SkillLevelScreen writes skillLevel + step via
+    // Pick a band - SkillLevelScreen writes skillLevel + step via
     // setStorageMetaMany before navigating. We're testing the RESUME
     // contract, so we unmount BEFORE the in-memory navigation settles
     // on the new page. Unmount simulates tab-close mid-onboarding.
@@ -86,7 +86,7 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
     )
 
     // Verify the persistence landed (this matches SkillLevelScreen's
-    // existing assertions — belt).
+    // existing assertions - belt).
     const skillLevel = await getStorageMeta(
       'onboarding.skillLevel',
       isSkillLevel,
@@ -97,7 +97,7 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
 
     first.unmount()
 
-    // Second mount: fresh MemoryRouter starts at `/` — the tester is
+    // Second mount: fresh MemoryRouter starts at `/` - the tester is
     // re-opening the PWA from Home Screen. FirstOpenGate reads
     // `step === 'todays_setup'` and redirects past Skill Level.
     renderTree('/')
@@ -108,7 +108,7 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
   })
 
   it('fresh install (no meta) always routes to /onboarding/skill-level on first mount', async () => {
-    // Sanity belt — the base FirstOpenGate.test covers this with a stub
+    // Sanity belt - the base FirstOpenGate.test covers this with a stub
     // skill-level route; this version uses the real SkillLevelScreen so
     // we also catch any integration mismatch between FirstOpenGate and
     // SkillLevelScreen's initial render.

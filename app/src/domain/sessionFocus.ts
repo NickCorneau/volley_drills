@@ -5,7 +5,7 @@ import type { SkillFocus } from '../types/drill'
 /**
  * Tier 1a Unit 5: inferred focus label for the Home last-3-sessions
  * row. One word per session, machine-derived from the plan's
- * `main_skill` block — the session's primary skill intent.
+ * `main_skill` block - the session's primary skill intent.
  *
  * Returns `'partial'` when:
  * - The plan has no `main_skill` block (short archetypes, early-abort
@@ -15,14 +15,14 @@ import type { SkillFocus } from '../types/drill'
  *   and historical logs should not suddenly read as a different
  *   focus when that happens.
  *
- * Not persisted anywhere — recomputed on each Home render. Home calls
+ * Not persisted anywhere - recomputed on each Home render. Home calls
  * this with at most 3 plans per mount, so the O(blocks × DRILLS)
  * cost is negligible (≤ ~90 comparisons total). When that ceases to
  * be true (Tier 2 history screen), precompute a `drillByName` map
  * once at module load.
  *
  * Why not match by `drillId`? `SessionPlanBlock` deliberately carries
- * only `drillName` + `shortName` — the plan is a frozen snapshot, not
+ * only `drillName` + `shortName` - the plan is a frozen snapshot, not
  * a pointer into the drill catalog. We accept the one-way name lookup
  * cost for the denormalization benefit (a deleted drill doesn't break
  * a historical log's render). See `db/types.ts::SessionPlanBlock`.

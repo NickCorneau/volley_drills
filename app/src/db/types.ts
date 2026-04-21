@@ -14,7 +14,7 @@ export interface SessionPlanBlock {
    * block landed on the user's session ("Chosen because: ..."). Optional
    * because legacy v3 / v0a plans do not carry it; RunScreen renders it
    * quietly below the coaching cue when present. Not persisted to Dexie
-   * explicitly — the plan object is stored as a whole, so the field
+   * explicitly - the plan object is stored as a whole, so the field
    * rides along automatically once a plan is rebuilt by the current
    * `createSessionFromDraft`. Tier 2 decides whether to surface it
    * through a richer "See why this session was chosen" modal.
@@ -156,11 +156,11 @@ export type RpeCaptureWindow =
  * Terminal state of a `SessionReview` (D-C7 / A5). Replaces the legacy
  * `sessionRpe: -1` sentinel used in v0a.
  *
- * - `'submitted'` — user completed the review; `sessionRpe` is a number in
+ * - `'submitted'` - user completed the review; `sessionRpe` is a number in
  *   `[0, 10]`.
- * - `'skipped'` — terminal stub produced by `skipReview` or `expireReview`;
+ * - `'skipped'` - terminal stub produced by `skipReview` or `expireReview`;
  *   `sessionRpe === null`, `goodPasses === 0`, `totalAttempts === 0`.
- * - `'draft'` — partial review persisted by `saveReviewDraft` (C-1 Unit 7);
+ * - `'draft'` - partial review persisted by `saveReviewDraft` (C-1 Unit 7);
  *   filtered out by `findPendingReview` / `expireStaleReviews` per A1.
  *
  * Optional on the type (`status?:`) for defense-in-depth: the v4 migration
@@ -176,7 +176,7 @@ export interface SessionReview {
   /**
    * Device-holder rating on the 0–10 CR10-style scale (D120). `null` only
    * when the review was auto-finalized via the expired-deferral path
-   * (V0B-31) — no usable subjective load was captured in that case.
+   * (V0B-31) - no usable subjective load was captured in that case.
    */
   sessionRpe: number | null
   goodPasses: number
@@ -245,13 +245,13 @@ export interface TimerState {
  * Row shape for the `storageMeta` key-value table added in Dexie v4 (C-0).
  *
  * Keys used in v0b (see `docs/specs/m001-phase-c-ux-decisions.md`):
- * - `onboarding.skillLevel` — D-C4 / D121 enum picked on Skill Level screen.
- * - `onboarding.completedAt` — epoch ms set when Today's Setup's "Build
+ * - `onboarding.skillLevel` - D-C4 / D121 enum picked on Skill Level screen.
+ * - `onboarding.completedAt` - epoch ms set when Today's Setup's "Build
  *   session" commits; also backfilled by C-0 Unit 2 for existing testers per
  *   H15 defense-in-depth.
- * - `onboarding.step` — `'skill_level' | 'todays_setup'`, crash-safe resume
+ * - `onboarding.step` - `'skill_level' | 'todays_setup'`, crash-safe resume
  *   key.
- * - `ux.softBlockDismissed.{execId}` — A7 check-and-set on the D-C1 soft-block
+ * - `ux.softBlockDismissed.{execId}` - A7 check-and-set on the D-C1 soft-block
  *   modal; cleaned up on terminal-review write.
  *
  * `value` is typed as `unknown` (C-0 Key Decision #4): numbers (timestamps),

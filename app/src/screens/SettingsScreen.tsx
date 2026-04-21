@@ -10,7 +10,7 @@ import { routes } from '../routes'
  * JSON export.
  *
  * Deliberately one button. Any scope creep ("reset data", "clear
- * drafts", "switch skill level") lands in M001-build — for the 5-tester
+ * drafts", "switch skill level") lands in M001-build - for the 5-tester
  * D91 cohort the only settings-surface job is giving the founder a way
  * to collect raw training records from each device.
  *
@@ -20,7 +20,7 @@ import { routes } from '../routes'
  * Phase F2 (2026-04-19): the export block now uses the shared focal
  * Card variant (same surface language as HomePrimaryCard post-F1) so
  * Settings feels like part of the same design family as Home. Pure
- * visual alignment — no behavior change.
+ * visual alignment - no behavior change.
  */
 
 type ExportState =

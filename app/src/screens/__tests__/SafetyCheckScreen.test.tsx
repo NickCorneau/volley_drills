@@ -9,7 +9,7 @@ import { saveDraft } from '../../services/session'
 import { SafetyCheckScreen } from '../SafetyCheckScreen'
 
 /**
- * C-3 Unit 4 (V0B-16): answer-first safety copy — inline consequence
+ * C-3 Unit 4 (V0B-16): answer-first safety copy - inline consequence
  * lines under the pain question and the recency chips, using D86
  * regulatory vocabulary (no "injury risk", no "overload", no "spike",
  * no red).
@@ -23,7 +23,7 @@ import { SafetyCheckScreen } from '../SafetyCheckScreen'
  * was reworded from "pain that changes how you move" to
  * "Any pain that's sharp, localized, or makes you avoid a movement?"
  * so DOMS is easier to self-sort. Heading matchers below use the
- * distinctive "sharp" token — strong enough to fail a regression,
+ * distinctive "sharp" token - strong enough to fail a regression,
  * loose enough to survive a subsequent copy tweak.
  */
 
@@ -171,8 +171,8 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     // when Yes was tapped, which made the Recency chips below visually
     // look blocked by the override card. Reversing puts PainOverrideCard
     // directly beneath its triggering question (canonical reveal-on-answer
-    // pattern) and answers the "when did you last train" question — which
-    // applies to every session regardless of pain status — first.
+    // pattern) and answers the "when did you last train" question - which
+    // applies to every session regardless of pain status - first.
     expect(headings[0].textContent).toMatch(/when did you last train/i)
     expect(headings[1].textContent).toMatch(/any pain.*sharp/i)
   })
@@ -185,7 +185,7 @@ describe('SafetyCheckScreen escape hatch', () => {
   })
 
   // Rationale: pre-C-5 this screen had no back affordance, so a tester
-  // who changed their mind after building a draft was stuck — the only
+  // who changed their mind after building a draft was stuck - the only
   // exits were "answer pain+recency" or closing the PWA entirely. The
   // draft is already persisted to `sessionDrafts`, so bouncing back to
   // Home is free from a data standpoint: the draft surfaces there via

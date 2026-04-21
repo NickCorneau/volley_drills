@@ -26,7 +26,7 @@ type BackButtonProps = {
  * `SettingsScreen`, `SetupScreen`, and `SafetyCheckScreen`. All three
  * carried the same visual intent (small 44 px tap target in the top-
  * left of the screen header, accent color, leftward arrow + label),
- * but had drifted slightly — SetupScreen was missing `min-h-[44px]`
+ * but had drifted slightly - SetupScreen was missing `min-h-[44px]`
  * and `px-2` entirely, so it rendered as a smaller tap target than
  * the other two.
  *
@@ -58,7 +58,7 @@ export function BackButton({
       className={cx(
         'min-h-[44px] px-2 text-sm text-accent transition-colors',
         // Phase F11 (2026-04-19): hover matches the Phase F7 press
-        // state so desktop pointers get the same clickability cue —
+        // state so desktop pointers get the same clickability cue -
         // the accent text darkens to `accent-pressed` on hover, then
         // stays at that shade during the press.
         'hover:text-accent-pressed active:text-accent-pressed',

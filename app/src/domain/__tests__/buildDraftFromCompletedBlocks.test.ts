@@ -133,7 +133,7 @@ describe('buildDraftFromCompletedBlocks (C-5 Unit 3)', () => {
       { id: 'b-1', minutes: 3 },
       { id: 'b-2', minutes: 10 },
     ])
-    // Stray entry with an unknown blockId (shouldn't matter — we
+    // Stray entry with an unknown blockId (shouldn't matter - we
     // iterate the plan and index into statuses by position).
     const log: ExecutionLog = {
       ...makeLog(['completed', 'skipped'], ['b-1', 'b-2']),

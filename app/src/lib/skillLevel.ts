@@ -3,8 +3,8 @@
  *
  * The onboarding screen persists one of five short enum values to
  * `storageMeta.onboarding.skillLevel`. They are **pair-first functional
- * bands** — action-anchored descriptions of what a pair (or solo player) can
- * currently do together — not identity labels like "beginner" or
+ * bands** - action-anchored descriptions of what a pair (or solo player) can
+ * currently do together - not identity labels like "beginner" or
  * "intermediate".
  *
  * The internal drill-metadata band (`PlayerLevel` in `./types/drill.ts`,
@@ -36,7 +36,7 @@ import type { PlayerLevel } from '../types/drill'
  * Short machine values only. The long helper sentences live in the
  * onboarding copy block and are free to evolve without a migration.
  *
- * `'unsure'` is the explicit "Not sure yet" escape hatch — preferred over a
+ * `'unsure'` is the explicit "Not sure yet" escape hatch - preferred over a
  * sentinel like `'skipped'` because it carries intent (the user read the
  * question, opted out) and survives taxonomy changes without ambiguity.
  */
@@ -63,7 +63,7 @@ export const SKILL_LEVELS: readonly SkillLevel[] = [
 /**
  * Short user-facing label rendered on each Skill Level button. The long
  * helper sentence under each label is held in the onboarding screen's copy
- * block and intentionally not exported here — copy is a screen concern, not
+ * block and intentionally not exported here - copy is a screen concern, not
  * a library concern.
  */
 export const SKILL_LEVEL_LABEL: Record<SkillLevel, string> = {
@@ -111,7 +111,7 @@ export function skillLevelToDrillBand(level: SkillLevel): PlayerLevel {
 
 /**
  * Type guard for persisted values. Guards against stale / future enum
- * values in `storageMeta.onboarding.skillLevel` — for example if a newer
+ * values in `storageMeta.onboarding.skillLevel` - for example if a newer
  * build persisted a value the current build does not yet know about, or if
  * storage was hand-edited.
  */

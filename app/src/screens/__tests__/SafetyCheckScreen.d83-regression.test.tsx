@@ -9,11 +9,11 @@ import { SafetyCheckScreen } from '../SafetyCheckScreen'
  *
  * D83 (docs/decisions.md): pain flag + training recency are per-session.
  * They MUST NOT be pre-filled from any prior SessionPlan, Draft, or
- * Review record — the tester has to answer them every time.
+ * Review record - the tester has to answer them every time.
  *
- * This test seeds the strongest possible "tempting-to-cache" signal —
+ * This test seeds the strongest possible "tempting-to-cache" signal -
  * a prior `SessionPlan.safetyCheck` with `painFlag: true` and
- * `trainingRecency: '0 days'` — then mounts SafetyCheckScreen on the
+ * `trainingRecency: '0 days'` - then mounts SafetyCheckScreen on the
  * repeat path (via a draft built from that plan's context). Both form
  * fields must render in their default/unselected state.
  *
@@ -40,7 +40,7 @@ describe('SafetyCheckScreen D83 regression (C-5 Unit 4)', () => {
   it('pain flag + recency NEVER pre-fill from a prior plan on the repeat path', async () => {
     // Seed a prior plan that DID answer both safety fields. In the
     // v0a/v0b world a plan's `safetyCheck` captures the answers from
-    // the day the plan was built — the temptation for a future
+    // the day the plan was built - the temptation for a future
     // refactor would be to reuse them on Repeat "for convenience".
     const priorTimestamp = Date.now() - 2 * 24 * 60 * 60 * 1000
     await db.sessionPlans.put({
@@ -132,7 +132,7 @@ describe('SafetyCheckScreen D83 regression (C-5 Unit 4)', () => {
       screen.queryByText(/know my body/i),
     ).not.toBeInTheDocument()
     // The prior plan had `trainingRecency: '0 days'` and a true
-    // `painFlag` — any regression that leaks those into state would
+    // `painFlag` - any regression that leaks those into state would
     // trigger PainOverrideCard or the Continue button above.
   })
 

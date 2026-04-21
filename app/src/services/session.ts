@@ -194,7 +194,7 @@ export async function findPendingReview(
   )
 
   // A1: build reviewedIds from TERMINAL reviews only. A draft review must
-  // not shadow the pending state — the log is still pending until the
+  // not shadow the pending state - the log is still pending until the
   // draft is finalized (submitted) or auto-expired (skipped).
   const reviewedIds = new Set(
     (await db.sessionReviews.toArray())
@@ -224,7 +224,7 @@ export async function findPendingReview(
 // --- Last-complete query (C-4) ---
 
 /**
- * Bundle returned by `getLastComplete` — everything the Home LastComplete
+ * Bundle returned by `getLastComplete` - everything the Home LastComplete
  * primary card (C-4 Unit 3) needs to render without a follow-up fetch:
  * the terminal execution log, its originating plan, and the finalized
  * review (either submitted or skipped-via-expire/skip).
@@ -243,7 +243,7 @@ export interface LastCompleteBundle {
  * A1 filter semantics: a `status: 'draft'` review is NOT terminal, so a
  * log with only a draft review is excluded (the session is still the
  * review-pending state). A8 also applies: `endedEarlyReason ===
- * 'discarded_resume'` logs never appear here — the tester explicitly
+ * 'discarded_resume'` logs never appear here - the tester explicitly
  * abandoned them, so offering Repeat on that session would be user-hostile.
  *
  * Returns `null` when no eligible record exists (fresh install, or every
@@ -284,7 +284,7 @@ export async function getLastComplete(): Promise<LastCompleteBundle | null> {
 /**
  * Tier 1a Unit 5: shape of a single row in the Home last-3-sessions
  * list. Three render-ready primitives (timestamp, plan for focus
- * inference, completion boolean). Kept deliberately narrow — richer
+ * inference, completion boolean). Kept deliberately narrow - richer
  * context (RPE, drill list, swap count) is a Tier 2 concern.
  */
 export interface RecentSessionEntry {
@@ -306,30 +306,30 @@ export interface RecentSessionEntry {
  *   contradict the adversarial-memo framing of Condition 2 (visible
  *   history reduces the founder's reason to keep a parallel notes
  *   app for real session history).
- * - Excludes `in_progress` / `paused` / `not_started` — those surface
+ * - Excludes `in_progress` / `paused` / `not_started` - those surface
  *   on the Resume primary card, not in history.
  *
  * Ordering: `completedAt ?? startedAt`, descending. Matches the
  * ordering `getLastComplete` uses so the first item here will
  * frequently be the same log backing the LastComplete primary card
- * (by design — "what you did last" and "recent sessions" share a
+ * (by design - "what you did last" and "recent sessions" share a
  * head).
  *
  * Unlike `getLastComplete`, this query does NOT require a finalized
  * `SessionReview`. The list is a "what happened" surface, not a
- * "what's actionable next" surface — a skipped review or an
+ * "what's actionable next" surface - a skipped review or an
  * expired-stub record still counts as a session that happened.
  *
  * `completed: boolean` collapses ExecutionStatus to a Y/N column for
  * the Home row: `status === 'completed'` → `true`; `ended_early` →
  * `false`. Ended-early captures both explicit finish-later and
- * D120-expired stubs — both read as "not completed" for the
+ * D120-expired stubs - both read as "not completed" for the
  * founder-facing row. Per-reason granularity is a Tier 2 concern.
  *
  * Plans missing from Dexie (orphaned after a plan-row deletion, very
  * rare in practice) drop out of the list silently. We take the first
- * `limit` records whose plan lookup succeeds — not the first `limit`
- * records and then filter — so a broken plan record doesn't shorten
+ * `limit` records whose plan lookup succeeds - not the first `limit`
+ * records and then filter - so a broken plan record doesn't shorten
  * the visible list below the caller's ask when there are later
  * recoverable sessions available.
  *
@@ -540,7 +540,7 @@ export async function saveExecution(updated: ExecutionLog): Promise<void> {
  *   plan.context)` so the new drill is context-valid and the `id` /
  *   `type` / `required` invariants are preserved.
  * - `plan.blocks[execution.activeBlockIndex]` MUST point at the
- *   current block — swap mutates the active slot, not a future one.
+ *   current block - swap mutates the active slot, not a future one.
  * - Timer pause is the caller's responsibility; this service only
  *   writes data. Matches the Shorten convention.
  *

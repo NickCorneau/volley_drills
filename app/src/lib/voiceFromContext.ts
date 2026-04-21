@@ -5,7 +5,7 @@
  * The onboarding screens originally shipped with **pair voice**
  * ("Where's the pair today?" / "We can keep a friendly toss alive.")
  * as the cold-state default per D121. That framing misleads solo users
- * on a solo-first product (`D5`) — they read the first screen as "not
+ * on a solo-first product (`D5`) - they read the first screen as "not
  * for me." The initial Phase F fix only flipped voice for **returning**
  * solo testers; D128 follows on by also flipping the **cold-state
  * default** to solo voice, so screen one reads "Where are you today?"

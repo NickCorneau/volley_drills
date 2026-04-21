@@ -8,7 +8,7 @@
  * Decisions: D4, D76 (feed type), D77 (fatigue cap), D79 (env flags).
  */
 
-/** How the ball is delivered — determines realism and skill-transfer claims. */
+/** How the ball is delivered - determines realism and skill-transfer claims. */
 export type FeedType = 'self-toss' | 'partner-toss' | 'live-serve' | 'wall-rebound' | 'coach-serve'
 
 // `'warmup'` is the Tier 1a (D105) tag for Beach Prep content. The session
@@ -111,7 +111,7 @@ export interface DrillVariant {
   coachingCues: string[]
 }
 
-/** A drill family — the canonical concept with one or more execution variants. */
+/** A drill family - the canonical concept with one or more execution variants. */
 export interface Drill {
   id: string
   name: string

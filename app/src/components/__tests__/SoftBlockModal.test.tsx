@@ -101,7 +101,7 @@ describe('SoftBlockModal (C-4 Unit 4 / D-C1)', () => {
     // Important: onSkipAndContinue marks the dismissal. onClose does NOT.
     // If this test fails the modal would stop re-firing after a close,
     // which is the wrong contract (the tester didn't actively accept the
-    // skip — they just dismissed the prompt).
+    // skip - they just dismissed the prompt).
     expect(onSkip).not.toHaveBeenCalled()
   })
 

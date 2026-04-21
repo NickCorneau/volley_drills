@@ -8,7 +8,7 @@ import { focusLabel, inferSessionFocus } from '../sessionFocus'
  *   - Partial when no `main_skill` block.
  *   - Partial when `main_skill` drillName doesn't match the catalog.
  *   - Correct `skillFocus[0]` pickup for known drills across focuses
- *     (pass, serve, set — the three Tier 1a focus labels actually
+ *     (pass, serve, set - the three Tier 1a focus labels actually
  *     used in the authored catalog).
  *   - `focusLabel` renders human-readable sentence case.
  *

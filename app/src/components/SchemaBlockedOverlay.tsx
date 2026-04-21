@@ -8,7 +8,7 @@ export interface SchemaBlockedOverlayProps {
 
 // `useSyncExternalStore` reads the sticky flag on every render (including the
 // initial one), so the overlay renders correctly even if `emitSchemaBlocked()`
-// fired before the component mounted — e.g., when `db.on('blocked', ...)`
+// fired before the component mounted - e.g., when `db.on('blocked', ...)`
 // fires during Dexie's initial open before React's first commit, or during
 // a StrictMode remount window.
 export function SchemaBlockedOverlay({ onReload }: SchemaBlockedOverlayProps = {}) {

@@ -118,7 +118,7 @@ describe('ReviewScreen Finish Later (C-1 Unit 8)', () => {
     // Let the initial draft hydration + form render; then stub
     // `saveReviewDraft` to reject. The auto-save effect also calls it,
     // but the belt save inside `handleFinishLater` is the one that must
-    // surface the failure — silently navigating home on save failure
+    // surface the failure - silently navigating home on save failure
     // violates the Finish-Later promise.
     const spy = vi
       .spyOn(reviewService, 'saveReviewDraft')
@@ -174,7 +174,7 @@ describe('ReviewScreen Finish Later (C-1 Unit 8)', () => {
     renderAt('exec-ended')
     await screen.findByRole('heading', { name: /quick review/i })
     await user.click(screen.getByRole('radio', { name: /^3/ }))
-    // Don't pick an incomplete reason — Finish later should still work.
+    // Don't pick an incomplete reason - Finish later should still work.
     await user.click(screen.getByRole('button', { name: /finish later/i }))
 
     expect(await screen.findByTestId('home-route')).toBeInTheDocument()

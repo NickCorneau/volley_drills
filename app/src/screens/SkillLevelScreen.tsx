@@ -27,7 +27,7 @@ import { setStorageMetaMany } from '../services/storageMeta'
  *   Copy table is module-local so it's easy to tweak without migrations.
  * - "Not sure yet" is a text button (not a fifth primary chip) to keep
  *   the primary rail four-tall.
- * - No back arrow — first-open = no prior screen (H9).
+ * - No back arrow - first-open = no prior screen (H9).
  *
  * Phase F Unit 2 (2026-04-19) amendment, revised 2026-04-19 (D128):
  * - Voice is `storageMeta.lastPlayerMode`-driven when a signal exists
@@ -41,7 +41,7 @@ import { setStorageMetaMany } from '../services/storageMeta'
  *   first screen ("Where's the pair today?" reads as "not for me" to a
  *   solo user). Returning pair testers still see pair voice because
  *   `lastPlayerMode === 'pair'` overrides the default.
- * - Taxonomy enum (`SkillLevel`) is **unchanged** — only the rendered
+ * - Taxonomy enum (`SkillLevel`) is **unchanged** - only the rendered
  *   copy differs. Persisted `storageMeta.onboarding.skillLevel` stays
  *   identical across voices so the M001-build adaptation engine sees
  *   one taxonomy regardless of how the onboarding copy read on the
@@ -78,7 +78,7 @@ const SOLO_COPY: Copy = {
 
 /**
  * Band descriptors stay in functional-ability voice (neutral between
- * solo and pair — "Pass easy serves" works in both) so the only surface
+ * solo and pair - "Pass easy serves" works in both) so the only surface
  * that flips is the heading. This keeps Phase F's copy delta minimal
  * and preserves D121's action-anchored framing. When the full D121
  * pair-vs-solo pronoun pass lands in M001-build, these strings are the
@@ -102,7 +102,7 @@ export function SkillLevelScreen() {
   // once `loadVoiceFromStorage` resolves (single Dexie read, <5 ms
   // in practice). The brief flicker is acceptable because (a) first
   // open is a single render with no flip, and (b) the returning-pair
-  // case only happens after at least one pair session completed — the
+  // case only happens after at least one pair session completed - the
   // user has already been onboarded once and the flicker is not their
   // first impression.
   const [voice, setVoice] = useState<Voice>('solo')
@@ -158,7 +158,7 @@ export function SkillLevelScreen() {
       </header>
 
       {/* Phase F2 (2026-04-19): option cards now use the same calm
-          focal-surface language as HomePrimaryCard / SettingsScreen —
+          focal-surface language as HomePrimaryCard / SettingsScreen -
           soft shadow + hairline ring instead of a hard `border-2`, a
           touch more vertical breathing between options, and slightly
           more internal padding so each option reads as a calm,

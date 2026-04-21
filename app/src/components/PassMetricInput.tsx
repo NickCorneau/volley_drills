@@ -26,7 +26,7 @@ type PassMetricInputProps = PassMetricInputBaseProps &
 /**
  * V0B-02 / B5 / H13 (red-team fix plan v3): tap-to-type is the SOLE
  * pass-metric control on the Review screen. No +, no -, no ±5 / ±10.
- * One control, one interaction pattern — adding a third pattern is the
+ * One control, one interaction pattern - adding a third pattern is the
  * thesis-extension H6 that H13 explicitly rules out.
  *
  * Uses a numeric `<input>` with `inputMode="numeric"` + `pattern="[0-9]*"`
@@ -127,7 +127,7 @@ function NumberCell({
     }
     onCommit(parsed)
     // The parent will push its clamped value back through the useEffect
-    // above, so no manual setText here — this avoids a stale-text flash.
+    // above, so no manual setText here - this avoids a stale-text flash.
   }
 
   return (

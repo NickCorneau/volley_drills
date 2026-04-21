@@ -9,7 +9,7 @@ import { CompleteScreen } from '../CompleteScreen'
  * any reason OTHER than a schema-blocked upgrade, the screen must drop
  * into a recoverable state (e.g. the 'missing' StatusMessage with a
  * Back-to-start button), NOT strand the tester on an indefinite loading
- * spinner. CompleteScreen is the terminal post-session screen — failure
+ * spinner. CompleteScreen is the terminal post-session screen - failure
  * here silently breaks the entire D91 post-session loop.
  */
 

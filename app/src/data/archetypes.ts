@@ -1,5 +1,5 @@
 /**
- * Session archetypes — fixed block templates selected from hard-filter context.
+ * Session archetypes - fixed block templates selected from hard-filter context.
  *
  * Deload is an overlay on any archetype, not a separate planner (D67).
  * Block order follows blended-practice evidence: blocked quality reps early,
@@ -19,7 +19,7 @@
 //    (chain-1..5 for pass, chain-6-serving for serve, chain-7-setting for set).
 //    Warmup and wrap blocks are focus-agnostic (they key off skillFocus
 //    'warmup' and 'recovery' respectively, not the session focus).
-//    Technique and movement_proxy blocks MAY support-focus — for example,
+//    Technique and movement_proxy blocks MAY support-focus - for example,
 //    a pass-focus session can use a movement_proxy block with
 //    `skillTags: ['pass', 'movement']`. Never author a session template
 //    that mixes two primary main-skill chains.
@@ -35,11 +35,11 @@
 //
 // 3. Warmup slot preference order (D105 + M001 Tier 1 Unit 1).
 //    The session builder prefers drills with `skillFocus: ['warmup']`
-//    (Beach Prep Two / Three / Five — see app/src/data/drills.ts).
+//    (Beach Prep Two / Three / Five - see app/src/data/drills.ts).
 //    The builder falls back to the first non-recovery drill only when the
 //    Beach Prep set is absent; this fallback is defensive and should never
 //    be the normal path. NEVER author a pass/serve/set drill as content
-//    that ends up in the warmup slot — warmup content must declare
+//    that ends up in the warmup slot - warmup content must declare
 //    `skillFocus: ['warmup']` as its primary focus.
 //
 // 4. Wrap slot preference (D105).

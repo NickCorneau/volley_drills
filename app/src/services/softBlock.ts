@@ -10,7 +10,7 @@ import { getStorageMeta, setStorageMeta } from './storageMeta'
  *
  * Cleanup note: terminal-review writers (`submitReview`, `expireReview`,
  * `skipReview`) delete the key inside their A3 transaction so
- * `storageMeta` stays bounded — each key lives at most one cap window
+ * `storageMeta` stays bounded - each key lives at most one cap window
  * before its review is finalized.
  *
  * Read-then-write atomicity for the modal itself (C-4) is the caller's

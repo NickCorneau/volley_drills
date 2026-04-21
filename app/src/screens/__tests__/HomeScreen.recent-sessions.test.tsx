@@ -9,7 +9,7 @@ import { HomeScreen } from '../HomeScreen'
  * last-3-sessions trailer. Verifies:
  *   - Fresh install renders nothing (no empty state).
  *   - Seeded sessions render one row each in reverse-chronological
- *     order with inferred focus + Yes/No completion.
+ *     order with inferred focus + Done/Partial completion.
  *   - Resume active suppresses the trailer (Resume is the only legal
  *     Home surface in that case).
  *
@@ -145,18 +145,20 @@ describe('HomeScreen recent sessions trailer (Tier 1a Unit 5)', () => {
       return found
     })
 
-    // Row 0: newest — Today, Set (from d38), Yes.
+    // Row 0: newest - Today, Set (from d38), Done.
+    // Copy pass 2026-04-21: Yes/No column relabelled to Done/Partial so
+    // the trailer reads as self-describing without a column header.
     expect(rows[0].textContent).toMatch(/Today/i)
     expect(rows[0].textContent).toMatch(/Set/)
-    expect(rows[0].textContent).toMatch(/Yes/)
+    expect(rows[0].textContent).toMatch(/Done/)
 
-    // Row 1: middle — Pass, No (ended_early).
+    // Row 1: middle - Pass, Partial (ended_early).
     expect(rows[1].textContent).toMatch(/Pass/)
-    expect(rows[1].textContent).toMatch(/No/)
+    expect(rows[1].textContent).toMatch(/Partial/)
 
-    // Row 2: oldest — Set (d41), Yes.
+    // Row 2: oldest - Set (d41), Done.
     expect(rows[2].textContent).toMatch(/Set/)
-    expect(rows[2].textContent).toMatch(/Yes/)
+    expect(rows[2].textContent).toMatch(/Done/)
   })
 
   it('is suppressed when a resumable session is active', async () => {

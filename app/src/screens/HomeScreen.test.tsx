@@ -109,7 +109,7 @@ describe('HomeScreen', () => {
       screen.getByRole('button', { name: 'Finish review' }),
     ).toBeInTheDocument()
 
-    // V0B / red-team #5: Skip review is a two-step confirm — the first tap
+    // V0B / red-team #5: Skip review is a two-step confirm - the first tap
     // opens the confirm row, the "Yes, skip" tap writes the expired stub.
     // A9 (red-team fix plan v3): after skip succeeds, Home navigates to
     // /complete/{execId} so the 3-case summary matrix fires (C-2) for the

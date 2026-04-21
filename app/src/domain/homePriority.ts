@@ -43,7 +43,7 @@ export function selectPrimaryCard(flags: FlagSummary): PrimaryVariant {
 }
 
 export function selectSecondaryRows(flags: FlagSummary): SecondaryRow[] {
-  // Resume mutes everything — the tester is mid-session, only Resume or
+  // Resume mutes everything - the tester is mid-session, only Resume or
   // Discard matter.
   if (flags.resume) return []
 
@@ -65,7 +65,7 @@ export function selectSecondaryRows(flags: FlagSummary): SecondaryRow[] {
   }
 
   // `draft` or `last_complete` primary with `reviewPending` true is
-  // unreachable by the precedence function above — reviewPending always
+  // unreachable by the precedence function above - reviewPending always
   // takes primary before them. Documented here so a future reader
   // doesn't try to reintroduce a review_pending_advisory secondary row
   // without first revising the precedence.

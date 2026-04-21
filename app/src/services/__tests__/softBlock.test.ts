@@ -9,7 +9,7 @@ import {
 } from '../softBlock'
 
 /**
- * A7 (approved red-team fix plan v3) — soft-block modal dismissal is keyed
+ * A7 (approved red-team fix plan v3) - soft-block modal dismissal is keyed
  * by executionId so the D-C1 Home modal fires at most once per pending
  * review instance. The cleanup side of A7 deletes the key in the same
  * A3 transaction that writes the terminal review, so `storageMeta` stays

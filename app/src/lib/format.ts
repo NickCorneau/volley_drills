@@ -114,7 +114,7 @@ export function effortLabel(rpe: number | null): string {
 export function phaseLabel(type: BlockSlotType): string {
   // Phase F8 (2026-04-19): sentence-case in source. Pre-F8 these were
   // all-caps literals paired with a CSS `uppercase tracking-wider`
-  // class on the RunScreen phase pill — classic dashboard-eyebrow
+  // class on the RunScreen phase pill - classic dashboard-eyebrow
   // voice the typography audit flagged as off-thesis for the calm,
   // shibui-leaning direction. Case is the source of truth now; the
   // pill drops its `uppercase` utility in the same pass. See

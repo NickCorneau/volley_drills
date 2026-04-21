@@ -30,7 +30,7 @@ import { scanElementForForbidden } from '../copyGuard'
  * the 3-case summary matrix end-to-end; this file is the broad
  * sweep that catches regressions anywhere a new copy string sneaks in).
  *
- * Fixtures are intentionally minimal — the goal is "mount, render,
+ * Fixtures are intentionally minimal - the goal is "mount, render,
  * scan", not to exercise flows. A legit forbidden phrase here means
  * the offending copy literal itself is in the component JSX.
  */
@@ -149,7 +149,7 @@ describe('V0B-18 D86 per-surface regression scan', () => {
     assertClean(container, 'SoftBlockModal')
   })
 
-  describe('HomePrimaryCard — all variants', () => {
+  describe('HomePrimaryCard - all variants', () => {
     it('new_user', () => {
       const { container } = render(
         <HomePrimaryCard variant="new_user" onStart={() => {}} />,
@@ -248,7 +248,7 @@ describe('V0B-18 D86 per-surface regression scan', () => {
     })
   })
 
-  describe('HomeSecondaryRow — all variants', () => {
+  describe('HomeSecondaryRow - all variants', () => {
     it('review_pending_advisory', () => {
       const { container } = render(
         <ul>
@@ -319,7 +319,7 @@ describe('V0B-18 D86 per-surface regression scan', () => {
     )
     // D128: cold-state heading is solo voice ("Where are you today?"),
     // not pair voice. The copy-guard scan runs on the rendered body,
-    // so this just anchors the wait — the scan itself is voice-agnostic.
+    // so this just anchors the wait - the scan itself is voice-agnostic.
     await screen.findByRole('heading', { name: /where are you today/i })
     assertClean(container, 'SkillLevelScreen')
   })

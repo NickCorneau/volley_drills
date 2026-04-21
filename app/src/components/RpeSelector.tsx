@@ -14,17 +14,15 @@
 // and docs/plans/2026-04-12-v0a-to-v0b-transition.md (V0B-01).
 //
 // Phase F11 (2026-04-19): anchor words moved out of the individual chips
-// into a single legend rail below the grid. Pre-F11, five of the eleven
-// chips (0, 3, 5, 7, 10) rendered a two-line anchor; the other six
-// reserved a blank line to keep baselines aligned (F7). That produced an
-// uneven visual rhythm — anchor words landed at irregular column
-// positions (1/4/6 on row one, 2/5 on row two) and made anchored chips
-// read heavier than unanchored ones, implying a tier the interaction
-// model doesn't have. "MODERATE" also routinely overflowed its cell at
-// the 54 px target width. The legend rail carries the full Borg scale
-// as a single-line caption so every chip can collapse to a clean
-// number, and the live `aria-label` on each button continues to carry
-// "3, easy" etc. for screen readers.
+// into a single legend rail below the grid.
+//
+// Feedback pass 2026-04-21: the legend rail is removed entirely. Field
+// testers read the `0 rest · 3 easy · 5 moderate · 7 hard · 10 max`
+// caption as visual noise - they preferred tapping a number and letting
+// the live `SELECTED_HINT` line ("Hard", "Very hard", …) reveal the
+// anchor on demand. Per-button `aria-label` on each chip still carries
+// "3, easy" etc. for screen readers, so the Borg anchor meaning is not
+// lost; it just no longer consumes vertical space on every session.
 
 const RPE_VALUES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const
 
@@ -108,37 +106,6 @@ export function RpeSelector({
             </button>
           )
         })}
-      </div>
-      {/* Legend rail. `aria-hidden` keeps this decorative — the per-
-          button `aria-label` ("3, easy") is the sole accessible
-          carrier of Borg anchor meaning. `flex-wrap` degrades
-          gracefully on narrow screens: the rail breaks to a second
-          line rather than clipping. 12 px (`text-xs`) is the
-          principled minimum for decorative captions per the outdoor
-          brief (`docs/research/outdoor-courtside-ui-brief.md`). */}
-      <div
-        aria-hidden="true"
-        className="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 text-xs text-text-secondary"
-      >
-        {RPE_VALUES.filter((n) => ANCHORS[n] !== undefined).flatMap(
-          (n, i) => {
-            const entry = (
-              <span key={n} className="whitespace-nowrap">
-                <span className="font-semibold tabular-nums text-text-primary">
-                  {n}
-                </span>{' '}
-                {ANCHORS[n]}
-              </span>
-            )
-            if (i === 0) return [entry]
-            return [
-              <span key={`sep-${n}`} className="text-text-secondary/60">
-                &middot;
-              </span>,
-              entry,
-            ]
-          },
-        )}
       </div>
       <p
         className="min-h-[1.25rem] text-center text-xs text-text-secondary"

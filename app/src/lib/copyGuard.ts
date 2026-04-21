@@ -8,7 +8,7 @@
  *
  * Adding a phrase here MUST come with a sweep across consuming tests
  * to confirm no current surface violates the rule. If something
- * violates, fix the copy — not the regex.
+ * violates, fix the copy - not the regex.
  *
  * The list is intentionally narrow:
  * - `compared`, `trend`, `progress`: avoid implying a longitudinal
@@ -33,7 +33,7 @@ export const AVOID_PHRASES = [
   'injury risk',
   'baseline',
   'early sessions',
-  // `first N days` — see regex group.
+  // `first N days` - see regex group.
 ] as const
 
 /**
@@ -58,7 +58,7 @@ export function scanForForbidden(text: string): string[] {
 /**
  * Scan a live DOM subtree for forbidden vocabulary in both visible text
  * AND accessibility attributes (`aria-label`, `title`, `alt`). Catches
- * copy that lives in screen-reader-only labels — the previous
+ * copy that lives in screen-reader-only labels - the previous
  * `document.body.textContent` sweeps missed these.
  */
 export function scanElementForForbidden(root: ParentNode): string[] {

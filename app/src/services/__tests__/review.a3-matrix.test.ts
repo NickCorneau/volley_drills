@@ -5,7 +5,7 @@ import { expireReview, submitReview } from '../review'
 import { skipReview } from '../session'
 
 /**
- * A3 (approved red-team fix plan v3, §A3) — 4x3 state-vs-action matrix
+ * A3 (approved red-team fix plan v3, §A3) - 4x3 state-vs-action matrix
  * for `submitReview` / `skipReview` / `expireReview`.
  *
  * | Existing   | submit              | skip              | expire           |

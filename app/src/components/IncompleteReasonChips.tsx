@@ -30,7 +30,7 @@ export function IncompleteReasonChips({ value, onChange }: IncompleteReasonChips
               // Phase F11 (2026-04-19): both chip states are
               // clickable (tap to pick, tap again to clear). Hover
               // and press cues mirror `QuickTagChips` / `RpeSelector`
-              // for consistency — selected chips use a
+              // for consistency - selected chips use a
               // slightly-darker `bg-warning/90` on hover/press
               // (there is no pre-baked `warning-pressed` token, and
               // `brightness-*` on a saturated red would shift hue

@@ -11,7 +11,7 @@ import { HomeSecondaryRow } from '../HomeSecondaryRow'
 /**
  * C-4 Unit 3: `HomeSecondaryRow` is a compact variant-driven `<li>`.
  * Three variants: review_pending_advisory, draft, last_complete.
- * Content is minimal (not a full card) — one CTA per row.
+ * Content is minimal (not a full card) - one CTA per row.
  */
 
 const pr: PendingReview = {

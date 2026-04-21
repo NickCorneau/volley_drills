@@ -25,7 +25,7 @@ const isTimestamp = (v: unknown): v is number =>
   typeof v === 'number' && Number.isFinite(v) && v > 0
 
 export type SetupScreenProps = {
-  /** C-3: first-run Today's Setup — no last-session prefill, back → Skill Level, wind row, completes onboarding on Build. */
+  /** C-3: first-run Today's Setup - no last-session prefill, back → Skill Level, wind row, completes onboarding on Build. */
   isOnboarding?: boolean
 }
 
@@ -48,8 +48,8 @@ function ToggleChip({
         'min-h-[48px] min-w-[48px] flex-1 rounded-[12px] px-3 py-2 text-base font-semibold transition-colors',
         active
           // Phase F11 (2026-04-19): selected chip darkens to
-          // `accent-pressed` on hover/press — same pattern as the
-          // `primary` Button variant — so desktop pointers and
+          // `accent-pressed` on hover/press - same pattern as the
+          // `primary` Button variant - so desktop pointers and
           // finger-presses both get a tactile cue that the selected
           // chip is still a clickable toggle.
           ? 'bg-accent text-white hover:bg-accent-pressed active:bg-accent-pressed'
@@ -67,7 +67,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   // C-5 Unit 1: `/setup?from=repeat` triggers the stale-context banner
-  // above the chip rows. The repeat path is read-only metadata — it
+  // above the chip rows. The repeat path is read-only metadata - it
   // doesn't change any pre-fill logic, which already runs on every
   // non-onboarding mount via `getLastContext()`. Keeping the banner
   // gated on the explicit query param avoids the banner flashing on a

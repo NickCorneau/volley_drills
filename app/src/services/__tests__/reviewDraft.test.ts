@@ -16,7 +16,7 @@ import {
  * covered by the A3 matrix tests).
  *
  * H19 edge: a draft write MUST NOT overwrite a pre-existing terminal
- * submitted record. This keeps the H19 conflict handoff honest — the
+ * submitted record. This keeps the H19 conflict handoff honest - the
  * tester on a stale ReviewScreen whose session was submitted in another
  * tab still sees the canonical values.
  */

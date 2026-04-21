@@ -6,7 +6,7 @@
  * and preroll tick today, and iOS Safari PWA does not support it (per
  * `D54`, `D57`, and the 2026 WebKit record). With the phone set down
  * on a towel 6 feet away, an iOS tester has NO reliable signal that a
- * block ended — which breaks the `D91` "phone courtside viable for
+ * block ended - which breaks the `D91` "phone courtside viable for
  * structured runner" hypothesis directly. This helper carves out the
  * narrow "block-end beep + preroll tick" slice of the originally-
  * deferred `V0B-08` layered cue stack; the full stack stays post-D91.
@@ -18,7 +18,7 @@
  * - Oscillator + gain envelope, not an `<audio>` element with an
  *   `.mp3` asset: no asset bundling, no SW precache concerns, and no
  *   iOS silent-switch bypass. A silent user is a user who asked for
- *   silence — the silent switch honors the AudioContext path by
+ *   silence - the silent switch honors the AudioContext path by
  *   design.
  * - Fire-and-forget: every `play*` function swallows every error path
  *   so a missing `AudioContext`, a rejected autoplay policy, or a
@@ -27,7 +27,7 @@
  *
  * Compatibility with `D54`: `D54` rules out **background** audio and
  * iPhone haptics. Foreground audio fired inside an active session
- * while the app is in the foreground is a different category — the
+ * while the app is in the foreground is a different category - the
  * same way `D42` scopes wake-lock and haptics as best-effort foreground
  * enhancements.
  *
@@ -112,7 +112,7 @@ function playTone(frequencyHz: number, durationSeconds: number): void {
   try {
     // iOS / Chrome sometimes leave the context in 'suspended' state when
     // created without a gesture; resume() is a no-op when already
-    // running. Fire-and-forget — the `.catch` is defensive over a
+    // running. Fire-and-forget - the `.catch` is defensive over a
     // browser regression (shouldn't reject on a gesture-bound call).
     if (ctx.state === 'suspended') {
       void ctx.resume().catch((err) => {
@@ -131,7 +131,7 @@ function playTone(frequencyHz: number, durationSeconds: number): void {
     oscillator.frequency.setValueAtTime(frequencyHz, now)
 
     const gain = ctx.createGain()
-    // 10 ms attack, 10 ms release — avoids click artifacts on the
+    // 10 ms attack, 10 ms release - avoids click artifacts on the
     // ramp edges without bloating the tone.
     gain.gain.setValueAtTime(0, now)
     gain.gain.linearRampToValueAtTime(0.25, now + 0.01)
@@ -152,7 +152,7 @@ function playTone(frequencyHz: number, durationSeconds: number): void {
 
 /**
  * Play the block-end cue. Called from `RunScreen.handleBlockComplete`
- * alongside the existing `navigator.vibrate` call — vibrate stays for
+ * alongside the existing `navigator.vibrate` call - vibrate stays for
  * Android + desktop haptics; the beep covers iOS Safari PWA where
  * vibrate is unsupported.
  *
@@ -181,7 +181,7 @@ export function playPrerollTick(): void {
  * without cross-test leakage. Not exported for production code paths.
  */
 export function __resetAudioContextForTesting(): void {
-  // Close the prior context (defensive — frees any audio resources).
+  // Close the prior context (defensive - frees any audio resources).
   try {
     sharedContext?.close()
   } catch {

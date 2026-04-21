@@ -88,15 +88,15 @@ function sessionEndTimestamp(exec: ExecutionLog): number {
 /**
  * Result of a `submitReview` call (A3 matrix).
  *
- * - `{ status: 'ok' }` — review persisted (existing was absent or a
+ * - `{ status: 'ok' }` - review persisted (existing was absent or a
  *   `status: 'draft'`).
- * - `{ status: 'refused'; existingStatus }` — a terminal review already
+ * - `{ status: 'refused'; existingStatus }` - a terminal review already
  *   exists for this execution. `existingStatus` distinguishes the two
  *   cases so the ReviewScreen H19 surface can render honest copy: a
  *   session that was "already reviewed" (`'submitted'`) vs one that was
  *   "already skipped" (`'skipped'`). Blurring them produces the
  *   adversarial finding adv-3 dishonest UX where a tester retries after
- *   a Home-skip and sees "already reviewed — showing what we saved."
+ *   a Home-skip and sees "already reviewed - showing what we saved."
  */
 export type SubmitReviewResult =
   | { status: 'ok' }
@@ -179,8 +179,8 @@ export interface ExpireReviewData {
  * when the existing record is a `status: 'draft'`, the user's actual inputs
  * (RPE, note, metrics, incompleteReason, extra `quickTags`) are PRESERVED
  * onto the terminal stub. Blindly overwriting the draft with zeros would
- * silently destroy the tester's data — particularly pain signals and
- * RPE — and then present "No change" copy on CompleteScreen, which is
+ * silently destroy the tester's data - particularly pain signals and
+ * RPE - and then present "No change" copy on CompleteScreen, which is
  * actively dishonest. The stub still gets `captureWindow: 'expired'` +
  * `eligibleForAdaptation: false` + `'expired'` appended to `quickTags` so
  * the adaptation engine correctly ignores it; V0B-15 export carries the
@@ -266,7 +266,7 @@ const isCohortTimestamp = (v: unknown): v is number =>
  * with pre-existing `ExecutionLog` records (H15); C-3 will write it on
  * fresh-install first-Build. If the sentinel is absent (pre-C-3 cold
  * state or a tester who never completed onboarding), fall back to
- * counting all submitted records — preserving the current contract.
+ * counting all submitted records - preserving the current contract.
  *
  * In-memory filter over the whole table because D91 cohort record counts
  * are bounded at ~20 per tester and Dexie doesn't index `status`. Matches
@@ -299,7 +299,7 @@ export interface DraftReviewData {
 /**
  * Persist an in-progress review as `status: 'draft'` through the same A3
  * envelope as the terminal writers. A pre-existing TERMINAL record
- * (`status` is `'submitted'` or `'skipped'`) is never overwritten — the
+ * (`status` is `'submitted'` or `'skipped'`) is never overwritten - the
  * H19 conflict and skip/expire paths own those states.
  *
  * Idempotent for same-shape re-saves; each call updates `submittedAt` so

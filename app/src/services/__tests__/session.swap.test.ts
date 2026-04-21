@@ -183,7 +183,7 @@ describe('swapActiveBlock (Phase F Unit 4)', () => {
       REPLACEMENT,
     )
 
-    // Block id stays 'b-1' — preserves the pairing with
+    // Block id stays 'b-1' - preserves the pairing with
     // blockStatuses[1].blockId === 'b-1'.
     expect(updatedPlan.blocks[1].id).toBe('b-1')
     expect(updatedExecution.blockStatuses[1].blockId).toBe('b-1')

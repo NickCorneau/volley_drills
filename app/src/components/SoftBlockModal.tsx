@@ -9,14 +9,14 @@ import { Button } from './ui'
  * dismissal contract differentiates two close paths so the modal can
  * re-fire when appropriate (red-team fix plan v3 §A7):
  *
- * - **Finish review** -> `onFinish` — navigate to the review flow. Does
+ * - **Finish review** -> `onFinish` - navigate to the review flow. Does
  *   NOT mark the dismissal; a tester who finishes will land in the
  *   normal review UI.
- * - **Skip review and continue** -> `onSkipAndContinue` — persist the
+ * - **Skip review and continue** -> `onSkipAndContinue` - persist the
  *   dismissal via `storageMeta.ux.softBlockDismissed.{execId}` (A7
  *   helper from C-1), then invoke the deferred non-review action. The
  *   modal won't fire again for this `execId`.
- * - **Close (X / ESC)** -> `onClose` — dismiss THIS mounting without
+ * - **Close (X / ESC)** -> `onClose` - dismiss THIS mounting without
  *   marking. Next non-review tap re-fires the modal. This is the key
  *   distinction adv-3 called out: accidental closes must not silently
  *   accept the skip.

@@ -13,8 +13,8 @@ import type {
  * tests against seeded v3 records.
  *
  * Classification rule (C-0 Key Decision #2): a valid `sessionRpe` is a
- * non-NaN number `>= 0`. Anything else — `null`, the legacy v0a sentinel
- * `-1`, or a hand-edited garbage value — maps to `'skipped'`.
+ * non-NaN number `>= 0`. Anything else - `null`, the legacy v0a sentinel
+ * `-1`, or a hand-edited garbage value - maps to `'skipped'`.
  *
  * The `if (r.status) return` guard is defense-in-depth for the edge case of
  * records that somehow already carry `status` because a forward-writer wrote

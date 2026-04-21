@@ -1,5 +1,5 @@
 /**
- * Seed drill catalog — drills organized into progression chains.
+ * Seed drill catalog - drills organized into progression chains.
  *
  * Source: research-output/drill-library-content-structure.md
  * Schema: app/src/types/drill.ts
@@ -94,7 +94,7 @@ const d01: Drill = {
         target: '≥ 20 consecutive clean contacts',
       },
       courtsideInstructions:
-        'Toss ball up with two hands. Forearm-pass it up/down. Between contacts, separate hands and clap behind your back, then rebuild platform before next contact. Work low/medium/high arcs.',
+        'Toss up, forearm-pass up to yourself. Between each contact, clap behind your back, then rebuild your platform. Mix low, medium, and high arcs.',
       coachingCues: [
         'Athletic posture.',
         'Contact between wrists and elbows.',
@@ -116,7 +116,7 @@ const d02: Drill = {
   chainId: 'chain-1-platform',
   m001Candidate: false,
   teachingPoints: [
-    'Ribs tucked — do not over-arch.',
+    'Ribs tucked - do not over-arch.',
     'Platform angle is the crucial part.',
     'Shoulders oriented to target.',
   ],
@@ -146,7 +146,7 @@ const d02: Drill = {
       courtsideInstructions:
         'Receiver places towel across neck/upper back. Partner tosses left/right. Receiver passes to set window without dropping towel.',
       coachingCues: [
-        'Ribs tucked — do not over-arch.',
+        'Ribs tucked - do not over-arch.',
         'Platform angle is the crucial part.',
         'Shoulders oriented to target.',
       ],
@@ -539,7 +539,7 @@ const d09: Drill = {
         target: '2 full laps with ≤ 3 errors',
       },
       courtsideInstructions:
-        'Partners pass while shuffling down sideline to service line, across, and back — keeping rally alive.',
+        'Partners pass while shuffling down sideline to service line, across, and back - keeping rally alive.',
       coachingCues: [
         'Wide base.',
         'Do not cross legs while shuffling.',
@@ -806,7 +806,7 @@ const d14: Drill = {
   teachingPoints: [
     'Play ball in front.',
     'Wide base helps.',
-    'Backward movement can narrow legs — watch it.',
+    'Backward movement can narrow legs - watch it.',
   ],
   progressionDescription: 'Run across net; add short/deep variation.',
   regressionDescription: 'Reduce reps; slow feed.',
@@ -836,7 +836,7 @@ const d14: Drill = {
       coachingCues: [
         'Play ball in front.',
         'Wide base helps.',
-        'Backward movement can narrow legs — watch it.',
+        'Backward movement can narrow legs - watch it.',
       ],
     },
   ],
@@ -858,7 +858,7 @@ const d15: Drill = {
   m001Candidate: true,
   teachingPoints: [
     'Centered ready position enables quick forward/back.',
-    "Read ball early — off the server's hand.",
+    "Read ball early - off the server's hand.",
     'Hands apart while moving.',
   ],
   progressionDescription: 'More random (mix all); faster serves.',
@@ -893,7 +893,7 @@ const d15: Drill = {
         'Server/coach delivers short or deep balls. Passer reads early, moves, passes to set window.',
       coachingCues: [
         'Centered ready position enables quick forward/back.',
-        "Read ball early — off the server's hand.",
+        "Read ball early - off the server's hand.",
         'Hands apart while moving.',
       ],
     },
@@ -1365,7 +1365,7 @@ const d24: Drill = {
 // ---------------------------------------------------------------------------
 
 // d25 is the Downshift block (D105). Framed as transition and comfort, not recovery
-// or injury prevention — post-2015 active-cool-down literature does not support
+// or injury prevention - post-2015 active-cool-down literature does not support
 // those claims at this dose. See docs/research/warmup-cooldown-minimum-protocols.md.
 const d25: Drill = {
   id: 'd25',
@@ -1380,7 +1380,7 @@ const d25: Drill = {
   m001Candidate: true,
   teachingPoints: [
     'Slow down gradually; long exhale.',
-    'Gentle tension only — do not crank any stretch.',
+    'Gentle tension only - do not crank any stretch.',
     'Skip any movement that hurts today.',
   ],
   progressionDescription: 'Add an extra 30–60 seconds of easy walking on very hot days.',
@@ -1406,7 +1406,7 @@ const d25: Drill = {
         target: 'Completed',
       },
       courtsideInstructions:
-        'Easy walk 60–90s (long exhale). Calf + foot unload 30s. Hip flexor + trunk reach 30s (split stance, overhead reach). Optional shoulder reset 30s (cross-body or lat reach, gentle tension only). Hydration and symptom check: if pain is rising, note it now.',
+        'Walk 60–90 s with long exhales. Unload calves and feet for 30 s. Open hips and reach overhead for 30 s. Optional shoulder stretch for 30 s. Hydrate and note any pain.',
       coachingCues: [
         'Long exhale, let heart rate come down.',
         'Gentle tension only.',
@@ -1450,7 +1450,7 @@ const d26: Drill = {
         target: 'Completed',
       },
       courtsideInstructions:
-        '6 stretches × 20–30 seconds each (calf straight, calf bent, hamstring, hip flexor, glute, adductor). No bouncing; "strong not painful."',
+        'Six stretches, 20–30 s each: calf straight, calf bent, hamstring, hip flexor, glute, adductor. No bouncing. Strong tension, not painful.',
       coachingCues: ['Breathe.', 'Avoid pain.', 'Hold steady.'],
     },
   ],
@@ -1461,7 +1461,7 @@ const d26: Drill = {
 // ---------------------------------------------------------------------------
 //
 // Three drills authored as a minimum setting probe (BAB Beginner's Guide
-// Lesson 2). No progression links in Tier 1a — Bump Set and Hand Set are
+// Lesson 2). No progression links in Tier 1a - Bump Set and Hand Set are
 // fundamentals, not rungs gated on each other. Tier 1b adds links once
 // founder dogfood and the partner walkthrough surface which pairs chain
 // in practice. See
@@ -1474,7 +1474,7 @@ const d26: Drill = {
 // `.pressure` in sessionBuilder.ts widen to include 'set' so
 // user-initiated Swap can reach these drills.
 
-// BAB Beginner's Guide, Lesson 2 — Bump Set tutorial.
+// BAB Beginner's Guide, Lesson 2 - Bump Set tutorial.
 const d38: Drill = {
   id: 'd38',
   name: 'Bump Set Fundamentals',
@@ -1488,7 +1488,7 @@ const d38: Drill = {
   teachingPoints: [
     'Platform stays square to the target.',
     'Contact on the forearms, not the wrists.',
-    'Legs drive the set — the arms aim, the legs lift.',
+    'Legs drive the set - the arms aim, the legs lift.',
   ],
   progressionDescription: 'Add a moving bump-set (one step in, one step back) between reps.',
   regressionDescription: 'Shorten target distance and reduce height; catch-and-reset instead of continuous.',
@@ -1514,7 +1514,7 @@ const d38: Drill = {
         target: '15 controlled sets',
       },
       courtsideInstructions:
-        'Self-toss to yourself ~1.5 m up. Bump-set the ball back up with platform angled at the sky — aim for a settable arc landing within a 1 m circle around you. Reset and repeat.',
+        'Self-toss to yourself ~1.5 m up. Bump-set the ball back up with platform angled at the sky - aim for a settable arc landing within a 1 m circle around you. Reset and repeat.',
       coachingCues: [
         'Platform square, not tilted.',
         'Contact on the forearms.',
@@ -1524,7 +1524,7 @@ const d38: Drill = {
   ],
 }
 
-// BAB Beginner's Guide, Lesson 2 — Hand Set tutorial. Wall-optional: the
+// BAB Beginner's Guide, Lesson 2 - Hand Set tutorial. Wall-optional: the
 // variant is authored as wall-independent (self-toss) because setting off
 // a wall rebound trains timing more than it trains hand shape. A wall
 // simply makes the drill rhythm-nicer; it's not a hard requirement.
@@ -1567,7 +1567,7 @@ const d39: Drill = {
         target: '12 clean sets',
       },
       courtsideInstructions:
-        'Self-toss above your forehead. Hand-set the ball straight back up ~2 m. Ball should leave both hands at the same instant — if you hear a "slap" it was too low; if you feel it sitting, your hands carried.',
+        'Self-toss above your forehead. Hand-set it straight back up ~2 m. Both hands release at the same instant. A slap means too low; a pause means you carried.',
       coachingCues: [
         'Contact above the forehead.',
         'Window between thumbs and forefingers.',
@@ -1577,7 +1577,7 @@ const d39: Drill = {
   ],
 }
 
-// BAB 2024 Drill Book — Plan 1 Drill 1, warm-up element "set back and
+// BAB 2024 Drill Book - Plan 1 Drill 1, warm-up element "set back and
 // forth". Authored as the Tier 1a pair setting probe; the lightest-weight
 // pair setting rung (no triangle geometry, no window target). Chosen
 // over `d40 Footwork for Setting` so Tier 1a can exercise setting via
@@ -1593,11 +1593,11 @@ const d41: Drill = {
   chainId: 'chain-7-setting',
   m001Candidate: true,
   teachingPoints: [
-    'Set to a spot your partner does not have to move to — the ball is the message, the target is the apology.',
+    'Set to a spot your partner does not have to move to - the ball is the message, the target is the apology.',
     'Reset feet between sets; plant before you set.',
     'Arc the ball ~1.5 m above reach height so your partner has time to square up.',
   ],
-  progressionDescription: 'Add a lateral step between sets — set, shuffle one step, set again.',
+  progressionDescription: 'Add a lateral step between sets - set, shuffle one step, set again.',
   regressionDescription: 'Catch and re-set (reset the rhythm) if the ball lands more than one step away.',
   variants: [
     {
@@ -1643,7 +1643,7 @@ const d41: Drill = {
 // docs/plans/2026-04-20-m001-tier1-implementation.md "Explicitly out of
 // scope" for the gating conditions.
 
-// D105 + BAB — Beach Prep Three, 3 min default warmup.
+// D105 + BAB - Beach Prep Three, 3 min default warmup.
 const d28: Drill = {
   id: 'd28',
   name: 'Beach Prep Three',
@@ -1657,7 +1657,7 @@ const d28: Drill = {
   m001Candidate: true,
   teachingPoints: [
     'Move through full range before loading.',
-    'Ankles first — short hops and lateral shuffles wake proprioception faster than jogging on sand.',
+    'Ankles first - short hops and lateral shuffles wake proprioception faster than jogging on sand.',
     'End warmer than you started; cold shoulders do not pass well.',
   ],
   progressionDescription:
@@ -1685,11 +1685,11 @@ const d28: Drill = {
         target: 'Completed',
       },
       courtsideInstructions:
-        '(1) 30 s light jog / A-skips around your sand box. (2) 30 s ankle hops + lateral shuffles. (3) 45 s arm circles forward + back, cross-body swings, trunk rotations. (4) 45 s movement rehearsal — two forward shuffles, two lateral shuffles, one drop-step + sprint, repeat. End warmer than you started.',
+        'Four quick blocks, ~45 s each. 1) Jog or A-skip around your sand box. 2) Ankle hops + lateral shuffles. 3) Arm circles and trunk rotations. 4) Shuffle and drop-step at game pace. End warmer than you started.',
       coachingCues: [
         'Short hops, loud feet.',
         'Full range on arm swings.',
-        'Move your feet — ankles first, then legs.',
+        'Move your feet - ankles first, then legs.',
       ],
     },
   ],

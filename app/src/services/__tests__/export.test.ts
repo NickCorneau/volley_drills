@@ -8,7 +8,7 @@ import { buildExportPayload, downloadExport } from '../export'
  * `buildExportPayload` is the pure read that founder replay scripts
  * consume; `downloadExport` is the browser-side anchor-click trigger.
  * The payload shape MUST match what the founder's D91 / D104 replay
- * scripts expect — any additions here need a parallel update to those
+ * scripts expect - any additions here need a parallel update to those
  * scripts, so the test asserts the exact top-level key set.
  */
 
@@ -155,9 +155,9 @@ describe('buildExportPayload (V0B-15)', () => {
 
     const payload = await buildExportPayload()
 
-    // @ts-expect-error — sessionDrafts must NOT be a key of the payload
+    // @ts-expect-error - sessionDrafts must NOT be a key of the payload
     expect(payload.sessionDrafts).toBeUndefined()
-    // @ts-expect-error — timerState must NOT be a key of the payload
+    // @ts-expect-error - timerState must NOT be a key of the payload
     expect(payload.timerState).toBeUndefined()
   })
 

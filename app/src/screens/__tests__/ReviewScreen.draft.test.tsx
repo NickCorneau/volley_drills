@@ -122,7 +122,7 @@ describe('ReviewScreen draft persistence (C-1 Unit 7)', () => {
     )
 
     // Pick an RPE to trigger the draft write (notCaptured alone is not a
-    // "meaningful change" for UX purposes — the tester can un-tap it).
+    // "meaningful change" for UX purposes - the tester can un-tap it).
     await user.click(screen.getByRole('radio', { name: /^4/ }))
 
     const draft = await waitForDraft('exec-notcap')

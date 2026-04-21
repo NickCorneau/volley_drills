@@ -183,7 +183,7 @@ describe('HomeScreen: Repeat on ended-early (C-5 Unit 3)', () => {
     )
     // handleRepeat routes to /setup?from=repeat where the tester
     // re-confirms context + rebuilds the full plan. Critically, it
-    // does NOT use the partial-block draft — the plan explicitly
+    // does NOT use the partial-block draft - the plan explicitly
     // prevents that regression (C-5 plan Unit 3 test scenarios).
     expect(await screen.findByTestId('setup-route')).toBeInTheDocument()
     // No partial draft written from this path.

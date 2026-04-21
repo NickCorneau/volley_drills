@@ -6,7 +6,7 @@ import { formatTime } from '../lib/format'
  * instead of the OS-default mono fallback. The inline
  * `fontFeatureSettings: '"zero" 1'` opts into JetBrains Mono's
  * slashed-zero variant so the digit `0` cannot be confused with `O`
- * at a glance in bright sun — aligned with the outdoor-legibility
+ * at a glance in bright sun - aligned with the outdoor-legibility
  * contract in `docs/research/outdoor-courtside-ui-brief.md`. Every
  * other class on the countdown div is unchanged from pre-F10; this
  * is purely a display-face swap. See
@@ -32,7 +32,7 @@ export function BlockTimer({ remainingSeconds, totalSeconds, isPaused }: BlockTi
       {isPaused && (
         // 2026-04-19 non-player tester feedback: the "Paused" pill alone
         // read as "the timer is broken" when the pause came from Swap
-        // (or Shorten) rather than from an explicit Pause tap — the
+        // (or Shorten) rather than from an explicit Pause tap - the
         // tester didn't connect her Swap action to the stopped timer
         // and had to trial-and-error Resume. The actionable subtitle
         // makes the cause/effect legible without tracking pause-reason

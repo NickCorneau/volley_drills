@@ -48,7 +48,7 @@ export function FirstOpenGate({ children }: { children: ReactNode }) {
           setResolved(true)
           return
         }
-        // Not yet completed — route to the step the user left off on,
+        // Not yet completed - route to the step the user left off on,
         // defaulting to Skill Level.
         const step = await getStorageMeta(
           'onboarding.step',

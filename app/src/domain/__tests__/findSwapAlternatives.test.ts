@@ -16,7 +16,7 @@ import { findSwapAlternatives } from '../sessionBuilder'
  * - Stable ordering: sorted by `drill.id` so repeated Swap taps on
  *   the same block walk the same list every time.
  * - Preserves `id`, `type`, `durationMinutes`, `required` from the
- *   input block — only drill identity (name / shortName / cue /
+ *   input block - only drill identity (name / shortName / cue /
  *   instructions) changes.
  * - VB-FL-7 (2026-04-19 non-player field look): `excludeDrillNames`
  *   option strips additional drill names (typically neighbors) when
@@ -123,7 +123,7 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
         wallAvailable: false,
       }),
     )
-    // Each pool is non-empty but not identical — solo-eligible drills
+    // Each pool is non-empty but not identical - solo-eligible drills
     // differ from pair-net eligible drills.
     expect(soloWall.length).toBeGreaterThan(0)
     expect(pairNet.length).toBeGreaterThan(0)
@@ -147,7 +147,7 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
    * exclusion should strip candidates whose name matches a
    * surrounding plan block, so Swap never lands on the drill
    * coming up next (or just finished). Uses the real solo+wall
-   * main_skill pool — we pick a name from the baseline output to
+   * main_skill pool - we pick a name from the baseline output to
    * drive the exclusion test so we don't have to hard-code drill
    * IDs that could drift if the catalog changes.
    */
@@ -197,7 +197,7 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
       })
 
       // Passing the current drill's name in excludeDrillNames must
-      // not cause the fallback to re-include it — the current
+      // not cause the fallback to re-include it - the current
       // drill exclusion is the one invariant that never relaxes.
       expect(
         withCurrentInExcludes.every((b) => b.drillName !== currentName),
@@ -278,7 +278,7 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
         }),
       )
       const names = out.map((b) => b.drillName)
-      // At least one of d38/d39 should surface — both are solo and have
+      // At least one of d38/d39 should surface - both are solo and have
       // `skillFocus: ['set']`, matching `pressure: ['pass', 'serve', 'set']`.
       expect(
         names.includes('Bump Set Fundamentals') ||

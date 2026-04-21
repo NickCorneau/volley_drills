@@ -10,7 +10,7 @@ type RunControlsProps = {
   onShorten: () => void
   onEndSession: () => void
   /**
-   * Phase F Unit 4 (2026-04-19): mid-run drill Swap. Optional prop —
+   * Phase F Unit 4 (2026-04-19): mid-run drill Swap. Optional prop -
    * parent (RunScreen) passes `undefined` when the current block has
    * no available alternates (warmup / wrap slots per D85/D105, or a
    * context with a single candidate in the slot pool). When absent
