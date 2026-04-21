@@ -9,6 +9,17 @@ export interface SessionPlanBlock {
   coachingCue: string
   courtsideInstructions: string
   required: boolean
+  /**
+   * Tier 1a Unit 4: one-sentence deterministic rationale for why this
+   * block landed on the user's session ("Chosen because: ..."). Optional
+   * because legacy v3 / v0a plans do not carry it; RunScreen renders it
+   * quietly below the coaching cue when present. Not persisted to Dexie
+   * explicitly — the plan object is stored as a whole, so the field
+   * rides along automatically once a plan is rebuilt by the current
+   * `createSessionFromDraft`. Tier 2 decides whether to surface it
+   * through a richer "See why this session was chosen" modal.
+   */
+  rationale?: string
 }
 
 export interface SessionPlanSafetyCheck {
@@ -53,6 +64,8 @@ export interface DraftBlock {
   coachingCue: string
   courtsideInstructions: string
   required: boolean
+  /** Tier 1a Unit 4: see `SessionPlanBlock.rationale`. */
+  rationale?: string
 }
 
 export interface SessionDraft {

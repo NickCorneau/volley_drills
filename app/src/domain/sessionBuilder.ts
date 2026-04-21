@@ -113,6 +113,50 @@ function pickForSlot(
   return pool[0]
 }
 
+/**
+ * Tier 1a Unit 4: deterministic one-sentence rationale for why a block
+ * landed in the session. The same (slot, drill, context) tuple always
+ * produces the same sentence — no randomness, no LLM — so the partner
+ * walkthrough can tag the rationale as "nodded at" or "ignored as
+ * noise" against a stable surface.
+ *
+ * Warmup and wrap get fixed boilerplate that cites D105 / D85, because
+ * their *why* is curatorial ("every session starts/ends this way") not
+ * context-derived. All other slot types read as
+ * "{slot-type-label} block, {drill primary focus} focus,
+ *  {playerMode} {timeProfile}-min."
+ *
+ * Not persisted to its own Dexie column — rides along inside the
+ * `SessionPlanBlock` object once `createSessionFromDraft` carries it
+ * from the draft onto the materialized plan. Tier 2 See-Why would
+ * expand this into a richer modal surface; Tier 1a ships the single
+ * sentence only.
+ */
+const SLOT_TYPE_LABEL: Record<BlockSlotType, string> = {
+  warmup: 'warmup',
+  technique: 'technique',
+  movement_proxy: 'movement-proxy',
+  main_skill: 'main-skill',
+  pressure: 'pressure',
+  wrap: 'wrap',
+}
+
+export function deriveBlockRationale(
+  slotType: BlockSlotType,
+  drill: Pick<Drill, 'skillFocus'>,
+  context: SetupContext,
+): string {
+  if (slotType === 'warmup') {
+    return 'Chosen because: every session starts with Beach Prep (D105).'
+  }
+  if (slotType === 'wrap') {
+    return 'Chosen because: every session ends with a downshift (D85).'
+  }
+  const focus = drill.skillFocus[0] ?? 'skill'
+  const slotLabel = SLOT_TYPE_LABEL[slotType]
+  return `Chosen because: ${slotLabel} block, ${focus} focus, ${context.playerMode} ${context.timeProfile}-min.`
+}
+
 function allocateDurations(layout: BlockSlot[], totalMinutes: number): number[] | null {
   const durations = layout.map((slot) => slot.durationMinMinutes)
   const minTotal = durations.reduce((sum, value) => sum + value, 0)
@@ -178,6 +222,7 @@ export function buildDraft(context: SetupContext): SessionDraft | null {
           : pick.drill.name,
       courtsideInstructions: pick.variant.courtsideInstructions,
       required: slot.required,
+      rationale: deriveBlockRationale(slot.type, pick.drill, context),
     })
   }
 
@@ -248,6 +293,11 @@ export function buildDraftFromCompletedBlocks(
       coachingCue: planBlock.coachingCue,
       courtsideInstructions: planBlock.courtsideInstructions,
       required: planBlock.required,
+      // Tier 1a Unit 4: preserve the original block's rationale on the
+      // rebuilt draft so a "Repeat what you did" session still reads
+      // with the same Chosen-because line. Legacy plans without
+      // rationale keep it undefined; the UI handles that case.
+      rationale: planBlock.rationale,
     })
   })
   if (completedBlocks.length === 0) return null
@@ -311,6 +361,7 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
           : pick.drill.name,
       courtsideInstructions: pick.variant.courtsideInstructions,
       required: slot.required,
+      rationale: deriveBlockRationale(slot.type, pick.drill, context),
     })
   }
 
@@ -467,5 +518,10 @@ export function findSwapAlternatives(
         : c.drill.name,
     courtsideInstructions: c.variant.courtsideInstructions,
     required: block.required,
+    // Tier 1a Unit 4: rebuild the rationale against the swapped drill
+    // so RunScreen's "Chosen because:" line stays truthful after a
+    // mid-run Swap. Without this, the rationale would keep reading
+    // "pass focus" even after the user swapped to a serve drill.
+    rationale: deriveBlockRationale(block.type, c.drill, context),
   }))
 }

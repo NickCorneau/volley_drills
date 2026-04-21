@@ -111,6 +111,10 @@ export async function createSessionFromDraft(
       coachingCue: b.coachingCue,
       courtsideInstructions: b.courtsideInstructions,
       required: b.required,
+      // Tier 1a Unit 4: rationale rides from draft onto plan so
+      // RunScreen's Chosen-because line has a surface to read from.
+      // Left undefined for legacy draft paths that don't populate it.
+      rationale: b.rationale,
     })),
     safetyCheck,
     context: draft.context,

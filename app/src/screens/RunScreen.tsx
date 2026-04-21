@@ -434,6 +434,17 @@ export function RunScreen() {
               Show coaching cues
             </button>
           ))}
+        {/* Tier 1a Unit 4 (2026-04-20): one-sentence rationale for why
+            this block landed on the session. Styled quieter than the
+            coaching cue (smaller, `text-text-secondary`) so it reads as
+            meta-context rather than instruction. Legacy plans without a
+            rationale render nothing. See
+            `docs/plans/2026-04-20-m001-tier1-implementation.md` Unit 4. */}
+        {currentBlock.rationale && (
+          <p className="text-xs leading-relaxed text-text-secondary">
+            {currentBlock.rationale}
+          </p>
+        )}
       </div>
 
       {prerollCount != null ? (

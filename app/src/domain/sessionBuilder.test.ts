@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { DRILLS } from '../data/drills'
-import { buildDraft, buildRecoveryDraft } from './sessionBuilder'
+import { buildDraft, buildRecoveryDraft, deriveBlockRationale } from './sessionBuilder'
 import type { SetupContext } from '../db/types'
 
 const variantById = new Map(
@@ -120,6 +120,93 @@ describe('sessionBuilder', () => {
     if (mainSkill !== undefined) {
       expect(['d38', 'd39', 'd41']).not.toContain(mainSkill.drillId)
     }
+  })
+
+  /**
+   * Tier 1a Unit 4 (Chosen-because rationale): every block on a default
+   * buildDraft result carries a one-sentence rationale, warmup/wrap get
+   * the fixed D105/D85 copy, other slots get the deterministic
+   * `{slot-label} block, {focus} focus, {playerMode} {time}-min.`
+   * sentence. Determinism is the contract that supports partner
+   * walkthrough "nodded / ignored" tagging.
+   */
+  it('every block on a default buildDraft carries a non-empty rationale', () => {
+    const draft = buildDraft({
+      playerMode: 'solo',
+      timeProfile: 15,
+      netAvailable: false,
+      wallAvailable: true,
+    })
+    expect(draft).not.toBeNull()
+    for (const block of draft!.blocks) {
+      expect(block.rationale, `${block.type} block missing rationale`).toBeTruthy()
+      expect(block.rationale).toMatch(/^Chosen because: /)
+    }
+  })
+
+  it('warmup rationale is the fixed D105 sentence', () => {
+    const draft = buildDraft({
+      playerMode: 'solo',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+    })
+    const warmup = draft!.blocks.find((b) => b.type === 'warmup')
+    expect(warmup?.rationale).toBe(
+      'Chosen because: every session starts with Beach Prep (D105).',
+    )
+  })
+
+  it('wrap rationale is the fixed D85 sentence', () => {
+    const draft = buildDraft({
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: true,
+      wallAvailable: false,
+    })
+    const wrap = draft!.blocks.at(-1)
+    expect(wrap?.type).toBe('wrap')
+    expect(wrap?.rationale).toBe(
+      'Chosen because: every session ends with a downshift (D85).',
+    )
+  })
+
+  it('deriveBlockRationale is deterministic for the same inputs', () => {
+    const context: SetupContext = {
+      playerMode: 'solo',
+      timeProfile: 15,
+      netAvailable: false,
+      wallAvailable: true,
+    }
+    const drill = { skillFocus: ['pass' as const] }
+    const first = deriveBlockRationale('main_skill', drill, context)
+    const second = deriveBlockRationale('main_skill', drill, context)
+    expect(first).toBe(second)
+    expect(first).toBe(
+      'Chosen because: main-skill block, pass focus, solo 15-min.',
+    )
+  })
+
+  it('buildDraft output is deterministic in its rationale sentences', () => {
+    const context: SetupContext = {
+      playerMode: 'solo',
+      timeProfile: 15,
+      netAvailable: false,
+      wallAvailable: true,
+    }
+    const a = buildDraft(context)
+    const b = buildDraft(context)
+    // Builder picks drills via shuffle so drill identity may vary, but
+    // the rationale sentence for every block that shares (slot type,
+    // picked drill's primary focus, context) is identical. We verify
+    // the invariant at the slot-type granularity: warmup and wrap are
+    // fixed strings, everything else is a well-formed sentence.
+    expect(a?.blocks.find((x) => x.type === 'warmup')?.rationale).toBe(
+      b?.blocks.find((x) => x.type === 'warmup')?.rationale,
+    )
+    expect(a?.blocks.find((x) => x.type === 'wrap')?.rationale).toBe(
+      b?.blocks.find((x) => x.type === 'wrap')?.rationale,
+    )
   })
 
   it('buildRecoveryDraft returns only warmup and wrap blocks', () => {
