@@ -40,9 +40,13 @@ import { cx } from '../../lib/cn'
  * - `overscroll-contain` keeps iOS rubber-band scrolling inside the
  *   body without bubbling to the document (there is no document scroll
  *   anymore — the shell locks it).
- * - Footer owns `pb-[env(safe-area-inset-bottom)]` so the home
- *   indicator cannot eat half of a primary CTA on a modern iPhone. Top
- *   safe-area is handled once upstream on `<main>` in App.tsx.
+ * - Footer owns `pb-[calc(1rem+env(safe-area-inset-bottom))]` so every
+ *   viewport gets at least 16 px of air below the last CTA (desktop
+ *   preview and browsers where `safe-area-inset-bottom` resolves to
+ *   0 used to clip outline buttons against the window edge), while
+ *   real iPhones still add the home-indicator inset on top of that 1
+ *   rem. Top safe-area is handled once upstream on `<main>` in
+ *   App.tsx.
  *
  * Modals (End-session confirm, SchemaBlockedOverlay, SoftBlockModal)
  * continue to use `fixed inset-0 z-50` and render *outside* the shell,
@@ -111,8 +115,9 @@ function Body({ children, className }: PartProps) {
 }
 
 /**
- * The pinned-footer zone. Carries safe-area-bottom so the home
- * indicator does not clip CTAs.
+ * The pinned-footer zone. Bottom padding is always at least 1 rem
+ * plus `safe-area-inset-bottom` so CTAs are never flush against the
+ * physical or logical bottom edge.
  *
  * A subtle `border-t border-text-primary/5` sits above the footer as
  * a hairline "dock" cue — quiet enough to disappear on calm screens
@@ -125,7 +130,7 @@ function Footer({ children, className }: PartProps) {
     <div
       data-screen-shell-footer
       className={cx(
-        'shrink-0 border-t border-text-primary/5 bg-surface-calm pb-[env(safe-area-inset-bottom)]',
+        'shrink-0 border-t border-text-primary/5 bg-surface-calm pb-[calc(1rem+env(safe-area-inset-bottom))]',
         className,
       )}
     >

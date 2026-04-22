@@ -34,9 +34,10 @@ function Layout({ children }: { children: React.ReactNode }) {
   // `ScreenShell.Body` (see `components/ui/ScreenShell.tsx`) and the
   // footer stays pinned.
   //
-  // `pb-[env(safe-area-inset-bottom)]` moved off the shell and onto
-  // `ScreenShell.Footer` — the home indicator now clears the CTA
-  // directly instead of cushioning a decorative bottom band.
+  // Bottom safe-area + minimum gutter moved off the shell and onto
+  // `ScreenShell.Footer` (`pb-[calc(1rem+env(safe-area-inset-bottom))]`)
+  // so CTAs clear the home indicator on iPhone and still get 1 rem of
+  // air when `safe-area-inset-bottom` is 0 (desktop preview).
   // `pt-[env(safe-area-inset-top)]` stays on `<main>` so every screen
   // (shell or not, status-message or not) pays the notch cost once
   // here.

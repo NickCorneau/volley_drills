@@ -33,7 +33,7 @@ Wrap screen content in `<ScreenShell>` (from `components/ui`) using the Header /
 <ScreenShell>
   <ScreenShell.Header>{/* top bar */}</ScreenShell.Header>
   <ScreenShell.Body>{/* scrolls when content exceeds the fold */}</ScreenShell.Body>
-  <ScreenShell.Footer>{/* pinned CTAs; carries safe-area-bottom */}</ScreenShell.Footer>
+  <ScreenShell.Footer>{/* pinned CTAs; 1rem + safe-area-bottom padding */}</ScreenShell.Footer>
 </ScreenShell>
 ```
 
