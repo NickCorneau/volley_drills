@@ -31,14 +31,31 @@ const focusRing =
 // and provides the tactile cue.
 const variantStyles: Record<ButtonVariant, string> = {
   primary: cx(
-    'min-h-[56px] rounded-[16px] px-4 py-3 text-base font-semibold',
+    'min-h-[56px] rounded-[16px] px-4 py-3 text-sm font-semibold',
     'bg-accent text-white hover:bg-accent-pressed active:bg-accent-pressed',
-    'disabled:cursor-not-allowed disabled:opacity-50',
+    // Partner-walkthrough polish 2026-04-22 (design review A1 /
+    // `D130` founder-use posture): the prior `disabled:opacity-50`
+    // kept the accent orange hue on a disabled primary CTA, which
+    // rendered as a peach tint that was hard to tell apart from the
+    // selected-chip peach on Setup / Safety and the info-surface
+    // coaching-note peach on Run. A disabled CTA should read as
+    // neutral "not yet," not as "lightly active." Use a gray surface
+    // + muted text so disabled is clearly inert, then let the
+    // `hover:` / `active:` above be no-ops via specificity
+    // (Tailwind's `disabled:` variant wins because it is applied
+    // after `hover:` / `active:` in the cascade). Token values
+    // `bg-text-secondary/10` + `text-text-secondary/70` chosen so
+    // the contrast ratio on the warm off-white surface stays
+    // readable per the outdoor-UI brief while remaining clearly
+    // subordinated to any enabled button in the same viewport. Keeps
+    // the `cursor-not-allowed` affordance. See
+    // `docs/plans/2026-04-22-partner-walkthrough-polish.md` item 2.
+    'disabled:cursor-not-allowed disabled:bg-text-secondary/10 disabled:text-text-secondary/70 disabled:hover:bg-text-secondary/10 disabled:active:bg-text-secondary/10',
     focusRing,
     'focus-visible:ring-accent',
   ),
   outline: cx(
-    'min-h-[54px] rounded-[16px] px-4 py-3 text-base font-semibold',
+    'min-h-[54px] rounded-[16px] px-4 py-3 text-sm font-semibold',
     'border-2 border-text-secondary/30 text-text-primary',
     'hover:bg-bg-warm active:bg-bg-warm',
     focusRing,
@@ -58,7 +75,7 @@ const variantStyles: Record<ButtonVariant, string> = {
     'focus-visible:ring-accent',
   ),
   danger: cx(
-    'min-h-[54px] rounded-[16px] px-4 py-3 text-base font-semibold',
+    'min-h-[54px] rounded-[16px] px-4 py-3 text-sm font-semibold',
     'border-2 border-warning/30 bg-warning-surface text-warning',
     'hover:bg-warning/10 active:bg-warning/10',
     focusRing,

@@ -98,7 +98,7 @@ describe('RunScreen: rationale placement + typography (P1-11 / walkthrough 2026-
     ).toBeTruthy()
   })
 
-  it('rationale honors the 16 px body floor (not text-xs)', async () => {
+  it('rationale uses text-sm (not text-xs / not legacy 16px scale)', async () => {
     await seedPausedSession('exec-size', 'plan-size')
     renderAt('exec-size')
 
@@ -106,19 +106,14 @@ describe('RunScreen: rationale placement + typography (P1-11 / walkthrough 2026-
       /Chosen because: today's main pass rep\./i,
     )
 
-    // Tailwind class-presence assertion. `text-base` === 16 px; any
-    // `text-xs` / `text-sm` on the rationale element would reintroduce
-    // the pre-fix floor violation.
-    expect(rationale.className).toContain('text-base')
+    // Tailwind class-presence: rationale is secondary body; ships at
+    // `text-sm` (founder 2026-04-22 downshift from 16 px / text-base).
+    expect(rationale.className).toContain('text-sm')
     expect(rationale.className).not.toContain('text-xs')
-    expect(rationale.className).not.toContain('text-sm')
+    expect(rationale.className).not.toContain('text-base')
   })
 
-  it('courtsideInstructions honors the 18 px run-mode PREFERRED (text-lg), not just the 16 px floor', async () => {
-    // Outdoor-UI brief freeze: body_min_px: 16, body_preferred_px: 18.
-    // Founder thought 2 flagged run-mode distance-readability, which
-    // is what the 18 px preferred is designed for - floor is minimum
-    // safety; preferred is what run-mode should ship.
+  it('courtsideInstructions renders at text-base (16 px outdoor floor), matching TransitionScreen', async () => {
     await seedPausedSession('exec-instr', 'plan-instr')
     renderAt('exec-instr')
 
@@ -126,25 +121,34 @@ describe('RunScreen: rationale placement + typography (P1-11 / walkthrough 2026-
       /Self-toss; forearm pass up and down\./i,
     )
 
-    expect(instructions.className).toContain('text-lg')
+    // Partner-walkthrough polish round 2 (2026-04-22): dropped from
+    // `text-lg` (18 px) to `text-base` (16 px) so the same drill
+    // paragraph reads at the same size on Run as on Transition, which
+    // bumped from `text-sm` in the same pass. 16 px is the
+    // outdoor-UI brief's body floor and still satisfies Seb P2-1
+    // "readable at arm's length." The prior pre-close 18 px was
+    // observed as visually heavy / "gross" when rendered side-by-
+    // side with the 14 px Transition version.
+    expect(instructions.className).toContain('text-base')
+    expect(instructions.className).not.toContain('text-lg')
     expect(instructions.className).not.toContain('text-sm')
-    expect(instructions.className).not.toContain('text-base')
+    expect(instructions.className).not.toContain('text-xs')
   })
 
-  it('coachingCue honors the 18 px run-mode preferred (text-lg)', async () => {
+  it('coachingCue renders at text-base (16 px outdoor floor)', async () => {
     await seedPausedSession('exec-cue-size', 'plan-cue-size')
     renderAt('exec-cue-size')
 
-    // Cue text is hidden by default (coaching cues collapsed post-
-    // 2026-04-21 feedback); expand before asserting typography.
-    const show = await screen.findByRole('button', {
-      name: /show coaching cues/i,
-    })
-    show.click()
-
+    // Short compact cue: full text is always shown in the coaching card
+    // (no expand). Same round-2 downshift rationale as
+    // courtsideInstructions above — run-mode body type unified at
+    // `text-base` across all three run-card paragraphs (rationale,
+    // instructions, coaching cue) so the screen reads as one
+    // consistent voice rather than three escalating sizes.
     const cue = await screen.findByText(/Athletic posture\./i)
-    expect(cue.className).toContain('text-lg')
+    expect(cue.className).toContain('text-base')
+    expect(cue.className).not.toContain('text-lg')
     expect(cue.className).not.toContain('text-sm')
-    expect(cue.className).not.toContain('text-base')
+    expect(cue.className).not.toContain('text-xs')
   })
 })

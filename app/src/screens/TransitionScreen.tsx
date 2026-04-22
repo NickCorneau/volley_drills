@@ -148,14 +148,33 @@ export function TransitionScreen() {
         <p className="text-xs font-medium text-text-secondary">
           Up next
         </p>
-        <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+        {/* Founder test-run feedback 2026-04-21 (round 3): unified
+            with RunScreen + ReviewScreen. `text-2xl font-bold` →
+            `text-xl font-semibold` across every page-title h1 so
+            the preview on TransitionScreen doesn't outweigh the
+            actual drill title on Run itself. */}
+        <h1 className="text-xl font-semibold tracking-tight text-text-primary">
           {nextBlock.drillName}
         </h1>
         <p className="text-sm text-text-secondary">
           {formatDuration(nextBlock.durationMinutes)}
         </p>
+        {/* Founder test-run feedback 2026-04-21 (round 3): matches
+            the RunScreen render - `whitespace-pre-line` honors `\n`
+            in list-shaped drill content (d26's six numbered
+            stretches) so the Transition preview scans as a list too.
+
+            Partner-walkthrough polish round 2 (2026-04-22): bumped
+            from `text-sm` (14 px) to `text-base` (16 px) so the
+            same drill paragraph reads at the same size on this
+            surface as on RunScreen (which dropped from `text-lg`
+            to `text-base` in the same pass). Previously the exact
+            same copy rendered at 14 px here and 18 px one tap
+            later, producing a jarring font-size jump across two
+            adjacent screens in the flow. 16 px also sits on the
+            outdoor-UI brief's body floor. */}
         {nextBlock.courtsideInstructions && (
-          <p className="text-sm leading-relaxed text-text-primary">
+          <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
             {nextBlock.courtsideInstructions}
           </p>
         )}
@@ -167,11 +186,23 @@ export function TransitionScreen() {
         <Button variant="primary" fullWidth onClick={handleStartNext}>
           Start next block
         </Button>
-        <div className="flex items-center justify-center gap-6">
-          <Button variant="ghost" onClick={handleStartShortened}>
-            Shorten block
-          </Button>
-          {!nextBlock.required && (
+        {/* Partner-walkthrough polish 2026-04-22 (design review
+            Transition section): `Shorten block` is the only escape a
+            tired athlete has on this surface, so it was promoted from
+            `variant="ghost"` (a bare accent text link) to
+            `variant="outline"` full-width. Outlined pill at CTA width
+            surfaces the option when it matters without violating the
+            calm envelope - same radius, same height, quieter chrome
+            than primary. `Skip block` stays ghost + centered because
+            it is a lower-priority escape (only exists on non-required
+            blocks) and bumping both would double the action weight
+            below the primary CTA. See
+            `docs/plans/2026-04-22-partner-walkthrough-polish.md` item 6. */}
+        <Button variant="outline" fullWidth onClick={handleStartShortened}>
+          Shorten block
+        </Button>
+        {!nextBlock.required && (
+          <div className="flex items-center justify-center">
             <Button
               variant="ghost"
               className="text-text-secondary"
@@ -179,8 +210,8 @@ export function TransitionScreen() {
             >
               Skip block
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -21,7 +21,7 @@ The first partner walkthrough (`docs/research/partner-walkthrough-results/2026-0
 
 Every primary screen headline must read as a question the reader would ask themselves, not a label for the surface. Subtitles must state what the app does with the answer, not reassure alone.
 
-- **Good** — "Where are you today?" with subtitle "Your rough current level — we size today's drills to match. Change anytime."
+- **Good** — "Where are you today?" with subtitle "Your rough current level. We size today's drills to match. Change anytime."
 - **Bad (before 2026-04-21)** — "Where are you today?" with subtitle "You can change this later." — reassurance without anchoring what "this" is; `SkillLevelScreen` P1-1.
 - **Test assertion** — partner-walkthrough Q2 ("first reaction on opening — did you know what to do?") is the verification channel. Any screen whose partner answer to Q2 is "took me a second" on two consecutive walkthroughs is a headline failure, not a reader failure.
 
@@ -55,18 +55,31 @@ Walkthrough partner quotes on this class of finding are the first-line evidence 
 Don't describe content as a product of axes. Enumerate.
 
 - **Bad** — "Toss to 6 locations: left/right × (in front / to side / slightly behind)." (6-Legged Monster; P1-7)
-- **Good** — "Six tosses total — one to each spot below: front-left, side-left, behind-left, front-right, side-right, behind-right."
+- **Good** — "Six tosses total, one to each spot below: front-left, side-left, behind-left, front-right, side-right, behind-right."
 
 The combinatoric form assumes the reader's parser is loaded with algebra. The courtside reader's is loaded with sand, sun, and a ball about to be tossed.
 
-### 4. Cool-down / wrap copy gets equal review weight as main-skill copy
+### 4. Plain punctuation, no em-dashes in prose
+
+User-visible courtside prose uses commas, periods, and colons. Em-dashes (`—`, `U+2014`) are aesthetically loaded (they signal essayist voice, not coach voice) and they read as visually heavy inside the narrow 390 px viewport. Partner-walkthrough polish round 2 (2026-04-22) — founder flagged them directly while looking at Run/Transition side by side.
+
+- **Bad** — `"Six tosses total — one to each spot below."`, `"Your rough current level — we size today's drills to match."`, `"We lower the load, not the time — your pick."`
+- **Good** — `"Six tosses total, one to each spot below."`, `"Your rough current level. We size today's drills to match."`, `"We lower the load, not the time. Your pick."`
+
+En-dashes (`–`, `U+2013`) are permitted **only** inside numeric ranges (`2–3 m away`, `1–4 wks`, `0–3 rubric`, `6–12 contacts`), where they are the typographic convention. En-dashes in prose are not permitted — convert to "to" or rewrite.
+
+Unicode guard: `U+2014` (em-dash) out of user-visible copy surfaces (`app/src/data/drills.ts`, `app/src/screens/**`, `app/src/components/**`). Regular hyphen-minus (`-`) in compound words (`front-left`, `side-out`) stays unchanged.
+
+Code comments can keep whichever dashes the author prefers — comments are author-facing, not courtside.
+
+### 5. Cool-down / wrap copy gets equal review weight as main-skill copy
 
 The lowest-engagement block is where jargon hides most. Authors spend attention on the main skill and leave wrap/cooldown blocks under-authored. P1-8 (cool-down stretches named without demonstration) is a direct consequence.
 
 - Every wrap/cooldown `courtsideInstructions` must pass the same jargon gate as main-skill blocks.
 - Stretches named by anatomical target must either (a) include a one-sentence execution cue inline, or (b) link to a tappable per-stretch description once that component ships (Tier 1b).
 
-### 5. Timed sub-blocks need audible structure (shipping gap)
+### 6. Timed sub-blocks need audible structure (shipping gap)
 
 This is documented here because it recurs in drill copy (warm-up 4×45s sub-blocks, cool-down 6×20–30s stretches, pair role-swap) and because the copy cannot compensate for the missing capability. Partner ask in P2-2.
 
@@ -82,6 +95,7 @@ When pacing-audio infra ships, its spec owns the cross-drill invariant and this 
 - [ ] Every term on the flagged-vocabulary table above is either renamed or glossed inline on first use in this drill.
 - [ ] The drill's `courtsideInstructions` passes the one-season rec player test (read aloud to yourself; if you stopped, fix it).
 - [ ] No combinatoric descriptions; enumerate.
+- [ ] No em-dashes (`—`, `U+2014`) in user-visible prose. En-dashes (`–`, `U+2013`) allowed only inside numeric ranges (`2–3 m`, `1–4 wks`); in prose, convert to "to" or rewrite.
 - [ ] Wrap/cooldown text has been read with the same attention as main-skill text.
 - [ ] Any timed sub-blocks are described in firing order and the variant carries the audio-gap comment (until audio ships).
 

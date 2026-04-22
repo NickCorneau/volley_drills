@@ -177,16 +177,22 @@ export function CompleteScreen() {
   // (verdict glyph + word + reason) the most air, and hold the button +
   // save-status to the bottom rail so every Home-bound exit lands in a
   // consistent thumb zone.
+  //
+  // Founder test-run feedback 2026-04-21 (second pass): the page-title
+  // eyebrow (`summary.header`: "Today's verdict" / "Today's pair
+  // verdict") was previously a standalone row below the lone SafetyIcon,
+  // which read as a weirdly padded empty band at the top of the screen.
+  // Hoist it into a three-column top bar that mirrors RunScreen's
+  // `[shield | center label | right meta]` pattern: the eyebrow is the
+  // centered page label, and an invisible spacer of the SafetyIcon's
+  // 56×56 footprint balances the right column so the eyebrow is
+  // optically centered. This also cleans up the heading outline -
+  // `<h1>` (page title) lives in the top bar; `<h2>` (verdict word)
+  // stays the focal sub-heading below.
   return (
-    <div className="mx-auto flex min-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-full max-w-[390px] flex-col items-center justify-start gap-10 pb-10 pt-6">
-      <div className="self-start">
+    <div className="mx-auto flex min-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-full max-w-[390px] flex-col items-center justify-start gap-10 pb-10 pt-2">
+      <div className="flex w-full items-center justify-between">
         <SafetyIcon />
-      </div>
-
-      <section
-        aria-labelledby="summary-verdict"
-        className="flex w-full flex-col items-center gap-4 pt-2 text-center"
-      >
         {/* Phase F8 (2026-04-19): was a `<p>` rendering `{summary.header}`
             at `text-sm font-semibold uppercase tracking-wider`. Promoted
             to `<h1>` so the page has a valid heading outline (was h2-only
@@ -196,6 +202,13 @@ export function CompleteScreen() {
         <h1 className="text-sm font-medium text-text-secondary">
           {summary.header}
         </h1>
+        <div className="h-14 w-14 shrink-0" aria-hidden />
+      </div>
+
+      <section
+        aria-labelledby="summary-verdict"
+        className="flex w-full flex-col items-center gap-4 text-center"
+      >
         {/* Verdict icon is a neutral steady-state glyph, not a warning.
             D86 compliance: no red, no warning iconography.
             The verdict word (aria-live polite below) carries the meaning

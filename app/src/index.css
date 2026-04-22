@@ -18,8 +18,36 @@
    */
   --color-surface-calm: #fcfaf5;
   --color-text-primary: #1a1a1a;
-  --color-text-secondary: #6b7280;
-  --color-success: #059669;
+  /*
+   * Founder test-run feedback 2026-04-21 (round 2): axe
+   * `e2e/accessibility.spec.ts` surfaced 7 WCAG AA contrast failures
+   * on CompleteScreen. Root cause was this token at the prior value
+   * `#6b7280` (Tailwind gray-500), which only clears ~3.9:1 on
+   * `bg-bg-warm` (`#f5f5f0`, Card variant="soft" surface) and
+   * ~4.4:1 on the body `surface-calm` (`#fcfaf5`) - both below the
+   * 4.5:1 threshold for WCAG 2.1 AA normal text. Lifted to gray-600
+   * equivalent (`#4b5563`). Contrast ratios against every surface
+   * the app actually uses: white 7.94, bg-warm 7.47,
+   * surface-calm 7.72, info-surface 7.20 - all comfortably above
+   * AAA (7.0) for normal text. Still visually muted against
+   * text-primary `#1a1a1a` so the "quiet secondary" voice in
+   * `docs/research/japanese-inspired-visual-direction.md` is
+   * preserved.
+   */
+  --color-text-secondary: #4b5563;
+  /*
+   * Founder test-run feedback 2026-04-21 (round 2): the prior value
+   * `#059669` (Tailwind emerald-600) only clears ~3.0:1 on the body
+   * `surface-calm` (`#fcfaf5`) - the "Saved in this browser on this
+   * device" save-status line on CompleteScreen and the check-mark
+   * success copy were failing WCAG 2.1 AA. Lifted to emerald-700
+   * equivalent (`#047857`). Contrast against every surface the app
+   * actually uses: white 5.35, bg-warm 5.03, surface-calm 5.21,
+   * warning-surface 5.74 - all comfortably above AA 4.5:1 for
+   * normal text. The color still reads as a restrained "it's
+   * saved" affirmation, not a billboard green.
+   */
+  --color-success: #047857;
   --color-warning: #dc2626;
   --color-warning-surface: #fee2e2;
   --color-info-surface: #fef3e8;

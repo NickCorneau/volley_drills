@@ -15,7 +15,7 @@ import { SafetyCheckScreen } from '../SafetyCheckScreen'
  * no red).
  *
  * Pain consequence:  "We'll switch to a lighter session if yes."
- * Recency consequence: "0 days or First time means a shorter, lower-intensity start."
+ * Recency consequence: "Today or First time means a shorter, lower-intensity start."
  * (Copy-polish pass 2026-04-19 replaced the `->` arrow with natural
  * prose.)
  *
@@ -25,6 +25,14 @@ import { SafetyCheckScreen } from '../SafetyCheckScreen'
  * so DOMS is easier to self-sort. Heading matchers below use the
  * distinctive "sharp" token - strong enough to fail a regression,
  * loose enough to survive a subsequent copy tweak.
+ *
+ * Partner-walkthrough polish 2026-04-22: recency chip display labels
+ * now read as "Today / Yesterday / 2+ days ago / First time"; the
+ * persisted `trainingRecency` string values (`'0 days'`, `'1 day'`,
+ * `'2+'`, `'First time'`) are unchanged for DB + adaptation
+ * compatibility. Tests below match the rendered labels, not the
+ * internal values. See
+ * `docs/plans/2026-04-22-partner-walkthrough-polish.md`.
  */
 
 async function clearDb() {
@@ -92,7 +100,7 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
       }),
     ).toBeInTheDocument()
     expect(
-      screen.getByText(/0 days or first time.*shorter.*lower-intensity start/i),
+      screen.getByText(/today or first time.*shorter.*lower-intensity start/i),
     ).toBeInTheDocument()
   })
 
@@ -112,10 +120,10 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     renderScreen()
 
     expect(
-      await screen.findByRole('button', { name: /first time/i }),
+      await screen.findByRole('radio', { name: /first time/i }),
     ).toBeInTheDocument()
     expect(
-      screen.getByText(/0 days or first time.*shorter.*lower-intensity start/i),
+      screen.getByText(/today or first time.*shorter.*lower-intensity start/i),
     ).toBeInTheDocument()
   })
 
@@ -137,21 +145,27 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     renderScreen()
 
     // Recency chips mount once hasEverStartedSession resolves.
-    await screen.findByRole('button', { name: /^0 days$/i })
-    // First time chip is filtered out.
+    // ToggleChip uses role="radio" inside a role="radiogroup" container,
+    // which is the accessible semantics for single-select chip rows.
+    await screen.findByRole('radio', { name: /^today$/i })
     expect(
-      screen.queryByRole('button', { name: /first time/i }),
+      screen.queryByRole('radio', { name: /first time/i }),
     ).not.toBeInTheDocument()
-    // The other three chips are still rendered.
-    expect(screen.getByRole('button', { name: /^0 days$/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /^1 day$/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /^2\+$/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('radio', { name: /^today$/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('radio', { name: /^yesterday$/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('radio', { name: /^2\+ days ago$/i }),
+    ).toBeInTheDocument()
     // Description drops the "or First time" clause so it matches the
     // rendered chip set. Copy-polish pass (2026-04-19) replaced the
     // `->` arrow with natural prose (`means a ... start.`); regex
     // stays flexible on the connecting phrase.
     expect(
-      screen.getByText(/0 days\s+.*shorter.*lower-intensity start/i),
+      screen.getByText(/today\s+.*shorter.*lower-intensity start/i),
     ).toBeInTheDocument()
     expect(
       screen.queryByText(/first time/i),

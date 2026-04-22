@@ -44,16 +44,37 @@ export function inferSessionFocus(
 /**
  * Tier 1a Unit 5: human-facing label for a focus inference result.
  * Kept small and sentence-cased so the Home row reads as plain
- * English ("Pass", "Set", "Partial") rather than a type dump.
+ * English ("Passing", "Setting", "Partial") rather than a type dump.
+ *
+ * 2026-04-22 — gerund rewrite for the three skill-focus volleyball
+ * terms (`pass` → "Passing", `serve` → "Serving", `set` → "Setting").
+ * The three-column Home row renders as `date · focus · status`, where
+ * status is "Done" / "Partial". The prior noun forms ("Pass" / "Serve"
+ * / "Set") sat adjacent to "Done" / "Partial" and a reader without the
+ * column model in mind parsed `Pass` as a status value — literally
+ * pass/fail. Field evidence: see `N3` in the Post-close partner
+ * mentions section of the 2026-04-21 Tier 1a walkthrough ledger
+ * (`docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md`),
+ * traced to courtside-copy rule §2 ("one-season rec player test").
+ *
+ * Why only the three volleyball-skill cases? `Movement` /
+ * `Conditioning` / `Recovery` / `Warm up` / `Partial` are already
+ * shape-disambiguated from the status column — none of them collides
+ * with "Done" / "Partial" (except `Partial` itself, which is both a
+ * valid focus fallback *and* the status value, and is allowed to
+ * coincide because the fallback means "we couldn't pin a focus" which
+ * is close enough to "the session ran partial" that either read is
+ * informative rather than wrong). Only the three volleyball nouns
+ * needed the gerund disambiguation.
  */
 export function focusLabel(focus: SkillFocus | 'partial'): string {
   switch (focus) {
     case 'pass':
-      return 'Pass'
+      return 'Passing'
     case 'serve':
-      return 'Serve'
+      return 'Serving'
     case 'set':
-      return 'Set'
+      return 'Setting'
     case 'movement':
       return 'Movement'
     case 'conditioning':

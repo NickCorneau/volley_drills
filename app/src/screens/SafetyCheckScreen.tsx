@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PainOverrideCard } from '../components/PainOverrideCard'
-import { BackButton, Button, StatusMessage } from '../components/ui'
+import { BackButton, Button, StatusMessage, ToggleChip } from '../components/ui'
 import type { SessionDraft } from '../db/types'
 import {
   buildRecoveryDraft,
@@ -15,9 +15,21 @@ import {
 } from '../services/session'
 
 // Primary recency chips. `2+` is an intermediate value - tapping it
-// reveals a sub-row of granular buckets (post-physio-review 2026-04-20),
-// and the persisted `trainingRecency` is the sub-bucket string, not the
-// literal `'2+'`. `canContinue` holds until a sub-bucket is picked.
+// reveals a sub-row of granular buckets (post-physio-review 2026-04-20,
+// `D129`), and the persisted `trainingRecency` is the sub-bucket
+// string, not the literal `'2+'`. `canContinue` holds until a
+// sub-bucket is picked.
+//
+// Partner-walkthrough polish 2026-04-22 (`D129`): the on-screen labels
+// are rendered from `PRIMARY_RECENCY_LABEL` so `"Today" / "Yesterday"
+// / "2+ days ago" / "First time"` reads as human time, not a
+// spreadsheet `0 / 1 / 2+` count. The internal string values are
+// unchanged so persisted `trainingRecency` fields, adaptation rules,
+// and existing Dexie records all remain compatible; only the rendered
+// label changes. Three passes (Player 3, iPhone viewport, design
+// review) converged on this fix; see
+// `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md`
+// and `docs/plans/2026-04-22-partner-walkthrough-polish.md`.
 type PrimaryRecency = '0 days' | '1 day' | '2+' | 'First time'
 type LayoffBucket =
   | '2-7 days'
@@ -27,6 +39,12 @@ type LayoffBucket =
 type TrainingRecency = PrimaryRecency | LayoffBucket
 
 const RECENCY_OPTIONS: PrimaryRecency[] = ['0 days', '1 day', '2+', 'First time']
+const PRIMARY_RECENCY_LABEL: Record<PrimaryRecency, string> = {
+  '0 days': 'Today',
+  '1 day': 'Yesterday',
+  '2+': '2+ days ago',
+  'First time': 'First time',
+}
 const LAYOFF_BUCKETS: LayoffBucket[] = [
   '2-7 days',
   '1-4 weeks',
@@ -215,7 +233,7 @@ export function SafetyCheckScreen() {
        */}
       <header className="flex items-center gap-2 pt-2">
         <BackButton label="Back" onClick={() => navigate(routes.home())} />
-        <h1 className="flex-1 text-center text-xl font-bold tracking-tight text-text-primary">
+        <h1 className="flex-1 text-center text-xl font-semibold tracking-tight text-text-primary">
           Before we start
         </h1>
         <div className="w-12" />
@@ -235,39 +253,29 @@ export function SafetyCheckScreen() {
           matches the "tapping Yes reveals options below" mental model
           users already expect from Setup / Safety form patterns. */}
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold text-text-primary">
+        <h2 className="text-sm font-semibold text-text-primary">
           When did you last train?
         </h2>
         {/* Description collapses the "or First time" clause for
-            returning users so it matches the rendered chip set. */}
+            returning users so it matches the rendered chip set.
+            Partner-walkthrough polish 2026-04-22: wording follows the
+            chip labels - "Today" reads as a valid answer, not an
+            alarm. */}
         <p className="text-sm text-text-secondary">
           {hasSessionHistory
-            ? '0 days means a shorter, lower-intensity start.'
-            : '0 days or First time means a shorter, lower-intensity start.'}
+            ? 'Today means a shorter, lower-intensity start.'
+            : 'Today or First time means a shorter, lower-intensity start.'}
         </p>
         <div className="flex gap-2">
-          {visibleRecencyOptions.map((opt) => {
-            const selected = primaryRowSelection === opt
-            const isWarning = opt === '0 days'
-            return (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => setRecency(opt)}
-                className={[
-                  'min-h-[54px] flex-1 rounded-[16px] px-2 py-2 text-sm font-medium transition-colors',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
-                  selected && isWarning
-                    ? 'border border-warning bg-warning-surface text-warning focus-visible:ring-warning'
-                    : selected
-                      ? 'border border-accent bg-info-surface text-accent focus-visible:ring-accent'
-                      : 'border border-gray-200 text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-accent',
-                ].join(' ')}
-              >
-                {opt}
-              </button>
-            )
-          })}
+          {visibleRecencyOptions.map((opt) => (
+            <ToggleChip
+              key={opt}
+              label={PRIMARY_RECENCY_LABEL[opt]}
+              selected={primaryRowSelection === opt}
+              onTap={() => setRecency(opt)}
+              tone={opt === '0 days' ? 'warning' : 'accent'}
+            />
+          ))}
         </div>
         {/* 2026-04-20 physio-review: detraining is not linear - bucketing
             "2+" by weeks/months lets a 3+ month returner see a clinician
@@ -280,25 +288,15 @@ export function SafetyCheckScreen() {
               Roughly how long off?
             </p>
             <div className="flex gap-2">
-              {LAYOFF_BUCKETS.map((bucket) => {
-                const selected = recency === bucket
-                return (
-                  <button
-                    key={bucket}
-                    type="button"
-                    onClick={() => setRecency(bucket)}
-                    className={[
-                      'min-h-[48px] flex-1 rounded-[12px] px-1 py-1 text-xs font-medium transition-colors',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
-                      selected
-                        ? 'border border-accent bg-info-surface text-accent focus-visible:ring-accent'
-                        : 'border border-gray-200 bg-bg-primary text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-accent',
-                    ].join(' ')}
-                  >
-                    {LAYOFF_BUCKET_LABEL[bucket]}
-                  </button>
-                )
-              })}
+              {LAYOFF_BUCKETS.map((bucket) => (
+                <ToggleChip
+                  key={bucket}
+                  label={LAYOFF_BUCKET_LABEL[bucket]}
+                  selected={recency === bucket}
+                  onTap={() => setRecency(bucket)}
+                  size="sm"
+                />
+              ))}
             </div>
             {recency === '3+ months' && (
               <p className="text-xs leading-relaxed text-text-secondary">
@@ -311,7 +309,7 @@ export function SafetyCheckScreen() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold text-text-primary">
+        <h2 className="text-sm font-semibold text-text-primary">
           Any pain that&apos;s sharp, or makes you guard a movement?
         </h2>
         {/* 2026-04-20 physio-review: the original "pain that changes how
@@ -334,7 +332,9 @@ export function SafetyCheckScreen() {
             "Before we start" reads as one consistent form. The
             unselected-Yes still swaps to a single hairline border to
             match the selected-state stroke width of the recency warning
-            chip and keep the two rows visually equivalent. */}
+            chip and keep the two rows visually equivalent. Unselected
+            fills use `bg-bg-primary` like `ToggleChip` so chips read
+            white on `bg-surface-calm`, not washed into the page. */}
         <div className="flex gap-2">
           <button
             type="button"
@@ -344,7 +344,7 @@ export function SafetyCheckScreen() {
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
               painFlag === false
                 ? 'border border-success bg-success text-white focus-visible:ring-success'
-                : 'border border-gray-200 text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-success',
+                : 'border border-gray-200 bg-bg-primary text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-success',
             ].join(' ')}
           >
             No
@@ -357,7 +357,7 @@ export function SafetyCheckScreen() {
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
               painFlag === true
                 ? 'border border-warning bg-warning-surface text-warning focus-visible:ring-warning'
-                : 'border border-gray-200 text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-warning',
+                : 'border border-gray-200 bg-bg-primary text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-warning',
             ].join(' ')}
           >
             Yes

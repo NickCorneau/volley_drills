@@ -212,6 +212,35 @@ A one-off DDL pass produces a moment of insight; it does not produce the offline
 
 **2026-04-20 — Dream-pass amendments A1–A4.** Added fifth D130 trigger (agent-assisted open asymmetry), Validation Posture String ladder (L1/L2/L3), Beach Prep Three for the founder (pre-authoring memo re-read ligament), and dream-pass cadence via `scripts/dream.sh`. **Justification**: these amendments add constraints (new triggers, new copy gates, new pre-authoring checks, new weekly rhythm) without weakening any of the three falsification conditions or any existing D130 trigger. Co-signer requirement waived per the memo's amendment rule, which binds only on edits that weaken a condition. The amendments inherit their evidential warrant from a one-off dream pass over the full repo corpus run on 2026-04-20; the pass's five Dream Fragments are preserved in the agent transcript for the session that authored this amendment, and the three that landed here are the ones that produced concrete new constraints rather than rhetorical parallels.
 
+### Amendment log entry for 2026-04-22 partner-walkthrough polish
+
+**2026-04-22 — Partner-walkthrough polish bundle (editorial-class, pre-close class).** Following Seb's 2026-04-21 Tier-1a walkthrough and the four 2026-04-22 review passes (workflow manual test, shibui pass, manual UI/design review, trifold + all-passes reconciled syntheses — all under `docs/research/partner-walkthrough-results/`), shipped a 6-item editorial-class bundle under `docs/plans/2026-04-22-partner-walkthrough-polish.md`:
+
+1. Safety recency chip display labels (`0 days` → `Today`; persisted `trainingRecency` values unchanged).
+2. Neutral `disabled` CTA token on `Button` `primary` (peach-overload fix per design review A1).
+3. `PainOverrideCard` microcopy — "We lower the load, not the time — your pick." (Seb wording-check).
+4. First-session verdict variant on `Complete` when `sessionCount === 1 && totalAttempts === 0` (design review T3).
+5. Preroll "keep phone unlocked" hint gated to first-time only via `storageMeta['ux.prerollHintDismissed']` (Player 3 + workflow pass).
+6. `Shorten block` on Transition promoted from ghost text to full-width outline (design review).
+
+**Justification.** Each item qualifies as `Accept (pre-close)` / `Accept (landed)` class per Seb's disposition table precedent (small editorial fix that fits the courtside-copy rule §2 or outdoor-UI brief floor, no new drill content, no new spec contract, no new Dexie migration). None of the three falsification conditions is weakened; the authoring-budget cap is respected (6 edits across 7 files + 3 regression tests + frontmatter/catalog updates). Validation: `npm run lint`, `npm run build`, `npm test -- --run` all clean (566 tests, 74 files). Red-team pass (correctness + scope-guardian + project-standards subagents) surfaced one P1 race condition on the preroll-hint flag mount-read vs. write, fixed with a functional setter + regression test — see `RunScreen.preroll-hint.test.tsx`. Co-signer requirement waived per the memo's amendment rule (no falsification condition weakened). Decision-ID authority: `D129` (pain/recency copy), `D130` (founder-use posture), `D127` (typography scaffolding preserved).
+
+**Items that did NOT ship and remain trigger-gated per this memo's authoring-budget cap** (tracked in `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md` §"Tier 1b — gated by founder-session trigger"):
+
+- Pair role-swap audio cue (Seb P2-2 Tier-1b half) — trigger: founder logs ≥2 pair sessions with unclear role transitions.
+- In-session running rep counter + full drill-metadata-driven capture UI (Seb P2-3 Tier-1b half + N2) — trigger: founder logs ≥2 sessions where the `notCaptured` default feels wrong, OR ≥1 `pass-rate-good` session where the guess was explicitly noted as fake.
+- Tap-to-expand per-stretch demo (Seb P1-8 Tier-1b half) — trigger: founder logs ≥1 wrap session where more form detail was wanted mid-block, OR next partner walkthrough surfaces the need.
+- `Chosen because:` deletion from Run + Swap-sheet re-home (trifold T1, re-opened) — trigger: ≥1 founder-use-ledger entry flagging the line as "coach footnoting." Until then, the pre-close relocated + 16 px state (landed 2026-04-21) holds.
+
+**Items that did NOT ship and require a spec revision first** (tracked in the reconciled synthesis §"Genuinely-open Tier 1b bundle (reconciled)"):
+
+- Full Review cut (RPE 11 → 3 anchors; delete Quick tags; divider-line cards; delete 2-hour Review-window copy; `Done` / `Finish later` equal weight; hide Good-passes card entirely on non-count drills) — blocked on revising `docs/specs/m001-review-micro-spec.md` contract.
+- Auto-fill training recency from Dexie; persist `Net` / `Wall` across sessions — cross-cutting draft-state + adaptation-rule reviews required.
+- Visual block-end countdown cue; Complete-screen Safari-eviction footnote compression; Skip-review confirmation modal; `Logged: N sessions` footer; accent color audit; warm-up numbered-step truncate-with-expand — each open as a separate editorial- or design-token-class candidate, not blocking this ship.
+- Effort/tag state anomaly investigation — open as a standalone bug, may be moot once the full Review cut deletes the Quick tags card.
+
+This entry does not alter Condition 3's 2026-05-21 close date or the re-eval decision rule.
+
 ## What falsifies *this memo*
 
 Meta-check: the memo itself has failure modes.

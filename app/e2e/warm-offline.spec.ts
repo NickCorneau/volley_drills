@@ -82,7 +82,7 @@ async function setupBuildAndEndEarly(page: import('@playwright/test').Page) {
 
   await expect(page.getByText('Before we start')).toBeVisible()
   await page.getByRole('button', { name: 'No' }).click()
-  await page.locator('button', { hasText: '1 day' }).click()
+  await page.locator('button', { hasText: 'Yesterday' }).click()
   await page.getByRole('button', { name: 'Continue' }).click()
 
   const pause = page.getByRole('button', { name: /pause/i })

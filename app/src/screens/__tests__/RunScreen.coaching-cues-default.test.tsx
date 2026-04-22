@@ -1,21 +1,19 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
 import { RunScreen } from '../RunScreen'
 
 /**
- * Feedback pass 2026-04-21: RunScreen defaults the coaching-cue toggle
- * to collapsed. Phase F Unit 5 (2026-04-19) had flipped the default to
- * visible, but field testing showed the cue text crowds the run view;
- * users preferred revealing cues on demand.
+ * RunScreen coaching note: warm card; short copy in full, long copy as
+ * preview + "Show full coaching note" (2026-04-22) so the affordance
+ * is large and the block is not one wall of text.
  *
- * Regression contract: on mount with a paused in-progress block whose
- * `coachingCue` is non-empty, the cue text is NOT rendered AND the
- * toggle button reads "Show coaching cues" (not "Hide cues"). This is
- * the single source of truth for the 2026-04-21 default flip; the
- * `Hide cues` label remains available post-toggle so users can collapse
- * cues again mid-block.
+ * Regression contract (updated 2026-04-22): **long** cues show a
+ * preview + "Show full coaching note"; the full body is not in the
+ * document until expand. **Short** cues (≤ 100 characters) show in
+ * full inside the coaching card with no expand control.
  */
 
 async function clearDb() {
@@ -43,8 +41,14 @@ async function seedPausedSession(execId: string, planId: string) {
         drillName: 'Passing',
         shortName: 'Pass',
         durationMinutes: 5,
-        // Realistic-ish coaching cue string so the assertion is honest.
-        coachingCue: 'Athletic posture. Platform angle drives the ball.',
+        // Intentionally long: compact cues skip the expand affordance; we
+        // need the long path so the full string stays out of the DOM until
+        // the user expands.
+        coachingCue:
+          'Athletic posture. Keep your platform steady through contact. ' +
+          'Let the ball find your angle. Breathe on the load; exhale ' +
+          'through the pass. Eyes to target early. Hips before arms. ' +
+          'Finish tall. CUEFULLMARKER_9f3a.',
         courtsideInstructions: 'Self-toss; forearm pass up and down.',
         required: true,
       },
@@ -73,27 +77,29 @@ function renderAt(execId: string) {
   )
 }
 
-describe('RunScreen: coaching cues default collapsed (feedback 2026-04-21)', () => {
+describe('RunScreen: coaching note card (long = preview + expand control)', () => {
   beforeEach(async () => {
     await clearDb()
   })
 
-  it('on mount: cue text is hidden and toggle reads "Show coaching cues"', async () => {
+  it('on mount: long cue is preview-only, full text after "Show full coaching note"', async () => {
     await seedPausedSession('exec-cue', 'plan-cue')
     renderAt('exec-cue')
 
-    // The toggle button reads "Show coaching cues" (default-collapsed)
-    // and the cue body text is NOT rendered.
     expect(
-      await screen.findByRole('button', { name: /show coaching cues/i }),
+      await screen.findByRole('button', { name: /show full coaching note/i }),
     ).toBeInTheDocument()
     expect(
-      screen.queryByRole('button', { name: /^hide cues$/i }),
+      screen.queryByText(/CUEFULLMARKER_9f3a/i),
     ).not.toBeInTheDocument()
+
+    await userEvent.click(
+      screen.getByRole('button', { name: /show full coaching note/i }),
+    )
+
+    expect(await screen.findByText(/CUEFULLMARKER_9f3a/)).toBeInTheDocument()
     expect(
-      screen.queryByText(
-        /athletic posture\. platform angle drives the ball\./i,
-      ),
-    ).not.toBeInTheDocument()
+      screen.getByRole('button', { name: /show less/i }),
+    ).toBeInTheDocument()
   })
 })

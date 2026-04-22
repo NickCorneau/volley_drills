@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { StaleContextBanner } from '../components/StaleContextBanner'
-import { BackButton, Button } from '../components/ui'
+import { BackButton, Button, ToggleChip } from '../components/ui'
 import type { PlayerMode, TimeProfile } from '../types/session'
 import type { SetupContext } from '../db/types'
 import { buildDraft } from '../domain/sessionBuilder'
@@ -15,7 +15,6 @@ import {
 } from '../services/session'
 import { getStorageMeta, setStorageMeta } from '../services/storageMeta'
 import { routes } from '../routes'
-import { cx } from '../lib/cn'
 
 const TIME_OPTIONS: TimeProfile[] = [15, 25, 40]
 
@@ -27,40 +26,6 @@ const isTimestamp = (v: unknown): v is number =>
 export type SetupScreenProps = {
   /** C-3: first-run Today's Setup - no last-session prefill, back → Skill Level, wind row, completes onboarding on Build. */
   isOnboarding?: boolean
-}
-
-function ToggleChip({
-  label,
-  active,
-  onTap,
-}: {
-  label: string
-  active: boolean
-  onTap: () => void
-}) {
-  return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={active}
-      onClick={onTap}
-      className={cx(
-        'min-h-[48px] min-w-[48px] flex-1 rounded-[12px] px-3 py-2 text-base font-semibold transition-colors',
-        active
-          // Phase F11 (2026-04-19): selected chip darkens to
-          // `accent-pressed` on hover/press - same pattern as the
-          // `primary` Button variant - so desktop pointers and
-          // finger-presses both get a tactile cue that the selected
-          // chip is still a clickable toggle.
-          ? 'bg-accent text-white hover:bg-accent-pressed active:bg-accent-pressed'
-          // Unselected gains the same `hover:bg-bg-warm active:bg-bg-warm`
-          // treatment as the Safety No/Yes and recency chips.
-          : 'border border-text-secondary/20 bg-bg-primary text-text-primary hover:bg-bg-warm active:bg-bg-warm',
-      )}
-    >
-      {label}
-    </button>
-  )
 }
 
 export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
@@ -231,7 +196,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
             "Settings", and the rest of the app per brand-ux
             guidelines §1.4. See
             `docs/plans/2026-04-19-feat-phase-f12-ux-consistency-plan.md`. */}
-        <h1 className="flex-1 text-center text-xl font-bold tracking-tight text-text-primary">
+        <h1 className="flex-1 text-center text-xl font-semibold tracking-tight text-text-primary">
           Today&apos;s setup
         </h1>
         <div className="w-12" />
@@ -246,61 +211,61 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           semantic role across the app). See
           `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold text-text-primary">Players</h2>
+        <h2 className="text-sm font-semibold text-text-primary">Players</h2>
         <div className="flex gap-2" role="radiogroup" aria-label="Player mode">
           <ToggleChip
             label="Solo"
-            active={playerMode === 'solo'}
+            selected={playerMode === 'solo'}
             onTap={() => setPlayerMode('solo')}
           />
           <ToggleChip
             label="Pair"
-            active={playerMode === 'pair'}
+            selected={playerMode === 'pair'}
             onTap={() => setPlayerMode('pair')}
           />
         </div>
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold text-text-primary">Net</h2>
+        <h2 className="text-sm font-semibold text-text-primary">Net</h2>
         <div className="flex gap-2" role="radiogroup" aria-label="Net available">
           <ToggleChip
             label="Yes"
-            active={netAvailable === true}
+            selected={netAvailable === true}
             onTap={() => setNetAvailable(true)}
           />
           <ToggleChip
             label="No"
-            active={netAvailable === false}
+            selected={netAvailable === false}
             onTap={() => setNetAvailable(false)}
           />
         </div>
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold text-text-primary">Wall or fence</h2>
+        <h2 className="text-sm font-semibold text-text-primary">Wall or fence</h2>
         <div className="flex gap-2" role="radiogroup" aria-label="Wall available">
           <ToggleChip
             label="Yes"
-            active={wallAvailable === true}
+            selected={wallAvailable === true}
             onTap={() => setWallAvailable(true)}
           />
           <ToggleChip
             label="No"
-            active={wallAvailable === false}
+            selected={wallAvailable === false}
             onTap={() => setWallAvailable(false)}
           />
         </div>
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold text-text-primary">Time</h2>
+        <h2 className="text-sm font-semibold text-text-primary">Time</h2>
         <div className="flex gap-2" role="radiogroup" aria-label="Time profile">
           {TIME_OPTIONS.map((t) => (
             <ToggleChip
               key={t}
               label={`${t} min`}
-              active={timeProfile === t}
+              selected={timeProfile === t}
               onTap={() => setTimeProfile(t)}
             />
           ))}
@@ -317,21 +282,21 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold text-text-primary">Wind</h2>
+        <h2 className="text-sm font-semibold text-text-primary">Wind</h2>
         <div className="flex gap-2" role="radiogroup" aria-label="Wind">
           <ToggleChip
             label="Calm"
-            active={wind === 'calm'}
+            selected={wind === 'calm'}
             onTap={() => setWind('calm')}
           />
           <ToggleChip
             label="Light wind"
-            active={wind === 'light'}
+            selected={wind === 'light'}
             onTap={() => setWind('light')}
           />
           <ToggleChip
             label="Strong wind"
-            active={wind === 'strong'}
+            selected={wind === 'strong'}
             onTap={() => setWind('strong')}
           />
         </div>

@@ -50,6 +50,7 @@ open_question_refs:
 - Tier 1b authors additional content only in response to a logged session gap, capped at 10 additional drill records before the founder's 5th post-Tier-1a session (see `docs/plans/2026-04-20-m001-adversarial-memo.md` authoring-budget cap).
 - Tier 1c lands the full focus-routing architecture (`sessionFocus` context field, dynamic `slot.skillTags` override in `sessionBuilder.ts::pickForSlot` + `findSwapAlternatives`, Swap-Focus button on the draft screen) only if behavioural evidence in `docs/research/founder-use-ledger.md` demands it. Pre-conditions and the specific evidence thresholds are in the *Tier 1c trigger* section below.
 - Tier 2 (the deferred-surfaces work from `D130`) remains gated on Tier 1a acceptance + adversarial-memo Condition 3 pass (partner unprompted open within 30 days) + 2 weeks of founder sessions. Tier 3+ stays governed by M002.
+- **2026-04-22 polish pass** supplements Tier 1a with a 6-item editorial-class bundle (`docs/plans/2026-04-22-partner-walkthrough-polish.md`): Safety recency chip display-label rewrite; neutral disabled-CTA token; PainOverrideCard microcopy; first-session verdict string on Complete; preroll hint gated first-time-only; Shorten block styling on Transition. All items qualify as `Accept (pre-close)`-class under the authoring-budget cap. Trigger-gated items remain deferred per the adversarial memo's 2026-04-22 Amendment Log entry.
 
 ## Why this plan exists, in its current shape
 

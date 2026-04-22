@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { BlockTimer } from '../components/BlockTimer'
 import { RunControls } from '../components/RunControls'
 import { SafetyIcon } from '../components/SafetyIcon'
 import { Button, StatusMessage } from '../components/ui'
+import { useBlockPacingTicks } from '../hooks/useBlockPacingTicks'
+import { usePreroll } from '../hooks/usePreroll'
 import { useTimer } from '../hooks/useTimer'
 import { useWakeLock } from '../hooks/useWakeLock'
 import { useSessionRunner } from '../hooks/useSessionRunner'
@@ -15,7 +17,29 @@ import {
 } from '../lib/audio'
 import { phaseLabel } from '../lib/format'
 import { computeShortened } from '../lib/shorten'
+import { isSchemaBlocked } from '../lib/schema-blocked'
+import { CUE_COMPACT_MAX } from '../domain/policies'
 import { routes } from '../routes'
+import { getStorageMeta, setStorageMeta } from '../services/storageMeta'
+
+/**
+ * Long cues: word-boundary preview (DOM shows preview only until expanded).
+ * Short cues: whole string, no expand control.
+ */
+function cueDisplayParts(
+  cue: string,
+):
+  | { kind: 'compact'; text: string }
+  | { kind: 'long'; preview: string; full: string } {
+  if (cue.length <= CUE_COMPACT_MAX) {
+    return { kind: 'compact', text: cue }
+  }
+  const slice = cue.slice(0, 90)
+  const lastSpace = slice.lastIndexOf(' ')
+  const cut = lastSpace > 40 ? lastSpace : 90
+  const preview = `${cue.slice(0, cut).trim()}…`
+  return { kind: 'long', preview, full: cue }
+}
 
 export function RunScreen() {
   const navigate = useNavigate()
@@ -26,25 +50,18 @@ export function RunScreen() {
     (location.state as { shortened?: boolean } | null)?.shortened ?? false
 
   const [showEndConfirm, setShowEndConfirm] = useState(false)
-  const [prerollCount, setPrerollCount] = useState<number | null>(null)
-  // Feedback pass 2026-04-21: coaching cues default collapsed so the
-  // run view stays quiet. Phase F Unit 5 opened them by default to
-  // ensure visibility, but field testing showed the extra chrome
-  // crowds the block and users prefer revealing cues on demand.
-  const [showInstructions, toggleInstructions] = useReducer(
-    (s: boolean) => !s,
-    false,
-  )
+  // `ux.prerollHintDismissed` gate: the "Keep the phone unlocked" line
+  // shows until the first preroll completes, then never again. `null`
+  // while the read is in flight (hint stays hidden - fail-quiet).
+  const [prerollHintDismissed, setPrerollHintDismissed] = useState<
+    boolean | null
+  >(null)
+  // Long coaching cues collapse to a preview until expanded; short
+  // cues (under `CUE_COMPACT_MAX`) render in full. Keeps the run view
+  // out of wall-of-text territory without hiding short one-breath cues.
+  const [coachingExpanded, setCoachingExpanded] = useState(false)
   const blockDurRef = useRef(0)
   const remainingRef = useRef(0)
-  // Pre-close 2026-04-21 (thought 3b, P2-2): audio-tick bookkeeping
-  // for the block-end countdown (3 / 2 / 1 ticks before the block-end
-  // beep) and the sub-block pacing tick (fires every
-  // `subBlockIntervalSeconds` for drills like d28 Beach Prep Three
-  // (45 s) and d26 Stretch Micro-sequence (30 s)). Refs so the poll
-  // loop below can mutate without re-rendering RunScreen.
-  const firedEndCountdownSecondsRef = useRef<Set<number>>(new Set())
-  const lastSubBlockTickIndexRef = useRef(0)
 
   const runner = useSessionRunner(executionLogId, {
     getAccumulatedElapsed: useCallback(() => {
@@ -83,8 +100,11 @@ export function RunScreen() {
   )
 
   if (currentBlock && currentBlock.id !== prevBlockId) {
+    // Sync per-block UI state to the new block identity in one pass
+    // (approved during-render pattern; avoids a cascading second effect).
     setActiveDuration(defaultDuration)
     setPrevBlockId(currentBlock.id)
+    setCoachingExpanded(false)
   }
 
   useEffect(() => {
@@ -95,11 +115,9 @@ export function RunScreen() {
 
   const handleBlockComplete = useCallback(async () => {
     try {
-      // Phase F Unit 3 (2026-04-19): foreground audio is the PRIMARY
-      // block-end cue for iOS Safari PWA testers (where vibrate is
-      // unsupported per D54/D57). Vibrate stays for Android + any
-      // desktop haptic surface. Both are best-effort; the core flow
-      // proceeds even if both fail silently.
+      // Foreground audio is the primary block-end cue on iOS (where
+      // vibrate is unsupported per D54/D57); vibrate is best-effort
+      // extra feedback on Android.
       playBlockEndBeep()
       if (navigator.vibrate) navigator.vibrate([100, 50, 100])
       const isLast = await completeBlock()
@@ -121,44 +139,66 @@ export function RunScreen() {
     remainingRef.current = timer.remainingSeconds
   })
 
-  const prerollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  const startWithPreroll = useCallback(() => {
-    setPrerollCount(3)
-    // Phase F Unit 3 (2026-04-19): first tick fires immediately on the
-    // "3" frame so the audio cue matches the visual; subsequent ticks
-    // (2, 1, go) fire inside the interval callback below.
-    playPrerollTick()
-    let count = 3
-    prerollTimerRef.current = setInterval(() => {
-      count -= 1
-      if (count <= 0) {
-        if (prerollTimerRef.current) clearInterval(prerollTimerRef.current)
-        prerollTimerRef.current = null
-        setPrerollCount(null)
-        // The "go" tick at count==0 - same beep as 2/1 so the tester
-        // gets a consistent sonic ramp into block start.
-        playPrerollTick()
-        startBlock()
-          .then(() => {
-            timer.start(activeDuration)
-            wakeLock.request()
-          })
-          .catch((err: unknown) => {
-            console.error('Failed to start block:', err)
-            navigate(routes.home(), { replace: true })
-          })
-        if (navigator.vibrate) navigator.vibrate(100)
-      } else {
-        setPrerollCount(count)
-        playPrerollTick()
-      }
-    }, 1000)
+  // On preroll completion: dismiss the keep-phone-unlocked hint,
+  // start the block in Dexie, and kick the timer + wake-lock.
+  const handlePrerollComplete = useCallback(() => {
+    setPrerollHintDismissed(true)
+    void setStorageMeta('ux.prerollHintDismissed', true).catch((err) => {
+      if (isSchemaBlocked()) return
+      console.error('prerollHintDismissed write failed:', err)
+    })
+    startBlock()
+      .then(() => {
+        timer.start(activeDuration)
+        wakeLock.request()
+      })
+      .catch((err: unknown) => {
+        console.error('Failed to start block:', err)
+        navigate(routes.home(), { replace: true })
+      })
+    if (navigator.vibrate) navigator.vibrate(100)
   }, [startBlock, timer, activeDuration, wakeLock, navigate])
 
+  const preroll = usePreroll({
+    onTick: playPrerollTick,
+    onComplete: handlePrerollComplete,
+  })
+  const prerollCount = preroll.count
+  const startWithPreroll = preroll.start
+
+  // Load the `prerollHintDismissed` flag once on mount.
+  //
+  // Race-guard: both this read and `handlePrerollComplete` write the
+  // same state. On a first-ever session where Dexie is cold, the read
+  // can resolve AFTER the user's first preroll completes; the
+  // functional setter below prefers `prev === true` over any read
+  // result so a locally-dismissed state is sticky for the mounted
+  // lifetime. Persistence is handled by the write in
+  // `handlePrerollComplete`; the next mount picks it up.
   useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const dismissed = await getStorageMeta(
+          'ux.prerollHintDismissed',
+          (v): v is boolean => typeof v === 'boolean',
+        )
+        if (cancelled) return
+        setPrerollHintDismissed((prev) =>
+          prev === true ? true : dismissed === true,
+        )
+      } catch (err) {
+        if (cancelled) return
+        if (isSchemaBlocked()) return
+        // Non-schema failure: preserve any locally-dismissed state;
+        // otherwise leave as null so the hint stays hidden. Reading a
+        // UX flag should never strand the run flow.
+        console.error('prerollHintDismissed read failed:', err)
+        setPrerollHintDismissed((prev) => (prev === true ? true : null))
+      }
+    })()
     return () => {
-      if (prerollTimerRef.current) clearInterval(prerollTimerRef.current)
+      cancelled = true
     }
   }, [])
 
@@ -214,82 +254,19 @@ export function RunScreen() {
     return () => clearInterval(interval)
   }, [timer.isRunning, activeDuration, currentBlock, flushTimer])
 
-  // Pre-close 2026-04-21 (thought 3b + P2-2): audio-tick poll loop.
-  //
-  // Two responsibilities, both driven off the continuously-updating
-  // `remainingRef` that the RAF tick loop maintains:
-  //
-  //  1. **Block-end 3-sec countdown.** When `ceil(remaining)` transitions
-  //     through 3 -> 2 -> 1, fire `playPrerollTick()` once per second.
-  //     The block-end beep itself still fires from `handleBlockComplete`
-  //     at remaining = 0, so the audible shape becomes
-  //     tick-tick-tick-BEEP - mirroring the preroll 3/2/1 entrance ramp
-  //     at the exit of every block. Thought 3b in the founder pre-close
-  //     review ("otherwise it just beeps and its done").
-  //
-  //  2. **Sub-block pacing tick.** When a drill variant declares
-  //     `subBlockIntervalSeconds`, fire `playSubBlockTick()` at each
-  //     multiple of that interval so e.g. Beach Prep Three's four ~45 s
-  //     segments each get an audible boundary cue. Partner walkthrough
-  //     P2-2.
-  //
-  // Poll at 250 ms: precision of ±125 ms on audio boundaries, which is
-  // well inside human-audible tolerance for a "pacing pulse"; low enough
-  // CPU work that running alongside the RAF tick is not a concern.
-  //
-  // Ref-based bookkeeping (Set of fired countdown seconds; last-fired
-  // sub-block index) lives across poll ticks and resets on block change
-  // via the separate reset effect below.
-  //
-  // Guards:
-  //  - sub-block ticks suppressed when `remaining < 4` to avoid
-  //    colliding with the 3-sec end-countdown + block-end beep on the
-  //    final boundary of a drill whose interval divides block length
-  //    evenly (d28's 45 s x 4 = 3 min; d26's 30 s x 6 = 3 min).
-  useEffect(() => {
-    if (!timer.isRunning || !currentBlock) return
-    const subBlockIntervalSeconds = currentBlock.subBlockIntervalSeconds
-    const interval = setInterval(() => {
-      const remaining = remainingRef.current
-      if (remaining <= 0) return
-
-      // (1) End-of-block countdown.
-      const ceil = Math.ceil(remaining)
-      if (ceil >= 1 && ceil <= 3 && !firedEndCountdownSecondsRef.current.has(ceil)) {
-        firedEndCountdownSecondsRef.current.add(ceil)
-        playPrerollTick()
-      }
-
-      // (2) Sub-block pacing tick.
-      if (
-        subBlockIntervalSeconds &&
-        subBlockIntervalSeconds > 0 &&
-        remaining >= 4
-      ) {
-        const elapsed = blockDurRef.current - remaining
-        const currentIndex = Math.floor(elapsed / subBlockIntervalSeconds)
-        if (
-          currentIndex > lastSubBlockTickIndexRef.current &&
-          currentIndex >= 1
-        ) {
-          lastSubBlockTickIndexRef.current = currentIndex
-          playSubBlockTick()
-        }
-      }
-    }, 250)
-    return () => clearInterval(interval)
-  }, [timer.isRunning, currentBlock])
-
-  // Reset audio-tick bookkeeping on block change so the new block
-  // starts with a clean countdown set and its own sub-block index
-  // counter. Tied to `currentBlock?.id` so a same-slot Swap does not
-  // reset the counters (the Swap keeps block.id stable per
-  // `findSwapAlternatives` contract), but advancing to the next block
-  // does.
-  useEffect(() => {
-    firedEndCountdownSecondsRef.current = new Set()
-    lastSubBlockTickIndexRef.current = 0
-  }, [currentBlock?.id])
+  // Pre-close 2026-04-21 (thought 3b + P2-2): end-of-block 3/2/1
+  // countdown ticks + optional sub-block pacing ticks. Implementation
+  // and tests in `useBlockPacingTicks`. Bookkeeping resets on block-id
+  // change (same-slot Swap keeps id stable; advancing does not).
+  useBlockPacingTicks({
+    running: timer.isRunning,
+    blockId: currentBlock?.id ?? null,
+    subBlockIntervalSeconds: currentBlock?.subBlockIntervalSeconds,
+    remainingRef,
+    blockDurRef,
+    onEndCountdownTick: playPrerollTick,
+    onSubBlockTick: playSubBlockTick,
+  })
 
   useEffect(() => {
     if (timer.isRunning) {
@@ -313,10 +290,9 @@ export function RunScreen() {
   const handleNext = useCallback(async () => {
     try {
       timer.pause()
-      // Phase F Unit 3 (2026-04-19): manual Next fires the same
-      // block-end beep as auto-complete so the tester gets consistent
-      // courtside feedback regardless of whether the timer ran out or
-      // they tapped early.
+      // Manual Next fires the same block-end beep as auto-complete
+      // so the tester's audio cue is consistent whether the timer ran
+      // out or they tapped early.
       playBlockEndBeep()
       if (navigator.vibrate) navigator.vibrate(100)
       const isLast = await completeBlock()
@@ -334,9 +310,8 @@ export function RunScreen() {
   const handleSkip = useCallback(async () => {
     try {
       timer.pause()
-      // Phase F Unit 3: Skip also ends the block (just with a skipped
-      // status instead of completed); beep so the tester's audio cue
-      // matches the end-of-block transition.
+      // Skip also ends the block (skipped status instead of completed).
+      // Beep so the audio cue matches any other end-of-block transition.
       playBlockEndBeep()
       if (navigator.vibrate) navigator.vibrate(100)
       const isLast = await skipBlock()
@@ -352,9 +327,8 @@ export function RunScreen() {
   }, [timer, skipBlock, navigate, executionLogId])
 
   const handleShorten = useCallback(() => {
-    // Pure math lives in `computeShortened` so the invariant "newRemaining
-    // never exceeds current remaining" is covered by direct unit tests.
-    // Red-team bug #2.
+    // Math in `computeShortened` (tested separately); enforces that
+    // newRemaining never exceeds current remaining.
     const { newRemainingSeconds, newDurationSeconds } = computeShortened(
       activeDuration,
       remainingRef.current,
@@ -364,17 +338,10 @@ export function RunScreen() {
   }, [timer, activeDuration])
 
   /**
-   * Phase F Unit 4 (2026-04-19): Swap drill mid-run.
-   *
-   * - Pauses the timer if running (same pattern as Shorten) so the
-   *   tester doesn't burn block time on a stale drill display.
-   * - Delegates the plan mutation + swapCount increment to
-   *   `useSessionRunner.swapBlock`, which goes through the atomic
-   *   `swapActiveBlock` transaction in services/session.ts.
-   * - On no-op (no alternates available for this block) surfaces a
-   *   subtle error message so the tester doesn't think their tap was
-   *   lost. Defensive - the UI hides the button when no alternates
-   *   exist, so this path is a belt-and-suspenders guard.
+   * Mid-run drill Swap. Pauses the timer (same pattern as Shorten);
+   * delegates the atomic plan mutation + `swapCount` increment to
+   * `useSessionRunner.swapBlock`. The no-alternates path is a belt
+   * under suspenders — the UI already hides the button in that case.
    */
   const handleSwap = useCallback(async () => {
     try {
@@ -468,17 +435,9 @@ export function RunScreen() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-col gap-6 pb-8">
+    <div className="mx-auto flex w-full max-w-[390px] flex-col gap-7 pb-8">
       <div className="flex items-center justify-between pt-2">
         <SafetyIcon />
-        {/* Phase F8 (2026-04-19): phase label was `text-sm font-bold
-            uppercase tracking-wider` paired with all-caps source
-            strings ('WARM UP' / 'WORK' / 'DOWNSHIFT'). The audit
-            (`canvases/typography-review.canvas.tsx`) flagged the
-            uppercase-eyebrow voice as the app's single biggest
-            "SaaS tell"; `phaseLabel()` now returns sentence case and
-            the pill carries emphasis through accent color plus
-            `font-semibold` instead of through case + letter-spacing. */}
         <span className="text-sm font-semibold text-accent">
           {phaseLabel(currentBlock.type)}
         </span>
@@ -487,114 +446,142 @@ export function RunScreen() {
         </span>
       </div>
 
-      <div className="flex flex-col gap-2">
-        {/* Phase F8 (2026-04-19): added `tracking-tight` to match the
-            Review / prep-screen display-heading treatment. Drill title
-            is the focal element when the timer isn't yet running. */}
-        <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+      {/* Content stack: drill name → rationale → instructions → cues.
+          Type sizes pinned by the outdoor-UI brief
+          (`docs/research/outdoor-courtside-ui-brief.md`). */}
+      <div className="flex flex-col gap-5">
+        <h1 className="text-xl font-semibold tracking-tight text-text-primary">
           {currentBlock.drillName}
         </h1>
-        {/* Tier 1a Unit 4 (2026-04-20): one-sentence rationale for why
-            this block landed on the session. Partner-walkthrough pass
-            2026-04-21 (P1-11): rationale was rendered BELOW the
-            coaching-cue toggle at `text-xs`, which caused Seb to merge
-            it with the coach-cue cluster on first read (he described
-            reading "the coach cues" when he had just read the
-            rationale). Fix: relocate above `courtsideInstructions` as
-            a subtitle under the drill name — this puts it in the
-            "what → why → how" reading order (drill name → rationale →
-            instructions → cues) and physically separates it from the
-            coach-cue region. Typography: `text-base` honors the
-            outdoor-UI brief's 16 px body floor (was `text-xs` / 12 px,
-            which violated the freeze). `text-text-secondary` keeps it
-            quiet relative to the instructions directly below. Legacy
-            plans without a rationale render nothing. See
-            `docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md`
-            P1-11 and `docs/research/outdoor-courtside-ui-brief.md` freeze. */}
+        {/* Rationale: one-sentence "why this block" (Tier 1a Unit 4).
+            Rendered quietly above instructions so the reading order is
+            what → why → how. Legacy plans without a rationale render
+            nothing. */}
         {currentBlock.rationale && (
-          <p className="text-base leading-relaxed text-text-secondary">
+          <p className="text-sm leading-relaxed text-text-secondary">
             {currentBlock.rationale}
           </p>
         )}
-        {/* Typography bump 2026-04-21 (thought 2 from founder pre-close
-            review): body copy was at `text-sm` / 14 px, below the
-            outdoor-UI brief's 16 px body floor AND below its 18 px
-            preferred run-mode body size. Founder reported text
-            unreadable at bench distance even off-sand ("couldn't have
-            the phone too far away since things were hard to read") -
-            which is the exact problem the brief's preferred floor
-            exists to solve. `text-lg` / 18 px on the two primary
-            active-drill surfaces: courtside instructions (what to do)
-            and the coach cue (how to do it well). Rationale stays at
-            the 16 px floor since it's meta-context, not hot content.
-            See `docs/research/outdoor-courtside-ui-brief.md` freeze:
-            "body_preferred_px: 18" and "Run-mode labels should prefer
-            18px." */}
+        {/* `whitespace-pre-line` preserves `\n` in
+            `courtsideInstructions` for drills with naturally list-shaped
+            content (e.g. d26 stretch sequence).
+
+            Partner-walkthrough polish round 2 (2026-04-22): dropped
+            from `text-lg` (18 px) to `text-base` (16 px). The prior
+            pre-close bump to 18 px made the same paragraph render
+            visibly larger on Run than on Transition (where it was
+            `text-sm` / 14 px), producing a font-size jump for the
+            exact same drill copy between two adjacent screens in the
+            flow. 16 px sits on the outdoor-UI brief's body floor,
+            satisfies Seb P2-1 "readable at arm's length," and lets
+            TransitionScreen meet it mid-scale (see its matching
+            bump) so the paragraph reads as one voice across both
+            surfaces. */}
         {currentBlock.courtsideInstructions && (
-          <p className="text-lg leading-relaxed text-text-primary">
+          <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
             {currentBlock.courtsideInstructions}
           </p>
         )}
         {currentBlock.coachingCue &&
-          (showInstructions ? (
-            <div className="flex flex-col gap-1">
-              <p className="text-lg font-medium leading-relaxed text-accent">
-                {currentBlock.coachingCue}
-              </p>
-              <button
-                type="button"
-                onClick={toggleInstructions}
-                className="min-h-[54px] self-start text-sm font-medium text-accent"
+          (() => {
+            const parts = cueDisplayParts(currentBlock.coachingCue)
+            if (parts.kind === 'compact') {
+              return (
+                <section
+                  aria-labelledby="coaching-cue-title"
+                  className="rounded-2xl border border-accent/30 bg-info-surface p-4"
+                >
+                  <h2
+                    id="coaching-cue-title"
+                    className="text-sm font-semibold text-accent"
+                  >
+                    Coaching note
+                  </h2>
+                  <p className="mt-2 whitespace-pre-line text-base font-medium leading-relaxed text-accent">
+                    {parts.text}
+                  </p>
+                </section>
+              )
+            }
+            if (coachingExpanded) {
+              return (
+                <section
+                  aria-labelledby="coaching-cue-title"
+                  className="rounded-2xl border border-accent/30 bg-info-surface p-4"
+                >
+                  <h2
+                    id="coaching-cue-title"
+                    className="text-sm font-semibold text-accent"
+                  >
+                    Coaching note
+                  </h2>
+                  <p className="mt-2 whitespace-pre-line text-base font-medium leading-relaxed text-accent">
+                    {parts.full}
+                  </p>
+                  <button
+                    type="button"
+                    aria-expanded
+                    onClick={() => setCoachingExpanded(false)}
+                    className="mt-3 flex w-full min-h-[56px] items-center justify-center rounded-xl border border-accent/30 bg-surface-calm px-4 text-sm font-semibold text-accent transition-colors active:bg-bg-warm"
+                  >
+                    Show less
+                  </button>
+                </section>
+              )
+            }
+            return (
+              <section
+                aria-labelledby="coaching-cue-title"
+                className="rounded-2xl border border-accent/30 bg-info-surface p-4"
               >
-                Hide cues
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={toggleInstructions}
-              className="min-h-[54px] self-start text-sm font-medium text-accent"
-            >
-              Show coaching cues
-            </button>
-          ))}
+                <h2
+                  id="coaching-cue-title"
+                  className="text-sm font-semibold text-accent"
+                >
+                  Coaching note
+                </h2>
+                <p className="mt-2 text-base font-medium leading-relaxed text-accent">
+                  {parts.preview}
+                </p>
+                <button
+                  type="button"
+                  aria-expanded={false}
+                  onClick={() => setCoachingExpanded(true)}
+                  className="mt-3 flex w-full min-h-[56px] items-center justify-center rounded-xl border border-accent/30 bg-surface-calm px-4 text-sm font-semibold text-accent transition-colors active:bg-bg-warm"
+                >
+                  Show full coaching note
+                </button>
+              </section>
+            )
+          })()}
       </div>
 
       {prerollCount != null ? (
         <div className="flex flex-col items-center gap-4 py-8">
-          {/* Phase F10 (2026-04-19): preroll countdown now shares the
-              BlockTimer's display face (JetBrains Mono Variable via
-              the `font-mono` utility + `--font-mono` token) so the
-              two timer surfaces read as one instrument at two
-              volumes. Accent color continues to signal "get ready"
-              vs the primary-colored live timer. The slashed-zero
-              feature matches BlockTimer for consistency even though
-              the preroll flips to the live timer before 0. See
-              `docs/plans/2026-04-19-feat-phase-f10-timer-display-face-plan.md`. */}
+          {/* Preroll countdown shares BlockTimer's display face
+              (`font-mono` / JetBrains Mono Variable + slashed-zero)
+              so the two timer surfaces read as one instrument; accent
+              color signals "get ready" vs the primary live timer. */}
           <span
             className="font-mono text-[72px] font-bold tabular-nums leading-none text-accent"
             style={{ fontFeatureSettings: '"zero" 1' }}
           >
             {prerollCount}
           </span>
-          <p className="text-base font-medium text-text-secondary">
+          <p className="text-sm font-medium text-text-secondary">
             Get ready&hellip;
           </p>
-          {/* Pre-close 2026-04-21 (thought 3a in founder pre-close review):
-              iOS Safari PWA suspends our `AudioContext` when the phone
-              is locked, so the block-end beep + 3-sec end-countdown
-              ticks do not fire through a locked screen. The
-              MediaSession + audioSession='ambient' spike that would
-              unlock the lock-screen presence lives in the post-D91 /
-              post-Condition-3 backlog (`docs/plans/2026-04-16-003-rest-of-v0b-plan.md`
-              §4 "Lock-screen presence"), gated on D54 reconsideration.
-              Until then, the cheapest honest thing is to set the
-              expectation on the preroll screen the tester already
-              looks at at block start. `text-sm text-text-secondary`
-              keeps it ambient - not a warning, not a safety gate. */}
-          <p className="max-w-[280px] text-center text-sm text-text-secondary">
-            Keep the phone unlocked so the block-end beep can fire.
-          </p>
+          {/* iOS Safari PWA suspends AudioContext on lock, so the
+              block-end beep won't fire through a locked screen. The
+              full lock-screen presence spike is post-D91 backlog. Until
+              then we set the expectation on the preroll. Shown only
+              until the first preroll completes
+              (`storageMeta['ux.prerollHintDismissed']`). */}
+          {prerollHintDismissed === false && (
+            <p className="max-w-[280px] text-center text-sm text-text-secondary">
+              Keep the phone unlocked so the block-end beep can fire.
+            </p>
+          )}
         </div>
       ) : (
       <BlockTimer
@@ -607,14 +594,8 @@ export function RunScreen() {
       {runError && <StatusMessage variant="error" message={runError} />}
 
       {prerollCount == null && (() => {
-        /**
-         * Phase F Unit 4: Swap is only available when the block has
-         * at least one curated alternate. Precompute once per render
-         * so the visibility gate (non-empty list) doesn't double-call
-         * `findSwapAlternatives`. Warmup / wrap always empty per
-         * D85/D105; a context with a single candidate in the slot
-         * pool is also empty.
-         */
+        // Swap is only offered when the block has at least one curated
+        // alternate. Warmup/wrap are always empty per D85/D105.
         const hasAlternates = plan.context
           ? findSwapAlternatives(currentBlock, plan.context).length > 0
           : false

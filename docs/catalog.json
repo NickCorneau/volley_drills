@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
   "repo_id": "volley_drills",
-  "last_updated": "2026-04-20",
+  "last_updated": "2026-04-22",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -568,6 +568,12 @@
     {
       "id": "v0a-to-v0b-transition",
       "path": "docs/plans/2026-04-12-v0a-to-v0b-transition.md",
+      "type": "plan",
+      "status": "active"
+    },
+    {
+      "id": "partner-walkthrough-polish-2026-04-22",
+      "path": "docs/plans/2026-04-22-partner-walkthrough-polish.md",
       "type": "plan",
       "status": "active"
     },

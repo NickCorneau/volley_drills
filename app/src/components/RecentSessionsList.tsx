@@ -39,6 +39,17 @@ import type { RecentSessionEntry } from '../services/session'
  * wording is self-describing. A checkmark + cross glyph pair was
  * rejected: glyphs read as decorative; text reads as a record.
  *
+ * Focus column (middle) uses gerund forms for the three volleyball
+ * skill focuses ("Passing" / "Serving" / "Setting") rather than
+ * nouns ("Pass" / "Serve" / "Set"). Rationale: the row renders as
+ * `date · focus · status` and the noun `Pass` sitting next to `Done`
+ * / `Partial` parses as a status value — literally pass/fail — for a
+ * reader who hasn't internalized the three-column model. Change
+ * traces to `N3` in the Post-close partner mentions section of the
+ * 2026-04-21 Tier 1a walkthrough ledger (2026-04-22 unsolicited
+ * partner message); see `focusLabel` in `domain/sessionFocus.ts` for
+ * why only the three volleyball cases needed the rewrite.
+ *
  * Three-column grid is enforced with `grid-cols-[auto_1fr_auto]` so
  * the date hugs the left edge, focus fills the middle, and
  * completion hugs the right - matching how a spreadsheet reader

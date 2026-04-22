@@ -68,7 +68,7 @@ export function PassMetricInput({
         />
       </div>
       {rate != null && !notCaptured && (
-        <p className="text-center text-base font-semibold text-accent">
+        <p className="text-center text-sm font-semibold text-accent">
           {rate}% good pass rate
         </p>
       )}

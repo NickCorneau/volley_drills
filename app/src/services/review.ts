@@ -7,6 +7,13 @@ import type {
   SessionPlan,
   SessionReview,
 } from '../db/types'
+import { endedAt } from '../domain/executionPredicates'
+import {
+  CAPTURE_WINDOW_IMMEDIATE_MS,
+  CAPTURE_WINDOW_SAME_DAY_MS,
+  CAPTURE_WINDOW_SAME_SESSION_MS,
+  FINISH_LATER_CAP_MS as POLICY_FINISH_LATER_CAP_MS,
+} from '../domain/policies'
 import { clearSoftBlockDismissed } from './softBlock'
 import { getStorageMeta } from './storageMeta'
 
@@ -30,33 +37,18 @@ export interface SubmitReviewData {
 }
 
 // --- Capture-window bucketing (V0B-30 / D120) ---
+// Policy knobs live in `domain/policies`. Re-exported here so existing
+// call sites (`ReviewScreen`, `services/session`, tests) keep working.
 
-// Boundaries in milliseconds. Inclusive upper bound applied at each step so a
-// delay that lands exactly on 30 min / 2 h / 24 h stays inside the more
-// favorable bucket.
-const THIRTY_MIN_MS = 30 * 60 * 1_000
-const TWO_HOURS_MS = 2 * 60 * 60 * 1_000
-const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1_000
-
-/**
- * The 2-hour `Finish Later` cap (V0B-31 / B4 / D120). Lands on the
- * `same_session` upper bound and the `same_day` lower bound of the
- * capture-window classifier above: anything submitted inside `TWO_HOURS_MS`
- * of session end is still `same_session`-eligible for the adaptation engine;
- * anything past this cap is auto-finalized as an expired stub and never
- * drives adaptation. Exported so the home-state resolver can classify a
- * pending review as `review_pending` vs `review_expired` using the same
- * boundary the review writer uses.
- */
-export const FINISH_LATER_CAP_MS = TWO_HOURS_MS
+export const FINISH_LATER_CAP_MS = POLICY_FINISH_LATER_CAP_MS
 
 export function classifyCaptureWindow(
   delaySeconds: number,
 ): RpeCaptureWindow {
   const ms = delaySeconds * 1_000
-  if (ms <= THIRTY_MIN_MS) return 'immediate'
-  if (ms <= TWO_HOURS_MS) return 'same_session'
-  if (ms <= TWENTY_FOUR_HOURS_MS) return 'same_day'
+  if (ms <= CAPTURE_WINDOW_IMMEDIATE_MS) return 'immediate'
+  if (ms <= CAPTURE_WINDOW_SAME_SESSION_MS) return 'same_session'
+  if (ms <= CAPTURE_WINDOW_SAME_DAY_MS) return 'same_day'
   return 'next_day_plus'
 }
 
@@ -76,12 +68,9 @@ export function isEligibleForAdaptation(window: RpeCaptureWindow): boolean {
   }
 }
 
-function sessionEndTimestamp(exec: ExecutionLog): number {
-  // `completedAt` is set at terminal transitions (completed / ended_early),
-  // so prefer it; fall back to `startedAt` when the record is malformed so
-  // the review still submits rather than throwing.
-  return exec.completedAt ?? exec.startedAt
-}
+// Alias retained for local readability; canonical helper is
+// `endedAt` in `domain/executionPredicates`.
+const sessionEndTimestamp = endedAt
 
 // --- Submit ---
 

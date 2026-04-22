@@ -147,11 +147,11 @@ export function SkillLevelScreen() {
   return (
     <div className="mx-auto flex w-full max-w-[390px] flex-col gap-6 pb-12 pt-8">
       <header className="flex flex-col gap-2">
-        <h1 className="text-xl font-bold tracking-tight text-text-primary">
+        <h1 className="text-xl font-semibold tracking-tight text-text-primary">
           {copy.heading}
         </h1>
         <p className="text-sm text-text-secondary">
-          Your rough current level — we size today&apos;s drills to match. Change anytime.
+          Your rough current level. We size today&apos;s drills to match. Change anytime.
         </p>
       </header>
 
@@ -185,7 +185,7 @@ export function SkillLevelScreen() {
               onClick={() => void handlePick(level)}
               className={`flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent hover:bg-bg-warm active:bg-bg-warm ${FOCAL_SURFACE_CLASS}`}
             >
-              <span className="text-base font-semibold text-text-primary">
+              <span className="text-sm font-semibold text-text-primary">
                 {SKILL_LEVEL_LABEL[level]}
               </span>
               <span className="text-sm text-text-secondary">
@@ -200,7 +200,7 @@ export function SkillLevelScreen() {
             onClick={() => void handlePick('unsure')}
             className={`flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent hover:bg-bg-warm active:bg-bg-warm ${FOCAL_SURFACE_CLASS}`}
           >
-            <span className="text-base font-semibold text-text-primary">
+            <span className="text-sm font-semibold text-text-primary">
               {SKILL_LEVEL_LABEL.unsure}
             </span>
             <span className="text-sm text-text-secondary">

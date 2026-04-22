@@ -21,7 +21,7 @@ async function setupAndStart(
 
 async function passSafety(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: 'No' }).click()
-  await page.locator('button', { hasText: '1 day' }).click()
+  await page.locator('button', { hasText: 'Yesterday' }).click()
   await page.getByRole('button', { name: 'Continue' }).click()
 }
 

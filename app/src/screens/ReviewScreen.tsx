@@ -8,6 +8,7 @@ import { SafetyIcon } from '../components/SafetyIcon'
 import { Button, Card, StatusMessage } from '../components/ui'
 import { DRILLS } from '../data/drills'
 import type { ExecutionLog, IncompleteReason, SessionPlan } from '../db'
+import { COUNT_BASED_METRIC_TYPES } from '../domain/policies'
 import { formatDurationLine, statusLabel } from '../lib/format'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { routes } from '../routes'
@@ -20,30 +21,6 @@ import {
 } from '../services/review'
 import { loadSession } from '../services/session'
 import type { MetricType } from '../types/drill'
-
-/**
- * Pre-close 2026-04-21 (thought 4 in founder pre-close review): the
- * "Good passes" capture only makes sense when the main_skill drill's
- * `successMetric.type` is a count-based metric the tester can tally
- * courtside. The current drill catalog has many non-count shapes
- * (`streak`, `points-to-target`, `pass-grade-avg`, `composite`,
- * `completion`) where asking for good / total is a guess at best.
- *
- * Sub-fix: when the main_skill drill's type is NOT count-based,
- * default the `notCaptured` quickTag to selected so the reviewer
- * isn't guilt-tripped into inventing numbers. Can still toggle off
- * if they did track something.
- *
- * The full drill-metadata-driven capture UI (hide the Good/Total
- * card entirely for non-count drills; branch PassMetricInput on
- * capture style) is Tier 1b; this is the pre-close approximation.
- * See `docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md`
- * P2-3 and the founder pre-close review thought 4.
- */
-const COUNT_BASED_METRIC_TYPES: ReadonlySet<MetricType> = new Set([
-  'pass-rate-good',
-  'reps-successful',
-])
 
 function inferMainSkillMetricType(plan: SessionPlan | null): MetricType | null {
   if (!plan) return null
@@ -501,24 +478,43 @@ function ReviewSessionContent({
 
   return (
     <div className="mx-auto flex w-full max-w-[390px] flex-col gap-8 pb-8">
-      <header className="flex items-start justify-between pt-2">
-        <div>
+      {/* Founder test-run feedback 2026-04-21 (round 2): the prior
+          header placed the SafetyIcon on the RIGHT while every other
+          screen (CompleteScreen / RunScreen / TransitionScreen / Setup
+          / Safety) puts the shield on the LEFT. Small thing, but the
+          eye had to re-learn the top-bar pattern on Review only. The
+          title stack was also a left-aligned block (`h1` + secondary
+          `<p>` eyebrow), whereas Safety's pattern - which Review is
+          structurally most similar to - uses centered title + centered
+          eyebrow below. Harmonize on Safety's pattern: three-column
+          top row `[shield | "Quick review" | 56×56 spacer]` with the
+          session eyebrow centered below. Same shibui restraint, same
+          thumb-zone shape across the app. */}
+      <header className="flex flex-col items-center gap-1 pt-2">
+        <div className="flex w-full items-center justify-between">
+          <SafetyIcon />
           {/* Phase F12 (2026-04-19): sentence case (was "Quick
-              Review" Title Case) per brand-ux guidelines §1.4. */}
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+              Review" Title Case) per brand-ux guidelines §1.4.
+              Founder test-run feedback 2026-04-21 (round 3): dropped
+              from `text-2xl font-bold` (24 px / 700) to `text-xl
+              font-semibold` (20 px / 600). Inter's 700 weight at
+              display sizes reads as techy-SaaS; 600 is the weight
+              the typeface is tuned for at headings. Unified with
+              every other page-title h1 across the app. */}
+          <h1 className="text-xl font-semibold tracking-tight text-text-primary">
             Quick review
           </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            {sessionTitle} &middot; {durationPart} &middot; {statusPart}
-          </p>
+          <div className="h-14 w-14 shrink-0" aria-hidden />
         </div>
-        <SafetyIcon />
+        <p className="text-sm text-text-secondary">
+          {sessionTitle} &middot; {durationPart} &middot; {statusPart}
+        </p>
       </header>
 
       <Card className="flex flex-col gap-3">
         <h2
           id="rpe-heading"
-          className="text-base font-semibold text-text-primary"
+          className="text-sm font-semibold text-text-primary"
         >
           {rpePrompt}
         </h2>
@@ -533,7 +529,7 @@ function ReviewSessionContent({
       {showMetrics && (
         <Card className="flex flex-col gap-3">
           <div>
-            <h2 className="text-base font-semibold text-text-primary">
+            <h2 className="text-sm font-semibold text-text-primary">
               Good passes
             </h2>
             {/* 2026-04-19 non-player tester note: the original phrasing
@@ -572,7 +568,7 @@ function ReviewSessionContent({
 
       {needsIncompleteReason && (
         <Card className="flex flex-col gap-3">
-          <h2 className="text-base font-semibold text-text-primary">
+          <h2 className="text-sm font-semibold text-text-primary">
             Why did you end early?
           </h2>
           <IncompleteReasonChips
@@ -583,7 +579,7 @@ function ReviewSessionContent({
       )}
 
       <Card className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold text-text-primary">
+        <h2 className="text-sm font-semibold text-text-primary">
           Quick tags
         </h2>
         <QuickTagChips selected={quickTags} onChange={setQuickTags} />
@@ -603,7 +599,7 @@ function ReviewSessionContent({
           value={shortNote}
           onChange={(e) => setShortNote(e.target.value)}
           placeholder="Anything else?"
-          className="min-h-[88px] w-full resize-y rounded-[12px] border border-text-primary/10 bg-bg-primary px-3 py-2 text-base text-text-primary placeholder:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="min-h-[88px] w-full resize-y rounded-[12px] border border-text-primary/10 bg-bg-primary px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         />
       </section>
 

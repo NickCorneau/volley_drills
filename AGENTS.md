@@ -1,18 +1,18 @@
 ---
-
-## id: agents
+id: agents
 title: Agent Orientation
 status: active
 stage: validation
 type: agent-contract
 summary: "Canonical prose repo contract: current state, read order, source-of-truth order, and repo-wide working constraints."
 authority: repo-wide routing, working constraints, and agent-facing orientation
-last_updated: 2026-04-19-c
+last_updated: 2026-04-22
 depends_on:
   - docs/catalog.json
   - docs/vision.md
   - docs/decisions.md
   - docs/ops/agent-operations.md
+---
 
 # Agent Orientation
 
@@ -60,11 +60,12 @@ Give agents one durable, concise repo contract for current state, read order, so
 ## Current State
 
 - **Phase**: 0 (validation)
-- **Posture**: v0b Starter Loop **feature-complete** as the D91 field-test artifact (`D119`); Phases A, B, C (C-0 → C-5), E, and F (F1 – F12) all landed. Live at [https://volleydrills.nicholascorneau.workers.dev](https://volleydrills.nicholascorneau.workers.dev).
+- **Mode**: `D130` founder-use mode (2026-04-20 → 2026-07-20 re-eval). D91 retention gate is **deferred**, not dropped.
+- **Posture**: v0b Starter Loop **feature-complete** as the D91 field-test artifact (`D119`); Phases A, B, C (C-0 → C-5), E, and F (F1 – F12) all landed through 2026-04-19. Tier 1a landed 2026-04-21 (see `docs/plans/2026-04-20-m001-tier1-implementation.md`). 2026-04-22 partner-walkthrough polish pass landed (6 editorial-class items; see `docs/plans/2026-04-22-partner-walkthrough-polish.md`). Live at [https://volleydrills.nicholascorneau.workers.dev](https://volleydrills.nicholascorneau.workers.dev).
 - **Active milestone**: `M001` Solo Session Loop
 - **Next milestone in queue**: `M002` Weekly Confidence Loop (post-M001 self-coached follow-on, per `D124`)
-- **Blocking gate**: D91 field-test evidence against v0b (`D119`) must pass before M001 moves into the full build. Remaining pre-field items are **non-code**: tester recruitment (5+ testers), a founder replay spot-check against a dogfeed export, and the operational cohort protocol in `docs/research/pre-telemetry-validation-protocol.md`.
-- **Prototype feedback**: start with `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for any retrospective work against v0a; current v0b execution status lives in `docs/plans/2026-04-16-003-rest-of-v0b-plan.md`.
+- **Current gate**: `D130` Condition 3 (partner unprompted open within 30 days) — **provisional pass** (Seb T+1-day open 2026-04-22); final read-out 2026-05-21. Conditions 1 (solo-first ≥40%) and 2 (outside-app planning events) tracked in `docs/research/founder-use-ledger.md` weekly.
+- **Prototype feedback**: start with `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for any retrospective work against v0a; current v0b execution status lives in `docs/plans/2026-04-16-003-rest-of-v0b-plan.md`. Most recent partner-walkthrough synthesis is `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md`.
 - **Key open questions**: `O4`, `O5`, `O6`, `O7`, `O11`, `O12`, `O14`, `O15`, `O16`, `O18`, `O19` in `docs/decisions.md`.
 
 ## Cold-Start Protocol
@@ -104,7 +105,7 @@ Rules of thumb:
 
 ## Stable IDs And Doc Conventions
 
-- `P`* — principles in `docs/vision.md`
+- `P*` — principles in `docs/vision.md`
 - `D*` — decisions in `docs/decisions.md`
 - `O*` — open questions in `docs/decisions.md`
 - `M*` — milestones in `docs/milestones/`

@@ -64,7 +64,7 @@ export function SettingsScreen() {
     <div className="mx-auto flex w-full max-w-[390px] flex-col gap-8 pb-12 pt-2">
       <header className="flex items-center gap-2 pt-2">
         <BackButton label="Back" onClick={() => navigate(routes.home())} />
-        <h1 className="flex-1 text-center text-xl font-bold tracking-tight text-text-primary">
+        <h1 className="flex-1 text-center text-xl font-semibold tracking-tight text-text-primary">
           Settings
         </h1>
         <div className="w-12" />
@@ -72,7 +72,7 @@ export function SettingsScreen() {
 
       <Card variant="focal">
         <div>
-          <h2 className="text-base font-semibold text-text-primary">
+          <h2 className="text-sm font-semibold text-text-primary">
             Export training records
           </h2>
           <p className="mt-1 text-sm text-text-secondary">

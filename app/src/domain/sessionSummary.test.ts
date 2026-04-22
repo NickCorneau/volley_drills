@@ -137,7 +137,39 @@ describe('composeSummary: Case C (default)', () => {
     // looking. Reframe preserves the evidentiary honesty (we are NOT
     // claiming the rate yet) while carrying forward-looking valence.
     expect(out.reason).toBe(
-      "Session 1. 10 good passes today out of 20 attempts. Just getting started. I'll start tuning once you have a few more in the book.",
+      'Session 1. 10 good passes today out of 20 attempts. Just getting started. I start tuning the pass rate once 50 attempts are recorded in a session. 30 more attempts to go.',
+    )
+  })
+
+  it('low-N copy shows singular attempt when 1 more until tuning (49 logged)', () => {
+    const review = makeReview({
+      status: 'submitted',
+      goodPasses: 30,
+      totalAttempts: 49,
+    })
+    const out = composeSummary({
+      review,
+      plan: makePlan(1),
+      sessionCount: 9,
+    })
+    expect(out.reason).toBe(
+      'Session 9. 30 good passes today out of 49 attempts. Just getting started. I start tuning the pass rate once 50 attempts are recorded in a session. 1 more attempt to go.',
+    )
+  })
+
+  it('uses singular pass/attempt in the stats line when counts are 1', () => {
+    const review = makeReview({
+      status: 'submitted',
+      goodPasses: 1,
+      totalAttempts: 1,
+    })
+    const out = composeSummary({
+      review,
+      plan: makePlan(1),
+      sessionCount: 10,
+    })
+    expect(out.reason).toBe(
+      'Session 10. 1 good pass today out of 1 attempt. Just getting started. I start tuning the pass rate once 50 attempts are recorded in a session. 49 more attempts to go.',
     )
   })
 
@@ -187,6 +219,51 @@ describe('composeSummary: Case C (default)', () => {
     expect(out.reason).toBe(
       'Session 5. One more in the book. Ready when you are.',
     )
+  })
+
+  // Partner-walkthrough polish 2026-04-22 (design review T3 / trifold T3):
+  // a first-ever session deserves a subtly milestone-ish reason line,
+  // not the pattern-matched `Session 1. One more in the book.` that
+  // reads identical to session 2, 5, 20 on the same path. Shape: single
+  // string, same voice, no celebration theatrics, no streak claim.
+  // See `docs/plans/2026-04-22-partner-walkthrough-polish.md` item 4.
+  it('uses a distinct first-session milestone line when sessionCount === 1 and totalAttempts === 0', () => {
+    const review = makeReview({
+      status: 'submitted',
+      goodPasses: 0,
+      totalAttempts: 0,
+    })
+    const out = composeSummary({
+      review,
+      plan: makePlan(1),
+      sessionCount: 1,
+    })
+    expect(out.case).toBe('default')
+    expect(out.verdict).toBe('Keep building')
+    expect(out.reason).toBe(
+      'First one\u2019s in the book. Ready when you are.',
+    )
+    // Explicitly NOT the session-2+ template.
+    expect(out.reason).not.toContain('Session 1.')
+  })
+
+  it('falls through to the low-N branch for sessionCount === 1 when attempts were recorded', () => {
+    // The first-session milestone line is the no-attempts path; a
+    // first-timer who actually logged reps gets the low-N tuning
+    // framing, which carries its own first-few-sessions voice.
+    const review = makeReview({
+      status: 'submitted',
+      goodPasses: 3,
+      totalAttempts: 5,
+    })
+    const out = composeSummary({
+      review,
+      plan: makePlan(1),
+      sessionCount: 1,
+    })
+    expect(out.reason).toContain('Session 1.')
+    expect(out.reason).toContain('Just getting started.')
+    expect(out.reason).not.toContain('First session')
   })
 })
 

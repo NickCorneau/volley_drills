@@ -45,20 +45,30 @@ export type ArchetypeId = 'solo_wall' | 'solo_net' | 'solo_open' | 'pair_net' | 
 
 export type TimeProfile = 15 | 25 | 40
 
-export type WindLevel = 'calm' | 'breezy' | 'windy'
-
 export type PlayerMode = 'solo' | 'pair'
 
-/** Hard-filter context captured before assembly. All tap-based, no typing. */
-export interface SessionContext {
+/**
+ * Wind level captured on Today's Setup (C-3 / D93). Optional on
+ * `SetupContext` because v3 records pre-date the field; consumers treat
+ * `undefined` as `'calm'` per C-0 Key Decision #7.
+ */
+export type WindLevel = 'calm' | 'light' | 'strong'
+
+/**
+ * Hard-filter context captured before session assembly, persisted on
+ * `SessionPlan` and `SessionDraft`. Tap-based inputs only - no typing.
+ *
+ * Also the shape the session builder reads against for candidate drill
+ * filtering and archetype selection. `db/types.ts` re-exports this type
+ * so the persistence layer can reference it without coupling the type
+ * definition to Dexie.
+ */
+export interface SetupContext {
   playerMode: PlayerMode
   timeProfile: TimeProfile
   netAvailable: boolean
   wallAvailable: boolean
-  balls: 1 | 'many'
-  markers: 'none' | 'improvised' | 'cones'
-  wind: WindLevel
-  painOrFatigue: 'none' | 'some'
+  wind?: WindLevel
 }
 
 export interface BlockSlot {
@@ -74,6 +84,6 @@ export interface SessionArchetype {
   id: ArchetypeId
   name: string
   description: string
-  requiredContext: Partial<SessionContext>
+  requiredContext: Partial<SetupContext>
   layouts: Partial<Record<TimeProfile, BlockSlot[]>>
 }

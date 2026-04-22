@@ -72,10 +72,21 @@ describe('inferSessionFocus (Tier 1a Unit 5)', () => {
 })
 
 describe('focusLabel (Tier 1a Unit 5)', () => {
-  it('renders all skill focuses in sentence case', () => {
-    expect(focusLabel('pass')).toBe('Pass')
-    expect(focusLabel('serve')).toBe('Serve')
-    expect(focusLabel('set')).toBe('Set')
+  /**
+   * 2026-04-22 — the three volleyball-skill focuses render as gerunds
+   * ("Passing" / "Serving" / "Setting") so that the Home recent-
+   * workouts row's `focus` column cannot be misread as a status value
+   * when it sits next to the `Done` / `Partial` status column. Field
+   * evidence: `N3` in the Post-close partner mentions section of the
+   * 2026-04-21 Tier 1a walkthrough ledger; traced to courtside-copy
+   * rule §2 ("one-season rec player test"). See `sessionFocus.ts`
+   * for the full rationale on why only the three volleyball cases
+   * needed the rewrite.
+   */
+  it('renders skill focuses as gerunds and fallbacks in sentence case', () => {
+    expect(focusLabel('pass')).toBe('Passing')
+    expect(focusLabel('serve')).toBe('Serving')
+    expect(focusLabel('set')).toBe('Setting')
     expect(focusLabel('movement')).toBe('Movement')
     expect(focusLabel('conditioning')).toBe('Conditioning')
     expect(focusLabel('recovery')).toBe('Recovery')

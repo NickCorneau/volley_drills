@@ -199,7 +199,7 @@ test.describe('phase-c5 repeat path', () => {
 
     // Answer safety and proceed to /run.
     await page.getByRole('button', { name: 'No' }).click()
-    await page.locator('button', { hasText: '1 day' }).click()
+    await page.locator('button', { hasText: 'Yesterday' }).click()
     await page.getByRole('button', { name: 'Continue' }).click()
     // /run uses a query-string id (`/run?id=...`) in v0b, not a path segment.
     await expect(page).toHaveURL(/\/run\?id=/, { timeout: 15_000 })

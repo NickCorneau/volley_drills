@@ -1,4 +1,15 @@
-import type { ArchetypeId, BlockSlotType, PlayerMode, TimeProfile } from '../types/session'
+import type {
+  ArchetypeId,
+  BlockSlotType,
+  SetupContext,
+} from '../types/session'
+
+// Re-export the canonical `SetupContext` (defined in `types/session.ts`)
+// so existing `import type { SetupContext } from '../db/types'` sites
+// keep working. The type belongs next to the other pre-assembly context
+// types (`ArchetypeId`, `TimeProfile`) but persistence code tends to
+// reach for it through `db/types`.
+export type { SetupContext }
 
 export interface SessionPlanBlock {
   id: string
@@ -36,19 +47,6 @@ export interface SessionPlanSafetyCheck {
   trainingRecency?: string
   heatCta: boolean
   painOverridden: boolean
-}
-
-export interface SetupContext {
-  playerMode: PlayerMode
-  timeProfile: TimeProfile
-  netAvailable: boolean
-  wallAvailable: boolean
-  /**
-   * Wind chip captured on Today's Setup (D93 / C-3). Optional because v3
-   * records and any caller that hasn't been updated to capture wind read it
-   * as `undefined`, which callers treat as `'calm'` per C-0 Key Decision #7.
-   */
-  wind?: 'calm' | 'light' | 'strong'
 }
 
 export interface SessionPlan {

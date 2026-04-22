@@ -593,7 +593,7 @@ const d10: Drill = {
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'Tosser at net (or ~2–3 m away). Six tosses total — one to each spot below. Receiver passes each back to the set window (where the setter would stand, ~3 m off the net): front-left, side-left, behind-left, front-right, side-right, behind-right.',
+        'Tosser at net (or 2 to 3 m away). Six tosses total, one to each spot below. Receiver passes each back to the set window (where the setter would stand, about 3 m off the net): front-left, side-left, behind-left, front-right, side-right, behind-right.',
       coachingCues: [
         'Point shoulders to target.',
         'Drop near shoulder, lift far shoulder on wide passes.',
@@ -1410,8 +1410,13 @@ const d25: Drill = {
         description: 'Completed (yes/no).',
         target: 'Completed',
       },
+      // Founder test-run feedback 2026-04-21 (round 3): same wall-of-
+      // paragraph problem as d26; reformatted to newline-separated
+      // numbered items with colons, `whitespace-pre-line` rendered by
+      // RunScreen + TransitionScreen. "60–90 s" flattened to "60 to
+      // 90 s" to match the SafetyCheck voice.
       courtsideInstructions:
-        'Walk 60–90 s with long exhales. Sit or lean for 30 s to rest calves and feet. Stretch hips: cross one ankle over opposite knee and lean forward, 30 s. Reach arms overhead with a gentle back-bend, 30 s. Optional shoulder stretch (one arm across chest, 30 s each). Hydrate and note any pain.',
+        '1. Walk 60 to 90 s with long exhales.\n2. Sit or lean for 30 s to rest calves and feet.\n3. Stretch hips: cross one ankle over the opposite knee and lean forward, 30 s.\n4. Reach arms overhead with a gentle back-bend, 30 s.\n5. Optional shoulder stretch: one arm across chest, 30 s each.\n6. Hydrate and note any pain.',
       coachingCues: [
         'Long exhale, let heart rate come down.',
         'Gentle tension only.',
@@ -1461,8 +1466,21 @@ const d26: Drill = {
         description: 'Completed (yes/no).',
         target: 'Completed',
       },
+      // Founder test-run feedback 2026-04-21 (round 3): the prior
+      // copy was a single ~90-word paragraph with 6 numbered items
+      // mashed together and em-dashes separating each stretch name
+      // from its execution cue. Unreadable at courtside-distance; the
+      // numbered list was not rendered as a list. Em-dashes also
+      // violate the dogfeed-polish em-dash-removal sweep (2026-04-19
+      // commit `ffa9628`). Reformatted: intro sentence, then six
+      // newline-separated numbered items with colons separating name
+      // from cue. RunScreen + TransitionScreen render
+      // `courtsideInstructions` with `whitespace-pre-line` so these
+      // `\n` render as actual line breaks. "20–30 s" flattened to
+      // "20 to 30 s" to match the SafetyCheck heat tip voice ("10 AM
+      // to 4 PM") landed in the same sweep.
       courtsideInstructions:
-        'Six stretches, 20–30 s each. No bouncing; strong tension, never painful. (1) Calf straight — back leg straight, heel down, lean forward into front knee. (2) Calf bent — same stance, bend back knee slightly, feel lower calf. (3) Hamstring — one leg forward, heel down, toes up; sit back into standing leg and reach toward toes. (4) Hip flexor — half-kneel on one knee, tuck pelvis, lean forward into front leg. (5) Glute — seated or lying, pull one knee toward opposite shoulder. (6) Adductor — wide stance, bend one knee, shift weight over it.',
+        'Six stretches, 20 to 30 s each. No bouncing; strong tension, never painful.\n\n1. Calf straight: back leg straight, heel down, lean forward into front knee.\n2. Calf bent: same stance, bend back knee slightly, feel lower calf.\n3. Hamstring: one leg forward, heel down, toes up; sit back into standing leg and reach toward toes.\n4. Hip flexor: half-kneel on one knee, tuck pelvis, lean forward into front leg.\n5. Glute: seated or lying, pull one knee toward opposite shoulder.\n6. Adductor: wide stance, bend one knee, shift weight over it.',
       coachingCues: ['Breathe.', 'Avoid pain.', 'Hold steady.'],
       subBlockIntervalSeconds: 30,
     },
@@ -1703,8 +1721,13 @@ const d28: Drill = {
         description: 'Completed all four components.',
         target: 'Completed',
       },
+      // Founder test-run feedback 2026-04-21 (round 3): reformatted
+      // the four numbered segments onto their own lines so the
+      // courtside reader sees a scannable list, not a paragraph. The
+      // `subBlockIntervalSeconds: 45` pacing tick already chimes at
+      // each segment boundary; the list structure matches the audio.
       courtsideInstructions:
-        'Four quick blocks, ~45 s each. 1) Jog or A-skip around your sand box. 2) Ankle hops + lateral shuffles. 3) Arm circles and trunk rotations. 4) Quick side shuffles and pivot-back starts at game pace. End warmer than you started.',
+        'Four quick blocks, ~45 s each. End warmer than you started.\n\n1. Jog or A-skip around your sand box.\n2. Ankle hops and lateral shuffles.\n3. Arm circles and trunk rotations.\n4. Quick side shuffles and pivot-back starts at game pace.',
       coachingCues: [
         'Short hops, loud feet.',
         'Full range on arm swings.',

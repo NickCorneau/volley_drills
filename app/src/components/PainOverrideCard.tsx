@@ -82,6 +82,25 @@ export function PainOverrideCard({
         Lighter session &middot; {recoveryMinutes} min
       </div>
 
+      {/* Partner-walkthrough polish 2026-04-22 (`D129` / `D130`):
+          Seb's wording-check reconciliation row surfaced that the
+          lighter session lowers load but keeps the requested duration
+          (per D113 adaptation-engine bands + the
+          `estimateRecoverySessionMinutes` contract), and the reason
+          isn't explained to the user. One quiet line names the swap
+          so the pick feels honest, not mysterious. Courtside-copy §2
+          rec-player check: `load` is used consistently in this card
+          (`Lower-load technique work today.` above) and rules out
+          "deload" / clinical jargon; `your pick` preserves agency
+          framing. The Override path below still exists for the tester
+          who knows what they want. See
+          `docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md`
+          wording-check `PainOverrideCard` row and
+          `docs/plans/2026-04-22-partner-walkthrough-polish.md` item 3. */}
+      <p className="text-xs leading-relaxed text-text-secondary">
+        We lower the load, not the time. Your pick.
+      </p>
+
       <Button
         variant="primary"
         fullWidth
