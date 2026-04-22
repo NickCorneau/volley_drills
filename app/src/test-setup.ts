@@ -4,6 +4,26 @@ import '@testing-library/jest-dom/vitest'
 import { afterEach, beforeEach, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
 
+// jsdom does not ship `ResizeObserver`. The `ScreenShell.Body` component
+// uses it to keep its top/bottom fade gradients in sync with content
+// reflow — construction alone throws `ReferenceError: ResizeObserver is
+// not defined` in jsdom, which would take down every RTL test that
+// renders a screen. Install a no-op stub that satisfies the contract
+// (observe / unobserve / disconnect). The scroll-edge behavior itself
+// is exercised in the component's browser preview, not the unit layer.
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  class NoopResizeObserver {
+    observe(): void {}
+    unobserve(): void {}
+    disconnect(): void {}
+  }
+  Object.defineProperty(globalThis, 'ResizeObserver', {
+    value: NoopResizeObserver,
+    configurable: true,
+    writable: true,
+  })
+}
+
 // `virtual:pwa-register` is a Vite virtual module and is unresolvable in
 // tests that import `lib/pwa-register` (directly or transitively). Mock it
 // globally and expose the captured config + updateServiceWorker spy on

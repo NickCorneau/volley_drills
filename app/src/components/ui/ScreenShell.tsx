@@ -7,7 +7,7 @@
    positive here (there is only one named export from this file).
    Disabling file-wide keeps the compound API readable; the fast-refresh
    penalty is negligible on a primitive that is rarely edited. */
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { cx } from '../../lib/cn'
 
 /**
@@ -34,12 +34,23 @@ import { cx } from '../../lib/cn'
  * - The outer `App` Layout fixes the viewport at `h-[100dvh]
  *   overflow-hidden`, so the shell itself does not create viewport
  *   height; it just fills whatever main offers via `h-full`.
- * - `min-h-0` on the Body is the classic flexbox-overflow trap: without
- *   it, a flex child refuses to shrink past its content, and the body
- *   bleeds out of the shell instead of scrolling.
+ * - `min-h-0` on the Body wrapper is the classic flexbox-overflow
+ *   trap: without it, a flex child refuses to shrink past its content,
+ *   and the body bleeds out of the shell instead of scrolling.
  * - `overscroll-contain` keeps iOS rubber-band scrolling inside the
  *   body without bubbling to the document (there is no document scroll
  *   anymore — the shell locks it).
+ * - Body scrollbar chrome is hidden on every platform (WebKit +
+ *   Firefox + legacy Edge) — iOS Safari auto-hides already, but
+ *   desktop Chrome otherwise paints a chunky always-on bar that reads
+ *   crude next to the calm shibui surface. The auto-appearing fade
+ *   gradients below are the scroll affordance instead; this matches
+ *   the native-iOS / Linear / Stripe pattern of "drag to discover."
+ * - Top + bottom fade gradients appear automatically when the body
+ *   has hidden content in that direction. They are absolutely
+ *   positioned `pointer-events-none` siblings of the scroll
+ *   container, so they never block taps and disappear the moment
+ *   the body fits within one viewport (calm screens stay calm).
  * - Footer owns `pb-[calc(1rem+env(safe-area-inset-bottom))]` so every
  *   viewport gets at least 16 px of air below the last CTA (desktop
  *   preview and browsers where `safe-area-inset-bottom` resolves to
@@ -85,6 +96,55 @@ function Header({ children, className }: PartProps) {
   )
 }
 
+type ScrollEdges = { canScrollUp: boolean; canScrollDown: boolean }
+
+/**
+ * Track whether the body has more content above / below the visible
+ * viewport so the ScreenShell can toggle the fade gradients in sync.
+ *
+ * - Listens to `scroll` on the container (passive) for user drags.
+ * - Uses a `ResizeObserver` on the container AND its children to
+ *   catch content reflow (image loads, cue expanded/collapsed,
+ *   router transitions mutating the subtree) so the fades refresh
+ *   without a scroll event.
+ * - Uses a 1 px tolerance (`> 1` / `+ 1 < scrollHeight`) because
+ *   retina fractional-pixel scroll positions otherwise jitter the
+ *   fade at the exact top / bottom edge.
+ */
+function useScrollEdges(ref: RefObject<HTMLDivElement | null>): ScrollEdges {
+  const [edges, setEdges] = useState<ScrollEdges>({
+    canScrollUp: false,
+    canScrollDown: false,
+  })
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    const update = () => {
+      const { scrollTop, scrollHeight, clientHeight } = el
+      setEdges({
+        canScrollUp: scrollTop > 1,
+        canScrollDown: scrollTop + clientHeight < scrollHeight - 1,
+      })
+    }
+
+    update()
+    el.addEventListener('scroll', update, { passive: true })
+
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    Array.from(el.children).forEach((child) => ro.observe(child as Element))
+
+    return () => {
+      el.removeEventListener('scroll', update)
+      ro.disconnect()
+    }
+  }, [ref])
+
+  return edges
+}
+
 /**
  * Body carries `tabIndex={0}` so the scrollable region is reachable
  * by keyboard users — axe-core's `scrollable-region-focusable` rule
@@ -98,18 +158,63 @@ function Header({ children, className }: PartProps) {
  * for screen readers. The focus ring is suppressed because the body
  * is not an action target; the visible cue is the screen's header +
  * content itself.
+ *
+ * The `className` prop is forwarded to the scroll container so screens
+ * can tune inner rhythm (e.g. `gap-4 pb-4` on Run, `gap-6 pb-4` on
+ * Review) without leaking layout into the fade/scrollbar plumbing.
  */
 function Body({ children, className }: PartProps) {
+  const scrollRef = useRef<HTMLDivElement | null>(null)
+  const { canScrollUp, canScrollDown } = useScrollEdges(scrollRef)
+
   return (
-    <div
-      data-screen-shell-body
-      tabIndex={0}
-      className={cx(
-        'flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain focus:outline-none',
-        className,
-      )}
-    >
-      {children}
+    <div className="relative flex min-h-0 flex-1 flex-col">
+      <div
+        ref={scrollRef}
+        data-screen-shell-body
+        tabIndex={0}
+        // Scrollbar chrome hidden cross-browser:
+        //   - `[&::-webkit-scrollbar]:hidden` → Chrome / Safari / iOS
+        //   - `[scrollbar-width:none]`       → Firefox
+        //   - `[-ms-overflow-style:none]`    → legacy Edge / IE
+        // The fade overlays below are the visible scroll affordance.
+        className={cx(
+          'flex flex-1 flex-col overflow-y-auto overscroll-contain focus:outline-none',
+          '[&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none]',
+          className,
+        )}
+      >
+        {children}
+      </div>
+      {/*
+        Top fade: appears once the user has scrolled past the first
+        pixel. Short (16 px) because the header above is already a
+        clear visual break; the fade just softens the re-entry of
+        scrolled-behind content under the header edge.
+      */}
+      <div
+        aria-hidden
+        className={cx(
+          'pointer-events-none absolute inset-x-0 top-0 h-4 bg-gradient-to-b from-surface-calm to-transparent',
+          'transition-opacity duration-150',
+          canScrollUp ? 'opacity-100' : 'opacity-0',
+        )}
+      />
+      {/*
+        Bottom fade: appears whenever there is more content below the
+        current viewport. Taller (28 px) than the top fade because the
+        bottom of the body is the primary "discover more" direction —
+        the gradient needs to read at a glance, not just on close
+        inspection, otherwise it disappears into the footer's hairline.
+      */}
+      <div
+        aria-hidden
+        className={cx(
+          'pointer-events-none absolute inset-x-0 bottom-0 h-7 bg-gradient-to-t from-surface-calm to-transparent',
+          'transition-opacity duration-150',
+          canScrollDown ? 'opacity-100' : 'opacity-0',
+        )}
+      />
     </div>
   )
 }

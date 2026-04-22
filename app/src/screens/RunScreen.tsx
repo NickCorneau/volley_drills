@@ -18,28 +18,8 @@ import {
 import { phaseLabel } from '../lib/format'
 import { computeShortened } from '../lib/shorten'
 import { isSchemaBlocked } from '../lib/schema-blocked'
-import { CUE_COMPACT_MAX } from '../domain/policies'
 import { routes } from '../routes'
 import { getStorageMeta, setStorageMeta } from '../services/storageMeta'
-
-/**
- * Long cues: word-boundary preview (DOM shows preview only until expanded).
- * Short cues: whole string, no expand control.
- */
-function cueDisplayParts(
-  cue: string,
-):
-  | { kind: 'compact'; text: string }
-  | { kind: 'long'; preview: string; full: string } {
-  if (cue.length <= CUE_COMPACT_MAX) {
-    return { kind: 'compact', text: cue }
-  }
-  const slice = cue.slice(0, 90)
-  const lastSpace = slice.lastIndexOf(' ')
-  const cut = lastSpace > 40 ? lastSpace : 90
-  const preview = `${cue.slice(0, cut).trim()}…`
-  return { kind: 'long', preview, full: cue }
-}
 
 export function RunScreen() {
   const navigate = useNavigate()
@@ -56,10 +36,6 @@ export function RunScreen() {
   const [prerollHintDismissed, setPrerollHintDismissed] = useState<
     boolean | null
   >(null)
-  // Long coaching cues collapse to a preview until expanded; short
-  // cues (under `CUE_COMPACT_MAX`) render in full. Keeps the run view
-  // out of wall-of-text territory without hiding short one-breath cues.
-  const [coachingExpanded, setCoachingExpanded] = useState(false)
   const blockDurRef = useRef(0)
   const remainingRef = useRef(0)
 
@@ -104,7 +80,6 @@ export function RunScreen() {
     // (approved during-render pattern; avoids a cascading second effect).
     setActiveDuration(defaultDuration)
     setPrevBlockId(currentBlock.id)
-    setCoachingExpanded(false)
   }
 
   useEffect(() => {
@@ -524,58 +499,39 @@ export function RunScreen() {
           (`rounded-2xl border border-accent/30 bg-info-surface p-4`
           with an h2 "Coaching note" in accent + accent-colored body
           copy) to a sidebar-voiced aside: a 2-px accent left-rule,
-          a small uppercase "Cue" label, and neutral body copy. The
-          rule signals "coaching stripe" without a second focal
-          container competing with the drill instructions above and
-          the timer below. Long cues keep the expand/collapse
-          behavior (`CUE_COMPACT_MAX`); compact cues render in full.
-          The button chrome is also slimmer to match the calmer
-          envelope.
+          a small uppercase "Cue" label, and neutral body copy.
+          2026-04-22 round 2: dropped the preview + "Show full
+          coaching note" toggle. The ScreenShell body is a first-class
+          scroll container with top/bottom fade affordances; hiding
+          cue text behind a tap was a second scroll affordance for
+          the same information goal. Always rendering the full cue
+          respects the user's "one tap to everything" ask and lets
+          the scroll-with-fade pattern do the density work. Compact
+          cues (short one-breath lines under `CUE_COMPACT_MAX`)
+          render exactly as before; long cues simply extend down into
+          the scroll region with the bottom fade signaling "more
+          below." `CUE_COMPACT_MAX` remains in
+          `domain/policies.ts` as reserved — if a future drill ships
+          a genuinely 300+ char cue that feels wall-of-text even in
+          the scroll container, we can reintroduce a collapse, but
+          the current catalog does not have that shape.
         */}
-        {currentBlock.coachingCue &&
-          (() => {
-            const parts = cueDisplayParts(currentBlock.coachingCue)
-            const Label = (
-              <span
-                id="coaching-cue-title"
-                className="text-xs font-semibold uppercase tracking-wide text-accent"
-              >
-                Cue
-              </span>
-            )
-            if (parts.kind === 'compact') {
-              return (
-                <section
-                  aria-labelledby="coaching-cue-title"
-                  className="border-l-2 border-accent/70 pl-3"
-                >
-                  {Label}
-                  <p className="mt-1 whitespace-pre-line text-base font-medium leading-relaxed text-text-primary">
-                    {parts.text}
-                  </p>
-                </section>
-              )
-            }
-            return (
-              <section
-                aria-labelledby="coaching-cue-title"
-                className="border-l-2 border-accent/70 pl-3"
-              >
-                {Label}
-                <p className="mt-1 whitespace-pre-line text-base font-medium leading-relaxed text-text-primary">
-                  {coachingExpanded ? parts.full : parts.preview}
-                </p>
-                <button
-                  type="button"
-                  aria-expanded={coachingExpanded}
-                  onClick={() => setCoachingExpanded((v) => !v)}
-                  className="mt-2 min-h-[44px] text-xs font-semibold uppercase tracking-wide text-accent underline underline-offset-2 transition-colors hover:text-accent-pressed active:text-accent-pressed"
-                >
-                  {coachingExpanded ? 'Show less' : 'Show full coaching note'}
-                </button>
-              </section>
-            )
-          })()}
+        {currentBlock.coachingCue && (
+          <section
+            aria-labelledby="coaching-cue-title"
+            className="border-l-2 border-accent/70 pl-3"
+          >
+            <span
+              id="coaching-cue-title"
+              className="text-xs font-semibold uppercase tracking-wide text-accent"
+            >
+              Cue
+            </span>
+            <p className="mt-1 whitespace-pre-line text-base font-medium leading-relaxed text-text-primary">
+              {currentBlock.coachingCue}
+            </p>
+          </section>
+        )}
       </ScreenShell.Body>
 
       {/*

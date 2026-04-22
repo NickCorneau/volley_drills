@@ -1,19 +1,21 @@
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
 import { RunScreen } from '../RunScreen'
 
 /**
- * RunScreen coaching note: warm card; short copy in full, long copy as
- * preview + "Show full coaching note" (2026-04-22) so the affordance
- * is large and the block is not one wall of text.
+ * RunScreen coaching note: quiet left-rule aside with a small "CUE"
+ * label and the full cue body.
  *
- * Regression contract (updated 2026-04-22): **long** cues show a
- * preview + "Show full coaching note"; the full body is not in the
- * document until expand. **Short** cues (≤ 100 characters) show in
- * full inside the coaching card with no expand control.
+ * Regression contract (updated 2026-04-22, round 2): the cue renders
+ * in full on mount regardless of length. The earlier preview +
+ * "Show full coaching note" toggle was removed once the ScreenShell
+ * body became a first-class scroll container with top/bottom fade
+ * affordances — hiding cue text behind a tap was redundant with the
+ * scroll affordance for the same information goal. If a future cue
+ * genuinely warrants collapse, the decision will be driven by
+ * founder-use evidence, not author preference.
  */
 
 async function clearDb() {
@@ -27,7 +29,17 @@ async function clearDb() {
   ])
 }
 
-async function seedPausedSession(execId: string, planId: string) {
+const LONG_CUE =
+  'Athletic posture. Keep your platform steady through contact. ' +
+  'Let the ball find your angle. Breathe on the load; exhale ' +
+  'through the pass. Eyes to target early. Hips before arms. ' +
+  'Finish tall. CUEFULLMARKER_9f3a.'
+
+async function seedPausedSession(
+  execId: string,
+  planId: string,
+  coachingCue: string,
+) {
   const now = Date.now()
   await db.sessionPlans.put({
     id: planId,
@@ -41,14 +53,7 @@ async function seedPausedSession(execId: string, planId: string) {
         drillName: 'Passing',
         shortName: 'Pass',
         durationMinutes: 5,
-        // Intentionally long: compact cues skip the expand affordance; we
-        // need the long path so the full string stays out of the DOM until
-        // the user expands.
-        coachingCue:
-          'Athletic posture. Keep your platform steady through contact. ' +
-          'Let the ball find your angle. Breathe on the load; exhale ' +
-          'through the pass. Eyes to target early. Hips before arms. ' +
-          'Finish tall. CUEFULLMARKER_9f3a.',
+        coachingCue,
         courtsideInstructions: 'Self-toss; forearm pass up and down.',
         required: true,
       },
@@ -77,29 +82,34 @@ function renderAt(execId: string) {
   )
 }
 
-describe('RunScreen: coaching note card (long = preview + expand control)', () => {
+describe('RunScreen: coaching note renders in full (no expand toggle)', () => {
   beforeEach(async () => {
     await clearDb()
   })
 
-  it('on mount: long cue is preview-only, full text after "Show full coaching note"', async () => {
-    await seedPausedSession('exec-cue', 'plan-cue')
-    renderAt('exec-cue')
+  it('long cue: full text is present on mount, no expand/collapse button', async () => {
+    await seedPausedSession('exec-long', 'plan-long', LONG_CUE)
+    renderAt('exec-long')
 
-    expect(
-      await screen.findByRole('button', { name: /show full coaching note/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.queryByText(/CUEFULLMARKER_9f3a/i),
-    ).not.toBeInTheDocument()
-
-    await userEvent.click(
-      screen.getByRole('button', { name: /show full coaching note/i }),
-    )
-
+    // Full cue marker is in the DOM without any interaction.
     expect(await screen.findByText(/CUEFULLMARKER_9f3a/)).toBeInTheDocument()
+
+    // The prior preview/toggle controls are gone.
     expect(
-      screen.getByRole('button', { name: /show less/i }),
-    ).toBeInTheDocument()
+      screen.queryByRole('button', { name: /show full coaching note/i }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /show less/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('short cue: renders in full with no toggle (same surface as long)', async () => {
+    await seedPausedSession('exec-short', 'plan-short', 'Athletic posture.')
+    renderAt('exec-short')
+
+    expect(await screen.findByText(/Athletic posture\./i)).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /show full coaching note/i }),
+    ).not.toBeInTheDocument()
   })
 })
