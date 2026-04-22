@@ -51,17 +51,14 @@ import { cx } from '../../lib/cn'
  *   positioned `pointer-events-none` siblings of the scroll
  *   container, so they never block taps and disappear the moment
  *   the body fits within one viewport (calm screens stay calm).
- * - Footer owns `pb-[max(1rem,env(safe-area-inset-bottom))]` so every
- *   viewport gets at least 16 px of air below the last CTA (desktop
- *   preview and browsers where `safe-area-inset-bottom` resolves to 0
- *   used to clip outline buttons against the window edge), while
- *   iPhones with a home indicator inherit the ~34 px inset without
- *   *stacking* 16 px on top of it. The earlier `calc(1rem + env(...))`
- *   formulation produced ~50 px of dead air below CTAs on iPhone —
- *   noticeably too much (founder feedback 2026-04-22). `max()` picks
- *   the larger of "platform clearance" and "hand-tuned minimum"
- *   instead of summing them. Top safe-area is handled once upstream
- *   on `<main>` in App.tsx.
+ * - Footer uses `pb-[max(0.5rem,env(safe-area-inset-bottom))]` so
+ *   iPhones with a home indicator keep the full inset (typically ~34
+ *   px) without stacking an extra 16 px on top (`calc(1rem + env(...))`
+ *   landed ~50 px — founder feedback 2026-04-22). When the inset is
+ *   0 (desktop preview), 8 px keeps secondary/outline CTAs off the
+ *   window edge — tighter than the old 1 rem floor but still
+ *   tappable. Top safe-area is handled once upstream on `<main>` in
+ *   App.tsx.
  *
  * Modals (End-session confirm, SchemaBlockedOverlay, SoftBlockModal)
  * continue to use `fixed inset-0 z-50` and render *outside* the shell,
@@ -78,7 +75,7 @@ function Root({ children, className }: ScreenShellProps) {
     <div
       data-screen-shell
       className={cx(
-        'mx-auto flex h-full w-full max-w-[390px] flex-col',
+        'mx-auto flex min-h-0 w-full max-w-[390px] flex-1 flex-col',
         className,
       )}
     >
@@ -239,7 +236,7 @@ function Footer({ children, className }: PartProps) {
     <div
       data-screen-shell-footer
       className={cx(
-        'shrink-0 border-t border-text-primary/5 bg-surface-calm pb-[max(1rem,env(safe-area-inset-bottom))]',
+        'shrink-0 border-t border-text-primary/5 bg-surface-calm pb-[max(0.5rem,env(safe-area-inset-bottom))]',
         className,
       )}
     >

@@ -34,14 +34,11 @@ function Layout({ children }: { children: React.ReactNode }) {
   // `ScreenShell.Body` (see `components/ui/ScreenShell.tsx`) and the
   // footer stays pinned.
   //
-  // Bottom safe-area + minimum gutter moved off the shell and onto
-  // `ScreenShell.Footer` (`pb-[max(1rem,env(safe-area-inset-bottom))]`)
-  // so CTAs clear the home indicator on iPhone and still get 1 rem of
-  // air when `safe-area-inset-bottom` is 0 (desktop preview). `max()`
-  // (not `calc(1rem + env(...))`) so iPhones do not stack 16 px on top
-  // of the ~34 px home-indicator inset — the earlier formulation
-  // produced ~50 px of dead space below CTAs on device. See the
-  // ScreenShell.Footer rationale for the full trade-off.
+  // Bottom safe-area + minimum gutter live on `ScreenShell.Footer`
+  // (`pb-[max(0.5rem,env(safe-area-inset-bottom))]`) so CTAs clear the
+  // home indicator on iPhone without `calc(1rem + env(...))` stacking,
+  // and desktop preview still gets 8 px off the window edge. See
+  // `ScreenShell.tsx` for the full rationale.
   // `pt-[env(safe-area-inset-top)]` stays on `<main>` so every screen
   // (shell or not, status-message or not) pays the notch cost once
   // here.
@@ -52,7 +49,17 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-surface-calm font-sans">
       <main className="flex min-h-0 flex-1 flex-col px-4 pt-[env(safe-area-inset-top)]">
-        {children}
+        {/*
+          Route roots (ScreenShell, etc.) must participate in this flex
+          column or `main` keeps unused height below a content-sized
+          screen — same `surface-calm` as the footer, so iPhone testers
+          read it as “huge padding under the CTAs” even when the real
+          culprit is flex distribution, not `ScreenShell.Footer` pb.
+          `min-h-0` preserves the overflow chain for internal Body scroll.
+        */}
+        <div className="flex min-h-0 flex-1 flex-col [&>*]:min-h-0 [&>*]:flex-1">
+          {children}
+        </div>
       </main>
     </div>
   )
