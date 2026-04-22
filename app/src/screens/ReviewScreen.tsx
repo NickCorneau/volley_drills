@@ -5,7 +5,7 @@ import { PassMetricInput } from '../components/PassMetricInput'
 import { QuickTagChips } from '../components/QuickTagChips'
 import { RpeSelector } from '../components/RpeSelector'
 import { SafetyIcon } from '../components/SafetyIcon'
-import { Button, Card, StatusMessage } from '../components/ui'
+import { Button, Card, ScreenShell, StatusMessage } from '../components/ui'
 import { DRILLS } from '../data/drills'
 import type { ExecutionLog, IncompleteReason, SessionPlan } from '../db'
 import { COUNT_BASED_METRIC_TYPES } from '../domain/policies'
@@ -477,20 +477,32 @@ function ReviewSessionContent({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-col gap-8 pb-8">
-      {/* Founder test-run feedback 2026-04-21 (round 2): the prior
-          header placed the SafetyIcon on the RIGHT while every other
-          screen (CompleteScreen / RunScreen / TransitionScreen / Setup
-          / Safety) puts the shield on the LEFT. Small thing, but the
-          eye had to re-learn the top-bar pattern on Review only. The
-          title stack was also a left-aligned block (`h1` + secondary
-          `<p>` eyebrow), whereas Safety's pattern - which Review is
-          structurally most similar to - uses centered title + centered
-          eyebrow below. Harmonize on Safety's pattern: three-column
-          top row `[shield | "Quick review" | 56×56 spacer]` with the
-          session eyebrow centered below. Same shibui restraint, same
-          thumb-zone shape across the app. */}
-      <header className="flex flex-col items-center gap-1 pt-2">
+    <ScreenShell>
+      {/*
+        2026-04-22 iPhone-viewport layout pass: Review is a legitimately
+        long form (RPE + Good passes + optional Ended-early reason +
+        Quick tags + Note + Submit + Finish later + cap-countdown
+        subtitle). On a 390 × 844 iPhone it routinely overflows the
+        fold; in the old document-scroll world that meant the Submit
+        button lived below the scroll, and testers had to hunt.
+        `ScreenShell` pins Submit + Finish later + the cap-countdown
+        subtitle to the footer so the primary action is always
+        reachable while the form scrolls independently inside the
+        body.
+      */}
+      <ScreenShell.Header className="flex flex-col items-center gap-1 pt-2 pb-3">
+        {/* Founder test-run feedback 2026-04-21 (round 2): the prior
+            header placed the SafetyIcon on the RIGHT while every other
+            screen (CompleteScreen / RunScreen / TransitionScreen / Setup
+            / Safety) puts the shield on the LEFT. Small thing, but the
+            eye had to re-learn the top-bar pattern on Review only. The
+            title stack was also a left-aligned block (`h1` + secondary
+            `<p>` eyebrow), whereas Safety's pattern - which Review is
+            structurally most similar to - uses centered title + centered
+            eyebrow below. Harmonize on Safety's pattern: three-column
+            top row `[shield | "Quick review" | 56×56 spacer]` with the
+            session eyebrow centered below. Same shibui restraint, same
+            thumb-zone shape across the app. */}
         <div className="flex w-full items-center justify-between">
           <SafetyIcon />
           {/* Phase F12 (2026-04-19): sentence case (was "Quick
@@ -509,7 +521,9 @@ function ReviewSessionContent({
         <p className="text-sm text-text-secondary">
           {sessionTitle} &middot; {durationPart} &middot; {statusPart}
         </p>
-      </header>
+      </ScreenShell.Header>
+
+      <ScreenShell.Body className="gap-6 pb-4">
 
       <Card className="flex flex-col gap-3">
         <h2
@@ -603,36 +617,38 @@ function ReviewSessionContent({
         />
       </section>
 
-      {submitError && <StatusMessage variant="error" message={submitError} />}
+      </ScreenShell.Body>
 
-      {missingHint && (
-        <p
-          className="text-center text-sm text-text-secondary"
-          aria-live="polite"
+      <ScreenShell.Footer className="flex flex-col gap-3 pt-4">
+        {submitError && <StatusMessage variant="error" message={submitError} />}
+        {missingHint && (
+          <p
+            className="text-center text-sm text-text-secondary"
+            aria-live="polite"
+          >
+            {missingHint}
+          </p>
+        )}
+        <Button
+          variant="primary"
+          fullWidth
+          onClick={() => void handleSubmit()}
+          disabled={!canSubmit || isSubmitting}
         >
-          {missingHint}
+          {isSubmitting ? 'Saving\u2026' : 'Submit review'}
+        </Button>
+        <Button
+          variant="link"
+          onClick={() => void handleFinishLater()}
+          disabled={isSubmitting}
+        >
+          Finish later
+        </Button>
+        <p className="-mt-1 text-center text-xs text-text-secondary">
+          {`This session ${formatFinishLaterWindow(log, nowMs)}, then it won\u2019t affect planning.`}
         </p>
-      )}
-
-      <Button
-        variant="primary"
-        fullWidth
-        onClick={() => void handleSubmit()}
-        disabled={!canSubmit || isSubmitting}
-      >
-        {isSubmitting ? 'Saving\u2026' : 'Submit review'}
-      </Button>
-      <Button
-        variant="link"
-        onClick={() => void handleFinishLater()}
-        disabled={isSubmitting}
-      >
-        Finish later
-      </Button>
-      <p className="-mt-2 text-center text-xs text-text-secondary">
-        {`This session ${formatFinishLaterWindow(log, nowMs)}, then it won\u2019t affect planning.`}
-      </p>
-    </div>
+      </ScreenShell.Footer>
+    </ScreenShell>
   )
 }
 

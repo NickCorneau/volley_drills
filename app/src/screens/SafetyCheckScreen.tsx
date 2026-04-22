@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PainOverrideCard } from '../components/PainOverrideCard'
-import { BackButton, Button, StatusMessage, ToggleChip } from '../components/ui'
+import {
+  BackButton,
+  Button,
+  ScreenShell,
+  StatusMessage,
+  ToggleChip,
+} from '../components/ui'
 import type { SessionDraft } from '../db/types'
 import {
   buildRecoveryDraft,
@@ -221,28 +227,42 @@ export function SafetyCheckScreen() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-col gap-6 pb-8">
-      {/**
-       * Three-column header (Back | centered title | spacer) mirrors
-       * SetupScreen so the "tap to escape" affordance lives in the same
-       * thumb zone across the pre-run flow. Leaving SafetyCheck does
-       * NOT mutate the persisted draft - SafetyCheckScreen only reads
-       * the draft and writes safety answers inline on Continue - so a
-       * Back tap returns the user to Home with their draft intact
-       * (surfaces there as the Draft primary card per C-4 Surface 2).
-       */}
-      <header className="flex items-center gap-2 pt-2">
-        <BackButton label="Back" onClick={() => navigate(routes.home())} />
-        <h1 className="flex-1 text-center text-xl font-semibold tracking-tight text-text-primary">
-          Before we start
-        </h1>
-        <div className="w-12" />
-      </header>
-      {sessionSummary && (
-        <p className="-mt-4 text-center text-sm font-medium text-accent">
-          {sessionSummary}
-        </p>
-      )}
+    <ScreenShell>
+      {/*
+        2026-04-22 iPhone-viewport layout pass: Safety check became
+        taller once the heat-expander, pain-override card, and recency
+        sub-row shipped — on a 390 × 844 iPhone the Continue button
+        regularly dropped below the fold. Pin Continue to the footer
+        when `painFlag === false` so the happy path CTA is always in
+        thumb reach; hide the footer when `painFlag !== false` because
+        the `PainOverrideCard` in the body owns the CTAs in that
+        state.
+      */}
+      <ScreenShell.Header className="pt-2 pb-3">
+        {/**
+         * Three-column header (Back | centered title | spacer) mirrors
+         * SetupScreen so the "tap to escape" affordance lives in the same
+         * thumb zone across the pre-run flow. Leaving SafetyCheck does
+         * NOT mutate the persisted draft - SafetyCheckScreen only reads
+         * the draft and writes safety answers inline on Continue - so a
+         * Back tap returns the user to Home with their draft intact
+         * (surfaces there as the Draft primary card per C-4 Surface 2).
+         */}
+        <div className="flex items-center gap-2">
+          <BackButton label="Back" onClick={() => navigate(routes.home())} />
+          <h1 className="flex-1 text-center text-xl font-semibold tracking-tight text-text-primary">
+            Before we start
+          </h1>
+          <div className="w-12" />
+        </div>
+        {sessionSummary && (
+          <p className="mt-1 text-center text-sm font-medium text-accent">
+            {sessionSummary}
+          </p>
+        )}
+      </ScreenShell.Header>
+
+      <ScreenShell.Body className="gap-6 pb-4">
 
       {/* 2026-04-19 dogfeed reorder: Recency first, then Pain. The
           old order placed the pain question first and rendered the
@@ -456,17 +476,20 @@ export function SafetyCheckScreen() {
       </section>
 
       {createError && <StatusMessage variant="error" message={createError} />}
+      </ScreenShell.Body>
 
       {painFlag === false && (
-        <Button
-          variant="primary"
-          fullWidth
-          onClick={() => void handleCreateSession(false, false)}
-          disabled={!canContinue || isCreating}
-        >
-          {isCreating ? 'Creating session\u2026' : 'Continue'}
-        </Button>
+        <ScreenShell.Footer className="flex flex-col gap-3 pt-4">
+          <Button
+            variant="primary"
+            fullWidth
+            onClick={() => void handleCreateSession(false, false)}
+            disabled={!canContinue || isCreating}
+          >
+            {isCreating ? 'Creating session\u2026' : 'Continue'}
+          </Button>
+        </ScreenShell.Footer>
       )}
-    </div>
+    </ScreenShell>
   )
 }

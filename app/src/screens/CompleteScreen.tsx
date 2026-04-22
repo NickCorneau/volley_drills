@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { SafetyIcon } from '../components/SafetyIcon'
 import { UpdatePrompt } from '../components/UpdatePrompt'
-import { Button, Card, StatusMessage } from '../components/ui'
+import { Button, Card, ScreenShell, StatusMessage } from '../components/ui'
 import { composeSummary, type SummaryOutput } from '../domain'
 import { useInstallPosture } from '../hooks/useInstallPosture'
 import { effortLabel, formatPassRateLine } from '../lib/format'
@@ -190,8 +190,18 @@ export function CompleteScreen() {
   // `<h1>` (page title) lives in the top bar; `<h2>` (verdict word)
   // stays the focal sub-heading below.
   return (
-    <div className="mx-auto flex min-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom))] w-full max-w-[390px] flex-col items-center justify-start gap-10 pb-10 pt-2">
-      <div className="flex w-full items-center justify-between">
+    <ScreenShell>
+      {/*
+        2026-04-22 iPhone-viewport layout pass: the prior layout pinned
+        `min-h-[calc(100dvh-...)]` with `mt-auto` on the CTA row to fake
+        a bottom dock. With `ScreenShell` the footer is a real pinned
+        zone, so the "Back to home" CTA + save-status line sit in the
+        same thumb position even when the page content (verdict hero +
+        recap card) happens to fit above with room to spare on tall
+        phones. Also cleans up the odd vertical justification math the
+        previous `min-h` trick required.
+      */}
+      <ScreenShell.Header className="flex w-full items-center justify-between pt-2 pb-3">
         <SafetyIcon />
         {/* Phase F8 (2026-04-19): was a `<p>` rendering `{summary.header}`
             at `text-sm font-semibold uppercase tracking-wider`. Promoted
@@ -203,8 +213,9 @@ export function CompleteScreen() {
           {summary.header}
         </h1>
         <div className="h-14 w-14 shrink-0" aria-hidden />
-      </div>
+      </ScreenShell.Header>
 
+      <ScreenShell.Body className="items-center gap-10 pb-4">
       <section
         aria-labelledby="summary-verdict"
         className="flex w-full flex-col items-center gap-4 text-center"
@@ -287,7 +298,10 @@ export function CompleteScreen() {
         </dl>
       </Card>
 
-      <div className="mt-auto flex w-full flex-col gap-4 pt-4">
+      <UpdatePrompt needRefresh={needRefresh} onUpdate={updateApp} />
+      </ScreenShell.Body>
+
+      <ScreenShell.Footer className="flex w-full flex-col gap-4 pt-4">
         {/* 2026-04-21 partner-walkthrough P1-2 fix: the CTA was "Done",
             which carried the terminal meaning ("session complete") but
             dropped the destination. Seb landed on Home and could not
@@ -318,9 +332,7 @@ export function CompleteScreen() {
             {storageCopy.secondary}
           </p>
         </div>
-      </div>
-
-      <UpdatePrompt needRefresh={needRefresh} onUpdate={updateApp} />
-    </div>
+      </ScreenShell.Footer>
+    </ScreenShell>
   )
 }

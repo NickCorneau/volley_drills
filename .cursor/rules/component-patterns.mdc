@@ -12,8 +12,9 @@ alwaysApply: false
 
 Use shared primitives from `components/ui/` for standard interactive elements:
 
-- `<Button variant="primary|outline|secondary|danger|ghost|soft">` for action buttons
+- `<Button variant="primary|outline|secondary|danger|ghost|soft|link">` for action buttons
 - `<Card>` for rounded content sections with warm background
+- `<ScreenShell>` (with `.Header` / `.Body` / `.Footer` subcomponents) for the outer screen layout
 - `<StatusMessage variant="loading|error|empty">` for loading, error, and not-found states
 
 Never build inline Tailwind class-string arrays with `.join(' ')` for buttons. Use the Button component and pass layout-specific classes via the `className` prop (e.g., `className="flex-1"`).
@@ -26,4 +27,14 @@ Toggle/selection patterns (PlayerToggle, RpeSelector, chips) have selection-spec
 
 Screens should be thin: read state from hooks, call services for mutations, render UI. Screens never import `db` directly.
 
-Wrap the outer container in `className="mx-auto flex w-full max-w-[390px] flex-col"` for consistent mobile layout.
+Wrap screen content in `<ScreenShell>` (from `components/ui`) using the Header / Body / Footer zones. This is how the app enforces the iPhone-viewport layout contract: the outer `App` Layout locks the viewport at `h-[100dvh] overflow-hidden`, and `ScreenShell.Body` owns the single scroll container so the pinned footer (Pause/Next on Run, Submit on Review, Continue on Safety, etc.) never slips below the fold. See `app/src/components/ui/ScreenShell.tsx` for the primitive and `app/src/screens/RunScreen.tsx` for the canonical "cockpit footer" usage.
+
+```tsx
+<ScreenShell>
+  <ScreenShell.Header>{/* top bar */}</ScreenShell.Header>
+  <ScreenShell.Body>{/* scrolls when content exceeds the fold */}</ScreenShell.Body>
+  <ScreenShell.Footer>{/* pinned CTAs; carries safe-area-bottom */}</ScreenShell.Footer>
+</ScreenShell>
+```
+
+Omit `ScreenShell.Footer` entirely on screens without a persistent CTA — the border-t hairline only appears when a footer is rendered. Do NOT hand-roll `mx-auto flex w-full max-w-[390px] flex-col ...` at the screen root; `ScreenShell` owns that contract.

@@ -1,6 +1,12 @@
 import { useCallback, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BackButton, Button, Card, StatusMessage } from '../components/ui'
+import {
+  BackButton,
+  Button,
+  Card,
+  ScreenShell,
+  StatusMessage,
+} from '../components/ui'
 import { downloadExport } from '../services/export'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { routes } from '../routes'
@@ -61,49 +67,61 @@ export function SettingsScreen() {
   }, [])
 
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-col gap-8 pb-12 pt-2">
-      <header className="flex items-center gap-2 pt-2">
+    <ScreenShell>
+      {/*
+        2026-04-22 iPhone-viewport layout pass: converted to `ScreenShell`
+        for consistency — the export card is short enough that this screen
+        fits a 390 × 844 iPhone today, but aligning the layout primitive
+        with the rest of the app keeps the back-button position, top-bar
+        rhythm, and footer ("Your data stays on this device.") on the
+        same grid as SetupScreen / SafetyCheckScreen / ReviewScreen.
+      */}
+      <ScreenShell.Header className="flex items-center gap-2 pt-2 pb-3">
         <BackButton label="Back" onClick={() => navigate(routes.home())} />
         <h1 className="flex-1 text-center text-xl font-semibold tracking-tight text-text-primary">
           Settings
         </h1>
         <div className="w-12" />
-      </header>
+      </ScreenShell.Header>
 
-      <Card variant="focal">
-        <div>
-          <h2 className="text-sm font-semibold text-text-primary">
-            Export training records
-          </h2>
-          <p className="mt-1 text-sm text-text-secondary">
-            Downloads your session history as a JSON file you can share.
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          fullWidth
-          onClick={handleExport}
-          disabled={state.kind === 'exporting'}
-        >
-          {state.kind === 'exporting' ? 'Exporting\u2026' : 'Export training records'}
-        </Button>
-        {state.kind === 'success' && (
-          <p
-            role="status"
-            aria-live="polite"
-            className="rounded-[12px] bg-success/10 px-4 py-3 text-center text-sm font-medium text-success"
+      <ScreenShell.Body className="gap-8 pb-4">
+        <Card variant="focal">
+          <div>
+            <h2 className="text-sm font-semibold text-text-primary">
+              Export training records
+            </h2>
+            <p className="mt-1 text-sm text-text-secondary">
+              Downloads your session history as a JSON file you can share.
+            </p>
+          </div>
+          <Button
+            variant="primary"
+            fullWidth
+            onClick={handleExport}
+            disabled={state.kind === 'exporting'}
           >
-            Export saved. Check your downloads.
-          </p>
-        )}
-        {state.kind === 'error' && (
-          <StatusMessage variant="error" message={state.message} />
-        )}
-      </Card>
+            {state.kind === 'exporting' ? 'Exporting\u2026' : 'Export training records'}
+          </Button>
+          {state.kind === 'success' && (
+            <p
+              role="status"
+              aria-live="polite"
+              className="rounded-[12px] bg-success/10 px-4 py-3 text-center text-sm font-medium text-success"
+            >
+              Export saved. Check your downloads.
+            </p>
+          )}
+          {state.kind === 'error' && (
+            <StatusMessage variant="error" message={state.message} />
+          )}
+        </Card>
+      </ScreenShell.Body>
 
-      <p className="mt-auto text-center text-xs text-text-secondary">
-        Your data stays on this device.
-      </p>
-    </div>
+      <ScreenShell.Footer className="pt-3">
+        <p className="pb-3 text-center text-xs text-text-secondary">
+          Your data stays on this device.
+        </p>
+      </ScreenShell.Footer>
+    </ScreenShell>
   )
 }

@@ -1,6 +1,7 @@
 export { BackButton } from './BackButton'
 export { Button } from './Button'
 export { Card } from './Card'
+export { ScreenShell } from './ScreenShell'
 export { StatusMessage } from './StatusMessage'
 export { ToggleChip } from './ToggleChip'
 export type { ToggleChipProps, ToggleChipSize, ToggleChipTone } from './ToggleChip'

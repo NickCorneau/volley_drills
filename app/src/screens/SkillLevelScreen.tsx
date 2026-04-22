@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ScreenShell } from '../components/ui'
 import { FOCAL_SURFACE_CLASS } from '../components/ui/Card'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import {
@@ -145,15 +146,26 @@ export function SkillLevelScreen() {
   const copy = copyForVoice(voice)
 
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-col gap-6 pb-12 pt-8">
-      <header className="flex flex-col gap-2">
+    <ScreenShell>
+      {/*
+        2026-04-22 iPhone-viewport layout pass: converted to `ScreenShell`
+        for consistency. Skill level has no pinned CTA — the tap-target
+        cards ARE the CTAs — so the footer is intentionally absent and
+        the body fills the viewport. The five option cards plus heading
+        + subtitle can overflow on short viewports (iPhone SE 375 × 667);
+        the body scrolls independently in that case without dragging
+        the rest of the chrome offscreen.
+      */}
+      <ScreenShell.Header className="flex flex-col gap-2 pt-8 pb-4">
         <h1 className="text-xl font-semibold tracking-tight text-text-primary">
           {copy.heading}
         </h1>
         <p className="text-sm text-text-secondary">
           Your rough current level. We size today&apos;s drills to match. Change anytime.
         </p>
-      </header>
+      </ScreenShell.Header>
+
+      <ScreenShell.Body className="pb-6">
 
       {/* Phase F2 (2026-04-19): option cards now use the same calm
           focal-surface language as HomePrimaryCard / SettingsScreen -
@@ -209,6 +221,7 @@ export function SkillLevelScreen() {
           </button>
         </li>
       </ul>
-    </div>
+      </ScreenShell.Body>
+    </ScreenShell>
   )
 }

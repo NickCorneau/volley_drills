@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-do
 import { BlockTimer } from '../components/BlockTimer'
 import { RunControls } from '../components/RunControls'
 import { SafetyIcon } from '../components/SafetyIcon'
-import { Button, StatusMessage } from '../components/ui'
+import { Button, ScreenShell, StatusMessage } from '../components/ui'
 import { useBlockPacingTicks } from '../hooks/useBlockPacingTicks'
 import { usePreroll } from '../hooks/usePreroll'
 import { useTimer } from '../hooks/useTimer'
@@ -434,9 +434,43 @@ export function RunScreen() {
     return <StatusMessage variant="loading" message="Loading session\u2026" />
   }
 
+  // Swap is only offered when the block has at least one curated
+  // alternate. Warmup/wrap are always empty per D85/D105. Computed
+  // here (not inline in JSX) so `RunControls` can receive the prop
+  // cleanly and the ScreenShell.Footer branch stays readable.
+  const hasAlternates = plan.context
+    ? findSwapAlternatives(currentBlock, plan.context).length > 0
+    : false
+
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-col gap-7 pb-8">
-      <div className="flex items-center justify-between pt-2">
+    <ScreenShell>
+      {/*
+        2026-04-22 iPhone-viewport layout pass: RunScreen moved to the
+        `ScreenShell` three-zone layout (Header / Body / Footer). The
+        drill name, rationale, instructions, and coaching cue live in
+        the scrollable body; the timer + controls pin to the footer
+        as a single "cockpit" that never slips below the fold, no
+        matter how long `courtsideInstructions` runs (d26 stretch
+        list, expanded coaching cue) or how the Safari URL bar resizes
+        the viewport mid-block. The old layout let the document scroll
+        at the root and dropped the timer off the bottom on long
+        drills — testers reported hunting for Next / Pause. See
+        `docs/research/partner-walkthrough-results/2026-04-21-iphone-viewport-design-review.md`
+        "Vertical dead space on tall viewports" for the originating
+        signal.
+
+        Density also tightened in the same pass (founder prompt
+        2026-04-22 "too much text on drills"):
+        - rationale demoted to a small italic line tucked under the
+          drill name instead of a full muted paragraph block;
+        - coaching-cue card chrome (accent border + `bg-info-surface`
+          fill + `h2 "Coaching note"`) replaced with a quiet left-rule
+          treatment + short "Cue" label so the cue reads as a
+          sidebar-voiced aside rather than a second focal card;
+        - body inner gap shrunk from `gap-5` (20 px) to `gap-4` (16 px)
+          for a calmer rhythm between what/why/how/cue.
+      */}
+      <ScreenShell.Header className="flex items-center justify-between pt-2 pb-3">
         <SafetyIcon />
         <span className="text-sm font-semibold text-accent">
           {phaseLabel(currentBlock.type)}
@@ -444,24 +478,27 @@ export function RunScreen() {
         <span className="text-sm font-medium text-text-secondary">
           {currentBlockIndex + 1}/{totalBlocks}
         </span>
-      </div>
+      </ScreenShell.Header>
 
-      {/* Content stack: drill name → rationale → instructions → cues.
-          Type sizes pinned by the outdoor-UI brief
-          (`docs/research/outdoor-courtside-ui-brief.md`). */}
-      <div className="flex flex-col gap-5">
-        <h1 className="text-xl font-semibold tracking-tight text-text-primary">
-          {currentBlock.drillName}
-        </h1>
-        {/* Rationale: one-sentence "why this block" (Tier 1a Unit 4).
-            Rendered quietly above instructions so the reading order is
-            what → why → how. Legacy plans without a rationale render
-            nothing. */}
-        {currentBlock.rationale && (
-          <p className="text-sm leading-relaxed text-text-secondary">
-            {currentBlock.rationale}
-          </p>
-        )}
+      <ScreenShell.Body className="gap-4 pb-4">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-text-primary">
+            {currentBlock.drillName}
+          </h1>
+          {/* Rationale: one-sentence "why this block" (Tier 1a Unit 4).
+              2026-04-22: demoted from a standalone `text-sm` muted
+              paragraph to a tucked-in italic suffix directly under the
+              title, so the reading weight on Run goes to instructions
+              + cue (what / how) and the why sits as a subtitle-voiced
+              aside. Saves ~28–40 px of vertical space per block and
+              makes the drill title plus rationale read as one unit.
+              Legacy plans without a rationale render nothing. */}
+          {currentBlock.rationale && (
+            <p className="mt-1 text-sm italic leading-snug text-text-secondary">
+              {currentBlock.rationale}
+            </p>
+          )}
+        </div>
         {/* `whitespace-pre-line` preserves `\n` in
             `courtsideInstructions` for drills with naturally list-shaped
             content (e.g. d26 stretch sequence).
@@ -482,137 +519,127 @@ export function RunScreen() {
             {currentBlock.courtsideInstructions}
           </p>
         )}
+        {/*
+          Coaching cue: 2026-04-22 quieted from the prior chunky card
+          (`rounded-2xl border border-accent/30 bg-info-surface p-4`
+          with an h2 "Coaching note" in accent + accent-colored body
+          copy) to a sidebar-voiced aside: a 2-px accent left-rule,
+          a small uppercase "Cue" label, and neutral body copy. The
+          rule signals "coaching stripe" without a second focal
+          container competing with the drill instructions above and
+          the timer below. Long cues keep the expand/collapse
+          behavior (`CUE_COMPACT_MAX`); compact cues render in full.
+          The button chrome is also slimmer to match the calmer
+          envelope.
+        */}
         {currentBlock.coachingCue &&
           (() => {
             const parts = cueDisplayParts(currentBlock.coachingCue)
+            const Label = (
+              <span
+                id="coaching-cue-title"
+                className="text-xs font-semibold uppercase tracking-wide text-accent"
+              >
+                Cue
+              </span>
+            )
             if (parts.kind === 'compact') {
               return (
                 <section
                   aria-labelledby="coaching-cue-title"
-                  className="rounded-2xl border border-accent/30 bg-info-surface p-4"
+                  className="border-l-2 border-accent/70 pl-3"
                 >
-                  <h2
-                    id="coaching-cue-title"
-                    className="text-sm font-semibold text-accent"
-                  >
-                    Coaching note
-                  </h2>
-                  <p className="mt-2 whitespace-pre-line text-base font-medium leading-relaxed text-accent">
+                  {Label}
+                  <p className="mt-1 whitespace-pre-line text-base font-medium leading-relaxed text-text-primary">
                     {parts.text}
                   </p>
-                </section>
-              )
-            }
-            if (coachingExpanded) {
-              return (
-                <section
-                  aria-labelledby="coaching-cue-title"
-                  className="rounded-2xl border border-accent/30 bg-info-surface p-4"
-                >
-                  <h2
-                    id="coaching-cue-title"
-                    className="text-sm font-semibold text-accent"
-                  >
-                    Coaching note
-                  </h2>
-                  <p className="mt-2 whitespace-pre-line text-base font-medium leading-relaxed text-accent">
-                    {parts.full}
-                  </p>
-                  <button
-                    type="button"
-                    aria-expanded
-                    onClick={() => setCoachingExpanded(false)}
-                    className="mt-3 flex w-full min-h-[56px] items-center justify-center rounded-xl border border-accent/30 bg-surface-calm px-4 text-sm font-semibold text-accent transition-colors active:bg-bg-warm"
-                  >
-                    Show less
-                  </button>
                 </section>
               )
             }
             return (
               <section
                 aria-labelledby="coaching-cue-title"
-                className="rounded-2xl border border-accent/30 bg-info-surface p-4"
+                className="border-l-2 border-accent/70 pl-3"
               >
-                <h2
-                  id="coaching-cue-title"
-                  className="text-sm font-semibold text-accent"
-                >
-                  Coaching note
-                </h2>
-                <p className="mt-2 text-base font-medium leading-relaxed text-accent">
-                  {parts.preview}
+                {Label}
+                <p className="mt-1 whitespace-pre-line text-base font-medium leading-relaxed text-text-primary">
+                  {coachingExpanded ? parts.full : parts.preview}
                 </p>
                 <button
                   type="button"
-                  aria-expanded={false}
-                  onClick={() => setCoachingExpanded(true)}
-                  className="mt-3 flex w-full min-h-[56px] items-center justify-center rounded-xl border border-accent/30 bg-surface-calm px-4 text-sm font-semibold text-accent transition-colors active:bg-bg-warm"
+                  aria-expanded={coachingExpanded}
+                  onClick={() => setCoachingExpanded((v) => !v)}
+                  className="mt-2 min-h-[44px] text-xs font-semibold uppercase tracking-wide text-accent underline underline-offset-2 transition-colors hover:text-accent-pressed active:text-accent-pressed"
                 >
-                  Show full coaching note
+                  {coachingExpanded ? 'Show less' : 'Show full coaching note'}
                 </button>
               </section>
             )
           })()}
-      </div>
+      </ScreenShell.Body>
 
-      {prerollCount != null ? (
-        <div className="flex flex-col items-center gap-4 py-8">
-          {/* Preroll countdown shares BlockTimer's display face
-              (`font-mono` / JetBrains Mono Variable + slashed-zero)
-              so the two timer surfaces read as one instrument; accent
-              color signals "get ready" vs the primary live timer. */}
-          <span
-            className="font-mono text-[72px] font-bold tabular-nums leading-none text-accent"
-            style={{ fontFeatureSettings: '"zero" 1' }}
-          >
-            {prerollCount}
-          </span>
-          <p className="text-sm font-medium text-text-secondary">
-            Get ready&hellip;
-          </p>
-          {/* iOS Safari PWA suspends AudioContext on lock, so the
-              block-end beep won't fire through a locked screen. The
-              full lock-screen presence spike is post-D91 backlog. Until
-              then we set the expectation on the preroll. Shown only
-              until the first preroll completes
-              (`storageMeta['ux.prerollHintDismissed']`). */}
-          {prerollHintDismissed === false && (
-            <p className="max-w-[280px] text-center text-sm text-text-secondary">
-              Keep the phone unlocked so the block-end beep can fire.
+      {/*
+        Cockpit footer — always in view, regardless of how far the
+        body has scrolled. During preroll the 72 px count-in digit
+        owns this zone (so "get ready" feels focal, not buried
+        under the drill body); once the block is running, the
+        BlockTimer + progress bar + RunControls sit here as one
+        tight instrument. `runError` surfaces inside the footer so
+        the tester never loses sight of the actionable message.
+      */}
+      <ScreenShell.Footer className="flex flex-col gap-3 px-1 pt-4">
+        {runError && <StatusMessage variant="error" message={runError} />}
+        {prerollCount != null ? (
+          <div className="flex flex-col items-center gap-2 pb-2">
+            {/* Preroll countdown shares BlockTimer's display face
+                (`font-mono` / JetBrains Mono Variable + slashed-zero)
+                so the two timer surfaces read as one instrument; accent
+                color signals "get ready" vs the primary live timer.
+                2026-04-22: dropped `py-8` padding (64 px) to `pb-2`
+                here — the footer pin already isolates the countdown
+                as the focal element; the extra air was redundant. */}
+            <span
+              className="font-mono text-[72px] font-bold tabular-nums leading-none text-accent"
+              style={{ fontFeatureSettings: '"zero" 1' }}
+            >
+              {prerollCount}
+            </span>
+            <p className="text-sm font-medium text-text-secondary">
+              Get ready&hellip;
             </p>
-          )}
-        </div>
-      ) : (
-      <BlockTimer
-        remainingSeconds={timer.remainingSeconds}
-        totalSeconds={activeDuration}
-        isPaused={isPaused}
-      />
-      )}
-
-      {runError && <StatusMessage variant="error" message={runError} />}
-
-      {prerollCount == null && (() => {
-        // Swap is only offered when the block has at least one curated
-        // alternate. Warmup/wrap are always empty per D85/D105.
-        const hasAlternates = plan.context
-          ? findSwapAlternatives(currentBlock, plan.context).length > 0
-          : false
-        return (
-          <RunControls
-            isPaused={isPaused}
-            isRequired={currentBlock.required}
-            onPause={handlePause}
-            onResume={handleResume}
-            onNext={handleNext}
-            onSkip={handleSkip}
-            onShorten={handleShorten}
-            onEndSession={handleEndSessionRequest}
-            onSwap={hasAlternates ? () => void handleSwap() : undefined}
-          />
-        )
-      })()}
+            {/* iOS Safari PWA suspends AudioContext on lock, so the
+                block-end beep won't fire through a locked screen. The
+                full lock-screen presence spike is post-D91 backlog. Until
+                then we set the expectation on the preroll. Shown only
+                until the first preroll completes
+                (`storageMeta['ux.prerollHintDismissed']`). */}
+            {prerollHintDismissed === false && (
+              <p className="max-w-[280px] text-center text-sm text-text-secondary">
+                Keep the phone unlocked so the block-end beep can fire.
+              </p>
+            )}
+          </div>
+        ) : (
+          <>
+            <BlockTimer
+              remainingSeconds={timer.remainingSeconds}
+              totalSeconds={activeDuration}
+              isPaused={isPaused}
+            />
+            <RunControls
+              isPaused={isPaused}
+              isRequired={currentBlock.required}
+              onPause={handlePause}
+              onResume={handleResume}
+              onNext={handleNext}
+              onSkip={handleSkip}
+              onShorten={handleShorten}
+              onEndSession={handleEndSessionRequest}
+              onSwap={hasAlternates ? () => void handleSwap() : undefined}
+            />
+          </>
+        )}
+      </ScreenShell.Footer>
 
       {showEndConfirm && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-8">
@@ -648,6 +675,6 @@ export function RunScreen() {
           </div>
         </div>
       )}
-    </div>
+    </ScreenShell>
   )
 }

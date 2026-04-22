@@ -6,7 +6,7 @@ import { HomeSecondaryRow } from '../components/HomeSecondaryRow'
 import { RecentSessionsList } from '../components/RecentSessionsList'
 import { SoftBlockModal } from '../components/SoftBlockModal'
 import { UpdatePrompt } from '../components/UpdatePrompt'
-import { Button } from '../components/ui'
+import { Button, ScreenShell } from '../components/ui'
 import { FOCAL_SURFACE_CLASS } from '../components/ui/Card'
 import { selectPrimaryCard, selectSecondaryRows } from '../domain/homePriority'
 import type {
@@ -366,6 +366,15 @@ export function HomeScreen() {
     )
   }
 
+  // 2026-04-22 iPhone-viewport layout pass: moved to `ScreenShell` so
+  // the brand row stays fixed at the top, the primary/secondary/recent
+  // cluster scrolls in the body when needed (tester with a Draft + a
+  // review-pending advisory + recent-sessions-list can otherwise run
+  // out of 100dvh on a 390 × 844 iPhone), and the Settings link +
+  // data-locality line pin to the footer so the tester never loses
+  // the data-promise footer when they reach the bottom of the list.
+  
+
   const { flags } = state
   const flagSummary = {
     resume: flags.resume !== null,
@@ -377,7 +386,7 @@ export function HomeScreen() {
   const secondary: SecondaryRow[] = selectSecondaryRows(flagSummary)
 
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-col gap-8 pb-12 pt-2">
+    <ScreenShell>
       {/* App-bar-scale brand row: inline icon + wordmark, subtle so the
           primary card carries the visual weight. Optical balance: the
           mark is a 24 px square with full ink; the wordmark sits at
@@ -385,13 +394,14 @@ export function HomeScreen() {
           curves - avoids the “app icon dwarfing the title” effect from
           pairing a 28 px mark with `text-lg` bold (F11). See
           `docs/research/brand-ux-guidelines.md` §1 (type hierarchy). */}
-      <header className="flex items-center gap-2.5 pt-4">
+      <ScreenShell.Header className="flex items-center gap-2.5 pt-6 pb-4">
         <Brandmark size={24} className="shrink-0" />
         <h1 className="text-xl font-semibold leading-none tracking-tight text-text-primary">
           Volleycraft
         </h1>
-      </header>
+      </ScreenShell.Header>
 
+      <ScreenShell.Body className="gap-8 pb-6">
       <UpdatePrompt needRefresh={needRefresh} onUpdate={updateApp} />
 
       {renderPrimary(primary, flags, {
@@ -462,8 +472,9 @@ export function HomeScreen() {
           onClose={handleSoftBlockClose}
         />
       )}
+      </ScreenShell.Body>
 
-      <footer className="mt-auto flex flex-col items-center gap-1 text-center text-xs text-text-secondary">
+      <ScreenShell.Footer className="flex flex-col items-center gap-1 pt-3 text-center text-xs text-text-secondary">
         <Link
           to={routes.settings()}
           className="inline-flex min-h-[44px] items-center px-2 underline underline-offset-2"
@@ -474,8 +485,8 @@ export function HomeScreen() {
             SettingsScreen footer copy. Same sentence, same
             punctuation. */}
         <p>Your data stays on this device.</p>
-      </footer>
-    </div>
+      </ScreenShell.Footer>
+    </ScreenShell>
   )
 }
 

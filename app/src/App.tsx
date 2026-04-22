@@ -23,9 +23,32 @@ function Layout({ children }: { children: React.ReactNode }) {
   // Still "slightly off-white" per the outdoor readability contract
   // in `docs/research/outdoor-courtside-ui-brief.md`, so RunScreen +
   // TransitionScreen stay readable courtside.
+  //
+  // 2026-04-22 iPhone-viewport layout pass: the shell is now
+  // height-locked (`h-[100dvh] overflow-hidden`) instead of
+  // `min-h-[100dvh]`. Previously the document itself scrolled when a
+  // screen's content exceeded one viewport, which pushed the Run
+  // screen's timer + controls below the fold on long drills (d26
+  // stretch list, expanded coaching cue) and made testers hunt for
+  // the Next / Pause buttons. With the lock, scroll happens inside
+  // `ScreenShell.Body` (see `components/ui/ScreenShell.tsx`) and the
+  // footer stays pinned.
+  //
+  // `pb-[env(safe-area-inset-bottom)]` moved off the shell and onto
+  // `ScreenShell.Footer` — the home indicator now clears the CTA
+  // directly instead of cushioning a decorative bottom band.
+  // `pt-[env(safe-area-inset-top)]` stays on `<main>` so every screen
+  // (shell or not, status-message or not) pays the notch cost once
+  // here.
+  //
+  // `min-h-0` on `<main>` is the flex-overflow gotcha: without it
+  // the flex child refuses to shrink past its intrinsic content size
+  // and the shell's internal scroll never engages.
   return (
-    <div className="min-h-[100dvh] flex flex-col font-sans bg-surface-calm pb-[env(safe-area-inset-bottom)]">
-      <main className="flex-1 px-4 pt-[env(safe-area-inset-top)]">{children}</main>
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-surface-calm font-sans">
+      <main className="flex min-h-0 flex-1 flex-col px-4 pt-[env(safe-area-inset-top)]">
+        {children}
+      </main>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { StaleContextBanner } from '../components/StaleContextBanner'
-import { BackButton, Button, ToggleChip } from '../components/ui'
+import { BackButton, Button, ScreenShell, ToggleChip } from '../components/ui'
 import type { PlayerMode, TimeProfile } from '../types/session'
 import type { SetupContext } from '../db/types'
 import { buildDraft } from '../domain/sessionBuilder'
@@ -181,8 +181,16 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-col gap-6 pb-8">
-      <header className="flex items-center gap-2 pt-2">
+    <ScreenShell>
+      {/*
+        2026-04-22 iPhone-viewport layout pass: pin `Build session` to
+        the footer. With the stale-context banner + five question
+        sections + the 2026-04-21 "Includes warm-up and cool-down"
+        clarifier + the wind row, Setup reliably slips below the fold
+        on a 390 × 844 iPhone when any section expands or a tester
+        re-reads the options.
+      */}
+      <ScreenShell.Header className="flex items-center gap-2 pt-2 pb-3">
         <BackButton
           label={isOnboarding ? 'Skill level' : 'Home'}
           onClick={() =>
@@ -200,8 +208,9 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           Today&apos;s setup
         </h1>
         <div className="w-12" />
-      </header>
+      </ScreenShell.Header>
 
+      <ScreenShell.Body className="gap-6 pb-4">
       {isFromRepeat && lastCompletedAt != null && (
         <StaleContextBanner dayName={formatDayName(lastCompletedAt)} />
       )}
@@ -307,8 +316,9 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           {error}
         </p>
       )}
+      </ScreenShell.Body>
 
-      <div className="mt-auto flex flex-col gap-4 pt-4">
+      <ScreenShell.Footer className="flex flex-col gap-4 pt-4">
         <Button
           variant="primary"
           fullWidth
@@ -317,7 +327,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         >
           {isSaving ? 'Building…' : 'Build session'}
         </Button>
-      </div>
-    </div>
+      </ScreenShell.Footer>
+    </ScreenShell>
   )
 }
