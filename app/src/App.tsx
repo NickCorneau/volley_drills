@@ -35,9 +35,13 @@ function Layout({ children }: { children: React.ReactNode }) {
   // footer stays pinned.
   //
   // Bottom safe-area + minimum gutter moved off the shell and onto
-  // `ScreenShell.Footer` (`pb-[calc(1rem+env(safe-area-inset-bottom))]`)
+  // `ScreenShell.Footer` (`pb-[max(1rem,env(safe-area-inset-bottom))]`)
   // so CTAs clear the home indicator on iPhone and still get 1 rem of
-  // air when `safe-area-inset-bottom` is 0 (desktop preview).
+  // air when `safe-area-inset-bottom` is 0 (desktop preview). `max()`
+  // (not `calc(1rem + env(...))`) so iPhones do not stack 16 px on top
+  // of the ~34 px home-indicator inset — the earlier formulation
+  // produced ~50 px of dead space below CTAs on device. See the
+  // ScreenShell.Footer rationale for the full trade-off.
   // `pt-[env(safe-area-inset-top)]` stays on `<main>` so every screen
   // (shell or not, status-message or not) pays the notch cost once
   // here.

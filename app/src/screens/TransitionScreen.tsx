@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { SafetyIcon } from '../components/SafetyIcon'
 import { Button, ScreenShell, StatusMessage } from '../components/ui'
+import { findSwapAlternatives } from '../domain/sessionBuilder'
 import { useSessionRunner } from '../hooks/useSessionRunner'
 import { formatDuration } from '../lib/format'
 import { routes } from '../routes'
@@ -39,6 +40,7 @@ export function TransitionScreen() {
 
   const [isSkipping, setIsSkipping] = useState(false)
   const [skipError, setSkipError] = useState<string | null>(null)
+  const [swapError, setSwapError] = useState<string | null>(null)
 
   const handleSkip = useCallback(async () => {
     if (isSkipping) return
@@ -55,6 +57,29 @@ export function TransitionScreen() {
       setIsSkipping(false)
     }
   }, [runner, navigate, executionLogId, isSkipping])
+
+  /**
+   * Pre-start Swap: the tester realizes on Transition they want a
+   * different drill before committing to the next block. Same
+   * underlying call as RunScreen's mid-block Swap (`runner.swapBlock`)
+   * which handles the plan mutation + swapCount increment atomically.
+   * No timer pause / resume dance here because the block hasn't
+   * started; the new `nextBlock` appears in the UI the moment Dexie's
+   * live query refreshes.
+   */
+  const handleSwap = useCallback(async () => {
+    setSwapError(null)
+    try {
+      if (navigator.vibrate) navigator.vibrate(100)
+      const ok = await runner.swapBlock()
+      if (!ok) {
+        setSwapError('No alternate drills available for this block.')
+      }
+    } catch (err) {
+      console.error('Swap failed:', err)
+      setSwapError('Something went wrong. Try again.')
+    }
+  }, [runner])
 
   if (!plan || !execution || !nextBlock) {
     if (loaded) {
@@ -76,17 +101,35 @@ export function TransitionScreen() {
     return <StatusMessage variant="loading" />
   }
 
+  const hasAlternates = plan.context
+    ? findSwapAlternatives(nextBlock, plan.context).length > 0
+    : false
+
   return (
     <ScreenShell>
       {/*
         2026-04-22 iPhone-viewport layout pass: the prior `mt-auto`
         on the button row was decorative — it only activated when the
         screen div happened to fill main, which it rarely did because
-        nothing enforced shell height. Pinning `Start next block` /
-        `Shorten block` / `Skip block` to `ScreenShell.Footer` makes
-        the CTA stack genuinely bottom-locked so a long up-next
-        preview (d26 stretches, long coaching cue) can scroll without
-        pushing `Start next block` below the fold.
+        nothing enforced shell height. Pinning the CTA stack to
+        `ScreenShell.Footer` makes it genuinely bottom-locked so a
+        long up-next preview (d26 stretches, long coaching cue) can
+        scroll without pushing `Start next block` below the fold.
+
+        2026-04-22 parity pass: the body used to render a truncated
+        preview (first line of `courtsideInstructions`, `text-sm`,
+        secondary color, 2-line clamp). Founder walkthrough caught
+        the resulting inconsistency — the same paragraph rendered at
+        a different size + color + with an ellipsis on Transition vs
+        the full text at `text-base` primary on Run, one tap away.
+        That failure mode is worse than "scroll on long drills":
+        short drills got truncated even though they fit, and long
+        drills lost the expand affordance. The body now mirrors Run's
+        treatment (full title, rationale, instructions, coaching cue
+        — same typography, same colors) so Transition reads as a
+        quiet dress-rehearsal of Run. The CTA stack in the footer is
+        the only thing that differs between the two surfaces: decide
+        here, execute there.
       */}
       <ScreenShell.Header className="flex items-center justify-between pt-2 pb-3">
         <SafetyIcon />
@@ -103,9 +146,9 @@ export function TransitionScreen() {
         </span>
       </ScreenShell.Header>
 
-      <ScreenShell.Body className="gap-6 pb-4">
+      <ScreenShell.Body className="gap-4 pb-4">
       {prevBlock && (
-        <div className="flex items-start gap-3 rounded-[12px] bg-bg-warm p-4">
+        <div className="flex items-start gap-2.5 rounded-[12px] bg-bg-warm p-3">
           <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success text-white">
             {prevBlockStatus?.status === 'completed' ? (
               <svg
@@ -150,69 +193,105 @@ export function TransitionScreen() {
 
       {skipError && <StatusMessage variant="error" message={skipError} />}
 
-      <div className="flex flex-col gap-2">
-        {/* Phase F8 (2026-04-19): was `text-xs font-semibold uppercase
-            tracking-wider` eyebrow. Dropped to sentence-case `text-xs
-            font-medium` so the next-block h1 below carries the focal
-            weight. Drill-title h1 gained `tracking-tight` to match the
-            Review / prep-screen display-heading treatment. */}
+      {swapError && <StatusMessage variant="error" message={swapError} />}
+
+      <div className="flex flex-col gap-1.5">
+        {/* "Up next" eyebrow keeps the pause-before-action framing so
+            Transition doesn't read as "you're already on Run." Quiet
+            `text-xs font-medium` so the drill title below carries the
+            focal weight (Phase F8 typography). */}
         <p className="text-xs font-medium text-text-secondary">
           Up next
         </p>
-        {/* Founder test-run feedback 2026-04-21 (round 3): unified
-            with RunScreen + ReviewScreen. `text-2xl font-bold` →
-            `text-xl font-semibold` across every page-title h1 so
-            the preview on TransitionScreen doesn't outweigh the
-            actual drill title on Run itself. */}
         <h1 className="text-xl font-semibold tracking-tight text-text-primary">
           {nextBlock.drillName}
         </h1>
-        <p className="text-sm text-text-secondary">
-          {formatDuration(nextBlock.durationMinutes)}
-        </p>
-        {/* Founder test-run feedback 2026-04-21 (round 3): matches
-            the RunScreen render - `whitespace-pre-line` honors `\n`
-            in list-shaped drill content (d26's six numbered
-            stretches) so the Transition preview scans as a list too.
-
-            Partner-walkthrough polish round 2 (2026-04-22): bumped
-            from `text-sm` (14 px) to `text-base` (16 px) so the
-            same drill paragraph reads at the same size on this
-            surface as on RunScreen (which dropped from `text-lg`
-            to `text-base` in the same pass). Previously the exact
-            same copy rendered at 14 px here and 18 px one tap
-            later, producing a jarring font-size jump across two
-            adjacent screens in the flow. 16 px also sits on the
-            outdoor-UI brief's body floor. */}
-        {nextBlock.courtsideInstructions && (
-          <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
-            {nextBlock.courtsideInstructions}
+        {nextBlock.rationale && (
+          <p className="mt-0.5 text-sm italic leading-snug text-text-secondary">
+            {nextBlock.rationale}
           </p>
         )}
+        <p className="mt-1 text-sm text-text-secondary">
+          {formatDuration(nextBlock.durationMinutes)}
+        </p>
       </div>
 
-      {skipError && <StatusMessage variant="error" message={skipError} />}
+      {/* Full prep at Run's typography: `text-base` primary, pre-line,
+          relaxed leading. Matches RunScreen exactly so the text reads
+          the same across both surfaces. Long drills (stretch lists,
+          warmup lists) scroll inside ScreenShell.Body; the bottom
+          fade gradient already signals "more below." */}
+      {nextBlock.courtsideInstructions && (
+        <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
+          {nextBlock.courtsideInstructions}
+        </p>
+      )}
+
+      {/* Coaching cue uses the exact same quiet left-rule treatment as
+          RunScreen so testers see the same visual voice across both
+          screens. Styled identically down to the classes. */}
+      {nextBlock.coachingCue && (
+        <section
+          aria-labelledby="transition-coaching-cue-title"
+          className="border-l-2 border-accent/70 pl-3"
+        >
+          <span
+            id="transition-coaching-cue-title"
+            className="text-xs font-semibold uppercase tracking-wide text-accent"
+          >
+            Cue
+          </span>
+          <p className="mt-1 whitespace-pre-line text-base font-medium leading-relaxed text-text-primary">
+            {nextBlock.coachingCue}
+          </p>
+        </section>
+      )}
+
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="flex flex-col gap-3 pt-4">
         <Button variant="primary" fullWidth onClick={handleStartNext}>
           Start next block
         </Button>
-        {/* Partner-walkthrough polish 2026-04-22 (design review
-            Transition section): `Shorten block` is the only escape a
-            tired athlete has on this surface, so it was promoted from
-            `variant="ghost"` (a bare accent text link) to
-            `variant="outline"` full-width. Outlined pill at CTA width
-            surfaces the option when it matters without violating the
-            calm envelope - same radius, same height, quieter chrome
-            than primary. `Skip block` stays ghost + centered because
-            it is a lower-priority escape (only exists on non-required
-            blocks) and bumping both would double the action weight
-            below the primary CTA. See
-            `docs/plans/2026-04-22-partner-walkthrough-polish.md` item 6. */}
-        <Button variant="outline" fullWidth onClick={handleStartShortened}>
-          Shorten block
-        </Button>
+        {/* Secondary row: Swap + Shorten side-by-side when both are
+            available, Shorten full-width when the current block can't
+            swap (warmup/wrap per D85/D105, or a slot with a single
+            candidate in the pool). Pre-start Swap was added 2026-04-22
+            because forcing the tester to Start → Run → Swap wasted a
+            preroll cycle + let the timer start on a drill they
+            already knew they wanted to change. Same underlying call
+            as RunScreen's mid-block Swap (`runner.swapBlock`); the
+            Dexie live query refreshes `nextBlock` in place so the
+            preview updates without a route change.
+
+            `Shorten block` stays `variant="outline"` (partner
+            walkthrough 2026-04-22 item 6) — it's the primary escape
+            for a tired athlete and deserves pill-at-CTA-width
+            visibility. When paired with Swap both render as equal-
+            weight `secondary` pills so neither dominates. */}
+        {hasAlternates ? (
+          <div className="flex gap-3">
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onClick={handleSwap}
+              aria-label="Swap drill"
+            >
+              Swap drill
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onClick={handleStartShortened}
+            >
+              Shorten
+            </Button>
+          </div>
+        ) : (
+          <Button variant="outline" fullWidth onClick={handleStartShortened}>
+            Shorten block
+          </Button>
+        )}
         {!nextBlock.required && (
           <div className="flex items-center justify-center">
             <Button

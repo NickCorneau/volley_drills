@@ -113,7 +113,7 @@ describe('RunScreen: rationale placement + typography (P1-11 / walkthrough 2026-
     expect(rationale.className).not.toContain('text-base')
   })
 
-  it('courtsideInstructions renders at text-base (16 px outdoor floor), matching TransitionScreen', async () => {
+  it('courtsideInstructions renders at text-base (16 px outdoor floor); Transition uses text-sm preview + collapse', async () => {
     await seedPausedSession('exec-instr', 'plan-instr')
     renderAt('exec-instr')
 
@@ -121,14 +121,9 @@ describe('RunScreen: rationale placement + typography (P1-11 / walkthrough 2026-
       /Self-toss; forearm pass up and down\./i,
     )
 
-    // Partner-walkthrough polish round 2 (2026-04-22): dropped from
-    // `text-lg` (18 px) to `text-base` (16 px) so the same drill
-    // paragraph reads at the same size on Run as on Transition, which
-    // bumped from `text-sm` in the same pass. 16 px is the
-    // outdoor-UI brief's body floor and still satisfies Seb P2-1
-    // "readable at arm's length." The prior pre-close 18 px was
-    // observed as visually heavy / "gross" when rendered side-by-
-    // side with the 14 px Transition version.
+    // Run keeps 16 px for courtsideInstructions during the block.
+    // TransitionScreen (2026-04-22) uses a smaller preview + optional
+    // "Show full prep" so long wrap lists do not bury the CTA stack.
     expect(instructions.className).toContain('text-base')
     expect(instructions.className).not.toContain('text-lg')
     expect(instructions.className).not.toContain('text-sm')

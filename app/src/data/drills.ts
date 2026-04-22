@@ -1431,23 +1431,25 @@ const d26: Drill = {
   name: 'Lower-body Stretch Micro-sequence',
   shortName: 'Stretch',
   skillFocus: ['recovery'],
-  objective: 'Calves/hamstrings/hips post-sand session.',
+  objective: 'Three lower-body staples post-sand session.',
   levelMin: 'beginner',
   levelMax: 'advanced',
   chainId: 'chain-cooldown',
   m001Candidate: true,
   teachingPoints: ['Breathe.', 'Avoid pain.', 'Hold steady.'],
-  progressionDescription: '2 sets each stretch (time permitting).',
-  regressionDescription: '3 stretches only (calf/hamstring/hip flexor).',
+  progressionDescription:
+    'When wrap runs 5+ minutes, add second sides, glutes, or adductors.',
+  regressionDescription:
+    'Two moves only (calf + hamstring) if you are pressed for time.',
   variants: [
     {
-      // Timed sub-blocks: 6 x 20-30 s stretch segments. Courtside copy
-      // enumerates each stretch with an execution cue inline (partner
-      // walkthrough P1-8: "I got stuck figuring out what stretches may be").
-      // Per-stretch tap-to-expand demos are a Tier 1b candidate.
-      // Pre-close 2026-04-21 (P2-2): 30s pacing tick ships via
-      // `subBlockIntervalSeconds` - matches the partner's explicit ask
-      // ("A beep every 30 seconds during the cool down would help").
+      // 2026-04-22 copy pass: six 20 to 30 s segments read as ~6 to 12
+      // minutes of work inside a wrap slot that is often only ~3 min
+      // on the session clock. Courtside copy now lists three staples
+      // sized for a short wrap (about 45 to 60 s each, one side at a
+      // time; mirror or add moves if the block runs long). Keeps the
+      // P2-2 sub-block pacing tick at 30 s so the beep still lands
+      // during cool-down without implying six separate holds.
       id: 'd26-solo',
       drillId: 'd26',
       label: 'Solo',
@@ -1466,21 +1468,12 @@ const d26: Drill = {
         description: 'Completed (yes/no).',
         target: 'Completed',
       },
-      // Founder test-run feedback 2026-04-21 (round 3): the prior
-      // copy was a single ~90-word paragraph with 6 numbered items
-      // mashed together and em-dashes separating each stretch name
-      // from its execution cue. Unreadable at courtside-distance; the
-      // numbered list was not rendered as a list. Em-dashes also
-      // violate the dogfeed-polish em-dash-removal sweep (2026-04-19
-      // commit `ffa9628`). Reformatted: intro sentence, then six
-      // newline-separated numbered items with colons separating name
-      // from cue. RunScreen + TransitionScreen render
-      // `courtsideInstructions` with `whitespace-pre-line` so these
-      // `\n` render as actual line breaks. "20–30 s" flattened to
-      // "20 to 30 s" to match the SafetyCheck heat tip voice ("10 AM
-      // to 4 PM") landed in the same sweep.
+      // Intro + three numbered lines; `whitespace-pre-line` on Run +
+      // Transition preserves newlines. No em-dashes (dogfeed-polish
+      // sweep). Timing voice matches short wrap slots on 15/25 min
+      // archetypes while progressionDescription covers longer wraps.
       courtsideInstructions:
-        'Six stretches, 20 to 30 s each. No bouncing; strong tension, never painful.\n\n1. Calf straight: back leg straight, heel down, lean forward into front knee.\n2. Calf bent: same stance, bend back knee slightly, feel lower calf.\n3. Hamstring: one leg forward, heel down, toes up; sit back into standing leg and reach toward toes.\n4. Hip flexor: half-kneel on one knee, tuck pelvis, lean forward into front leg.\n5. Glute: seated or lying, pull one knee toward opposite shoulder.\n6. Adductor: wide stance, bend one knee, shift weight over it.',
+        'Short wrap (~3 min on the timer): three moves, about 45 to 60 s each, one side (mirror if time remains). No bouncing; firm tension, never sharp pain.\n\n1. Calf: straight back leg, heel down, lean in; soften the back knee for the lower calf.\n2. Hamstring: front leg heel down, toes up; hinge from the hips.\n3. Hip flexor: half-kneel, tuck pelvis, lean into the front leg.',
       coachingCues: ['Breathe.', 'Avoid pain.', 'Hold steady.'],
       subBlockIntervalSeconds: 30,
     },

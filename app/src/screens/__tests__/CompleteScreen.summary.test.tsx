@@ -124,7 +124,9 @@ describe('CompleteScreen summary (C-2 Unit 3)', () => {
     expect(screen.getByText('Keep building')).toBeInTheDocument()
     // sessionCount === 1 (this review is the only submitted one).
     expect(
-      screen.getByText(/Session 1\..*40 good passes today.*60 attempts/i),
+      screen.getByText(
+        /Completed session 1:.*40 good passes today.*60 attempts/i,
+      ),
     ).toBeInTheDocument()
   })
 
@@ -179,11 +181,11 @@ describe('CompleteScreen summary (C-2 Unit 3)', () => {
       reviewStatus: 'submitted',
       goodPasses: 80,
       totalAttempts: 100,
-      extraSubmittedCount: 2, // 2 prior submitted + this one = Session 3.
+      extraSubmittedCount: 2, // 2 prior submitted + this one = completed session 3.
     })
     renderAt('exec-counter')
 
-    expect(await screen.findByText(/Session 3\./)).toBeInTheDocument()
+    expect(await screen.findByText(/Completed session 3:/)).toBeInTheDocument()
   })
 
   it('verdict line has aria-live=polite for screen-reader priority', async () => {

@@ -5,7 +5,6 @@ import { Brandmark } from '../../components/Brandmark'
 import { HomePrimaryCard } from '../../components/HomePrimaryCard'
 import { HomeSecondaryRow } from '../../components/HomeSecondaryRow'
 import { SoftBlockModal } from '../../components/SoftBlockModal'
-import { StaleContextBanner } from '../../components/StaleContextBanner'
 import { db } from '../../db'
 import type { SessionDraft } from '../../db'
 import { HomeScreen } from '../../screens/HomeScreen'
@@ -130,11 +129,6 @@ describe('V0B-18 D86 per-surface regression scan', () => {
   it('Brandmark', () => {
     const { container } = render(<Brandmark />)
     assertClean(container, 'Brandmark')
-  })
-
-  it('StaleContextBanner', () => {
-    const { container } = render(<StaleContextBanner dayName="Tuesday" />)
-    assertClean(container, 'StaleContextBanner')
   })
 
   it('SoftBlockModal', () => {

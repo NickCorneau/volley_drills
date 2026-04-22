@@ -5,19 +5,23 @@ import {
 } from './helpers'
 
 /**
- * Phase C-5 + Phase F Unit 1 Playwright smoke: repeat path end-to-end.
+ * Repeat path + Start-a-different-session Playwright smoke.
  *
- * Three cases covered (updated 2026-04-19 for Phase F):
- * 1. Normal Repeat: Home LastComplete → /setup (with stale-context banner)
- *    → /safety (pain/recency default per D83) → /run.
+ * Three cases covered (updated 2026-04-22 for one-tap Repeat):
+ * 1. Normal Repeat: Home LastComplete → /safety directly (pain/recency
+ *    default per D83) → /run. No Setup detour, no stale-context banner,
+ *    no toggle review. `handleRepeat` rebuilds the draft from the last
+ *    plan's SetupContext via `buildDraft()` and writes it before
+ *    navigating. The pre-2026-04-22 `/setup?from=repeat` detour was
+ *    retired because it fought the user's stated intent (Repeat means
+ *    "same conditions") and contradicted the adjacent "Repeat what
+ *    you did" which already bypassed Setup.
  * 2. Ended-early Repeat: Home shows BOTH buttons. "Repeat what you did"
  *    routes directly to /safety with a subset draft.
  * 3. Start a different session (Phase F Unit 1, 2026-04-19): Home
  *    tertiary text link on LastComplete routes to fresh `/setup` (no
- *    `?from=repeat`, no banner, no pre-fill). Replaces the pre-Phase-F
- *    `Same as last time` case which bypassed Setup entirely — that
- *    shortcut was cut per the 2026-04-19 red-team because it bypassed
- *    the StaleContextBanner's "Adjust if today's different" nudge.
+ *    banner, no pre-fill cue). This is the explicit escape when
+ *    today's conditions actually changed.
  *
  * Seeding happens via `page.evaluate` after the first `/` navigation so
  * the Dexie v4 schema is already in place; no version gymnastics like
@@ -163,7 +167,7 @@ test.describe('phase-c5 repeat path', () => {
     await seedOnboardingAndOpenHome(page)
   })
 
-  test('normal case: Repeat -> /setup (banner) -> /safety (defaults) -> /run', async ({
+  test('normal case: Repeat -> /safety (defaults per D83) -> /run', async ({
     page,
   }) => {
     await seedLastComplete(page)
@@ -175,23 +179,16 @@ test.describe('phase-c5 repeat path', () => {
 
     await page.getByRole('button', { name: /repeat this session/i }).click()
 
-    // /setup with the stale-context banner.
-    await expect(page).toHaveURL(/\/setup\?from=repeat/)
-    const banner = page.getByRole('status')
-    await expect(banner).toBeVisible()
-    await expect(banner).toHaveAttribute('aria-live', 'polite')
-    await expect(banner).toContainText(/setup pre-?filled/i)
-
-    // Context pre-filled: Solo / net=No / wall=Yes / 25 min.
-    await expect(page.getByRole('radio', { name: 'Solo' })).toHaveAttribute(
-      'aria-checked',
-      'true',
-    )
-
-    await page.getByRole('button', { name: /build session/i }).click()
+    // 2026-04-22 one-tap Repeat: direct to /safety, no Setup detour,
+    // no stale-context banner. The draft was rebuilt silently via
+    // `buildDraft()` from the last plan's SetupContext.
+    await expect(page).toHaveURL(/\/safety/, { timeout: 10_000 })
+    await expect(page.getByRole('status')).toHaveCount(0)
 
     // /safety: pain + recency are in default state. PainOverrideCard
-    // and Continue button do not render until pain is answered.
+    // and Continue button do not render until pain is answered. This
+    // is the D83 contract — the Repeat shortcut must not leak any
+    // prior safety answers.
     await expect(page.getByText(/any pain that changes/i)).toBeVisible()
     await expect(
       page.getByRole('button', { name: /^continue$/i }),
@@ -256,9 +253,10 @@ test.describe('phase-c5 repeat path', () => {
       .getByRole('button', { name: /start a different session/i })
       .click()
 
-    // Lands on fresh /setup (no `?from=repeat`, no banner). The
-    // stale-context banner must NOT render — this is the "today is
-    // different" path.
+    // Lands on fresh /setup (no banner). The stale-context banner
+    // was retired in the 2026-04-22 one-tap Repeat pass — this is
+    // the "today is different" path where Setup reads the last
+    // context silently as a pre-fill convenience only.
     await expect(page).toHaveURL(/\/setup$/, { timeout: 10_000 })
     await expect(page.getByRole('status')).toHaveCount(0)
   })

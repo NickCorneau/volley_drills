@@ -120,80 +120,14 @@ describe('SetupScreen (C-3)', () => {
     expect(draft?.context.wind).toBeUndefined()
   })
 
-  it('C-5 Unit 1: /setup?from=repeat renders the stale-context banner with the last-session day name', async () => {
-    // Seed a completed session 3 days ago (must be Tuesday if today is
-    // Friday etc - the test asserts a weekday match rather than a
-    // specific one so it's stable across CI run days).
-    const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000
-    const completedAt = Date.now() - THREE_DAYS_MS
-    await db.storageMeta.put({
-      key: 'onboarding.completedAt',
-      value: 1,
-      updatedAt: 1,
-    })
-    await db.sessionPlans.put({
-      id: 'plan-lc',
-      presetId: 'solo_wall',
-      presetName: 'Solo + Wall',
-      playerCount: 1,
-      blocks: [],
-      safetyCheck: { painFlag: false, heatCta: false, painOverridden: false },
-      createdAt: completedAt - 60_000,
-      context: {
-        playerMode: 'solo',
-        timeProfile: 25,
-        netAvailable: false,
-        wallAvailable: true,
-      },
-    })
-    await db.executionLogs.put({
-      id: 'exec-lc',
-      planId: 'plan-lc',
-      status: 'completed',
-      activeBlockIndex: 0,
-      blockStatuses: [],
-      startedAt: completedAt - 20 * 60_000,
-      completedAt,
-    })
-    await db.sessionReviews.put({
-      id: 'review-exec-lc',
-      executionLogId: 'exec-lc',
-      sessionRpe: 6,
-      goodPasses: 10,
-      totalAttempts: 15,
-      submittedAt: completedAt,
-      status: 'submitted',
-    })
-
-    render(
-      <MemoryRouter initialEntries={['/setup?from=repeat']}>
-        <Routes>
-          <Route path="/setup" element={<SetupScreen />} />
-        </Routes>
-      </MemoryRouter>,
-    )
-
-    // Banner renders with role="status" + aria-live="polite".
-    const banner = await screen.findByRole('status')
-    expect(banner).toHaveAttribute('aria-live', 'polite')
-    // Copy: "Setup pre-filled from {dayName}. Adjust if today's different."
-    // 3 days ago is in the [2..6] window -> weekday name.
-    expect(banner.textContent).toMatch(
-      /Setup pre-filled from (Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\. Adjust if today.?s different/i,
-    )
-
-    // Context pre-filled from the last plan: solo, net-no, wall-yes, 25 min.
-    expect(
-      within(screen.getByRole('radiogroup', { name: 'Player mode' })).getByRole(
-        'radio',
-        { name: 'Solo', checked: true },
-      ),
-    ).toBeInTheDocument()
-  })
-
-  it('C-5 Unit 1: plain /setup (no from=repeat) does NOT render the banner', async () => {
-    // Seed a completed session so the banner *could* fire if the gate
-    // were broken.
+  it('2026-04-22 one-tap Repeat cleanup: plain /setup never renders the stale-context banner', async () => {
+    // Regression guard: when `handleRepeat` routed to /setup?from=repeat
+    // the banner ("Setup pre-filled from Tuesday…") lived above the
+    // chip rows. The one-tap Repeat change retires that entry point
+    // entirely — Setup should never render a `role="status"` banner
+    // regardless of what's seeded, because the only non-onboarding
+    // entries now are `Start a different session` and `New workout`.
+    // Pre-fill via `getLastContext()` still happens silently.
     await db.storageMeta.put({
       key: 'onboarding.completedAt',
       value: 1,
@@ -242,7 +176,7 @@ describe('SetupScreen (C-3)', () => {
       </MemoryRouter>,
     )
 
-    // Wait for prefill completion so the absence assertion is meaningful.
+    // Silent pre-fill from the last context still happens.
     await screen.findByRole('radio', { name: 'Solo', checked: true })
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })

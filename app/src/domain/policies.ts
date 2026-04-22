@@ -26,12 +26,27 @@ export const CAPTURE_WINDOW_SAME_DAY_MS = 24 * 60 * 60 * 1_000
  */
 export const FINISH_LATER_CAP_MS = CAPTURE_WINDOW_SAME_SESSION_MS
 
-// --- Complete-screen tuning copy (C-2) ---
+// --- Pass-rate progression floor (RESERVED, D104 / O12) ---
 
 /**
- * Minimum recorded attempts before `sessionSummary.composeDefaultReason`
- * will phrase the pass rate as tunable. Below this floor, copy explains
- * we're not yet claiming the rate.
+ * Minimum recorded attempts before any pass-rate can be treated as
+ * decision-grade by downstream logic.
+ *
+ * Set to 50 per `D104` (Bayesian posterior rule
+ * `P(p_corrected >= 0.70) >= 0.80`, which resolves to ~38 / 50 corrected
+ * or ~41 / 50 raw as a pre-calibration proxy). See `decisions.md` `O12`
+ * for the open field-validation work (does a real user actually
+ * accumulate 50 scored contacts at 1-2 sessions/week, does tester
+ * self-scoring correlate with partner/video review, etc.).
+ *
+ * Not currently surfaced in any UI. `sessionSummary.composeDefaultReason`
+ * used to cite this threshold ("Pass-rate tuning waits until this
+ * session logs 50 attempts…") but the copy was retired 2026-04-22
+ * because v0b has no engine that reads `review.totalAttempts` and
+ * changes the next session — that was an aspirational claim the
+ * product could not back. The constant stays here so the real D104 /
+ * O12 progression engine can import it without reintroducing a magic
+ * number when it ships.
  */
 export const TUNING_FLOOR_ATTEMPTS = 50
 

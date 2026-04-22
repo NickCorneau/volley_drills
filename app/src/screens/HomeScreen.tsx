@@ -17,7 +17,10 @@ import type { SessionDraft } from '../db'
 import { useAppRegisterSW } from '../lib/pwa-register'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { routes } from '../routes'
-import { buildDraftFromCompletedBlocks } from '../domain/sessionBuilder'
+import {
+  buildDraft,
+  buildDraftFromCompletedBlocks,
+} from '../domain/sessionBuilder'
 import {
   discardSession,
   expireStaleReviews,
@@ -234,12 +237,23 @@ export function HomeScreen() {
   // - `Edit` + `Same as last time` cut; their wiring
   //   (`handleLastCompleteEdit` / `handleSameAsLast`) is gone.
   // - `Start a different session` is new: routes to fresh `/setup`
-  //   (no `?from=repeat`, no pre-fill, no banner). Same target URL as
-  //   NewUser Start, different user-facing label.
+  //   (no pre-fill cue, no banner). Same target URL as NewUser Start,
+  //   different user-facing label.
   //
-  // C-5 wires the remaining repeat-path handlers:
-  // - handleRepeat: /setup?from=repeat (with stale-context banner)
-  // - handleRepeatWhatYouDid: partial draft from completed blocks
+  // 2026-04-22 one-tap Repeat: `handleRepeat` used to route to
+  // `/setup?from=repeat` where the tester saw every last-session
+  // toggle pre-filled + a stale-context banner + had to tap Build
+  // session. That ceremony fought the user's stated intent ("repeat
+  // this session" literally means "same conditions"), contradicted
+  // the adjacent `handleRepeatWhatYouDid` which already bypassed
+  // Setup, and matched no industry peer (Spotify / Peloton / Strava /
+  // Amazon "Buy it again" all treat Repeat as one-tap-execute). Now
+  // it rebuilds a fresh draft from the last plan's `SetupContext`
+  // via `buildDraft()` and routes straight to `/safety`. If
+  // rebuilding fails (archetype or drill catalog drift since the
+  // last session) the handler falls back to `/setup` so the tester
+  // can still proceed by hand. `Start a different session` is the
+  // explicit escape when today's conditions genuinely changed.
   const interceptedHandlers = useMemo(() => {
     const intercept = (inner: () => void | Promise<void>) => async () => {
       if (state.kind !== 'ready' || !state.flags.reviewPending) {
@@ -274,13 +288,36 @@ export function HomeScreen() {
       handleNewUserStart: intercept(() => navigate(routes.setup())),
       handleDraftStart: intercept(() => navigate(routes.safety())),
       handleDraftEdit: intercept(() => navigate(routes.setup())),
-      handleRepeat: intercept(() =>
-        navigate(`${routes.setup()}?from=repeat`),
-      ),
-      // Phase F Unit 1: LastComplete's sole secondary. Fresh setup -
-      // no `?from=repeat`, no pre-fill, no banner - for the tester
-      // whose answer to "same as last time?" is *no*. The intercept
-      // ensures review_pending still fires the soft-block modal.
+      // One-tap Repeat: rebuild a fresh full-plan draft from the last
+      // session's SetupContext and route straight to `/safety`. No
+      // Setup detour, no stale-context banner, no toggle review. The
+      // `Start a different session` CTA right below is the explicit
+      // escape hatch when today's conditions changed.
+      handleRepeat: intercept(async () => {
+        if (state.kind !== 'ready' || !state.flags.lastComplete) return
+        const priorContext = state.flags.lastComplete.plan.context
+        if (!priorContext) {
+          navigate(routes.setup())
+          return
+        }
+        try {
+          const draft = buildDraft(priorContext)
+          if (!draft) {
+            navigate(routes.setup())
+            return
+          }
+          await saveDraft(draft)
+          navigate(routes.safety())
+        } catch (err) {
+          if (isSchemaBlocked()) return
+          console.error('Repeat session failed:', err)
+          navigate(routes.setup())
+        }
+      }),
+      // Phase F Unit 1: LastComplete's sole secondary. Fresh setup for
+      // the tester whose answer to "same as last time?" is *no*. The
+      // intercept ensures review_pending still fires the soft-block
+      // modal.
       handleStartDifferentSession: intercept(() =>
         navigate(routes.setup()),
       ),
@@ -296,9 +333,7 @@ export function HomeScreen() {
             state.flags.lastComplete.plan,
           )
           if (!draft) {
-            // Nothing worth repeating - defensive fallback to the
-            // pre-filled Setup path so the tester can adjust.
-            navigate(`${routes.setup()}?from=repeat`)
+            navigate(routes.setup())
             return
           }
           await saveDraft(draft)
@@ -306,7 +341,7 @@ export function HomeScreen() {
         } catch (err) {
           if (isSchemaBlocked()) return
           console.error('Repeat-what-you-did failed:', err)
-          navigate(`${routes.setup()}?from=repeat`)
+          navigate(routes.setup())
         }
       }),
     }

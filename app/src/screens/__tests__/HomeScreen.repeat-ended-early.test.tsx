@@ -13,7 +13,8 @@ import { HomeScreen } from '../HomeScreen'
  * The shape of the test: seed an ExecutionLog with
  * `status: 'ended_early'` where only 2 of 3 plan blocks completed.
  * Assert the card renders two buttons, assert each button's behavior:
- * - "Repeat full N-min plan" -> /setup?from=repeat (rebuilds full)
+ * - "Repeat full N-min plan" -> /safety with a rebuilt full-plan draft
+ *   (2026-04-22 one-tap Repeat; previously went to /setup?from=repeat)
  * - "Repeat what you did (M min)" -> /safety with partial draft
  */
 
@@ -171,7 +172,7 @@ describe('HomeScreen: Repeat on ended-early (C-5 Unit 3)', () => {
     expect(draft).not.toHaveProperty('safetyCheck')
   })
 
-  it('Repeat full plan on ended-early -> /setup?from=repeat (regression guard: NOT the subset)', async () => {
+  it('Repeat full plan on ended-early -> /safety with a full-plan draft (regression guard: NOT the subset)', async () => {
     const user = userEvent.setup()
     await seedEndedEarly()
     renderHome()
@@ -181,13 +182,23 @@ describe('HomeScreen: Repeat on ended-early (C-5 Unit 3)', () => {
         name: /repeat full 25-min plan/i,
       }),
     )
-    // handleRepeat routes to /setup?from=repeat where the tester
-    // re-confirms context + rebuilds the full plan. Critically, it
-    // does NOT use the partial-block draft - the plan explicitly
-    // prevents that regression (C-5 plan Unit 3 test scenarios).
-    expect(await screen.findByTestId('setup-route')).toBeInTheDocument()
-    // No partial draft written from this path.
+    // 2026-04-22 one-tap Repeat: handleRepeat rebuilds a fresh
+    // full-plan draft from the last session's SetupContext via
+    // `buildDraft()` and routes straight to /safety. Critically it
+    // must NOT use the partial-block subset draft (C-5 plan Unit 3
+    // test scenarios), so we assert both the route AND the block
+    // count on the written draft below.
+    expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
     const draft = await db.sessionDrafts.get('current')
-    expect(draft).toBeUndefined()
+    expect(draft).toBeDefined()
+    // Full plan is 25 min / 3 blocks; subset would be 2. The builder
+    // can legitimately pick different drills than the prior plan so
+    // we assert on block count + total duration rather than ids.
+    expect(draft!.blocks.length).toBeGreaterThanOrEqual(3)
+    const totalMinutes = draft!.blocks.reduce(
+      (sum, b) => sum + b.durationMinutes,
+      0,
+    )
+    expect(totalMinutes).toBe(25)
   })
 })

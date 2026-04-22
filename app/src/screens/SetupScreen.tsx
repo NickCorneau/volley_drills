@@ -1,18 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { StaleContextBanner } from '../components/StaleContextBanner'
+import { useNavigate } from 'react-router-dom'
 import { BackButton, Button, ScreenShell, ToggleChip } from '../components/ui'
 import type { PlayerMode, TimeProfile } from '../types/session'
 import type { SetupContext } from '../db/types'
 import { buildDraft } from '../domain/sessionBuilder'
-import { formatDayName } from '../lib/format'
 import { isOnboardingStep } from '../lib/onboarding'
 import { isSchemaBlocked } from '../lib/schema-blocked'
-import {
-  getLastComplete,
-  getLastContext,
-  saveDraft,
-} from '../services/session'
+import { getLastContext, saveDraft } from '../services/session'
 import { getStorageMeta, setStorageMeta } from '../services/storageMeta'
 import { routes } from '../routes'
 
@@ -30,14 +24,14 @@ export type SetupScreenProps = {
 
 export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  // C-5 Unit 1: `/setup?from=repeat` triggers the stale-context banner
-  // above the chip rows. The repeat path is read-only metadata - it
-  // doesn't change any pre-fill logic, which already runs on every
-  // non-onboarding mount via `getLastContext()`. Keeping the banner
-  // gated on the explicit query param avoids the banner flashing on a
-  // plain Home->Setup tap where nothing has changed.
-  const isFromRepeat = searchParams.get('from') === 'repeat'
+  // 2026-04-22 one-tap Repeat simplification: the `?from=repeat`
+  // branch + `StaleContextBanner` were retired here because `Repeat
+  // this session` on Home now rebuilds the draft and jumps straight
+  // to `/safety`. Setup only renders for fresh / "Start a different
+  // session" entries, where `getLastContext()` silently pre-fills the
+  // toggles from the last session as a convenience (no banner — the
+  // user explicitly asked to start something different, so naming the
+  // prior day is noise).
 
   const [playerMode, setPlayerMode] = useState<PlayerMode | null>(null)
   const [netAvailable, setNetAvailable] = useState<boolean | null>(null)
@@ -45,7 +39,6 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   const [timeProfile, setTimeProfile] = useState<TimeProfile>(15)
   const [wind, setWind] = useState<WindChoice>('calm')
   const [prefilled, setPrefilled] = useState(false)
-  const [lastCompletedAt, setLastCompletedAt] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -81,37 +74,15 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       }
 
       try {
-        // Fetch the last complete bundle when arriving via the repeat
-        // path so the banner can name the day ("Tuesday"). Fall back to
-        // `getLastContext()` for the normal Home->Setup mount so we
-        // don't do the extra read unnecessarily.
-        if (isFromRepeat) {
-          const lc = await getLastComplete()
-          if (cancelled) return
-          if (lc) {
-            const { context } = lc.plan
-            if (context) {
-              setPlayerMode(context.playerMode)
-              setNetAvailable(context.netAvailable)
-              setWallAvailable(context.wallAvailable)
-              setTimeProfile(context.timeProfile)
-              if (context.wind === 'light' || context.wind === 'strong') {
-                setWind(context.wind)
-              }
-            }
-            setLastCompletedAt(lc.log.completedAt ?? lc.log.startedAt)
-          }
-        } else {
-          const ctx = await getLastContext()
-          if (cancelled) return
-          if (ctx) {
-            setPlayerMode(ctx.playerMode)
-            setNetAvailable(ctx.netAvailable)
-            setWallAvailable(ctx.wallAvailable)
-            setTimeProfile(ctx.timeProfile)
-            if (ctx.wind === 'light' || ctx.wind === 'strong') {
-              setWind(ctx.wind)
-            }
+        const ctx = await getLastContext()
+        if (cancelled) return
+        if (ctx) {
+          setPlayerMode(ctx.playerMode)
+          setNetAvailable(ctx.netAvailable)
+          setWallAvailable(ctx.wallAvailable)
+          setTimeProfile(ctx.timeProfile)
+          if (ctx.wind === 'light' || ctx.wind === 'strong') {
+            setWind(ctx.wind)
           }
         }
       } catch {
@@ -121,7 +92,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       }
     })()
     return () => { cancelled = true }
-  }, [isFromRepeat, isOnboarding, navigate])
+  }, [isOnboarding, navigate])
 
   const isComplete =
     playerMode !== null && netAvailable !== null && wallAvailable !== null
@@ -211,10 +182,6 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       </ScreenShell.Header>
 
       <ScreenShell.Body className="gap-6 pb-4">
-      {isFromRepeat && lastCompletedAt != null && (
-        <StaleContextBanner dayName={formatDayName(lastCompletedAt)} />
-      )}
-
       {/* Phase F8 (2026-04-19): section h2s lifted from `text-sm` to
           `text-base` to match Safety / Review / Settings (same
           semantic role across the app). See

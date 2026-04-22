@@ -116,11 +116,19 @@ describe('composeSummary: Case C (default)', () => {
     // are." so Complete reads as a handoff rather than a flat verdict.
     // Low-N case keeps its own forward-looking suffix (tested below).
     expect(out.reason).toBe(
-      'Session 3. 40 good passes today out of 60 attempts. Ready when you are.',
+      'Completed session 3: 40 good passes today out of 60 attempts. Ready when you are.',
     )
   })
 
-  it('appends the forward-looking low-N floor copy when totalAttempts < 50 and goodPasses > 0 (Phase F Unit 5 reframe)', () => {
+  // 2026-04-22 honest-copy pass: the prior low-N branch cited a
+  // "pass-rate tuning waits until 50 attempts" threshold. That copy
+  // implied an adaptation engine v0b does not have — nothing reads
+  // `review.totalAttempts` and changes the next session. Pulled.
+  // `TUNING_FLOOR_ATTEMPTS` stays reserved in `policies.ts` for the
+  // real `D104` / `O12` pass-rate progression engine when it ships.
+  // Until then, every `totalAttempts > 0` submission gets the base
+  // stats line + the standard `FORWARD_HOOK`, regardless of N.
+  it('uses the standard forward hook for low-N submissions (no tuning-engine claim)', () => {
     const review = makeReview({
       status: 'submitted',
       sessionRpe: 5,
@@ -132,29 +140,10 @@ describe('composeSummary: Case C (default)', () => {
       plan: makePlan(1),
       sessionCount: 1,
     })
-    // Phase F Unit 5 (2026-04-19): pre-Phase-F read
-    // "Not enough reps yet to trust the rate." - flat and backward-
-    // looking. Reframe preserves the evidentiary honesty (we are NOT
-    // claiming the rate yet) while carrying forward-looking valence.
     expect(out.reason).toBe(
-      'Session 1. 10 good passes today out of 20 attempts. Just getting started. I start tuning the pass rate once 50 attempts are recorded in a session. 30 more attempts to go.',
+      'Completed session 1: 10 good passes today out of 20 attempts. Ready when you are.',
     )
-  })
-
-  it('low-N copy shows singular attempt when 1 more until tuning (49 logged)', () => {
-    const review = makeReview({
-      status: 'submitted',
-      goodPasses: 30,
-      totalAttempts: 49,
-    })
-    const out = composeSummary({
-      review,
-      plan: makePlan(1),
-      sessionCount: 9,
-    })
-    expect(out.reason).toBe(
-      'Session 9. 30 good passes today out of 49 attempts. Just getting started. I start tuning the pass rate once 50 attempts are recorded in a session. 1 more attempt to go.',
-    )
+    expect(out.reason).not.toMatch(/tuning|more attempt/i)
   })
 
   it('uses singular pass/attempt in the stats line when counts are 1', () => {
@@ -169,11 +158,11 @@ describe('composeSummary: Case C (default)', () => {
       sessionCount: 10,
     })
     expect(out.reason).toBe(
-      'Session 10. 1 good pass today out of 1 attempt. Just getting started. I start tuning the pass rate once 50 attempts are recorded in a session. 49 more attempts to go.',
+      'Completed session 10: 1 good pass today out of 1 attempt. Ready when you are.',
     )
   })
 
-  it('does NOT append low-N floor when totalAttempts >= 50 (Phase F4: forward hook only)', () => {
+  it('uses the same forward hook at or above the 50-attempt floor', () => {
     const review = makeReview({
       status: 'submitted',
       goodPasses: 30,
@@ -185,11 +174,11 @@ describe('composeSummary: Case C (default)', () => {
       sessionCount: 4,
     })
     expect(out.reason).toBe(
-      'Session 4. 30 good passes today out of 50 attempts. Ready when you are.',
+      'Completed session 4: 30 good passes today out of 50 attempts. Ready when you are.',
     )
   })
 
-  it('does NOT append low-N floor when goodPasses === 0 (even if < 50 attempts); Phase F4 forward hook still appended', () => {
+  it('uses the standard forward hook when goodPasses === 0 with attempts recorded', () => {
     const review = makeReview({
       status: 'submitted',
       goodPasses: 0,
@@ -201,7 +190,7 @@ describe('composeSummary: Case C (default)', () => {
       sessionCount: 2,
     })
     expect(out.reason).toBe(
-      'Session 2. 0 good passes today out of 10 attempts. Ready when you are.',
+      'Completed session 2: 0 good passes today out of 10 attempts. Ready when you are.',
     )
   })
 
@@ -217,13 +206,13 @@ describe('composeSummary: Case C (default)', () => {
       sessionCount: 5,
     })
     expect(out.reason).toBe(
-      'Session 5. One more in the book. Ready when you are.',
+      'Completed session 5. One more in the book. Ready when you are.',
     )
   })
 
   // Partner-walkthrough polish 2026-04-22 (design review T3 / trifold T3):
   // a first-ever session deserves a subtly milestone-ish reason line,
-  // not the pattern-matched `Session 1. One more in the book.` that
+  // not the pattern-matched `Completed session 1. One more in the book.` that
   // reads identical to session 2, 5, 20 on the same path. Shape: single
   // string, same voice, no celebration theatrics, no streak claim.
   // See `docs/plans/2026-04-22-partner-walkthrough-polish.md` item 4.
@@ -244,13 +233,14 @@ describe('composeSummary: Case C (default)', () => {
       'First one\u2019s in the book. Ready when you are.',
     )
     // Explicitly NOT the session-2+ template.
-    expect(out.reason).not.toContain('Session 1.')
+    expect(out.reason).not.toContain('Completed session 1')
   })
 
-  it('falls through to the low-N branch for sessionCount === 1 when attempts were recorded', () => {
+  it('uses the stats + forward hook line for sessionCount === 1 when attempts were recorded', () => {
     // The first-session milestone line is the no-attempts path; a
-    // first-timer who actually logged reps gets the low-N tuning
-    // framing, which carries its own first-few-sessions voice.
+    // first-timer who actually logged reps gets the standard stats
+    // line + `FORWARD_HOOK`. (No tuning-engine claim in v0b — see
+    // sessionSummary.ts honest-copy comment.)
     const review = makeReview({
       status: 'submitted',
       goodPasses: 3,
@@ -261,9 +251,11 @@ describe('composeSummary: Case C (default)', () => {
       plan: makePlan(1),
       sessionCount: 1,
     })
-    expect(out.reason).toContain('Session 1.')
-    expect(out.reason).toContain('Just getting started.')
+    expect(out.reason).toBe(
+      'Completed session 1: 3 good passes today out of 5 attempts. Ready when you are.',
+    )
     expect(out.reason).not.toContain('First session')
+    expect(out.reason).not.toMatch(/tuning|more attempt/i)
   })
 })
 
