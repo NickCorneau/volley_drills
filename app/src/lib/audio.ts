@@ -182,6 +182,36 @@ function playTone(frequencyHz: number, durationSeconds: number): void {
 }
 
 /**
+ * Prime the shared AudioContext from a real user gesture without making
+ * an audible sound. iOS Safari/PWA requires audio contexts to be
+ * created/resumed from a gesture; RunScreen starts its preroll from
+ * route/effect timing, so the tap that *enters* Run must unlock audio
+ * before the first preroll tick tries to play.
+ *
+ * Safe to call from any click/tap handler. No-ops if audio is
+ * unavailable or already running; never throws.
+ */
+export function primeAudioForGesture(): void {
+  const ctx = ensureAudioContext()
+  if (!ctx) return
+  try {
+    if (ctx.state === 'suspended') {
+      void ctx.resume().catch((err) => {
+        if (!loggedAutoplayBlocked) {
+          loggedAutoplayBlocked = true
+          console.info('lib/audio: autoplay prime rejected', err)
+        }
+      })
+    }
+  } catch (err) {
+    if (!loggedGenericFailure) {
+      loggedGenericFailure = true
+      console.warn('lib/audio: audio prime failed', err)
+    }
+  }
+}
+
+/**
  * Play the block-end cue. Called from `RunScreen.handleBlockComplete`
  * alongside the existing `navigator.vibrate` call - vibrate stays for
  * Android + desktop haptics; the beep covers iOS Safari PWA where

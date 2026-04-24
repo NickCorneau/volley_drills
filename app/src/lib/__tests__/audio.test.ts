@@ -4,6 +4,7 @@ import {
   playBlockEndBeep,
   playPrerollTick,
   playSubBlockTick,
+  primeAudioForGesture,
 } from '../audio'
 
 /**
@@ -170,6 +171,19 @@ describe('lib/audio (Phase F Unit 3)', () => {
     playBlockEndBeep()
 
     expect(fake.resume).toHaveBeenCalledTimes(1)
+  })
+
+  it('primeAudioForGesture: creates and resumes AudioContext without scheduling an audible tone', () => {
+    const fake = makeFakeContext({ state: 'suspended' })
+    const Ctor = makeCtorMock(() => fake)
+    stubAudioContextCtor(Ctor)
+
+    primeAudioForGesture()
+
+    expect(Ctor).toHaveBeenCalledTimes(1)
+    expect(fake.resume).toHaveBeenCalledTimes(1)
+    expect(fake.createOscillator).not.toHaveBeenCalled()
+    expect(fake.createGain).not.toHaveBeenCalled()
   })
 
   it('playBlockEndBeep: never throws when oscillator scheduling fails', () => {

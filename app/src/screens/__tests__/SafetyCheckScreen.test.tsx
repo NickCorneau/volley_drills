@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../db'
 import { buildDraft } from '../../domain/sessionBuilder'
 import { FORBIDDEN_RE } from '../../lib/copyGuard'
@@ -73,6 +73,10 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
   beforeEach(async () => {
     await clearDb()
     await seedDraft()
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
   })
 
   it('renders the pain consequence line under the pain question', async () => {
@@ -189,6 +193,36 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     // applies to every session regardless of pain status - first.
     expect(headings[0].textContent).toMatch(/when did you last train/i)
     expect(headings[1].textContent).toMatch(/any pain.*sharp/i)
+  })
+
+  it('primes audio from the Continue tap before routing to Run (iOS beep unlock)', async () => {
+    const user = userEvent.setup()
+    const audioContextCtor = vi.fn(function (this: unknown) {
+      return {
+        state: 'running',
+        resume: vi.fn(() => Promise.resolve()),
+        close: vi.fn(),
+      }
+    })
+    vi.stubGlobal('AudioContext', audioContextCtor)
+    vi.stubGlobal('webkitAudioContext', undefined)
+
+    render(
+      <MemoryRouter initialEntries={['/safety']}>
+        <Routes>
+          <Route path="/safety" element={<SafetyCheckScreen />} />
+          <Route path="/run" element={<div data-testid="run-route">run</div>} />
+          <Route path="/setup" element={<div data-testid="setup">setup</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await user.click(await screen.findByRole('radio', { name: /^today$/i }))
+    await user.click(screen.getByRole('button', { name: /^no$/i }))
+    await user.click(screen.getByRole('button', { name: /^continue$/i }))
+
+    expect(audioContextCtor).toHaveBeenCalledTimes(1)
+    expect(await screen.findByTestId('run-route')).toBeInTheDocument()
   })
 })
 

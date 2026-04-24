@@ -13,6 +13,7 @@ import {
   buildRecoveryDraft,
   estimateRecoverySessionMinutes,
 } from '../domain/sessionBuilder'
+import { primeAudioForGesture } from '../lib/audio'
 import { routes } from '../routes'
 import {
   createSessionFromDraft,
@@ -172,6 +173,11 @@ export function SafetyCheckScreen() {
     if (creating.current) return
     if (painFlag === null || !recencyChosen) return
     if (!draft) return
+    // iOS Safari/PWA only unlocks Web Audio from a real user gesture.
+    // RunScreen's preroll starts after routing/effect timing, so prime
+    // the shared AudioContext here while the Continue tap is still the
+    // active gesture. No audible tone is scheduled.
+    primeAudioForGesture()
     creating.current = true
     setIsCreating(true)
     setCreateError(null)
