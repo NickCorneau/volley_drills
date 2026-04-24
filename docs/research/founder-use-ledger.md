@@ -93,6 +93,10 @@ Named explicitly so the Tier 1b trigger's "specific content gap" half reads legi
 
 Implication for Tier 1b authoring: the founder-session half of the Tier 1b trigger (`docs/plans/2026-04-20-m001-tier1-implementation.md` lines 272–276) is formally met as of 2026-04-24. The serving-first sequencing is supported by founder-session evidence (gaps 2 + 3). Tier 1b content authoring may begin per the scope in `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md`, subject to the §R7 exit-3 decision on `d36`.
 
+### Operating notes (courtside / device audio)
+
+- **iOS hardware silent mode (mute switch).** The physical ring/silent switch can suppress audible Web Audio beeps and ticks in Safari/PWA—including block-end cues—even when the app, Screen Wake Lock, and first-interaction audio priming are working as intended. That behavior respects user hardware intent; it is not an app bug. The founder confirmed this as the root cause after debugging "no beeps on phone" (see reconciled Tier 1b item #17 and the wake-lock / audio-context work tied to content-gap item 4 above).
+
 
 ## Week rollups
 
