@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { SafetyIcon } from '../components/SafetyIcon'
 import { UpdatePrompt } from '../components/UpdatePrompt'
 import { Button, Card, ScreenShell, StatusMessage } from '../components/ui'
@@ -328,9 +328,33 @@ export function CompleteScreen() {
             <SavedCheckIcon />
             {storageCopy.primary}
           </p>
-          <p className="max-w-[320px] text-center text-xs text-text-secondary">
-            {storageCopy.secondary}
-          </p>
+          {/* 2026-04-23 walkthrough closeout polish item 3 (merged
+              Review / Complete proposal in
+              `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`
+              + plan
+              `docs/plans/2026-04-23-walkthrough-closeout-polish.md`):
+              the posture-sensitive Safari-eviction footnote was
+              compressed off the terminal verdict surface and into the
+              Settings "About local storage" sub-section. The save
+              line above (`storageCopy.primary`) stays exactly as-is
+              — it is the single most trust-building sentence in the
+              product per the design review — and a small
+              `Why is this?` affordance carries the tester to the
+              fuller explanation when they want it, instead of
+              dumping three posture variants of eviction copy below
+              the verdict on every session completion. D118
+              three-state durability posture is unchanged; this is a
+              placement edit, not a durability-claim edit. The
+              explainer in Settings is driven by the same
+              `getStorageCopy(posture)` source of truth, so the
+              Settings copy and what would have been rendered here
+              stay in lockstep. */}
+          <Link
+            to={routes.settings()}
+            className="text-xs font-medium text-text-secondary underline underline-offset-2 hover:text-text-primary"
+          >
+            Why is this?
+          </Link>
         </div>
       </ScreenShell.Footer>
     </ScreenShell>

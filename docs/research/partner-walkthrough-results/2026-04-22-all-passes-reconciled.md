@@ -7,7 +7,7 @@ stage: validation
 type: research
 summary: "Final reconciliation of the four 2026-04-22 passes (workflow, shibui, design review, trifold synthesis) and the three 2026-04-21 inputs they build on (Seb's Tier 1a partner walkthrough with its founder-response dispositions, Player 3 amateur test, iPhone viewport review). Scrubs the trifold's proposed Tier 1b bundle against the already-landed pre-close work catalogued in Seb's walkthrough, absorbs Seb's post-close (N1–N3) mentions and the Condition 3 provisional-pass signal, re-evaluates the `Chosen because:` tension in light of its pre-close relocation + typography bump, and leaves a tighter open list plus updated discipline guardrails. Supersedes the trifold on priority list only; the trifold's finding-level reasoning and tension resolutions remain valid."
 authority: "Canonical priority list across all partner-walkthrough feedback through 2026-04-22. Supersedes the Tier 1b bundles in `2026-04-22-trifold-synthesis.md`, `2026-04-22-synthesis-workflow-and-shibui.md`, and `2026-04-22-ux-workflow-manual-test.md`. Defers to Seb's founder-response dispositions (`2026-04-21-tier-1a-walkthrough.md`) on any item where they disagree, and to the adversarial memo's authoring-budget cap on unlock decisions."
-last_updated: 2026-04-22
+last_updated: 2026-04-24
 depends_on:
   - docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md
   - docs/research/partner-walkthrough-results/2026-04-22-synthesis-workflow-and-shibui.md
@@ -129,22 +129,22 @@ The trifold resolved this as "delete from Run, re-home in Swap sheet + Tier-2 mo
 
 Ordered by attention-tax-per-LOC, scrubbed against landings. Items tagged by source: **W** workflow, **S** shibui, **D** design review, **SEB** Seb walkthrough / post-close, **P3** Player 3, **IV** iPhone viewport.
 
-1. **Neutral `disabled` CTA token** distinct from peach; apply to Setup `Build session` and Review `Submit`/`Done`. [D A1]
-2. **Reword `0 days` → `Today / Yesterday / 2+ days ago / First time`.** [W + S + D + P3 + IV]
-3. **Finish the Review cut** (RPE 11 → 3 anchors; delete Quick tags; divider-line treatment; delete 2-hour countdown; `Done` / `Finish later` equal weight; fully hide Good-passes card on non-count drills, not just default-notCaptured). [W + S + D, building on Seb P1-12 + P2-3]
-4. **Delete 2-hour Review-window copy**; compress Complete Safari-eviction footnote to Settings; keep the `✓ Saved on this device` line. [W + S + D]
+1. **Neutral `disabled` CTA token** distinct from peach; apply to Setup `Build session` and Review `Submit`/`Done`. **[Landed 2026-04-22]** per `docs/plans/2026-04-22-partner-walkthrough-polish.md` item 2. [D A1]
+2. **Reword `0 days` → `Today / Yesterday / 2+ days ago / First time`.** **[Landed 2026-04-22]** per `docs/plans/2026-04-22-partner-walkthrough-polish.md` item 1 — display labels mapped in `PRIMARY_RECENCY_LABEL` while internal `trainingRecency` string values stay unchanged for Dexie / adaptation compatibility. [W + S + D + P3 + IV]
+3. **Finish the Review cut** (RPE 11 → 3 anchors; delete Quick tags; divider-line treatment; delete 2-hour countdown; `Done` / `Finish later` equal weight; fully hide Good-passes card on non-count drills, not just default-notCaptured). **[Landed 2026-04-24]** per `docs/plans/2026-04-23-walkthrough-closeout-polish.md` items 2 + 3. RPE chips are now `Easy / Right / Hard` mapping to canonical sessionRpe 3 / 5 / 7 via `app/src/components/rpeSelectorUtils.ts` (non-canonical historical values snap to nearest chip for display, not mutated on disk); `QuickTagChips` component deleted; hairline divider between RPE and Good-passes; 2-hour `This session stops counting in about N hr M min` subtitle removed; Submit → Done + Finish later upgraded to `variant="primary"` full-width; Good-passes gated on `inferMainSkillMetricType` being count-based. [W + S + D, building on Seb P1-12 + P2-3]
+4. **Delete 2-hour Review-window copy**; compress Complete Safari-eviction footnote to Settings; keep the `✓ Saved on this device` line. **[Landed 2026-04-24]** per `docs/plans/2026-04-23-walkthrough-closeout-polish.md` item 3. Posture-sensitive secondary moved into a new Settings `About local storage` sub-section driven by the same `getStorageCopy(posture)` source of truth; Complete carries a small `Why is this?` link. `D118` three-state durability posture unchanged. [W + S + D]
 5. **Auto-fill training recency** for returning users — `Today — tap to change` — reading from the app's own Dexie tables. [S, W-accepted]
 6. **Persist `Net` / `Wall` across sessions**; ask only on first setup and on explicit "conditions different today." [S, W-accepted]
 7. **Truncate-with-expand pattern for numbered warm-up steps** (Beach Prep Three blob). [D + P3, building on Seb P1-8's stretch-list enumeration landing]
 8. **Visual block-end countdown cue** on Run — thicker progress bar + "0:47 left" chip. [D A4] Complements the already-landed audio tick (Seb P2-2).
-9. **Reproduce and file the effort / tag state anomaly before D91** — even if the Quick-tags card is deleted in item 3, confirm the path is the fix, not silent latency. [D A6]
-10. **Gate "keep phone unlocked" warm-up hint** to first-time-only or on observed block-end miss. [W + P3]
+9. **Reproduce and file the effort / tag state anomaly before D91** — even if the Quick-tags card is deleted in item 3, confirm the path is the fix, not silent latency. [D A6] **Note (2026-04-24):** the Quick-tags card deletion landed in this pass (item 3 above), so the user-visible surface for the anomaly is gone; the underlying reproduction + test-case work remains open for code-hygiene / D91 reasons.
+10. **Gate "keep phone unlocked" warm-up hint** to first-time-only or on observed block-end miss. **[Landed 2026-04-22]** per `docs/plans/2026-04-22-partner-walkthrough-polish.md` item 5 — `storageMeta.ux.prerollHintDismissed` gate. [W + P3]
 11. **Skip-review confirmation modal** matching the `End session early?` pattern. [W]
-12. **First-session-only verdict string** on Complete (`Session 1 → logged. First one is in the book.`). [D + T3]
+12. **First-session-only verdict string** on Complete (`Session 1 → logged. First one is in the book.`). **[Landed 2026-04-22]** per `docs/plans/2026-04-22-partner-walkthrough-polish.md` item 4. [D + T3]
 13. **Quiet `Logged: N sessions · HH:MM total` footer** near Settings. [D A5]
 14. **Accent color demotion** across non-action surfaces. [S + D A1-adjacent]
-15. `**Shorten block` button styling on Transition** — outlined pill at CTA width. [D]
-16. `**PainOverrideCard` "we lower the load, not the time — your pick" microcopy.** [SEB wording-check]
+15. **`Shorten block` button styling on Transition** — outlined pill at CTA width. **[Landed 2026-04-22]** per `docs/plans/2026-04-22-partner-walkthrough-polish.md` item 6. [D]
+16. **`PainOverrideCard` "we lower the load, not the time — your pick" microcopy.** **[Landed 2026-04-22]** per `docs/plans/2026-04-22-partner-walkthrough-polish.md` item 3 — shipped in courtside-copy-rule §4 compliant period form (`We lower the load, not the time. Your pick.`) rather than the walkthrough-verbatim em-dash form, because rule §4 explicitly forbids em-dashes in user-visible prose and cites this exact sentence as the canonical "Bad → Good" example. Same meaning, plain punctuation. [SEB wording-check]
 
 ### Tier 1b — gated by founder-session trigger (authoring-budget cap discipline)
 
@@ -187,23 +187,23 @@ The single most important governance fact the same-day synthesis passes were una
 
 ## Updated pre-D91 discipline checklist (scrubbed)
 
-Strictly items that are still open and required before a D91 cohort kickoff. Items landed via Seb pre-close are already struck.
+Strictly items that are still open and required before a D91 cohort kickoff. Items landed via Seb pre-close are already struck; 2026-04-22 polish-pass ships and the 2026-04-24 closeout-polish ship are annotated inline.
 
-- Neutral `disabled` CTA token shipped (items 1 above).
-- `Today / Yesterday / 2+ days ago / First time` wording live on Safety (item 2).
-- Review cut completed per merged proposal (item 3).
-- 2-hour Review-window copy removed; Complete save-line intact; Safari-eviction footnote moved to Settings (item 4).
-- Training recency auto-fills for returning users; `Net` / `Wall` persist (items 5, 6).
-- Warm-up numbered-step truncate-with-expand (item 7).
-- Visual block-end countdown cue on Run (item 8).
-- Effort / tag state anomaly reproduced and fixed with a regression test (item 9).
-- "Keep phone unlocked" hint gated (item 10).
-- Skip-review confirmation modal (item 11).
-- First-session-only verdict string on Complete (item 12).
-- `Logged: N sessions · HH:MM total` footer (item 13).
-- Accent color audit complete (item 14).
-- `Shorten block` styling on Transition (item 15).
-- `PainOverrideCard` microcopy (item 16).
+- ✅ Neutral `disabled` CTA token shipped (item 1). [2026-04-22 polish pass]
+- ✅ `Today / Yesterday / 2+ days ago / First time` wording live on Safety (item 2). [2026-04-22 polish pass — display-label mapping via `PRIMARY_RECENCY_LABEL`]
+- ✅ Review cut completed per merged proposal (item 3). [2026-04-24 closeout polish — RPE 3-chip, Quick tags deleted, divider, Done / Finish later equal weight, Good-passes gated on count metric]
+- ✅ 2-hour Review-window copy removed; Complete save-line intact; Safari-eviction footnote moved to Settings (item 4). [2026-04-24 closeout polish — `About local storage` sub-section on Settings + `Why is this?` link on Complete]
+- Training recency auto-fills for returning users; `Net` / `Wall` persist (items 5, 6). **Still open.** Founder-session-trigger-gated per the authoring-budget cap.
+- Warm-up numbered-step truncate-with-expand (item 7). **Still open.**
+- Visual block-end countdown cue on Run (item 8). **Still open.**
+- Effort / tag state anomaly reproduced and fixed with a regression test (item 9). **User-visible surface gone** via 2026-04-24 Quick-tags card deletion; underlying repro remains open for code-hygiene / D91.
+- ✅ "Keep phone unlocked" hint gated (item 10). [2026-04-22 polish pass — `storageMeta.ux.prerollHintDismissed`]
+- Skip-review confirmation modal (item 11). **Still open.**
+- ✅ First-session-only verdict string on Complete (item 12). [2026-04-22 polish pass]
+- `Logged: N sessions · HH:MM total` footer (item 13). **Still open.**
+- Accent color audit complete (item 14). **Still open.**
+- ✅ `Shorten block` styling on Transition (item 15). [2026-04-22 polish pass]
+- ✅ `PainOverrideCard` microcopy (item 16). [2026-04-22 polish pass — courtside-copy §4 period form]
 - Playwright hit-area overlay at 375 px on `/review` confirms 44 pt floor on the reduced chip row.
 - **Repeat pair session on sand** (Seb Pass 2 ran on grass; sand-specific readability + warmup behavior still unverified).
 - Physical iPhone pass for safe-area + Dynamic Type + real sunlight scheduled.

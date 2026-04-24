@@ -82,7 +82,9 @@ describe('ReviewScreen Finish Later (C-1 Unit 8)', () => {
     renderAt('exec-later')
 
     await screen.findByRole('heading', { name: /quick review/i })
-    await user.click(screen.getByRole('radio', { name: /^5/ }))
+    // 2026-04-23 polish: RPE is a 3-chip picker (Easy=3 / Right=5 /
+    // Hard=7). `Right` maps to canonical sessionRpe=5.
+    await user.click(screen.getByRole('radio', { name: /^right$/i }))
     await user.click(screen.getByRole('button', { name: /finish later/i }))
 
     expect(await screen.findByTestId('home-route')).toBeInTheDocument()
@@ -99,7 +101,7 @@ describe('ReviewScreen Finish Later (C-1 Unit 8)', () => {
     // First mount: enter RPE, Finish later.
     const first = renderAt('exec-return')
     await screen.findByRole('heading', { name: /quick review/i })
-    await user.click(screen.getByRole('radio', { name: /^7/ }))
+    await user.click(screen.getByRole('radio', { name: /^hard$/i }))
     await user.click(screen.getByRole('button', { name: /finish later/i }))
     await screen.findByTestId('home-route')
     await waitForDraft('exec-return')
@@ -107,7 +109,7 @@ describe('ReviewScreen Finish Later (C-1 Unit 8)', () => {
 
     // Second mount: form comes up pre-seeded with the saved draft.
     renderAt('exec-return')
-    const rpeChip = await screen.findByRole('radio', { name: /^7/ })
+    const rpeChip = await screen.findByRole('radio', { name: /^hard$/i })
     expect(rpeChip).toHaveAttribute('aria-checked', 'true')
   })
 
@@ -127,7 +129,7 @@ describe('ReviewScreen Finish Later (C-1 Unit 8)', () => {
     try {
       renderAt('exec-save-fail')
       await screen.findByRole('heading', { name: /quick review/i })
-      await user.click(screen.getByRole('radio', { name: /^6/ }))
+      await user.click(screen.getByRole('radio', { name: /^right$/i }))
 
       await user.click(screen.getByRole('button', { name: /finish later/i }))
 
@@ -173,7 +175,7 @@ describe('ReviewScreen Finish Later (C-1 Unit 8)', () => {
 
     renderAt('exec-ended')
     await screen.findByRole('heading', { name: /quick review/i })
-    await user.click(screen.getByRole('radio', { name: /^3/ }))
+    await user.click(screen.getByRole('radio', { name: /^easy$/i }))
     // Don't pick an incomplete reason - Finish later should still work.
     await user.click(screen.getByRole('button', { name: /finish later/i }))
 

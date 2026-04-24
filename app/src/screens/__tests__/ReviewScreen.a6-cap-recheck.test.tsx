@@ -87,9 +87,11 @@ describe('ReviewScreen A6 submit-time cap re-check', () => {
     renderAt('exec-inside')
     await screen.findByRole('heading', { name: /quick review/i })
 
-    // Pick an RPE so Submit becomes enabled.
-    await user.click(screen.getByRole('radio', { name: /^6/ }))
-    await user.click(screen.getByRole('button', { name: /submit review/i }))
+    // 2026-04-23 polish: RPE is 3-chip (Easy=3 / Right=5 / Hard=7).
+    // Pick `Right` so Done becomes enabled and stored sessionRpe is
+    // the canonical `Right` anchor value (5).
+    await user.click(screen.getByRole('radio', { name: /^right$/i }))
+    await user.click(screen.getByRole('button', { name: /^done$/i }))
 
     await screen.findByTestId('complete-route')
 
@@ -98,7 +100,7 @@ describe('ReviewScreen A6 submit-time cap re-check', () => {
       .equals('exec-inside')
       .first()
     expect(stored?.status).toBe('submitted')
-    expect(stored?.sessionRpe).toBe(6)
+    expect(stored?.sessionRpe).toBe(5)
   })
 
   it('past the cap while filling the form: Submit routes to /complete with an expired skipped stub and no submitted review', async () => {
@@ -111,7 +113,9 @@ describe('ReviewScreen A6 submit-time cap re-check', () => {
 
     renderAt('exec-crosscap')
     await screen.findByRole('heading', { name: /quick review/i })
-    await user.click(screen.getByRole('radio', { name: /^7/ }))
+    // Pick `Hard` (canonical sessionRpe=7) so the subsequent assertion
+    // on the preserved draft payload matches.
+    await user.click(screen.getByRole('radio', { name: /^hard$/i }))
 
     // Simulate the tester sitting through the 2 h cap: bump the clock so
     // Date.now() now reports past-cap while the form-state render is
@@ -120,7 +124,7 @@ describe('ReviewScreen A6 submit-time cap re-check', () => {
       .spyOn(Date, 'now')
       .mockReturnValue(completedAt + FINISH_LATER_CAP_MS + 60_000)
 
-    await user.click(screen.getByRole('button', { name: /submit review/i }))
+    await user.click(screen.getByRole('button', { name: /^done$/i }))
 
     await screen.findByTestId('complete-route')
 

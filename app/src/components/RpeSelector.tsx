@@ -1,55 +1,47 @@
-// V0B-01 / D120: Discrete 0-10 RPE chip grid.
+// V0B-01 / D120 / 2026-04-23 walkthrough closeout polish:
 //
-// Replaces the v0a 4-band Easy/Moderate/Hard/Max collapse with an 11-chip
-// 0-10 tappable grid plus sparse Borg anchors (`0 rest / 3 easy /
-// 5 moderate / 7 hard / 10 max`). Single-tap selection; chips meet the
-// courtside 54-60 px touch-target baseline (D8, UX-01).
+// Three-chip effort picker (Easy / Right / Hard) that captures the
+// session RPE as a canonical numeric band value. Collapses the prior
+// 11-chip 0-10 grid per the merged Review proposal in
+// `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`
+// and the closeout polish plan
+// `docs/plans/2026-04-23-walkthrough-closeout-polish.md`.
 //
-// Why discrete chips and not a slider: slider controls produce higher
-// nonresponse and lower mean scores than discrete buttons in survey
-// experiments, and one-handed mobile targets perform better when they are
-// big and discrete (NN/g ~1 cm minimum; Conradi 14x14 mm). Serious training
-// precedent (TrainingPeaks 10-point, Garmin 1-10, Fitbod discrete per-exercise)
-// supports discrete-grid over slider. See docs/specs/m001-review-micro-spec.md
-// and docs/plans/2026-04-12-v0a-to-v0b-transition.md (V0B-01).
+// Why three and not eleven: the four 2026-04-22 synthesis passes
+// (workflow, shibui, design review, trifold) and Seb P1-12 converged on
+// the 0-10 scale reading as "RPE fluency assumption" - courtside
+// decision-making does not need to distinguish a 6 from a 7, it needs
+// a one-tap read of how the session felt. The persisted `sessionRpe`
+// field remains a number in the 0-10 domain so Dexie records, the
+// `composeSummary` thresholds in `app/src/domain/sessionSummary`, the
+// `effortLabel` bands in `app/src/lib/format.ts`, the migration
+// backfill in `phase-c0-schema-v4.spec.ts`, and the adaptation-engine
+// tuning constants (`TUNING_FLOOR_ATTEMPTS` etc. in
+// `app/src/domain/policies.ts`) all continue to operate on the same
+// numeric range - the capture UI just stops asking for granularity it
+// was never going to use.
 //
-// Phase F11 (2026-04-19): anchor words moved out of the individual chips
-// into a single legend rail below the grid.
+// Chip-to-RPE mapping (canonical band anchors) lives in
+// `rpeSelectorUtils.ts`:
+//   Easy  -> 3  (Borg anchor "easy"     -> `effortLabel` band "Easy")
+//   Right -> 5  (Borg anchor "moderate" -> `effortLabel` band "Moderate")
+//   Hard  -> 7  (Borg anchor "hard"     -> `effortLabel` band "Hard")
 //
-// Feedback pass 2026-04-21: the legend rail is removed entirely. Field
-// testers read the `0 rest · 3 easy · 5 moderate · 7 hard · 10 max`
-// caption as visual noise - they preferred tapping a number and letting
-// the live `SELECTED_HINT` line ("Hard", "Very hard", …) reveal the
-// anchor on demand. Per-button `aria-label` on each chip still carries
-// "3, easy" etc. for screen readers, so the Borg anchor meaning is not
-// lost; it just no longer consumes vertical space on every session.
+// "Right" is the label per the merged proposal (not "Moderate"), to
+// match the Quick-tags vocabulary that was simultaneously deleted
+// ("About right" / "Too easy" / "Too hard") and read naturally at
+// arm's length. Downstream summaries still say "Moderate" via
+// `effortLabel(5)`; the capture label and the summary label live in
+// different vocabulary spaces on purpose.
+//
+// Historical captures: existing records in Dexie may hold any value
+// 0-10. Rehydration uses `pickChipForRpe` (see `rpeSelectorUtils.ts`)
+// to snap a non-canonical stored value to the nearest chip for
+// display, so a rehydrated draft with `sessionRpe: 6` lands on
+// `Right` (nearest canonical 5). The stored value is not mutated
+// until the user taps a different chip.
 
-const RPE_VALUES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const
-
-// Sparse Borg anchors displayed beneath the grid. Semantic labels keyed by
-// value so the control stays a primary numeric affordance and the anchors
-// are supportive captions, not replacement vocabulary.
-const ANCHORS: Record<number, string> = {
-  0: 'rest',
-  3: 'easy',
-  5: 'moderate',
-  7: 'hard',
-  10: 'max',
-}
-
-const SELECTED_HINT: Record<number, string> = {
-  0: 'No effort',
-  1: 'Very light',
-  2: 'Light',
-  3: 'Easy',
-  4: 'Moderate-easy',
-  5: 'Moderate',
-  6: 'Moderate-hard',
-  7: 'Hard',
-  8: 'Very hard',
-  9: 'Near max',
-  10: 'Max effort',
-}
+import { EFFORT_CHIPS, pickChipForRpe } from './rpeSelectorUtils'
 
 type RpeSelectorProps = {
   value: number | null
@@ -57,8 +49,8 @@ type RpeSelectorProps = {
   /**
    * ID of the heading element labelling this control. Defaults to the
    * ReviewScreen heading (`rpe-heading`) but is overridable so the
-   * component can be reused on other surfaces without silently losing its
-   * label when a second instance renders. Red-team UX #13.
+   * component can be reused on other surfaces without silently losing
+   * its label when a second instance renders. Red-team UX #13.
    */
   ariaLabelledBy?: string
 }
@@ -68,51 +60,43 @@ export function RpeSelector({
   onChange,
   ariaLabelledBy = 'rpe-heading',
 }: RpeSelectorProps) {
+  const selectedValue = pickChipForRpe(value)
   return (
-    <div className="flex flex-col gap-3">
-      <div
-        className="grid grid-cols-6 gap-2"
-        role="radiogroup"
-        aria-labelledby={ariaLabelledBy}
-      >
-        {RPE_VALUES.map((n) => {
-          const selected = value === n
-          const anchor = ANCHORS[n]
-          return (
-            <button
-              key={n}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              aria-label={anchor ? `${n}, ${anchor}` : `${n}`}
-              onClick={() => onChange(n)}
-              className={[
-                'flex min-h-[54px] items-center justify-center rounded-[12px] px-1 py-1 text-center transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
-                // Phase F11 (2026-04-19): RPE chips are clickable in
-                // either state (tap to pick, tap a different chip to
-                // change). Mirrors `QuickTagChips`: selected chips
-                // darken via `accent-pressed`; unselected chips use
-                // `brightness-*` so the warm base tone survives the
-                // hover / press cue.
-                selected
-                  ? 'bg-accent text-white hover:bg-accent-pressed active:bg-accent-pressed'
-                  : 'bg-bg-warm text-text-primary hover:brightness-95 active:brightness-90',
-              ].join(' ')}
-            >
-              <span className="text-lg font-semibold leading-none tabular-nums">
-                {n}
-              </span>
-            </button>
-          )
-        })}
-      </div>
-      <p
-        className="min-h-[1.25rem] text-center text-xs text-text-secondary"
-        aria-live="polite"
-      >
-        {value !== null ? SELECTED_HINT[value] : 'Tap a number to rate effort'}
-      </p>
+    <div
+      className="grid grid-cols-3 gap-2"
+      role="radiogroup"
+      aria-labelledby={ariaLabelledBy}
+    >
+      {EFFORT_CHIPS.map((chip) => {
+        const selected = selectedValue === chip.value
+        return (
+          <button
+            key={chip.label}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onChange(chip.value)}
+            className={[
+              'flex min-h-[54px] items-center justify-center rounded-[12px] px-2 py-2 text-center transition-colors',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
+              // Design review A2 (neutral outline default on
+              // unselected chips) so tappable things look tappable on
+              // the reduced 3-chip row. Selected chips darken via
+              // `accent-pressed`; unselected chips keep a hairline
+              // border on a neutral surface and use `brightness-*` to
+              // give a hover/press cue without swapping the surface
+              // tone on touch.
+              selected
+                ? 'bg-accent text-white hover:bg-accent-pressed active:bg-accent-pressed'
+                : 'border border-text-secondary/25 bg-bg-primary text-text-primary hover:brightness-95 active:brightness-90',
+            ].join(' ')}
+          >
+            <span className="text-base font-semibold leading-none">
+              {chip.label}
+            </span>
+          </button>
+        )
+      })}
     </div>
   )
 }

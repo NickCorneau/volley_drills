@@ -7,8 +7,10 @@ import {
   ScreenShell,
   StatusMessage,
 } from '../components/ui'
-import { downloadExport } from '../services/export'
+import { useInstallPosture } from '../hooks/useInstallPosture'
 import { isSchemaBlocked } from '../lib/schema-blocked'
+import { getStorageCopy } from '../lib/storageCopy'
+import { downloadExport } from '../services/export'
 import { routes } from '../routes'
 
 /**
@@ -39,6 +41,15 @@ export function SettingsScreen() {
   const navigate = useNavigate()
   const acting = useRef(false)
   const [state, setState] = useState<ExportState>({ kind: 'idle' })
+  // 2026-04-23 walkthrough closeout polish item 3: the
+  // posture-sensitive Safari-eviction explainer moved off the Complete
+  // screen's terminal verdict surface and into this sub-section. The
+  // three D118 posture variants (browser-tab / installed-not-persisted
+  // / installed-persisted) are authoritatively sourced from
+  // `storageCopy.ts` so the Complete `Why is this?` link and this
+  // detail stay in lockstep if the posture copy is revised later.
+  const { posture } = useInstallPosture()
+  const storageCopy = getStorageCopy(posture)
 
   const handleExport = useCallback(async () => {
     if (acting.current) return
@@ -115,6 +126,44 @@ export function SettingsScreen() {
             <StatusMessage variant="error" message={state.message} />
           )}
         </Card>
+
+        {/* 2026-04-23 walkthrough closeout polish item 3: About local
+            storage sub-section, below the Export card. Scope-guardian
+            A7 discipline (Settings stays single-card minimal in Tier
+            1b) allows this addition because it is the *same* D118
+            copy previously on CompleteScreen's terminal verdict
+            surface, not net-new content — it moved here to keep the
+            Complete screen shibui-calm and to give the explainer a
+            permanent home users can consult on their own time. Per
+            the posture-sensitive `storageCopy.ts`, the headline stays
+            "Saved on this device" (installed states) or "Saved in
+            this browser on this device" (browser-tab) and the body
+            carries the posture-specific durability caveat. This is
+            the surface that the Complete `Why is this?` link lands
+            on. */}
+        <section
+          aria-labelledby="settings-storage-heading"
+          data-testid="settings-storage-info"
+          data-posture={posture}
+          className="flex flex-col gap-2 rounded-[12px] border border-text-secondary/15 bg-bg-warm/40 p-4"
+        >
+          <h2
+            id="settings-storage-heading"
+            className="text-sm font-semibold text-text-primary"
+          >
+            About local storage
+          </h2>
+          <p className="text-sm font-medium text-text-primary">
+            {storageCopy.primary}
+          </p>
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {storageCopy.secondary}
+          </p>
+          <p className="text-sm leading-relaxed text-text-secondary">
+            Use Export training records above to move your history
+            between devices or keep a copy off-device.
+          </p>
+        </section>
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="pt-3">

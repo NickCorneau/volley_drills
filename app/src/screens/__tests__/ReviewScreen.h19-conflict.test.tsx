@@ -84,8 +84,11 @@ describe('ReviewScreen H19 conflict handoff', () => {
       totalAttempts: 10,
     })
 
-    await user.click(screen.getByRole('radio', { name: /^8/ }))
-    await user.click(screen.getByRole('button', { name: /submit review/i }))
+    // 2026-04-23 polish: RPE is 3-chip (Easy=3 / Right=5 / Hard=7).
+    // The user-input value here is noise — the conflict path aborts
+    // the submit without writing — so any chip works.
+    await user.click(screen.getByRole('radio', { name: /^hard$/i }))
+    await user.click(screen.getByRole('button', { name: /^done$/i }))
 
     // Differentiated H19 copy: "already reviewed" is honest for the
     // submitted case.
@@ -123,8 +126,8 @@ describe('ReviewScreen H19 conflict handoff', () => {
       status: 'skipped',
     })
 
-    await user.click(screen.getByRole('radio', { name: /^6/ }))
-    await user.click(screen.getByRole('button', { name: /submit review/i }))
+    await user.click(screen.getByRole('radio', { name: /^right$/i }))
+    await user.click(screen.getByRole('button', { name: /^done$/i }))
 
     // Differentiated H19 copy: "already skipped" must NOT claim "already
     // reviewed" for a session that was explicitly skipped. adv-3 called
@@ -152,8 +155,8 @@ describe('ReviewScreen H19 conflict handoff', () => {
       totalAttempts: 9,
     })
 
-    await user.click(screen.getByRole('radio', { name: /^2/ }))
-    await user.click(screen.getByRole('button', { name: /submit review/i }))
+    await user.click(screen.getByRole('radio', { name: /^easy$/i }))
+    await user.click(screen.getByRole('button', { name: /^done$/i }))
 
     await user.click(
       await screen.findByRole('button', { name: /view saved review/i }),

@@ -12,6 +12,14 @@ import { ReviewScreen } from '../ReviewScreen'
  * - Re-mounting for the same execId seeds the form state from the draft.
  * - `notCaptured` chip zeroes the metric and tags the review
  *   `quickTags: ['notCaptured']`; the draft persists that state.
+ *
+ * 2026-04-23 walkthrough closeout polish: RpeSelector collapsed from 11
+ * numeric chips to 3 labelled chips (Easy=3 / Right=5 / Hard=7) per
+ * `docs/plans/2026-04-23-walkthrough-closeout-polish.md`. Radio name
+ * matchers below use the new labels; sessionRpe values asserted below
+ * match the canonical chip values. Non-canonical historical draft
+ * values still rehydrate (snapped to nearest chip by
+ * `pickChipForRpe`), covered by the rehydrate test below.
  */
 
 async function clearDb() {
@@ -81,16 +89,20 @@ describe('ReviewScreen draft persistence (C-1 Unit 7)', () => {
     renderAt('exec-first')
 
     await screen.findByRole('heading', { name: /quick review/i })
-    await user.click(screen.getByRole('radio', { name: /^7/ }))
+    await user.click(screen.getByRole('radio', { name: /^hard$/i }))
 
     // Draft write is fire-and-forget; wait a tick for Dexie.
     const draft = await waitForDraft('exec-first')
     expect(draft?.status).toBe('draft')
+    // Hard chip maps to canonical sessionRpe=7 (Borg "hard" anchor).
     expect(draft?.sessionRpe).toBe(7)
   })
 
-  it('rehydrates form state from an existing draft on mount', async () => {
+  it('rehydrates form state from an existing draft on mount (snaps non-canonical RPE to nearest chip)', async () => {
     await seed('exec-reload')
+    // Historical draft carries sessionRpe=8 from the old 11-chip
+    // picker. After 2026-04-23, the 3-chip UI is Easy=3 / Right=5 /
+    // Hard=7. `pickChipForRpe(8)` snaps to Hard (nearest canonical).
     await db.sessionReviews.put({
       id: `review-exec-reload`,
       executionLogId: 'exec-reload',
@@ -104,9 +116,8 @@ describe('ReviewScreen draft persistence (C-1 Unit 7)', () => {
     renderAt('exec-reload')
     await screen.findByRole('heading', { name: /quick review/i })
 
-    // Verify the RPE chip comes up pre-selected (aria-checked=true).
-    const rpeChip = await screen.findByRole('radio', { name: /^8/ })
-    expect(rpeChip).toHaveAttribute('aria-checked', 'true')
+    const hardChip = await screen.findByRole('radio', { name: /^hard$/i })
+    expect(hardChip).toHaveAttribute('aria-checked', 'true')
   })
 
   it('notCaptured chip tags the draft with quickTags: [notCaptured] and zeros the metric', async () => {
@@ -123,7 +134,7 @@ describe('ReviewScreen draft persistence (C-1 Unit 7)', () => {
 
     // Pick an RPE to trigger the draft write (notCaptured alone is not a
     // "meaningful change" for UX purposes - the tester can un-tap it).
-    await user.click(screen.getByRole('radio', { name: /^4/ }))
+    await user.click(screen.getByRole('radio', { name: /^easy$/i }))
 
     const draft = await waitForDraft('exec-notcap')
     expect(draft?.status).toBe('draft')

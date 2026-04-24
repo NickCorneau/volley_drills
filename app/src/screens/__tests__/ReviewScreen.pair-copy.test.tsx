@@ -81,12 +81,17 @@ describe('ReviewScreen RPE prompt (V0B-32 / D120)', () => {
     expect(screen.getByText(/one rating per device/i)).toBeInTheDocument()
   })
 
-  it('exposes a Finish later escape-hatch link alongside Submit review', async () => {
+  it('exposes a Finish later escape-hatch alongside Done', async () => {
     await seed(1, 'exec-link', 'plan-link')
     renderAt('exec-link')
 
+    // 2026-04-23 walkthrough closeout polish: the prior `Submit review`
+    // + underlined `Finish later` pair was replaced by two
+    // equal-weight primary buttons (`Done` on top, `Finish later`
+    // below) per the merged Review proposal in
+    // `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`.
     expect(
-      await screen.findByRole('button', { name: /submit review/i }),
+      await screen.findByRole('button', { name: /^done$/i }),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: /finish later/i }),

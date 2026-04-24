@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { IncompleteReasonChips } from '../components/IncompleteReasonChips'
 import { PassMetricInput } from '../components/PassMetricInput'
-import { QuickTagChips } from '../components/QuickTagChips'
 import { RpeSelector } from '../components/RpeSelector'
 import { SafetyIcon } from '../components/SafetyIcon'
 import { Button, Card, ScreenShell, StatusMessage } from '../components/ui'
@@ -55,25 +54,17 @@ function isPastDeferralCap(log: ExecutionLog, now: number): boolean {
   return now - endAt >= FINISH_LATER_CAP_MS
 }
 
-/**
- * Render the remaining Finish-Later window as a concrete countdown instead
- * of a static "2 hours" promise. Red-team UX #14. Granularity matches the
- * cap (2 h) so we only need minutes; we round UP to avoid ever showing "0
- * min left" while the session is still actionable.
- */
-function formatFinishLaterWindow(log: ExecutionLog, now: number): string {
-  const endAt = log.completedAt ?? log.startedAt
-  const remainingMs = Math.max(0, FINISH_LATER_CAP_MS - (now - endAt))
-  if (remainingMs <= 0) return 'stops counting now'
-  const minutesLeft = Math.max(1, Math.ceil(remainingMs / 60_000))
-  if (minutesLeft >= 60) {
-    const h = Math.floor(minutesLeft / 60)
-    const m = minutesLeft % 60
-    if (m === 0) return `stops counting in about ${h} hr`
-    return `stops counting in about ${h} hr ${m} min`
-  }
-  return `stops counting in about ${minutesLeft} min`
-}
+// 2026-04-23 walkthrough closeout polish: the "stops counting in about
+// N hr M min" subtitle was removed from the Review footer per the
+// merged proposal in
+// `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`
+// and the closeout polish plan
+// `docs/plans/2026-04-23-walkthrough-closeout-polish.md` item 3. The
+// four 2026-04-22 passes (workflow / shibui / design review / trifold)
+// converged that the countdown read as pressure, not helpfulness; the
+// expired-stub behavior (A6 / A9 past-cap re-routes + the
+// `expireStaleReviews` sweep) still fires on the same cap, users just
+// are not counted-down at. D118 durability posture is unchanged.
 
 function ReviewSessionContent({
   executionLogId,
@@ -93,15 +84,6 @@ function ReviewSessionContent({
   const [conflictedWith, setConflictedWith] = useState<
     'submitted' | 'skipped' | null
   >(null)
-  // Keep a clock-tick in state so the Finish Later countdown below stays
-  // accurate while the user sits on the form, without calling Date.now()
-  // from render (which trips the react-hooks/purity rule). Once a minute
-  // is plenty for a 2 h cap. Red-team UX #14.
-  const [nowMs, setNowMs] = useState<number>(() => Date.now())
-  useEffect(() => {
-    const tick = setInterval(() => setNowMs(Date.now()), 60_000)
-    return () => clearInterval(tick)
-  }, [])
 
   const [sessionRpe, setSessionRpe] = useState<number | null>(null)
   const [good, setGood] = useState(0)
@@ -178,6 +160,18 @@ function ReviewSessionContent({
         // `hydrated`. The save-effect is gated on `hydrated`, so this
         // ensures no pre-hydration zero-state write races with the real
         // draft.
+        //
+        // 2026-04-23 walkthrough closeout polish: the prior branch that
+        // pre-selected `quickTags: ['notCaptured']` for non-count
+        // drills was removed because the Good-passes card is now
+        // hidden entirely on non-count drills (see `showMetrics`
+        // below). The downstream `notCaptured` signal is carried by
+        // `totalAttempts === 0` on submission, which `composeSummary`
+        // already reads as the notCaptured state (see
+        // `app/src/domain/sessionSummary.test.ts`
+        // "returns the notCaptured copy when totalAttempts === 0").
+        // Historical records that still carry the tag continue to
+        // survive round-trips unchanged.
         const draft = await loadReviewDraft(executionLogId)
         if (cancelled) return
         if (draft) {
@@ -187,16 +181,6 @@ function ReviewSessionContent({
           setIncompleteReason(draft.incompleteReason ?? null)
           setQuickTags(draft.quickTags ?? [])
           setShortNote(draft.shortNote ?? '')
-        } else {
-          // Pre-close 2026-04-21 (thought 4): no prior draft - if the
-          // main_skill drill isn't count-based, default `notCaptured`
-          // to selected so the tester doesn't feel obligated to
-          // invent a Good/Total pair. They can toggle off to record
-          // real numbers if they did track them.
-          const metricType = inferMainSkillMetricType(result.plan)
-          if (metricType != null && !COUNT_BASED_METRIC_TYPES.has(metricType)) {
-            setQuickTags(['notCaptured'])
-          }
         }
         setLoaded({
           status: 'ready',
@@ -414,7 +398,22 @@ function ReviewSessionContent({
   const wasDiscarded =
     isEndedEarly && log.endedEarlyReason === 'discarded_resume'
   const needsIncompleteReason = isEndedEarly && !wasDiscarded
-  const showMetrics = !wasDiscarded && hasSkillBlocks
+  // 2026-04-23 walkthrough closeout polish item 2 (merged Review
+  // proposal per `docs/plans/2026-04-23-walkthrough-closeout-polish.md`
+  // + `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`):
+  // hide the Good-passes card entirely when the main-skill drill's
+  // success metric is non-count-based (streak / points-to-target /
+  // pass-grade-avg / composite / completion), rather than showing the
+  // card in a pre-selected `notCaptured` state. The pre-close
+  // 2026-04-21 default-to-notCaptured fix (thought 4) was necessary
+  // but not sufficient — testers still read the empty card as an open
+  // ask. `metricType === null` keeps the card visible for synthetic /
+  // unknown drills so tests seeded with arbitrary drill names do not
+  // silently lose their capture surface.
+  const metricType = inferMainSkillMetricType(plan)
+  const metricCountsByRule =
+    metricType == null || COUNT_BASED_METRIC_TYPES.has(metricType)
+  const showMetrics = !wasDiscarded && hasSkillBlocks && metricCountsByRule
   const isPairMode = plan?.playerCount === 2
   const rpePrompt = isPairMode
     ? 'How hard was this session for you?'
@@ -479,16 +478,16 @@ function ReviewSessionContent({
   return (
     <ScreenShell>
       {/*
-        2026-04-22 iPhone-viewport layout pass: Review is a legitimately
-        long form (RPE + Good passes + optional Ended-early reason +
-        Quick tags + Note + Submit + Finish later + cap-countdown
-        subtitle). On a 390 × 844 iPhone it routinely overflows the
-        fold; in the old document-scroll world that meant the Submit
-        button lived below the scroll, and testers had to hunt.
-        `ScreenShell` pins Submit + Finish later + the cap-countdown
-        subtitle to the footer so the primary action is always
-        reachable while the form scrolls independently inside the
-        body.
+        2026-04-22 iPhone-viewport layout pass + 2026-04-23 walkthrough
+        closeout polish: Review fits the merged-proposal shape — effort
+        (RPE 3-anchor) + optional Good passes (count drills only) +
+        optional Ended-early reason + optional Short note. The Quick
+        tags card, the cap-countdown subtitle, and the RPE 11-chip
+        grid were removed on 2026-04-23 per
+        `docs/plans/2026-04-23-walkthrough-closeout-polish.md`.
+        `ScreenShell` still pins the Done + Finish later pair to the
+        footer so the terminal decision surface stays in the same
+        thumb zone on a 390 × 844 iPhone as the body scrolls.
       */}
       <ScreenShell.Header className="flex flex-col items-center gap-1 pt-2 pb-3">
         {/* Founder test-run feedback 2026-04-21 (round 2): the prior
@@ -541,6 +540,24 @@ function ReviewSessionContent({
       </Card>
 
       {showMetrics && (
+        <>
+          {/* 2026-04-23 walkthrough closeout polish item 2: divider
+              between the RPE card and the Good-passes card. Per the
+              design review recommendation cited in the merged Review
+              proposal in
+              `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`
+              and the closeout plan
+              `docs/plans/2026-04-23-walkthrough-closeout-polish.md`,
+              the two primary captures (effort + count) should read as
+              distinct-but-related sections rather than as two stacked
+              cards of equal visual weight. The hairline keeps the
+              `Card` container intact (no token / layout refactor)
+              while separating the two questions. */}
+          <div
+            className="h-px w-full bg-text-secondary/15"
+            role="presentation"
+            aria-hidden="true"
+          />
         <Card className="flex flex-col gap-3">
           <div>
             <h2 className="text-sm font-semibold text-text-primary">
@@ -578,6 +595,7 @@ function ReviewSessionContent({
             onToggleNotCaptured={handleToggleNotCaptured}
           />
         </Card>
+        </>
       )}
 
       {needsIncompleteReason && (
@@ -592,12 +610,19 @@ function ReviewSessionContent({
         </Card>
       )}
 
-      <Card className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-text-primary">
-          Quick tags
-        </h2>
-        <QuickTagChips selected={quickTags} onChange={setQuickTags} />
-      </Card>
+      {/* 2026-04-23 walkthrough closeout polish item 2: the Quick tags
+          card was deleted per the merged Review proposal in
+          `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`.
+          The four 2026-04-22 passes converged that Too easy / About
+          right / Too hard duplicate the RPE signal now that RPE
+          collapsed to a 3-anchor picker (Easy / Right / Hard), and
+          `Need partner` belongs on the next session's setup, not
+          last session's review. `quickTags` state is retained because
+          (a) the `notCaptured` chip inside `PassMetricInput` still
+          writes it for count drills, (b) the A6 / A9 expired-stub
+          paths still need to merge `'expired'` into it, and (c)
+          historical draft rehydration preserves the field for
+          round-trip fidelity. */}
 
       <section className="flex flex-col gap-2">
         <label
@@ -629,24 +654,43 @@ function ReviewSessionContent({
             {missingHint}
           </p>
         )}
+        {/* 2026-04-23 walkthrough closeout polish item 2 (merged
+            Review proposal in
+            `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`
+            + plan
+            `docs/plans/2026-04-23-walkthrough-closeout-polish.md`):
+            Done and Finish later render as equal-weight primary
+            buttons, differentiated only by position (Done on top =
+            forward motion; Finish later below = escape-hatch) and
+            label. The prior styling treated Done (then labelled
+            `Submit review`) as a primary CTA and Finish later as an
+            underlined tertiary link, which read as reprimanding the
+            Finish Later path. Two full-width primary buttons is
+            intentional per the merged proposal — the footer is the
+            session's terminal decision surface, both answers are
+            honest and adaptation-valid inside the 2 h Finish Later
+            cap, and neutral disabled styling (polish pass 2026-04-22)
+            prevents the Done button from looking active-but-inert
+            before effort is picked. `Submit review` rename to `Done`
+            matches the post-session voice (cf. CompleteScreen `Back
+            to home`) and the Transition `Up next` family rather than
+            the old form-centric `Submit` voice. */}
         <Button
           variant="primary"
           fullWidth
           onClick={() => void handleSubmit()}
           disabled={!canSubmit || isSubmitting}
         >
-          {isSubmitting ? 'Saving\u2026' : 'Submit review'}
+          {isSubmitting ? 'Saving\u2026' : 'Done'}
         </Button>
         <Button
-          variant="link"
+          variant="primary"
+          fullWidth
           onClick={() => void handleFinishLater()}
           disabled={isSubmitting}
         >
           Finish later
         </Button>
-        <p className="-mt-1 text-center text-xs text-text-secondary">
-          {`This session ${formatFinishLaterWindow(log, nowMs)}, then it won\u2019t affect planning.`}
-        </p>
       </ScreenShell.Footer>
     </ScreenShell>
   )
