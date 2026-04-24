@@ -269,7 +269,20 @@ This plan ships when **all** of the following hold:
 
 **Verification.** `npm run lint` clean. `npm run build` clean. `npm run test` → 82 files, 639 tests passing (baseline before this pass was ~616 after a grow-in period since the plan's 566 estimate).
 
-**Deferred on this pass (ledgered, not blocked).** The `D132` downstream propagation edits, the `§R7` exit-3 upgrade decision, the adversarial-memo A3 ligament re-read, the `persistent-team-identity.md` O13 re-weighted note, the M001 milestone Agent Quick Scan D132 one-liner, and the 2026-04-20 adversarial-memo Condition 1 re-reading note are batched for a separate editorial sweep per the user's reconciled-file execution note. This ship does the four code items only.
+**Deferred on this pass (ledgered, not blocked) — subsequently applied 2026-04-24.**
+
+Originally batched for a separate editorial sweep. The sweep ran 2026-04-24 in a single pass immediately after the code ship. What landed:
+
+- **`D132` downstream propagation edits (3 surfaces).** `docs/research/persistent-team-identity.md` Agent Quick Scan gained an `O13` re-weighting note (strategic importance of eventual persistent pair identity is higher under pair-first; `D117` graduation gate unchanged). `docs/milestones/m001-solo-session-loop.md` Agent Quick Scan gained a one-line "solo-first here is tactical; `D132` pair-first is strategic" clarifier keyed to the milestone's own name. `docs/plans/2026-04-20-m001-adversarial-memo.md` Condition 1 gained a `D132` re-reading block — threshold and falsification consequence unchanged, interpretation updated (≥40% solo-share measures whether the accommodated solo case works, not whether solo-first is strategic).
+- **Adversarial-memo amendment log entry.** New entry "2026-04-24 — Walkthrough closeout polish pass (editorial-class, pre-close class)" records the ship, the items-already-landed reconciliation, and the decision-ID authority chain. No falsification condition weakened; co-signer requirement waived per the amendment rule.
+- **A3 ligament Weekly Log addendum (partial discharge).** Honest structural addendum appended under week 1 of the Weekly Log capturing the 2026-04-22 / -23 / -24 authoring scope, trigger (e) interim reading (agent-assisted open asymmetry), Condition 1 / 2 / 3 interim status, and the authoring-budget cap check. Founder's own end-to-end memo re-read remains pending and is explicitly flagged as the final closer step.
+- **Meta-synthesis §Next steps table refresh.** `docs/research/2026-04-22-research-sweep-meta-synthesis.md` §Next steps updated: moves #2, #3, #4 marked as landed / partially discharged; move #1 (§R7 exit-3 decision) remains open as founder decision with a cost-of-delay-is-zero note because Tier 1b is still trigger-gated; new move #6 "What's next" lands a recommendation for the next concrete step (founder runs a personal training session against the shipped Tier 1a build in the week of 2026-04-27).
+
+**What remains open after 2026-04-24.**
+
+1. `§R7 exit-3 upgrade decision` — founder-only call. Holds until the Tier 1b trigger fires.
+2. Founder's A3 memo re-read (one ≤5 min read; append `A3 re-read YYYY-MM-DD — <n> min` line under the week-1 addendum when done).
+3. Continued Seb usage + founder post-injury usage — background behavior, not canon work.
 
 ## For agents
 

@@ -1,48 +1,50 @@
 ---
 
 ## id: 2026-04-22-research-sweep-meta-synthesis
+
 title: "2026-04-22 research sweep — meta-synthesis and canon deltas"
 type: research
 status: active
 stage: validation
 authority: "Meta-synthesis of the three 2026-04-22 external vendor research waves (skill correlation, per-skill baseline assessments, jump-float introduction) and the concrete canon deltas each wave does and does not authorize. Routing doc only — the three per-topic synthesis notes under `docs/research/` remain the evidence source of truth; this note is the cross-topic readout plus a red-team discipline layer to prevent over-commitment."
 summary: "Nine vendor responses returned on 2026-04-22 across three topics. Skill-correlation: 3-of-3 converge on per-skill vector over scalar at r ≈ 0.35–0.50 (below r > 0.70 scalar-defensibility). Baseline assessments: 3-of-3 converge on asymmetric ship posture (ship serve; pass/set partner-mode-primary; solo-no-wall pass/set are control drills, not baselines). Jump-float: vendor 3 diverges sharply from vendors 1+2, pushing the `d36 Jump Float Introduction` first-exposure volume to 3×4=12 under a conservative-wins-on-safety principle. Two founder corrections on 2026-04-22-c reshaped the framing: (1) vision is pair-first (with solo accommodation), not solo-first — applied to `docs/vision.md` strategic stance + new P13 + product promise and to `docs/roadmap.md` Roadmap intent; (2) personal-ledger logging is not a canon-edit gate — Seb's usage is first-class behavioral evidence. Canon deltas D1–D7 all applied by 2026-04-22-d; new `D132 Pair-first vision stance` landed in `docs/decisions.md`. What this sweep does NOT change: Tier 1b activation, Phase 1.5 activation, `D80` / `D104` / `D121` re-parameterization, M001 scope. What remains open: the §F6 §R7 upgrade (remove `d36` from Tier 1b entirely, defer to `O7` track 2) — flagged for founder decision, not applied."
-last_updated: 2026-04-22-d
+last_updated: 2026-04-24
 depends_on:
-  - docs/research/skill-correlation-amateur-beach.md
-  - docs/research/baseline-skill-assessments-amateur-beach.md
-  - docs/research/jump-float-amateur-beach.md
+
+- docs/research/skill-correlation-amateur-beach.md
+- docs/research/baseline-skill-assessments-amateur-beach.md
+- docs/research/jump-float-amateur-beach.md
 related:
-  - docs/vision.md
-  - docs/roadmap.md
-  - docs/decisions.md
-  - docs/milestones/m001-solo-session-loop.md
-  - docs/milestones/m002-weekly-confidence-loop.md
-  - docs/plans/2026-04-22-tier1b-serving-setting-expansion.md
-  - docs/plans/2026-04-20-m001-adversarial-memo.md
-  - docs/research/founder-use-ledger.md
-  - docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md
-  - docs/research/binary-scoring-progression.md
-  - docs/research/regulatory-boundary-pain-gated-training-apps.md
+- docs/vision.md
+- docs/roadmap.md
+- docs/decisions.md
+- docs/milestones/m001-solo-session-loop.md
+- docs/milestones/m002-weekly-confidence-loop.md
+- docs/plans/2026-04-22-tier1b-serving-setting-expansion.md
+- docs/plans/2026-04-20-m001-adversarial-memo.md
+- docs/research/founder-use-ledger.md
+- docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md
+- docs/research/binary-scoring-progression.md
+- docs/research/regulatory-boundary-pain-gated-training-apps.md
 decision_refs:
-  - D80
-  - D82
-  - D83
-  - D85
-  - D88
-  - D91
-  - D104
-  - D105
-  - D119
-  - D121
-  - D123
-  - D130
-  - D132
+- D80
+- D82
+- D83
+- D85
+- D88
+- D91
+- D104
+- D105
+- D119
+- D121
+- D123
+- D130
+- D132
 open_question_refs:
-  - O7
-  - O12
-  - O17
-  - O21
+- O7
+- O12
+- O17
+- O21
 
 # 2026-04-22 research sweep — meta-synthesis and canon deltas
 
@@ -237,18 +239,48 @@ Each of the three synthesis notes carries its own "Open Questions Flagged For Fu
 
 **None of these are opened as new O# IDs today.** They are design-surface inputs for when a concrete design-pass activates (Phase 1.5 baseline-test surface; Phase 2 coach-clipboard; D91 re-eval under D130).
 
-## Next steps — remaining open questions after 2026-04-22-d closeout
+## Next steps — remaining open questions after 2026-04-24 sweep closeout
 
-D1–D7 and D132 are all applied. What's left:
+D1–D7 and D132 are all applied. The 2026-04-23 walkthrough closeout polish pass shipped on 2026-04-24 (items 2 + 3 of the plan; items 1 + 4 were already landed in the 2026-04-22 pass). D132 downstream propagations applied 2026-04-24. What's left:
 
 
 | #   | Move                                                                                                                                                                                                                                                                                                                                                                                             | Status                                                                                             |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| 1   | **§R7 exit-3 upgrade decision.** Choose between (a) keeping D7 as-applied (pointer-only — `d36` stays in Tier 1b candidate list with authoring-pointer constraining volume) or (b) the exit-3 upgrade (remove `d36` from Tier 1b candidate list entirely; replace with a different Layer-A-fitting serving drill; re-enter `d36` when `O7` track 2 delivers).                                    | **Open — founder decision.**                                                                       |
-| 2   | **Partner-walkthrough closeout polish pass (Tier 1a Wave 2).** Ship a bounded bundle from the `2026-04-22-all-passes-reconciled.md` open-list. Plan draft at `docs/plans/2026-04-23-tier1a-wave2-walkthrough-closeout.md`.                                                                                                                                                                       | **Open — next concrete product work.**                                                             |
-| 3   | **Downstream `D132` propagation edits (small).** `docs/research/persistent-team-identity.md` note that `O13` re-weighted per `D132`; `docs/milestones/m001-solo-session-loop.md` Agent Quick Scan adds a one-line "solo-first is tactical per `D132`; pair-first is strategic"; `docs/plans/2026-04-20-m001-adversarial-memo.md` Condition 1 interpretation note picks up the `D132` re-reading. | **Open — can batch with Tier 1a Wave 2 or defer to the next natural edit pass on those surfaces.** |
-| 4   | A3 ligament satisfaction (memo re-read + Weekly Log entry).                                                                                                                                                                                                                                                                                                                                      | **Open — not a gate; worth honoring when the founder next engages with the memo.**                 |
-| 5   | Seb's continued usage + founder's post-injury usage next week.                                                                                                                                                                                                                                                                                                                                   | **Ongoing — background behavior, not canon work.**                                                 |
+| 1   | **§R7 exit-3 upgrade decision.** Choose between (a) keeping D7 as-applied (pointer-only — `d36` stays in Tier 1b candidate list with authoring-pointer constraining volume) or (b) the exit-3 upgrade (remove `d36` from Tier 1b candidate list entirely; replace with a different Layer-A-fitting serving drill; re-enter `d36` when `O7` track 2 delivers).                                    | **Open — founder decision, now with real cost-of-delay.** Tier 1b formally unlocked 2026-04-24 (trigger met on ledger backfill + founder-named serving-content gap). `d31 Self Toss Target Practice` is exit-3 compatible and addresses the 2026-04-21 founder gap directly; `d33`, `d40`, `d42`, `d43` are also exit-3 compatible. Only `d36 Jump Float Introduction` is contested. A Tier 1b first-wave ship of the five compatible drills can proceed independently of the §R7 decision on `d36`; this removes the zero-cost-of-delay read the earlier framing relied on. |
+| 2   | **Partner-walkthrough closeout polish pass (Tier 1a Wave 2).** Ship a bounded bundle from the `2026-04-22-all-passes-reconciled.md` open-list.                                                                                                                                                                                                                                                   | **Landed 2026-04-24** as `docs/plans/2026-04-23-walkthrough-closeout-polish.md` (four items: RPE 3-anchor collapse + Quick-tags deletion + divider + Done/Finish-later equal weight + non-count Good-passes hide + 2-hour Review-window copy removal + Safari-caveat compression). Items 1 and 4 of the plan discovered as already-shipped in the 2026-04-22 polish pass. |
+| 3   | **Downstream `D132` propagation edits (small).** `docs/research/persistent-team-identity.md` note that `O13` re-weighted per `D132`; `docs/milestones/m001-solo-session-loop.md` Agent Quick Scan adds a one-line "solo-first is tactical per `D132`; pair-first is strategic"; `docs/plans/2026-04-20-m001-adversarial-memo.md` Condition 1 interpretation note picks up the `D132` re-reading. | **Landed 2026-04-24.** All three propagations applied. No behavior change; interpretive notes only. |
+| 4   | A3 ligament satisfaction (memo re-read + Weekly Log entry).                                                                                                                                                                                                                                                                                                                                      | **Partially discharged 2026-04-24** — structural addendum logged under week 1 in the memo's Weekly Log recording the 2026-04-22 / -23 / -24 authoring scope, trigger (e) interim reading, and Condition 1 / 2 / 3 status. Founder's own end-to-end re-read still pending as of 2026-04-24; cheap to complete next time the memo is opened. |
+| 5   | Seb's continued usage + founder's personal usage (already happening; some of it not yet logged).                                                                                                                                                                                                                                                                                                 | **Ongoing — background behavior, not canon work.** Seb's last instrumented open was 2026-04-23. Founder ran a solo + joint pair session on 2026-04-21 (joint-session reframe added 2026-04-24); additional founder usage expected post-injury. |
+| 6   | **What's next (revised 2026-04-24 after joint-session reframe).** Identify the single next concrete step. See §"Next concrete step (2026-04-24, revised)" below.                                                                                                                                                                                                                                | **Open — revised recommendation landed below.** Shifts from "run a session" (stale framing — founder already did) to "backfill the 2026-04-21 sessions as artifact-reconstructed ledger rows + name any observed content gap," which is what the Tier 1b trigger's substantive-vs-formal gap actually hinges on. |
+
+## Next concrete step (2026-04-24 late — post-ledger-backfill)
+
+**State.** The 2026-04-21 ledger backfill landed 2026-04-24 late: two rows (solo 15 min / RPE 3 / completed; pair 15 min / RPE 4 / completed), `focus: pass` on both with an explicit "not user-selected" note per the Tier 1c UI-gap finding, plus a four-item content-gap list below the rows. See `docs/research/founder-use-ledger.md` §Sessions + §"Content gaps surfaced on the 2026-04-21 sessions."
+
+With the backfill, three things changed:
+
+1. **Tier 1b founder-session trigger formally met.** Both clauses of `docs/plans/2026-04-20-m001-tier1-implementation.md` lines 272–276 are now satisfied — partner-walkthrough half (multiple ≥P1 Tier-1b-addressable findings) + founder-session half (ledger row + named content gap). Tier 1b authoring is unlocked. The memo's authoring-budget cap is still 0 / 10 consumed; the cap-gating "5th session" condition from adversarial-memo line 151 still applies to Tier 1b's second wave but not to the first wave.
+2. **P1-3 walkthrough disposition re-opened app-side.** The Wontfix-app-side call on 2026-04-21 was falsified 2026-04-24 on two-user independent corroboration — the founder hit the same "can't find serving via Swap on `solo_open`" gap Seb hit, independent of the script. The fix is content-pool expansion (Tier 1b `d31 / d33`), not Swap-UX re-engineering. See the updated P1-3 row in `docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md` Founder response table.
+3. **New finding surfaced, not on any prior tracked list: timer-end screen-off anxiety / audio-suspend-on-lock.** iOS Safari PWA suspends audio when the screen locks; the block-end beep cannot be relied on. The 2026-04-22 preroll "keep phone unlocked" hint was gated first-time-only in the polish ship, which dismissed it for the two users most likely to be watching for the problem. The structural fix is the **Screen Wake Lock API** (iOS Safari 16.4+), not copy. Captured as a new item in `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md` §"Genuinely-open Tier 1b bundle" and **landed 2026-04-24** via `useWakeLock` lifecycle hardening + tests.
+
+**Recommended next move (post-backfill + Wake Lock ship).** Ship the Tier 1b first wave per `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md`, ordered by founder-ledger evidence.
+
+**Sequencing the five exit-3-compatible Tier 1b drill records:**
+
+1. **`d31 Self Toss Target Practice`** (solo serving, `beginner → beginner`). Directly addresses founder ledger gap 2 (can't find serving via Swap on `solo_open`). Highest-evidence-weight Tier 1b unlock. Ship first.
+2. **`d33 Around the World Serving`** (solo + pair serving, `beginner → intermediate`). Extends the serving ladder; complements `d31` for session-variety (ledger gap 3). Ship second.
+3. **`d40 Footwork for Setting`**, **`d42 Corner to Corner Setting`**, **`d43 Triangle Setting`** (setting chain). Addresses Condition 1's set-floor (currently 0 of 3) — when any of these lands, founder + Seb can reach set-focused sessions. Ship third through fifth in whatever order is convenient.
+
+**§R7 decision on `d36`:** can be deferred. Shipping `d31` / `d33` / `d40` / `d42` / `d43` does not block on the `d36` call; `d36` is parallel-unlocked from `d33` in the chain, so it can be added later (exit 2) or deferred to `O7` track 2 (exit 3) without delaying the first-wave ship. **Recommended posture:** ship the five exit-3-compatible drills first, then make the §R7 call on `d36` based on whether the founder-session ledger accumulates any additional evidence that would tip the decision.
+
+**Before shipping the Tier 1b first wave:**
+
+- The founder completes the §A3 memo re-read (≤5 min, append one-line under the 2026-04-24 week-1 addendum in the adversarial memo). The ligament is pre-authoring; `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md` will need substantive edits when authoring starts (drill records + progression links + vocabulary sweep per the plan's spec), so the re-read wants to land before that plan opens for authoring.
+- The founder confirms or waives the **§R7 `d36` decision in-scope for the first wave** — "ship the 5 compatible drills first, hold `d36` for a second call" is a defensible default that doesn't require a final §R7 answer today.
+
+**What this recommendation explicitly is not.** Not: author the Tier 1b content immediately without the founder's explicit go-ahead (Tier 1b is now unlocked, not auto-shipped; the authoring-budget cap + A3 re-read are still discipline surfaces the founder exercises personally). Not: resolve §R7 on `d36` under pressure — it doesn't need to be resolved to unblock the first wave, and delaying it costs nothing.
+
+**Alternative: founder runs one more session before Tier 1b authoring starts.** Defensible if the founder wants one more ledger row (n=3) before content-scope is set — it would strengthen the Condition 1 reading and give the §R7 `d36` call more signal if `d36`'s absence is felt. Not recommended as a gate; the existing 2-row backfill + content gaps + partner walkthrough dispositions are collectively sufficient to unblock the first-wave serving ladder.
 
 
 ## Provenance and revision

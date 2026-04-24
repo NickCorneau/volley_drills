@@ -51,12 +51,14 @@ Each condition states a **specific behavioral threshold** and a **specific conse
 
 **Pre-registered claim.** The product vision and roadmap treat solo-first as the primary activation path (`D22`, `D60`; `docs/vision.md` P-whatever on solo-first; `docs/roadmap.md` Phase 0 solo-first anchor). Founder-use mode's validity as a stand-in for real validation depends on the founder actually training solo a majority of the time.
 
+**`D132` re-reading (2026-04-22, no threshold change).** After `D132` landed in `docs/decisions.md`, the product's strategic framing is *pair-first with solo-accommodating tactics*, not solo-first simpliciter. This changes the interpretation of Condition 1, not the threshold itself: the ≥40% solo-share bar measures whether the accommodated solo case works well enough for founder-use-mode validity, not whether solo-first is the strategic north star (it isn't). The falsification consequence below still fires on the same behavioral signal — a founder who cannot / will not train solo meaningfully invalidates founder-use mode as a stand-in for real validation, regardless of whether solo is strategic or tactical. The consequence's specific repoint remains correct under pair-first: if solo share falls below 40%, the `D123` "recommendation-first first-run" polish repoints at pair-default, which is *more* aligned with pair-first strategy, not less. See `docs/research/2026-04-22-research-sweep-meta-synthesis.md` §R10 for the companion dissolution of the prior "partner-mode data vs solo-first vision" structural tension.
+
 **Threshold.** Across the 90-day re-eval window (2026-04-20 → 2026-07-20):
 
 - **≥40%** of founder-logged sessions in `docs/research/founder-use-ledger.md` have `playerMode: solo`.
 - AND **≥3** logged sessions have `sessionFocus: set` (regardless of playerMode) — the minimum to say setting content is touched, not shelved.
 
-**Falsification consequence.** If solo share falls below 40% OR if fewer than 3 set-focused sessions are logged, **Tier 2 must re-sequence to put pair-first activation ahead of solo-first trust surfaces**. Specifically: the `D123` "recommendation-first first-run" polish is repointed at a pair-default first-run instead of solo-default. The founder does not get to say "but I personally preferred pair" and proceed with solo-first — the behavioral data said the vision's solo-first premise is wrong for the actual use pattern, and the product has to follow the behavior.
+**Falsification consequence.** If solo share falls below 40% OR if fewer than 3 set-focused sessions are logged, **Tier 2 must re-sequence to put pair-first activation ahead of solo-first trust surfaces**. Specifically: the `D123` "recommendation-first first-run" polish is repointed at a pair-default first-run instead of solo-default. The founder does not get to say "but I personally preferred pair" and proceed with solo-first — the behavioral data said the vision's solo-first premise is wrong for the actual use pattern, and the product has to follow the behavior. Under `D132`, this consequence is coherent with strategy (pair-default first-run aligns with pair-first) rather than a fallback against it.
 
 **Why this threshold.** Solo-first is the hardest premise to confirm from n=1, because a founder with a willing partner will naturally drift to pair. 40% is low enough to accommodate realistic drift; below that, the premise is behaviorally falsified even if the founder feels otherwise. The 3-set-session floor is separate because set content could otherwise be authored-and-shelved without being falsified.
 
@@ -125,6 +127,7 @@ Every Monday during the 90-day window, the founder pastes into this memo's Weekl
 ```
 ## YYYY-MM-DD (week N of 13)
 - Sessions logged this past week: <n> (running total: <n/13-week-target>)
+- Sessions that actually ran this past week but are not yet in the ledger: <n / brief notes>
 - Solo share so far: <%>
 - Focus breakdown so far: <pass n / serve n / set n>
 - Outside-app planning this week: <yes/no — if yes, what>
@@ -133,6 +136,11 @@ Every Monday during the 90-day window, the founder pastes into this memo's Weekl
   - (b) 3-week silence: <most recent session date>
   - (c) invited anyone outside partner: <y/n>
   - (d) Tier 1a + ≥10 sessions + no open P0: <status>
+  - (e) agent-assisted open asymmetry: <status — agent-assisted opens ≥5 AND agent-free work check ≤1 in last 14 days?>
+- Non-ledger behavioral-evidence channels this week (added 2026-04-24):
+  - Partner usage (Seb opens / sessions / unprompted messages): <brief summary>
+  - Founder chat / voice-memo feedback to the repo: <count of substantive chat threads that drove canon edits, or "none">
+  - Joint-session evidence (founder ran alongside partner without separate ledger row): <y/n, rough count>
 - Falsification conditions status:
   - 1: pass / fail / ambiguous
   - 2: pass / fail / ambiguous
@@ -141,6 +149,16 @@ Every Monday during the 90-day window, the founder pastes into this memo's Weekl
 ```
 
 The ritual is designed to take three minutes and be impossible to skip without leaving a visible gap. If three consecutive Mondays are missed, that is itself evidence the founder-use premise is underwater; trigger a re-eval at the next weekly slot.
+
+**Recognized behavioral-evidence channels (2026-04-22-c + 2026-04-24 expansion).** Five channels feed the weekly read; no single channel's emptiness falsifies founder-use mode on its own, and the channel-mix read is what the 2026-07-20 re-eval consumes:
+
+1. **Founder-use ledger rows** — `docs/research/founder-use-ledger.md`. Authoritative per-session record, 30-sec append target.
+2. **Partner (Seb) usage signals** — Dexie exports sent unsolicited, partner unprompted-open cadence, post-close mentions table in the walkthrough ledger.
+3. **Partner-walkthrough observations** — `docs/research/partner-walkthrough-results/*.md`, including joint founder+partner sessions flagged by their joint-session-reframe clarifiers.
+4. **Condition 3 signals** — the 30-day unprompted-open tracker in the walkthrough ledger.
+5. **Founder chat / voice-memo feedback to the repo and agent** — added 2026-04-24. Substantive founder corrections, scope-discipline interventions, and canonical framing changes delivered via chat (e.g., the 2026-04-22-c correction, the 2026-04-23 closeout-polish plan request, the 2026-04-24 joint-session reframe). These are legible through agent transcripts + the downstream canon edits those transcripts produced; they are not separately stored as a "chat ledger" and do not need to be.
+
+Research-velocity substitution (see `docs/roadmap.md` Risks-and-mitigations) now fires on research-notes-landed-this-week ≥3 AND **all five** of these channels producing ≤0 or near-zero signal, not on the ledger-alone reading the original memo used.
 
 ## Authoring-budget cap (anti-displacement)
 
@@ -241,6 +259,22 @@ A one-off DDL pass produces a moment of insight; it does not produce the offline
 
 This entry does not alter Condition 3's 2026-05-21 close date or the re-eval decision rule.
 
+### Amendment log entry for 2026-04-23 walkthrough closeout polish
+
+**2026-04-24 — Walkthrough closeout polish pass (editorial-class, pre-close class).** Shipped the four-item bundle in `docs/plans/2026-04-23-walkthrough-closeout-polish.md` drawn from `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md` §"Genuinely-open Tier 1b bundle" items 2 + 3 + 4 + 16. On execution, items 1 (Safety recency reword) and 16 (`PainOverrideCard` microcopy) were discovered as **already landed in the 2026-04-22 polish pass** (chip-label rename via `PRIMARY_RECENCY_LABEL` + `PainOverrideCard` period-form microcopy per courtside-copy §4, which explicitly forbids em-dashes in user-visible prose); both are recorded in the plan's ship log as landed, with the founder-specified walkthrough-verbatim em-dash form converted to the rule-compliant period form. Items 2 (Review merged-proposal remainder) and 3 (2-hour Review-window copy + Safari-caveat compression) shipped in this pass:
+
+- RpeSelector collapsed from 11 numeric chips (0–10) to three labelled chips (Easy / Right / Hard) mapping to canonical `sessionRpe` 3 / 5 / 7; `sessionRpe` field remains a number in the 0–10 domain so `composeSummary`, `effortLabel`, the `phase-c0-schema-v4` migration backfill, and the `D104` / `O12` tuning floor are unaffected. Historical non-canonical values rehydrate via `pickChipForRpe` (nearest-chip snap, no data mutation).
+- `QuickTagChips.tsx` deleted; the Quick tags card removed from Review.
+- Hairline divider between the RPE and Good-passes cards.
+- Good-passes card hidden entirely when the main-skill drill's `successMetric.type` is non-count (previously pre-selected `notCaptured`).
+- `Submit review` renamed to `Done`; both `Done` and `Finish later` render as full-width `variant="primary"` equal-weight buttons.
+- 2-hour Finish-Later countdown subtitle deleted from the Review footer; `formatFinishLaterWindow` + `nowMs` tick state removed. A6 / A9 past-cap re-route logic unchanged — expired-stub behavior still fires on the same cap.
+- Posture-sensitive Safari-eviction secondary compressed off `CompleteScreen` and into a new Settings `About local storage` sub-section driven by the same `getStorageCopy(posture)` source of truth; Complete carries a small `Why is this?` link to `/settings`. `D118` three-state durability posture unchanged.
+
+**Justification.** All items qualify as `Accept (pre-close)` / `Accept (landed)` class per the 2026-04-22 partner-walkthrough-polish precedent (editorial-class fix that fits the courtside-copy rule or outdoor-UI brief floor, no new drill content, no new spec contract, no new Dexie migration, no metadata schema changes, no persistence-behavior additions, no new archetype variants, no SetupScreen toggles). Zero drill records consumed from the authoring-budget cap (still 4 of 10 remaining). None of the three falsification conditions is weakened. Validation: `npm run lint`, `npm run build`, `npm test -- --run` all clean (639 tests, 82 files — up from 566/74 at the 2026-04-22 polish-pass baseline). Co-signer requirement waived per the amendment rule (no falsification condition weakened). Decision-ID authority: `D118` (durability posture preserved), `D120` (RPE 0-10 domain preserved), `D127` (typography scaffolding preserved), `D130` (founder-use posture), `D132` (pair-first vision-stance alignment applied per the plan's §Pair-first review).
+
+**Re-eval impact.** None. The Condition 3 2026-05-21 close date, the decision rule at the 2026-07-20 re-eval, and the three falsification conditions are untouched. The ship is evidence *for* Condition 3 provisional pass holding — a cleaner product through the remaining quiet window reduces the likelihood of a late-window regression on Seb's unprompted-open signal — but it does not change any threshold.
+
 ## What falsifies *this memo*
 
 Meta-check: the memo itself has failure modes.
@@ -271,6 +305,40 @@ Append one block per Monday during the 90-day window. The first entry is the wee
 - One-line note: Partner walkthrough landed with zero P0, a tight copy/vocabulary cluster, and one navigation seam; Bucket A fixes landed same week (Beach Prep, 6-Leg Monster, Set Window gloss, SkillLevelScreen subtitle). No plan re-sequencing required.
 - Partner-walkthrough delta (this week only): ledger filed; script amended (Task 2 no longer implies serving; Pass 2 Q4 wording fixed; Protocol deviations section added to ledger template).
 - Authoring-budget cap check: 0 new drill records authored this week. Current budget consumed: 0 / 10 until founder's 5th post-Tier-1a session.
+
+### 2026-04-24 week-1 addendum (mid-week, for honest provenance)
+
+This sub-entry is not a new Monday block — it is an honest addendum appended to week 1 on 2026-04-24 (Friday, day 5 of the window) so the week's substantive activity is not lost before week 2 opens.
+
+- **Plans authored / substantively edited this week (>50 lines each):** `docs/plans/2026-04-22-partner-walkthrough-polish.md` (2026-04-22, shipped — see the 2026-04-22 amendment-log entry above); `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md` (2026-04-22, `d36` row authoring-pointer applied per `D7`); `docs/plans/2026-04-23-walkthrough-closeout-polish.md` (2026-04-23 draft, 2026-04-24 shipped — see the 2026-04-23 amendment-log entry above).
+- **Research authored / substantively edited this week:** three 2026-04-22 synthesis docs (`skill-correlation-amateur-beach.md`, `baseline-skill-assessments-amateur-beach.md`, `jump-float-amateur-beach.md`); meta-synthesis `docs/research/2026-04-22-research-sweep-meta-synthesis.md`; 2026-04-22 partner-walkthrough review passes (workflow / shibui / UI-design / trifold / all-passes-reconciled); 2026-04-24 reconciled-list row updates for items 1–16 per the closeout polish ship.
+- **A3 ligament status.** The pre-authoring memo re-read ritual was not visibly logged on 2026-04-22 before the research+plan wave landed (flagged in `docs/research/2026-04-22-research-sweep-meta-synthesis.md` §R1 at severity medium per the 2026-04-22-c founder correction). The 2026-04-24 closeout-polish ship's author (agent, not founder) surfaces this honestly: this addendum is the structural log entry, not a substitute for the founder's own re-read. **Action for founder:** next time the memo is opened, read end-to-end (≤5 min) and append a one-line `A3 re-read YYYY-MM-DD — <n> min` under this addendum. The re-read is cheap and it is the ritual the memo exists to protect; missing it once is not a gate but a second miss would signal the ligament is decorative.
+- **Trigger (e) "agent-assisted open asymmetry" check — revised 2026-04-24.** Pre-registered threshold: ≥5 agent-assisted repo opens AND ≤1 agent-free work check across any 14-day window during founder-use window. Honest reading of 2026-04-10 → 2026-04-24 after the joint-session reframe:
+  - **Agent-assisted work:** the 2026-04-21 / -22 / -23 / -24 authoring days are agent-assisted (Cursor / Claude). ≥5 opens — yes.
+  - **Agent-free work:** the founder ran a solo session and a joint pair session with Seb on 2026-04-21 (clarified 2026-04-24 — see `docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md` Agent Quick Scan "Joint-session reframe"). That is substantive *agent-free behavior on the product itself* — the product running on a phone courtside is the opposite of the repo-as-conversation failure mode trigger (e) was designed to catch. The sessions are not yet written to `docs/research/founder-use-ledger.md` (ledger rows pending), but the behavior happened and is legible through the 2026-04-21 voice memo + Seb's Dexie export + the walkthrough ledger's joint-session reframe. Trigger (e) is **not firing** under the reframed reading.
+  - **Self-report closer.** The memo's own trigger-(e) text allows the agent-free check to be "an explicit founder self-report in the ledger confirming agent-free work." A one-line ledger row (or a short sub-entry under this addendum) describing the 2026-04-21 solo + pair sessions closes the loop definitively and removes trigger (e) ambiguity for the 14-day window.
+- **Condition 3 interim status (2026-04-24).** Seb produced a strengthened provisional pass: T+1 unprompted message + T+2 instrumented session (all 4 blocks, RPE 3, 25/40 capture on `Self-Toss Pass to Set Window`, review submitted 3.9 min after completion). Final read-out remains 2026-05-21. The closeout polish ship landed while the quiet-window invariant held (URL live, no prompting, no founder-initiated pull since the 2026-04-23 push-delivered export).
+- **Condition 1 interim status (2026-04-24, revised).** Under `D132`, Condition 1 is re-read as measuring whether the *accommodated solo case works* (see Condition 1's new "`D132` re-reading" block added 2026-04-24). Honest read of founder-side behavior after the 2026-04-24 joint-session reframe:
+  - **Founder-side sessions logged in the ledger:** 0. **Founder-side sessions that actually ran:** ≥1 solo + ≥1 pair, both on 2026-04-21 alongside Seb's walkthrough (solo parallel to Pass 1, joint pair for Pass 2 on grass). The ledger is lagging actual behavior by ≥3 days; the 2026-04-22-c correction recorded this specifically — "the founder has used the product but the ledger reflects personal-discipline logging, not a measured usage channel."
+  - **Solo-share interim read:** 1 solo of 2 founder-side sessions = 50%, **above the ≥40% bar** on n=2. Still too thin to call Condition 1 at n=2, but not a falsification signal either; the prior "0 of 0 = undefined" framing was misleading.
+  - **Set-focused session floor:** still 0 of 3 (no set-focused session among the 2026-04-21 founder sessions or Seb's four captured sessions). This remains the sharper sub-constraint of Condition 1 and is the concrete shape of the next founder session's focus.
+  - **Partner-side reference point (retained):** Seb solo-share across four captured sessions is 3 of 4 = 75% solo; focus breakdown pass 4 / serve 0 / set 0. Consistent with the pair-first / solo-accommodating frame under `D132`.
+- **Condition 2 interim status (2026-04-24).** Honest read: no outside-app planning or history-keeping observed in what the repo can see. Founder self-report would close this honestly; absent it, no failure signal.
+- **Feedback-channel health check (2026-04-24, new sub-entry).** Since 2026-04-21 the behavioral-evidence channel mix is: (i) Seb's 2026-04-21 Dexie export capturing the joint walkthrough, (ii) Seb's 2026-04-22 T+1 unprompted message (Condition 3 trigger), (iii) Seb's 2026-04-23 T+2 instrumented open, (iv) the joint 2026-04-21 voice memo (delivering founder+Seb observations, not just Seb's), and (v) a substantial volume of founder feedback delivered via chat during the 2026-04-22 / -23 / -24 authoring days (drove the 2026-04-22-c correction, framed the closeout polish plan, produced the 2026-04-24 joint-session reframe itself). Channels (iv) and (v) are **founder-side** behavioral-evidence channels that the ledger schema does not capture and the original memo did not enumerate. The 2026-04-22-c correction's four-channel list (ledger, Seb usage, partner-walkthrough observations, Condition 3) implicitly folded (iv) and (v) into the partner-walkthrough channel; the 2026-04-24 addendum names them explicitly so they are not silently discounted at the 2026-07-20 re-eval.
+- **Authoring-budget cap check (2026-04-24 closeout polish).** 0 new drill records authored in the 2026-04-23 polish ship. Cap consumed: still 0 / 10 until founder's 5th post-Tier-1a session (per the ship log in `docs/plans/2026-04-23-walkthrough-closeout-polish.md` §"Ship log"). Per the 2026-04-24 joint-session reframe, the founder is 2 sessions closer to that cap-gating 5th session than the ledger previously implied.
+
+### 2026-04-24 week-1 addendum — ledger backfill + Tier 1b trigger status change (appended later same day)
+
+After the initial 2026-04-24 addendum above landed, the founder added two artifact-reconstructed rows to `docs/research/founder-use-ledger.md` for the 2026-04-21 joint sessions (solo 15 min / RPE 3 / completed; pair 15 min / RPE 4 / completed — see the ledger table) and named four content gaps below the rows. This delta is recorded here so the Weekly Log reads accurately without re-scrolling the earlier addendum.
+
+- **Tier 1b founder-session trigger status (per `docs/plans/2026-04-20-m001-tier1-implementation.md` lines 272–276):** **formally met as of 2026-04-24.** Both clauses satisfied:
+  - **Clause (i) — founder has attempted to substitute from the existing library AND logged the attempt.** The solo row records an attempted solo-on-solo_open session where the founder could not find serving content via Swap (ledger gap 2). Logged.
+  - **Clause (ii) — partner walkthrough ≥P1 that Tier 1b content would address, OR founder has logged ≥3 sessions describing a specific content gap.** Partner walkthrough half already satisfied (P1-3, P1-4, P1-5, P1-6, P1-7, P1-8, P2-2 — multiple ≥P1 findings Tier 1b serving/setting content addresses). Founder-logged-content-gap half now also satisfied by the same solo row plus the explicit gap list appended below the rows.
+- **Condition 1 interim read after backfill.** Founder-side solo share: 1 of 2 logged rows = 50% (above the ≥40% bar). Set-focused session floor: still 0 of 3. Cadence: 2 sessions logged, both from 2026-04-21, with 3 days elapsed — not on a regression signal.
+- **`focus: pass` on both backfill rows is accurate to what the builder produced; the note field documents that the founder did not user-select the focus because no UI for focus-picking exists.** This is the first behavioral data point against the Tier 1c trigger (≥8 ledger rows flagging explicit intent mismatch per `docs/plans/2026-04-20-m001-tier1-implementation.md` line 293). One row is not 8 rows; the Tier 1c trigger is NOT met. Flagged so future sessions can be watched for the same gap and so the signal is not lost.
+- **New finding not on prior lists: timer-end screen-off anxiety / audio-suspend-on-lock** (ledger gap 4). The 2026-04-22 preroll hint was gated first-time-only in the polish ship, which means the founder + Seb have both dismissed it and no longer see the "keep phone unlocked" reminder. iOS Safari PWA suspends audio on screen-lock; the block-end beep cannot be relied on if the screen turns off mid-session. The fix is structural (Screen Wake Lock API), not copy-level, and is flagged as a new item in `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md` §"Genuinely-open Tier 1b bundle." This is the kind of finding that only surfaces on real agent-free courtside use — the A3 ligament and trigger (e) are exactly working as designed.
+- **Authoring-budget cap status change.** Cap still at 0 / 10 (no drill records authored this week), but the cap-gating condition has moved: Tier 1b authoring is now **unlocked** by the trigger above. The cap's "5th session" gate (line 151) still applies to Tier 1b's second wave; the first wave is ready to ship per `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md`. The founder's outstanding §R7 exit-3 decision (`d36` in or out of Tier 1b's first-wave) now has behavioral cost-of-delay — the serving-first sequencing supported by ledger gaps 2 + 3 would unlock immediately on `d31 Self Toss Target Practice`, which is exit-3 compatible (`d31` is not the safety-contested drill; `d36` is).
+- **Amendment-log co-signer status.** None of the adjustments above weaken any falsification condition, no threshold is shifted, no decision rule changes. The Tier 1b trigger's formal satisfaction is a state-update, not a threshold-change; co-signer requirement does not apply.
 
 ## Amendment log
 

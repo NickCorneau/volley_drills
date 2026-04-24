@@ -6,12 +6,13 @@ stage: planning
 type: research
 authority: "operational posture on O13 (persistent team identity); forward-compatible participant/consent contract; graduation gate for shipping a first-class Team object (D114-D117)"
 summary: "Stay session-first with forward-compatible participant, side, and consent hooks; do not ship a durable Team object until behavior, trust, and uplift evidence support it."
-last_updated: 2026-04-16
+last_updated: 2026-04-24
 depends_on:
   - docs/vision.md
   - docs/decisions.md
   - docs/prd-foundation.md
   - docs/research/dexie-schema-and-architecture.md
+  - docs/research/2026-04-22-research-sweep-meta-synthesis.md
 related:
   - docs/research/README.md
   - docs/research/solo-training-environments.md
@@ -25,6 +26,7 @@ related:
 
 - Use this note to answer: should the app ship a first-class `Team` object for beach pairs now, and if not, what are the minimum forward-compatible hooks?
 - The operational answer resolves `O13` for planning purposes and is encoded in `D114` (session-first posture), `D115` (forward-compatible participant schema), `D116` (layered, revocable consent), and `D117` (graduation gate before a Team object ships).
+- **`O13` re-weighting under `D132` (2026-04-22).** The vision-level reframe from "personal-first / solo-first" to *pair-first with solo-accommodating tactics* (`D132` in `docs/decisions.md`; §P13 in `docs/vision.md`) raises the strategic importance of persistent pair identity without changing this note's tactical posture. The graduation gate in `D117` remains binding — a first-class `Team` object does not ship until behavior, trust, and uplift evidence support it — but the *eventual* destination is closer to the product's strategic center under pair-first than it was under solo-first. Concrete consequences: (a) the session-first posture stays correct for M001 and v0b (`D114`); (b) the forward-compatible participant / consent hooks (`D115` / `D116`) take on slightly higher priority when the next surface that touches partner identity is authored, because the pay-off of "small hook now saves reshape later" is larger under pair-first; (c) nothing else in this note changes — the bottom line, the graduation-gate evidence bar, and the minimum hooks list are all unchanged. The meta-synthesis at `docs/research/2026-04-22-research-sweep-meta-synthesis.md` §R10 records the full dissolution of the prior "structural tension between solo-first behavior and partner-primary pass/set data collection."
 - Not this note for courtside UI, adaptation rules, onboarding screen count, warm-up content, or regulatory posture; use the respective narrower notes.
 
 ## Bottom line
@@ -262,3 +264,4 @@ Audited against the repo as of 2026-04-16. No immediate code changes are require
 
 - 2026-04-16 — note created from desk research on comparable pair-sport consumer products (SwingVision, PB Vision, UTR, PickleGo, UltiAnalytics, The Rowing App, Balltime, Stat Together, Steazzi, KAYA, The Topo, DancePartner, Danceflavors, U-Stat, Pickleball Stats Tracker), HCI research on shared accounts and post-breakup disentanglement, fitness adherence literature (JMIR, Nature Communications, Philadelphia RCT, step-incentive and loss-framing trials), Strava Flyby privacy history, PB Vision/DUPR trust-erosion evidence, and local-first collaboration literature (Kleppmann, Ink & Switch, Automerge, Keyhive). Raw provenance in `research-output/persistent-team-identity-pair-sport-apps.md`. Resolves `O13` operationally and seeds `D114`–`D117`.
 - 2026-04-16 — added reinforcing analogues (DUPR person-level durable identity, Tennis Fit solo→doubles evolution without a Team object, SwingVision 2026 Family Sharing, Kitman Labs / Teamworks kiosk participant-aware capture), beach-specific patterns (BeachUp / Beach Volleyball App scheduling-unit vs individual-skill split, VolleyTrain / PlayBeach partner-as-modality framing), and a Sweatmates subsection separating pair-native accountability from durable Team identity. Linked the D91 cohort readout to the pair-vs-solo stratified reading band in `docs/research/d91-retention-gate-evidence.md`. No decision changes; `D114`–`D117` and the v0b exclusion of persistent partner/team identity stand. This is evidence depth, not posture drift.
+- 2026-04-24 — `D132` propagation. Added `O13` re-weighting note to Agent Quick Scan. The vision-level reframe (solo-first → pair-first with solo accommodation) raises strategic importance of eventual persistent pair identity but **does not** move the graduation gate or soften the tactical session-first posture: `D117`'s evidence bar remains the sole gate on shipping a first-class `Team` object. No tactical changes. See `docs/research/2026-04-22-research-sweep-meta-synthesis.md` §R10 for the companion dissolution of the "partner-mode data vs solo-first vision" structural tension.
