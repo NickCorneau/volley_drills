@@ -1,14 +1,19 @@
 ---
-id: brief-per-skill-baseline-tests-2026-04-22
+
+## id: brief-per-skill-baseline-tests-2026-04-22
 title: "Research brief: Per-skill baseline skill assessments for amateur beach volleyball"
 type: research
-status: draft
+status: sent
 stage: validation
 authority: "Vendor-facing research brief. Content below the '--- BRIEF ---' marker is the text intended for the vendor; the frontmatter above is internal-only."
 summary: "Self-contained research brief requesting a synthesis of validated or field-tested baseline skill assessments (passing / serving / setting) for adult amateur beach volleyball players, scoped to self-administered courtside use and ~3-5 minute per-skill duration. Deliverable is a ~2000-4000-word memo with per-skill assessment catalog, synthesis table, recommendation section, and gaps section. Priority sources tiered from peer-reviewed to practitioner wisdom."
-last_updated: 2026-04-22
+last_updated: 2026-04-22-a
 internal_motivation: "Informs the per-skill user-level taxonomy open question (decisions.md O21) and the Phase 1.5 baseline-tests scope in the roadmap. Skip-reason-if-deferred: existing single-scalar `storageMeta.onboarding.skillLevel` (D-C4 / D121) remains sufficient for M001; per-skill tracking is a Phase 1.5 question and this research compounds over time."
----
+responses:
+  - docs/research/briefs/responses/2026-04-22-per-skill-baseline-tests-vendor-1.md
+  - docs/research/briefs/responses/2026-04-22-per-skill-baseline-tests-vendor-2.md
+  - docs/research/briefs/responses/2026-04-22-per-skill-baseline-tests-vendor-3.md
+distilled_in: docs/research/baseline-skill-assessments-amateur-beach.md
 
 # Research brief: Per-skill baseline skill assessments for amateur beach volleyball
 

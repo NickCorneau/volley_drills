@@ -6,13 +6,14 @@ stage: validation
 type: research
 authority: minimum scored-contact thresholds, self-scoring bias guardrails, and product policy shape for the binary Good / Not Good progression gate
 summary: "Curated evidence base for the binary-score progression gate: how many attempts support a trustworthy 'true rate ≥ 70%' statement, expected self-scoring bias direction and magnitude, and the operational policy shape that falls out under cost asymmetry."
-last_updated: 2026-04-16
+last_updated: 2026-04-22
 depends_on:
   - docs/decisions.md
   - docs/specs/m001-adaptation-rules.md
   - docs/research/beach-training-resources.md
 related:
   - docs/research/README.md
+  - docs/research/baseline-skill-assessments-amateur-beach.md
 ---
 
 # Binary Skill Scoring For Drill Progression
@@ -131,6 +132,26 @@ No published dataset cleanly states "amateur volleyball players over-credit them
 
 Treat these as inferred product priors, not measured constants. They are used explicitly to shrink empirical calibration estimates rather than to swap in a fixed offset.
 
+### Later evidence: 2026-04-22 three-vendor convergence on direction
+
+The 2026-04-22 per-skill-baseline-tests research intake (three independent external vendors, reconciled in [`docs/research/baseline-skill-assessments-amateur-beach.md`](./baseline-skill-assessments-amateur-beach.md)) reinforces and refines the priors above without altering the core claims or the Recommended operating rule below.
+
+**What it confirms (carry into canon):**
+
+- **Direction is settled.** Three independent vendor triangulations converge on overestimation as the reliable direction of amateur self-scoring bias on outcome-ambiguous tasks. No vendor contradicted the direction.
+- **The r ≈ 0.47 athletics anchor has a second independent source.** Vendor 1 cites Mabe & West (1982, *J Applied Psychology* 67(3)) for r ≈ 0.47 self-vs-objective in athletics. Vendor 3 independently reproduces the same number via Karpen's review of biased self-assessment (r ≈ 0.29 general, r ≈ 0.47 athletics). Two independent reviews converging on the same athletics-domain number strengthens the 10–20 % ICC-compression assumption used implicitly above the "product prior" table.
+- **No volleyball-specific self-scoring evidence exists.** All three vendors independently confirmed this gap. The +5 pp / +8 pp priors remain extrapolations; the highest-ROI way to replace them is an internal self-score-vs-video agreement measurement on the product's own cohort (see `docs/research/pre-telemetry-validation-protocol.md` and the `Open Questions` section below).
+- **Calibration-video lever is ship-ready.** Aguayo-Albasini et al. (2024, *BMC Psychology*, DOI 10.1186/s40359-024-01643-7) showed a short calibration tutorial lifted inter-rater ICC to 0.94. Concrete product mechanism: a 30-second calibration tutorial per test showing what each score level looks like. Compatible with (not a replacement for) the three-layer correction described below; adopt when the score-time UI is next touched.
+
+**What it flags as candidate open questions (do NOT change the correction math yet):**
+
+Two mechanisms independently surfaced by vendors 2 and 3 argue against a purely monotonic bias correction. Neither has volleyball-specific evidence; both are plausible enough to flag and to let the app's own data adjudicate once `N` allows.
+
+- **Biphasic bias (vendor 2).** Low-skill athletes overestimate; near-mastery athletes underestimate. A single-magnitude correction factor (as implemented in `D104`) would systematically over-correct at one end of the skill range. If biphasic holds, the correction needs a piecewise form with an empirically-estimated inflection point, not a constant offset. Source: vendor 2 cites a general self-assessment biphasic-vs-monophasic literature (PeerJ 2024) without a volleyball replication.
+- **Outlier-anchoring / best-moment bias (vendor 3).** Athletes over-weight their best performances as representative. Source: Guenther, Taylor & Alicke (2015, *J Applied Social Psychology*, DOI 10.1111/jasp.12303) — in baseball / softball samples, 81.3 % / 76.9 % of players judge their best game as more representative than their worst; 50 % of those choosing their best game pick a perfect performance. If dominant in volleyball, the scoring pipeline would need a winsorization or best-X% trim term rather than a reversing correction factor — mechanically distinct from biphasic.
+
+Both mechanisms are carried as candidate open questions on top of `O12` rather than absorbed into new `O*` items from this note alone. The product default remains the three-layer monotonic correction below until the app's own calibration data can distinguish between monotonic, biphasic, and outlier-anchoring shapes. The Validate-Later section is extended accordingly.
+
 ## Bias correction that fits a 10-second workflow
 
 Three patterns from the self-assessment literature outside sport are useful:
@@ -241,12 +262,32 @@ If the whole policy has to fit in one sentence: **gate progression on 50 attempt
 - Whether bias drifts measurably with session fatigue or session order (late-drill leniency).
 - Whether the 10-second borderline review survives real courtside attention or is routinely skipped.
 - Whether the personal anchor block pattern (20 self- + expert-scored attempts every few weeks) is tolerable as a recurring ask or needs to fall back to video-only anchors.
+- Whether the self-scoring bias shape in the product's actual cohort is **monotonic** (current assumption), **biphasic** (reverses sign near mastery — vendor 2 mechanism), or **outlier-anchored** (over-weights best attempts — vendor 3 mechanism via Guenther 2015). Distinguishable only with calibration data stratified across skill-band and with rep-level anchor tags; see `docs/research/baseline-skill-assessments-amateur-beach.md` § Open Questions 2–3.
+- Whether the calibration-video tutorial (Aguayo-Albasini 2024 ICC lift to 0.94) is feasible as a ship-ready mitigation in this product's score-time UI — ship-mechanism question, not an evidence question.
 
 ## Open Questions
 
 - `O12` remains a field-validation question: whether the 50-attempt minimum, the posterior rule, and the +5 / +8 pp priors agree with observed tester data at rolling N on real beach sessions. This note provides the planning default, not the validated answer.
 - Whether a pre-estimation tap (`O15`) shifts bias direction enough to relax the pre-calibration proxy safely.
 - Whether the borderline-review tap should itself be gated (e.g., only on the first gate-eligible session in a window) to avoid habituation.
+
+## Candidate open questions flagged by external evidence (2026-04-22)
+
+The 2026-04-22 per-skill baseline-assessment research wave (three independent vendors, synthesis at [`docs/research/baseline-skill-assessments-amateur-beach.md`](./baseline-skill-assessments-amateur-beach.md)) surfaced two independent mechanisms that each argue against the **monotonic** bias-correction shape in `D104`'s +5 / +8 pp priors. Both are flagged here as *candidate* open questions — the evidence bar to re-parameterize `D104` is not met, and this note does not re-parameterize anything on the current strength of the evidence.
+
+- **Biphasic bias (vendor 2, single-source, non-volleyball).** PeerJ 2024 monophasic-vs-biphasic self-assessment framing: low-skill athletes overestimate; near-mastery athletes underestimate. If this generalizes to amateur beach, a monotonic +5 / +8 pp correction would *over*-correct near mastery and a piecewise shape would be needed. No volleyball-specific replication. Vendor 2 offers mechanism only, not a fitted band or threshold.
+- **Outlier-anchoring / best-moment bias (vendor 3, single-source, baseball/softball).** Guenther, Taylor & Alicke (2015, *J Applied Social Psychology*, DOI 10.1111/jasp.12303): 81.3 % of players in one sample / 76.9 % in another judge their **best** game as more representative of their true ability than their worst; 50 % of those choosing their best game pick a perfect performance. If this generalizes, the scoring pipeline would need to down-weight outlier successes or the monotonic correction would inherit the anchoring bias. No volleyball-specific replication.
+
+**Decision bar for re-opening `D104`.** Neither mechanism is sufficient on its own. Pre-registered here so the bar is visible when future evidence lands:
+
+- **Volleyball-specific replication.** A study in adult amateur volleyball (beach or indoor) that either (a) fits a piecewise bias-correction shape with a significant sign reversal near a skill-band transition, or (b) demonstrates outlier-anchoring in self-scored volleyball accuracy at effect sizes that would shift the +5 / +8 pp priors by ≥ 2 pp under either biphasic or outlier-weighted correction. Or:
+- **Internal measurement on the app's own cohort.** Self-score-vs-video or self-score-vs-partner agreement data, stratified across skill bands, showing either biphasic flip (significant near-mastery under-scoring) or systematic over-weight of best-attempt windows. The `D91` / `D130` re-eval cohorts are the natural data source; pre-register the statistical test before the data exists to avoid post-hoc fishing.
+
+**What this does not change.** `D104` posterior rule stays at **50 scored contacts + `P(p_corrected ≥ 0.70) ≥ 0.80`** with the +5 pp generic / +8 pp injury-sensitive priors. The 3-of-3 vendor agreement on "no volleyball-specific self-scoring evidence exists" (baseline-assessment synthesis §Executive conclusion) is the explicit gap; shipping a piecewise or outlier-aware correction on non-volleyball literature alone would replace one literature-inference default with a more-complicated literature-inference default. Hold the current shape; wait for internal data.
+
+**Calibration-video mitigation (ship-ready, noted separately).** The baseline-assessment synthesis flags Aguayo-Albasini et al. 2024 (*BMC Psychology*, DOI 10.1186/s40359-024-01643-7): a 30-second calibration tutorial lifted inter-rater ICC to 0.94. This is a procedural lever available to any future score-calibration UI; it does not enter the `D104` correction math and does not require re-parameterization. Tracked in the baseline-assessment synthesis note, not here.
+
+**Meta-synthesis + discipline framing.** Cross-topic readout of the 2026-04-22 research wave lives in `docs/research/2026-04-22-research-sweep-meta-synthesis.md`. This flag section was applied as delta D6 per that note; D132 (pair-first vision stance) does not affect the bias-correction math.
 
 ## Sources (summary)
 

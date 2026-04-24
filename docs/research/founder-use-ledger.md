@@ -1,5 +1,4 @@
----
-id: founder-use-ledger
+## id: founder-use-ledger
 title: "Founder-Use Ledger (Dated append-only log during D130 window)"
 type: research
 status: active
@@ -17,7 +16,6 @@ related:
 decision_refs:
   - D91
   - D130
----
 
 # Founder-Use Ledger
 
@@ -32,7 +30,11 @@ decision_refs:
 
 `D130` asserts that founder-use mode is valid in place of the D91 stranger-cohort gate because the founder has personal conviction for the product. The `docs/reviews/2026-04-20-m001-red-team.md` red-team flagged that "personal conviction" is not observable and not falsifiable. This ledger converts conviction into a behavior log: which sessions happened, which did not, what focus the founder actually chose, and whether the founder finished what they started.
 
+---
+
 The ledger exists so the 2026-07-20 re-eval can be informed by data, not by the founder's recollection of enthusiasm. Absence of data at the re-eval is itself a signal; the adversarial memo's Condition 1 and Condition 2 both read directly from this file.
+
+**This ledger is one behavioral-evidence channel, not the only one.** It captures founder personal-use sessions; it does not capture partner (Seb) usage, partner-walkthrough observations, or Condition 3 unprompted-open signals. Per the 2026-04-22-c founder correction recorded in `docs/research/2026-04-22-research-sweep-meta-synthesis.md`, personal-ledger logging should not be treated as a prerequisite for canon work, research synthesis, or Tier 1b / Tier 2 progression — Seb's ongoing usage, the partner-walkthrough reconciliation, and the founder's planned post-injury resumption of personal use are first-class evidence alongside rows in this file. Research-velocity substitution is still a real failure mode (see `docs/roadmap.md` Risks-and-mitigations), but it is the research-vs-**any-behavioral-evidence** ratio that matters, not the research-vs-founder-ledger ratio specifically. The weekly Monday adversarial-memo review should read ledger count alongside Seb's open cadence, partner-walkthrough output, and any other observable behavior channel, rather than reading ledger count alone.
 
 ## How to use this ledger
 
@@ -46,15 +48,17 @@ The ledger exists so the 2026-07-20 re-eval can be informed by data, not by the 
 
 ## Schema
 
-| Field | Values | Notes |
-|---|---|---|
-| `date` | YYYY-MM-DD | Session start date in founder's local time. If a session straddles midnight, use the start date. |
-| `playerMode` | `solo` \| `pair` | If pair, capture the partner's first name in the note field. |
-| `focus` | `pass` \| `serve` \| `set` \| `mixed` | What the founder was actually trying to train. `mixed` is legitimate but should be rare; recurring `mixed` entries suggest the single-focus invariant is being ignored and should be noted in the weekly review. |
-| `duration_min` | integer | Actual training minutes (not the timer's planned minutes if the session ended early or ran long). |
-| `completed` | `Y` \| `N` \| `partial` | `Y` = ran every block intended to be run. `N` = abandoned before any real skill block. `partial` = ran the warmup + main skill but cut pressure or wrap. |
-| `rpe` | 1–10 or blank | Self-reported session RPE right after the session. Blank if not captured. |
-| `note` | one short sentence | What made the session worth logging, what drill was swapped, what annoyed, what surprised. Include partner name if `playerMode: pair`. Include "outside-app planning" if any planning happened outside the app (Condition 2). |
+
+| Field          | Values                             | Notes                                                                                                                                                                                                                         |
+| -------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `date`         | YYYY-MM-DD                         | Session start date in founder's local time. If a session straddles midnight, use the start date.                                                                                                                              |
+| `playerMode`   | `solo` | `pair`                    | If pair, capture the partner's first name in the note field.                                                                                                                                                                  |
+| `focus`        | `pass` | `serve` | `set` | `mixed` | What the founder was actually trying to train. `mixed` is legitimate but should be rare; recurring `mixed` entries suggest the single-focus invariant is being ignored and should be noted in the weekly review.              |
+| `duration_min` | integer                            | Actual training minutes (not the timer's planned minutes if the session ended early or ran long).                                                                                                                             |
+| `completed`    | `Y` | `N` | `partial`              | `Y` = ran every block intended to be run. `N` = abandoned before any real skill block. `partial` = ran the warmup + main skill but cut pressure or wrap.                                                                      |
+| `rpe`          | 1–10 or blank                      | Self-reported session RPE right after the session. Blank if not captured.                                                                                                                                                     |
+| `note`         | one short sentence                 | What made the session worth logging, what drill was swapped, what annoyed, what surprised. Include partner name if `playerMode: pair`. Include "outside-app planning" if any planning happened outside the app (Condition 2). |
+
 
 ## Sessions
 
@@ -66,17 +70,21 @@ Newest first. The first real row lands after the first founder session on the Ti
 | YYYY-MM-DD | solo/pair | pass/serve/set/mixed | 15 | Y/N/partial | 6 | one short sentence |
 ```
 
-| date | playerMode | focus | duration_min | completed | rpe | note |
-|---|---|---|---|---|---|---|
-| _example row, delete when first real row lands_ | solo | pass | 15 | Y | 6 | Tier 1a smoke test. Beach Prep Three surfaced correctly; d28 four-component copy read clearly; main_skill rolled d1 Corner Pass. No Swap this session. |
+
+| date                                            | playerMode | focus | duration_min | completed | rpe | note                                                                                                                                                   |
+| ----------------------------------------------- | ---------- | ----- | ------------ | --------- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| *example row, delete when first real row lands* | solo       | pass  | 15           | Y         | 6   | Tier 1a smoke test. Beach Prep Three surfaced correctly; d28 four-component copy read clearly; main_skill rolled d1 Corner Pass. No Swap this session. |
+
 
 ## Week rollups
 
 At the start of each Monday's adversarial-memo review, append a one-line roll-up here for the week just completed. This is a convenience view, not an authoritative one — the authoritative log is the Sessions table above.
 
-| week start (Monday) | total sessions | solo n | pair n | pass n | serve n | set n | mixed n | outside-app planning events |
-|---|---|---|---|---|---|---|---|---|
-| _template row, delete on first real rollup_ | 2026-04-20 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+
+| week start (Monday)                         | total sessions | solo n | pair n | pass n | serve n | set n | mixed n | outside-app planning events |
+| ------------------------------------------- | -------------- | ------ | ------ | ------ | ------- | ----- | ------- | --------------------------- |
+| *template row, delete on first real rollup* | 2026-04-20     | 0      | 0      | 0      | 0       | 0     | 0       | 0                           |
+
 
 ## Interpreting this ledger at the re-eval
 
@@ -99,3 +107,4 @@ Additional context this ledger cannot answer directly but makes legible:
 - **Belongs elsewhere**: partner walkthrough findings (`docs/research/partner-walkthrough-results/`), adversarial memo itself (`docs/plans/2026-04-20-m001-adversarial-memo.md`), Tier 1a scope (`docs/plans/2026-04-20-m001-tier1-implementation.md`).
 - **Outranked by**: nothing. This is a raw behavioral log; it is the source, not a derivation.
 - **Key pattern**: an append-only dated log. Do not re-organize, re-bucket, or add columns without discussion; the whole point is that it stays cheap to append.
+

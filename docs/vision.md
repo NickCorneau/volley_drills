@@ -6,7 +6,7 @@ stage: planning
 type: core
 authority: product principles, strategic stance, local-first doctrine, non-goals, product promise
 summary: "Product vision, principles, and strategic guardrails for the beach volleyball training OS."
-last_updated: 2026-04-19
+last_updated: 2026-04-22
 depends_on: []
 ---
 
@@ -40,7 +40,7 @@ The product should feel **light on the surface and serious underneath**.
 
 ## Strategic stance
 
-- Start personal-first for self-coached amateurs; real training groups are fluid (solo, a partner, sometimes 3-4 people) and the system should handle whoever shows up.
+- **Pair-first in mental model; solo-accommodating in tactics.** The sport is 2v2 beach volleyball, and individual training — solo or otherwise — is in service of improving pair performance. Most amateur training time is spent solo or with whoever shows up on a given day; the product accommodates that reality without losing the pair-performance frame as the strategic north star. Real training groups are fluid (solo, a partner, sometimes 3-4 people) and the system handles whoever is present.
 - Design so coach-to-client and coach-organizer workflows can layer on without changing the core loop.
 - Optimize for courtside mobile use and low-equipment fallback over desktop planning comfort.
 - Recommend before interrogating. Ask only for inputs that materially change today's session or satisfy the safety contract.
@@ -67,6 +67,7 @@ These are the authoritative product principles. Other docs should reference this
 - **P10.** Your training data lives on your device first. Starting, running, and reviewing a session must never depend on a strong network connection.
 - **P11.** Recommend before you interrogate.
 - **P12.** Every key surface should deliver one clear action, one confidence signal, and one reason to come back.
+- **P13.** The mental model is pair-first: every session — solo or otherwise — is in service of improving pair performance in a 2v2 sport. Solo is the accommodated case, not the strategic end-state. Framing, copy, metrics, and progression should read as "how this session helps your pair" even when the partner is not present.
 
 ## Non-goals (for now)
 
@@ -79,7 +80,7 @@ These are the authoritative product principles. Other docs should reference this
 
 ## Product promise
 
-Help me build and run better beach practices in minutes, understand why today's session fits, and leave each session clearer about what to do next. My training data stays on my device and belongs to me.
+Help me build and run better beach practices in minutes — whether I'm training alone or with my partner — understand why today's session fits my pair's game, and leave each session clearer about what to do next. My training data stays on my device and belongs to me.
 
 ## For agents
 
