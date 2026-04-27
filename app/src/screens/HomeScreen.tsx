@@ -171,7 +171,7 @@ export function HomeScreen() {
       // persisted skill level during plan build.
       handleNewUserStart: intercept(() => navigate(routes.setup())),
       handleDraftStart: intercept(() => navigate(routes.safety())),
-      handleDraftEdit: intercept(() => navigate(routes.setup())),
+      handleDraftEdit: intercept(() => navigate(routes.setup(), { state: { editDraft: true } })),
       // One-tap Repeat: rebuild a fresh full-plan draft from the last
       // session's SetupContext and route straight to `/safety`. No
       // Setup detour, no stale-context banner, no toggle review. The

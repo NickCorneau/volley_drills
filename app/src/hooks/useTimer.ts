@@ -12,9 +12,14 @@ export function useTimer(durationSeconds: number, onComplete: () => void) {
   const durationRef = useRef(durationSeconds)
   const lastPublishedRemainingRef = useRef(durationSeconds)
   const onCompleteRef = useRef(onComplete)
+  // Mirror of `isRunning` for synchronous reads inside imperative
+  // callbacks (`resume` early-return guard). React state would be stale
+  // inside the same tick a double-tap fires.
+  const isRunningRef = useRef(false)
 
   useEffect(() => {
     onCompleteRef.current = onComplete
+    isRunningRef.current = isRunning
   })
 
   const tickRef = useRef<(() => void) | undefined>(undefined)
@@ -70,7 +75,19 @@ export function useTimer(durationSeconds: number, onComplete: () => void) {
   }, [publishRemaining])
 
   const resume = useCallback(() => {
+    // Idempotent (red-team adversarial finding, 2026-04-27). Without
+    // these guards, a double-tap of Resume - or a React StrictMode
+    // double-invoke - reschedules `requestAnimationFrame` while the
+    // previous RAF is still queued and resets `startTsRef` to a later
+    // timestamp. The pending tick then computes elapsed against the
+    // newer `startTsRef`, leaking ~(T2 - T1)s of timer credit and
+    // leaving an orphan RAF chain that the next `pause` would not
+    // cancel. Cancel any pending RAF first and bail when we're already
+    // running so resume() is safe to call repeatedly.
+    if (isRunningRef.current) return
+    cancelAnimationFrame(rafRef.current)
     startTsRef.current = performance.now()
+    isRunningRef.current = true
     setIsRunning(true)
     rafRef.current = requestAnimationFrame(() => tickRef.current?.())
   }, [])

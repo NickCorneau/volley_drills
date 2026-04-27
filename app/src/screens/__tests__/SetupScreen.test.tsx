@@ -165,6 +165,66 @@ describe('SetupScreen (C-3)', () => {
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
+  it('draft edit: pre-fills from the current draft instead of the last completed context', async () => {
+    await db.storageMeta.put({
+      key: 'onboarding.completedAt',
+      value: 1,
+      updatedAt: 1,
+    })
+    const completedAt = Date.now() - 3 * 24 * 60 * 60 * 1000
+    await db.sessionPlans.put({
+      id: 'plan-lc',
+      presetId: 'solo_wall',
+      presetName: 'Solo + Wall',
+      playerCount: 1,
+      blocks: [],
+      safetyCheck: { painFlag: false, heatCta: false, painOverridden: false },
+      createdAt: completedAt - 60_000,
+      context: {
+        playerMode: 'solo',
+        timeProfile: 25,
+        netAvailable: false,
+        wallAvailable: true,
+      },
+    })
+    await db.sessionDrafts.put({
+      id: 'current',
+      context: {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: true,
+        wallAvailable: false,
+      },
+      archetypeId: 'pair_net',
+      archetypeName: 'Pair + Net',
+      blocks: [],
+      updatedAt: completedAt,
+    })
+
+    render(
+      <MemoryRouter initialEntries={[{ pathname: '/setup', state: { editDraft: true } }]}>
+        <Routes>
+          <Route path="/setup" element={<SetupScreen />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await screen.findByRole('radio', { name: 'Pair', checked: true })
+    expect(
+      within(screen.getByRole('radiogroup', { name: 'Net available' })).getByRole('radio', {
+        name: 'Yes',
+        checked: true,
+      }),
+    ).toBeInTheDocument()
+    expect(
+      within(screen.getByRole('radiogroup', { name: 'Wall available' })).getByRole('radio', {
+        name: 'No',
+        checked: true,
+      }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: '40 min', checked: true })).toBeInTheDocument()
+  })
+
   it('non-onboarding Build does NOT write onboarding.completedAt (regression guard per C-3 Unit 3 test scenarios)', async () => {
     // Pre-set the completedAt sentinel so the non-onboarding escape
     // doesn't bounce us to /onboarding/*.

@@ -100,10 +100,12 @@ describe('PassMetricInput (V0B-02 / H13 tap-to-type)', () => {
     expect(good.value).toBe('')
     expect(good).toHaveAttribute('placeholder', '0')
     // The pass-rate still computes against the parent's domain value
-    // (good === 0, total === 10 → 0% good pass rate). The visible
-    // 0% line confirms the empty input committed to 0 even though
-    // the field rendered empty.
-    expect(screen.getByText(/^0% good pass rate$/i)).toBeInTheDocument()
+    // (good === 0, total === 10 → 0% good). The visible 0% line
+    // confirms the empty input committed to 0 even though the field
+    // rendered empty. 2026-04-27 V0B-28 surface-move: rate label is
+    // skill-neutral now that `PerDrillCapture` renders the per-drill
+    // success rule above the inputs.
+    expect(screen.getByText(/^0% good$/i)).toBeInTheDocument()
   })
 
   it('typing a Good value commits the new number on blur', async () => {
@@ -152,13 +154,18 @@ describe('PassMetricInput (V0B-02 / H13 tap-to-type)', () => {
     const goodInput = screen.getByLabelText(/good/i) as HTMLInputElement
     expect(goodInput.value).toBe('')
     expect(goodInput).toHaveAttribute('placeholder', '0')
-    expect(screen.getByText(/^0% good pass rate$/i)).toBeInTheDocument()
+    expect(screen.getByText(/^0% good$/i)).toBeInTheDocument()
   })
 
   it('shows pass-rate line when Total > 0 and notCaptured is off', () => {
     render(<Harness initialGood={3} initialTotal={5} />)
 
-    expect(screen.getByText(/60% good pass rate/i)).toBeInTheDocument()
+    // 2026-04-27 V0B-28 surface-move: rate label is skill-neutral
+    // ("% good") because the per-drill success rule renders above the
+    // input inside `PerDrillCapture`. The label used to read
+    // "% good pass rate", which mis-named the rate on serving and
+    // setting drills that fall under `COUNT_BASED_METRIC_TYPES`.
+    expect(screen.getByText(/^60% good$/i)).toBeInTheDocument()
   })
 
   it('keeps the notCaptured chip present below the numeric inputs', () => {

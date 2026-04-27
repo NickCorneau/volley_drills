@@ -2,7 +2,7 @@
 id: solo-vs-pair-variant-sweep-2026-04-27
 title: "Solo vs Pair variant authoring sweep (2026-04-27)"
 type: plan
-status: shipped
+status: complete
 stage: validation
 authority: "Catalog-authoring sweep that closes the partner-voice gap on the active M001 drill set: today the session builder can serve Solo-labelled variants to pair sessions when `participants.max ≥ 2`, and several active drills (notably `d38 Bump Set Fundamentals`, `d39 Hand Set Fundamentals`) have first-person self-toss voice that reads wrong with a partner present. Authors first-class Pair siblings for every active `m001Candidate: true` Solo-only drill where pair mode adds real training value (`d05`, `d38`, `d39`, `d40`, `d01`, `d31`, `d22`), splits `d33`'s inline dual-mode paragraph into separate Solo + Pair variants for catalog uniformity, tightens `participants.max = 1` on the Solo siblings whose pair voice now lives in a separate variant, and adds a permanent regression guard via a new catalog-validation rule. Lives within Tier 1b authoring discipline (variants ≠ drills for `MAX_SHIPPED_DRILLS`); no schema bump, no Dexie migration, no new Drill records, no new archetype rules."
 summary: "Authoring sweep of 8 new Pair variants on 8 existing `m001Candidate: true` Drill families, plus a `d33-solo-net` rewrite-and-split, plus three `participants.max = 1` tightenings on the now-redundant Solo voices, plus a new `participants_label_mismatch` catalog-validation rule. Lifts the pair-mode menu from 'leaky solo voice' to a first-class pair drill catalog matching `D132`'s pair-first product stance, while keeping the M001 catalog footprint at 19 active Drill records (variant count grows; Drill count unchanged)."

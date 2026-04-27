@@ -3,17 +3,17 @@ import type { DifficultyTag } from '../db'
 import { PassMetricInput } from './PassMetricInput'
 
 /**
- * Tier 1b D133 (2026-04-26): per-drill capture surface that lives on the
- * Transition screen between blocks. See
- * `docs/specs/m001-review-micro-spec.md` §"Per-drill capture at
- * Transition (D133)" for the contract and
+ * Tier 1b D133 (2026-04-26): per-drill capture surface that lives on
+ * the Drill Check screen (`/run/check`) after each completed main_skill
+ * / pressure block. See `docs/specs/m001-review-micro-spec.md` §"Per-
+ * drill capture at Drill Check (D133)" for the contract and
  * `docs/research/2026-04-26-pair-rep-capture-options.md` Framing D for
  * the design rationale.
  *
  * Two capture controls:
  *
  * 1. **Required** 3-anchor `Difficulty` chip row
- *    (`Too hard / Still learning / Too easy`). The Transition screen
+ *    (`Too hard / Still learning / Too easy`). The Drill Check screen
  *    cannot advance until one chip is tapped. Vocabulary deliberately
  *    differs from the deleted session-level `QuickTagChips` so
  *    rehydration can never collapse a per-drill capture into the legacy
@@ -21,9 +21,20 @@ import { PassMetricInput } from './PassMetricInput'
  *    not an intensity rating.
  * 2. **Optional** Good/Total counts via the existing `PassMetricInput`,
  *    behind a collapsed "Add counts" affordance. Only rendered when
- *    `showCounts` is `true` (the Transition screen passes `true` only
+ *    `showCounts` is `true` (the Drill Check screen passes `true` only
  *    for count-based main-skill drills, see
  *    `domain/policies.ts` `COUNT_BASED_METRIC_TYPES`).
+ *
+ * **V0B-28 forced-criterion prompt (2026-04-27)**: when the user opens
+ * the optional `Add counts` body, render the per-drill success rule
+ * above the inputs as `Success rule: <rule>. If unsure, don't count it
+ * as Good.` The rule is sourced from `variant.successMetric.description`
+ * via `getBlockSuccessRule` and passed through `successRuleDescription`,
+ * so the prompt generalizes across pass / serve / set drills. Implements
+ * the first layer of the `D104` three-layer self-scoring bias correction
+ * on the post-`D133` capture surface. See
+ * `docs/plans/2026-04-27-per-drill-success-criterion.md` and
+ * `docs/specs/m001-review-micro-spec.md` §Required line 78.
  */
 
 const DIFFICULTY_CHIPS: { value: DifficultyTag; label: string }[] = [
@@ -37,6 +48,14 @@ type PerDrillCaptureProps = {
   difficulty: DifficultyTag | null
   onDifficultyChange: (next: DifficultyTag) => void
   showCounts: boolean
+  /**
+   * V0B-28 forced-criterion prompt copy, sourced from
+   * `variant.successMetric.description` via `getBlockSuccessRule`.
+   * Optional so unit tests stay decoupled from the catalog; when
+   * absent, the criterion paragraph is omitted and the inputs render
+   * unchanged. Only renders inside the expanded `Add counts` body.
+   */
+  successRuleDescription?: string
   goodPasses: number
   attemptCount: number
   notCaptured: boolean
@@ -50,6 +69,7 @@ export function PerDrillCapture({
   difficulty,
   onDifficultyChange,
   showCounts,
+  successRuleDescription,
   goodPasses,
   attemptCount,
   notCaptured,
@@ -66,7 +86,7 @@ export function PerDrillCapture({
       data-testid="per-drill-capture"
     >
       <div className="flex flex-col gap-1">
-        <p className="text-xs font-medium uppercase tracking-wide text-accent">Quick tag</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">Quick tag</p>
         <h2 id="per-drill-heading" className="text-sm font-semibold text-text-primary">
           How was {drillName}?
         </h2>
@@ -114,6 +134,26 @@ export function PerDrillCapture({
             <span className="font-medium text-text-primary">Counts</span>{' '}
             <span className="font-normal">(optional)</span>
           </p>
+          {/*
+            V0B-28 forced-criterion prompt (D104 layer-1). Voice mirrors
+            the legacy `ReviewScreen` fallback path so the rule reads as
+            one rule across the codebase, but the criterion text is now
+            sourced from the drill record (`variant.successMetric.description`)
+            instead of being hard-coded for passing. The prompt sits
+            inside the expanded `Add counts` body so the chip-only fast
+            path stays calm and the rule only loads when the user has
+            opted into counts. See
+            `docs/plans/2026-04-27-per-drill-success-criterion.md`.
+          */}
+          {successRuleDescription && (
+            <p className="text-sm text-text-secondary" data-testid="per-drill-success-rule">
+              <span className="font-medium text-text-primary">Success rule:</span>{' '}
+              {successRuleDescription}{' '}
+              <span className="font-medium text-text-primary">
+                If unsure, don&rsquo;t count it as Good.
+              </span>
+            </p>
+          )}
           <PassMetricInput
             good={goodPasses}
             total={attemptCount}

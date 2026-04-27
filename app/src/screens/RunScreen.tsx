@@ -397,14 +397,30 @@ export function RunScreen() {
   }, [endSession, navigate, executionLogId])
 
   const handleEndSessionCancel = useCallback(async () => {
-    setShowEndConfirm(false)
+    // Red-team adversarial finding (2026-04-27): await the in-flight
+    // pause BEFORE closing the modal. The previous order
+    // (`setShowEndConfirm(false)` first, then await + resume) opened a
+    // window where the modal was gone, the timer was visibly paused,
+    // and the live RunControls underneath were interactive — a tester
+    // could mash Resume / Pause manually before our resume actually
+    // fired. Now the modal acts as a transient "settling" affordance:
+    // it stays up while the pause finishes flushing, then closes and
+    // resumes in the same tick. With `useSessionRunner`'s action queue
+    // the underlying pause + resume cannot interleave, but keeping the
+    // modal up here protects the UI surface itself.
     if (wasRunning) {
-      await pendingEndSessionPauseRef.current
+      try {
+        await pendingEndSessionPauseRef.current
+      } finally {
+        setShowEndConfirm(false)
+      }
       timer.resume()
       void resumeBlock().catch((err: unknown) => {
         timer.pause()
         handleRunPersistenceError('End-session resume failed:', err)
       })
+    } else {
+      setShowEndConfirm(false)
     }
   }, [wasRunning, timer, resumeBlock, handleRunPersistenceError])
 

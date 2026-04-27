@@ -163,4 +163,101 @@ describe('PerDrillCapture', () => {
     expect(screen.getByTestId('per-drill-counts')).toBeInTheDocument()
     expect(screen.queryByTestId('per-drill-add-counts')).not.toBeInTheDocument()
   })
+
+  // 2026-04-27 V0B-28 surface-move (D104 layer-1 forced-criterion
+  // prompt): when the user expands `Add counts`, the per-drill success
+  // rule and the anti-generosity nudge render above the Good/Total
+  // inputs. Sourced from the drill record's
+  // `variant.successMetric.description` via `getBlockSuccessRule` on
+  // the `DrillCheckScreen` wire-up. See
+  // `docs/plans/2026-04-27-per-drill-success-criterion.md` and
+  // `docs/specs/m001-review-micro-spec.md` §Required line 78.
+  describe('V0B-28 forced-criterion prompt', () => {
+    it('renders the per-drill success rule and the anti-generosity nudge above the inputs after expanding counts', () => {
+      render(
+        <PerDrillCapture
+          drillName="Self Toss Target Practice"
+          difficulty="still_learning"
+          onDifficultyChange={noop}
+          showCounts={true}
+          successRuleDescription="Serves or serve-toss contacts landing in or near a marked target circle."
+          goodPasses={0}
+          attemptCount={0}
+          notCaptured={false}
+          onGoodChange={noop}
+          onAttemptChange={noop}
+          onToggleNotCaptured={noop}
+        />,
+      )
+
+      fireEvent.click(screen.getByTestId('per-drill-add-counts'))
+      const rule = screen.getByTestId('per-drill-success-rule')
+      expect(rule).toHaveTextContent(/^Success rule:/)
+      expect(rule).toHaveTextContent(
+        /Serves or serve-toss contacts landing in or near a marked target circle\./,
+      )
+      expect(rule).toHaveTextContent(/If unsure, don.t count it as Good\./)
+    })
+
+    it('does not render the success rule while the counts surface is collapsed', () => {
+      render(
+        <PerDrillCapture
+          drillName="Self Toss Target Practice"
+          difficulty="still_learning"
+          onDifficultyChange={noop}
+          showCounts={true}
+          successRuleDescription="Serves or serve-toss contacts landing in or near a marked target circle."
+          goodPasses={0}
+          attemptCount={0}
+          notCaptured={false}
+          onGoodChange={noop}
+          onAttemptChange={noop}
+          onToggleNotCaptured={noop}
+        />,
+      )
+
+      expect(screen.queryByTestId('per-drill-success-rule')).not.toBeInTheDocument()
+    })
+
+    it('omits the success rule when successRuleDescription is undefined (defensive default)', () => {
+      render(
+        <PerDrillCapture
+          drillName="Self Toss Target Practice"
+          difficulty="still_learning"
+          onDifficultyChange={noop}
+          showCounts={true}
+          goodPasses={0}
+          attemptCount={0}
+          notCaptured={false}
+          onGoodChange={noop}
+          onAttemptChange={noop}
+          onToggleNotCaptured={noop}
+        />,
+      )
+
+      fireEvent.click(screen.getByTestId('per-drill-add-counts'))
+      expect(screen.getByTestId('per-drill-counts')).toBeInTheDocument()
+      expect(screen.queryByTestId('per-drill-success-rule')).not.toBeInTheDocument()
+    })
+
+    it('omits the success rule on non-count drills (showCounts=false)', () => {
+      render(
+        <PerDrillCapture
+          drillName="Pass and Slap Hands"
+          difficulty="too_easy"
+          onDifficultyChange={noop}
+          showCounts={false}
+          successRuleDescription="Clean contacts in a row (restart on obvious mishit)."
+          goodPasses={0}
+          attemptCount={0}
+          notCaptured={false}
+          onGoodChange={noop}
+          onAttemptChange={noop}
+          onToggleNotCaptured={noop}
+        />,
+      )
+
+      expect(screen.queryByTestId('per-drill-success-rule')).not.toBeInTheDocument()
+    })
+  })
 })

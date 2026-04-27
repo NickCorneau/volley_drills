@@ -156,8 +156,9 @@ export interface DrillVariantScore {
 }
 
 /**
- * D133 (2026-04-26): per-drill required difficulty enum captured on the
- * Transition screen between blocks. Distinct vocabulary from the deleted
+ * D133 (2026-04-26): per-drill required difficulty enum captured on
+ * `DrillCheckScreen` at `/run/check` after completed main-skill /
+ * pressure blocks. Distinct vocabulary from the deleted
  * session-level `QuickTagChips` (`Too easy / About right / Too hard`)
  * because:
  * - capture grain is per-drill-variant, not per-session
@@ -166,14 +167,18 @@ export interface DrillVariantScore {
  *   RPE (`Easy / Right / Hard`) which lives at session grain
  *
  * See `docs/specs/m001-review-micro-spec.md` §"Per-drill capture at
- * Transition (D133)" and `docs/research/2026-04-26-pair-rep-capture-options.md`
- * Framing D for the rationale.
+ * Transition (D133)" (the spec section name retains the historical
+ * "Transition" label even though the surface shipped as `/run/check`)
+ * and `docs/research/2026-04-26-pair-rep-capture-options.md` Framing D
+ * for the rationale.
  */
 export type DifficultyTag = 'too_hard' | 'still_learning' | 'too_easy'
 
 /**
  * D133 (2026-04-26): one entry per completed main-skill / pressure block,
- * captured on the Transition screen immediately after the block ends.
+ * captured on `DrillCheckScreen` (route `/run/check`) immediately after
+ * the block ends. The pre-`D133` Transition surface is now refocused on
+ * Up Next handoff; capture lives on the dedicated check screen.
  *
  * Realises `V0B-12`'s drill-variant-grain requirement for the first time
  * in M001 (Tier 1a was session-level only) and feeds `D104`'s 50-contact
@@ -195,8 +200,9 @@ export interface PerDrillCapture {
    */
   blockIndex: number
   /**
-   * Required by D133. The Transition screen cannot advance to the next
-   * block until the user taps one of the three chips.
+   * Required by D133. `DrillCheckScreen` cannot advance to the next
+   * block (Transition / Up Next) until the user taps one of the three
+   * chips.
    */
   difficulty: DifficultyTag
   /**
@@ -215,7 +221,7 @@ export interface PerDrillCapture {
    * adaptation engine should treat the drill as RPE-only signal.
    */
   notCaptured?: boolean
-  /** Epoch ms at which the capture was tapped on the Transition screen. */
+  /** Epoch ms at which the capture was tapped on `DrillCheckScreen`. */
   capturedAt: number
 }
 

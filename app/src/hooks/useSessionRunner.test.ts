@@ -434,6 +434,74 @@ describe('useSessionRunner', () => {
     expect(saved.actualDurationMinutes).toBe(5)
   })
 
+  // Red-team adversarial finding (2026-04-27): mutating actions on
+  // `useSessionRunner` MUST serialize through a single in-flight queue
+  // so a rapid pause + endSession (or pause + resume from the
+  // end-session modal cancel path) cannot interleave their underlying
+  // saveExecution writes. Without the queue, both `saveExecution` calls
+  // would launch in parallel - the second can resolve first and the
+  // stale `paused` write lands on top of the `ended_early` record.
+  it('serializes mutating actions so a queued endSession waits for an in-flight pauseBlock to flush', async () => {
+    const inProgressExec = makeExec({ status: 'in_progress' })
+    vi.mocked(sessionService.loadSession).mockResolvedValue({
+      execution: inProgressExec,
+      plan,
+    })
+    const paused = makeExec({ status: 'paused', pausedAt: Date.now() })
+    vi.mocked(sessionService.buildPausedExecution).mockReturnValue(paused)
+    const ended = makeExec({
+      status: 'ended_early',
+      completedAt: Date.now(),
+      endedEarlyReason: 'user_quit',
+    })
+    vi.mocked(sessionService.buildEndedSession).mockReturnValue(ended)
+
+    // Hand-rolled deferred so we can hold the first saveExecution open
+    // and observe whether endSession started its work prematurely.
+    let releaseFirstSave: () => void = () => {}
+    const firstSave = new Promise<void>((resolve) => {
+      releaseFirstSave = resolve
+    })
+    vi.mocked(sessionService.saveExecution)
+      .mockImplementationOnce(() => firstSave)
+      .mockResolvedValue(undefined)
+
+    const { result } = renderHook(() => useSessionRunner('exec-1'))
+    await waitFor(() => expect(result.current.loaded).toBe(true))
+
+    let pausePromise: Promise<unknown> | undefined
+    let endPromise: Promise<unknown> | undefined
+    act(() => {
+      pausePromise = result.current.pauseBlock(15, 180)
+      endPromise = result.current.endSession('user_quit')
+    })
+
+    // Pause's persist is in flight (saveExecution called once with the
+    // paused stub) but endSession has NOT started its derivation yet -
+    // it's queued behind pauseBlock. If the queue were absent both
+    // builders would have fired by now.
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(sessionService.saveExecution).toHaveBeenCalledTimes(1)
+    expect(sessionService.saveExecution).toHaveBeenLastCalledWith(paused)
+    expect(sessionService.buildPausedExecution).toHaveBeenCalledTimes(1)
+    expect(sessionService.buildEndedSession).not.toHaveBeenCalled()
+
+    // Release pause's save. endSession runs only after pauseBlock fully
+    // finishes, including its post-persist `flushTimerForBlock` step.
+    await act(async () => {
+      releaseFirstSave()
+      await pausePromise
+      await endPromise
+    })
+
+    expect(sessionService.buildEndedSession).toHaveBeenCalledTimes(1)
+    // Two saves landed, in pause-then-end order, not in parallel.
+    expect(sessionService.saveExecution).toHaveBeenCalledTimes(2)
+    expect(sessionService.saveExecution).toHaveBeenNthCalledWith(1, paused)
+    expect(sessionService.saveExecution).toHaveBeenNthCalledWith(2, ended)
+  })
+
   // Red-team RT-4 corollary: a stale timer from a different execution must
   // NOT contribute partial seconds to the current session's duration.
   it('skipping the last block ignores a timer owned by a different execution', async () => {

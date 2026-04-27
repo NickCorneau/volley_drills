@@ -1,12 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { BackButton, Button, ScreenShell, ToggleChip } from '../components/ui'
 import type { PlayerMode, TimeProfile } from '../types/session'
 import type { SetupContext } from '../db/types'
 import { buildDraft } from '../domain/sessionBuilder'
 import { isOnboardingStep } from '../lib/onboarding'
 import { isSchemaBlocked } from '../lib/schema-blocked'
-import { findLastCompletedDrillIdsByType, getLastContext, saveDraft } from '../services/session'
+import {
+  findLastCompletedDrillIdsByType,
+  getCurrentDraft,
+  getLastContext,
+  saveDraft,
+} from '../services/session'
 import type { BlockSlotType } from '../types/session'
 import { getStorageMeta, setStorageMeta } from '../services/storageMeta'
 import { routes } from '../routes'
@@ -18,6 +23,14 @@ type WindChoice = 'calm' | 'light' | 'strong'
 const isTimestamp = (v: unknown): v is number =>
   typeof v === 'number' && Number.isFinite(v) && v > 0
 
+type SetupLocationState = {
+  editDraft?: boolean
+}
+
+function isSetupLocationState(value: unknown): value is SetupLocationState {
+  return typeof value === 'object' && value !== null && 'editDraft' in value
+}
+
 export type SetupScreenProps = {
   /** C-3: first-run Today's Setup - no last-session prefill, back → Skill Level, wind row, completes onboarding on Build. */
   isOnboarding?: boolean
@@ -25,6 +38,11 @@ export type SetupScreenProps = {
 
 export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const shouldHydrateDraft =
+    !isOnboarding &&
+    isSetupLocationState(location.state) &&
+    location.state.editDraft === true
   // 2026-04-22 one-tap Repeat simplification: the `?from=repeat`
   // branch + `StaleContextBanner` were retired here because `Repeat
   // this session` on Home now rebuilds the draft and jumps straight
@@ -69,7 +87,9 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       }
 
       try {
-        const ctx = await getLastContext()
+        const ctx = shouldHydrateDraft
+          ? ((await getCurrentDraft())?.context ?? null)
+          : await getLastContext()
         if (cancelled) return
         if (ctx) {
           setPlayerMode(ctx.playerMode)
@@ -89,7 +109,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     return () => {
       cancelled = true
     }
-  }, [isOnboarding, navigate])
+  }, [isOnboarding, navigate, shouldHydrateDraft])
 
   const isComplete = playerMode !== null && netAvailable !== null && wallAvailable !== null
 

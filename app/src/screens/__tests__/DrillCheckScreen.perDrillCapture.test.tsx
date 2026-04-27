@@ -1,9 +1,20 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../db'
 import { DRILLS } from '../../data/drills'
+import { saveReviewDraft } from '../../services/review'
 import { DrillCheckScreen } from '../DrillCheckScreen'
+
+vi.mock('../../services/review', async () => {
+  const actual = await vi.importActual<typeof import('../../services/review')>(
+    '../../services/review',
+  )
+  return {
+    ...actual,
+    saveReviewDraft: vi.fn(actual.saveReviewDraft),
+  }
+})
 
 /**
  * 2026-04-27 pre-D91 editorial polish (plan Item 9): per-drill capture
@@ -131,7 +142,15 @@ function renderAt(execId: string) {
   return render(
     <MemoryRouter initialEntries={[`/run/check?id=${execId}`]}>
       <Routes>
-        <Route path="/run/check" element={<DrillCheckScreen />} />
+        <Route
+          path="/run/check"
+          element={
+            <>
+              <LocationProbe />
+              <DrillCheckScreen />
+            </>
+          }
+        />
         <Route
           path="/run/transition"
           element={
@@ -165,6 +184,7 @@ function renderAt(execId: string) {
 }
 
 beforeEach(async () => {
+  vi.clearAllMocks()
   await clearDb()
 })
 
@@ -238,6 +258,37 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
       expect(row.drillId).toBe(COUNT_DRILL.id)
       expect(row.variantId).toBe(COUNT_VARIANT.id)
       expect(row.blockIndex).toBe(0)
+    })
+  })
+
+  it('waits for the latest per-drill capture save before navigating to transition', async () => {
+    let resolveSave!: () => void
+    const pendingSave = new Promise<void>((resolve) => {
+      resolveSave = resolve
+    })
+    vi.mocked(saveReviewDraft).mockReturnValueOnce(pendingSave)
+
+    const execId = await seedTwoBlockSession({
+      prevType: 'main_skill',
+      prevCompleted: true,
+    })
+    renderAt(execId)
+
+    await screen.findByTestId('per-drill-capture')
+    fireEvent.click(screen.getByRole('radio', { name: /still learning/i }))
+    await waitFor(() => expect(saveReviewDraft).toHaveBeenCalled())
+
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }))
+
+    expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/check')
+
+    await act(async () => {
+      resolveSave()
+      await pendingSave
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
     })
   })
 

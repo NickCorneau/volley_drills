@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { PerDrillCapture } from '../components/PerDrillCapture'
 import { SafetyIcon } from '../components/SafetyIcon'
@@ -8,7 +8,7 @@ import type {
   PerDrillCapture as PerDrillCaptureRecord,
   SessionPlanBlock,
 } from '../db'
-import { getBlockMetricType } from '../domain/drillMetadata'
+import { getBlockMetricType, getBlockSuccessRule } from '../domain/drillMetadata'
 import { COUNT_BASED_METRIC_TYPES } from '../domain/policies'
 import { useSessionRunner } from '../hooks/useSessionRunner'
 import { isSchemaBlocked } from '../lib/schema-blocked'
@@ -51,10 +51,21 @@ import { loadReviewDraft, saveReviewDraft } from '../services/review'
  * unchanged; only the host surface moved. See
  * `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 9.
  */
+
+function mergePerDrillCapture(
+  captures: PerDrillCaptureRecord[],
+  next: PerDrillCaptureRecord,
+): PerDrillCaptureRecord[] {
+  return [...captures.filter((c) => c.blockIndex !== next.blockIndex), next].sort(
+    (a, b) => a.blockIndex - b.blockIndex,
+  )
+}
+
 export function DrillCheckScreen() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const executionLogId = searchParams.get('id') ?? ''
+  const pendingCaptureSave = useRef<Promise<boolean> | null>(null)
 
   const runner = useSessionRunner(executionLogId)
   const { plan, execution, loaded, currentBlockIndex, totalBlocks } = runner
@@ -89,6 +100,14 @@ export function DrillCheckScreen() {
   )
   const showCaptureCounts =
     captureMetricType !== null && COUNT_BASED_METRIC_TYPES.has(captureMetricType)
+  // V0B-28 forced-criterion prompt source (D104 layer-1). Resolved
+  // alongside the metric type from the same variant so the rule and
+  // the count-eligibility decision can never disagree. Renders inside
+  // the expanded `Add counts` body inside `PerDrillCapture`.
+  const captureSuccessRule = useMemo(
+    () => getBlockSuccessRule(captureTarget, playerCount),
+    [captureTarget, playerCount],
+  )
 
   const [captures, setCaptures] = useState<PerDrillCaptureRecord[]>([])
   const [hydrated, setHydrated] = useState(false)
@@ -96,6 +115,7 @@ export function DrillCheckScreen() {
   const [captureGood, setCaptureGood] = useState(0)
   const [captureTotal, setCaptureTotal] = useState(0)
   const [captureNotCaptured, setCaptureNotCaptured] = useState(false)
+  const [captureSaveError, setCaptureSaveError] = useState<string | null>(null)
 
   // Rehydrate the full captures list from any existing review draft on
   // mount. Tier 1b drafts hold per-drill captures across the whole
@@ -154,15 +174,11 @@ export function DrillCheckScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, captureTarget, prevBlockIdx])
 
-  // Persist every meaningful per-drill change immediately. Difficulty
-  // is the gate: until the user taps a chip there is nothing honest to
-  // record (D133 mandates difficulty as the required field).
-  useEffect(() => {
-    if (!hydrated) return
-    if (!captureTarget) return
-    if (difficulty == null) return
-    if (!captureTarget.drillId || !captureTarget.variantId) return
-    const next: PerDrillCaptureRecord = {
+  const buildCurrentCapture = useCallback((): PerDrillCaptureRecord | null => {
+    if (!captureTarget) return null
+    if (difficulty == null) return null
+    if (!captureTarget.drillId || !captureTarget.variantId) return null
+    return {
       drillId: captureTarget.drillId,
       variantId: captureTarget.variantId,
       blockIndex: prevBlockIdx,
@@ -177,35 +193,71 @@ export function DrillCheckScreen() {
             }
           : {}),
     }
-    setCaptures((prev) => {
-      const merged = [...prev.filter((c) => c.blockIndex !== prevBlockIdx), next].sort(
-        (a, b) => a.blockIndex - b.blockIndex,
-      )
-      void saveReviewDraft({
+  }, [
+    captureGood,
+    captureNotCaptured,
+    captureTarget,
+    captureTotal,
+    difficulty,
+    prevBlockIdx,
+    showCaptureCounts,
+  ])
+
+  const persistMergedCaptures = useCallback(
+    (merged: PerDrillCaptureRecord[]): Promise<boolean> => {
+      const pending = saveReviewDraft({
         executionLogId,
         sessionRpe: null,
         goodPasses: 0,
         totalAttempts: 0,
         perDrillCaptures: merged,
-      }).catch((err) => {
-        if (isSchemaBlocked()) return
-        console.error('DrillCheck draft save failed:', err)
       })
+        .then(() => {
+          setCaptureSaveError(null)
+          return true
+        })
+        .catch((err) => {
+          if (!isSchemaBlocked()) {
+            console.error('DrillCheck draft save failed:', err)
+            setCaptureSaveError('Could not save this drill check. Try again.')
+          }
+          return false
+        })
+
+      pendingCaptureSave.current = pending
+      void pending.then(() => {
+        if (pendingCaptureSave.current === pending) {
+          pendingCaptureSave.current = null
+        }
+      })
+      return pending
+    },
+    [executionLogId],
+  )
+
+  const flushCurrentCapture = useCallback(async (): Promise<boolean> => {
+    const next = buildCurrentCapture()
+    if (!next) return false
+    const merged = mergePerDrillCapture(captures, next)
+    setCaptures(merged)
+    return persistMergedCaptures(merged)
+  }, [buildCurrentCapture, captures, persistMergedCaptures])
+
+  // Persist every meaningful per-drill change immediately. Difficulty
+  // is the gate: until the user taps a chip there is nothing honest to
+  // record (D133 mandates difficulty as the required field).
+  useEffect(() => {
+    if (!hydrated) return
+    const next = buildCurrentCapture()
+    if (!next) return
+    setCaptures((prev) => {
+      const merged = mergePerDrillCapture(prev, next)
+      void persistMergedCaptures(merged)
       return merged
     })
     // `captures` intentionally not in deps: setCaptures uses the prev
     // callback so we don't need to re-run when captures change.
-  }, [
-    hydrated,
-    captureTarget,
-    prevBlockIdx,
-    difficulty,
-    captureGood,
-    captureTotal,
-    captureNotCaptured,
-    showCaptureCounts,
-    executionLogId,
-  ])
+  }, [hydrated, buildCurrentCapture, persistMergedCaptures])
 
   // Bypass: no capture target → the user has nothing to reflect on for
   // the previous block (warmup → main, technique block, skipped block,
@@ -237,11 +289,18 @@ export function DrillCheckScreen() {
 
   const captureSatisfied = difficulty !== null
 
-  const handleContinue = useCallback(() => {
+  const handleContinue = useCallback(async () => {
     if (!captureSatisfied) return
+    const pending = pendingCaptureSave.current
+    if (pending) {
+      const saved = await pending
+      if (!saved) return
+    }
+    const saved = await flushCurrentCapture()
+    if (!saved) return
     if (navigator.vibrate) navigator.vibrate(50)
     navigate(routes.transition(executionLogId))
-  }, [captureSatisfied, navigate, executionLogId])
+  }, [captureSatisfied, executionLogId, flushCurrentCapture, navigate])
 
   if (!plan || !execution) {
     if (loaded) {
@@ -338,6 +397,7 @@ export function DrillCheckScreen() {
           difficulty={difficulty}
           onDifficultyChange={setDifficulty}
           showCounts={showCaptureCounts}
+          successRuleDescription={captureSuccessRule ?? undefined}
           goodPasses={captureGood}
           attemptCount={captureTotal}
           notCaptured={captureNotCaptured}
@@ -365,6 +425,7 @@ export function DrillCheckScreen() {
         "swap", no shorten. The only way out forward is to tag.
       */}
       <ScreenShell.Footer className="flex flex-col gap-3 pt-4">
+        {captureSaveError && <StatusMessage variant="error" message={captureSaveError} />}
         {!captureSatisfied && (
           <p
             className="text-center text-sm text-text-secondary"

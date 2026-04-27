@@ -8,12 +8,16 @@ import { skipReview } from '../session'
  * A3 (approved red-team fix plan v3, §A3) - 4x3 state-vs-action matrix
  * for `submitReview` / `skipReview` / `expireReview`.
  *
- * | Existing   | submit              | skip              | expire           |
- * |------------|---------------------|-------------------|------------------|
- * | none       | write submitted     | write skipped     | write skipped    |
- * | draft      | overwrite submitted | overwrite skipped | overwrite skipped|
- * | submitted  | refuse (H19)        | no-op             | no-op            |
- * | skipped    | refuse (H19)        | no-op             | no-op            |
+ * | Existing   | submit              | skip                   | expire                |
+ * |------------|---------------------|------------------------|-----------------------|
+ * | none       | write submitted     | write skipped          | write skipped         |
+ * | draft      | overwrite submitted | overwrite skipped*     | overwrite skipped*    |
+ * | submitted  | refuse (H19)        | no-op                  | no-op                 |
+ * | skipped    | refuse (H19)        | no-op                  | no-op                 |
+ *
+ * (*) Both skip and expire PRESERVE the draft payload onto the terminal
+ *     stub (red-team adv-1/adv-2 fix; skipReview parity landed 2026-04-27).
+ *     Distinguished by `quickTags`: skip carries 'skipped', expire 'expired'.
  *
  * Intra-connection atomicity only per H17: each writer wraps the
  * read-decide-write in `db.transaction('rw', db.sessionReviews,
@@ -134,12 +138,26 @@ describe('A3 matrix: existing state = draft', () => {
     expect(stored?.goodPasses).toBe(20)
   })
 
-  it('(draft, skip) overwrites to skipped', async () => {
+  it('(draft, skip) overwrites to skipped, preserving draft payload (red-team adv-1/adv-2 parity, 2026-04-27)', async () => {
+    // Pre-2026-04-27 skipReview blindly zeroed the draft payload on
+    // overwrite; the parity fix mirrors expireReview so a tester who
+    // entered RPE / per-drill captures / a note before tapping Skip
+    // does not silently lose that data. The 'skipped' quickTag stays
+    // exclusive to user-initiated skip so exports can still tell skip
+    // and expire apart.
     await skipReview(EXEC_ID)
     const stored = await db.sessionReviews.get(REVIEW_ID)
     expect(stored?.status).toBe('skipped')
-    expect(stored?.quickTags).toEqual(['skipped'])
-    expect(stored?.sessionRpe).toBeNull()
+    expect(stored?.quickTags).toContain('skipped')
+    // Draft payload preserved (seedExisting('draft') writes
+    // sessionRpe: 4, goodPasses: 2, totalAttempts: 5).
+    expect(stored?.sessionRpe).toBe(4)
+    expect(stored?.goodPasses).toBe(2)
+    expect(stored?.totalAttempts).toBe(5)
+    // Skip stub still carries the `expired` capture window + non-eligible
+    // adaptation flag so the engine ignores it.
+    expect(stored?.captureWindow).toBe('expired')
+    expect(stored?.eligibleForAdaptation).toBe(false)
   })
 
   it('(draft, expire) overwrites to skipped (quickTags includes expired), preserving draft payload (adv-1/adv-2 fix)', async () => {

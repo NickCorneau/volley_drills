@@ -88,4 +88,75 @@ describe('SkipReviewModal (R11)', () => {
     expect(yesSkipIdx).toBeGreaterThan(-1)
     expect(neverMindIdx).toBeLessThan(yesSkipIdx)
   })
+
+  /**
+   * Focus management (red-team adversarial finding, 2026-04-27):
+   * the dialog must autofocus the safe-primary button on mount, trap
+   * Tab + Shift+Tab inside the dialog while open, and restore focus
+   * to the previously-focused element on close. Mirrors WAI-ARIA
+   * Authoring Practices for `role=dialog` + `aria-modal=true`.
+   */
+  describe('focus management (red-team adversarial finding 2026-04-27)', () => {
+    it('autofocuses Never mind on mount so a keyboard user lands on the safe default', () => {
+      render(<SkipReviewModal planName="Solo + Wall" onConfirm={() => {}} onCancel={() => {}} />)
+      const neverMind = screen.getByRole('button', { name: /never mind/i })
+      expect(document.activeElement).toBe(neverMind)
+    })
+
+    it('traps Tab inside the dialog: Tab on Yes, skip wraps back to Never mind', async () => {
+      const user = userEvent.setup()
+      render(<SkipReviewModal planName="Solo + Wall" onConfirm={() => {}} onCancel={() => {}} />)
+
+      const neverMind = screen.getByRole('button', { name: /never mind/i })
+      const yesSkip = screen.getByRole('button', { name: /yes, skip/i })
+
+      // Mount focuses Never mind.
+      expect(document.activeElement).toBe(neverMind)
+
+      await user.tab()
+      expect(document.activeElement).toBe(yesSkip)
+
+      // Tab on the last focusable should wrap back to the first.
+      await user.tab()
+      expect(document.activeElement).toBe(neverMind)
+    })
+
+    it('traps Shift+Tab inside the dialog: Shift+Tab on Never mind wraps to Yes, skip', async () => {
+      const user = userEvent.setup()
+      render(<SkipReviewModal planName="Solo + Wall" onConfirm={() => {}} onCancel={() => {}} />)
+
+      const neverMind = screen.getByRole('button', { name: /never mind/i })
+      const yesSkip = screen.getByRole('button', { name: /yes, skip/i })
+
+      expect(document.activeElement).toBe(neverMind)
+
+      await user.tab({ shift: true })
+      expect(document.activeElement).toBe(yesSkip)
+    })
+
+    it('restores focus to the previously-focused element on unmount', () => {
+      // Render an opener button that "owns" focus before the modal mounts.
+      const Opener = ({ open }: { open: boolean }) => (
+        <>
+          <button data-testid="opener">Skip review</button>
+          {open && (
+            <SkipReviewModal planName="Solo + Wall" onConfirm={() => {}} onCancel={() => {}} />
+          )}
+        </>
+      )
+      const { rerender } = render(<Opener open={false} />)
+      const opener = screen.getByTestId('opener')
+      opener.focus()
+      expect(document.activeElement).toBe(opener)
+
+      rerender(<Opener open={true} />)
+      // Modal should have stolen focus to its safe-primary button.
+      const neverMind = screen.getByRole('button', { name: /never mind/i })
+      expect(document.activeElement).toBe(neverMind)
+
+      // Closing the modal restores focus to the opener.
+      rerender(<Opener open={false} />)
+      expect(document.activeElement).toBe(opener)
+    })
+  })
 })

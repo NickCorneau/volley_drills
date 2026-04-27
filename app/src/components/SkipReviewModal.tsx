@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
+
 import { Button } from './ui'
 
 /**
@@ -26,6 +27,19 @@ import { Button } from './ui'
  * The card itself simplifies (`ReviewPendingCard` no longer carries
  * `confirmingSkip` state); the modal mounts at the screen root next to
  * the existing `SoftBlockModal`.
+ *
+ * Focus management (red-team adversarial finding, 2026-04-27): the
+ * modal autofocuses the safe-primary `Never mind` button on mount,
+ * traps keyboard focus inside the dialog while open (Tab + Shift+Tab
+ * cycle through the dialog's focusable elements), and restores focus
+ * to whatever element opened it (typically the Home `Skip review`
+ * link) on close. Without focus management, a keyboard or screen-
+ * reader user who tabs past the destructive `Yes, skip` button lands
+ * on the underlying Home page elements while the dialog is still
+ * up - structurally undermining the `aria-modal` contract and making
+ * the destructive confirm easier to mis-tap. The implementation
+ * mirrors WAI-ARIA Authoring Practices for dialogs (focus trap +
+ * restore-on-close); ESC dismissal stays as before.
  */
 
 interface Props {
@@ -35,14 +49,69 @@ interface Props {
   onCancel: () => void
 }
 
+const FOCUSABLE_SELECTOR =
+  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
 export function SkipReviewModal({ planName, onConfirm, onCancel }: Props) {
+  const panelRef = useRef<HTMLDivElement | null>(null)
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null)
+
+  const getFocusable = useCallback((): HTMLElement[] => {
+    const panel = panelRef.current
+    if (!panel) return []
+    return Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
+  }, [])
+
+  useEffect(() => {
+    previouslyFocusedRef.current = (document.activeElement as HTMLElement | null) ?? null
+    // The safe-primary `Never mind` button is the first focusable
+    // element inside the panel; focus it on mount so a keyboard or
+    // screen-reader user lands on the non-destructive default.
+    const focusable = getFocusable()
+    focusable[0]?.focus()
+    return () => {
+      // Restore focus on close so a keyboard user lands back on the
+      // Home `Skip review` link they came from.
+      const prev = previouslyFocusedRef.current
+      if (prev && typeof prev.focus === 'function') {
+        prev.focus()
+      }
+    }
+  }, [getFocusable])
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel()
+      if (e.key === 'Escape') {
+        onCancel()
+        return
+      }
+      if (e.key !== 'Tab') return
+      const focusable = getFocusable()
+      if (focusable.length === 0) {
+        e.preventDefault()
+        return
+      }
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      const active = document.activeElement as HTMLElement | null
+      // If focus drifted outside the dialog (background interaction
+      // before the trap engaged), pull it back inside.
+      if (!active || !panelRef.current?.contains(active)) {
+        e.preventDefault()
+        first.focus()
+        return
+      }
+      if (e.shiftKey && active === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault()
+        first.focus()
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [onCancel])
+  }, [onCancel, getFocusable])
 
   return (
     <div
@@ -51,7 +120,7 @@ export function SkipReviewModal({ planName, onConfirm, onCancel }: Props) {
       aria-modal="true"
       aria-labelledby="skip-review-title"
     >
-      <div className="w-full max-w-[340px] rounded-[12px] bg-bg-primary p-6 shadow-lg">
+      <div ref={panelRef} className="w-full max-w-[340px] rounded-[12px] bg-bg-primary p-6 shadow-lg">
         <h2 id="skip-review-title" className="text-lg font-bold text-text-primary">
           Skip review?
         </h2>

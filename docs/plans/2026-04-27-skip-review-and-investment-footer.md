@@ -2,7 +2,7 @@
 id: skip-review-modal-and-investment-footer-2026-04-27
 title: "Skip-review confirm modal + Settings investment footer (2026-04-27)"
 type: plan
-status: shipped
+status: complete
 stage: validation
 authority: "Editorial-class polish bundle drawn from the genuinely-open Tier 1b items in `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md` §Genuinely-open Tier 1b bundle. Walkthrough-evidenced + multi-pass-converged; not founder-session-trigger-gated, so scope is strictly constrained to *editorial-class* per the 2026-04-22 adversarial-memo authoring-budget discipline (see `docs/plans/2026-04-20-m001-adversarial-memo.md` §5). No new drill records. No metadata schema changes. No persistence-behavior changes. No new archetype variants. No SetupScreen toggles. No Dexie migrations."
 summary: "Two-item editorial-class polish bundle, the fourth successive pass after 2026-04-22 (six items), 2026-04-23 (four items), and 2026-04-26 (six items). Lifts the Home `Skip review` confirmation from an inline two-step row into a centered `role=dialog` modal whose shape matches the existing `End session early?` modal in RunScreen and the existing `ResumePrompt` / `SoftBlockModal` pattern, and adds a quiet `Logged: N sessions · H:MM total` line to the Settings footer above the existing privacy promise so the user has one passive cue of total investment without the surface getting louder. Two reconciled-list items demoted on closer inspection (`Beach Prep Three truncate-with-expand`: the underlying blob condition no longer holds and a prior parity pass deliberately removed the truncate-with-expand pattern; `Accent color demotion`: audit-class scope, separate pass)."

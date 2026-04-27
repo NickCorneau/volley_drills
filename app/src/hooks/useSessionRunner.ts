@@ -84,50 +84,88 @@ export function useSessionRunner(executionLogId: string, options?: SessionRunner
     setExecution(updated)
   }, [])
 
-  const startBlock = useCallback(async () => {
-    const exec = executionRef.current
-    const p = planRef.current
-    if (!exec || !p) return
-    const updated = buildStartedBlock(exec, p)
-    if (!updated) return
-    await persist(updated)
-  }, [persist])
+  /**
+   * Run-state action queue (red-team adversarial finding, 2026-04-27).
+   *
+   * Every mutating action below (start / pause / resume / advance / end /
+   * swap / flushTimer) goes through `runSerial`. The queue is a single
+   * promise chain - a new operation can't begin until the previous one
+   * has resolved or rejected. This serializes:
+   *
+   *   - Rapid double-tap on Pause / Resume during the network/I-O round
+   *     trip, which previously could read a stale `executionRef.current`
+   *     and double-write `pausedAt` / clobber elapsed time.
+   *   - `RunScreen.handleEndSessionRequest` issuing pause + cancel
+   *     interleaved with the user dismissing the modal (the previous
+   *     pause was still mid-flight when the cancel path fired resume).
+   *   - Visibility / beforeunload `flushTimer` racing a pending Pause
+   *     write so the elapsed snapshot read on flush corresponded to a
+   *     pre-pause execution.
+   *
+   * A failed op should not poison the queue, so the ref retracts to a
+   * resolved promise on rejection (`.catch(() => undefined)`).
+   */
+  const queueRef = useRef<Promise<unknown>>(Promise.resolve())
+  const runSerial = useCallback(<T>(work: () => Promise<T>): Promise<T> => {
+    const next = queueRef.current.then(work, work)
+    queueRef.current = next.catch(() => undefined)
+    return next
+  }, [])
 
-  const pauseBlock = useCallback(
-    async (accumulatedElapsed: number, effectiveDurationSeconds?: number) => {
-      const exec = executionRef.current
-      if (!exec) return
-      const updated = buildPausedExecution(exec)
-      await persist(updated)
-      await flushTimerForBlock(exec, accumulatedElapsed, effectiveDurationSeconds, 'paused')
-    },
-    [persist],
+  const startBlock = useCallback(
+    () =>
+      runSerial(async () => {
+        const exec = executionRef.current
+        const p = planRef.current
+        if (!exec || !p) return
+        const updated = buildStartedBlock(exec, p)
+        if (!updated) return
+        await persist(updated)
+      }),
+    [persist, runSerial],
   )
 
-  const resumeBlock = useCallback(async () => {
-    const exec = executionRef.current
-    if (!exec) return
-    await persist(buildResumedExecution(exec))
-  }, [persist])
+  const pauseBlock = useCallback(
+    (accumulatedElapsed: number, effectiveDurationSeconds?: number) =>
+      runSerial(async () => {
+        const exec = executionRef.current
+        if (!exec) return
+        const updated = buildPausedExecution(exec)
+        await persist(updated)
+        await flushTimerForBlock(exec, accumulatedElapsed, effectiveDurationSeconds, 'paused')
+      }),
+    [persist, runSerial],
+  )
+
+  const resumeBlock = useCallback(
+    () =>
+      runSerial(async () => {
+        const exec = executionRef.current
+        if (!exec) return
+        await persist(buildResumedExecution(exec))
+      }),
+    [persist, runSerial],
+  )
 
   const advanceBlock = useCallback(
-    async (status: 'completed' | 'skipped'): Promise<boolean> => {
-      const exec = executionRef.current
-      const p = planRef.current
-      if (!exec || !p) return false
-      const onLastBlock = exec.activeBlockIndex >= p.blocks.length - 1
-      const timer = onLastBlock && status === 'skipped' ? await readTimerState() : undefined
-      const { execution: updated, isLast } = buildAdvancedBlock(exec, p, status)
-      if (isLast) {
-        const partialSeconds =
-          timer?.executionLogId === exec.id ? timer.accumulatedElapsed : undefined
-        updated.actualDurationMinutes = computeActualDurationMinutes(updated, p, partialSeconds)
-      }
-      await persist(updated)
-      await clearTimerState()
-      return isLast
-    },
-    [persist],
+    (status: 'completed' | 'skipped'): Promise<boolean> =>
+      runSerial(async () => {
+        const exec = executionRef.current
+        const p = planRef.current
+        if (!exec || !p) return false
+        const onLastBlock = exec.activeBlockIndex >= p.blocks.length - 1
+        const timer = onLastBlock && status === 'skipped' ? await readTimerState() : undefined
+        const { execution: updated, isLast } = buildAdvancedBlock(exec, p, status)
+        if (isLast) {
+          const partialSeconds =
+            timer?.executionLogId === exec.id ? timer.accumulatedElapsed : undefined
+          updated.actualDurationMinutes = computeActualDurationMinutes(updated, p, partialSeconds)
+        }
+        await persist(updated)
+        await clearTimerState()
+        return isLast
+      }),
+    [persist, runSerial],
   )
 
   const completeBlock = useCallback(() => advanceBlock('completed'), [advanceBlock])
@@ -135,18 +173,19 @@ export function useSessionRunner(executionLogId: string, options?: SessionRunner
   const skipBlock = useCallback(() => advanceBlock('skipped'), [advanceBlock])
 
   const endSession = useCallback(
-    async (reason?: string) => {
-      const exec = executionRef.current
-      const p = planRef.current
-      if (!exec || !p) return
-      const timer = await readTimerState()
-      const ended = buildEndedSession(exec, reason)
-      const ownedElapsed = timer?.executionLogId === exec.id ? timer.accumulatedElapsed : undefined
-      ended.actualDurationMinutes = computeActualDurationMinutes(ended, p, ownedElapsed)
-      await persist(ended)
-      await clearTimerState()
-    },
-    [persist],
+    (reason?: string) =>
+      runSerial(async () => {
+        const exec = executionRef.current
+        const p = planRef.current
+        if (!exec || !p) return
+        const timer = await readTimerState()
+        const ended = buildEndedSession(exec, reason)
+        const ownedElapsed = timer?.executionLogId === exec.id ? timer.accumulatedElapsed : undefined
+        ended.actualDurationMinutes = computeActualDurationMinutes(ended, p, ownedElapsed)
+        await persist(ended)
+        await clearTimerState()
+      }),
+    [persist, runSerial],
   )
 
   /**
@@ -170,37 +209,42 @@ export function useSessionRunner(executionLogId: string, options?: SessionRunner
    * falls back to base exclusion when the neighbor-filtered pool
    * would be empty, so this never starves the Swap button.
    */
-  const swapBlock = useCallback(async (): Promise<boolean> => {
-    const exec = executionRef.current
-    const p = planRef.current
-    if (!exec || !p) return false
-    if (!p.context) return false
-    const currentBlock = p.blocks[exec.activeBlockIndex]
-    if (!currentBlock) return false
-    const neighborNames = [
-      p.blocks[exec.activeBlockIndex - 1]?.drillName,
-      p.blocks[exec.activeBlockIndex + 1]?.drillName,
-    ].filter((n): n is string => typeof n === 'string' && n.length > 0)
-    const alternates = findSwapAlternatives(currentBlock, p.context, {
-      excludeDrillNames: neighborNames,
-    })
-    if (alternates.length === 0) return false
-    const next = alternates[0]
-    const { updatedExecution, updatedPlan } = await swapActiveBlock(exec, p, next)
-    executionRef.current = updatedExecution
-    planRef.current = updatedPlan
-    setExecution(updatedExecution)
-    setPlan(updatedPlan)
-    return true
-  }, [])
+  const swapBlock = useCallback(
+    (): Promise<boolean> =>
+      runSerial(async () => {
+        const exec = executionRef.current
+        const p = planRef.current
+        if (!exec || !p) return false
+        if (!p.context) return false
+        const currentBlock = p.blocks[exec.activeBlockIndex]
+        if (!currentBlock) return false
+        const neighborNames = [
+          p.blocks[exec.activeBlockIndex - 1]?.drillName,
+          p.blocks[exec.activeBlockIndex + 1]?.drillName,
+        ].filter((n): n is string => typeof n === 'string' && n.length > 0)
+        const alternates = findSwapAlternatives(currentBlock, p.context, {
+          excludeDrillNames: neighborNames,
+        })
+        if (alternates.length === 0) return false
+        const next = alternates[0]
+        const { updatedExecution, updatedPlan } = await swapActiveBlock(exec, p, next)
+        executionRef.current = updatedExecution
+        planRef.current = updatedPlan
+        setExecution(updatedExecution)
+        setPlan(updatedPlan)
+        return true
+      }),
+    [runSerial],
+  )
 
   const flushTimer = useCallback(
-    async (accumulatedElapsed: number, effectiveDurationSeconds?: number) => {
-      const exec = executionRef.current
-      if (!exec) return
-      await flushTimerForBlock(exec, accumulatedElapsed, effectiveDurationSeconds)
-    },
-    [],
+    (accumulatedElapsed: number, effectiveDurationSeconds?: number) =>
+      runSerial(async () => {
+        const exec = executionRef.current
+        if (!exec) return
+        await flushTimerForBlock(exec, accumulatedElapsed, effectiveDurationSeconds)
+      }),
+    [runSerial],
   )
 
   const recoverTimerState = useCallback(

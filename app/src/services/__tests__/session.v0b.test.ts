@@ -161,6 +161,115 @@ describe('v0b session services', () => {
     expect(nextPending?.executionId).toBe('exec-old')
   })
 
+  it('skipReview preserves the draft payload (RPE, perDrillCaptures, reason, note) onto the skipped stub (red-team adv-1/adv-2 parity)', async () => {
+    // Adversarial-finding parity with expireReview: a tester who taps
+    // through /run/check capturing per-drill Difficulty + Good/Total for
+    // each block, fills RPE, and writes a short note - then taps "Skip
+    // review" from Home - should not silently lose that data. Without
+    // preservation, skipReview would zero everything out and ship a
+    // hollow stub through V0B-15 export.
+    const now = Date.now()
+    await db.sessionPlans.put({
+      id: 'plan-skip-preserve',
+      presetId: 'solo_wall',
+      presetName: 'Solo + Wall',
+      playerCount: 1,
+      blocks: [],
+      safetyCheck: {
+        painFlag: false,
+        heatCta: false,
+        painOverridden: false,
+      },
+      createdAt: 1,
+    })
+    await db.executionLogs.put({
+      id: 'exec-skip-preserve',
+      planId: 'plan-skip-preserve',
+      status: 'completed',
+      activeBlockIndex: 0,
+      blockStatuses: [],
+      startedAt: now - 30 * 60_000,
+      completedAt: now - 25 * 60_000,
+    })
+    await db.sessionReviews.put({
+      id: 'review-exec-skip-preserve',
+      executionLogId: 'exec-skip-preserve',
+      sessionRpe: 6,
+      goodPasses: 12,
+      totalAttempts: 18,
+      perDrillCaptures: [
+        { drillId: 'd38', variantId: 'd38-pair', blockIndex: 0, difficulty: 'still_learning', capturedAt: now - 8 * 60_000 },
+        { drillId: 'd31', variantId: 'd31-pair', blockIndex: 1, difficulty: 'too_easy', goodPasses: 8, attemptCount: 10, capturedAt: now - 7 * 60_000 },
+      ],
+      incompleteReason: 'time',
+      shortNote: 'good session, light wind',
+      submittedAt: now - 5 * 60_000,
+      status: 'draft',
+    })
+
+    await skipReview('exec-skip-preserve')
+
+    const stub = await db.sessionReviews.where('executionLogId').equals('exec-skip-preserve').first()
+    expect(stub).toBeDefined()
+    expect(stub!.status).toBe('skipped')
+    // Skip stays distinguishable from expire via the 'skipped' tag.
+    expect(stub!.quickTags).toContain('skipped')
+    // Draft payload preserved end-to-end.
+    expect(stub!.sessionRpe).toBe(6)
+    expect(stub!.goodPasses).toBe(12)
+    expect(stub!.totalAttempts).toBe(18)
+    expect(stub!.perDrillCaptures).toHaveLength(2)
+    expect(stub!.perDrillCaptures?.[0]?.variantId).toBe('d38-pair')
+    expect(stub!.perDrillCaptures?.[1]?.goodPasses).toBe(8)
+    expect(stub!.perDrillCaptures?.[1]?.attemptCount).toBe(10)
+    expect(stub!.incompleteReason).toBe('time')
+    expect(stub!.shortNote).toBe('good session, light wind')
+    expect(stub!.captureWindow).toBe('expired')
+    expect(stub!.eligibleForAdaptation).toBe(false)
+  })
+
+  it('skipReview is a no-op when an existing terminal stub already exists', async () => {
+    const now = Date.now()
+    await db.sessionPlans.put({
+      id: 'plan-skip-noop',
+      presetId: 'solo_wall',
+      presetName: 'Solo + Wall',
+      playerCount: 1,
+      blocks: [],
+      safetyCheck: {
+        painFlag: false,
+        heatCta: false,
+        painOverridden: false,
+      },
+      createdAt: 1,
+    })
+    await db.executionLogs.put({
+      id: 'exec-skip-noop',
+      planId: 'plan-skip-noop',
+      status: 'completed',
+      activeBlockIndex: 0,
+      blockStatuses: [],
+      startedAt: now - 30 * 60_000,
+      completedAt: now - 25 * 60_000,
+    })
+    const submittedAt = now - 10 * 60_000
+    await db.sessionReviews.put({
+      id: 'review-exec-skip-noop',
+      executionLogId: 'exec-skip-noop',
+      sessionRpe: 7,
+      goodPasses: 4,
+      totalAttempts: 5,
+      submittedAt,
+      status: 'submitted',
+    })
+
+    await skipReview('exec-skip-noop')
+
+    const stub = await db.sessionReviews.where('executionLogId').equals('exec-skip-noop').first()
+    expect(stub!.status).toBe('submitted')
+    expect(stub!.submittedAt).toBe(submittedAt)
+  })
+
   it('findPendingReview returns a log whose only review is status: draft (A1)', async () => {
     const now = Date.now()
     await db.sessionPlans.put({

@@ -194,32 +194,54 @@ export async function expireStaleReviews(now: number = Date.now()): Promise<numb
  * User-initiated review skip from the home pending-review prompt.
  * Writes a terminal `skipped` stub; kept distinct from `expireReview`
  * via the `'skipped'` quickTag so exports can tell them apart.
+ *
+ * Draft payload preservation (red-team adversarial parity, 2026-04-27):
+ * mirrors `expireReview`'s behavior. When the user has already entered
+ * RPE, per-drill captures, an incomplete reason, or a note before
+ * tapping Skip, those values are CARRIED through onto the skipped stub
+ * instead of being overwritten with zeros. The skip is a UX decision
+ * about whether the *Review* surface should re-prompt; it is not a
+ * decision to discard already-captured drill-grain signal. Without
+ * this, a user who completed `/run/check` taps for several blocks and
+ * then skipped the final Review would silently destroy their per-drill
+ * Difficulty + Good/Total data on the way out. The `'skipped'` quickTag
+ * stays exclusive to this path so exports and the adaptation engine
+ * can still distinguish user-initiated skip from auto-expire.
  */
 export async function skipReview(executionId: string): Promise<void> {
   const now = Date.now()
   const exec = await db.executionLogs.get(executionId)
   const endAt = exec ? endedAt(exec) : now
   const captureDelaySeconds = Math.max(0, Math.round((now - endAt) / 1_000))
-  const stub: SessionReview = {
-    id: `review-${executionId}`,
-    executionLogId: executionId,
-    sessionRpe: null,
-    goodPasses: 0,
-    totalAttempts: 0,
-    quickTags: ['skipped'],
-    shortNote: 'Review skipped from home screen',
-    submittedAt: now,
-    captureDelaySeconds,
-    captureWindow: 'expired',
-    eligibleForAdaptation: false,
-    status: 'skipped',
-  }
 
   await db.transaction('rw', db.sessionReviews, db.storageMeta, async (tx) => {
     const reviews = tx.table<SessionReview, string>('sessionReviews')
     const existing = await reviews.where('executionLogId').equals(executionId).first()
     if (existing && (existing.status === 'submitted' || existing.status === 'skipped')) {
       return
+    }
+
+    const draft = existing && existing.status === 'draft' ? existing : null
+    const existingTags = draft?.quickTags ?? []
+    const quickTags = existingTags.includes('skipped') ? existingTags : [...existingTags, 'skipped']
+
+    const stub: SessionReview = {
+      id: `review-${executionId}`,
+      executionLogId: executionId,
+      sessionRpe: draft?.sessionRpe ?? null,
+      goodPasses: draft?.goodPasses ?? 0,
+      totalAttempts: draft?.totalAttempts ?? 0,
+      drillScores: draft?.drillScores,
+      perDrillCaptures: draft?.perDrillCaptures,
+      borderlineCount: draft?.borderlineCount,
+      incompleteReason: draft?.incompleteReason,
+      quickTags,
+      shortNote: draft?.shortNote ?? 'Review skipped from home screen',
+      submittedAt: now,
+      captureDelaySeconds,
+      captureWindow: 'expired',
+      eligibleForAdaptation: false,
+      status: 'skipped',
     }
     await reviews.put(stub)
     await clearSoftBlockDismissed(executionId, tx)

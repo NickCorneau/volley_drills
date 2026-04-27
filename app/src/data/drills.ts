@@ -1558,19 +1558,25 @@ const d33: Drill = {
         rpeMax: 7,
         fatigueCap: { maxReps: 24, maxMinutes: 10 },
       },
+      // 2026-04-27 V0B-28 surface-move: `description` re-worded from
+      // the session-level zone enumeration to a per-attempt rule so it
+      // reads correctly inside the V0B-28 forced-criterion prompt
+      // rendered above the optional Good/Total counts on `/run/check`.
+      // The 6-zone order and the "all 6 zones once" goal stay in
+      // `target` and `courtsideInstructions` where they belong as the
+      // session goal, not as the per-rep criterion. See
+      // `docs/plans/2026-04-27-per-drill-success-criterion.md`.
       successMetric: {
         type: 'reps-successful',
-        description:
-          'Serves landing in the named 6-zone serving grid: front-left, front-middle, front-right, back-left, back-middle, back-right.',
+        description: 'Serve lands in the called zone.',
         target: 'Hit all 6 zones once',
       },
       courtsideInstructions:
         'Serve through six zones in order: front-left, front-middle, front-right, back-left, back-middle, back-right. Misses repeat the same zone. Shag between rounds.',
       coachingCues: ['Name the zone first.', 'High arc for deep zones.', 'Reset after each miss.'],
     },
-    // Pair sibling: alternate servers, partner shags. Same 6-zone
-    // ladder, faster ball density (no full walk-and-collect between
-    // every serve).
+    // Pair sibling: round-based turn-taking, partner calls the zone
+    // and shags. Same 6-zone ladder as the solo variant.
     {
       id: 'd33-pair',
       drillId: 'd33',
@@ -1585,8 +1591,11 @@ const d33: Drill = {
       // 2026-04-27 solo-vs-pair sweep: balls = 1 (not 'many') to stay
       // shippable. `hasUnmodeledRequirements` in sessionBuilder.ts
       // excludes `balls === 'many'` and `balls > 1` pending D102
-      // equipment-context resolution. Pair execution still works:
-      // shagger collects between rounds.
+      // equipment-context resolution. Pair cadence below is honest
+      // about the one-ball reality: round-based switching (each
+      // partner runs the full 6-zone ladder, then they switch) rather
+      // than alternate-every-rep (which would require either a second
+      // ball or a stop-go shag between every serve).
       equipment: { balls: 1, markers: true },
       workload: {
         durationMinMinutes: 6,
@@ -1595,15 +1604,29 @@ const d33: Drill = {
         rpeMax: 7,
         fatigueCap: { maxReps: 24, maxMinutes: 10 },
       },
+      // 2026-04-27 V0B-28 surface-move: per-attempt rule (see
+      // `d33-solo-net` rationale comment above). The "both partners
+      // hit all 6 zones" addendum was session-level and stays only in
+      // `target`.
       successMetric: {
         type: 'reps-successful',
-        description:
-          'Serves landing in the named 6-zone serving grid: front-left, front-middle, front-right, back-left, back-middle, back-right; both partners hit each zone.',
+        description: 'Serve lands in the called zone.',
         target: 'Both partners hit all 6 zones',
       },
+      // 2026-04-27 red-team adversarial finding: prior copy said
+      // "Alternate servers each rep" AND "shag between rounds", which
+      // can't both be true with `equipment.balls: 1`. Rewritten to
+      // round-based turn-taking so the shagger has one shag per round
+      // (each partner's full 6-zone pass), matching the solo variant's
+      // "Shag between rounds." voice. Em-dashes replaced with periods
+      // per `.cursor/rules/courtside-copy.mdc` §Invariant 4.
       courtsideInstructions:
-        'Alternate servers each rep; shagger stays across the net to call the next zone and shag between rounds. Both partners work the same 6-zone order: front-left, front-middle, front-right, back-left, back-middle, back-right. A miss repeats the same zone.',
-      coachingCues: ['Name the zone first.', 'High arc for deep zones.', 'Reset after each miss.'],
+        'Take turns. Each partner works the full 6-zone order: front-left, front-middle, front-right, back-left, back-middle, back-right. Partner across the net calls the next zone before each serve and shags after the round. A miss repeats the same zone on the next attempt.',
+      coachingCues: [
+        'Caller names the zone first.',
+        'High arc for deep zones.',
+        'Reset after each miss.',
+      ],
     },
   ],
 }

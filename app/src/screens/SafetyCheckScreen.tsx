@@ -434,7 +434,7 @@ export function SafetyCheckScreen() {
                     key={tip}
                     className="flex items-start gap-2 text-sm leading-relaxed text-text-secondary"
                   >
-                    <span className="shrink-0 text-accent" aria-hidden>
+                    <span className="shrink-0 text-text-secondary" aria-hidden>
                       •
                     </span>
                     {tip}

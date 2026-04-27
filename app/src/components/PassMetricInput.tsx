@@ -67,8 +67,19 @@ export function PassMetricInput({
           }}
         />
       </div>
+      {/*
+        2026-04-27 (V0B-28 surface-move): rate label is skill-neutral
+        (`% good`) because the per-drill success rule renders above the
+        inputs inside `PerDrillCapture` on the active capture surface.
+        The legacy `ReviewScreen` fallback path still hard-codes the
+        passing rule above this component (out of scope this pass) — the
+        rate line stays correct in that path because "% good" reads as
+        "% good passes" once the rule above it has named the pass
+        criterion. See
+        `docs/plans/2026-04-27-per-drill-success-criterion.md`.
+      */}
       {rate != null && !notCaptured && (
-        <p className="text-center text-sm font-semibold text-accent">{rate}% good pass rate</p>
+        <p className="text-center text-sm font-semibold text-text-primary">{rate}% good</p>
       )}
       {onToggleNotCaptured && (
         <button
