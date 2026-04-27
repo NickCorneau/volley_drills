@@ -1,7 +1,5 @@
 ---
-
-## id: m001-adversarial-memo
-
+id: m001-adversarial-memo
 title: "M001 Adversarial Memo — Pre-Registered Falsification Conditions for D130"
 type: plan
 status: active
@@ -27,6 +25,7 @@ decision_refs:
 - D131
 open_question_refs:
 - O5
+---
 
 # M001 Adversarial Memo — Pre-Registered Falsification Conditions for D130
 

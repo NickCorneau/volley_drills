@@ -1,7 +1,5 @@
-﻿---
-
-## id: decisions
-
+---
+id: decisions
 title: Decisions Log
 status: active
 stage: planning
@@ -18,6 +16,7 @@ depends_on:
 - docs/research/persistent-team-identity.md
 - docs/research/srpe-load-adaptation-rules.md
 - docs/specs/m001-review-micro-spec.md
+---
 
 # Decisions Log
 

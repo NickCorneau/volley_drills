@@ -1,7 +1,5 @@
 ---
-
-## id: prd-foundation
-
+id: prd-foundation
 title: PRD Foundation
 status: draft
 stage: planning
@@ -14,6 +12,7 @@ depends_on:
 - docs/vision.md
 - docs/decisions.md
 - docs/research/beach-training-resources.md
+---
 
 # PRD Foundation
 

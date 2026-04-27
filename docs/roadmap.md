@@ -1,7 +1,5 @@
 ---
-
-## id: roadmap
-
+id: roadmap
 title: Roadmap
 status: draft
 stage: planning
@@ -21,6 +19,7 @@ depends_on:
 - docs/research/srpe-load-adaptation-rules.md
 - docs/research/baseline-skill-assessments-amateur-beach.md
 - docs/research/2026-04-22-research-sweep-meta-synthesis.md
+---
 
 # Roadmap
 
