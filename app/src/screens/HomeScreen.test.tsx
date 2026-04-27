@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
@@ -98,13 +98,19 @@ describe('HomeScreen', () => {
     expect(screen.getByText(/solo \+ wall/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Finish review' })).toBeInTheDocument()
 
-    // V0B / red-team #5: Skip review is a two-step confirm - the first tap
-    // opens the confirm row, the "Yes, skip" tap writes the expired stub.
+    // V0B / red-team #5: Skip review is a two-step confirm. 2026-04-27
+    // reconciled-list `R11` lifted the second step from an inline
+    // in-card row into the centered `SkipReviewModal` (role=dialog,
+    // aria-modal=true) so the destructive confirm matches the rest of
+    // the app's modal language (`End session early?` on RunScreen,
+    // `ResumePrompt`, `SoftBlockModal`). First-tap opens the modal;
+    // the modal's `Yes, skip` writes the expired stub.
     // A9 (red-team fix plan v3): after skip succeeds, Home navigates to
     // /complete/{execId} so the 3-case summary matrix fires (C-2) for the
     // skipped case instead of the tester landing on a silent Home.
     await user.click(screen.getByRole('button', { name: /^skip review$/i }))
-    await user.click(await screen.findByRole('button', { name: /yes, skip/i }))
+    const modal = await screen.findByRole('dialog', { name: /skip review\?/i })
+    await user.click(within(modal).getByRole('button', { name: /yes, skip/i }))
 
     expect(await screen.findByTestId('complete-route')).toBeInTheDocument()
     expect(await db.sessionReviews.count()).toBe(1)
@@ -144,9 +150,56 @@ describe('HomeScreen', () => {
     )
 
     await user.click(await screen.findByRole('button', { name: /^skip review$/i }))
-    await user.click(await screen.findByRole('button', { name: /never mind/i }))
+    // 2026-04-27 R11: confirm now lives in the SkipReviewModal
+    // (role=dialog). `Never mind` closes the modal without writing.
+    const modal = await screen.findByRole('dialog', { name: /skip review\?/i })
+    await user.click(within(modal).getByRole('button', { name: /never mind/i }))
 
+    // Modal closed -> dialog gone, card still shows Finish review.
+    expect(screen.queryByRole('dialog', { name: /skip review\?/i })).not.toBeInTheDocument()
     expect(await screen.findByRole('button', { name: 'Finish review' })).toBeInTheDocument()
+    expect(await db.sessionReviews.count()).toBe(0)
+  })
+
+  it('Esc on the SkipReviewModal cancels the skip without writing (R11)', async () => {
+    await db.sessionPlans.put({
+      id: 'plan-3',
+      presetId: 'solo_wall',
+      presetName: 'Solo + Wall',
+      playerCount: 1,
+      blocks: [],
+      safetyCheck: {
+        painFlag: false,
+        heatCta: false,
+        painOverridden: false,
+      },
+      createdAt: 1,
+    })
+    const now = Date.now()
+    await db.executionLogs.put({
+      id: 'exec-3',
+      planId: 'plan-3',
+      status: 'completed',
+      activeBlockIndex: 0,
+      blockStatuses: [],
+      startedAt: now - 10 * 60_000,
+      completedAt: now - 5 * 60_000,
+    })
+
+    const user = userEvent.setup()
+
+    render(
+      <MemoryRouter>
+        <HomeScreen />
+      </MemoryRouter>,
+    )
+
+    await user.click(await screen.findByRole('button', { name: /^skip review$/i }))
+    expect(await screen.findByRole('dialog', { name: /skip review\?/i })).toBeInTheDocument()
+
+    await user.keyboard('{Escape}')
+
+    expect(screen.queryByRole('dialog', { name: /skip review\?/i })).not.toBeInTheDocument()
     expect(await db.sessionReviews.count()).toBe(0)
   })
 })

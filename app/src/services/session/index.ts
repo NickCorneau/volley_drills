@@ -11,6 +11,7 @@ export type {
   PendingReview,
   RecentSessionEntry,
   ResumableSession,
+  SessionTallySummary,
 } from './queries'
 export {
   findLastCompletedDrillIdsByType,
@@ -20,6 +21,7 @@ export {
   getLastComplete,
   getLastContext,
   getRecentSessions,
+  getSessionTallySummary,
   hasEverStartedSession,
   loadSession,
 } from './queries'

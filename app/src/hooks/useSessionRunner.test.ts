@@ -118,6 +118,18 @@ describe('useSessionRunner', () => {
     expect(result.current.execution).toBeNull()
   })
 
+  it('sets loaded=true with null data when session load rejects', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.mocked(sessionService.loadSession).mockRejectedValue(new Error('dexie read failed'))
+
+    const { result } = renderHook(() => useSessionRunner('exec-error'))
+
+    await waitFor(() => expect(result.current.loaded).toBe(true))
+
+    expect(result.current.plan).toBeNull()
+    expect(result.current.execution).toBeNull()
+  })
+
   it('startBlock calls buildStartedBlock + saveExecution', async () => {
     const started = makeExec({
       status: 'in_progress',

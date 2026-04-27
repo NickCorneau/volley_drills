@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
   "repo_id": "volley_drills",
-  "last_updated": "2026-04-26-b",
+  "last_updated": "2026-04-27",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -11,7 +11,7 @@
   },
   "repo_state": {
     "stage": "validation",
-    "posture": "v0b Starter Loop feature-complete as D91 field-test artifact (D119); Phases A/B/C/E/F all landed through 2026-04-19; awaiting D91 cohort kickoff",
+    "posture": "Operating in D130 founder-use mode (2026-04-20 → 2026-07-20). M001 Tier 1a shipped 2026-04-21; partner-walkthrough polish (2026-04-22), walkthrough closeout polish (2026-04-23), Wake Lock + audio-priming infrastructure (2026-04-24), pre-D91 editorial polish (2026-04-26), D133 pair rep-capture (per-drill Difficulty + optional Good/Total on /run/check, Dexie v5 with perDrillCaptures), Tier 1b Layer A drill authoring (`d31`, `d33`, `d40`, `d42`; `d36` deferred to O7, `d43` deferred to D101), the 2026-04-27 reconciled-list editorial polish (`R11` Skip-review confirm modal lifted into a centered role=dialog matching `End session early?`; `R13` quiet `Logged: N sessions · H:MM total` Settings footer gated on count>0; `R7` and `R14` demoted), and the 2026-04-27 solo-vs-pair variant sweep (8 new tuned Pair variants on `d01`/`d05`/`d22`/`d31`/`d38`/`d39`/`d40`/`d33`; `d33-solo-net` split into `d33-solo` + `d33-pair`; `participants.max=1` tightened on `d22-solo`/`d33-solo`/`d38-solo`/`d39-solo`; warmup/cooldown labels relabeled `Solo`→`Any` on `d25`/`d26`/`d28`; new `participants_label_mismatch` catalogValidation rule) all shipped 2026-04-27. D91 retention gate deferred under D130, not dropped.",
     "runtime": "cursor-first",
     "platform_bias": "wsl-first",
     "environment_contract": {
@@ -21,8 +21,8 @@
       "notes": "Editing from Windows Cursor is fine; repo automation assumes WSL/bash."
     },
     "active_milestone": "M001",
-    "stack": "Vite + React + TypeScript + PWA + Dexie",
-    "blocking_gate": "D91 field-test evidence against v0b (D119) must pass before M001 moves into the full build; remaining pre-field items are non-code (tester recruitment, founder replay spot-check, operational cohort protocol)",
+    "stack": "Vite + React + TypeScript + PWA + Dexie (schema v5)",
+    "blocking_gate": "D130 Condition 3 — partner unprompted open within 30 days. Provisional pass (Seb T+1-day open 2026-04-22); final read-out 2026-05-21. Conditions 1 (solo-first ≥40%) and 2 (outside-app planning events) tracked weekly in docs/research/founder-use-ledger.md. D91 retention re-evaluation scheduled 2026-07-20.",
     "prototype_feedback": "docs/research/2026-04-12-v0a-runner-probe-feedback.md",
     "v0b_field_look_feedback": "docs/research/2026-04-19-v0b-starter-loop-feedback.md",
     "v0b_status_registry": "docs/plans/2026-04-16-003-rest-of-v0b-plan.md"
@@ -644,6 +644,13 @@
       "status": "active"
     },
     {
+      "id": "tier1b-serving-setting-expansion-2026-04-22",
+      "path": "docs/plans/2026-04-22-tier1b-serving-setting-expansion.md",
+      "type": "plan",
+      "status": "complete",
+      "canonical_for": "Tier 1b Layer A drill-authoring plan: shipped four source-backed drill records (`d31`, `d33`, `d40`, `d42`) plus safe same-chain progression links for `chain-6-serving` and `chain-7-setting`, without schema/filter/UI/Dexie changes. Defers `d36 Jump Float Introduction` to `O7` sports-medicine / PT review and `d43 Triangle Setting` to `D101` 3+ player support; current Layer A cap consumption is 4/10."
+    },
+    {
       "id": "walkthrough-closeout-polish-2026-04-23",
       "path": "docs/plans/2026-04-23-walkthrough-closeout-polish.md",
       "type": "plan",
@@ -653,14 +660,21 @@
       "id": "pre-d91-editorial-polish-2026-04-26",
       "path": "docs/plans/2026-04-26-pre-d91-editorial-polish.md",
       "type": "plan",
-      "status": "draft"
+      "status": "complete"
     },
     {
       "id": "pair-rep-capture-tier1b-2026-04-26",
       "path": "docs/plans/2026-04-26-pair-rep-capture-tier1b.md",
       "type": "plan",
-      "status": "draft",
-      "canonical_for": "Tier 1b implementation plan for the post-2026-04-26 pair rep-capture work unlocked by the P2-3 founder-session trigger (`docs/research/founder-use-ledger.md` 2026-04-26 row). Implements `D133` (Framing D from `docs/research/2026-04-26-pair-rep-capture-options.md`): per-drill **Difficulty tag** required on Transition + collapsed-by-default optional **Add counts** affordance, plus Review-screen card removal for count drills, plus drill-grain aggregation on Complete, plus a forward-only Dexie migration (`perDrillCaptures: PerDrillCapture[]`). Authors zero new drill records (does not consume the drill-record cap; sibling `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md` continues to hold 5/10). Consumes one Tier 1b authoring-attention slot. Estimated ~5 days when gate fires. Defers Framing C (in-session counter on RunScreen) under explicit re-trigger condition. Spec contract in `docs/specs/m001-review-micro-spec.md` §'Per-drill capture at Transition (D133)'."
+      "status": "complete",
+      "canonical_for": "Tier 1b implementation plan for the post-2026-04-26 pair rep-capture work unlocked by the P2-3 founder-session trigger (`docs/research/founder-use-ledger.md` 2026-04-26 row). Implements `D133` (Framing D from `docs/research/2026-04-26-pair-rep-capture-options.md`): new `/run/check` route after completed blocks with required per-drill **Difficulty tag** plus optional per-drill **Good/Total**, Transition refocused on Up Next, Review-screen session-level count card removed for count drills, Complete drill-grain aggregation, plus a forward-only Dexie migration (`perDrillCaptures: PerDrillCapture[]`). Authors zero new drill records (does not consume the drill-record cap; sibling `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md` consumes 4/10). Defers Framing C (in-session counter on RunScreen) under explicit re-trigger condition. Spec contract in `docs/specs/m001-review-micro-spec.md` §'Per-drill capture at Transition (D133)'."
+    },
+    {
+      "id": "skip-review-modal-and-investment-footer-2026-04-27",
+      "path": "docs/plans/2026-04-27-skip-review-and-investment-footer.md",
+      "type": "plan",
+      "status": "shipped",
+      "canonical_for": "Fourth successive editorial-class polish pass (after 2026-04-22 / 2026-04-23 / 2026-04-26) targeting the genuinely-open Tier 1b items in `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md`. Two items shipped: `R11` lifted the Home Skip-review confirm from an inline two-step row into a centered `role=dialog` `SkipReviewModal` matching `RunScreen`'s `End session early?` shape (safe-primary `Never mind` first, danger `Yes, skip` below; `Esc` closes; aria-modal + aria-labelledby); `R13` added a quiet `Logged: N session{s} · H:MM total` line above the Settings privacy promise, gated on `count > 0`, sourced from a new `getSessionTallySummary()` query that mirrors `formatDurationLine` per-session minute math and excludes `discarded_resume` stubs via `isTerminalSession`. Two items demoted on close inspection: `R7` (Beach Prep Three truncate-with-expand — underlying blob no longer holds, `d28` reformatted 2026-04-21, and the 2026-04-22 Transition parity pass deliberately removed truncate-with-expand) and `R14` (Accent color demotion — audit-class scope, deferred to a separate pass). Authors zero new drill records; no Dexie migration; no metadata schema changes."
     },
     {
       "id": "blocker-report-template",

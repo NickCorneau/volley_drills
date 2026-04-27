@@ -93,6 +93,16 @@ describe('buildDraftFromCompletedBlocks (C-5 Unit 3)', () => {
     expect(draft?.blocks[0].variantId).toBe('d03-pair')
   })
 
+  it('preserves sub-block pacing for completed blocks', () => {
+    const plan = makePlan([{ id: 'b-1', minutes: 3, type: 'warmup' }])
+    plan.blocks[0].subBlockIntervalSeconds = 45
+    const log = makeLog(['completed'], ['b-1'])
+
+    const draft = buildDraftFromCompletedBlocks(log, plan)
+
+    expect(draft?.blocks[0].subBlockIntervalSeconds).toBe(45)
+  })
+
   it('keeps legacy completed blocks identity-empty when plan blocks have no ids', () => {
     const plan = makePlan([{ id: 'b-1', minutes: 10, type: 'main_skill' }])
     const log = makeLog(['completed'], ['b-1'])

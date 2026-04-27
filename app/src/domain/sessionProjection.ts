@@ -8,6 +8,16 @@ export function applyBlockOverrides(plan: SessionPlan, execution?: ExecutionLog)
 
   return {
     ...plan,
-    blocks: plan.blocks.map((block, index) => overrides[index] ?? block),
+    blocks: plan.blocks.map((block, index) => {
+      const override = overrides[index]
+      if (!override) return block
+      return {
+        ...override,
+        id: block.id,
+        type: block.type,
+        durationMinutes: block.durationMinutes,
+        required: block.required,
+      }
+    }),
   }
 }

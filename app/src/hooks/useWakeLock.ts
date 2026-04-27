@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   hasActiveScreenWakeLock,
   releaseScreenWakeLock,
@@ -49,5 +49,5 @@ export function useWakeLock() {
     }
   }, [])
 
-  return { isLocked, request, release }
+  return useMemo(() => ({ isLocked, request, release }), [isLocked, request, release])
 }

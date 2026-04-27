@@ -473,6 +473,7 @@ export function buildDraftFromCompletedBlocks(
       // with the same Chosen-because line. Legacy plans without
       // rationale keep it undefined; the UI handles that case.
       rationale: planBlock.rationale,
+      subBlockIntervalSeconds: planBlock.subBlockIntervalSeconds,
     })
   })
   if (completedBlocks.length === 0) return null
@@ -772,12 +773,24 @@ export function findSwapAlternatives(
     required: block.required,
     skillTags: [...SKILL_TAGS_BY_TYPE[block.type]],
   }
-  const candidates = findCandidates(slot, context)
+  const candidates = findCandidates(slot, context).sort((a, b) =>
+    a.drill.id.localeCompare(b.drill.id),
+  )
 
   // Base exclusion (always on): the drill currently in this slot.
   // Legacy SessionPlanBlock rows may lack drillId, so name remains the
-  // defensive exclusion fallback for old persisted plans.
-  const baseFiltered = candidates.filter((c) => c.drill.name !== block.drillName)
+  // defensive exclusion fallback for old persisted plans. Rotate the
+  // sorted pool from the current drill so repeated Swap taps walk forward
+  // instead of bouncing between the lowest two drill IDs.
+  const currentIndex = candidates.findIndex(
+    (c) => c.drill.id === block.drillId || c.drill.name === block.drillName,
+  )
+  const baseFiltered =
+    currentIndex >= 0
+      ? [...candidates.slice(currentIndex + 1), ...candidates.slice(0, currentIndex)].filter(
+          (c) => c.drill.name !== block.drillName,
+        )
+      : candidates.filter((c) => c.drill.name !== block.drillName)
 
   // Neighbor-aware exclusion (VB-FL-7): try to also drop any drill
   // whose name matches a surrounding block. Keep the base filter as
@@ -793,11 +806,6 @@ export function findSwapAlternatives(
       filtered = neighborFiltered
     }
   }
-
-  // Sort by drill id for deterministic cycling - each tap picks
-  // alternates[0], then re-derives with the NEW drillName excluded,
-  // so successive taps walk the list in a stable order.
-  filtered.sort((a, b) => a.drill.id.localeCompare(b.drill.id))
 
   // Two promotion paths, in priority order:
   //   1. Preferred-promotion (chain-based): if the natural next drill

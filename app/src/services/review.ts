@@ -15,6 +15,7 @@ import {
   CAPTURE_WINDOW_SAME_SESSION_MS,
   FINISH_LATER_CAP_MS as POLICY_FINISH_LATER_CAP_MS,
 } from '../domain/policies'
+import { applyBlockOverrides } from '../domain/sessionProjection'
 import { clearSoftBlockDismissed } from './softBlock'
 import { getStorageMeta } from './storageMeta'
 
@@ -25,8 +26,8 @@ export interface SubmitReviewData {
   totalAttempts: number
   drillScores?: DrillVariantScore[]
   /**
-   * D133 (2026-04-26): per-drill captures collected on the Transition
-   * screen between blocks. When present and non-empty, ReviewScreen and
+   * D133 (2026-04-26): per-drill captures collected on the Drill Check
+   * screen after completed blocks. When present and non-empty, ReviewScreen and
    * CompleteScreen prefer this list over the session-level Good/Total
    * fields. See `docs/specs/m001-review-micro-spec.md` §"Per-drill
    * capture at Transition (D133)".
@@ -442,5 +443,5 @@ export async function loadSessionBundle(execId: string): Promise<SessionBundle |
     db.sessionReviews.where('executionLogId').equals(log.id).first(),
   ])
   if (!plan || !review) return null
-  return { log, plan, review }
+  return { log, plan: applyBlockOverrides(plan, log), review }
 }

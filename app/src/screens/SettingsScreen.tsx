@@ -1,11 +1,13 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BackButton, Button, Card, ScreenShell, StatusMessage } from '../components/ui'
 import { useInstallPosture } from '../hooks/useInstallPosture'
 import { BUILD_DATE, BUILD_SHA } from '../lib/buildInfo'
+import { formatTotalDurationLine } from '../lib/format'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { getStorageCopy } from '../lib/storageCopy'
 import { downloadExport } from '../services/export'
+import { getSessionTallySummary, type SessionTallySummary } from '../services/session'
 import { routes } from '../routes'
 
 /**
@@ -36,6 +38,29 @@ export function SettingsScreen() {
   const navigate = useNavigate()
   const acting = useRef(false)
   const [state, setState] = useState<ExportState>({ kind: 'idle' })
+  // 2026-04-27 reconciled-list `R13`: quiet `Logged: N sessions · H:MM
+  // total` investment footer. Single-shot read on mount — Settings is
+  // a leaf screen with no live-update requirement, and the footer
+  // hides entirely when `count === 0` so first-week testers see no
+  // row. `null` until the read resolves so the row never flashes a
+  // wrong value during the initial render.
+  const [tally, setTally] = useState<SessionTallySummary | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    getSessionTallySummary().then(
+      (summary) => {
+        if (!cancelled) setTally(summary)
+      },
+      (err) => {
+        if (isSchemaBlocked()) return
+        // Fail quiet — the footer simply hides for this render.
+        console.error('Settings tally read failed:', err)
+      },
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [])
   // 2026-04-23 walkthrough closeout polish item 3: the
   // posture-sensitive Safari-eviction explainer moved off the Complete
   // screen's terminal verdict surface and into this sub-section. The
@@ -150,6 +175,25 @@ export function SettingsScreen() {
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="pt-3">
+        {/* 2026-04-27 reconciled-list `R13` (Settings investment footer):
+            quiet `Logged: N sessions · H:MM total` row above the
+            existing privacy promise. Hidden entirely when no sessions
+            have been logged so first-week testers see no row at all.
+            Source-of-truth: `getSessionTallySummary()` read once on
+            mount; per-session minute math mirrors `formatDurationLine`
+            so this total matches the sum of per-row durations the
+            user sees on Complete / Recent Sessions. Excludes
+            `discarded_resume` stubs via the existing
+            `isTerminalSession` predicate (`A8`). */}
+        {tally && tally.count > 0 && (
+          <p
+            className="pb-1 text-center text-xs text-text-secondary"
+            data-testid="settings-investment-footer"
+          >
+            Logged: {tally.count} {tally.count === 1 ? 'session' : 'sessions'} ·{' '}
+            {formatTotalDurationLine(tally.totalMinutes)} total
+          </p>
+        )}
         <p className="pb-2 text-center text-xs text-text-secondary">
           Your data stays on this device.
         </p>

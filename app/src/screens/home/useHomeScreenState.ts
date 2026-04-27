@@ -30,7 +30,10 @@ export interface HomeFlags {
   recentSessions: readonly RecentSessionEntry[]
 }
 
-export type HomeState = { kind: 'loading' } | { kind: 'ready'; flags: HomeFlags } | { kind: 'error' }
+export type HomeState =
+  | { kind: 'loading' }
+  | { kind: 'ready'; flags: HomeFlags }
+  | { kind: 'error' }
 
 async function resolveHomeFlags(): Promise<HomeFlags> {
   const resume = await findResumableSession()

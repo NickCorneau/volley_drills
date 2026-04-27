@@ -119,10 +119,9 @@ test.describe('warm-offline PWA shell (V0B-21)', () => {
     await setupBuildAndEndEarly(page)
 
     await page.goto('/')
-    // C-4 (Surface 2): review-pending primary card renders "Review your
-    // last session" + plan name instead of the pre-C-4 "unreviewed
-    // session" sentence.
-    await expect(page.getByText(/review your last session/i)).toBeVisible({ timeout: 5000 })
+    // C-4/F11: review-pending primary card renders the tightened
+    // "Review pending" eyebrow + plan name.
+    await expect(page.getByText(/^Review pending$/)).toBeVisible({ timeout: 5000 })
     await expect(page.getByRole('button', { name: /finish review/i })).toBeVisible()
 
     await context.setOffline(true)

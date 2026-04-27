@@ -4,6 +4,7 @@ import { Brandmark } from '../components/Brandmark'
 import { HomePrimaryCard } from '../components/HomePrimaryCard'
 import { HomeSecondaryRow } from '../components/HomeSecondaryRow'
 import { RecentSessionsList } from '../components/RecentSessionsList'
+import { SkipReviewModal } from '../components/SkipReviewModal'
 import { SoftBlockModal } from '../components/SoftBlockModal'
 import { UpdatePrompt } from '../components/UpdatePrompt'
 import { Button, ScreenShell } from '../components/ui'
@@ -67,13 +68,18 @@ export function HomeScreen() {
     }
   }, [navigate, setError, state])
 
-  // First-tap: flips the card into the two-step confirm row.
+  // First-tap: opens the SkipReviewModal (centered role=dialog) so the
+  // destructive confirm matches the rest of the app's modal language
+  // (`End session early?`, `ResumePrompt`, `SoftBlockModal`). The card
+  // itself no longer hosts an inline two-step row (2026-04-27
+  // reconciled-list R11).
   const handleRequestSkip = useCallback(() => {
     if (state.kind !== 'ready' || !state.flags.reviewPending) return
     setConfirmingSkip(true)
   }, [state])
 
-  // Second-tap: actually writes the skipped stub and routes to /complete.
+  // Modal `Yes, skip` tap: actually writes the skipped stub and routes
+  // to /complete.
   const handleConfirmSkip = useCallback(async () => {
     if (state.kind !== 'ready' || !state.flags.reviewPending || acting.current) {
       return
@@ -264,10 +270,7 @@ export function HomeScreen() {
       <div className="mx-auto flex w-full max-w-[390px] flex-col items-center gap-6 pt-16">
         <Brandmark size={56} />
         <p className="text-text-secondary">Something went wrong</p>
-        <Button
-          variant="ghost"
-          onClick={retry}
-        >
+        <Button variant="ghost" onClick={retry}>
           Try again
         </Button>
       </div>
@@ -316,9 +319,6 @@ export function HomeScreen() {
           handleDiscard,
           handleFinishReview,
           handleRequestSkip,
-          handleConfirmSkip,
-          handleCancelSkip,
-          confirmingSkip,
           ...interceptedHandlers,
         })}
 
@@ -373,6 +373,22 @@ export function HomeScreen() {
             onClose={handleSoftBlockClose}
           />
         )}
+
+        {/* 2026-04-27 reconciled-list R11: Skip-review confirm modal.
+            Mounted at the screen root next to SoftBlockModal so the
+            destructive confirm reads as a centered role=dialog (matches
+            `End session early?` on RunScreen and the rest of the app's
+            modal language) instead of the previous inline two-step row
+            inside ReviewPendingCard. State (`confirmingSkip`) and
+            handlers stay HomeScreen-owned; the card simplified to just
+            `Finish review` + `Skip review` link. */}
+        {confirmingSkip && state.flags.reviewPending && (
+          <SkipReviewModal
+            planName={state.flags.reviewPending.planName}
+            onConfirm={() => void handleConfirmSkip()}
+            onCancel={handleCancelSkip}
+          />
+        )}
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="flex flex-col items-center gap-1 pt-3 text-center text-xs text-text-secondary">
@@ -398,9 +414,6 @@ interface PrimaryHandlers {
   handleDiscard: () => void
   handleFinishReview: () => void
   handleRequestSkip: () => void
-  handleConfirmSkip: () => void
-  handleCancelSkip: () => void
-  confirmingSkip: boolean
   handleDraftStart: () => void
   handleDraftEdit: () => void
   handleRepeat: () => void
@@ -433,11 +446,8 @@ function renderPrimary(primary: PrimaryVariant, flags: HomeFlags, h: PrimaryHand
         <HomePrimaryCard
           variant="review_pending"
           data={flags.reviewPending}
-          confirmingSkip={h.confirmingSkip}
           onFinish={h.handleFinishReview}
           onSkip={h.handleRequestSkip}
-          onConfirmSkip={h.handleConfirmSkip}
-          onCancelSkip={h.handleCancelSkip}
         />
       )
     case 'draft':

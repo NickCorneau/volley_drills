@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { Brandmark } from '../../components/Brandmark'
 import { HomePrimaryCard } from '../../components/HomePrimaryCard'
 import { HomeSecondaryRow } from '../../components/HomeSecondaryRow'
+import { SkipReviewModal } from '../../components/SkipReviewModal'
 import { SoftBlockModal } from '../../components/SoftBlockModal'
 import { db } from '../../db'
 import type { SessionDraft } from '../../db'
@@ -136,38 +137,38 @@ describe('V0B-18 D86 per-surface regression scan', () => {
     assertClean(container, 'SoftBlockModal')
   })
 
+  // 2026-04-27 reconciled-list `R11`: Skip-review confirm now lives in
+  // its own centered role=dialog modal instead of an inline two-step
+  // row inside ReviewPendingCard. The modal carries net-new copy
+  // ("Skip review?", "Yes, skip", "Never mind", and a short "saved to
+  // your history" reassurance line) so it gets its own surface scan.
+  it('SkipReviewModal', () => {
+    const { container } = render(
+      <SkipReviewModal planName="Solo + Wall" onConfirm={() => {}} onCancel={() => {}} />,
+    )
+    assertClean(container, 'SkipReviewModal')
+  })
+
   describe('HomePrimaryCard - all variants', () => {
     it('new_user', () => {
       const { container } = render(<HomePrimaryCard variant="new_user" onStart={() => {}} />)
       assertClean(container, 'HomePrimaryCard.new_user')
     })
 
-    it('review_pending (idle + confirming-skip)', () => {
-      const idle = render(
+    it('review_pending', () => {
+      // 2026-04-27 R11: confirm-skip no longer lives in this card; the
+      // single-render scan below replaces the previous idle + confirming
+      // pair. The confirming-state copy moved into SkipReviewModal,
+      // which has its own surface scan above.
+      const { container } = render(
         <HomePrimaryCard
           variant="review_pending"
           data={fakePendingReview}
-          confirmingSkip={false}
           onFinish={() => {}}
           onSkip={() => {}}
-          onConfirmSkip={() => {}}
-          onCancelSkip={() => {}}
         />,
       )
-      assertClean(idle.container, 'HomePrimaryCard.review_pending idle')
-
-      const confirming = render(
-        <HomePrimaryCard
-          variant="review_pending"
-          data={fakePendingReview}
-          confirmingSkip
-          onFinish={() => {}}
-          onSkip={() => {}}
-          onConfirmSkip={() => {}}
-          onCancelSkip={() => {}}
-        />,
-      )
-      assertClean(confirming.container, 'HomePrimaryCard.review_pending confirming')
+      assertClean(container, 'HomePrimaryCard.review_pending')
     })
 
     it('draft', () => {

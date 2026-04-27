@@ -186,7 +186,7 @@ EOF
 write_catalog_json() {
   cat > "$CURRENT_FIXTURE/docs/catalog.json" <<'EOF'
 {
-  "schema_version": 1,
+  "schema_version": 4,
   "repo_state": {},
   "entrypoints": [
     { "path": "AGENTS.md" },
@@ -347,6 +347,45 @@ path.write_text(path.read_text(encoding='utf-8').replace('summary: \"Fixture can
     bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
 }
 
+test_direct_validator_fails_on_malformed_yaml_frontmatter() {
+  make_fixture_root
+  write_common_files
+  cat > "$CURRENT_FIXTURE/docs/decisions.md" <<'EOF'
+---
+id: decisions
+title: Decisions Log
+status: active
+stage: validation
+type: core
+summary: "unterminated fixture summary
+authority: fixture decisions
+last_updated: 2026-04-15
+depends_on: []
+---
+
+# Decisions Log
+EOF
+  assert_command_fails \
+    "validate-agent-docs fails on malformed YAML frontmatter" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_direct_validator_fails_on_stale_catalog_schema_version() {
+  make_fixture_root
+  write_common_files
+  python3 -c "
+import json
+from pathlib import Path
+path = Path(r'$CURRENT_FIXTURE/docs/catalog.json')
+data = json.loads(path.read_text(encoding='utf-8'))
+data['schema_version'] = 3
+path.write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8')
+"
+  assert_command_fails \
+    "validate-agent-docs fails on stale catalog schema_version" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
 test_direct_validator_fails_on_missing_catalog_entrypoint() {
   make_fixture_root
   write_common_files
@@ -380,7 +419,9 @@ test_direct_validator_passes_on_valid_fixture
 test_direct_validator_fails_on_missing_required_heading
 test_direct_validator_fails_on_pseudo_frontmatter
 test_direct_validator_fails_on_missing_canonical_frontmatter_key
+test_direct_validator_fails_on_malformed_yaml_frontmatter
 test_direct_validator_fails_on_missing_catalog_entrypoint
+test_direct_validator_fails_on_stale_catalog_schema_version
 test_direct_validator_fails_on_thick_compatibility_surface
 
 echo "All validator tests passed."

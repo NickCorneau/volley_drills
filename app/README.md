@@ -29,7 +29,7 @@ This folder holds the runnable Phase 0 validation prototype for Volleycraft. It 
 - **Timer**: timestamp-based with 5s flush to `timerState`, wake-lock during active blocks, 3-2-1 pre-roll with audio tick, block-end beep via `lib/audio.ts` (foreground `AudioContext`; narrow slice of `V0B-08`).
 - **Safety**: binary pain gate + training recency + heat CTA, answer-first consequence copy (`V0B-16`), lighter-session override with confirmation, regulatory-posture copy audit landed (`V0B-18`, `D86`).
 - Product direction lives in `docs/`; do not treat the prototype UI as final production design.
-- The M001 milestone implementation gate remains closed until D91 field validation against v0b completes.
+- M001 is proceeding in `D130` founder-use mode. `D91` remains preserved as the stranger-cohort validation gate for the 2026-07-20 re-eval or an earlier trigger, but it no longer blocks app implementation work.
 
 ## v0b posture notes
 

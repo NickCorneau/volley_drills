@@ -102,18 +102,13 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
     const user = userEvent.setup()
     const onFinish = vi.fn()
     const onSkip = vi.fn()
-    const onConfirmSkip = vi.fn()
-    const onCancelSkip = vi.fn()
 
     render(
       <HomePrimaryCard
         variant="review_pending"
         data={fakePendingReview}
-        confirmingSkip={false}
         onFinish={onFinish}
         onSkip={onSkip}
-        onConfirmSkip={onConfirmSkip}
-        onCancelSkip={onCancelSkip}
       />,
     )
 
@@ -128,36 +123,30 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
 
     await user.click(screen.getByRole('button', { name: /^skip review$/i }))
     expect(onSkip).toHaveBeenCalledTimes(1)
-    expect(onConfirmSkip).not.toHaveBeenCalled()
-    expect(onCancelSkip).not.toHaveBeenCalled()
   })
 
-  it('review_pending with confirmingSkip=true: Yes-skip -> onConfirmSkip, Never-mind -> onCancelSkip', async () => {
-    const user = userEvent.setup()
-    const onSkip = vi.fn()
-    const onConfirmSkip = vi.fn()
-    const onCancelSkip = vi.fn()
-
+  // 2026-04-27 reconciled-list `R11`: the Skip-review confirm lives in
+  // the new SkipReviewModal (centered role=dialog), NOT in the card.
+  // The card itself must never render an inline `Yes, skip` /
+  // `Never mind` confirm row again — a regression there would put the
+  // app back to the lone in-card destructive confirm pattern that the
+  // R11 ship retired. Assert both the structural absence (no buttons
+  // with those labels rendered by the card) and the prop shape (the
+  // card no longer accepts confirmingSkip / onConfirmSkip / onCancelSkip).
+  it('review_pending: never renders an inline confirm-row inside the card (R11)', () => {
     render(
       <HomePrimaryCard
         variant="review_pending"
         data={fakePendingReview}
-        confirmingSkip
         onFinish={() => {}}
-        onSkip={onSkip}
-        onConfirmSkip={onConfirmSkip}
-        onCancelSkip={onCancelSkip}
+        onSkip={() => {}}
       />,
     )
 
-    await user.click(screen.getByRole('button', { name: /never mind/i }))
-    expect(onCancelSkip).toHaveBeenCalledTimes(1)
-    expect(onConfirmSkip).not.toHaveBeenCalled()
-    expect(onSkip).not.toHaveBeenCalled()
-
-    await user.click(screen.getByRole('button', { name: /yes, skip/i }))
-    expect(onConfirmSkip).toHaveBeenCalledTimes(1)
-    expect(onCancelSkip).toHaveBeenCalledTimes(1) // unchanged from prev click
+    expect(screen.queryByRole('button', { name: /never mind/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /yes, skip/i })).not.toBeInTheDocument()
+    expect(screen.queryByText(/skipping leaves this session/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('draft: renders Today\u2019s suggestion + Start session + Change setup (Phase F Unit 1 rename)', async () => {

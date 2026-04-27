@@ -157,20 +157,22 @@ Level-reaching coverage counts (skill slots only, excluding warmup / cooldown):
 - `intermediate → intermediate`: 7 (`d07`, `d11`, `d13`, `d14`, `d15`, `d20`)
 - `intermediate → advanced` or higher on skill slots: 0
 
-Tier 1b adds:
-- `d31 Self Toss Target Practice` → likely `beginner → beginner`
-- `d33 Around the World Serving` → likely `beginner → intermediate`
-- `d36 Jump Float Introduction` → likely `intermediate → advanced` (first skill-slot advanced-band drill)
-- `d40 Footwork for Setting` → likely `beginner → intermediate`
-- `d42 Corner to Corner Setting` → likely `intermediate → intermediate`
-- `d43 Triangle Setting` → likely `intermediate → advanced` (second skill-slot advanced-band drill)
+Tier 1b Layer A currently adds (2026-04-27 correction):
+- `d31 Self Toss Target Practice` → `beginner → beginner`
+- `d33 Around the World Serving` → `beginner → intermediate`
+- `d40 Footwork for Setting` → `beginner → intermediate`
+- `d42 Corner to Corner Setting` → `intermediate → intermediate`
 
-Post-Tier-1b the advanced-band population on skill slots grows from 0 to 2, which is still thin but non-degenerate. That's the first point at which Layer B filtering could work at all for `competitive_pair` users — still not a good reason to ship Layer B without behavioral evidence of need.
+Deferred from current Layer A:
+- `d36 Jump Float Introduction` → likely `intermediate → advanced`, but held for `O7` sports-medicine / PT review before authoring.
+- `d43 Triangle Setting` → likely `intermediate → advanced`, but held for `D101` 3+ player support because the BAB source geometry is 3-player.
+
+Post-current-Layer-A the advanced-band population on skill slots remains 0 because both advanced-band candidates are deferred. That reinforces this audit's original conclusion: Layer B filtering still should not ship without both behavioral evidence and enough authored content to make `competitive_pair` filtering meaningful.
 
 ## Conclusions
 
 1. **Data is mostly clean.** No drill is catastrophically mistagged against its source material. Two minor mismatches (`d07` upper, `d22` lower) are worth noting for later but don't block any downstream work.
-2. **The structural skew is the real finding.** Layer B filtering is unsafe to ship for `competitive_pair` users regardless of filter logic cleverness, because the content simply isn't there. Tier 1b partially addresses this (2 of 6 new drills reach into advanced), but the library remains beginner/intermediate-biased by design.
+2. **The structural skew is the real finding.** Layer B filtering is unsafe to ship for `competitive_pair` users regardless of filter logic cleverness, because the content simply isn't there. The current Tier 1b Layer A slice does not address advanced-band coverage because `d36` and `d43` are both intentionally deferred.
 3. **This audit does not produce any fix commits.** The two mismatches are flagged (`drill-d07-upper-bound-2026-04-22`, `drill-d22-lower-bound-2026-04-22`) for later resolution; the structural findings are decision inputs for any future Layer B or `PlayerLevel`-widening conversation. Shipping tag fixes today without a decision about what the tags *will be used for* is premature.
 4. **Tier 1b can proceed as planned** with level metadata captured correctly on new drills (Layer A only). The audit provides no evidence against Tier 1b and no evidence for Layer B beyond what was already on the table.
 

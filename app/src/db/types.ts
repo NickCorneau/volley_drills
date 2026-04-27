@@ -128,7 +128,7 @@ export interface ExecutionLog {
    * the tester fired during this session. Optional (absent === 0 for
    * legacy v3 / v0a records and for sessions where no swap happened).
    * Incremented inside the `swapActiveBlock` transaction so the counter
-   * and the swapped `SessionPlan.blocks[activeIdx]` mutation land atomically.
+   * and the active slot's `blockOverrides` write land atomically.
    *
    * D91 replay: founder reads `swapCount > 0` as the signal that the
    * tester diverged from the assembled plan. A structured
@@ -143,7 +143,7 @@ export interface ExecutionLog {
    * the original plan while allowing read paths to project what the tester
    * actually did. Optional for legacy rows and sessions with no swaps.
    */
-  blockOverrides?: Record<number, SessionPlanBlock>
+  blockOverrides?: Partial<Record<number, SessionPlanBlock>>
 }
 
 export type IncompleteReason = 'time' | 'fatigue' | 'pain' | 'other'

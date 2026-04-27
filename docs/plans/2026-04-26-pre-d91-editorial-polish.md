@@ -2,11 +2,11 @@
 id: pre-d91-editorial-polish-2026-04-26
 title: "Pre-D91 editorial polish (2026-04-26)"
 type: plan
-status: draft
-stage: validation
+status: complete
+stage: shipped
 authority: "Editorial-class polish bundle drawn from the 2026-04-26 deep UX review (`docs/design/reviews/2026-04-26-agent-ux-review.md`). Walkthrough-evidenced + agent-evidenced; not founder-session-trigger-gated, so scope is strictly constrained to *editorial-class* per the 2026-04-22 adversarial-memo authoring-budget discipline (see `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md` §Authoring-budget cap): copy, typography, conditional renders, small visual fixes, and one build-time identifier wiring for D91 field-test debugging. No new drill records. No metadata schema changes. No persistence-behavior changes. No new archetype variants. No SetupScreen toggles. No Dexie migrations."
 summary: "Six-item editorial-class polish bundle, the third successive pass after 2026-04-22 (six items) and 2026-04-23 (four items). Drops 3 of the 9 items originally batched in the 2026-04-26 review (`F1`, `F3`, `F4`) on re-reading the actual source — `F1` and `F3` are weaker than framed (the H1 weight is consistent with the app, the BackButton is already 44px, and quietness is intentional Shibui), and `F4` is stale (the 2026-04-23 recency reword removed the second `Yes/No` pair so the muscle-memory risk no longer exists). Six items remain: `F11` review-pending eyebrow voice, `F12` recent-workouts row collision, `F7` Good-passes `0/0` placeholder, `F9` `Completed session N` ordinal redundancy, `F10` `Today's verdict` solo-eyebrow redundancy (kept for pair as the only pair-context signal), `F14` build-id row in Settings for D91 field-test build identification. Estimated effort 3–5 hours focused; ordering goes lightest-touch first so each commit is independently shippable."
-last_updated: 2026-04-26
+last_updated: 2026-04-27
 depends_on:
   - docs/milestones/m001-solo-session-loop.md
   - docs/plans/2026-04-20-m001-tier1-implementation.md

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
-import type { DrillVariantScore } from '../../db'
+import type { DrillVariantScore, SessionPlanBlock } from '../../db'
 import {
   classifyCaptureWindow,
   countSubmittedReviews,
@@ -83,6 +83,78 @@ describe('borderlineCount round-trip (V0B-29)', () => {
     const bundle = await loadSessionBundle(EXEC_ID)
     expect(bundle).not.toBeNull()
     expect(bundle!.review.borderlineCount).toBeUndefined()
+  })
+})
+
+describe('loadSessionBundle', () => {
+  it('projects block overrides while leaving the stored plan unchanged', async () => {
+    const completedAt = Date.now()
+    const original: SessionPlanBlock = {
+      id: 'block-main',
+      type: 'main_skill',
+      drillId: 'd03',
+      variantId: 'd03-pair',
+      drillName: 'Continuous Passing',
+      shortName: 'Passing',
+      durationMinutes: 10,
+      coachingCue: 'original cue',
+      courtsideInstructions: 'original instructions',
+      required: true,
+    }
+    const override: SessionPlanBlock = {
+      ...original,
+      id: 'bad-override-id',
+      type: 'pressure',
+      drillId: 'd99',
+      variantId: 'd99-solo',
+      drillName: 'Swapped Drill',
+      shortName: 'Swap',
+      durationMinutes: 99,
+      coachingCue: 'swapped cue',
+      courtsideInstructions: 'swapped instructions',
+      required: false,
+    }
+    await db.sessionPlans.put({
+      id: PLAN_ID,
+      presetId: 'solo_wall',
+      presetName: 'Solo + Wall',
+      playerCount: 1,
+      blocks: [original],
+      safetyCheck: {
+        painFlag: false,
+        heatCta: false,
+        painOverridden: false,
+      },
+      createdAt: completedAt,
+    })
+    await db.executionLogs.put({
+      id: EXEC_ID,
+      planId: PLAN_ID,
+      status: 'completed',
+      activeBlockIndex: 0,
+      blockOverrides: { 0: override },
+      blockStatuses: [{ blockId: 'block-main', status: 'completed', completedAt }],
+      startedAt: completedAt - 60_000,
+      completedAt,
+    })
+    await submitReview({
+      executionLogId: EXEC_ID,
+      sessionRpe: 6,
+      goodPasses: 20,
+      totalAttempts: 30,
+    })
+
+    const bundle = await loadSessionBundle(EXEC_ID)
+    expect(bundle?.plan.blocks[0]).toEqual({
+      ...override,
+      id: original.id,
+      type: original.type,
+      durationMinutes: original.durationMinutes,
+      required: original.required,
+    })
+
+    const stored = await db.sessionPlans.get(PLAN_ID)
+    expect(stored?.blocks[0]).toEqual(original)
   })
 })
 

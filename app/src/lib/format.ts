@@ -11,6 +11,26 @@ export function formatDuration(minutes: number): string {
   return minutes === 1 ? '1 min' : `${minutes} min`
 }
 
+/**
+ * 2026-04-27 reconciled-list `R13` (Settings investment footer): render
+ * a non-negative minute count as `"H:MM"`, where minutes are zero-padded
+ * and hours are not. Matches the `formatTime()` minutes:seconds shape so
+ * the app's two `:`-separated time formats read consistently.
+ *
+ * Examples: 0 -> `"0:00"`, 11 -> `"0:11"`, 60 -> `"1:00"`, 750 -> `"12:30"`.
+ *
+ * Negative inputs clamp to 0 (defensive for any caller that subtracts
+ * timestamps without a `Math.max` guard); non-integer inputs are rounded
+ * down (the per-session minute math in `formatDurationLine` already
+ * rounds, so the upstream sum is integer-valued in practice).
+ */
+export function formatTotalDurationLine(totalMinutes: number): string {
+  const safe = Math.max(0, Math.floor(totalMinutes))
+  const hours = Math.floor(safe / 60)
+  const mins = safe % 60
+  return `${hours}:${mins.toString().padStart(2, '0')}`
+}
+
 /** Sentinel rendered when a duration can't be computed (no completedAt /
  *  pausedAt). A plain hyphen over the em-dash per 2026-04-17 copy pass. */
 const NO_VALUE = '-'

@@ -26,11 +26,13 @@ type HomePrimaryCardProps =
   | {
       variant: 'review_pending'
       data: PendingReview
-      confirmingSkip: boolean
       onFinish: () => void
+      /**
+       * Skip-review tap. Parent (HomeScreen) opens a centered
+       * `SkipReviewModal` in response; the card no longer carries the
+       * inline two-step confirm props (2026-04-27 reconciled-list R11).
+       */
       onSkip: () => void
-      onConfirmSkip: () => void
-      onCancelSkip: () => void
     }
   | {
       variant: 'draft'

@@ -300,11 +300,18 @@ export function DrillCheckScreen() {
       {/*
         Body is intentionally sparse: the just-finished pill (so the
         user knows which drill they're tagging) and the PerDrillCapture
-        component, vertically centered with `justify-center` so the
-        chips land in the natural thumb zone. No "Up next" content
-        here — that lives on the next screen by design.
+        component, top-aligned so the eye lands on the pill immediately
+        below the header and the "Last → Next" run-flow rhythm reads as
+        a matched pair with TransitionScreen (whose body is also
+        top-aligned). The previous `justify-center` posture floated the
+        pill mid-screen on tall viewports, which read as a loading state
+        and pushed the chips past the thumb zone; the Continue CTA is
+        footer-anchored regardless, so vertical centering bought us
+        nothing on tap-reach. A small `pt-2` keeps the pill from
+        slamming against the header hairline. No "Up next" content here
+        — that lives on the next screen by design.
       */}
-      <ScreenShell.Body className="items-stretch justify-center gap-6 pb-4">
+      <ScreenShell.Body className="items-stretch gap-6 pb-4 pt-2">
         <div className="flex items-start gap-2.5 rounded-[12px] bg-bg-warm p-3">
           <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success text-white">
             <svg

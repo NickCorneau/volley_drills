@@ -174,6 +174,36 @@ export async function hasEverStartedSession(): Promise<boolean> {
   return (await db.executionLogs.count()) > 0
 }
 
+/**
+ * 2026-04-27 reconciled-list `R13` (Settings investment footer):
+ * total count + summed minutes across finalized terminal sessions,
+ * excluding `discarded_resume` stubs (`A8`).
+ *
+ * Drives the quiet `Logged: N sessions · H:MM total` row on
+ * `SettingsScreen`. The footer hides when `count === 0`, so first-week
+ * testers see no row at all.
+ *
+ * Per-session minute math mirrors `formatDurationLine()` exactly
+ * (`Math.max(1, Math.round((endedAt(log) - log.startedAt) / 60_000))`)
+ * so the footer total matches the sum of the per-row durations the user
+ * sees on Complete / Recent Sessions surfaces.
+ */
+export interface SessionTallySummary {
+  count: number
+  totalMinutes: number
+}
+
+export async function getSessionTallySummary(): Promise<SessionTallySummary> {
+  const logs = await getTerminalExecutionLogs()
+  const terminal = logs.filter(isTerminalSession)
+  let totalMinutes = 0
+  for (const log of terminal) {
+    const end = endedAt(log)
+    totalMinutes += Math.max(1, Math.round((end - log.startedAt) / 60_000))
+  }
+  return { count: terminal.length, totalMinutes }
+}
+
 export async function getCurrentDraft(): Promise<SessionDraft | null> {
   return (await db.sessionDrafts.get('current')) ?? null
 }

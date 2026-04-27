@@ -26,6 +26,15 @@ async function waitForRunControls(page: import('@playwright/test').Page) {
   }
 }
 
+async function completeDrillCheckIfPresent(page: import('@playwright/test').Page) {
+  const drillCheck = page.getByText(/drill check/i)
+  await drillCheck.waitFor({ state: 'visible', timeout: 2000 }).catch(() => {})
+  if (!(await drillCheck.isVisible().catch(() => false))) return
+
+  await page.getByRole('radio', { name: /still learning/i }).click()
+  await page.getByRole('button', { name: /^continue$/i }).click()
+}
+
 test.describe('edge cases', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
@@ -49,7 +58,7 @@ test.describe('edge cases', () => {
   test('direct navigation to /run without session shows error', async ({ page }) => {
     await page.goto('/run')
     await expect(page.getByText(/session not found/i)).toBeVisible()
-    await expect(page.getByText(/back to start/i)).toBeVisible()
+    await expect(page.getByText(/back to home/i)).toBeVisible()
   })
 
   test('direct navigation to /safety without draft redirects to /setup', async ({ page }) => {
@@ -79,6 +88,7 @@ test.describe('edge cases', () => {
       const startNext = page.getByRole('button', { name: /start next block/i })
       if (await startNext.isVisible().catch(() => false)) {
         await startNext.click({ timeout: 5000 }).catch(() => {})
+        await completeDrillCheckIfPresent(page)
         await page.waitForTimeout(5000)
         continue
       }
@@ -86,6 +96,7 @@ test.describe('edge cases', () => {
       const next = page.getByRole('button', { name: 'Next' })
       if (await next.isVisible().catch(() => false)) {
         await next.click({ timeout: 3000 }).catch(() => {})
+        await completeDrillCheckIfPresent(page)
         continue
       }
 

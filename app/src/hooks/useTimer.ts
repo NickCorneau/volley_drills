@@ -45,17 +45,20 @@ export function useTimer(durationSeconds: number, onComplete: () => void) {
     }
   }, [publishRemaining])
 
-  const start = useCallback((overrideDuration?: number) => {
-    cancelAnimationFrame(rafRef.current)
-    if (overrideDuration !== undefined) {
-      durationRef.current = overrideDuration
-    }
-    accumulatedRef.current = 0
-    startTsRef.current = performance.now()
-    publishRemaining(durationRef.current, true)
-    setIsRunning(true)
-    rafRef.current = requestAnimationFrame(() => tickRef.current?.())
-  }, [publishRemaining])
+  const start = useCallback(
+    (overrideDuration?: number) => {
+      cancelAnimationFrame(rafRef.current)
+      if (overrideDuration !== undefined) {
+        durationRef.current = overrideDuration
+      }
+      accumulatedRef.current = 0
+      startTsRef.current = performance.now()
+      publishRemaining(durationRef.current, true)
+      setIsRunning(true)
+      rafRef.current = requestAnimationFrame(() => tickRef.current?.())
+    },
+    [publishRemaining],
+  )
 
   const pause = useCallback((): number => {
     cancelAnimationFrame(rafRef.current)
@@ -72,30 +75,36 @@ export function useTimer(durationSeconds: number, onComplete: () => void) {
     rafRef.current = requestAnimationFrame(() => tickRef.current?.())
   }, [])
 
-  const reset = useCallback((newDuration?: number) => {
-    cancelAnimationFrame(rafRef.current)
-    if (newDuration !== undefined) {
-      durationRef.current = newDuration
-    }
-    accumulatedRef.current = 0
-    setIsRunning(false)
-    publishRemaining(durationRef.current, true)
-  }, [publishRemaining])
+  const reset = useCallback(
+    (newDuration?: number) => {
+      cancelAnimationFrame(rafRef.current)
+      if (newDuration !== undefined) {
+        durationRef.current = newDuration
+      }
+      accumulatedRef.current = 0
+      setIsRunning(false)
+      publishRemaining(durationRef.current, true)
+    },
+    [publishRemaining],
+  )
 
   useEffect(() => {
     return () => cancelAnimationFrame(rafRef.current)
   }, [])
 
-  const adjustRemaining = useCallback((newRemaining: number) => {
-    const now = performance.now()
-    const currentElapsed = accumulatedRef.current + (now - startTsRef.current) / 1000
-    const currentRemaining = Math.max(0, durationRef.current - currentElapsed)
-    const diff = currentRemaining - newRemaining
-    if (diff > 0) {
-      accumulatedRef.current += diff
-      publishRemaining(newRemaining, true)
-    }
-  }, [publishRemaining])
+  const adjustRemaining = useCallback(
+    (newRemaining: number) => {
+      const now = performance.now()
+      const currentElapsed = accumulatedRef.current + (now - startTsRef.current) / 1000
+      const currentRemaining = Math.max(0, durationRef.current - currentElapsed)
+      const diff = currentRemaining - newRemaining
+      if (diff > 0) {
+        accumulatedRef.current += diff
+        publishRemaining(newRemaining, true)
+      }
+    },
+    [publishRemaining],
+  )
 
   return { remainingSeconds, isRunning, start, pause, resume, reset, adjustRemaining }
 }

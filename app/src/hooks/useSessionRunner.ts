@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ExecutionLog, SessionPlan, SessionPlanBlock } from '../db'
 import { findSwapAlternatives } from '../domain/sessionBuilder'
+import { isSchemaBlocked } from '../lib/schema-blocked'
 import {
   buildAdvancedBlock,
   buildEndedSession,
@@ -46,17 +47,28 @@ export function useSessionRunner(executionLogId: string, options?: SessionRunner
 
   useEffect(() => {
     let cancelled = false
-    loadSession(executionLogId).then((result) => {
-      if (cancelled) return
-      if (!result) {
+    ;(async () => {
+      try {
+        const result = await loadSession(executionLogId)
+        if (cancelled) return
+        if (!result) {
+          setExecution(null)
+          setPlan(null)
+        } else {
+          setExecution(result.execution)
+          setPlan(result.plan)
+        }
+        setLoaded(true)
+      } catch (err) {
+        if (cancelled) return
+        if (!isSchemaBlocked()) {
+          console.error('useSessionRunner load failed:', err)
+        }
         setExecution(null)
         setPlan(null)
-      } else {
-        setExecution(result.execution)
-        setPlan(result.plan)
+        setLoaded(true)
       }
-      setLoaded(true)
-    })
+    })()
     return () => {
       cancelled = true
     }

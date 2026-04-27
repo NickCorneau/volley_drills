@@ -120,6 +120,50 @@ describe('validateDrillCatalog', () => {
     )
   })
 
+  it('reports non-finite timing and effort values', () => {
+    const issues = validateDrillCatalog({
+      drills: [
+        drill({
+          variants: [
+            {
+              ...drill().variants[0],
+              workload: {
+                durationMinMinutes: Number.NaN,
+                durationMaxMinutes: Number.POSITIVE_INFINITY,
+                rpeMin: Number.NaN,
+                rpeMax: Number.POSITIVE_INFINITY,
+              },
+              subBlockIntervalSeconds: Number.POSITIVE_INFINITY,
+            },
+          ],
+        }),
+      ],
+      progressionChains: [chain()],
+    })
+
+    expect(issues.map((issue) => issue.code)).toEqual(
+      expect.arrayContaining(['invalid_duration_range', 'invalid_rpe_range', 'invalid_sub_block']),
+    )
+  })
+
+  it('reports variant drill id mismatches', () => {
+    const issues = validateDrillCatalog({
+      drills: [
+        drill({
+          variants: [
+            {
+              ...drill().variants[0],
+              drillId: 'wrong-drill',
+            },
+          ],
+        }),
+      ],
+      progressionChains: [chain()],
+    })
+
+    expect(issues.map((issue) => issue.code)).toContain('variant_drill_id_mismatch')
+  })
+
   it('reports broken progression references and chain mismatches', () => {
     const issues = validateDrillCatalog({
       drills: [drill({ id: 'd-test', chainId: 'other-chain' })],
@@ -142,8 +186,39 @@ describe('validateDrillCatalog', () => {
       expect.arrayContaining([
         'unknown_chain_drill',
         'chain_id_mismatch',
+        'link_outside_chain',
         'unknown_progression_target',
       ]),
+    )
+  })
+
+  it('reports unknown progression sources and links outside their chain', () => {
+    const outside = drill({ id: 'd-outside' })
+    const issues = validateDrillCatalog({
+      drills: [drill(), outside],
+      progressionChains: [
+        chain({
+          drillIds: ['d-test'],
+          links: [
+            {
+              fromDrillId: 'missing-source',
+              toDrillId: 'd-test',
+              direction: 'progression',
+              description: 'Broken source.',
+            },
+            {
+              fromDrillId: 'd-test',
+              toDrillId: 'd-outside',
+              direction: 'progression',
+              description: 'Outside target.',
+            },
+          ],
+        }),
+      ],
+    })
+
+    expect(issues.map((issue) => issue.code)).toEqual(
+      expect.arrayContaining(['unknown_progression_source', 'link_outside_chain']),
     )
   })
 
@@ -163,5 +238,62 @@ describe('validateDrillCatalog', () => {
     })
 
     expect(issues.map((issue) => issue.code)).toContain('m001_candidate_without_variant')
+  })
+
+  it('reports Solo-labelled variants whose participants.max is greater than 1', () => {
+    const issues = validateDrillCatalog({
+      drills: [
+        drill({
+          variants: [
+            {
+              ...drill().variants[0],
+              label: 'Solo',
+              participants: { min: 1, ideal: 1, max: 4 },
+            },
+          ],
+        }),
+      ],
+      progressionChains: [chain()],
+    })
+
+    expect(issues.map((issue) => issue.code)).toContain('participants_label_mismatch')
+  })
+
+  it('reports Pair-labelled variants whose participants.min is not 2', () => {
+    const issues = validateDrillCatalog({
+      drills: [
+        drill({
+          variants: [
+            {
+              ...drill().variants[0],
+              label: 'Pair',
+              participants: { min: 1, ideal: 2, max: 2 },
+            },
+          ],
+        }),
+      ],
+      progressionChains: [chain()],
+    })
+
+    expect(issues.map((issue) => issue.code)).toContain('participants_label_mismatch')
+  })
+
+  it('does not report participants_label_mismatch for non-Solo / non-Pair labels', () => {
+    const issues = validateDrillCatalog({
+      drills: [
+        drill({
+          variants: [
+            {
+              ...drill().variants[0],
+              label: 'Any',
+              participants: { min: 1, ideal: 1, max: 14 },
+            },
+          ],
+        }),
+      ],
+      progressionChains: [chain()],
+    })
+
+    expect(issues.map((issue) => issue.code)).not.toContain('participants_label_mismatch')
   })
 })

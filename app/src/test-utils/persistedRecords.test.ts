@@ -29,6 +29,16 @@ describe('persisted record test fixtures', () => {
     })
   })
 
+  it('passes through current plan assembly metadata', () => {
+    const plan = currentPersistedPlan({
+      assemblySeed: 'seed-test',
+      assemblyAlgorithmVersion: 7,
+    })
+
+    expect(plan.assemblySeed).toBe('seed-test')
+    expect(plan.assemblyAlgorithmVersion).toBe(7)
+  })
+
   it('creates legacy plans that intentionally omit block identity', () => {
     const plan = legacyPersistedPlan()
 
@@ -51,6 +61,16 @@ describe('persisted record test fixtures', () => {
       completedAt: 2000,
     })
     expect(log.blockStatuses[0].status).toBe('completed')
+    expect(log.blockStatuses[0].blockId).toBe('block-main')
+  })
+
+  it('passes through block overrides on execution logs', () => {
+    const override = currentPersistedPlan().blocks[0]
+    const log = currentPersistedExecutionLog({
+      blockOverrides: { 0: override },
+    })
+
+    expect(log.blockOverrides?.[0]).toEqual(override)
   })
 
   it('creates submitted reviews with adaptation-eligible timing fields', () => {

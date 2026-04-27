@@ -14,8 +14,9 @@ import { findSwapAlternatives } from '../sessionBuilder'
  *   candidate pool for the slot type).
  * - Excludes the drill whose name matches the current block
  *   (prevents tapping Swap and landing on the same drill).
- * - Stable ordering: sorted by `drill.id` so repeated Swap taps on
- *   the same block walk the same list every time.
+ * - Stable ordering: begins after the current drill in sorted `drill.id`
+ *   order so repeated Swap taps on the same block walk the pool instead
+ *   of toggling between two drills.
  * - Preserves `id`, `type`, `durationMinutes`, `required` from the
  *   input block - only drill identity (name / shortName / cue /
  *   instructions) changes.
@@ -126,6 +127,29 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
     const a = findSwapAlternatives(block, makeContext())
     const b = findSwapAlternatives(block, makeContext())
     expect(a.map((x) => x.drillName)).toEqual(b.map((x) => x.drillName))
+  })
+
+  it('cycles past the previous drill instead of toggling between two alternates', () => {
+    const context = makeContext({
+      playerMode: 'solo',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+    })
+    const first = findSwapAlternatives(makeBlock({ type: 'main_skill' }), context)
+    expect(first.length).toBeGreaterThanOrEqual(3)
+
+    const firstSwap = first[0]
+    const second = findSwapAlternatives(firstSwap, context)
+    expect(second.length).toBeGreaterThanOrEqual(2)
+    const secondSwap = second[0]
+    const third = findSwapAlternatives(secondSwap, context)
+    expect(third.length).toBeGreaterThanOrEqual(2)
+    const thirdSwap = third[0]
+
+    expect(new Set([firstSwap.drillId, secondSwap.drillId, thirdSwap.drillId]).size).toBe(3)
+    expect(thirdSwap.drillId).not.toBe(firstSwap.drillId)
+    expect(second[0].drillName).not.toBe('Does Not Exist')
   })
 
   it('pair + net context produces a different pool than solo + wall', () => {
@@ -296,8 +320,20 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
         }),
       )
 
+      // Semantics under test: a legacy name-only block (no `drillId`)
+      // skips the preferred/substitute promotion paths and returns the
+      // natural id-sorted pool with the slot's normal rationale. The
+      // specific first id (`d05`) tracks the rotation logic in
+      // `findSwapAlternatives` - the sorted pool is rotated to start
+      // immediately AFTER the current block's drill, so repeated Swap
+      // taps walk forward instead of bouncing between the lowest two
+      // drill IDs. With `d03` (Continuous Passing) at index 1 of the
+      // sorted pool [d01, d03, d05, ...], the rotation returns `d05`
+      // first. 2026-04-27 solo-vs-pair sweep added `d05-pair`, which
+      // shifted the post-d03 rotation tip from `d10` to `d05`. Update
+      // if the pool reorders or `d05-pair` is removed.
       expect(out.length).toBeGreaterThan(0)
-      expect(out[0].drillId).toBe('d10')
+      expect(out[0].drillId).toBe('d05')
       expect(out[0].rationale).toBe("Chosen because: today's main passing rep.")
     })
 

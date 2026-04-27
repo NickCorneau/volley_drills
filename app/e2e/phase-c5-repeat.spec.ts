@@ -184,7 +184,7 @@ test.describe('phase-c5 repeat path', () => {
     // and Continue button do not render until pain is answered. This
     // is the D83 contract — the Repeat shortcut must not leak any
     // prior safety answers.
-    await expect(page.getByText(/any pain that changes/i)).toBeVisible()
+    await expect(page.getByText(/before we start/i)).toBeVisible()
     await expect(page.getByRole('button', { name: /^continue$/i })).toHaveCount(0)
 
     // Answer safety and proceed to /run.
@@ -215,7 +215,7 @@ test.describe('phase-c5 repeat path', () => {
 
     // Lands on /safety directly (skips Setup).
     await expect(page).toHaveURL(/\/safety/, { timeout: 10_000 })
-    await expect(page.getByText(/any pain that changes/i)).toBeVisible()
+    await expect(page.getByText(/before we start/i)).toBeVisible()
   })
 
   test('Start a different session (Phase F Unit 1): tertiary link routes to fresh /setup', async ({

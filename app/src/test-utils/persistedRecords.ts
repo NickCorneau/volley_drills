@@ -31,9 +31,11 @@ const defaultContext: SetupContext = {
   wind: 'calm',
 }
 
+const DEFAULT_BLOCK_ID = 'block-main'
+
 function currentBlock(overrides: BlockOverrides = {}): SessionPlanBlock {
   return {
-    id: overrides.id ?? 'block-main',
+    id: overrides.id ?? DEFAULT_BLOCK_ID,
     type: overrides.type ?? 'main_skill',
     drillId: overrides.drillId ?? 'd03',
     variantId: overrides.variantId ?? 'd03-pair',
@@ -61,6 +63,8 @@ export function currentPersistedPlan(overrides: PlanOverrides = {}): SessionPlan
     presetId: overrides.presetId ?? 'pair_net_25',
     presetName: overrides.presetName ?? 'Pair net 25',
     playerCount: overrides.playerCount ?? 2,
+    assemblySeed: overrides.assemblySeed,
+    assemblyAlgorithmVersion: overrides.assemblyAlgorithmVersion,
     blocks: (overrides.blocks ?? [{}]).map((block) => currentBlock(block)),
     safetyCheck: {
       painFlag: overrides.safetyCheck?.painFlag ?? false,
@@ -96,7 +100,7 @@ export function currentPersistedExecutionLog(overrides: ExecutionLogOverrides = 
     status,
     activeBlockIndex: overrides.activeBlockIndex ?? 0,
     blockStatuses: (overrides.blockStatuses ?? [{}]).map((blockStatus, index) => ({
-      blockId: blockStatus.blockId ?? `block-${index + 1}`,
+      blockId: blockStatus.blockId ?? (index === 0 ? DEFAULT_BLOCK_ID : `block-${index + 1}`),
       status: blockStatus.status ?? defaultBlockStatus(status),
       startedAt: blockStatus.startedAt ?? (status === 'not_started' ? undefined : 1000),
       completedAt: blockStatus.completedAt ?? (status === 'completed' ? 2000 : undefined),
@@ -107,6 +111,7 @@ export function currentPersistedExecutionLog(overrides: ExecutionLogOverrides = 
     endedEarlyReason: overrides.endedEarlyReason,
     actualDurationMinutes: overrides.actualDurationMinutes,
     swapCount: overrides.swapCount,
+    blockOverrides: overrides.blockOverrides,
   }
 }
 

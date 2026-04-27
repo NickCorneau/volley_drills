@@ -1,12 +1,12 @@
 ---
 id: pair-rep-capture-tier1b-2026-04-26
-title: "Tier 1b: Pair rep capture moves to per-drill at Transition (D133)"
+title: "Tier 1b: Pair rep capture moves to per-drill Check (D133)"
 type: plan
-status: draft
-stage: planning
-authority: "Tier 1b implementation plan for the post-2026-04-26 pair rep-capture work unlocked by the P2-3 founder-session trigger. Implements `D133` (Framing D from `docs/research/2026-04-26-pair-rep-capture-options.md`): a per-drill **Difficulty tag** required on the Transition screen between blocks, plus an optional per-drill **Add counts** affordance that reuses the existing `PassMetricInput` component, plus the corresponding Review-screen card removal for count drills, plus the Dexie schema migration that lands the `perDrillCaptures` shape `V0B-12` already required."
-summary: "5-day implementation slice. Adds `perDrillCaptures: PerDrillCapture[]` to the `SessionReview` Dexie record, wires a 3-chip required `DifficultyTag` plus a collapsed-by-default `PassMetricInput` per-drill on `TransitionScreen.tsx`, removes the session-level `PassMetricInput` from `ReviewScreen.tsx` for count drills (`successMetric.type` ∈ `pass-rate-good` / `reps-successful`), updates `CompleteScreen.tsx` to aggregate from drill-grain when present, and bumps the Dexie schema with a forward-only migration. Trigger formally met 2026-04-26 per `docs/research/founder-use-ledger.md`. Does **not** consume the drill-record authoring-budget cap (zero new drills); does consume one Tier 1b authoring-attention slot."
-last_updated: 2026-04-26
+status: complete
+stage: shipped
+authority: "Tier 1b implementation plan for the post-2026-04-26 pair rep-capture work unlocked by the P2-3 founder-session trigger. Implements `D133` (Framing D from `docs/research/2026-04-26-pair-rep-capture-options.md`): a dedicated `/run/check` screen after completed blocks with required per-drill **Difficulty tag**, optional per-drill **Good/Total** affordance that reuses the existing `PassMetricInput` component, corresponding Review-screen card removal for count drills, Complete drill-grain aggregation, and the Dexie schema migration that lands the `perDrillCaptures` shape `V0B-12` already required."
+summary: "Shipped 2026-04-27. Adds `perDrillCaptures: PerDrillCapture[]` to the `SessionReview` Dexie record, wires a 3-chip required `DifficultyTag` plus optional per-drill Good/Total capture on the dedicated `/run/check` (`DrillCheckScreen`) route, removes the session-level `PassMetricInput` from `ReviewScreen.tsx` for count drills (`successMetric.type` ∈ `pass-rate-good` / `reps-successful`), updates Complete to aggregate from drill-grain when present, and bumps the Dexie schema with a forward-only migration. Trigger formally met 2026-04-26 per `docs/research/founder-use-ledger.md`. Does **not** consume the drill-record authoring-budget cap (zero new drills); does consume one Tier 1b authoring-attention slot."
+last_updated: 2026-04-27
 depends_on:
   - docs/decisions.md
   - docs/specs/m001-review-micro-spec.md
@@ -37,9 +37,9 @@ decision_refs:
 
 - **One product change, one Dexie migration, one new component, two screen edits, one screen card-removal.** Scope is narrow and shaped by the authoring-attention cap, not by what is technically possible.
 - **Gated on the Tier 1b `P2-3` founder-session trigger.** Trigger formally met **2026-04-26** via `docs/research/founder-use-ledger.md` 2026-04-26 row (`pass-rate-good` pair session with explicit "fake count" flag).
-- **Decision input:** `docs/research/2026-04-26-pair-rep-capture-options.md` (four-framing analysis). **Decision:** `D133` in `docs/decisions.md` (agent-proposed Framing D, pending founder ratification before implementation). **Spec contract:** `docs/specs/m001-review-micro-spec.md` §"Per-drill capture at Transition (D133)".
-- **Authoring-budget consumption:** **zero new drill records** (the per-`docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md` reconciled-list rule that "trigger-gated items involve metadata and UI, not new drill records — they do not consume the cap of three Tier-1b drill records"). Sibling plan `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md` continues to hold 5/10 of the drill-record cap. This plan consumes one **Tier 1b authoring-attention slot** alongside that one.
-- **Estimated effort when gate fires: ~5 days of focused work.** The pieces are individually small (Transition affordance, Review removal, Complete aggregate, Dexie bump, services/review write-path, tests) but each touches both UI and storage, so test coverage is the bulk of the work.
+- **Decision input:** `docs/research/2026-04-26-pair-rep-capture-options.md` (four-framing analysis). **Decision:** `D133` in `docs/decisions.md` (ratified Framing D, shipped 2026-04-27). **Spec contract:** `docs/specs/m001-review-micro-spec.md` §"Per-drill capture at Drill Check (D133)".
+- **Authoring-budget consumption:** **zero new drill records** (the per-`docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md` reconciled-list rule that "trigger-gated items involve metadata and UI, not new drill records"). Sibling plan `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md` consumes 4/10 of the drill-record cap. This plan consumes one **Tier 1b authoring-attention slot** alongside that one.
+- **Shipped shape:** dedicated Drill Check route after completed blocks, Review removal, Complete aggregate, Dexie bump, services/review write-path, and focused tests.
 
 ## Why this plan exists in its current shape
 
@@ -58,16 +58,16 @@ Per `docs/plans/2026-04-20-m001-tier1-implementation.md` Tier 1b trigger model +
 
 - **Tier 1a acceptance bar passes.** Met (Tier 1a shipped 2026-04-20 onward; units 1-5 landed; 2026-04-22 partner-walkthrough polish and 2026-04-23 walkthrough-closeout polish both landed).
 - **`P2-3` single-session trigger condition.** Met **2026-04-26** — `docs/research/founder-use-ledger.md` 2026-04-26 row records a `pass-rate-good` pair pass session with the explicit "fake count" flag (`d11 One-Arm Passing Drill`, `d03 Continuous Passing`, `d10 The 6-Legged Monster`).
-- **`D133` proposed-decision row exists.** Met — see `docs/decisions.md` `D133` (2026-04-26).
-- **Spec patch in place.** Met — see `docs/specs/m001-review-micro-spec.md` §"Per-drill capture at Transition (D133)" (`last_updated: 2026-04-26`, `D133` added to `decision_refs`).
+- **`D133` decision row ratified.** Met — see `docs/decisions.md` `D133` (2026-04-27).
+- **Spec patch in place.** Met — see `docs/specs/m001-review-micro-spec.md` §"Per-drill capture at Drill Check (D133)" (`last_updated: 2026-04-27`, `D133` added to `decision_refs`).
 
 **Plan authoring is permitted; implementation is permitted contingent on founder ratification of `D133`.** The agent-proposed posture in `D133` records the rollback path: if the founder downgrades to Framing B (per-drill counts at Transition, no required tag) before implementation lands, this plan amends in place — the §"Scope" Difficulty-tag rows drop, the §"Implementation" `DifficultyTag` component is dropped, and §"Tests" loses the tag-required cases. The Dexie migration shape stays valid because `perDrillCaptures.difficulty` becomes optional rather than required. Ratification can be implicit (founder reads the plan, doesn't push back, agent ships) or explicit (founder edits `D133` row to remove the agent-proposed posture).
 
 ## Scope
 
-### Surface change 1: Transition screen gains per-drill capture
+### Surface change 1: Drill Check screen gains per-drill capture
 
-`app/src/screens/TransitionScreen.tsx` (between drill blocks) gains a card titled `How was that drill?` (final copy decided in courtside-copy review, not here). Card contains:
+`app/src/screens/DrillCheckScreen.tsx` (`/run/check`, after completed drill blocks and before Transition/Up Next) gains a card titled `How was that drill?` (final copy decided in courtside-copy review, not here). Card contains:
 
 - **Required: 3-chip Difficulty selector.** Internal enum `DifficultyTag = 'too_hard' | 'still_learning' | 'too_easy'`. User-facing labels TBD in courtside-copy review under `.cursor/rules/courtside-copy.mdc` invariants 2 (one-season rec player) and 5 (cool-down equal review weight). Initial proposed labels: `Too hard`, `Still learning`, `Too easy` — the spec patch flagged that `still_learning` deliberately distinguishes the per-drill tag from the deleted session-level `QuickTagChips` `About right` (load-rightness vs acquisition-stage). Card cannot advance until one chip is tapped.
 - **Optional: collapsed `Add counts` affordance.** Below the Difficulty chips. Tap to expand → renders the existing `PassMetricInput` component for this drill-variant, with the same `Good passes` / `Total attempts` / `notCaptured` controls. Default expanded state for count drills (`successMetric.type` ∈ `pass-rate-good` / `reps-successful`): collapsed (per `D133` rationale that the user should never feel obligated to invent counts). Default for non-count drills: not rendered at all (the existing `notCaptured`-default rule on Review applies; Transition does not duplicate the choice).
@@ -109,9 +109,9 @@ Forward-only migration. Existing reviews keep `perDrillCaptures: undefined`; rea
 
 ### Surface change 5: Service write-path
 
-`app/src/services/review.ts`: extend the review-write path to accept `perDrillCaptures[]` from the Transition screen, persist it on the `SessionReview` record at session end. Aggregation read-path in `CompleteScreen` and `ReviewScreen` consumes the field via a small helper (`aggregateDrillCaptures(perDrillCaptures)` returning `{ goodPasses, attemptCount, drillCount }`).
+`app/src/services/review.ts`: extend the review-write path to accept `perDrillCaptures[]` from the Drill Check screen, persist it on the `SessionReview` record at session end. Aggregation read-path in `CompleteScreen` and `ReviewScreen` consumes the field via a small helper (`aggregateDrillCaptures(perDrillCaptures)` returning `{ goodPasses, attemptCount, drillCount }`).
 
-State during the session itself (between blocks, not yet at session end): the Transition screen accumulates captures in component-local React state plus a `useReducer`-or-`useStore` slice (existing pattern: see how RPE / draft state is held across screens). Captures persist to Dexie only at session end with the rest of the review payload, exactly as the existing flow already does for `sessionRpe`.
+State during the session itself (between blocks, not yet at session end): the runner accumulates captures before routing through Transition. Captures persist to Dexie only at session end with the rest of the review payload, exactly as the existing flow already does for `sessionRpe`.
 
 ### Vocabulary work (small)
 
@@ -130,21 +130,21 @@ Per the spec patch, `DifficultyTag` user-facing labels need a courtside-copy rev
 | `pickForSlot` / `findSwapAlternatives` filter changes | Out of scope. Same architectural-shape concern called out in `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md` §"What is NOT in this plan". | Separate Tier 1c work, separate decision |
 | Revival of session-level `QuickTagChips` | The 2026-04-23 deletion stands per spec patch. The per-drill `DifficultyTag` is grain-different (per-drill not per-session) and meaning-different (acquisition-stage not load-rightness), not a reversal. | Not in scope; design discipline |
 | Per-block RPE | `D120` keeps one `sessionRpe` per session in v0b. Per-block subjective load is `D120`'s "eventually" track, gated on `SessionParticipant[]` shape from `D115`. | Not in scope |
-| New drill records | This plan authors zero. Sibling plan `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md` carries the drill-record cap (currently 5/10). | Not in scope |
+| New drill records | This plan authors zero. Sibling plan `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md` carries the drill-record cap (currently 4/10). | Not in scope |
 
 ## Implementation
 
 ### Files touched
 
 - `app/src/db/schema.ts` — bump version; add `perDrillCaptures?: PerDrillCapture[]` field on `SessionReview` table; add `PerDrillCapture` and `DifficultyTag` type exports.
-- `app/src/screens/TransitionScreen.tsx` — add `<PerDrillCapture />` card above existing content; wire to in-session draft state; gate Next-block button on `difficulty` being set.
+- `app/src/screens/DrillCheckScreen.tsx` — add `<PerDrillCapture />` card on `/run/check`; wire to in-session draft state; gate continuing to Transition on `difficulty` being set.
 - `app/src/components/PerDrillCapture.tsx` — **new** component. Renders the Difficulty 3-chip selector (required) and the collapsed `Add counts` affordance (optional, expands to `<PassMetricInput />` for the just-completed drill-variant).
 - `app/src/components/PassMetricInput.tsx` — make the existing component embeddable per-drill (it already takes per-instance props; verify nothing assumes session-level singleton).
 - `app/src/screens/ReviewScreen.tsx` — for count drills (`successMetric.type` ∈ `pass-rate-good` / `reps-successful`), **do not render** the session-level `PassMetricInput`; render a read-only `aggregateDrillCaptures` summary chip instead. For non-count drills, leave existing rendering unchanged.
 - `app/src/screens/CompleteScreen.tsx` — `formatPassRateLine` consumes `aggregateDrillCaptures(perDrillCaptures)` when entries are present; falls back to session-level when not.
 - `app/src/services/review.ts` — extend `submitReview` write-path to persist `perDrillCaptures[]`; add `aggregateDrillCaptures` helper.
 - `app/src/services/__tests__/review.test.ts` (or equivalent) — new write-path coverage.
-- `app/src/screens/__tests__/TransitionScreen.test.tsx` — new tests for the per-drill capture card.
+- `app/src/screens/__tests__/DrillCheckScreen.test.tsx` — new tests for the per-drill capture card.
 - `app/src/screens/__tests__/ReviewScreen.*.test.tsx` — extend existing tests for the count-drill-card-hidden case.
 - `app/src/screens/__tests__/CompleteScreen.summary.test.tsx` — extend for the drill-grain aggregate path.
 - `app/src/components/__tests__/PerDrillCapture.test.tsx` — new component-level tests.
@@ -170,7 +170,7 @@ Per the spec patch, `DifficultyTag` user-facing labels need a courtside-copy rev
 4. `Add counts` does not render at all for non-count drills.
 5. Expanding `Add counts` renders an embedded `PassMetricInput` for the current drill-variant.
 
-**`TransitionScreen.test.tsx`** (extend):
+**`DrillCheckScreen.test.tsx`** (extend):
 
 6. Per-drill capture card renders above the "Up next" preview.
 7. Next-block button is disabled until a Difficulty chip is selected.
@@ -208,13 +208,13 @@ Tier 1b ships when **all** of the following hold:
 
 1. **Trigger fires.** Met **2026-04-26** per `docs/research/founder-use-ledger.md` 2026-04-26 row.
 2. **`D133` is ratified** (founder reads the row and either accepts the agent-proposed posture or downgrades to Framing B; the plan amends in place if the latter).
-3. **Spec patch is in place.** Met — `docs/specs/m001-review-micro-spec.md` §"Per-drill capture at Transition (D133)" exists; `last_updated: 2026-04-26`; `D133` is in `decision_refs`.
+3. **Spec patch is in place.** Met — `docs/specs/m001-review-micro-spec.md` §"Per-drill capture at Drill Check (D133)" exists; `last_updated: 2026-04-27`; `D133` is in `decision_refs`.
 4. The 5 surface changes above land in their respective files; types are exported from `app/src/db/schema.ts`; the Dexie schema version bumps cleanly.
 5. The `PerDrillCapture.tsx` component lands; the `PassMetricInput` component is embeddable per drill without regressions.
 6. All new + regression tests pass locally (units, screens, services, one extended e2e).
 7. `npm run lint` and `npm run build` clean.
 8. Tier 1a acceptance items remain unaffected: `d28` warmup default, Chosen-because annotations on every block, 3-row Home trailer, `SKILL_TAGS_BY_TYPE` includes `'set'`, the post-2026-04-23 RPE chip ship, the post-2026-04-22 polish landings.
-9. **No drill-record authoring-budget consumption.** Sibling plan `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md` continues to hold 5/10 of the cap; this plan adds 0/10. **One Tier 1b authoring-attention slot is consumed** alongside that plan; weekly adversarial-memo review acknowledges this.
+9. **No drill-record authoring-budget consumption.** Sibling plan `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md` consumes 4/10 of the cap; this plan adds 0/10. **One Tier 1b authoring-attention slot is consumed** alongside that plan; weekly adversarial-memo review acknowledges this.
 10. **No telemetry change.** `D131` posture is preserved — all new fields are local Dexie only; no network calls; no observer effect on Condition 3.
 11. **Courtside-copy review** of the `DifficultyTag` user-facing labels passes `.cursor/rules/courtside-copy.mdc` invariants 2 + 5 before merge.
 

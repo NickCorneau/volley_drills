@@ -88,10 +88,9 @@ test.describe('v0b session flow', () => {
     await endSessionEarly(page)
 
     await page.goto('/')
-    // C-4 (Surface 2): the review-pending primary card renders "Review
-    // your last session" + the plan name instead of the old "You have an
-    // unreviewed session" sentence.
-    await expect(page.getByText(/review your last session/i)).toBeVisible({ timeout: 5000 })
+    // C-4/F11: the review-pending primary card renders the tightened
+    // "Review pending" eyebrow + the plan name.
+    await expect(page.getByText(/^Review pending$/)).toBeVisible({ timeout: 5000 })
     await expect(page.getByRole('button', { name: /finish review/i })).toBeVisible()
   })
 })

@@ -102,6 +102,40 @@ const d01: Drill = {
         'Bend knees to keep platform stable.',
       ],
     },
+    // 2026-04-27 solo-vs-pair sweep. Pair variant: partner tosses an
+    // arc to the passer; passer forearm-passes back, claps behind the
+    // back while partner catches, then resets. Streak metric mirrors
+    // the solo variant so progression reads as one drill across modes.
+    {
+      id: 'd01-pair',
+      drillId: 'd01',
+      label: 'Pair',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['tosser', 'passer'] },
+      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      equipment: { balls: 1 },
+      workload: {
+        durationMinMinutes: 3,
+        durationMaxMinutes: 6,
+        rpeMin: 3,
+        rpeMax: 5,
+        fatigueCap: { maxReps: 40, maxMinutes: 6 },
+      },
+      successMetric: {
+        type: 'streak',
+        description:
+          'Clean passes in a row before a mishit or a missed slap (restart on either).',
+        target: '≥ 15 consecutive clean passes',
+      },
+      courtsideInstructions:
+        'Stand 3 m apart. Tosser sends an easy arc to the passer. Passer forearm-passes back at catchable height, then claps behind the back while the tosser catches. Reset and repeat. Switch roles after every 10 reps or every miss.',
+      coachingCues: [
+        'Athletic posture.',
+        'Contact between wrists and elbows.',
+        'Pass back to your partner, not past them.',
+        'Bend knees to keep platform stable.',
+      ],
+    },
   ],
 }
 
@@ -332,6 +366,42 @@ const d05: Drill = {
         'Get behind ball horizontally.',
         'Brake-step.',
         'Platform angle drives direction.',
+        'Transfer weight to front foot.',
+      ],
+    },
+    // 2026-04-27 solo-vs-pair sweep. Pair variant: partner stands at
+    // the set window and the passer passes *to* the partner instead of
+    // to a marker. Adds the missing reactive element the solo variant
+    // calls out in its honesty clause ("trains platform + direction,
+    // not serve-reading"). Pair RPE is one notch higher than solo
+    // because partner-toss timing forces footwork the self-toss can
+    // game.
+    {
+      id: 'd05-pair',
+      drillId: 'd05',
+      label: 'Pair',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['tosser', 'passer'] },
+      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 4,
+        durationMaxMinutes: 8,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 40, maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'pass-rate-good',
+        description: 'Passes graded 2+ on 0–3 rubric, partner-reachable without a step.',
+        target: '≥ 70% over 20 partner tosses',
+      },
+      courtsideInstructions:
+        'Partner stands at the set window (where the setter would stand, ~3 m off the net) and tosses an arc 2–3 m in front of the passer. Passer passes back so partner catches without moving more than one step. Switch roles after 20 tosses.',
+      coachingCues: [
+        'Get behind ball horizontally.',
+        'Brake-step.',
+        'Pass to your partner, not past them.',
         'Transfer weight to front foot.',
       ],
     },
@@ -1228,11 +1298,15 @@ const d22: Drill = {
   regressionDescription: 'Bigger zones; count "in" serves only.',
   variants: [
     {
+      // 2026-04-27 solo-vs-pair sweep: max tightened from 4 to 1 now
+      // that d22-pair carries the two-player route. Prevents the
+      // session builder from serving solo-voice copy to a pair
+      // session.
       id: 'd22-solo',
       drillId: 'd22',
       label: 'Solo',
       feedType: 'self-toss',
-      participants: { min: 1, ideal: 1, max: 4 },
+      participants: { min: 1, ideal: 1, max: 1 },
       environmentFlags: env({
         needsNet: true,
         windFriendly: true,
@@ -1257,6 +1331,44 @@ const d22: Drill = {
         'Develop a serving routine.',
         'Consistent hand contact.',
         'Adjust for wind movement.',
+      ],
+    },
+    // 2026-04-27 solo-vs-pair sweep. Pair variant runs as a
+    // race-to-10: partners alternate serves, each scoring on their
+    // own zone hits, first to 10 wins. Adds an explicit competitive
+    // frame that the solo variant cannot — a solo target is a wall;
+    // a partner target is a person.
+    {
+      id: 'd22-pair',
+      drillId: 'd22',
+      label: 'Pair',
+      feedType: 'self-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['server', 'server'] },
+      environmentFlags: env({
+        needsNet: true,
+        windFriendly: true,
+        lowScreenTime: true,
+      }),
+      equipment: { balls: 'many' },
+      workload: {
+        durationMinMinutes: 6,
+        durationMaxMinutes: 12,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxMinutes: 12 },
+      },
+      successMetric: {
+        type: 'points-to-target',
+        description:
+          'Race to 10 points: each partner scores their own zone hits; serve out loses a point.',
+        target: 'First partner to 10 wins',
+      },
+      courtsideInstructions:
+        'Mark the same zone values for both partners. Alternate serves: each partner serves, scores their own result, then hands the next ball over. Serve out loses a point. First to 10 wins; play a second round if there is time.',
+      coachingCues: [
+        'Develop a serving routine.',
+        'Consistent hand contact.',
+        'Score honestly; this is your data, not your opponent\'s.',
       ],
     },
   ],
@@ -1356,6 +1468,47 @@ const d31: Drill = {
         'Mark a 2 m target circle. Self-toss and serve or strike toward it. Count only balls landing in or brushing the circle. Reset your routine before every rep.',
       coachingCues: ['One target before each serve.', 'Same toss height.', 'Watch the landing.'],
     },
+    // 2026-04-27 solo-vs-pair sweep. Pair variant: server serves to a
+    // called zone; partner stands across the net, calls the next zone,
+    // shags between rounds. Adds shaggable density (no walking the
+    // court between every rep) and a verbal commitment cue ("call
+    // before you toss") that solo cannot enforce.
+    // 2026-04-27 solo-vs-pair sweep: equipment.balls = 1 (not 'many')
+    // to match d31-solo-open and stay inside the engine's
+    // unmodeled-requirements filter (`hasUnmodeledRequirements` in
+    // sessionBuilder.ts excludes `balls === 'many'` and `balls > 1`,
+    // pending D102 equipment-context resolution). Pair execution
+    // still works with one ball: shagger throws it back between
+    // serves.
+    {
+      id: 'd31-pair',
+      drillId: 'd31',
+      label: 'Pair',
+      feedType: 'self-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['server', 'shagger'] },
+      environmentFlags: env({ needsNet: true, windFriendly: true, lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 4,
+        durationMaxMinutes: 8,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 20, maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description:
+          'Serves landing in or near the 2 m target circle named by the shagger before each toss.',
+        target: '8 of 10 near the called target',
+      },
+      courtsideInstructions:
+        'Mark a 2 m target circle. Shagger stands across the net and calls the target out loud before the server tosses. Server resets routine, tosses, and serves toward the called circle. Shagger collects balls between rounds. Switch after 10 serves.',
+      coachingCues: [
+        'Call the target before you toss.',
+        'Same toss height.',
+        'Watch the landing before you reset.',
+      ],
+    },
   ],
 }
 
@@ -1379,12 +1532,19 @@ const d33: Drill = {
   progressionDescription: 'Require two makes per zone, then shrink each zone.',
   regressionDescription: 'Use three large zones: left, middle, right.',
   variants: [
+    // 2026-04-27 solo-vs-pair sweep: variant ID `d33-solo-net` is
+    // preserved (no rename) so any persisted ExecutionLog row that
+    // references it stays valid. Label, copy, and `participants.max`
+    // change to make this a Solo-only variant; the inline "Pair: ..."
+    // sentence moves to the new `d33-pair` sibling below. Em-dash in
+    // the prior copy was already a `.cursor/rules/courtside-copy.mdc`
+    // §Invariant 4 violation; rewriting now also fixes that.
     {
       id: 'd33-solo-net',
       drillId: 'd33',
-      label: 'Solo or pair with net',
+      label: 'Solo',
       feedType: 'self-toss',
-      participants: { min: 1, ideal: 1, max: 2 },
+      participants: { min: 1, ideal: 1, max: 1 },
       environmentFlags: env({
         needsNet: true,
         windFriendly: true,
@@ -1405,7 +1565,44 @@ const d33: Drill = {
         target: 'Hit all 6 zones once',
       },
       courtsideInstructions:
-        'Solo: serve through six zones in order — front-left, front-middle, front-right, back-left, back-middle, back-right. Misses repeat the same zone. Pair: alternate servers each rep; one shags between rounds.',
+        'Serve through six zones in order: front-left, front-middle, front-right, back-left, back-middle, back-right. Misses repeat the same zone. Shag between rounds.',
+      coachingCues: ['Name the zone first.', 'High arc for deep zones.', 'Reset after each miss.'],
+    },
+    // Pair sibling: alternate servers, partner shags. Same 6-zone
+    // ladder, faster ball density (no full walk-and-collect between
+    // every serve).
+    {
+      id: 'd33-pair',
+      drillId: 'd33',
+      label: 'Pair',
+      feedType: 'self-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['server', 'shagger'] },
+      environmentFlags: env({
+        needsNet: true,
+        windFriendly: true,
+        lowScreenTime: true,
+      }),
+      // 2026-04-27 solo-vs-pair sweep: balls = 1 (not 'many') to stay
+      // shippable. `hasUnmodeledRequirements` in sessionBuilder.ts
+      // excludes `balls === 'many'` and `balls > 1` pending D102
+      // equipment-context resolution. Pair execution still works:
+      // shagger collects between rounds.
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 6,
+        durationMaxMinutes: 10,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxReps: 24, maxMinutes: 10 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description:
+          'Serves landing in the named 6-zone serving grid: front-left, front-middle, front-right, back-left, back-middle, back-right; both partners hit each zone.',
+        target: 'Both partners hit all 6 zones',
+      },
+      courtsideInstructions:
+        'Alternate servers each rep; shagger stays across the net to call the next zone and shag between rounds. Both partners work the same 6-zone order: front-left, front-middle, front-right, back-left, back-middle, back-right. A miss repeats the same zone.',
       coachingCues: ['Name the zone first.', 'High arc for deep zones.', 'Reset after each miss.'],
     },
   ],
@@ -1492,9 +1689,15 @@ const d25: Drill = {
       // segment beeps) not yet shipped - see partner walkthrough P2-2 in
       // docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md
       // and the courtside-copy rule §Invariant 5.
+      // 2026-04-27 solo-vs-pair sweep: label changed from 'Solo' to
+      // 'Any'. The drill is a cooldown walk + stretch sequence —
+      // partners do it side by side, no role asymmetry — so the
+      // participants envelope is correctly broad (max 14) and the
+      // 'Solo' label was a misnomer. Variant ID retained (`-solo`
+      // suffix) for ExecutionLog migration safety.
       id: 'd25-solo',
       drillId: 'd25',
-      label: 'Solo',
+      label: 'Any',
       feedType: 'self-toss',
       participants: { min: 1, ideal: 1, max: 14 },
       environmentFlags: env({ lowScreenTime: true }),
@@ -1556,9 +1759,12 @@ const d26: Drill = {
       // invariants 2 (one-season rec player test) + 5 (cool-down
       // gets equal review weight). Structure (intro + 3 staples) and
       // 30 s sub-block tick unchanged.
+      // 2026-04-27 solo-vs-pair sweep: label 'Solo' → 'Any'. Stretch
+      // micro-sequence is run side-by-side regardless of party size;
+      // see d25-solo comment for full rationale.
       id: 'd26-solo',
       drillId: 'd26',
-      label: 'Solo',
+      label: 'Any',
       feedType: 'self-toss',
       participants: { min: 1, ideal: 1, max: 14 },
       environmentFlags: env({ lowScreenTime: true }),
@@ -1615,7 +1821,10 @@ const d38: Drill = {
   name: 'Bump Set Fundamentals',
   shortName: 'Bump Set',
   skillFocus: ['set'],
-  objective: 'Controlled bump-set trajectory off self-toss; platform shape and aim with the arms.',
+  // 2026-04-27 solo-vs-pair sweep: objective rewritten pair-neutral
+  // (was "off self-toss" which presumed solo execution). The two
+  // variants below carry mode-specific feed semantics.
+  objective: 'Controlled bump-set trajectory; platform shape and aim with the arms.',
   levelMin: 'beginner',
   levelMax: 'intermediate',
   chainId: 'chain-7-setting',
@@ -1630,11 +1839,14 @@ const d38: Drill = {
     'Shorten target distance and reduce height; catch-and-reset instead of continuous.',
   variants: [
     {
+      // 2026-04-27 solo-vs-pair sweep: max tightened from 4 to 1 now
+      // that d38-pair carries the two-player route. Solo voice no
+      // longer leaks into pair sessions.
       id: 'd38-solo',
       drillId: 'd38',
       label: 'Solo',
       feedType: 'self-toss',
-      participants: { min: 1, ideal: 1, max: 4 },
+      participants: { min: 1, ideal: 1, max: 1 },
       environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
       equipment: { balls: 1 },
       workload: {
@@ -1651,10 +1863,44 @@ const d38: Drill = {
         target: '15 controlled sets',
       },
       courtsideInstructions:
-        'Self-toss to yourself ~1.5 m up. Bump-set the ball back up with platform angled at the sky - aim for a settable arc landing within a 1 m circle around you. Reset and repeat.',
+        'Self-toss to yourself ~1.5 m up. Bump-set the ball back up with platform angled at the sky; aim for a settable arc landing within a 1 m circle around you. Reset and repeat.',
       coachingCues: [
         'Platform square, not tilted.',
         'Contact on the forearms.',
+        'Legs lift; arms aim.',
+      ],
+    },
+    // 2026-04-27 solo-vs-pair sweep. Pair variant: partner across
+    // tosses an arc; setter bump-sets back at catchable height.
+    // Streak metric mirrors d41 (the chain-7 pair-only sibling) so
+    // pair setting reads as one progression family across drills.
+    // Voice intentionally avoids the solo "self-toss" trigger.
+    {
+      id: 'd38-pair',
+      drillId: 'd38',
+      label: 'Pair',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['tosser', 'setter'] },
+      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      equipment: { balls: 1 },
+      workload: {
+        durationMinMinutes: 4,
+        durationMaxMinutes: 8,
+        rpeMin: 3,
+        rpeMax: 5,
+        fatigueCap: { maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'streak',
+        description:
+          'Longest continuous rally of clean bump-sets between partners (restart on any catch or mishit).',
+        target: '15-set rally',
+      },
+      courtsideInstructions:
+        'Stand 3 m apart. Partner tosses an arc to the setter; setter bump-sets it back at catchable height. Goal: unbroken rally. If it breaks, restart and count the new streak. Switch tosser and setter every 10 reps.',
+      coachingCues: [
+        'Platform square, not tilted.',
+        'Set to your partner, not past them.',
         'Legs lift; arms aim.',
       ],
     },
@@ -1684,11 +1930,13 @@ const d39: Drill = {
   regressionDescription: 'Catch in the window shape and re-toss instead of continuous sets.',
   variants: [
     {
+      // 2026-04-27 solo-vs-pair sweep: max tightened from 4 to 1 now
+      // that d39-pair carries the two-player route.
       id: 'd39-solo',
       drillId: 'd39',
       label: 'Solo',
       feedType: 'self-toss',
-      participants: { min: 1, ideal: 1, max: 4 },
+      participants: { min: 1, ideal: 1, max: 1 },
       environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
       equipment: { balls: 1 },
       workload: {
@@ -1708,6 +1956,41 @@ const d39: Drill = {
       coachingCues: [
         'Contact above the forehead.',
         'Window between thumbs and forefingers.',
+        'Both hands release together.',
+      ],
+    },
+    // 2026-04-27 solo-vs-pair sweep. Pair sibling sits between the
+    // d38-pair "platform back-and-forth" and the d41 "hand-set
+    // back-and-forth" rungs: tosser feeds, setter hand-sets back from
+    // a platted base. Streak target shorter than d41 because the
+    // "no throw / no carry" cleanliness gate is the explicit success
+    // signal here.
+    {
+      id: 'd39-pair',
+      drillId: 'd39',
+      label: 'Pair',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['tosser', 'setter'] },
+      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      equipment: { balls: 1 },
+      workload: {
+        durationMinMinutes: 4,
+        durationMaxMinutes: 8,
+        rpeMin: 3,
+        rpeMax: 5,
+        fatigueCap: { maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description:
+          'Hand-sets with clean forehead contact and no throw (no carry, no double); partner catches without moving more than one step.',
+        target: '12 clean sets to your partner',
+      },
+      courtsideInstructions:
+        'Stand 3 m apart. Partner tosses an arc above the setter\'s forehead; setter hand-sets it back so the partner catches without moving more than one step. A slap means too low; a pause means you carried. Switch roles after 12 clean sets.',
+      coachingCues: [
+        'Contact above the forehead.',
+        'Set to your partner, not past them.',
         'Both hands release together.',
       ],
     },
@@ -1756,6 +2039,36 @@ const d40: Drill = {
       courtsideInstructions:
         'Mark a 1 m landing circle. Self-toss, take one small move, plant both feet, then set into the circle. Reset if you drift during contact.',
       coachingCues: ['Move first.', 'Plant both feet.', 'Face the target.'],
+    },
+    // 2026-04-27 solo-vs-pair sweep. Pair variant: partner toss
+    // varies front/back/side so footwork must respond to actual ball
+    // direction (the solo self-toss can game this by tossing where
+    // the feet already are). Setter's success is the partner being
+    // able to catch without a step.
+    {
+      id: 'd40-pair',
+      drillId: 'd40',
+      label: 'Pair',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['tosser', 'setter'] },
+      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 10,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 30, maxMinutes: 10 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description:
+          'Sets released after a clean plant; partner catches without moving more than one step.',
+        target: '20 balanced sets',
+      },
+      courtsideInstructions:
+        'Tosser stands 3 m from the setter and varies the toss: short, deep, left, right. Setter moves, plants both feet, then sets back so the tosser catches without moving more than one step. Reset if you set while drifting. Switch roles after 20 sets.',
+      coachingCues: ['Move first.', 'Plant both feet.', 'Face your partner.'],
     },
   ],
 }
@@ -1912,9 +2225,12 @@ const d28: Drill = {
       // `subBlockIntervalSeconds` - four segments each get a pacing
       // pulse at their boundary so the tester doesn't need to watch
       // the phone to know when to flip components.
+      // 2026-04-27 solo-vs-pair sweep: label 'Solo' → 'Any'. Beach
+      // Prep Three is a warmup with four side-by-side segments; same
+      // rationale as d25-solo and d26-solo.
       id: 'd28-solo',
       drillId: 'd28',
-      label: 'Solo',
+      label: 'Any',
       feedType: 'self-toss',
       participants: { min: 1, ideal: 1, max: 14 },
       environmentFlags: env({ lowScreenTime: true, windFriendly: true }),

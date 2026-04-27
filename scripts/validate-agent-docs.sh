@@ -190,10 +190,11 @@ canonical_frontmatter_must_be_valid() {
 
   if [[ -f "$full_path" ]]; then
     local findings
-    findings="$(python3 -c "
+    findings="$(python3 - "$full_path" <<'PY' 2>/dev/null || true
+import sys
 from pathlib import Path
 
-path = Path(r'$full_path')
+path = Path(sys.argv[1])
 lines = path.read_text(encoding='utf-8').splitlines()
 required = {'id', 'title', 'status', 'stage', 'type', 'summary', 'authority', 'last_updated', 'depends_on'}
 
@@ -211,23 +212,33 @@ if closing_index is None:
     print('__missing_closing_frontmatter__')
     raise SystemExit(0)
 
+frontmatter_lines = lines[1:closing_index]
 keys = set()
-for line_number, line in enumerate(lines[1:closing_index], start=2):
+for line_number, line in enumerate(frontmatter_lines, start=2):
     stripped = line.strip()
     if not stripped or stripped.startswith('- '):
         continue
     if stripped.startswith('##'):
         print(f'__pseudo_frontmatter__:{line_number}:{stripped}')
         continue
-    if line[:1].isspace():
+    if line[:1].isspace() or ':' not in stripped:
         continue
-    if ':' not in stripped:
+    key, value = stripped.split(':', 1)
+    value = value.strip()
+    if (value.startswith('"') and not value.endswith('"')) or (
+        value.startswith("'") and not value.endswith("'")
+    ):
+        print(f'__invalid_yaml__:unterminated_quoted_scalar_at_line_{line_number}')
         continue
-    keys.add(stripped.split(':', 1)[0].strip())
+    if value.startswith('[') and not value.endswith(']'):
+        print(f'__invalid_yaml__:unterminated_sequence_at_line_{line_number}')
+        continue
+    keys.add(key.strip())
 
 for key in sorted(required - keys):
     print(f'__missing_key__:{key}')
-" 2>/dev/null)" || true
+PY
+)"
 
     while IFS= read -r item; do
       [[ -z "$item" ]] && continue
@@ -240,6 +251,9 @@ for key in sorted(required - keys):
           ;;
         "__pseudo_frontmatter__:"*)
           errors+=("$rel_path: frontmatter contains markdown-styled pseudo-frontmatter '${item#*:*:}'")
+          ;;
+        "__invalid_yaml__:"*)
+          errors+=("$rel_path: frontmatter is not valid YAML (${item#__invalid_yaml__:})")
           ;;
         "__missing_key__:"*)
           errors+=("$rel_path: frontmatter missing required key '${item#__missing_key__:}'")
@@ -277,21 +291,36 @@ sys.exit(0 if ok else 1)
 
 catalog_must_have_keys() {
   local catalog_path="$REPO_ROOT/docs/catalog.json"
+  local expected_schema_version=4
 
   if [[ -f "$catalog_path" ]]; then
-    local missing_keys
-    missing_keys="$(python3 -c "
+    local findings
+    findings="$(python3 - "$catalog_path" "$expected_schema_version" <<'PY' 2>/dev/null || true
 import json
-d = json.load(open('$catalog_path', encoding='utf-8'))
-required = ['schema_version', 'repo_state', 'entrypoints', 'read_packs', 'source_of_truth_order', 'docs', 'update_routing', 'research_routing', 'status_vocabularies', 'doc_conventions']
-missing = [k for k in required if k not in d]
-if missing:
-    print('\n'.join(missing))
-" 2>/dev/null)" || true
+import sys
 
-    while IFS= read -r key; do
-      [[ -n "$key" ]] && errors+=("docs/catalog.json: missing required key '$key'")
-    done <<< "$missing_keys"
+catalog_path = sys.argv[1]
+expected_schema_version = int(sys.argv[2])
+d = json.load(open(catalog_path, encoding='utf-8'))
+required = ['schema_version', 'repo_state', 'entrypoints', 'read_packs', 'source_of_truth_order', 'docs', 'update_routing', 'research_routing', 'status_vocabularies', 'doc_conventions']
+for key in [k for k in required if k not in d]:
+    print(f'__missing_key__:{key}')
+if d.get('schema_version') != expected_schema_version:
+    print(f'__stale_schema_version__:{d.get("schema_version")}')
+PY
+)"
+
+    while IFS= read -r item; do
+      [[ -z "$item" ]] && continue
+      case "$item" in
+        "__missing_key__:"*)
+          errors+=("docs/catalog.json: missing required key '${item#__missing_key__:}'")
+          ;;
+        "__stale_schema_version__:"*)
+          errors+=("docs/catalog.json: schema_version must be $expected_schema_version (found ${item#__stale_schema_version__:})")
+          ;;
+      esac
+    done <<< "$findings"
   fi
 
   return 0

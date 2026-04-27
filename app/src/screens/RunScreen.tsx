@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { BlockTimer } from '../components/BlockTimer'
 import { RunControls } from '../components/RunControls'
@@ -31,6 +31,7 @@ export function RunScreen() {
   const [prerollHintDismissed, setPrerollHintDismissed] = useState<boolean | null>(null)
   const blockDurRef = useRef(0)
   const remainingRef = useRef(0)
+  const pendingEndSessionPauseRef = useRef<Promise<void> | null>(null)
 
   const runner = useSessionRunner(executionLogId, {
     getAccumulatedElapsed: useCallback(() => {
@@ -77,6 +78,12 @@ export function RunScreen() {
 
   const [runError, setRunError] = useState<string | null>(null)
 
+  const handleRunPersistenceError = useCallback((message: string, err: unknown) => {
+    if (isSchemaBlocked()) return
+    console.error(message, err)
+    setRunError('Something went wrong. Try again or end session.')
+  }, [])
+
   const handleBlockComplete = useCallback(async () => {
     try {
       // Foreground audio is the primary block-end cue on iOS (where
@@ -103,7 +110,11 @@ export function RunScreen() {
   }, [completeBlock, navigate, executionLogId])
 
   const timer = useTimer(activeDuration, handleBlockComplete)
-  const wakeLock = useWakeLock()
+  const {
+    isLocked: isWakeLocked,
+    request: requestWakeLock,
+    release: releaseWakeLock,
+  } = useWakeLock()
 
   useEffect(() => {
     remainingRef.current = timer.remainingSeconds
@@ -120,14 +131,15 @@ export function RunScreen() {
     startBlock()
       .then(() => {
         timer.start(activeDuration)
-        wakeLock.request()
+        requestWakeLock()
       })
       .catch((err: unknown) => {
+        if (isSchemaBlocked()) return
         console.error('Failed to start block:', err)
         navigate(routes.home(), { replace: true })
       })
     if (navigator.vibrate) navigator.vibrate(100)
-  }, [startBlock, timer, activeDuration, wakeLock, navigate])
+  }, [startBlock, timer, activeDuration, requestWakeLock, navigate])
 
   const preroll = usePreroll({
     onTick: playPrerollTick,
@@ -188,14 +200,14 @@ export function RunScreen() {
               timer.reset(recovered.remaining)
             } else {
               timer.start(recovered.remaining)
-              wakeLock.request()
+              requestWakeLock()
             }
           } else {
             if (execution.status === 'paused') {
               timer.reset(defaultDuration)
             } else {
               timer.start(defaultDuration)
-              wakeLock.request()
+              requestWakeLock()
             }
           }
         })
@@ -205,7 +217,7 @@ export function RunScreen() {
             timer.reset(defaultDuration)
           } else {
             timer.start(defaultDuration)
-            wakeLock.request()
+            requestWakeLock()
           }
         })
     } else if (bs.status === 'planned' || execution.status === 'not_started') {
@@ -217,7 +229,7 @@ export function RunScreen() {
     defaultDuration,
     recoverTimerState,
     timer,
-    wakeLock,
+    requestWakeLock,
     startWithPreroll,
   ])
 
@@ -246,22 +258,28 @@ export function RunScreen() {
 
   useEffect(() => {
     if (timer.isRunning) {
-      wakeLock.request()
+      requestWakeLock()
     } else {
-      wakeLock.release()
+      releaseWakeLock()
     }
-  }, [timer.isRunning, wakeLock])
+  }, [timer.isRunning, requestWakeLock, releaseWakeLock])
 
   const handlePause = useCallback(() => {
     timer.pause()
     const elapsed = activeDuration - remainingRef.current
-    pauseBlock(elapsed, activeDuration)
-  }, [timer, pauseBlock, activeDuration])
+    void pauseBlock(elapsed, activeDuration).catch((err: unknown) => {
+      timer.resume()
+      handleRunPersistenceError('Pause block failed:', err)
+    })
+  }, [timer, pauseBlock, activeDuration, handleRunPersistenceError])
 
   const handleResume = useCallback(() => {
     timer.resume()
-    resumeBlock()
-  }, [timer, resumeBlock])
+    void resumeBlock().catch((err: unknown) => {
+      timer.pause()
+      handleRunPersistenceError('Resume block failed:', err)
+    })
+  }, [timer, resumeBlock, handleRunPersistenceError])
 
   const handleNext = useCallback(async () => {
     try {
@@ -331,7 +349,7 @@ export function RunScreen() {
       if (timer.isRunning) {
         timer.pause()
         const elapsed = activeDuration - remainingRef.current
-        pauseBlock(elapsed, activeDuration)
+        await pauseBlock(elapsed, activeDuration)
       }
       const ok = await swapBlock()
       if (!ok) {
@@ -349,15 +367,27 @@ export function RunScreen() {
     if (timer.isRunning) {
       setWasRunning(true)
       timer.pause()
-      pauseBlock(activeDuration - remainingRef.current, activeDuration)
+      const pendingPause = pauseBlock(activeDuration - remainingRef.current, activeDuration).catch(
+        (err: unknown) => {
+          timer.resume()
+          handleRunPersistenceError('End-session pause failed:', err)
+        },
+      )
+      const trackedPause = pendingPause.finally(() => {
+        if (pendingEndSessionPauseRef.current === trackedPause) {
+          pendingEndSessionPauseRef.current = null
+        }
+      })
+      pendingEndSessionPauseRef.current = trackedPause
     } else {
       setWasRunning(false)
     }
     setShowEndConfirm(true)
-  }, [timer, pauseBlock, activeDuration])
+  }, [timer, pauseBlock, activeDuration, handleRunPersistenceError])
 
   const handleEndSessionConfirm = useCallback(async () => {
     try {
+      await pendingEndSessionPauseRef.current
       await endSession()
       navigate(routes.review(executionLogId), { replace: true })
     } catch (err) {
@@ -366,13 +396,17 @@ export function RunScreen() {
     }
   }, [endSession, navigate, executionLogId])
 
-  const handleEndSessionCancel = useCallback(() => {
+  const handleEndSessionCancel = useCallback(async () => {
     setShowEndConfirm(false)
     if (wasRunning) {
+      await pendingEndSessionPauseRef.current
       timer.resume()
-      resumeBlock()
+      void resumeBlock().catch((err: unknown) => {
+        timer.pause()
+        handleRunPersistenceError('End-session resume failed:', err)
+      })
     }
-  }, [wasRunning, timer, resumeBlock])
+  }, [wasRunning, timer, resumeBlock, handleRunPersistenceError])
 
   useEffect(() => {
     if (!executionLogId) return
@@ -389,6 +423,15 @@ export function RunScreen() {
       navigate(routes.review(executionLogId), { replace: true })
     }
   }, [executionLogId, execution, plan, navigate])
+
+  const planContext = plan?.context
+  const hasAlternates = useMemo(
+    () =>
+      planContext && currentBlock
+        ? findSwapAlternatives(currentBlock, planContext).length > 0
+        : false,
+    [currentBlock, planContext],
+  )
 
   if (!plan || !execution || !currentBlock) {
     if (loaded) {
@@ -411,12 +454,8 @@ export function RunScreen() {
   }
 
   // Swap is only offered when the block has at least one curated
-  // alternate. Warmup/wrap are always empty per D85/D105. Computed
-  // here (not inline in JSX) so `RunControls` can receive the prop
-  // cleanly and the ScreenShell.Footer branch stays readable.
-  const hasAlternates = plan.context
-    ? findSwapAlternatives(currentBlock, plan.context).length > 0
-    : false
+  // alternate. Warmup/wrap are always empty per D85/D105. The memo
+  // keeps catalog scans out of the 4 Hz timer render path.
 
   return (
     <ScreenShell>
@@ -590,7 +629,7 @@ export function RunScreen() {
               onEndSession={handleEndSessionRequest}
               onSwap={hasAlternates ? () => void handleSwap() : undefined}
             />
-            {timer.isRunning && !wakeLock.isLocked && (
+            {timer.isRunning && !isWakeLocked && (
               <p className="px-2 text-center text-xs leading-snug text-text-secondary">
                 Keep the screen on; locking your phone pauses the timer and sound.
               </p>

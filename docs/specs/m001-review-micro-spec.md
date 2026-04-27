@@ -7,7 +7,7 @@ type: spec
 date: 2026-04-11
 authority: post-session review payload, UX rules, completion definition, deferred/skipped behavior
 summary: "Post-session review payload, completion rules, and starter-metric defaults."
-last_updated: 2026-04-26
+last_updated: 2026-04-27
 depends_on:
   - docs/milestones/m001-solo-session-loop.md
   - docs/specs/m001-adaptation-rules.md
@@ -80,7 +80,7 @@ Optional:
   - do not use a full `0-3` pass-quality rubric as the default M001 metric
   - store `attemptCount` alongside the rate so adaptation can reject low-signal sessions
   - **persist `goodPasses` and `attemptCount` at drill-variant grain inside the review payload**, not only as a session-level aggregate. Required so `D104` can aggregate a progression window across sessions per drill-variant, and so post-hoc `O12` analysis can replay rolling `N = 20/50/80/100`. Tracked as `V0B-12` in `docs/plans/2026-04-12-v0a-to-v0b-transition.md`.
-  - **Capture surface, per `D133` (2026-04-26)**: drill-grain `goodPasses` / `attemptCount` are captured **on the Transition screen between blocks**, not on the Review screen at session end. The Review screen no longer renders the session-level `Good passes / Total attempts` card for count-style drills (`successMetric.type` ∈ `pass-rate-good` / `reps-successful`); the per-drill values aggregate into the session-level totals on the Complete screen. Drill-grain capture is **optional**, gated behind a collapsed `Add counts` affordance below the always-required per-drill Difficulty tag. When the user fills it, `V0B-12` is satisfied for that drill-variant; when they don't, the field is `null` and the `D104` fallback (next bullet) applies.
+  - **Capture surface, per `D133` (2026-04-26)**: drill-grain `goodPasses` / `attemptCount` are captured **on the Drill Check screen after completed blocks**, not on the Review screen at session end. The Review screen no longer renders the session-level `Good passes / Total attempts` card for count-style drills (`successMetric.type` ∈ `pass-rate-good` / `reps-successful`); the per-drill values aggregate into the session-level totals on the Complete screen. Drill-grain capture is **optional**, gated behind a collapsed `Add counts` affordance below the always-required per-drill Difficulty tag. When the user fills it, `V0B-12` is satisfied for that drill-variant; when they don't, the field is `null` and the `D104` fallback (next bullet) applies.
   - **`D104` graceful-degradation rule, per `D133`**: a drill-variant for which the optional Good/Total counts were not captured does not advance progression on that drill-variant — `D104` aggregates only filled rolling windows. The session-level RPE remains the engine's signal of overall load. Progression is held, not regressed, when count data is absent — consistent with the existing "If review is still pending… preserve the current adaptation level rather than inventing a harder or easier next session" rule below in *Output to next session*.
   - any UI that displays a percentage (review, session summary, future weekly receipt) must show `N` alongside it, e.g., `72% (18 passes)`. Low-N honesty rule per `D104` and `D89`; tracked as `V0B-13`.
   - if the user cannot reasonably capture a drill, they may leave the per-drill capture untouched (Difficulty tag still required, counts skipped); the Review screen also retains the existing session-level `notCaptured` choice for drill types where counts make no semantic sense (`successMetric.type` ∈ `streak` / `points-to-target` / `pass-grade-avg` / `composite` / `completion`).
@@ -107,7 +107,7 @@ Optional:
   - free text, one sentence max
 
 - `quickTag`
-  - **session-level**, optional preset tag. **Note (2026-04-23):** the `QuickTagChips` UI component was deleted from the Review screen in `docs/plans/2026-04-23-walkthrough-closeout-polish.md` item 3 because it duplicated the new 3-anchor RPE chips at session grain. The schema field stays reserved for non-UI uses (notably `quickTags: ['expired']` in *Deferred-review behavior* below) and for future revival if a session-level tag with non-RPE-duplicate semantics is needed. Do **not** confuse `quickTag` with the per-drill `perDrillDifficulty` enum captured at Transition under `D133` — the grain (session vs drill), the surface (Review vs Transition), and the meaning (load-rightness vs acquisition-stage) all differ.
+  - **session-level**, optional preset tag. **Note (2026-04-23):** the `QuickTagChips` UI component was deleted from the Review screen in `docs/plans/2026-04-23-walkthrough-closeout-polish.md` item 3 because it duplicated the new 3-anchor RPE chips at session grain. The schema field stays reserved for non-UI uses (notably `quickTags: ['expired']` in *Deferred-review behavior* below) and for future revival if a session-level tag with non-RPE-duplicate semantics is needed. Do **not** confuse `quickTag` with the per-drill `perDrillDifficulty` enum captured on Drill Check under `D133` — the grain (session vs drill), the surface (Review vs Drill Check), and the meaning (load-rightness vs acquisition-stage) all differ.
   - historical preset values (no longer rendered):
     - `too easy`
     - `about right`
@@ -115,14 +115,14 @@ Optional:
     - `need partner next time`
     - `weather issue`
 
-## Per-drill capture at Transition (D133)
+## Per-drill capture at Drill Check (D133)
 
-Per `D133` (2026-04-26), the post-session payload includes a **per drill-variant** capture step that lives on the Transition screen between drill blocks, not on the Review screen at session end. This realizes `V0B-12`'s drill-variant-grain requirement for the first time in M001 — Tier 1a UI was session-level only — and is the trigger-evidence response to the 2026-04-26 founder pair pass session (P2-3 Tier 1b unlock).
+Per `D133` (2026-04-26), the post-session payload includes a **per drill-variant** capture step that lives on the Drill Check screen after completed blocks, not on the Review screen at session end. This realizes `V0B-12`'s drill-variant-grain requirement for the first time in M001 — Tier 1a UI was session-level only — and is the trigger-evidence response to the 2026-04-26 founder pair pass session (P2-3 Tier 1b unlock).
 
 ### Per-drill required field
 
 - `perDrillDifficulty: 'too_hard' | 'still_learning' | 'too_easy'`
-  - **Required** on the Transition screen for every completed drill block (not warmup, not cooldown — only main-skill blocks). The block cannot advance until the user taps one of the three chips.
+  - **Required** on the Drill Check screen for every completed drill block (not warmup, not cooldown — only main-skill blocks). The block cannot advance until the user taps one of the three chips.
   - Three values, one tap. Labels are 3-anchor (matches the `Easy / Right / Hard` shape of the post-session RPE chips at session grain) but **labels and meaning differ deliberately** from the deleted session-level `QuickTagChips`:
     - `too_hard` reads as "the drill outpaced me on this block."
     - `still_learning` reads as "I am acquiring this — stage, not load." Distinct from the deleted `about right` because it carries an *acquisition-stage* meaning, not a *load-rightness* meaning.
@@ -143,13 +143,13 @@ Below the required Difficulty tag, a single `Add counts` affordance expands to r
 
 When the optional counts are filled, the values aggregate into the session-level `goodPasses` / `attemptCount` displayed on `CompleteScreen.tsx` and into `D104`'s rolling-window math at drill-variant grain. When they are skipped, `D104` does not advance progression on that drill-variant for that session (per the *graceful-degradation rule* under `primarySkillMetric` above). The session-level RPE chip on Review still drives load adaptation independently.
 
-### Why Transition, not Review
+### Why Drill Check, not Review
 
-Per the 2026-04-26 founder report ("the 'passes and good passes' bit at the end is too hard to track and fill out post workout"), and per the `D133` rationale row in `docs/decisions.md`, the literal complaint is post-session typing on a count that has gone stale. Transition captures the same data while it is still fresh and replaces a hard ask (typing) with an easy one (1-tap tag) for the required field. The optional counts inherit the freshness improvement without making counts mandatory.
+Per the 2026-04-26 founder report ("the 'passes and good passes' bit at the end is too hard to track and fill out post workout"), and per the `D133` rationale row in `docs/decisions.md`, the literal complaint is post-session typing on a count that has gone stale. Drill Check captures the same data while it is still fresh and replaces a hard ask (typing) with an easy one (1-tap tag) for the required field. The optional counts inherit the freshness improvement without making counts mandatory.
 
 ### Why not session-level only
 
-The Tier 1a session-level Good/Total card on Review deviates from `V0B-12`'s drill-variant-grain requirement and cannot feed `D104`'s same-drill-variant rolling-window math. `D133` realizes the drill-grain capture the spec already required, and uses the previously-untapped Transition surface to do it without raising the per-block authoring-attention cost.
+The Tier 1a session-level Good/Total card on Review deviates from `V0B-12`'s drill-variant-grain requirement and cannot feed `D104`'s same-drill-variant rolling-window math. `D133` realizes the drill-grain capture the spec already required, and uses the post-block Drill Check surface to do it without raising the per-block authoring-attention cost.
 
 ## UX rules
 
@@ -164,7 +164,7 @@ The Tier 1a session-level Good/Total card on Review deviates from `V0B-12`'s dri
 Recommended field order:
 
 1. `sessionRpe`
-2. `primarySkillMetric` — for count drills (`successMetric.type` ∈ `pass-rate-good` / `reps-successful`), the per-drill capture under `D133` happens on the Transition screen and the Review screen does **not** render this card; the session-level `goodPasses` / `attemptCount` aggregate displays on the Complete screen instead. For non-count drills, the existing `notCaptured`-default card stays on Review.
+2. `primarySkillMetric` — for count drills (`successMetric.type` ∈ `pass-rate-good` / `reps-successful`), the per-drill capture under `D133` happens on Drill Check and the Review screen does **not** render this card; the session-level `goodPasses` / `attemptCount` aggregate displays on the Complete screen instead. For non-count drills, the existing `notCaptured`-default card stays on Review.
 3. `incompleteReason` when relevant
 4. `shortNote`
 5. `Submit review`

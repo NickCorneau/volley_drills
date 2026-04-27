@@ -1,5 +1,10 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { __resetScreenWakeLockForTesting, requestScreenWakeLock } from '../../lib/screenWakeLock'
+import {
+  __resetScreenWakeLockForTesting,
+  hasActiveScreenWakeLock,
+  releaseScreenWakeLock,
+  requestScreenWakeLock,
+} from '../../lib/screenWakeLock'
 import { useWakeLock } from '../useWakeLock'
 
 type ReleaseHandler = EventListener
@@ -173,5 +178,18 @@ describe('useWakeLock', () => {
 
     await expect(first).resolves.toBe(true)
     await expect(second).resolves.toBe(true)
+  })
+
+  it('releases a stale sentinel when release happens during acquisition', async () => {
+    const { request, sentinel, resolveRequest } = installDeferredWakeLockMock()
+
+    const acquisition = requestScreenWakeLock()
+    await releaseScreenWakeLock()
+    resolveRequest()
+
+    await expect(acquisition).resolves.toBe(false)
+    expect(request).toHaveBeenCalledTimes(1)
+    expect(sentinel.released).toBe(true)
+    expect(hasActiveScreenWakeLock()).toBe(false)
   })
 })

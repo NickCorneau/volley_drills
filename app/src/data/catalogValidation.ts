@@ -13,6 +13,7 @@ export type DrillCatalogIssueCode =
   | 'unknown_progression_target'
   | 'link_outside_chain'
   | 'm001_candidate_without_variant'
+  | 'participants_label_mismatch'
 
 export interface DrillCatalogIssue {
   code: DrillCatalogIssueCode
@@ -88,6 +89,8 @@ export function validateDrillCatalog({
       }
 
       if (
+        !Number.isFinite(variant.workload.durationMinMinutes) ||
+        !Number.isFinite(variant.workload.durationMaxMinutes) ||
         variant.workload.durationMinMinutes <= 0 ||
         variant.workload.durationMaxMinutes < variant.workload.durationMinMinutes
       ) {
@@ -101,6 +104,8 @@ export function validateDrillCatalog({
       }
 
       if (
+        !Number.isFinite(variant.workload.rpeMin) ||
+        !Number.isFinite(variant.workload.rpeMax) ||
         variant.workload.rpeMin < 0 ||
         variant.workload.rpeMax > 10 ||
         variant.workload.rpeMax < variant.workload.rpeMin
@@ -123,6 +128,30 @@ export function validateDrillCatalog({
             'invalid_sub_block',
             `drills.${drill.id}.variants.${variant.id}.subBlockIntervalSeconds`,
             `${variant.id} has an invalid sub-block interval`,
+          ),
+        )
+      }
+
+      // 2026-04-27 solo-vs-pair sweep: participants envelope must
+      // match the variant label so the session builder can route by
+      // playerCount without solo voice leaking into pair sessions
+      // (and vice versa). Symmetric rule: Solo => max=1, Pair => min=2.
+      const labelLower = variant.label.toLowerCase()
+      if (labelLower.startsWith('solo') && variant.participants.max !== 1) {
+        issues.push(
+          issue(
+            'participants_label_mismatch',
+            `drills.${drill.id}.variants.${variant.id}.participants`,
+            `${variant.id} is labelled Solo but participants.max is ${variant.participants.max} (expected 1)`,
+          ),
+        )
+      }
+      if (labelLower.startsWith('pair') && variant.participants.min !== 2) {
+        issues.push(
+          issue(
+            'participants_label_mismatch',
+            `drills.${drill.id}.variants.${variant.id}.participants`,
+            `${variant.id} is labelled Pair but participants.min is ${variant.participants.min} (expected 2)`,
           ),
         )
       }
