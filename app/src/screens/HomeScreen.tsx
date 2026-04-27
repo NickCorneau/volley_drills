@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Brandmark } from '../components/Brandmark'
 import { HomePrimaryCard } from '../components/HomePrimaryCard'
@@ -10,27 +10,13 @@ import { Button, ScreenShell } from '../components/ui'
 import { FOCAL_SURFACE_CLASS } from '../components/ui/Card'
 import { selectPrimaryCard, selectSecondaryRows } from '../domain/homePriority'
 import type { PrimaryVariant, SecondaryRow } from '../domain/homePriority'
-import type { SessionDraft } from '../db'
 import { useAppRegisterSW } from '../lib/pwa-register'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { routes } from '../routes'
 import { buildDraft, buildDraftFromCompletedBlocks } from '../domain/sessionBuilder'
-import {
-  discardSession,
-  expireStaleReviews,
-  findPendingReview,
-  findResumableSession,
-  getCurrentDraft,
-  getLastComplete,
-  getRecentSessions,
-  saveDraft,
-  skipReview,
-  type LastCompleteBundle,
-  type PendingReview,
-  type RecentSessionEntry,
-  type ResumableSession,
-} from '../services/session'
+import { discardSession, saveDraft, skipReview, type PendingReview } from '../services/session'
 import { markSoftBlockDismissed, readSoftBlockDismissed } from '../services/softBlock'
+import { useHomeScreenState, type HomeFlags } from './home/useHomeScreenState'
 
 /**
  * C-4: Home screen with flat 4-row precedence.
@@ -47,24 +33,6 @@ import { markSoftBlockDismissed, readSoftBlockDismissed } from '../services/soft
  * writers' A3 transactions (C-1), so storageMeta stays bounded.
  */
 
-interface HomeFlags {
-  resume: ResumableSession | null
-  reviewPending: PendingReview | null
-  draft: SessionDraft | null
-  lastComplete: LastCompleteBundle | null
-  /**
-   * Tier 1a Unit 5 (2026-04-20): last-3-sessions list. Read alongside
-   * the other Home flags; `[]` on a fresh install (RecentSessionsList
-   * renders nothing in that case). Not read on the Resume branch -
-   * the Resume card is the only allowed surface when a resumable
-   * session exists, so loading the recent list there would be work
-   * the user never sees.
-   */
-  recentSessions: readonly RecentSessionEntry[]
-}
-
-type HomeState = { kind: 'loading' } | { kind: 'ready'; flags: HomeFlags } | { kind: 'error' }
-
 type SoftBlockTarget = {
   pendingReview: PendingReview
   innerAction: () => void
@@ -72,78 +40,11 @@ type SoftBlockTarget = {
 
 export function HomeScreen() {
   const navigate = useNavigate()
-  const [state, setState] = useState<HomeState>({ kind: 'loading' })
+  const { state, setError, retry } = useHomeScreenState()
   const acting = useRef(false)
   const [confirmingSkip, setConfirmingSkip] = useState(false)
   const [softBlockTarget, setSoftBlockTarget] = useState<SoftBlockTarget>(null)
   const { needRefresh, updateApp } = useAppRegisterSW()
-
-  // Mount counter so the error-state "Try again" can trigger a fresh
-  // resolve by bumping the counter; the mount effect re-runs.
-  const [resolveVersion, setResolveVersion] = useState(0)
-
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const resume = await findResumableSession()
-        if (cancelled) return
-        if (resume) {
-          // Resume overrides everything per precedence row 1; don't
-          // bother fetching the rest.
-          setState({
-            kind: 'ready',
-            flags: {
-              resume,
-              reviewPending: null,
-              draft: null,
-              lastComplete: null,
-              recentSessions: [],
-            },
-          })
-          return
-        }
-
-        // V0B-31 / D120 (C-1 Unit 1 rel-6 fix): auto-finalize past-cap
-        // sessions before resolving the rest of Home state so stale
-        // records fall through to LastComplete correctly.
-        await expireStaleReviews()
-        if (cancelled) return
-
-        // Tier 1a Unit 5 (2026-04-20): `getRecentSessions` joins into
-        // the same Promise.all as the other flags. The three queries
-        // each hit Dexie once at minimum; batching the resolves keeps
-        // first paint flicker identical to pre-Unit-5 behavior.
-        const [reviewPending, draft, lastComplete, recentSessions] = await Promise.all([
-          findPendingReview(),
-          getCurrentDraft(),
-          getLastComplete(),
-          getRecentSessions(3),
-        ])
-        if (cancelled) return
-
-        setState({
-          kind: 'ready',
-          flags: {
-            resume: null,
-            reviewPending,
-            draft,
-            lastComplete,
-            recentSessions,
-          },
-        })
-      } catch {
-        if (cancelled) return
-        // SchemaBlockedOverlay owns the UI during a concurrent-tab
-        // upgrade.
-        if (isSchemaBlocked()) return
-        setState({ kind: 'error' })
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [resolveVersion])
 
   // --- action handlers ---
 
@@ -162,9 +63,9 @@ export function HomeScreen() {
     } catch {
       acting.current = false
       if (isSchemaBlocked()) return
-      setState({ kind: 'error' })
+      setError()
     }
-  }, [navigate, state])
+  }, [navigate, setError, state])
 
   // First-tap: flips the card into the two-step confirm row.
   const handleRequestSkip = useCallback(() => {
@@ -187,9 +88,9 @@ export function HomeScreen() {
     } catch {
       acting.current = false
       if (isSchemaBlocked()) return
-      setState({ kind: 'error' })
+      setError()
     }
-  }, [navigate, state])
+  }, [navigate, setError, state])
 
   const handleCancelSkip = useCallback(() => {
     setConfirmingSkip(false)
@@ -365,10 +266,7 @@ export function HomeScreen() {
         <p className="text-text-secondary">Something went wrong</p>
         <Button
           variant="ghost"
-          onClick={() => {
-            setState({ kind: 'loading' })
-            setResolveVersion((v) => v + 1)
-          }}
+          onClick={retry}
         >
           Try again
         </Button>
