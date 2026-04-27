@@ -11,6 +11,7 @@ import { FINISH_LATER_CAP_MS } from '../../domain/policies'
 import { buildEndedSession } from '../../domain/executionState'
 import { applyBlockOverrides } from '../../domain/sessionProjection'
 import { clearTimerState, readTimerState } from '../timer'
+import { getResumableExecutionLogs, getTerminalExecutionLogs } from './logSelectors'
 
 export interface ResumableSession {
   execution: ExecutionLog
@@ -19,12 +20,7 @@ export interface ResumableSession {
 }
 
 export async function findResumableSession(): Promise<ResumableSession | null> {
-  const logs = await db.executionLogs.toArray()
-  const resumable = logs
-    .filter(
-      (l) => l.status === 'not_started' || l.status === 'in_progress' || l.status === 'paused',
-    )
-    .sort((a, b) => b.startedAt - a.startedAt)
+  const resumable = (await getResumableExecutionLogs()).sort((a, b) => b.startedAt - a.startedAt)
   const exec = resumable[0]
   if (!exec) return null
 
@@ -74,7 +70,7 @@ export interface PendingReview {
  * returned; call `expireStaleReviews()` first to auto-finalize them.
  */
 export async function findPendingReview(now: number = Date.now()): Promise<PendingReview | null> {
-  const logs = await db.executionLogs.toArray()
+  const logs = await getTerminalExecutionLogs()
   const terminal = logs.filter(isTerminalSession)
 
   // A1: only TERMINAL reviews shadow the pending state. A draft does not.
@@ -113,7 +109,7 @@ export interface LastCompleteBundle {
  */
 export async function getLastComplete(): Promise<LastCompleteBundle | null> {
   const [logs, reviews] = await Promise.all([
-    db.executionLogs.toArray(),
+    getTerminalExecutionLogs(),
     db.sessionReviews.toArray(),
   ])
   const finalizedReviewByExec = new Map<string, SessionReview>()
@@ -151,7 +147,7 @@ export interface RecentSessionEntry {
  */
 export async function getRecentSessions(limit: number = 3): Promise<RecentSessionEntry[]> {
   if (limit <= 0) return []
-  const logs = await db.executionLogs.toArray()
+  const logs = await getTerminalExecutionLogs()
   const terminal = logs.filter(isTerminalSession).sort(byRecentEndedAt)
 
   const entries: RecentSessionEntry[] = []
@@ -228,7 +224,7 @@ const RECENCY_WINDOW_DEFAULT = 20
 export async function findLastCompletedDrillIdsByType(
   recencyLimit: number = RECENCY_WINDOW_DEFAULT,
 ): Promise<Partial<Record<BlockSlotType, string>>> {
-  const logs = await db.executionLogs.toArray()
+  const logs = await getTerminalExecutionLogs()
   const terminal = logs.filter(isTerminalSession).sort(byRecentEndedAt)
   if (terminal.length === 0) return {}
 

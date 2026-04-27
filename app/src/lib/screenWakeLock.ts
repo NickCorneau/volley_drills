@@ -1,5 +1,7 @@
 let sentinel: WakeLockSentinel | null = null
 let wantsWakeLock = false
+let requestInFlight: Promise<boolean> | null = null
+let requestEpoch = 0
 
 const listeners = new Set<() => void>()
 
@@ -40,22 +42,32 @@ export async function requestScreenWakeLock(): Promise<boolean> {
     emit()
     return true
   }
-
-  try {
-    const nextSentinel = await navigator.wakeLock.request('screen')
-    if (!wantsWakeLock) {
-      await nextSentinel.release()
-      return false
-    }
-    sentinel?.removeEventListener('release', handleRelease)
-    sentinel = nextSentinel
-    sentinel.addEventListener('release', handleRelease)
-    emit()
-    return true
-  } catch {
-    emit()
-    return false
+  if (requestInFlight) {
+    return requestInFlight
   }
+
+  const epoch = ++requestEpoch
+  requestInFlight = (async () => {
+    try {
+      const nextSentinel = await navigator.wakeLock.request('screen')
+      if (!wantsWakeLock || epoch !== requestEpoch) {
+        await nextSentinel.release()
+        return false
+      }
+      sentinel?.removeEventListener('release', handleRelease)
+      sentinel = nextSentinel
+      sentinel.addEventListener('release', handleRelease)
+      emit()
+      return true
+    } catch {
+      emit()
+      return false
+    } finally {
+      requestInFlight = null
+    }
+  })()
+
+  return requestInFlight
 }
 
 export function primeScreenWakeLockForGesture(): void {
@@ -64,6 +76,8 @@ export function primeScreenWakeLockForGesture(): void {
 
 export async function releaseScreenWakeLock(): Promise<void> {
   wantsWakeLock = false
+  requestInFlight = null
+  requestEpoch += 1
   const currentSentinel = sentinel
   sentinel = null
   currentSentinel?.removeEventListener('release', handleRelease)
@@ -85,6 +99,8 @@ export function subscribeScreenWakeLock(listener: () => void): () => void {
 
 export function __resetScreenWakeLockForTesting(): void {
   wantsWakeLock = false
+  requestInFlight = null
+  requestEpoch = 0
   sentinel?.removeEventListener('release', handleRelease)
   sentinel = null
   listeners.clear()

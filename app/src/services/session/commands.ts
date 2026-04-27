@@ -19,6 +19,7 @@ import { applyBlockOverrides } from '../../domain/sessionProjection'
 import { expireReview } from '../review'
 import { clearSoftBlockDismissed } from '../softBlock'
 import { clearTimerState } from '../timer'
+import { getTerminalExecutionLogs } from './logSelectors'
 
 // V0B-25 / D118: request persistent storage on a user-gesture save
 // boundary. WebKit grants persistence heuristically and responds better
@@ -168,7 +169,7 @@ export async function swapActiveBlock(
  * whole sweep.
  */
 export async function expireStaleReviews(now: number = Date.now()): Promise<number> {
-  const logs = await db.executionLogs.toArray()
+  const logs = await getTerminalExecutionLogs()
   const terminal = logs.filter(isTerminalSession)
   const finalizedIds = new Set(
     (await db.sessionReviews.toArray())

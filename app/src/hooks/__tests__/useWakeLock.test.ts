@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { __resetScreenWakeLockForTesting } from '../../lib/screenWakeLock'
+import { __resetScreenWakeLockForTesting, requestScreenWakeLock } from '../../lib/screenWakeLock'
 import { useWakeLock } from '../useWakeLock'
 
 type ReleaseHandler = EventListener
@@ -53,6 +53,26 @@ function installWakeLockMock() {
     value: { request },
   })
   return { request, sentinels }
+}
+
+function installDeferredWakeLockMock() {
+  const sentinel = new MockWakeLockSentinel()
+  let resolveRequest: ((sentinel: MockWakeLockSentinel) => void) | null = null
+  const request = vi.fn(
+    () =>
+      new Promise<MockWakeLockSentinel>((resolve) => {
+        resolveRequest = resolve
+      }),
+  )
+  Object.defineProperty(navigator, 'wakeLock', {
+    configurable: true,
+    value: { request },
+  })
+  return {
+    request,
+    sentinel,
+    resolveRequest: () => resolveRequest?.(sentinel),
+  }
 }
 
 describe('useWakeLock', () => {
@@ -140,5 +160,18 @@ describe('useWakeLock', () => {
     unmount()
 
     await waitFor(() => expect(sentinels[0].released).toBe(true))
+  })
+
+  it('deduplicates concurrent request attempts while acquisition is in flight', async () => {
+    const { request, resolveRequest } = installDeferredWakeLockMock()
+
+    const first = requestScreenWakeLock()
+    const second = requestScreenWakeLock()
+
+    expect(request).toHaveBeenCalledTimes(1)
+    resolveRequest()
+
+    await expect(first).resolves.toBe(true)
+    await expect(second).resolves.toBe(true)
   })
 })

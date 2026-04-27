@@ -80,4 +80,25 @@ describe('useTimer', () => {
     expect(result.current.isRunning).toBe(false)
     expect(result.current.remainingSeconds).toBe(30)
   })
+
+  it('throttles visible countdown updates below animation-frame rate', () => {
+    const observed: number[] = []
+    const onComplete = vi.fn()
+    const { result } = renderHook(() => {
+      const timer = useTimer(60, onComplete)
+      observed.push(timer.remainingSeconds)
+      return timer
+    })
+
+    act(() => {
+      result.current.start()
+    })
+    const renderCountAfterStart = observed.length
+
+    act(() => {
+      vi.advanceTimersByTime(100)
+    })
+
+    expect(observed.length - renderCountAfterStart).toBeLessThanOrEqual(1)
+  })
 })
