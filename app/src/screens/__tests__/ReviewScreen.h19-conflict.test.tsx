@@ -52,10 +52,7 @@ function renderAt(execId: string) {
     <MemoryRouter initialEntries={[`/review?id=${execId}`]}>
       <Routes>
         <Route path="/review" element={<ReviewScreen />} />
-        <Route
-          path="/complete"
-          element={<div data-testid="complete-route">complete</div>}
-        />
+        <Route path="/complete" element={<div data-testid="complete-route">complete</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -92,17 +89,10 @@ describe('ReviewScreen H19 conflict handoff', () => {
 
     // Differentiated H19 copy: "already reviewed" is honest for the
     // submitted case.
-    expect(
-      await screen.findByText(/already reviewed/i),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /view saved review/i }),
-    ).toBeInTheDocument()
+    expect(await screen.findByText(/already reviewed/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /view saved review/i })).toBeInTheDocument()
 
-    const stored = await db.sessionReviews
-      .where('executionLogId')
-      .equals('exec-conflict')
-      .first()
+    const stored = await db.sessionReviews.where('executionLogId').equals('exec-conflict').first()
     expect(stored?.sessionRpe).toBe(5)
   })
 
@@ -133,12 +123,8 @@ describe('ReviewScreen H19 conflict handoff', () => {
     // reviewed" for a session that was explicitly skipped. adv-3 called
     // out that the blurred copy is dishonest for the skip-then-retry
     // scenario.
-    expect(
-      await screen.findByText(/already skipped/i),
-    ).toBeInTheDocument()
-    expect(
-      screen.queryByText(/already reviewed/i),
-    ).not.toBeInTheDocument()
+    expect(await screen.findByText(/already skipped/i)).toBeInTheDocument()
+    expect(screen.queryByText(/already reviewed/i)).not.toBeInTheDocument()
   })
 
   it('tapping "View saved review" routes to /complete/{execId}', async () => {
@@ -158,9 +144,7 @@ describe('ReviewScreen H19 conflict handoff', () => {
     await user.click(screen.getByRole('radio', { name: /^easy$/i }))
     await user.click(screen.getByRole('button', { name: /^done$/i }))
 
-    await user.click(
-      await screen.findByRole('button', { name: /view saved review/i }),
-    )
+    await user.click(await screen.findByRole('button', { name: /view saved review/i }))
 
     expect(await screen.findByTestId('complete-route')).toBeInTheDocument()
   })

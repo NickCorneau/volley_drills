@@ -64,9 +64,7 @@ export function scanForForbidden(text: string): string[] {
 export function scanElementForForbidden(root: ParentNode): string[] {
   const bodyText = root.textContent ?? ''
   const matches = scanForForbidden(bodyText)
-  const attributed = root.querySelectorAll<HTMLElement>(
-    '[aria-label], [title], [alt]',
-  )
+  const attributed = root.querySelectorAll<HTMLElement>('[aria-label], [title], [alt]')
   for (const el of attributed) {
     for (const attr of ['aria-label', 'title', 'alt'] as const) {
       const value = el.getAttribute(attr)

@@ -34,17 +34,15 @@ function setNeedRefresh(value: boolean): void {
 // when the API is unavailable. We keep this call at module scope so SW
 // registration happens on every page load regardless of which route the user
 // lands on (see the Phase B reliability review).
-const updateServiceWorker: (reloadPage?: boolean) => Promise<void> = registerSW(
-  {
-    immediate: true,
-    onNeedRefresh() {
-      setNeedRefresh(true)
-    },
-    onRegisterError(error) {
-      console.warn('SW registration failed', error)
-    },
+const updateServiceWorker: (reloadPage?: boolean) => Promise<void> = registerSW({
+  immediate: true,
+  onNeedRefresh() {
+    setNeedRefresh(true)
   },
-)
+  onRegisterError(error) {
+    console.warn('SW registration failed', error)
+  },
+})
 
 function subscribe(cb: Listener): () => void {
   listeners.add(cb)

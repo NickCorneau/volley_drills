@@ -32,12 +32,7 @@ interface Props {
   onClose: () => void
 }
 
-export function SoftBlockModal({
-  pendingReview,
-  onFinish,
-  onSkipAndContinue,
-  onClose,
-}: Props) {
+export function SoftBlockModal({ pendingReview, onFinish, onSkipAndContinue, onClose }: Props) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -62,18 +57,13 @@ export function SoftBlockModal({
         >
           &times;
         </button>
-        <h2
-          id="softblock-title"
-          className="text-lg font-bold text-text-primary"
-        >
+        <h2 id="softblock-title" className="text-lg font-bold text-text-primary">
           Finish your review first?
         </h2>
         <p className="mt-3 text-sm text-text-secondary">
           You have a review pending for{' '}
-          <span className="font-medium text-text-primary">
-            {pendingReview.planName}
-          </span>
-          . Finish it first, or skip and continue?
+          <span className="font-medium text-text-primary">{pendingReview.planName}</span>. Finish it
+          first, or skip and continue?
         </p>
 
         <div className="mt-6 flex flex-col gap-3">

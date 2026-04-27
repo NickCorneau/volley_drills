@@ -148,123 +148,112 @@ export function TransitionScreen() {
             `text-sm font-medium` sentence case; the "Transition"
             label is a calm status marker, not a hero. See
             `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
-        <span className="text-sm font-medium text-text-secondary">
-          Transition
-        </span>
+        <span className="text-sm font-medium text-text-secondary">Transition</span>
         <span className="text-sm font-medium text-text-secondary">
           Next: {currentBlockIndex + 1}/{totalBlocks}
         </span>
       </ScreenShell.Header>
 
       <ScreenShell.Body className="gap-4 pb-4">
-      {prevBlock && (
-        <div className="flex items-start gap-2.5 rounded-[12px] bg-bg-warm p-3">
-          <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success text-white">
-            {prevBlockStatus?.status === 'completed' ? (
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            ) : (
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-            )}
+        {prevBlock && (
+          <div className="flex items-start gap-2.5 rounded-[12px] bg-bg-warm p-3">
+            <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success text-white">
+              {prevBlockStatus?.status === 'completed' ? (
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              ) : (
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              )}
+            </div>
+            <div>
+              <p className="font-semibold text-text-primary">{prevBlock.drillName}</p>
+              <p className="text-sm text-success">
+                {prevBlockStatus?.status === 'completed' ? 'Complete' : 'Skipped'}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="font-semibold text-text-primary">
-              {prevBlock.drillName}
-            </p>
-            <p className="text-sm text-success">
-              {prevBlockStatus?.status === 'completed' ? 'Complete' : 'Skipped'}
-            </p>
-          </div>
-        </div>
-      )}
+        )}
 
-      <div className="border-t border-text-secondary/10" />
+        <div className="border-t border-text-secondary/10" />
 
-      {skipError && <StatusMessage variant="error" message={skipError} />}
+        {skipError && <StatusMessage variant="error" message={skipError} />}
 
-      {swapError && <StatusMessage variant="error" message={swapError} />}
+        {swapError && <StatusMessage variant="error" message={swapError} />}
 
-      <div className="flex flex-col gap-1.5">
-        {/* "Up next" eyebrow keeps the pause-before-action framing so
+        <div className="flex flex-col gap-1.5">
+          {/* "Up next" eyebrow keeps the pause-before-action framing so
             Transition doesn't read as "you're already on Run." Quiet
             `text-xs font-medium` so the drill title below carries the
             focal weight (Phase F8 typography). */}
-        <p className="text-xs font-medium text-text-secondary">
-          Up next
-        </p>
-        <h1 className="text-xl font-semibold tracking-tight text-text-primary">
-          {nextBlock.drillName}
-        </h1>
-        {nextBlock.rationale && (
-          <p className="mt-0.5 text-sm italic leading-snug text-text-secondary">
-            {nextBlock.rationale}
+          <p className="text-xs font-medium text-text-secondary">Up next</p>
+          <h1 className="text-xl font-semibold tracking-tight text-text-primary">
+            {nextBlock.drillName}
+          </h1>
+          {nextBlock.rationale && (
+            <p className="mt-0.5 text-sm italic leading-snug text-text-secondary">
+              {nextBlock.rationale}
+            </p>
+          )}
+          <p className="mt-1 text-sm text-text-secondary">
+            {formatDuration(nextBlock.durationMinutes)}
           </p>
-        )}
-        <p className="mt-1 text-sm text-text-secondary">
-          {formatDuration(nextBlock.durationMinutes)}
-        </p>
-      </div>
+        </div>
 
-      {/* Full prep at Run's typography: `text-base` primary, pre-line,
+        {/* Full prep at Run's typography: `text-base` primary, pre-line,
           relaxed leading. Matches RunScreen exactly so the text reads
           the same across both surfaces. Long drills (stretch lists,
           warmup lists) scroll inside ScreenShell.Body; the bottom
           fade gradient already signals "more below." */}
-      {nextBlock.courtsideInstructions && (
-        <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
-          {nextBlock.courtsideInstructions}
-        </p>
-      )}
+        {nextBlock.courtsideInstructions && (
+          <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
+            {nextBlock.courtsideInstructions}
+          </p>
+        )}
 
-      {/* Coaching cue uses the exact same quiet left-rule treatment as
+        {/* Coaching cue uses the exact same quiet left-rule treatment as
           RunScreen so testers see the same visual voice across both
           screens. Styled identically down to the classes. */}
-      {nextBlock.coachingCue && (
-        <section
-          aria-labelledby="transition-coaching-cue-title"
-          className="border-l-2 border-accent/70 pl-3"
-        >
-          <span
-            id="transition-coaching-cue-title"
-            className="text-xs font-semibold uppercase tracking-wide text-accent"
+        {nextBlock.coachingCue && (
+          <section
+            aria-labelledby="transition-coaching-cue-title"
+            className="border-l-2 border-accent/70 pl-3"
           >
-            Cue
-          </span>
-          <p className="mt-1 whitespace-pre-line text-base font-medium leading-relaxed text-text-primary">
-            {nextBlock.coachingCue}
-          </p>
-        </section>
-      )}
-
+            <span
+              id="transition-coaching-cue-title"
+              className="text-xs font-semibold uppercase tracking-wide text-accent"
+            >
+              Cue
+            </span>
+            <p className="mt-1 whitespace-pre-line text-base font-medium leading-relaxed text-text-primary">
+              {nextBlock.coachingCue}
+            </p>
+          </section>
+        )}
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="flex flex-col gap-3 pt-4">
-        <Button
-          variant="primary"
-          fullWidth
-          onClick={handleStartNext}
-        >
+        <Button variant="primary" fullWidth onClick={handleStartNext}>
           Start next block
         </Button>
         {/* Secondary row: Swap + Shorten side-by-side when both are
@@ -293,30 +282,18 @@ export function TransitionScreen() {
             >
               Swap drill
             </Button>
-            <Button
-              variant="secondary"
-              className="flex-1"
-              onClick={handleStartShortened}
-            >
+            <Button variant="secondary" className="flex-1" onClick={handleStartShortened}>
               Shorten
             </Button>
           </div>
         ) : (
-          <Button
-            variant="outline"
-            fullWidth
-            onClick={handleStartShortened}
-          >
+          <Button variant="outline" fullWidth onClick={handleStartShortened}>
             Shorten block
           </Button>
         )}
         {!nextBlock.required && (
           <div className="flex items-center justify-center">
-            <Button
-              variant="ghost"
-              className="text-text-secondary"
-              onClick={handleSkip}
-            >
+            <Button variant="ghost" className="text-text-secondary" onClick={handleSkip}>
               Skip block
             </Button>
           </div>

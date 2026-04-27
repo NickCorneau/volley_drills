@@ -9,8 +9,7 @@ export async function flushTimerForBlock(
   effectiveDurationSeconds?: number,
   status?: 'running' | 'paused',
 ): Promise<void> {
-  const blockStart =
-    exec.blockStatuses[exec.activeBlockIndex]?.startedAt ?? Date.now()
+  const blockStart = exec.blockStatuses[exec.activeBlockIndex]?.startedAt ?? Date.now()
   const state: TimerState = {
     id: ACTIVE_ID,
     executionLogId: exec.id,
@@ -30,11 +29,7 @@ export async function recoverTimer(
   blockDurationSeconds: number,
 ): Promise<{ remaining: number; effectiveDurationSeconds: number } | null> {
   const saved = await readTimerState()
-  if (
-    saved &&
-    saved.executionLogId === execId &&
-    saved.blockIndex === blockIndex
-  ) {
+  if (saved && saved.executionLogId === execId && saved.blockIndex === blockIndex) {
     const duration = saved.effectiveDurationSeconds ?? blockDurationSeconds
     return {
       remaining: Math.max(0, duration - saved.accumulatedElapsed),

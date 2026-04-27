@@ -18,12 +18,8 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 p-4 text-center">
-          <h1 className="text-xl font-bold text-text-primary">
-            Something went wrong
-          </h1>
-          <p className="text-sm text-text-secondary">
-            The app encountered an unexpected error.
-          </p>
+          <h1 className="text-xl font-bold text-text-primary">Something went wrong</h1>
+          <p className="text-sm text-text-secondary">The app encountered an unexpected error.</p>
           <button
             type="button"
             onClick={() => {

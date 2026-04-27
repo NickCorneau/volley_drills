@@ -29,10 +29,7 @@ export function useWakeLock() {
 
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (
-        document.visibilityState === 'visible' &&
-        shouldHoldScreenWakeLock()
-      ) {
+      if (document.visibilityState === 'visible' && shouldHoldScreenWakeLock()) {
         void requestScreenWakeLock()
       }
     }

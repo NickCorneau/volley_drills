@@ -8,10 +8,7 @@
  */
 import type { ExecutionLog, SessionPlan } from '../db/types'
 
-export function buildStartedBlock(
-  exec: ExecutionLog,
-  plan: SessionPlan,
-): ExecutionLog | null {
+export function buildStartedBlock(exec: ExecutionLog, plan: SessionPlan): ExecutionLog | null {
   const idx = exec.activeBlockIndex
   if (idx >= plan.blocks.length) return null
   if (exec.blockStatuses[idx]?.status === 'in_progress') return null
@@ -59,11 +56,7 @@ export function buildAdvancedBlock(
       ...exec,
       activeBlockIndex: nextIdx,
       blockStatuses,
-      status: isLast
-        ? 'completed'
-        : exec.status === 'paused'
-          ? 'in_progress'
-          : exec.status,
+      status: isLast ? 'completed' : exec.status === 'paused' ? 'in_progress' : exec.status,
       completedAt: isLast ? now : undefined,
       pausedAt: isLast ? exec.pausedAt : undefined,
     },
@@ -71,10 +64,7 @@ export function buildAdvancedBlock(
   }
 }
 
-export function buildEndedSession(
-  exec: ExecutionLog,
-  reason?: string,
-): ExecutionLog {
+export function buildEndedSession(exec: ExecutionLog, reason?: string): ExecutionLog {
   const now = Date.now()
   const blockStatuses = exec.blockStatuses.map((bs, i) => {
     if (i === exec.activeBlockIndex && bs.status === 'in_progress') {

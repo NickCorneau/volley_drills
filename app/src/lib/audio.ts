@@ -84,10 +84,7 @@ let loggedMissingContext = false
 let loggedAutoplayBlocked = false
 let loggedGenericFailure = false
 
-type MaybeAudioContextCtor =
-  | typeof AudioContext
-  | undefined
-  | (new () => AudioContext)
+type MaybeAudioContextCtor = typeof AudioContext | undefined | (new () => AudioContext)
 
 /**
  * Resolve the AudioContext constructor across the two common names.
@@ -110,9 +107,7 @@ function ensureAudioContext(): AudioContext | null {
     sharedContext = null
     if (!loggedMissingContext) {
       loggedMissingContext = true
-      console.info(
-        'lib/audio: AudioContext not available in this environment; audio cues disabled',
-      )
+      console.info('lib/audio: AudioContext not available in this environment; audio cues disabled')
     }
     return null
   }

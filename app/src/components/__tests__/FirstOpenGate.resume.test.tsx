@@ -38,10 +38,7 @@ function renderTree(initial: string) {
       <FirstOpenGate>
         <Routes>
           <Route path="/" element={<div data-testid="home">home</div>} />
-          <Route
-            path="/onboarding/skill-level"
-            element={<SkillLevelScreen />}
-          />
+          <Route path="/onboarding/skill-level" element={<SkillLevelScreen />} />
           <Route
             path="/onboarding/todays-setup"
             element={<div data-testid="todays-setup">setup</div>}
@@ -67,9 +64,7 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
     // SkillLevelScreen renders its voice-aware heading on mount. The
     // 2026-04-21 copy pass dropped the "Welcome. Let's get you started."
     // preamble - the heading below is the landing sentinel now.
-    expect(
-      await screen.findByRole('heading', { level: 1, name: /today\?/i }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: /today\?/i })).toBeInTheDocument()
   })
 
   it('true tab-close/remount round-trip: SkillLevel pick then remount lands the tester on Today\u2019s Setup', async () => {
@@ -83,16 +78,11 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
     // setStorageMetaMany before navigating. We're testing the RESUME
     // contract, so we unmount BEFORE the in-memory navigation settles
     // on the new page. Unmount simulates tab-close mid-onboarding.
-    await user.click(
-      screen.getByRole('button', { name: /rally builders/i }),
-    )
+    await user.click(screen.getByRole('button', { name: /rally builders/i }))
 
     // Verify the persistence landed (this matches SkillLevelScreen's
     // existing assertions - belt).
-    const skillLevel = await getStorageMeta(
-      'onboarding.skillLevel',
-      isSkillLevel,
-    )
+    const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
     const step = await getStorageMeta('onboarding.step', isOnboardingStep)
     expect(skillLevel).toBe('rally_builders')
     expect(step).toBe('todays_setup')
@@ -104,9 +94,7 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
     // `step === 'todays_setup'` and redirects past Skill Level.
     renderTree('/')
     expect(await screen.findByTestId('todays-setup')).toBeInTheDocument()
-    expect(
-      screen.queryByRole('heading', { level: 1, name: /today\?/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 1, name: /today\?/i })).not.toBeInTheDocument()
   })
 
   it('fresh install (no meta) always routes to /onboarding/skill-level on first mount', async () => {
@@ -115,9 +103,7 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
     // we also catch any integration mismatch between FirstOpenGate and
     // SkillLevelScreen's initial render.
     renderTree('/')
-    expect(
-      await screen.findByRole('heading', { level: 1, name: /today\?/i }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: /today\?/i })).toBeInTheDocument()
   })
 
   it('C-0 backfill coverage (H15): ExecutionLog + onboarding.completedAt keep the tester out of onboarding on next open', async () => {
@@ -141,8 +127,6 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
 
     renderTree('/')
     expect(await screen.findByTestId('home')).toBeInTheDocument()
-    expect(
-      screen.queryByRole('heading', { level: 1, name: /today\?/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 1, name: /today\?/i })).not.toBeInTheDocument()
   })
 })

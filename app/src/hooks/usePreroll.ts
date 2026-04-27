@@ -30,11 +30,7 @@ export interface UsePrerollResult {
  * - `cancel()` aborts without calling `onComplete`.
  * - `start()` while running restarts from `from`.
  */
-export function usePreroll({
-  onTick,
-  onComplete,
-  from = 3,
-}: UsePrerollOptions): UsePrerollResult {
+export function usePreroll({ onTick, onComplete, from = 3 }: UsePrerollOptions): UsePrerollResult {
   const [count, setCount] = useState<number | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 

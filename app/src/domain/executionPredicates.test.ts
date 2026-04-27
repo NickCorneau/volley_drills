@@ -31,17 +31,13 @@ describe('isTerminalSession', () => {
 
   it('excludes discarded-resume sessions (A8)', () => {
     expect(
-      isTerminalSession(
-        log({ status: 'ended_early', endedEarlyReason: 'discarded_resume' }),
-      ),
+      isTerminalSession(log({ status: 'ended_early', endedEarlyReason: 'discarded_resume' })),
     ).toBe(false)
   })
 
   it('includes other ended_early reasons', () => {
     expect(
-      isTerminalSession(
-        log({ status: 'ended_early', endedEarlyReason: 'missing_plan' }),
-      ),
+      isTerminalSession(log({ status: 'ended_early', endedEarlyReason: 'missing_plan' })),
     ).toBe(true)
   })
 })

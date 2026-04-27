@@ -28,10 +28,7 @@ import { test, expect, type BrowserContext, type Page } from '@playwright/test'
 
 const DB_NAME = 'volley-drills'
 
-async function clearOriginStorage(
-  context: BrowserContext,
-  page: Page,
-): Promise<void> {
+async function clearOriginStorage(context: BrowserContext, page: Page): Promise<void> {
   const origin = new URL(page.url() !== 'about:blank' ? page.url() : 'http://127.0.0.1:4173').origin
   const client = await context.newCDPSession(page)
   try {
@@ -83,10 +80,7 @@ interface V3ExecLogSeed {
 
 async function seedV3Database(
   page: Page,
-  {
-    reviews,
-    execLogs,
-  }: { reviews: V3ReviewSeed[]; execLogs: V3ExecLogSeed[] },
+  { reviews, execLogs }: { reviews: V3ReviewSeed[]; execLogs: V3ExecLogSeed[] },
 ): Promise<void> {
   await page.evaluate(
     async ({ dbName, reviews, execLogs }) => {
@@ -114,10 +108,7 @@ async function seedV3Database(
 
       // Step 2: seed review + exec log fixtures inside a single tx.
       await new Promise<void>((resolve, reject) => {
-        const tx = dbInstance.transaction(
-          ['sessionReviews', 'executionLogs'],
-          'readwrite',
-        )
+        const tx = dbInstance.transaction(['sessionReviews', 'executionLogs'], 'readwrite')
         tx.oncomplete = () => resolve()
         tx.onerror = () => reject(tx.error)
         const reviewStore = tx.objectStore('sessionReviews')
@@ -152,9 +143,9 @@ async function waitForV4(page: Page): Promise<void> {
   )
 }
 
-async function readAllReviews(page: Page): Promise<
-  Array<{ id: string; status?: string; sessionRpe: number | null }>
-> {
+async function readAllReviews(
+  page: Page,
+): Promise<Array<{ id: string; status?: string; sessionRpe: number | null }>> {
   return page.evaluate((dbName) => {
     return new Promise((resolve, reject) => {
       const open = indexedDB.open(dbName)
@@ -165,11 +156,11 @@ async function readAllReviews(page: Page): Promise<
         const req = store.getAll()
         req.onsuccess = () => {
           resolve(
-            (req.result as Array<{
+            req.result as Array<{
               id: string
               status?: string
               sessionRpe: number | null
-            }>),
+            }>,
           )
           dbInst.close()
         }
@@ -189,35 +180,31 @@ async function readStorageMetaKey(
 ): Promise<{ key: string; value: unknown; updatedAt: number } | undefined> {
   return page.evaluate(
     ({ dbName, key }) => {
-      return new Promise<
-        { key: string; value: unknown; updatedAt: number } | undefined
-      >((resolve, reject) => {
-        const open = indexedDB.open(dbName)
-        open.onsuccess = () => {
-          const dbInst = open.result
-          if (!dbInst.objectStoreNames.contains('storageMeta')) {
-            dbInst.close()
-            resolve(undefined)
-            return
+      return new Promise<{ key: string; value: unknown; updatedAt: number } | undefined>(
+        (resolve, reject) => {
+          const open = indexedDB.open(dbName)
+          open.onsuccess = () => {
+            const dbInst = open.result
+            if (!dbInst.objectStoreNames.contains('storageMeta')) {
+              dbInst.close()
+              resolve(undefined)
+              return
+            }
+            const tx = dbInst.transaction('storageMeta', 'readonly')
+            const store = tx.objectStore('storageMeta')
+            const req = store.get(key)
+            req.onsuccess = () => {
+              resolve(req.result as { key: string; value: unknown; updatedAt: number } | undefined)
+              dbInst.close()
+            }
+            req.onerror = () => {
+              reject(req.error)
+              dbInst.close()
+            }
           }
-          const tx = dbInst.transaction('storageMeta', 'readonly')
-          const store = tx.objectStore('storageMeta')
-          const req = store.get(key)
-          req.onsuccess = () => {
-            resolve(
-              req.result as
-                | { key: string; value: unknown; updatedAt: number }
-                | undefined,
-            )
-            dbInst.close()
-          }
-          req.onerror = () => {
-            reject(req.error)
-            dbInst.close()
-          }
-        }
-        open.onerror = () => reject(open.error)
-      })
+          open.onerror = () => reject(open.error)
+        },
+      )
     },
     { dbName: DB_NAME, key },
   )
@@ -297,17 +284,12 @@ test.describe('Phase C-0 schema v4 migration', () => {
     expect(byId.get('review-rpe-null')?.status).toBe('skipped')
     expect(byId.get('review-rpe-neg1')?.status).toBe('skipped')
 
-    const completedAt = await readStorageMetaKey(
-      page,
-      'onboarding.completedAt',
-    )
+    const completedAt = await readStorageMetaKey(page, 'onboarding.completedAt')
     expect(completedAt).toBeDefined()
     expect(typeof completedAt?.value).toBe('number')
   })
 
-  test('does NOT backfill onboarding.completedAt when no ExecutionLog exists', async ({
-    page,
-  }) => {
+  test('does NOT backfill onboarding.completedAt when no ExecutionLog exists', async ({ page }) => {
     const now = 1_700_000_000_000
     await seedV3Database(page, {
       reviews: [
@@ -326,10 +308,7 @@ test.describe('Phase C-0 schema v4 migration', () => {
     await page.reload()
     await waitForV4(page)
 
-    const completedAt = await readStorageMetaKey(
-      page,
-      'onboarding.completedAt',
-    )
+    const completedAt = await readStorageMetaKey(page, 'onboarding.completedAt')
     expect(completedAt).toBeUndefined()
 
     const reviews = await readAllReviews(page)

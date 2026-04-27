@@ -1,15 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import {
-  getStorageCopy,
-  STORAGE_COPY,
-  type InstallPosture,
-} from './storageCopy'
+import { getStorageCopy, STORAGE_COPY, type InstallPosture } from './storageCopy'
 
-const POSTURES: InstallPosture[] = [
-  'browser-tab',
-  'installed-not-persisted',
-  'installed-persisted',
-]
+const POSTURES: InstallPosture[] = ['browser-tab', 'installed-not-persisted', 'installed-persisted']
 
 describe('storageCopy', () => {
   it('returns browser-tab copy with a 7-day Safari-removal hint', () => {

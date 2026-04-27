@@ -43,9 +43,7 @@ function installMatchMedia(matches: boolean): void {
   })
 }
 
-function installStorage(
-  persistedFn: ReturnType<typeof vi.fn>,
-): void {
+function installStorage(persistedFn: ReturnType<typeof vi.fn>): void {
   Object.defineProperty(navigator, 'storage', {
     configurable: true,
     value: { persisted: persistedFn, persist: vi.fn() },

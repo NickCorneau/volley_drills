@@ -6,10 +6,7 @@ import {
   type BlockedConstraint,
   type SubstitutionRule,
 } from '../data/substitutionRules'
-import {
-  findPreferredCandidate,
-  findSubstitute,
-} from './drillSelection'
+import { findPreferredCandidate, findSubstitute } from './drillSelection'
 import type { Drill, DrillVariant } from '../types/drill'
 import type { BlockSlot, BlockSlotType } from '../types/session'
 import type {
@@ -56,10 +53,7 @@ function hasUnmodeledRequirements(variant: DrillVariant): boolean {
   )
 }
 
-function findCandidates(
-  slot: BlockSlot,
-  context: SetupContext,
-): CandidateVariant[] {
+function findCandidates(slot: BlockSlot, context: SetupContext): CandidateVariant[] {
   const playerCount = context.playerMode === 'solo' ? 1 : 2
 
   const candidates: CandidateVariant[] = []
@@ -69,9 +63,7 @@ function findCandidates(
     const hasMatchingFocus =
       !slot.skillTags ||
       slot.skillTags.length === 0 ||
-      slot.skillTags.some((tag) =>
-        drill.skillFocus.includes(tag as Drill['skillFocus'][number]),
-      )
+      slot.skillTags.some((tag) => drill.skillFocus.includes(tag as Drill['skillFocus'][number]))
     if (!hasMatchingFocus) continue
 
     for (const variant of drill.variants) {
@@ -275,9 +267,7 @@ export function buildDraft(
   // technique slot's `Math.random()` shuffle determines whether the
   // substitute survives, which surfaces as a flaky main_skill drill
   // identity across repeated `buildDraft` calls.
-  let mainSkillSubstitute:
-    | { candidate: CandidateVariant; rationale: string }
-    | undefined
+  let mainSkillSubstitute: { candidate: CandidateVariant; rationale: string } | undefined
   const lastMainSkillDrillId = options?.lastCompletedByType?.main_skill
   if (lastMainSkillDrillId) {
     const mainSkillSlot = layout.find((s) => s.type === 'main_skill')
@@ -330,9 +320,7 @@ export function buildDraft(
           : pick.drill.name,
       courtsideInstructions: pick.variant.courtsideInstructions,
       required: slot.required,
-      rationale:
-        substitutionRationale ??
-        deriveBlockRationale(slot.type, pick.drill, context),
+      rationale: substitutionRationale ?? deriveBlockRationale(slot.type, pick.drill, context),
       subBlockIntervalSeconds: pick.variant.subBlockIntervalSeconds,
     })
   }
@@ -383,12 +371,7 @@ function pickMainSkillSubstitute(
   const unused = candidates.filter((c) => !usedDrillIds.has(c.drill.id))
   const pool = unused.length > 0 ? unused : candidates
 
-  const result = findSubstitute(
-    lastMainSkillDrillId,
-    pool,
-    context,
-    SUBSTITUTION_RULES,
-  )
+  const result = findSubstitute(lastMainSkillDrillId, pool, context, SUBSTITUTION_RULES)
   if (!result) return undefined
 
   return {
@@ -500,18 +483,14 @@ const RECOVERY_BLOCK_SLOT_TYPES: readonly BlockSlotType[] = [
  * minutes fold into the Work block inside `buildRecoveryDraft` so the
  * middle drill is clearly the session.
  */
-export function estimateRecoverySessionMinutes(
-  context: SetupContext,
-): number | null {
+export function estimateRecoverySessionMinutes(context: SetupContext): number | null {
   const archetype = selectArchetype(context)
   if (!archetype) return null
 
   const layout = archetype.layouts[context.timeProfile]
   if (!layout) return null
 
-  const recoveryLayout = layout.filter((s) =>
-    RECOVERY_BLOCK_SLOT_TYPES.includes(s.type),
-  )
+  const recoveryLayout = layout.filter((s) => RECOVERY_BLOCK_SLOT_TYPES.includes(s.type))
   if (recoveryLayout.length === 0) return null
 
   return context.timeProfile
@@ -532,10 +511,7 @@ export function estimateRecoverySessionMinutes(
  * a technique block past its full-session max is correct - the max was
  * never a clinical upper bound, it was a scheduling tradeoff.
  */
-function allocateRecoveryDurations(
-  layout: BlockSlot[],
-  totalMinutes: number,
-): number[] | null {
+function allocateRecoveryDurations(layout: BlockSlot[], totalMinutes: number): number[] | null {
   const durations = layout.map((s) => s.durationMinMinutes)
   const minTotal = durations.reduce((a, b) => a + b, 0)
   if (totalMinutes < minTotal) return null
@@ -586,9 +562,7 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
   const layout = archetype.layouts[context.timeProfile]
   if (!layout) return null
 
-  const recoveryLayout = layout.filter((s) =>
-    RECOVERY_BLOCK_SLOT_TYPES.includes(s.type),
-  )
+  const recoveryLayout = layout.filter((s) => RECOVERY_BLOCK_SLOT_TYPES.includes(s.type))
   if (recoveryLayout.length === 0) return null
   // Target the user's chosen timeProfile, not the filtered layout's
   // minimum total. The minutes that `main_skill` + `pressure` would
@@ -721,9 +695,7 @@ export type FindSwapAlternativesOptions = {
 function findPreferredProgressionTarget(drillId: string): string | undefined {
   for (const chain of PROGRESSION_CHAINS) {
     const link = chain.links.find(
-      (candidate) =>
-        candidate.direction === 'progression' &&
-        candidate.fromDrillId === drillId,
+      (candidate) => candidate.direction === 'progression' && candidate.fromDrillId === drillId,
     )
     if (link) return link.toDrillId
   }
@@ -768,9 +740,7 @@ export function findSwapAlternatives(
   // when the plan is materialized from the draft - see
   // createSessionFromDraft in services/session.ts), so name is the
   // available identity.
-  const baseFiltered = candidates.filter(
-    (c) => c.drill.name !== block.drillName,
-  )
+  const baseFiltered = candidates.filter((c) => c.drill.name !== block.drillName)
 
   // Neighbor-aware exclusion (VB-FL-7): try to also drop any drill
   // whose name matches a surrounding block. Keep the base filter as
@@ -781,9 +751,7 @@ export function findSwapAlternatives(
   )
   let filtered = baseFiltered
   if (extraExcludes.size > 0) {
-    const neighborFiltered = baseFiltered.filter(
-      (c) => !extraExcludes.has(c.drill.name),
-    )
+    const neighborFiltered = baseFiltered.filter((c) => !extraExcludes.has(c.drill.name))
     if (neighborFiltered.length > 0) {
       filtered = neighborFiltered
     }
@@ -813,17 +781,9 @@ export function findSwapAlternatives(
       ? findPreferredCandidate(preferredToDrillId, filtered)
       : undefined
     if (preferred) {
-      filtered = [
-        preferred,
-        ...filtered.filter((candidate) => candidate !== preferred),
-      ]
+      filtered = [preferred, ...filtered.filter((candidate) => candidate !== preferred)]
     } else {
-      const substitute = findSubstitute(
-        block.drillId,
-        filtered,
-        context,
-        SUBSTITUTION_RULES,
-      )
+      const substitute = findSubstitute(block.drillId, filtered, context, SUBSTITUTION_RULES)
       if (substitute) {
         filtered = [
           substitute.candidate,
@@ -848,9 +808,7 @@ export function findSwapAlternatives(
     shortName: c.drill.shortName,
     durationMinutes: block.durationMinutes,
     coachingCue:
-      c.variant.coachingCues.length > 0
-        ? c.variant.coachingCues.join(' \u00b7 ')
-        : c.drill.name,
+      c.variant.coachingCues.length > 0 ? c.variant.coachingCues.join(' \u00b7 ') : c.drill.name,
     courtsideInstructions: c.variant.courtsideInstructions,
     required: block.required,
     // Tier 1a Unit 4: rebuild the rationale against the swapped drill
@@ -858,8 +816,7 @@ export function findSwapAlternatives(
     // mid-run Swap. Without this, the rationale would keep reading
     // "pass focus" even after the user swapped to a serve drill.
     rationale:
-      rationaleByDrillId.get(c.drill.id) ??
-      deriveBlockRationale(block.type, c.drill, context),
+      rationaleByDrillId.get(c.drill.id) ?? deriveBlockRationale(block.type, c.drill, context),
     // Pre-close 2026-04-21 (P2-2): carry the swapped variant's sub-block
     // pacing (if any) through the swap. In practice the Swap button is
     // hidden on warmup/wrap per D85/D105 and the main_skill variants

@@ -25,7 +25,9 @@ describe('SUBSTITUTION_RULES catalog', () => {
   it('references only existing drills', () => {
     for (const rule of SUBSTITUTION_RULES) {
       expect(drillById.has(rule.fromDrillId), `${rule.fromDrillId} missing`).toBe(true)
-      expect(drillById.has(rule.preferredToDrillId), `${rule.preferredToDrillId} missing`).toBe(true)
+      expect(drillById.has(rule.preferredToDrillId), `${rule.preferredToDrillId} missing`).toBe(
+        true,
+      )
       for (const substituteId of rule.substituteDrillIds) {
         expect(drillById.has(substituteId), `${substituteId} missing`).toBe(true)
       }
@@ -35,9 +37,7 @@ describe('SUBSTITUTION_RULES catalog', () => {
   it('has non-empty, unique substitutes that do not point back to the source drill', () => {
     for (const rule of SUBSTITUTION_RULES) {
       expect(rule.substituteDrillIds.length).toBeGreaterThan(0)
-      expect(new Set(rule.substituteDrillIds).size).toBe(
-        rule.substituteDrillIds.length,
-      )
+      expect(new Set(rule.substituteDrillIds).size).toBe(rule.substituteDrillIds.length)
       expect(rule.substituteDrillIds).not.toContain(rule.fromDrillId)
     }
   })
@@ -125,9 +125,7 @@ describe('SUBSTITUTION_RULES catalog', () => {
     for (const rule of SUBSTITUTION_RULES) {
       const matches = PROGRESSION_CHAINS.flatMap((chain) =>
         chain.links.filter(
-          (link) =>
-            link.direction === 'progression' &&
-            link.fromDrillId === rule.fromDrillId,
+          (link) => link.direction === 'progression' && link.fromDrillId === rule.fromDrillId,
         ),
       )
       expect(

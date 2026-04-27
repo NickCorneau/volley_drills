@@ -14,10 +14,7 @@ import { swapActiveBlock } from '../session'
  */
 
 async function clearDb() {
-  await Promise.all([
-    db.sessionPlans.clear(),
-    db.executionLogs.clear(),
-  ])
+  await Promise.all([db.sessionPlans.clear(), db.executionLogs.clear()])
 }
 
 function makePlan(): SessionPlan {
@@ -128,11 +125,7 @@ describe('swapActiveBlock (Phase F Unit 4)', () => {
     await db.sessionPlans.put(plan)
     await db.executionLogs.put(exec)
 
-    const { updatedExecution } = await swapActiveBlock(
-      exec,
-      plan,
-      REPLACEMENT,
-    )
+    const { updatedExecution } = await swapActiveBlock(exec, plan, REPLACEMENT)
     expect(updatedExecution.swapCount).toBe(1)
 
     const persisted = await db.executionLogs.get('exec-swap')
@@ -167,11 +160,7 @@ describe('swapActiveBlock (Phase F Unit 4)', () => {
     await db.sessionPlans.put(plan)
     await db.executionLogs.put(exec)
 
-    const { updatedExecution } = await swapActiveBlock(
-      exec,
-      plan,
-      REPLACEMENT,
-    )
+    const { updatedExecution } = await swapActiveBlock(exec, plan, REPLACEMENT)
     expect(updatedExecution.blockStatuses).toEqual(exec.blockStatuses)
   })
 
@@ -181,11 +170,7 @@ describe('swapActiveBlock (Phase F Unit 4)', () => {
     await db.sessionPlans.put(plan)
     await db.executionLogs.put(exec)
 
-    const { updatedPlan, updatedExecution } = await swapActiveBlock(
-      exec,
-      plan,
-      REPLACEMENT,
-    )
+    const { updatedPlan, updatedExecution } = await swapActiveBlock(exec, plan, REPLACEMENT)
 
     // Block id stays 'b-1' - preserves the pairing with
     // blockStatuses[1].blockId === 'b-1'.

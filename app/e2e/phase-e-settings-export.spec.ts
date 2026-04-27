@@ -65,9 +65,7 @@ test.describe('phase-e settings + export', () => {
     await seedOnboardingAndOpenHome(page)
   })
 
-  test('Home footer Settings -> /settings -> Export fires success state', async ({
-    page,
-  }) => {
+  test('Home footer Settings -> /settings -> Export fires success state', async ({ page }) => {
     await instrumentAnchorClicks(page)
     // Reload so the init script takes effect for the test's navigation.
     await page.reload()
@@ -87,29 +85,23 @@ test.describe('phase-e settings + export', () => {
     await exportBtn.click()
 
     // Success toast appears (role=status, aria-live=polite).
-    await expect(
-      page.getByText(/export saved.*check your downloads/i),
-    ).toBeVisible({ timeout: 5_000 })
+    await expect(page.getByText(/export saved.*check your downloads/i)).toBeVisible({
+      timeout: 5_000,
+    })
 
     // Anchor was created with the expected filename format.
     const captured = await readCapturedFilenames(page)
     expect(captured).toHaveLength(1)
-    expect(captured[0]).toMatch(
-      /^volley-drills-export-\d{4}-\d{2}-\d{2}\.json$/,
-    )
+    expect(captured[0]).toMatch(/^volley-drills-export-\d{4}-\d{2}-\d{2}\.json$/)
   })
 
-  test('Settings Back button returns to Home without mutating state', async ({
-    page,
-  }) => {
+  test('Settings Back button returns to Home without mutating state', async ({ page }) => {
     await page.getByRole('link', { name: /^settings$/i }).click()
     await expect(page).toHaveURL(/\/settings$/)
 
     await page.getByRole('button', { name: /back/i }).click()
     await expect(page).toHaveURL(/\/$/)
     // NewUser empty state (no seeded LastComplete) still renders.
-    await expect(
-      page.getByRole('button', { name: /start first workout/i }),
-    ).toBeVisible()
+    await expect(page.getByRole('button', { name: /start first workout/i })).toBeVisible()
   })
 })

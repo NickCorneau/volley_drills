@@ -5,11 +5,7 @@ import { UpdatePrompt } from '../components/UpdatePrompt'
 import { Button, Card, ScreenShell, StatusMessage } from '../components/ui'
 import { composeSummary, type SummaryOutput } from '../domain'
 import { useInstallPosture } from '../hooks/useInstallPosture'
-import {
-  effortLabel,
-  formatDifficultyBreakdownLine,
-  formatPassRateLine,
-} from '../lib/format'
+import { effortLabel, formatDifficultyBreakdownLine, formatPassRateLine } from '../lib/format'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { getStorageCopy } from '../lib/storageCopy'
 import { useAppRegisterSW } from '../lib/pwa-register'
@@ -157,10 +153,7 @@ export function CompleteScreen() {
         variant="empty"
         message="Session not found."
         action={
-          <Button
-            variant="ghost"
-            onClick={() => navigate(routes.home(), { replace: true })}
-          >
+          <Button variant="ghost" onClick={() => navigate(routes.home(), { replace: true })}>
             Back to home
           </Button>
         }
@@ -171,9 +164,7 @@ export function CompleteScreen() {
   const { bundle, summary } = bundleState
   const { log, plan, review } = bundle
   const totalBlocks = plan.blocks.length
-  const completedBlocks = log.blockStatuses.filter(
-    (b) => b.status === 'completed',
-  ).length
+  const completedBlocks = log.blockStatuses.filter((b) => b.status === 'completed').length
 
   // D133 (2026-04-26) recap aggregation: when the session was reviewed
   // with per-drill captures, prefer those numbers over the
@@ -186,12 +177,8 @@ export function CompleteScreen() {
   // shipped.
   const captureAggregate = aggregateDrillCaptures(review.perDrillCaptures)
   const recapHasCaptures = captureAggregate.drillsTagged > 0
-  const recapGood = recapHasCaptures
-    ? captureAggregate.goodPasses
-    : review.goodPasses
-  const recapTotal = recapHasCaptures
-    ? captureAggregate.totalAttempts
-    : review.totalAttempts
+  const recapGood = recapHasCaptures ? captureAggregate.goodPasses : review.goodPasses
+  const recapTotal = recapHasCaptures ? captureAggregate.totalAttempts : review.totalAttempts
   const recapTaggedOnly = recapHasCaptures && captureAggregate.drillsWithCounts === 0
 
   // 2026-04-27 pre-D91 editorial polish (plan Item 8): close the loop
@@ -201,9 +188,7 @@ export function CompleteScreen() {
   // the row entirely (no zero-state placeholder — restraint per Shibui).
   // See `lib/format.ts` `formatDifficultyBreakdownLine` for the
   // collapse-to-"All X" / dot-separated rendering rules.
-  const difficultyLine = formatDifficultyBreakdownLine(
-    captureAggregate.tagBreakdown,
-  )
+  const difficultyLine = formatDifficultyBreakdownLine(captureAggregate.tagBreakdown)
 
   // Field-test feedback 2026-04-21: the terminal verdict screen read as
   // "weirdly dense / compact" because the previous layout stacked every
@@ -268,9 +253,7 @@ export function CompleteScreen() {
             on pair — the solo case omits the eyebrow entirely so the
             verdict word stands alone. */}
         {isPairSummary ? (
-          <h1 className="text-sm font-medium text-text-secondary">
-            {summary.header}
-          </h1>
+          <h1 className="text-sm font-medium text-text-secondary">{summary.header}</h1>
         ) : (
           <span aria-hidden />
         )}
@@ -278,11 +261,11 @@ export function CompleteScreen() {
       </ScreenShell.Header>
 
       <ScreenShell.Body className="items-center gap-10 pb-4">
-      <section
-        aria-labelledby="summary-verdict"
-        className="flex w-full flex-col items-center gap-4 text-center"
-      >
-        {/* Verdict icon is a neutral steady-state glyph, not a warning.
+        <section
+          aria-labelledby="summary-verdict"
+          className="flex w-full flex-col items-center gap-4 text-center"
+        >
+          {/* Verdict icon is a neutral steady-state glyph, not a warning.
             D86 compliance: no red, no warning iconography.
             The verdict word (aria-live polite below) carries the meaning
             for screen readers, so the icon is aria-hidden.
@@ -290,8 +273,8 @@ export function CompleteScreen() {
             (rendered at text-4xl, which read as a typo) with a purpose-
             built two-bar horizontal SVG. Same semantic, unambiguous
             rendering. */}
-        <VerdictGlyph />
-        {/* Phase F11 (2026-04-19): verdict lifted from `text-3xl` to
+          <VerdictGlyph />
+          {/* Phase F11 (2026-04-19): verdict lifted from `text-3xl` to
             `text-4xl` (30 → 36 px). The verdict is the single Jo-Ha-
             Kyu "kyu" / clean-finish beat of the session loop and the
             one place typography gets to carry the "investment"
@@ -302,34 +285,30 @@ export function CompleteScreen() {
             three verdict strings ('Keep building', 'Lighter next',
             'No change'). See
             `docs/plans/2026-04-19-feat-phase-f11-brand-hero-typography-plan.md`. */}
-        <h2
-          id="summary-verdict"
-          aria-live="polite"
-          className="text-4xl font-bold tracking-tight text-text-primary"
-        >
-          {summary.verdict}
-        </h2>
-        <p className="max-w-[320px] text-sm leading-relaxed text-text-secondary">
-          {summary.reason}
-        </p>
-      </section>
+          <h2
+            id="summary-verdict"
+            aria-live="polite"
+            className="text-4xl font-bold tracking-tight text-text-primary"
+          >
+            {summary.verdict}
+          </h2>
+          <p className="max-w-[320px] text-sm leading-relaxed text-text-secondary">
+            {summary.reason}
+          </p>
+        </section>
 
-      <Card className="w-full" aria-label="Session recap">
-        {/* Phase F8 (2026-04-19): dropped `uppercase tracking-wider` and
+        <Card className="w-full" aria-label="Session recap">
+          {/* Phase F8 (2026-04-19): dropped `uppercase tracking-wider` and
             bumped weight from `semibold` to `medium`. Same restraint move
             as the verdict header and the HomePrimaryCard eyebrows. */}
-        <p className="mb-3 text-sm font-medium text-text-secondary">
-          Session recap
-        </p>
-        <dl className="flex flex-col gap-3 text-sm">
-          <div className="flex items-center justify-between gap-4">
-            <dt className="text-text-secondary">Session</dt>
-            <dd className="font-medium text-text-primary">
-              {plan.presetName}
-            </dd>
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            {/*
+          <p className="mb-3 text-sm font-medium text-text-secondary">Session recap</p>
+          <dl className="flex flex-col gap-3 text-sm">
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-text-secondary">Session</dt>
+              <dd className="font-medium text-text-primary">{plan.presetName}</dd>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              {/*
               Phase F7 (2026-04-19): renamed from "Blocks completed" to
               "Drills completed". In volleyball, "blocks" also means
               defensive blocks at the net; rendering "Blocks: 4/4" right
@@ -338,23 +317,23 @@ export function CompleteScreen() {
               one drill, so the numeric value is unchanged - only the
               label changes for disambiguation.
             */}
-            <dt className="text-text-secondary">Drills completed</dt>
-            <dd className="font-medium tabular-nums text-text-primary">
-              {completedBlocks}/{totalBlocks}
-            </dd>
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <dt className="text-text-secondary">Good passes</dt>
-            <dd
-              className={`font-medium tabular-nums ${recapTotal > 0 ? 'text-success' : 'text-text-secondary'}`}
-              data-testid="recap-good-passes"
-            >
-              {recapTaggedOnly
-                ? 'Tagged, counts not logged'
-                : formatPassRateLine(recapGood, recapTotal)}
-            </dd>
-          </div>
-          {/* 2026-04-27 pre-D91 editorial polish (plan Item 8): the
+              <dt className="text-text-secondary">Drills completed</dt>
+              <dd className="font-medium tabular-nums text-text-primary">
+                {completedBlocks}/{totalBlocks}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-text-secondary">Good passes</dt>
+              <dd
+                className={`font-medium tabular-nums ${recapTotal > 0 ? 'text-success' : 'text-text-secondary'}`}
+                data-testid="recap-good-passes"
+              >
+                {recapTaggedOnly
+                  ? 'Tagged, counts not logged'
+                  : formatPassRateLine(recapGood, recapTotal)}
+              </dd>
+            </div>
+            {/* 2026-04-27 pre-D91 editorial polish (plan Item 8): the
               Difficulty row closes the loop on the per-drill chip taps.
               Hidden entirely (not rendered) when no chips were tapped —
               pre-Tier-1b sessions, all-warmup sessions, and any future
@@ -365,27 +344,23 @@ export function CompleteScreen() {
               quieter. The breakdown line itself is non-tabular (prose,
               not a number column) so courtside readers parse it as a
               short observation rather than a metric. */}
-          {difficultyLine !== null && (
-            <div
-              className="flex items-center justify-between gap-4"
-              data-testid="recap-difficulty"
-            >
-              <dt className="text-text-secondary">Difficulty</dt>
-              <dd className="text-right font-medium text-text-primary">
-                {difficultyLine}
-              </dd>
+            {difficultyLine !== null && (
+              <div
+                className="flex items-center justify-between gap-4"
+                data-testid="recap-difficulty"
+              >
+                <dt className="text-text-secondary">Difficulty</dt>
+                <dd className="text-right font-medium text-text-primary">{difficultyLine}</dd>
+              </div>
+            )}
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-text-secondary">Effort</dt>
+              <dd className="font-medium text-text-primary">{effortLabel(review.sessionRpe)}</dd>
             </div>
-          )}
-          <div className="flex items-center justify-between gap-4">
-            <dt className="text-text-secondary">Effort</dt>
-            <dd className="font-medium text-text-primary">
-              {effortLabel(review.sessionRpe)}
-            </dd>
-          </div>
-        </dl>
-      </Card>
+          </dl>
+        </Card>
 
-      <UpdatePrompt needRefresh={needRefresh} onUpdate={updateApp} />
+        <UpdatePrompt needRefresh={needRefresh} onUpdate={updateApp} />
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="flex w-full flex-col gap-4 pt-4">
@@ -399,11 +374,7 @@ export function CompleteScreen() {
             below). See
             docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md
             P1-2 and the courtside-copy rule §Invariant 1. */}
-        <Button
-          variant="primary"
-          fullWidth
-          onClick={() => navigate(routes.home())}
-        >
+        <Button variant="primary" fullWidth onClick={() => navigate(routes.home())}>
           Back to home
         </Button>
         <div

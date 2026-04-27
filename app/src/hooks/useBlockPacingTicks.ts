@@ -69,38 +69,20 @@ export function useBlockPacingTicks({
       if (remaining <= 0) return
 
       const ceil = Math.ceil(remaining)
-      if (
-        ceil >= 1 &&
-        ceil <= 3 &&
-        !firedEndCountdownSecondsRef.current.has(ceil)
-      ) {
+      if (ceil >= 1 && ceil <= 3 && !firedEndCountdownSecondsRef.current.has(ceil)) {
         firedEndCountdownSecondsRef.current.add(ceil)
         onEndRef.current()
       }
 
-      if (
-        subBlockIntervalSeconds &&
-        subBlockIntervalSeconds > 0 &&
-        remaining >= 4
-      ) {
+      if (subBlockIntervalSeconds && subBlockIntervalSeconds > 0 && remaining >= 4) {
         const elapsed = blockDurRef.current - remaining
         const currentIndex = Math.floor(elapsed / subBlockIntervalSeconds)
-        if (
-          currentIndex > lastSubBlockTickIndexRef.current &&
-          currentIndex >= 1
-        ) {
+        if (currentIndex > lastSubBlockTickIndexRef.current && currentIndex >= 1) {
           lastSubBlockTickIndexRef.current = currentIndex
           onSubRef.current()
         }
       }
     }, pollIntervalMs)
     return () => clearInterval(interval)
-  }, [
-    running,
-    blockId,
-    subBlockIntervalSeconds,
-    remainingRef,
-    blockDurRef,
-    pollIntervalMs,
-  ])
+  }, [running, blockId, subBlockIntervalSeconds, remainingRef, blockDurRef, pollIntervalMs])
 }

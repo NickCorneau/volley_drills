@@ -59,10 +59,7 @@ function makeSkillBlock(overrides?: Partial<SessionPlanBlock>): SessionPlanBlock
   }
 }
 
-async function seedCompletedWithBlock(
-  execId: string,
-  block: SessionPlanBlock,
-) {
+async function seedCompletedWithBlock(execId: string, block: SessionPlanBlock) {
   const now = Date.now()
   await db.sessionPlans.put({
     id: `plan-${execId}`,
@@ -117,9 +114,7 @@ describe('ReviewScreen 2026-04-23 polish (merged proposal)', () => {
 
     await screen.findByRole('heading', { name: /quick review/i })
     for (const n of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
-      expect(
-        screen.queryByRole('radio', { name: new RegExp(`^${n}$`) }),
-      ).not.toBeInTheDocument()
+      expect(screen.queryByRole('radio', { name: new RegExp(`^${n}$`) })).not.toBeInTheDocument()
     }
   })
 
@@ -131,21 +126,11 @@ describe('ReviewScreen 2026-04-23 polish (merged proposal)', () => {
     // The Quick-tags card was the only surface rendering these effort
     // tags alongside the RPE scale. With the card deleted, none of
     // these labels should appear on Review anymore.
-    expect(
-      screen.queryByRole('heading', { name: /^quick tags$/i }),
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: /^too easy$/i }),
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: /^about right$/i }),
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: /^too hard$/i }),
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: /^need partner$/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /^quick tags$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^too easy$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^about right$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^too hard$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^need partner$/i })).not.toBeInTheDocument()
   })
 
   it('(d) footer exposes Done as primary and Finish later as a lower-emphasis link', async () => {
@@ -157,9 +142,7 @@ describe('ReviewScreen 2026-04-23 polish (merged proposal)', () => {
     expect(done).toBeInTheDocument()
     expect(finishLater).toBeInTheDocument()
     // The old label is gone.
-    expect(
-      screen.queryByRole('button', { name: /^submit review$/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^submit review$/i })).not.toBeInTheDocument()
     expect(done.className).toMatch(/bg-accent/)
     expect(finishLater.className).not.toMatch(/bg-accent/)
     expect(finishLater.className).toMatch(/underline/)
@@ -203,9 +186,7 @@ describe('ReviewScreen 2026-04-23 polish (merged proposal)', () => {
       renderAt('exec-noncount')
 
       await screen.findByRole('heading', { name: /quick review/i })
-      expect(
-        screen.queryByRole('heading', { name: /^good passes$/i }),
-      ).not.toBeInTheDocument()
+      expect(screen.queryByRole('heading', { name: /^good passes$/i })).not.toBeInTheDocument()
       // The pre-close 2026-04-21 default-to-notCaptured chip also
       // disappears with the card.
       expect(
@@ -225,15 +206,10 @@ describe('ReviewScreen 2026-04-23 polish (merged proposal)', () => {
       ).toBeDefined()
       if (!countDrill) return
 
-      await seedCompletedWithBlock(
-        'exec-count',
-        makeSkillBlock({ drillName: countDrill.name }),
-      )
+      await seedCompletedWithBlock('exec-count', makeSkillBlock({ drillName: countDrill.name }))
       renderAt('exec-count')
 
-      expect(
-        await screen.findByRole('heading', { name: /^good passes$/i }),
-      ).toBeInTheDocument()
+      expect(await screen.findByRole('heading', { name: /^good passes$/i })).toBeInTheDocument()
     })
 
     it('shows the Good-passes card when the main-skill drill name is synthetic / unknown (defensive default)', async () => {
@@ -248,9 +224,7 @@ describe('ReviewScreen 2026-04-23 polish (merged proposal)', () => {
       )
       renderAt('exec-synthetic')
 
-      expect(
-        await screen.findByRole('heading', { name: /^good passes$/i }),
-      ).toBeInTheDocument()
+      expect(await screen.findByRole('heading', { name: /^good passes$/i })).toBeInTheDocument()
     })
 
     it('uses stable drillId before drillName when deciding count capture visibility', async () => {
@@ -265,9 +239,7 @@ describe('ReviewScreen 2026-04-23 polish (merged proposal)', () => {
       renderAt('exec-id-first-noncount')
 
       await screen.findByRole('heading', { name: /quick review/i })
-      expect(
-        screen.queryByRole('heading', { name: /^good passes$/i }),
-      ).not.toBeInTheDocument()
+      expect(screen.queryByRole('heading', { name: /^good passes$/i })).not.toBeInTheDocument()
     })
 
     it('falls back to drillName for legacy plans without stable drillId', async () => {
@@ -278,9 +250,7 @@ describe('ReviewScreen 2026-04-23 polish (merged proposal)', () => {
       renderAt('exec-legacy-name-fallback')
 
       await screen.findByRole('heading', { name: /quick review/i })
-      expect(
-        screen.queryByRole('heading', { name: /^good passes$/i }),
-      ).not.toBeInTheDocument()
+      expect(screen.queryByRole('heading', { name: /^good passes$/i })).not.toBeInTheDocument()
     })
   })
 })

@@ -107,11 +107,8 @@ const DIFFICULTY_LINE_ORDER: ReadonlyArray<{
   { key: 'too_easy', singular: 'too easy' },
 ]
 
-export function formatDifficultyBreakdownLine(
-  breakdown: TagBreakdown,
-): string | null {
-  const total =
-    breakdown.too_hard + breakdown.still_learning + breakdown.too_easy
+export function formatDifficultyBreakdownLine(breakdown: TagBreakdown): string | null {
+  const total = breakdown.too_hard + breakdown.still_learning + breakdown.too_easy
   if (total === 0) return null
 
   // Single-bucket collapse: when every tap landed on one chip, "All X"
@@ -154,15 +151,11 @@ export function formatDayName(timestamp: number, now: number = Date.now()): stri
     return d.getTime()
   }
   const MS_PER_DAY = 24 * 60 * 60 * 1000
-  const daysDiff = Math.round(
-    (startOfLocalDay(now) - startOfLocalDay(timestamp)) / MS_PER_DAY,
-  )
+  const daysDiff = Math.round((startOfLocalDay(now) - startOfLocalDay(timestamp)) / MS_PER_DAY)
   if (daysDiff === 0) return 'Today'
   if (daysDiff === 1) return 'Yesterday'
   if (daysDiff >= 2 && daysDiff <= 6) {
-    return new Intl.DateTimeFormat(undefined, { weekday: 'long' }).format(
-      new Date(timestamp),
-    )
+    return new Intl.DateTimeFormat(undefined, { weekday: 'long' }).format(new Date(timestamp))
   }
   // Older than a week: short month + day. "Apr 9" on en-US; locales may
   // render differently but the output stays concise.

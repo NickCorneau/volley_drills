@@ -244,10 +244,7 @@ describe('submitReview carries perDrillCaptures onto the terminal record', () =>
     })
     expect(result.status).toBe('ok')
 
-    const stored = await db.sessionReviews
-      .where('executionLogId')
-      .equals(EXEC)
-      .first()
+    const stored = await db.sessionReviews.where('executionLogId').equals(EXEC).first()
     expect(stored?.status).toBe('submitted')
     expect(stored?.perDrillCaptures).toEqual(captures)
   })
@@ -259,10 +256,7 @@ describe('submitReview carries perDrillCaptures onto the terminal record', () =>
       goodPasses: 4,
       totalAttempts: 7,
     })
-    const stored = await db.sessionReviews
-      .where('executionLogId')
-      .equals(EXEC)
-      .first()
+    const stored = await db.sessionReviews.where('executionLogId').equals(EXEC).first()
     expect(stored?.perDrillCaptures).toBeUndefined()
   })
 })
@@ -283,10 +277,7 @@ describe('expireReview preserves perDrillCaptures from the draft (adv-1 / adv-2 
 
     await expireReview({ executionLogId: EXEC })
 
-    const stored = await db.sessionReviews
-      .where('executionLogId')
-      .equals(EXEC)
-      .first()
+    const stored = await db.sessionReviews.where('executionLogId').equals(EXEC).first()
     expect(stored?.status).toBe('skipped')
     expect(stored?.captureWindow).toBe('expired')
     expect(stored?.perDrillCaptures).toEqual(captures)
@@ -295,10 +286,7 @@ describe('expireReview preserves perDrillCaptures from the draft (adv-1 / adv-2 
   it('does not invent captures when there is no draft', async () => {
     await expireReview({ executionLogId: EXEC })
 
-    const stored = await db.sessionReviews
-      .where('executionLogId')
-      .equals(EXEC)
-      .first()
+    const stored = await db.sessionReviews.where('executionLogId').equals(EXEC).first()
     expect(stored?.status).toBe('skipped')
     expect(stored?.perDrillCaptures).toBeUndefined()
   })

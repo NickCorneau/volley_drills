@@ -43,8 +43,7 @@ const HEADER_SOLO = "Today's verdict"
 const VERDICT_SKIPPED = 'No change'
 const VERDICT_PAIN = 'Lighter next'
 const VERDICT_DEFAULT = 'Keep building'
-const REASON_SKIPPED =
-  'No review this time. Next session stays at the same level.'
+const REASON_SKIPPED = 'No review this time. Next session stays at the same level.'
 const REASON_PAIN =
   'You stopped early with pain. Next session will be gentler to let things settle.'
 
@@ -61,10 +60,7 @@ export function composeSummary(input: SummaryInput): SummaryOutput {
       reason: REASON_SKIPPED,
     }
   }
-  if (
-    review.status === 'submitted' &&
-    review.incompleteReason === 'pain'
-  ) {
+  if (review.status === 'submitted' && review.incompleteReason === 'pain') {
     return {
       case: 'pain',
       header,
@@ -96,10 +92,7 @@ export function composeSummary(input: SummaryInput): SummaryOutput {
 // - pass the FORBIDDEN_RE copy-guard regex unchanged.
 const FORWARD_HOOK = 'Ready when you are.'
 
-function passAttemptStatsLine(
-  goodPasses: number,
-  totalAttempts: number,
-): string {
+function passAttemptStatsLine(goodPasses: number, totalAttempts: number): string {
   const passNoun = goodPasses === 1 ? 'good pass' : 'good passes'
   const attemptNoun = totalAttempts === 1 ? 'attempt' : 'attempts'
   return `${goodPasses} ${passNoun} today out of ${totalAttempts} ${attemptNoun}.`
@@ -150,10 +143,7 @@ function passAttemptStatsLine(
 const FIRST_SESSION_NO_ATTEMPTS_REASON = `First one\u2019s in the book. ${FORWARD_HOOK}`
 const REPEAT_NO_ATTEMPTS_REASON = `One more in the book. ${FORWARD_HOOK}`
 
-function composeDefaultReason(
-  review: SessionReview,
-  sessionCount: number,
-): string {
+function composeDefaultReason(review: SessionReview, sessionCount: number): string {
   if (review.totalAttempts === 0) {
     if (sessionCount === 1) {
       return FIRST_SESSION_NO_ATTEMPTS_REASON

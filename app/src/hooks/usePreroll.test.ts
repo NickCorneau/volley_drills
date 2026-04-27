@@ -13,18 +13,14 @@ afterEach(() => {
 
 describe('usePreroll', () => {
   it('starts with count === null', () => {
-    const { result } = renderHook(() =>
-      usePreroll({ onTick: vi.fn(), onComplete: vi.fn() }),
-    )
+    const { result } = renderHook(() => usePreroll({ onTick: vi.fn(), onComplete: vi.fn() }))
     expect(result.current.count).toBeNull()
   })
 
   it('fires a tick immediately on start and counts down 3 → 2 → 1 → 0', () => {
     const onTick = vi.fn()
     const onComplete = vi.fn()
-    const { result } = renderHook(() =>
-      usePreroll({ onTick, onComplete }),
-    )
+    const { result } = renderHook(() => usePreroll({ onTick, onComplete }))
 
     act(() => result.current.start())
     expect(result.current.count).toBe(3)
@@ -54,9 +50,7 @@ describe('usePreroll', () => {
   it('cancel stops the countdown and clears state', () => {
     const onTick = vi.fn()
     const onComplete = vi.fn()
-    const { result } = renderHook(() =>
-      usePreroll({ onTick, onComplete }),
-    )
+    const { result } = renderHook(() => usePreroll({ onTick, onComplete }))
 
     act(() => result.current.start())
     act(() => {
@@ -77,9 +71,7 @@ describe('usePreroll', () => {
 
   it('clears the interval on unmount', () => {
     const onComplete = vi.fn()
-    const { result, unmount } = renderHook(() =>
-      usePreroll({ onTick: vi.fn(), onComplete }),
-    )
+    const { result, unmount } = renderHook(() => usePreroll({ onTick: vi.fn(), onComplete }))
     act(() => result.current.start())
     unmount()
     vi.advanceTimersByTime(5000)
@@ -89,9 +81,7 @@ describe('usePreroll', () => {
   it('restarting while active resets the countdown', () => {
     const onTick = vi.fn()
     const onComplete = vi.fn()
-    const { result } = renderHook(() =>
-      usePreroll({ onTick, onComplete }),
-    )
+    const { result } = renderHook(() => usePreroll({ onTick, onComplete }))
 
     act(() => result.current.start())
     act(() => {

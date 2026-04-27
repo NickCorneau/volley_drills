@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
 import type { ExecutionLog, SessionReview } from '../../db'
-import {
-  backfillOnboardingCompletedAt,
-  backfillSessionReviewStatus,
-} from '../migrations/backfills'
+import { backfillOnboardingCompletedAt, backfillSessionReviewStatus } from '../migrations/backfills'
 
 async function clearDb(): Promise<void> {
   await Promise.all([
@@ -149,18 +146,11 @@ describe('backfillSessionReviewStatus', () => {
 
 describe('backfillOnboardingCompletedAt', () => {
   it('writes onboarding.completedAt when an ExecutionLog exists and key is absent', async () => {
-    await db.executionLogs.put(
-      baseExecution({ id: 'exec-1', planId: 'plan-1' }),
-    )
+    await db.executionLogs.put(baseExecution({ id: 'exec-1', planId: 'plan-1' }))
 
-    await db.transaction(
-      'rw',
-      db.storageMeta,
-      db.executionLogs,
-      async (tx) => {
-        await backfillOnboardingCompletedAt(tx)
-      },
-    )
+    await db.transaction('rw', db.storageMeta, db.executionLogs, async (tx) => {
+      await backfillOnboardingCompletedAt(tx)
+    })
 
     const row = await db.storageMeta.get('onboarding.completedAt')
     expect(row).toBeDefined()
@@ -169,37 +159,25 @@ describe('backfillOnboardingCompletedAt', () => {
   })
 
   it('does not overwrite an existing onboarding.completedAt', async () => {
-    await db.executionLogs.put(
-      baseExecution({ id: 'exec-2', planId: 'plan-2' }),
-    )
+    await db.executionLogs.put(baseExecution({ id: 'exec-2', planId: 'plan-2' }))
     await db.storageMeta.put({
       key: 'onboarding.completedAt',
       value: 1_234_567_890,
       updatedAt: 1_234_567_890,
     })
 
-    await db.transaction(
-      'rw',
-      db.storageMeta,
-      db.executionLogs,
-      async (tx) => {
-        await backfillOnboardingCompletedAt(tx)
-      },
-    )
+    await db.transaction('rw', db.storageMeta, db.executionLogs, async (tx) => {
+      await backfillOnboardingCompletedAt(tx)
+    })
 
     const row = await db.storageMeta.get('onboarding.completedAt')
     expect(row?.value).toBe(1_234_567_890)
   })
 
   it('no-ops when no ExecutionLog exists', async () => {
-    await db.transaction(
-      'rw',
-      db.storageMeta,
-      db.executionLogs,
-      async (tx) => {
-        await backfillOnboardingCompletedAt(tx)
-      },
-    )
+    await db.transaction('rw', db.storageMeta, db.executionLogs, async (tx) => {
+      await backfillOnboardingCompletedAt(tx)
+    })
 
     const row = await db.storageMeta.get('onboarding.completedAt')
     expect(row).toBeUndefined()

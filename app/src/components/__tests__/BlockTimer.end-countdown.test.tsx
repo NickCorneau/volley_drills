@@ -25,13 +25,7 @@ import { BlockTimer } from '../BlockTimer'
 
 describe('BlockTimer end-countdown pulse (visual half of thought 3b)', () => {
   it('digits render with text-text-primary color when remainingSeconds > 3.5', () => {
-    render(
-      <BlockTimer
-        remainingSeconds={30}
-        totalSeconds={60}
-        isPaused={false}
-      />,
-    )
+    render(<BlockTimer remainingSeconds={30} totalSeconds={60} isPaused={false} />)
     const digits = screen.getByTestId('block-timer-digits')
     expect(digits.dataset.countdown).toBe('false')
     expect(digits.className).toContain('text-text-primary')
@@ -42,13 +36,7 @@ describe('BlockTimer end-countdown pulse (visual half of thought 3b)', () => {
     // 3.0 is inside the <= 3.5 threshold. This frame is also the one
     // where `ceil(3.0) === 3` audibly fires `playPrerollTick()` in
     // RunScreen. Visual + audio land on the same frame.
-    render(
-      <BlockTimer
-        remainingSeconds={3}
-        totalSeconds={60}
-        isPaused={false}
-      />,
-    )
+    render(<BlockTimer remainingSeconds={3} totalSeconds={60} isPaused={false} />)
     const digits = screen.getByTestId('block-timer-digits')
     expect(digits.dataset.countdown).toBe('true')
     expect(digits.className).toContain('text-accent')
@@ -56,13 +44,7 @@ describe('BlockTimer end-countdown pulse (visual half of thought 3b)', () => {
   })
 
   it('digits stay in text-accent at remainingSeconds = 1', () => {
-    render(
-      <BlockTimer
-        remainingSeconds={1}
-        totalSeconds={60}
-        isPaused={false}
-      />,
-    )
+    render(<BlockTimer remainingSeconds={1} totalSeconds={60} isPaused={false} />)
     const digits = screen.getByTestId('block-timer-digits')
     expect(digits.dataset.countdown).toBe('true')
     expect(digits.className).toContain('text-accent')
@@ -72,13 +54,7 @@ describe('BlockTimer end-countdown pulse (visual half of thought 3b)', () => {
     // At remaining === 0, the block is ending - handleBlockComplete
     // fires. We stop the accent highlight on this frame so the
     // visual "countdown" doesn't bleed past the boundary.
-    render(
-      <BlockTimer
-        remainingSeconds={0}
-        totalSeconds={60}
-        isPaused={false}
-      />,
-    )
+    render(<BlockTimer remainingSeconds={0} totalSeconds={60} isPaused={false} />)
     const digits = screen.getByTestId('block-timer-digits')
     expect(digits.dataset.countdown).toBe('false')
     expect(digits.className).toContain('text-text-primary')
@@ -88,13 +64,7 @@ describe('BlockTimer end-countdown pulse (visual half of thought 3b)', () => {
     // Paused state means no countdown is active. The tester may have
     // paused mid-block in the final 3 seconds; don't surface an
     // urgency cue when the block isn't advancing.
-    render(
-      <BlockTimer
-        remainingSeconds={2}
-        totalSeconds={60}
-        isPaused={true}
-      />,
-    )
+    render(<BlockTimer remainingSeconds={2} totalSeconds={60} isPaused={true} />)
     const digits = screen.getByTestId('block-timer-digits')
     expect(digits.dataset.countdown).toBe('false')
     expect(digits.className).toContain('text-text-primary')
@@ -107,25 +77,11 @@ describe('BlockTimer end-countdown pulse (visual half of thought 3b)', () => {
     // inside human perception tolerance and guarantees the visual
     // cannot lag the audio.
     const { rerender } = render(
-      <BlockTimer
-        remainingSeconds={3.6}
-        totalSeconds={60}
-        isPaused={false}
-      />,
+      <BlockTimer remainingSeconds={3.6} totalSeconds={60} isPaused={false} />,
     )
-    expect(
-      screen.getByTestId('block-timer-digits').dataset.countdown,
-    ).toBe('false')
+    expect(screen.getByTestId('block-timer-digits').dataset.countdown).toBe('false')
 
-    rerender(
-      <BlockTimer
-        remainingSeconds={3.4}
-        totalSeconds={60}
-        isPaused={false}
-      />,
-    )
-    expect(
-      screen.getByTestId('block-timer-digits').dataset.countdown,
-    ).toBe('true')
+    rerender(<BlockTimer remainingSeconds={3.4} totalSeconds={60} isPaused={false} />)
+    expect(screen.getByTestId('block-timer-digits').dataset.countdown).toBe('true')
   })
 })

@@ -26,14 +26,8 @@ describe('SetupScreen (C-3)', () => {
     render(
       <MemoryRouter initialEntries={['/onboarding/todays-setup']}>
         <Routes>
-          <Route
-            path="/onboarding/todays-setup"
-            element={<SetupScreen isOnboarding />}
-          />
-          <Route
-            path="/onboarding/skill-level"
-            element={<div>skill-level-route</div>}
-          />
+          <Route path="/onboarding/todays-setup" element={<SetupScreen isOnboarding />} />
+          <Route path="/onboarding/skill-level" element={<div>skill-level-route</div>} />
         </Routes>
       </MemoryRouter>,
     )
@@ -47,10 +41,7 @@ describe('SetupScreen (C-3)', () => {
     render(
       <MemoryRouter initialEntries={['/onboarding/todays-setup']}>
         <Routes>
-          <Route
-            path="/onboarding/todays-setup"
-            element={<SetupScreen isOnboarding />}
-          />
+          <Route path="/onboarding/todays-setup" element={<SetupScreen isOnboarding />} />
           <Route path="/safety" element={<div>safety</div>} />
         </Routes>
       </MemoryRouter>,
@@ -58,16 +49,14 @@ describe('SetupScreen (C-3)', () => {
 
     await user.click(screen.getByRole('radio', { name: 'Solo' }))
     await user.click(
-      within(screen.getByRole('radiogroup', { name: 'Net available' })).getByRole(
-        'radio',
-        { name: 'No' },
-      ),
+      within(screen.getByRole('radiogroup', { name: 'Net available' })).getByRole('radio', {
+        name: 'No',
+      }),
     )
     await user.click(
-      within(screen.getByRole('radiogroup', { name: 'Wall available' })).getByRole(
-        'radio',
-        { name: 'No' },
-      ),
+      within(screen.getByRole('radiogroup', { name: 'Wall available' })).getByRole('radio', {
+        name: 'No',
+      }),
     )
     await user.click(screen.getByRole('radio', { name: 'Light wind' }))
     await user.click(screen.getByRole('button', { name: /build session/i }))
@@ -86,10 +75,7 @@ describe('SetupScreen (C-3)', () => {
     render(
       <MemoryRouter initialEntries={['/onboarding/todays-setup']}>
         <Routes>
-          <Route
-            path="/onboarding/todays-setup"
-            element={<SetupScreen isOnboarding />}
-          />
+          <Route path="/onboarding/todays-setup" element={<SetupScreen isOnboarding />} />
           <Route path="/safety" element={<div>safety</div>} />
         </Routes>
       </MemoryRouter>,
@@ -97,16 +83,14 @@ describe('SetupScreen (C-3)', () => {
 
     await user.click(screen.getByRole('radio', { name: 'Solo' }))
     await user.click(
-      within(screen.getByRole('radiogroup', { name: 'Net available' })).getByRole(
-        'radio',
-        { name: 'No' },
-      ),
+      within(screen.getByRole('radiogroup', { name: 'Net available' })).getByRole('radio', {
+        name: 'No',
+      }),
     )
     await user.click(
-      within(screen.getByRole('radiogroup', { name: 'Wall available' })).getByRole(
-        'radio',
-        { name: 'No' },
-      ),
+      within(screen.getByRole('radiogroup', { name: 'Wall available' })).getByRole('radio', {
+        name: 'No',
+      }),
     )
     // Leave wind on the default "Calm".
     await user.click(screen.getByRole('button', { name: /build session/i }))
@@ -203,16 +187,14 @@ describe('SetupScreen (C-3)', () => {
 
     await user.click(await screen.findByRole('radio', { name: 'Solo' }))
     await user.click(
-      within(screen.getByRole('radiogroup', { name: 'Net available' })).getByRole(
-        'radio',
-        { name: 'No' },
-      ),
+      within(screen.getByRole('radiogroup', { name: 'Net available' })).getByRole('radio', {
+        name: 'No',
+      }),
     )
     await user.click(
-      within(screen.getByRole('radiogroup', { name: 'Wall available' })).getByRole(
-        'radio',
-        { name: 'No' },
-      ),
+      within(screen.getByRole('radiogroup', { name: 'Wall available' })).getByRole('radio', {
+        name: 'No',
+      }),
     )
     await user.click(screen.getByRole('button', { name: /build session/i }))
 

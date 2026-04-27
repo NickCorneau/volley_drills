@@ -81,9 +81,7 @@ function Layout({ children }: { children: React.ReactNode }) {
           culprit is flex distribution, not `ScreenShell.Footer` pb.
           `min-h-0` preserves the overflow chain for internal Body scroll.
         */}
-        <div className="flex min-h-0 flex-1 flex-col [&>*]:min-h-0 [&>*]:flex-1">
-          {children}
-        </div>
+        <div className="flex min-h-0 flex-1 flex-col [&>*]:min-h-0 [&>*]:flex-1">{children}</div>
       </main>
     </div>
   )
@@ -105,14 +103,8 @@ export default function App() {
             <Route path={routePaths.review} element={<ReviewScreen />} />
             <Route path={routePaths.complete} element={<CompleteScreen />} />
             <Route path={routePaths.settings} element={<SettingsScreen />} />
-            <Route
-              path={routePaths.onboardingSkillLevel}
-              element={<SkillLevelScreen />}
-            />
-            <Route
-              path={routePaths.onboardingTodaysSetup}
-              element={<TodaysSetupScreen />}
-            />
+            <Route path={routePaths.onboardingSkillLevel} element={<SkillLevelScreen />} />
+            <Route path={routePaths.onboardingTodaysSetup} element={<TodaysSetupScreen />} />
             <Route path="*" element={<Navigate to={routePaths.home} replace />} />
           </Routes>
         </Layout>

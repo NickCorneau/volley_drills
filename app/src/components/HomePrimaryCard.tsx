@@ -1,16 +1,7 @@
 import type { SessionDraft } from '../db'
 import { formatInterruptedAgo } from '../lib/format'
-import type {
-  LastCompleteBundle,
-  PendingReview,
-  ResumableSession,
-} from '../services/session'
-import {
-  DraftCard,
-  LastCompleteCard,
-  NewUserCard,
-  ReviewPendingCard,
-} from './home'
+import type { LastCompleteBundle, PendingReview, ResumableSession } from '../services/session'
+import { DraftCard, LastCompleteCard, NewUserCard, ReviewPendingCard } from './home'
 import { ResumePrompt } from './ResumePrompt'
 
 /**
@@ -66,8 +57,8 @@ export function HomePrimaryCard(props: HomePrimaryCardProps) {
         <ResumePrompt
           sessionName={props.data.plan.presetName}
           blockDrillName={
-            props.data.plan.blocks[props.data.execution.activeBlockIndex]
-              ?.drillName ?? 'Current block'
+            props.data.plan.blocks[props.data.execution.activeBlockIndex]?.drillName ??
+            'Current block'
           }
           blockPositionLabel={`Block ${
             props.data.execution.activeBlockIndex + 1
@@ -87,9 +78,7 @@ export function HomePrimaryCard(props: HomePrimaryCardProps) {
       return <NewUserCard onStart={props.onStart} />
     default: {
       const _exhaustive: never = props
-      throw new Error(
-        `Unhandled HomePrimaryCard variant: ${JSON.stringify(_exhaustive)}`,
-      )
+      throw new Error(`Unhandled HomePrimaryCard variant: ${JSON.stringify(_exhaustive)}`)
     }
   }
 }

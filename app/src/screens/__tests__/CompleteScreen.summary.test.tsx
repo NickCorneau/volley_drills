@@ -108,7 +108,7 @@ describe('CompleteScreen summary (C-2 Unit 3)', () => {
     await clearDb()
   })
 
-  it("solo + submitted renders verdict word with no eyebrow above it", async () => {
+  it('solo + submitted renders verdict word with no eyebrow above it', async () => {
     // 2026-04-26 pre-D91 editorial polish (`F10`, `D125` / `D132`
     // pair-first vision-stance check): the solo eyebrow
     // `Today's verdict` was redundant with the giant `<h2>` verdict
@@ -140,9 +140,7 @@ describe('CompleteScreen summary (C-2 Unit 3)', () => {
     // `Completed session N:` ordinal prefix was dropped — the reason
     // line leads with the stats sentence directly.
     expect(
-      screen.getByText(
-        /^40 good passes today out of 60 attempts\. Ready when you are\.$/,
-      ),
+      screen.getByText(/^40 good passes today out of 60 attempts\. Ready when you are\.$/),
     ).toBeInTheDocument()
     expect(screen.queryByText(/Completed session/i)).not.toBeInTheDocument()
   })
@@ -157,9 +155,7 @@ describe('CompleteScreen summary (C-2 Unit 3)', () => {
     })
     renderAt('exec-pair')
 
-    expect(
-      await screen.findByText(/today's pair verdict/i),
-    ).toBeInTheDocument()
+    expect(await screen.findByText(/today's pair verdict/i)).toBeInTheDocument()
   })
 
   it("skipped review renders 'No change' with the skipped reason copy", async () => {
@@ -210,9 +206,7 @@ describe('CompleteScreen summary (C-2 Unit 3)', () => {
     renderAt('exec-counter')
 
     expect(
-      await screen.findByText(
-        /^80 good passes today out of 100 attempts\. Ready when you are\.$/,
-      ),
+      await screen.findByText(/^80 good passes today out of 100 attempts\. Ready when you are\.$/),
     ).toBeInTheDocument()
     expect(screen.queryByText(/Completed session/i)).not.toBeInTheDocument()
   })

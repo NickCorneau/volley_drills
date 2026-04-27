@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
-import {
-  isVoice,
-  loadVoiceFromStorage,
-  voiceFromStoredValue,
-} from '../voiceFromContext'
+import { isVoice, loadVoiceFromStorage, voiceFromStoredValue } from '../voiceFromContext'
 
 /**
  * Phase F Unit 2 (2026-04-19): voice context helper contract.
@@ -16,9 +12,7 @@ import {
  */
 
 async function clearDb() {
-  await Promise.all([
-    db.storageMeta.clear(),
-  ])
+  await Promise.all([db.storageMeta.clear()])
 }
 
 describe('isVoice (Phase F Unit 2)', () => {

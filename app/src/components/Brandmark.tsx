@@ -35,13 +35,7 @@ export function Brandmark({ size = 32, className }: BrandmarkProps) {
       className={className}
     >
       <rect width="512" height="512" rx="108" fill="#E8732A" />
-      <g
-        fill="none"
-        stroke="#FFF8F0"
-        strokeWidth="32"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
+      <g fill="none" stroke="#FFF8F0" strokeWidth="32" strokeLinecap="round" strokeLinejoin="round">
         <path d="M256 92c82 0 148 74 148 164s-66 164-148 164S108 346 108 256s66-164 148-164z" />
         <path d="M108 220c92 36 204 36 296 0" />
         <path d="M108 292c92-36 204-36 296 0" />

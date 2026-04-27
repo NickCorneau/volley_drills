@@ -57,9 +57,7 @@ export function PainOverrideCard({
           <line x1="12" y1="17.5" x2="12" y2="17.5" />
         </svg>
         <div>
-          <h3 className="font-semibold text-text-primary">
-            Switched to a lighter session
-          </h3>
+          <h3 className="font-semibold text-text-primary">Switched to a lighter session</h3>
           <p className="mt-1 text-sm leading-relaxed text-text-secondary">
             Lower-load technique work today.
           </p>
@@ -101,12 +99,7 @@ export function PainOverrideCard({
         We lower the load, not the time. Your pick.
       </p>
 
-      <Button
-        variant="primary"
-        fullWidth
-        onClick={onContinueRecovery}
-        disabled={actionsDisabled}
-      >
+      <Button variant="primary" fullWidth onClick={onContinueRecovery} disabled={actionsDisabled}>
         {disabled ? 'Creating session\u2026' : 'Continue with lighter session'}
       </Button>
 
@@ -129,9 +122,7 @@ export function PainOverrideCard({
             onClick={onOverride}
             disabled={actionsDisabled}
           >
-            {disabled
-              ? 'Creating session\u2026'
-              : 'Yes, use original session'}
+            {disabled ? 'Creating session\u2026' : 'Yes, use original session'}
           </Button>
           <Button
             variant="ghost"
@@ -148,9 +139,8 @@ export function PainOverrideCard({
               specific time cue ("more than a few days") does the
               actual friction work a hard block couldn't. */}
           <p className="text-center text-xs font-medium text-warning">
-            Training through pain that&apos;s sharp, getting worse, or
-            lasting more than a few days can turn a small issue into a
-            long layoff. If unsure, stop and see a clinician.
+            Training through pain that&apos;s sharp, getting worse, or lasting more than a few days
+            can turn a small issue into a long layoff. If unsure, stop and see a clinician.
           </p>
         </div>
       )}

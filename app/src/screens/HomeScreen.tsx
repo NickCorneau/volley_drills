@@ -9,18 +9,12 @@ import { UpdatePrompt } from '../components/UpdatePrompt'
 import { Button, ScreenShell } from '../components/ui'
 import { FOCAL_SURFACE_CLASS } from '../components/ui/Card'
 import { selectPrimaryCard, selectSecondaryRows } from '../domain/homePriority'
-import type {
-  PrimaryVariant,
-  SecondaryRow,
-} from '../domain/homePriority'
+import type { PrimaryVariant, SecondaryRow } from '../domain/homePriority'
 import type { SessionDraft } from '../db'
 import { useAppRegisterSW } from '../lib/pwa-register'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { routes } from '../routes'
-import {
-  buildDraft,
-  buildDraftFromCompletedBlocks,
-} from '../domain/sessionBuilder'
+import { buildDraft, buildDraftFromCompletedBlocks } from '../domain/sessionBuilder'
 import {
   discardSession,
   expireStaleReviews,
@@ -36,10 +30,7 @@ import {
   type RecentSessionEntry,
   type ResumableSession,
 } from '../services/session'
-import {
-  markSoftBlockDismissed,
-  readSoftBlockDismissed,
-} from '../services/softBlock'
+import { markSoftBlockDismissed, readSoftBlockDismissed } from '../services/softBlock'
 
 /**
  * C-4: Home screen with flat 4-row precedence.
@@ -72,10 +63,7 @@ interface HomeFlags {
   recentSessions: readonly RecentSessionEntry[]
 }
 
-type HomeState =
-  | { kind: 'loading' }
-  | { kind: 'ready'; flags: HomeFlags }
-  | { kind: 'error' }
+type HomeState = { kind: 'loading' } | { kind: 'ready'; flags: HomeFlags } | { kind: 'error' }
 
 type SoftBlockTarget = {
   pendingReview: PendingReview
@@ -87,8 +75,7 @@ export function HomeScreen() {
   const [state, setState] = useState<HomeState>({ kind: 'loading' })
   const acting = useRef(false)
   const [confirmingSkip, setConfirmingSkip] = useState(false)
-  const [softBlockTarget, setSoftBlockTarget] =
-    useState<SoftBlockTarget>(null)
+  const [softBlockTarget, setSoftBlockTarget] = useState<SoftBlockTarget>(null)
   const { needRefresh, updateApp } = useAppRegisterSW()
 
   // Mount counter so the error-state "Try again" can trigger a fresh
@@ -127,13 +114,12 @@ export function HomeScreen() {
         // the same Promise.all as the other flags. The three queries
         // each hit Dexie once at minimum; batching the resolves keeps
         // first paint flicker identical to pre-Unit-5 behavior.
-        const [reviewPending, draft, lastComplete, recentSessions] =
-          await Promise.all([
-            findPendingReview(),
-            getCurrentDraft(),
-            getLastComplete(),
-            getRecentSessions(3),
-          ])
+        const [reviewPending, draft, lastComplete, recentSessions] = await Promise.all([
+          findPendingReview(),
+          getCurrentDraft(),
+          getLastComplete(),
+          getRecentSessions(3),
+        ])
         if (cancelled) return
 
         setState({
@@ -188,11 +174,7 @@ export function HomeScreen() {
 
   // Second-tap: actually writes the skipped stub and routes to /complete.
   const handleConfirmSkip = useCallback(async () => {
-    if (
-      state.kind !== 'ready' ||
-      !state.flags.reviewPending ||
-      acting.current
-    ) {
+    if (state.kind !== 'ready' || !state.flags.reviewPending || acting.current) {
       return
     }
     acting.current = true
@@ -218,10 +200,7 @@ export function HomeScreen() {
     navigate(routes.review(state.flags.reviewPending.executionId))
   }, [navigate, state])
 
-  const handleStartWorkout = useCallback(
-    () => navigate(routes.setup()),
-    [navigate],
-  )
+  const handleStartWorkout = useCallback(() => navigate(routes.setup()), [navigate])
 
   // --- soft-block interception + non-review CTA handlers ---
   //
@@ -261,9 +240,7 @@ export function HomeScreen() {
         return
       }
       try {
-        const dismissed = await readSoftBlockDismissed(
-          state.flags.reviewPending.executionId,
-        )
+        const dismissed = await readSoftBlockDismissed(state.flags.reviewPending.executionId)
         if (dismissed) {
           await inner()
           return
@@ -318,9 +295,7 @@ export function HomeScreen() {
       // the tester whose answer to "same as last time?" is *no*. The
       // intercept ensures review_pending still fires the soft-block
       // modal.
-      handleStartDifferentSession: intercept(() =>
-        navigate(routes.setup()),
-      ),
+      handleStartDifferentSession: intercept(() => navigate(routes.setup())),
       // C-5 Unit 3: ended-early secondary CTA. Builds a partial draft
       // from only the blocks that actually completed and routes to
       // /safety. Uses the state-captured `lastComplete` bundle so we
@@ -408,7 +383,6 @@ export function HomeScreen() {
   // out of 100dvh on a 390 × 844 iPhone), and the Settings link +
   // data-locality line pin to the footer so the tester never loses
   // the data-promise footer when they reach the bottom of the list.
-  
 
   const { flags } = state
   const flagSummary = {
@@ -437,20 +411,20 @@ export function HomeScreen() {
       </ScreenShell.Header>
 
       <ScreenShell.Body className="gap-8 pb-6">
-      <UpdatePrompt needRefresh={needRefresh} onUpdate={updateApp} />
+        <UpdatePrompt needRefresh={needRefresh} onUpdate={updateApp} />
 
-      {renderPrimary(primary, flags, {
-        handleResume,
-        handleDiscard,
-        handleFinishReview,
-        handleRequestSkip,
-        handleConfirmSkip,
-        handleCancelSkip,
-        confirmingSkip,
-        ...interceptedHandlers,
-      })}
+        {renderPrimary(primary, flags, {
+          handleResume,
+          handleDiscard,
+          handleFinishReview,
+          handleRequestSkip,
+          handleConfirmSkip,
+          handleCancelSkip,
+          confirmingSkip,
+          ...interceptedHandlers,
+        })}
 
-      {/* Phase F1 (2026-04-19): secondary rows used to render as a
+        {/* Phase F1 (2026-04-19): secondary rows used to render as a
           flex-col of independent bordered cards, which competed with
           the primary card for visual weight. They now sit inside a
           single calmer container grouped by a hairline divider, so
@@ -458,35 +432,31 @@ export function HomeScreen() {
           cluster" instead of a flat stack of competing mini-cards.
           Variant API unchanged; HomeSecondaryRow flattens its own
           surface to match. */}
-      {secondary.length > 0 && (
-        <ul
-          role="list"
-          aria-label="Other active actions"
-          className={`divide-y divide-text-primary/5 overflow-hidden ${FOCAL_SURFACE_CLASS}`}
-        >
-          {secondary.map((row) =>
-            renderSecondary(row, flags, {
-              handleFinishReview,
-              handleDraftOpen: interceptedHandlers.handleDraftStart,
-              handleRepeat: interceptedHandlers.handleRepeat,
-            }),
-          )}
-        </ul>
-      )}
-
-      {flags.resume && (
-        <section className="mt-4 flex flex-col gap-4">
-          <Button
-            variant="outline"
-            fullWidth
-            onClick={handleStartWorkout}
+        {secondary.length > 0 && (
+          <ul
+            role="list"
+            aria-label="Other active actions"
+            className={`divide-y divide-text-primary/5 overflow-hidden ${FOCAL_SURFACE_CLASS}`}
           >
-            Start New Workout
-          </Button>
-        </section>
-      )}
+            {secondary.map((row) =>
+              renderSecondary(row, flags, {
+                handleFinishReview,
+                handleDraftOpen: interceptedHandlers.handleDraftStart,
+                handleRepeat: interceptedHandlers.handleRepeat,
+              }),
+            )}
+          </ul>
+        )}
 
-      {/* Tier 1a Unit 5 (2026-04-20): last-3-sessions trailer. Gated
+        {flags.resume && (
+          <section className="mt-4 flex flex-col gap-4">
+            <Button variant="outline" fullWidth onClick={handleStartWorkout}>
+              Start New Workout
+            </Button>
+          </section>
+        )}
+
+        {/* Tier 1a Unit 5 (2026-04-20): last-3-sessions trailer. Gated
           on `!flags.resume` because the Resume primary card is the
           only legal Home surface when a resumable session exists -
           showing a history list below a "Resume your session" modal
@@ -495,18 +465,16 @@ export function HomeScreen() {
           a fresh install renders nothing here. Supports adversarial
           memo Condition 2 (visible session history removes the
           founder's reason to keep a parallel notes app). */}
-      {!flags.resume && (
-        <RecentSessionsList entries={flags.recentSessions} />
-      )}
+        {!flags.resume && <RecentSessionsList entries={flags.recentSessions} />}
 
-      {softBlockTarget && (
-        <SoftBlockModal
-          pendingReview={softBlockTarget.pendingReview}
-          onFinish={handleSoftBlockFinish}
-          onSkipAndContinue={() => void handleSoftBlockSkipAndContinue()}
-          onClose={handleSoftBlockClose}
-        />
-      )}
+        {softBlockTarget && (
+          <SoftBlockModal
+            pendingReview={softBlockTarget.pendingReview}
+            onFinish={handleSoftBlockFinish}
+            onSkipAndContinue={() => void handleSoftBlockSkipAndContinue()}
+            onClose={handleSoftBlockClose}
+          />
+        )}
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="flex flex-col items-center gap-1 pt-3 text-center text-xs text-text-secondary">
@@ -549,11 +517,7 @@ interface PrimaryHandlers {
   handleNewUserStart: () => void
 }
 
-function renderPrimary(
-  primary: PrimaryVariant,
-  flags: HomeFlags,
-  h: PrimaryHandlers,
-) {
+function renderPrimary(primary: PrimaryVariant, flags: HomeFlags, h: PrimaryHandlers) {
   switch (primary) {
     case 'resume':
       if (!flags.resume) return null
@@ -597,9 +561,7 @@ function renderPrimary(
           onRepeat={h.handleRepeat}
           onStartDifferent={h.handleStartDifferentSession}
           onRepeatWhatYouDid={
-            flags.lastComplete.log.status === 'ended_early'
-              ? h.handleRepeatWhatYouDid
-              : undefined
+            flags.lastComplete.log.status === 'ended_early' ? h.handleRepeatWhatYouDid : undefined
           }
         />
       )
@@ -618,11 +580,7 @@ interface SecondaryHandlers {
   handleRepeat: () => void
 }
 
-function renderSecondary(
-  row: SecondaryRow,
-  flags: HomeFlags,
-  h: SecondaryHandlers,
-) {
+function renderSecondary(row: SecondaryRow, flags: HomeFlags, h: SecondaryHandlers) {
   switch (row.kind) {
     case 'review_pending_advisory':
       if (!flags.reviewPending) return null

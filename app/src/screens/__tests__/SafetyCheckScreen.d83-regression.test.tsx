@@ -123,14 +123,10 @@ describe('SafetyCheckScreen D83 regression (C-5 Unit 4)', () => {
     // without coupling the test to className or aria-pressed details
     // that the screen doesn't currently emit.
     await screen.findByText(/any pain.*sharp/i)
-    expect(
-      screen.queryByRole('button', { name: /^continue$/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^continue$/i })).not.toBeInTheDocument()
     // PainOverrideCard contains "Lighter session" / "I know my body" copy.
     // Its absence proves painFlag defaulted to null.
-    expect(
-      screen.queryByText(/know my body/i),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByText(/know my body/i)).not.toBeInTheDocument()
     // The prior plan had `trainingRecency: '0 days'` and a true
     // `painFlag` - any regression that leaks those into state would
     // trigger PainOverrideCard or the Continue button above.
@@ -217,9 +213,7 @@ describe('SafetyCheckScreen D83 regression (C-5 Unit 4)', () => {
     // Same default-state proxy as the first test: the reveal-on-answer
     // UI (PainOverrideCard + Continue) is absent while both fields
     // default to null.
-    expect(
-      screen.queryByRole('button', { name: /^continue$/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^continue$/i })).not.toBeInTheDocument()
     expect(screen.queryByText(/know my body/i)).not.toBeInTheDocument()
   })
 })

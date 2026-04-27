@@ -13,10 +13,7 @@
 // secondary line changes. The headline stays "Saved on this device" for State
 // B and State C so the user is not asked to chase a heuristic WebKit state.
 
-export type InstallPosture =
-  | 'browser-tab'
-  | 'installed-not-persisted'
-  | 'installed-persisted'
+export type InstallPosture = 'browser-tab' | 'installed-not-persisted' | 'installed-persisted'
 
 export interface StorageCopy {
   primary: string

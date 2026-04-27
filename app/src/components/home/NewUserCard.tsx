@@ -7,18 +7,10 @@ export interface NewUserCardProps {
 
 export function NewUserCard({ onStart }: NewUserCardProps) {
   return (
-    <section
-      role="region"
-      aria-label="Ready for your first session"
-      className={PRIMARY_CARD_CLASS}
-    >
+    <section role="region" aria-label="Ready for your first session" className={PRIMARY_CARD_CLASS}>
       <div>
-        <p className="text-sm font-medium text-text-secondary">
-          Ready for your first session?
-        </p>
-        <p className="mt-2 text-sm text-text-secondary">
-          3 min setup, then ~15 min on sand.
-        </p>
+        <p className="text-sm font-medium text-text-secondary">Ready for your first session?</p>
+        <p className="mt-2 text-sm text-text-secondary">3 min setup, then ~15 min on sand.</p>
       </div>
       <Button variant="primary" fullWidth onClick={onStart}>
         Start first workout

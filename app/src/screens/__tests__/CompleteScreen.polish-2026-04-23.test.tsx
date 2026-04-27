@@ -151,9 +151,7 @@ describe('SettingsScreen 2026-04-23 polish (About local storage sub-section)', (
 
     const section = await screen.findByTestId('settings-storage-info')
     expect(section).toBeInTheDocument()
-    expect(
-      screen.getByRole('heading', { name: /about local storage/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /about local storage/i })).toBeInTheDocument()
     // In jsdom the install posture defaults to `browser-tab`. The
     // browser-tab secondary copy calls out iPhone Safari eviction.
     // Matching on the distinctive token lets the test remain honest
@@ -175,8 +173,6 @@ describe('SettingsScreen 2026-04-23 polish (About local storage sub-section)', (
     // this assertion fails loudly alongside the Complete-side test
     // that pins the link target — keeping the two surfaces honest
     // together, not independently.
-    expect(
-      await screen.findByTestId('settings-storage-info'),
-    ).toBeInTheDocument()
+    expect(await screen.findByTestId('settings-storage-info')).toBeInTheDocument()
   })
 })

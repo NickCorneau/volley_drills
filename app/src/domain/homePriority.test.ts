@@ -199,9 +199,7 @@ describe('selectPrimaryCard - invariant: always returns exactly one variant', ()
     ])
     for (const flags of ALL_COMBINATIONS) {
       const primary = selectPrimaryCard(flags)
-      expect(valid.has(primary), `unknown variant for ${label(flags)}`).toBe(
-        true,
-      )
+      expect(valid.has(primary), `unknown variant for ${label(flags)}`).toBe(true)
     }
   })
 })

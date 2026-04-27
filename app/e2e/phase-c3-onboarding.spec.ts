@@ -18,13 +18,8 @@ import { test, expect, type BrowserContext, type Page } from '@playwright/test'
 const DB_NAME = 'volley-drills'
 const DB_VERSION_V4 = 4
 
-async function clearOriginStorage(
-  context: BrowserContext,
-  page: Page,
-): Promise<void> {
-  const origin = new URL(
-    page.url() !== 'about:blank' ? page.url() : 'http://127.0.0.1:4173',
-  ).origin
+async function clearOriginStorage(context: BrowserContext, page: Page): Promise<void> {
+  const origin = new URL(page.url() !== 'about:blank' ? page.url() : 'http://127.0.0.1:4173').origin
   const client = await context.newCDPSession(page)
   try {
     await client.send('Storage.clearDataForOrigin', {
@@ -52,58 +47,50 @@ async function gotoBlankOnAppOrigin(page: Page): Promise<void> {
   await page.unroute('**/*')
 }
 
-async function seedV4ExistingTester(
-  page: Page,
-  completedAt: number,
-): Promise<void> {
+async function seedV4ExistingTester(page: Page, completedAt: number): Promise<void> {
   // Simulate the post-C-0-backfill device: executionLogs has one record
   // AND storageMeta.onboarding.completedAt is set. FirstOpenGate should
   // recognize this and let the tester land on Home.
   await page.evaluate(
     async ({ dbName, version, completedAt }) => {
-      const dbInstance = await new Promise<IDBDatabase>(
-        (resolve, reject) => {
-          const req = indexedDB.open(dbName, version)
-          req.onupgradeneeded = () => {
-            const dbInst = req.result
-            // Recreate the full v4 store shape so the app can open
-            // cleanly at v4 on the next load without re-running upgrades.
-            if (!dbInst.objectStoreNames.contains('sessionPlans')) {
-              dbInst.createObjectStore('sessionPlans', { keyPath: 'id' })
-            }
-            if (!dbInst.objectStoreNames.contains('executionLogs')) {
-              const execs = dbInst.createObjectStore('executionLogs', {
-                keyPath: 'id',
-              })
-              execs.createIndex('planId', 'planId')
-              execs.createIndex('status', 'status')
-            }
-            if (!dbInst.objectStoreNames.contains('sessionReviews')) {
-              const r = dbInst.createObjectStore('sessionReviews', {
-                keyPath: 'id',
-              })
-              r.createIndex('executionLogId', 'executionLogId')
-            }
-            if (!dbInst.objectStoreNames.contains('timerState')) {
-              dbInst.createObjectStore('timerState', { keyPath: 'id' })
-            }
-            if (!dbInst.objectStoreNames.contains('sessionDrafts')) {
-              dbInst.createObjectStore('sessionDrafts', { keyPath: 'id' })
-            }
-            if (!dbInst.objectStoreNames.contains('storageMeta')) {
-              dbInst.createObjectStore('storageMeta', { keyPath: 'key' })
-            }
+      const dbInstance = await new Promise<IDBDatabase>((resolve, reject) => {
+        const req = indexedDB.open(dbName, version)
+        req.onupgradeneeded = () => {
+          const dbInst = req.result
+          // Recreate the full v4 store shape so the app can open
+          // cleanly at v4 on the next load without re-running upgrades.
+          if (!dbInst.objectStoreNames.contains('sessionPlans')) {
+            dbInst.createObjectStore('sessionPlans', { keyPath: 'id' })
           }
-          req.onsuccess = () => resolve(req.result)
-          req.onerror = () => reject(req.error)
-        },
-      )
+          if (!dbInst.objectStoreNames.contains('executionLogs')) {
+            const execs = dbInst.createObjectStore('executionLogs', {
+              keyPath: 'id',
+            })
+            execs.createIndex('planId', 'planId')
+            execs.createIndex('status', 'status')
+          }
+          if (!dbInst.objectStoreNames.contains('sessionReviews')) {
+            const r = dbInst.createObjectStore('sessionReviews', {
+              keyPath: 'id',
+            })
+            r.createIndex('executionLogId', 'executionLogId')
+          }
+          if (!dbInst.objectStoreNames.contains('timerState')) {
+            dbInst.createObjectStore('timerState', { keyPath: 'id' })
+          }
+          if (!dbInst.objectStoreNames.contains('sessionDrafts')) {
+            dbInst.createObjectStore('sessionDrafts', { keyPath: 'id' })
+          }
+          if (!dbInst.objectStoreNames.contains('storageMeta')) {
+            dbInst.createObjectStore('storageMeta', { keyPath: 'key' })
+          }
+        }
+        req.onsuccess = () => resolve(req.result)
+        req.onerror = () => reject(req.error)
+      })
 
       await new Promise<void>((resolve, reject) => {
-        const tx = dbInstance.transaction(
-          ['executionLogs', 'storageMeta'],
-          'readwrite',
-        )
+        const tx = dbInstance.transaction(['executionLogs', 'storageMeta'], 'readwrite')
         tx.oncomplete = () => resolve()
         tx.onerror = () => reject(tx.error)
         tx.objectStore('executionLogs').put({
@@ -140,9 +127,9 @@ test.describe('Phase C-3 onboarding first-open flow', () => {
     await page.goto('/')
 
     // FirstOpenGate -> /onboarding/skill-level
-    await expect(
-      page.getByText(/welcome\. let.?s get you started\./i),
-    ).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText(/welcome\. let.?s get you started\./i)).toBeVisible({
+      timeout: 10_000,
+    })
     // D128: cold-state heading is solo voice ("Where are you today?").
     await expect(
       page.getByRole('heading', { level: 1, name: /where are you today\?/i }),
@@ -151,9 +138,7 @@ test.describe('Phase C-3 onboarding first-open flow', () => {
     // Pick a band -> /onboarding/todays-setup
     await page.getByRole('button', { name: /foundations/i }).click()
     await expect(page).toHaveURL(/\/onboarding\/todays-setup$/)
-    await expect(
-      page.getByRole('heading', { level: 1, name: /today.?s setup/i }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: /today.?s setup/i })).toBeVisible()
 
     // Fill in the Setup form; default wind (Calm) stays.
     await page.getByRole('radio', { name: 'Solo' }).click()
@@ -181,17 +166,11 @@ test.describe('Phase C-3 onboarding first-open flow', () => {
           req.onsuccess = () => {
             const dbInst = req.result
             const tx = dbInst.transaction('storageMeta', 'readonly')
-            const getReq = tx
-              .objectStore('storageMeta')
-              .get('onboarding.completedAt')
+            const getReq = tx.objectStore('storageMeta').get('onboarding.completedAt')
             getReq.onsuccess = () => {
-              const row = getReq.result as
-                | { value: unknown }
-                | undefined
+              const row = getReq.result as { value: unknown } | undefined
               dbInst.close()
-              resolve(
-                row && typeof row.value === 'number' ? row.value : null,
-              )
+              resolve(row && typeof row.value === 'number' ? row.value : null)
             }
             getReq.onerror = () => {
               dbInst.close()
@@ -225,11 +204,9 @@ test.describe('Phase C-3 onboarding first-open flow', () => {
 
     // Home headline ("Volleycraft") renders, and there is NO Skill
     // Level welcome preamble.
-    await expect(
-      page.getByRole('heading', { level: 1, name: /volleycraft/i }),
-    ).toBeVisible({ timeout: 10_000 })
-    await expect(
-      page.getByText(/welcome\. let.?s get you started\./i),
-    ).toHaveCount(0)
+    await expect(page.getByRole('heading', { level: 1, name: /volleycraft/i })).toBeVisible({
+      timeout: 10_000,
+    })
+    await expect(page.getByText(/welcome\. let.?s get you started\./i)).toHaveCount(0)
   })
 })

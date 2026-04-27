@@ -39,18 +39,10 @@ describe('PassMetricInput (V0B-02 / H13 tap-to-type)', () => {
   it('does NOT render any +/- or stepper buttons', () => {
     render(<Harness initialGood={3} initialTotal={5} />)
 
-    expect(
-      screen.queryByRole('button', { name: /increase good/i }),
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: /decrease good/i }),
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: /increase total/i }),
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: /decrease total/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /increase good/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /decrease good/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /increase total/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /decrease total/i })).not.toBeInTheDocument()
   })
 
   it('renders tap-to-type numeric inputs labeled Good and Total', () => {
@@ -172,8 +164,6 @@ describe('PassMetricInput (V0B-02 / H13 tap-to-type)', () => {
   it('keeps the notCaptured chip present below the numeric inputs', () => {
     render(<Harness initialGood={3} initialTotal={5} />)
 
-    expect(
-      screen.getByRole('button', { name: /couldn.t capture reps/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /couldn.t capture reps/i })).toBeInTheDocument()
   })
 })

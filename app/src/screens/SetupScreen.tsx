@@ -6,11 +6,7 @@ import type { SetupContext } from '../db/types'
 import { buildDraft } from '../domain/sessionBuilder'
 import { isOnboardingStep } from '../lib/onboarding'
 import { isSchemaBlocked } from '../lib/schema-blocked'
-import {
-  findLastCompletedDrillIdsByType,
-  getLastContext,
-  saveDraft,
-} from '../services/session'
+import { findLastCompletedDrillIdsByType, getLastContext, saveDraft } from '../services/session'
 import type { BlockSlotType } from '../types/session'
 import { getStorageMeta, setStorageMeta } from '../services/storageMeta'
 import { routes } from '../routes'
@@ -55,16 +51,10 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     let cancelled = false
     ;(async () => {
       try {
-        const completedAt = await getStorageMeta(
-          'onboarding.completedAt',
-          isTimestamp,
-        )
+        const completedAt = await getStorageMeta('onboarding.completedAt', isTimestamp)
         if (cancelled) return
         if (completedAt == null) {
-          const step = await getStorageMeta(
-            'onboarding.step',
-            isOnboardingStep,
-          )
+          const step = await getStorageMeta('onboarding.step', isOnboardingStep)
           if (cancelled) return
           navigate(
             step === 'todays_setup'
@@ -96,11 +86,12 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         if (!cancelled) setPrefilled(true)
       }
     })()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [isOnboarding, navigate])
 
-  const isComplete =
-    playerMode !== null && netAvailable !== null && wallAvailable !== null
+  const isComplete = playerMode !== null && netAvailable !== null && wallAvailable !== null
 
   const submitting = useRef(false)
 
@@ -185,11 +176,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       <ScreenShell.Header className="flex items-center gap-2 pt-2 pb-3">
         <BackButton
           label={isOnboarding ? 'Skill level' : 'Home'}
-          onClick={() =>
-            navigate(
-              isOnboarding ? routes.onboardingSkillLevel() : routes.home(),
-            )
-          }
+          onClick={() => navigate(isOnboarding ? routes.onboardingSkillLevel() : routes.home())}
         />
         {/* Phase F12 (2026-04-19): screen title sentence case (was
             "Today's Setup" Title Case). Matches "Before we start",
@@ -203,107 +190,101 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       </ScreenShell.Header>
 
       <ScreenShell.Body className="gap-6 pb-4">
-      {/* Phase F8 (2026-04-19): section h2s lifted from `text-sm` to
+        {/* Phase F8 (2026-04-19): section h2s lifted from `text-sm` to
           `text-base` to match Safety / Review / Settings (same
           semantic role across the app). See
           `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-text-primary">Players</h2>
-        <div className="flex gap-2" role="radiogroup" aria-label="Player mode">
-          <ToggleChip
-            label="Solo"
-            selected={playerMode === 'solo'}
-            onTap={() => setPlayerMode('solo')}
-          />
-          <ToggleChip
-            label="Pair"
-            selected={playerMode === 'pair'}
-            onTap={() => setPlayerMode('pair')}
-          />
-        </div>
-      </section>
-
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-text-primary">Net</h2>
-        <div className="flex gap-2" role="radiogroup" aria-label="Net available">
-          <ToggleChip
-            label="Yes"
-            selected={netAvailable === true}
-            onTap={() => setNetAvailable(true)}
-          />
-          <ToggleChip
-            label="No"
-            selected={netAvailable === false}
-            onTap={() => setNetAvailable(false)}
-          />
-        </div>
-      </section>
-
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-text-primary">Wall or fence</h2>
-        <div className="flex gap-2" role="radiogroup" aria-label="Wall available">
-          <ToggleChip
-            label="Yes"
-            selected={wallAvailable === true}
-            onTap={() => setWallAvailable(true)}
-          />
-          <ToggleChip
-            label="No"
-            selected={wallAvailable === false}
-            onTap={() => setWallAvailable(false)}
-          />
-        </div>
-      </section>
-
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-text-primary">Time</h2>
-        <div className="flex gap-2" role="radiogroup" aria-label="Time profile">
-          {TIME_OPTIONS.map((t) => (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-sm font-semibold text-text-primary">Players</h2>
+          <div className="flex gap-2" role="radiogroup" aria-label="Player mode">
             <ToggleChip
-              key={t}
-              label={`${t} min`}
-              selected={timeProfile === t}
-              onTap={() => setTimeProfile(t)}
+              label="Solo"
+              selected={playerMode === 'solo'}
+              onTap={() => setPlayerMode('solo')}
             />
-          ))}
-        </div>
-        {/* 2026-04-21 partner-walkthrough P1-10: Seb expected 15 min to
+            <ToggleChip
+              label="Pair"
+              selected={playerMode === 'pair'}
+              onTap={() => setPlayerMode('pair')}
+            />
+          </div>
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h2 className="text-sm font-semibold text-text-primary">Net</h2>
+          <div className="flex gap-2" role="radiogroup" aria-label="Net available">
+            <ToggleChip
+              label="Yes"
+              selected={netAvailable === true}
+              onTap={() => setNetAvailable(true)}
+            />
+            <ToggleChip
+              label="No"
+              selected={netAvailable === false}
+              onTap={() => setNetAvailable(false)}
+            />
+          </div>
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h2 className="text-sm font-semibold text-text-primary">Wall or fence</h2>
+          <div className="flex gap-2" role="radiogroup" aria-label="Wall available">
+            <ToggleChip
+              label="Yes"
+              selected={wallAvailable === true}
+              onTap={() => setWallAvailable(true)}
+            />
+            <ToggleChip
+              label="No"
+              selected={wallAvailable === false}
+              onTap={() => setWallAvailable(false)}
+            />
+          </div>
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h2 className="text-sm font-semibold text-text-primary">Time</h2>
+          <div className="flex gap-2" role="radiogroup" aria-label="Time profile">
+            {TIME_OPTIONS.map((t) => (
+              <ToggleChip
+                key={t}
+                label={`${t} min`}
+                selected={timeProfile === t}
+                onTap={() => setTimeProfile(t)}
+              />
+            ))}
+          </div>
+          {/* 2026-04-21 partner-walkthrough P1-10: Seb expected 15 min to
             mean 15 min of main/technique work, not "total session
             including warm-up and cool-down." One-line clarifier below
             the picker surfaces the framing without inflating the setup
             funnel. See
             docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md. */}
-        <p className="text-xs text-text-secondary">
-          Includes warm-up and cool-down.
-        </p>
-      </section>
+          <p className="text-xs text-text-secondary">Includes warm-up and cool-down.</p>
+        </section>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-text-primary">Wind</h2>
-        <div className="flex gap-2" role="radiogroup" aria-label="Wind">
-          <ToggleChip
-            label="Calm"
-            selected={wind === 'calm'}
-            onTap={() => setWind('calm')}
-          />
-          <ToggleChip
-            label="Light wind"
-            selected={wind === 'light'}
-            onTap={() => setWind('light')}
-          />
-          <ToggleChip
-            label="Strong wind"
-            selected={wind === 'strong'}
-            onTap={() => setWind('strong')}
-          />
-        </div>
-      </section>
+        <section className="flex flex-col gap-3">
+          <h2 className="text-sm font-semibold text-text-primary">Wind</h2>
+          <div className="flex gap-2" role="radiogroup" aria-label="Wind">
+            <ToggleChip label="Calm" selected={wind === 'calm'} onTap={() => setWind('calm')} />
+            <ToggleChip
+              label="Light wind"
+              selected={wind === 'light'}
+              onTap={() => setWind('light')}
+            />
+            <ToggleChip
+              label="Strong wind"
+              selected={wind === 'strong'}
+              onTap={() => setWind('strong')}
+            />
+          </div>
+        </section>
 
-      {error && (
-        <p className="rounded-[12px] bg-warning-surface px-4 py-3 text-sm text-warning">
-          {error}
-        </p>
-      )}
+        {error && (
+          <p className="rounded-[12px] bg-warning-surface px-4 py-3 text-sm text-warning">
+            {error}
+          </p>
+        )}
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="flex flex-col gap-4 pt-4">

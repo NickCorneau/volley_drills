@@ -24,10 +24,7 @@ export function LastCompleteCard({
   onStartDifferent,
   onRepeatWhatYouDid,
 }: LastCompleteCardProps) {
-  const plannedTotalMinutes = data.plan.blocks.reduce(
-    (sum, b) => sum + b.durationMinutes,
-    0,
-  )
+  const plannedTotalMinutes = data.plan.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
   const daysAgo = formatDaysAgo(data.log.completedAt ?? data.log.startedAt)
   const isEndedEarly = data.log.status === 'ended_early'
   // "Repeat what you did" label shows actually-completed minutes so
@@ -38,22 +35,13 @@ export function LastCompleteCard({
         return status?.status === 'completed' ? sum + block.durationMinutes : sum
       }, 0)
     : 0
-  const canRepeatSubset =
-    isEndedEarly && completedMinutes > 0 && onRepeatWhatYouDid !== undefined
+  const canRepeatSubset = isEndedEarly && completedMinutes > 0 && onRepeatWhatYouDid !== undefined
 
   return (
-    <section
-      role="region"
-      aria-label="Your last session"
-      className={PRIMARY_CARD_CLASS}
-    >
+    <section role="region" aria-label="Your last session" className={PRIMARY_CARD_CLASS}>
       <div>
-        <p className="text-sm font-medium text-text-secondary">
-          Your last session
-        </p>
-        <p className="mt-1 text-sm font-medium text-text-primary">
-          {data.plan.presetName}
-        </p>
+        <p className="text-sm font-medium text-text-secondary">Your last session</p>
+        <p className="mt-1 text-sm font-medium text-text-primary">{data.plan.presetName}</p>
         <p className="mt-0.5 text-sm text-text-secondary">
           {plannedTotalMinutes > 0 ? `${plannedTotalMinutes} min` : ''}
           {plannedTotalMinutes > 0 && daysAgo ? ' \u00b7 ' : ''}
@@ -77,11 +65,7 @@ export function LastCompleteCard({
           Repeat this session
         </Button>
       )}
-      <Button
-        variant="link"
-        onClick={onStartDifferent}
-        className={LINK_BELOW_PRIMARY_CLASS}
-      >
+      <Button variant="link" onClick={onStartDifferent} className={LINK_BELOW_PRIMARY_CLASS}>
         Start a different session
       </Button>
     </section>

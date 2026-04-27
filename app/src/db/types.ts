@@ -1,8 +1,4 @@
-import type {
-  ArchetypeId,
-  BlockSlotType,
-  SetupContext,
-} from '../types/session'
+import type { ArchetypeId, BlockSlotType, SetupContext } from '../types/session'
 
 // Re-export the canonical `SetupContext` (defined in `types/session.ts`)
 // so existing `import type { SetupContext } from '../db/types'` sites

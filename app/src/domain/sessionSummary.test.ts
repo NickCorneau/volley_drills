@@ -58,9 +58,7 @@ describe('composeSummary: Case A (skipped)', () => {
     })
     expect(out.case).toBe('skipped')
     expect(out.verdict).toBe('No change')
-    expect(out.reason).toBe(
-      'No review this time. Next session stays at the same level.',
-    )
+    expect(out.reason).toBe('No review this time. Next session stays at the same level.')
   })
 
   it('skipped-wins-over-pain (A2 ordering)', () => {
@@ -120,9 +118,7 @@ describe('composeSummary: Case C (default)', () => {
     // `Completed session N:` ordinal prefix was dropped — the reason
     // line now leads with the stats sentence directly. See
     // `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 4.
-    expect(out.reason).toBe(
-      '40 good passes today out of 60 attempts. Ready when you are.',
-    )
+    expect(out.reason).toBe('40 good passes today out of 60 attempts. Ready when you are.')
     expect(out.reason).not.toContain('Completed session')
   })
 
@@ -146,9 +142,7 @@ describe('composeSummary: Case C (default)', () => {
       plan: makePlan(1),
       sessionCount: 1,
     })
-    expect(out.reason).toBe(
-      '10 good passes today out of 20 attempts. Ready when you are.',
-    )
+    expect(out.reason).toBe('10 good passes today out of 20 attempts. Ready when you are.')
     expect(out.reason).not.toMatch(/tuning|more attempt/i)
   })
 
@@ -163,9 +157,7 @@ describe('composeSummary: Case C (default)', () => {
       plan: makePlan(1),
       sessionCount: 10,
     })
-    expect(out.reason).toBe(
-      '1 good pass today out of 1 attempt. Ready when you are.',
-    )
+    expect(out.reason).toBe('1 good pass today out of 1 attempt. Ready when you are.')
   })
 
   it('uses the same forward hook at or above the 50-attempt floor', () => {
@@ -179,9 +171,7 @@ describe('composeSummary: Case C (default)', () => {
       plan: makePlan(1),
       sessionCount: 4,
     })
-    expect(out.reason).toBe(
-      '30 good passes today out of 50 attempts. Ready when you are.',
-    )
+    expect(out.reason).toBe('30 good passes today out of 50 attempts. Ready when you are.')
   })
 
   it('uses the standard forward hook when goodPasses === 0 with attempts recorded', () => {
@@ -195,9 +185,7 @@ describe('composeSummary: Case C (default)', () => {
       plan: makePlan(1),
       sessionCount: 2,
     })
-    expect(out.reason).toBe(
-      '0 good passes today out of 10 attempts. Ready when you are.',
-    )
+    expect(out.reason).toBe('0 good passes today out of 10 attempts. Ready when you are.')
   })
 
   it("returns the notCaptured copy when totalAttempts === 0 ('one more in the book') + Phase F4 forward hook", () => {
@@ -211,9 +199,7 @@ describe('composeSummary: Case C (default)', () => {
       plan: makePlan(1),
       sessionCount: 5,
     })
-    expect(out.reason).toBe(
-      'One more in the book. Ready when you are.',
-    )
+    expect(out.reason).toBe('One more in the book. Ready when you are.')
     expect(out.reason).not.toContain('Completed session')
   })
 
@@ -236,9 +222,7 @@ describe('composeSummary: Case C (default)', () => {
     })
     expect(out.case).toBe('default')
     expect(out.verdict).toBe('Keep building')
-    expect(out.reason).toBe(
-      'First one\u2019s in the book. Ready when you are.',
-    )
+    expect(out.reason).toBe('First one\u2019s in the book. Ready when you are.')
     // Explicitly NOT the session-2+ template (and not the dropped
     // `Completed session N` ordinal prefix per `F9` 2026-04-26).
     expect(out.reason).not.toContain('Completed session')
@@ -264,9 +248,7 @@ describe('composeSummary: Case C (default)', () => {
       plan: makePlan(1),
       sessionCount: 1,
     })
-    expect(out.reason).toBe(
-      '3 good passes today out of 5 attempts. Ready when you are.',
-    )
+    expect(out.reason).toBe('3 good passes today out of 5 attempts. Ready when you are.')
     expect(out.reason).not.toContain('First session')
     expect(out.reason).not.toContain('Completed session')
     expect(out.reason).not.toMatch(/tuning|more attempt/i)
@@ -274,7 +256,7 @@ describe('composeSummary: Case C (default)', () => {
 })
 
 describe('composeSummary: header (pair vs solo, D121 / D120)', () => {
-  it("emits \"Today's pair verdict\" for playerCount === 2", () => {
+  it('emits "Today\'s pair verdict" for playerCount === 2', () => {
     const review = makeReview({ status: 'submitted' })
     const out = composeSummary({
       review,
@@ -284,7 +266,7 @@ describe('composeSummary: header (pair vs solo, D121 / D120)', () => {
     expect(out.header).toBe("Today's pair verdict")
   })
 
-  it("emits \"Today's verdict\" for playerCount === 1", () => {
+  it('emits "Today\'s verdict" for playerCount === 1', () => {
     const review = makeReview({ status: 'submitted' })
     const out = composeSummary({
       review,

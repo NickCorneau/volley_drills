@@ -112,14 +112,8 @@ function renderHome() {
     <MemoryRouter>
       <Routes>
         <Route path="/" element={<HomeScreen />} />
-        <Route
-          path="/safety"
-          element={<div data-testid="safety-route">safety</div>}
-        />
-        <Route
-          path="/setup"
-          element={<div data-testid="setup-route">setup</div>}
-        />
+        <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
+        <Route path="/setup" element={<div data-testid="setup-route">setup</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -195,10 +189,7 @@ describe('HomeScreen: Repeat on ended-early (C-5 Unit 3)', () => {
     // can legitimately pick different drills than the prior plan so
     // we assert on block count + total duration rather than ids.
     expect(draft!.blocks.length).toBeGreaterThanOrEqual(3)
-    const totalMinutes = draft!.blocks.reduce(
-      (sum, b) => sum + b.durationMinutes,
-      0,
-    )
+    const totalMinutes = draft!.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
     expect(totalMinutes).toBe(25)
   })
 })

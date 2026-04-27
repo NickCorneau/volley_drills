@@ -25,10 +25,7 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-function block(
-  id: string,
-  durationMinutes = 5,
-): SessionPlanBlock {
+function block(id: string, durationMinutes = 5): SessionPlanBlock {
   return {
     id,
     type: 'main_skill',
@@ -117,9 +114,7 @@ describe('buildPausedExecution / buildResumedExecution', () => {
   })
 
   it('resumes by clearing pausedAt and setting in_progress', () => {
-    const out = buildResumedExecution(
-      log({ status: 'paused', pausedAt: FIXED_NOW - 1 }),
-    )
+    const out = buildResumedExecution(log({ status: 'paused', pausedAt: FIXED_NOW - 1 }))
     expect(out.status).toBe('in_progress')
     expect(out.pausedAt).toBeUndefined()
   })
@@ -140,10 +135,9 @@ describe('buildAdvancedBlock', () => {
 
   it('marks completed on the final block and stamps completedAt', () => {
     const p = plan([block('b1')])
-    const exec = log(
-      { status: 'in_progress', activeBlockIndex: 0 },
-      [{ blockId: 'b1', status: 'in_progress', startedAt: 1 }],
-    )
+    const exec = log({ status: 'in_progress', activeBlockIndex: 0 }, [
+      { blockId: 'b1', status: 'in_progress', startedAt: 1 },
+    ])
     const { execution, isLast } = buildAdvancedBlock(exec, p, 'completed')
     expect(isLast).toBe(true)
     expect(execution.status).toBe('completed')
@@ -160,13 +154,10 @@ describe('buildAdvancedBlock', () => {
 
 describe('buildEndedSession', () => {
   it('marks the active in-progress block skipped and stamps the session', () => {
-    const exec = log(
-      { status: 'in_progress', activeBlockIndex: 0 },
-      [
-        { blockId: 'b1', status: 'in_progress', startedAt: 1 },
-        { blockId: 'b2', status: 'planned' },
-      ],
-    )
+    const exec = log({ status: 'in_progress', activeBlockIndex: 0 }, [
+      { blockId: 'b1', status: 'in_progress', startedAt: 1 },
+      { blockId: 'b2', status: 'planned' },
+    ])
     const out = buildEndedSession(exec, 'user_ended')
     expect(out.status).toBe('ended_early')
     expect(out.completedAt).toBe(FIXED_NOW)
@@ -216,8 +207,6 @@ describe('computeActualDurationMinutes', () => {
     const exec = log({}, [{ blockId: 'b1', status: 'completed' }])
     expect(computeActualDurationMinutes(exec, p, Number.NaN)).toBe(5)
     expect(computeActualDurationMinutes(exec, p, -1)).toBe(5)
-    expect(computeActualDurationMinutes(exec, p, Number.POSITIVE_INFINITY)).toBe(
-      5,
-    )
+    expect(computeActualDurationMinutes(exec, p, Number.POSITIVE_INFINITY)).toBe(5)
   })
 })

@@ -206,10 +206,7 @@ describe('ReviewScreen per-drill aggregate (D133)', () => {
     fireEvent.click(screen.getByRole('button', { name: /^done$/i }))
 
     await waitFor(async () => {
-      const stored = await db.sessionReviews
-        .where('executionLogId')
-        .equals(execId)
-        .first()
+      const stored = await db.sessionReviews.where('executionLogId').equals(execId).first()
       expect(stored?.status).toBe('submitted')
       expect(stored?.perDrillCaptures).toEqual(captures)
       expect(stored?.goodPasses).toBe(6)

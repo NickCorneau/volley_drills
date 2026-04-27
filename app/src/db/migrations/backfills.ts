@@ -1,9 +1,5 @@
 import type { Transaction } from 'dexie'
-import type {
-  ExecutionLog,
-  SessionReview,
-  StorageMetaEntry,
-} from '../types'
+import type { ExecutionLog, SessionReview, StorageMetaEntry } from '../types'
 
 /**
  * v4 backfill for `SessionReview.status` (D-C7 / A5).
@@ -21,9 +17,7 @@ import type {
  * them on a v3 schema. In normal operation Dexie upgrades run exactly once
  * per version transition and this guard is otherwise a no-op.
  */
-export async function backfillSessionReviewStatus(
-  tx: Transaction,
-): Promise<void> {
+export async function backfillSessionReviewStatus(tx: Transaction): Promise<void> {
   const reviews = tx.table<SessionReview, string>('sessionReviews')
   await reviews.toCollection().modify((r) => {
     if (r.status) return
@@ -47,9 +41,7 @@ export async function backfillSessionReviewStatus(
  *
  * Idempotent: the `existing` guard bails out when the key is already set.
  */
-export async function backfillOnboardingCompletedAt(
-  tx: Transaction,
-): Promise<void> {
+export async function backfillOnboardingCompletedAt(tx: Transaction): Promise<void> {
   const meta = tx.table<StorageMetaEntry, string>('storageMeta')
   const execs = tx.table<ExecutionLog, string>('executionLogs')
   const existing = await meta.get('onboarding.completedAt')

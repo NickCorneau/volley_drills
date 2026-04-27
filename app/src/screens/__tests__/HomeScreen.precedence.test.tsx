@@ -133,14 +133,8 @@ function renderHome() {
     <MemoryRouter>
       <Routes>
         <Route path="/" element={<HomeScreen />} />
-        <Route
-          path="/complete"
-          element={<div data-testid="complete-route">complete</div>}
-        />
-        <Route
-          path="/review"
-          element={<div data-testid="review-route">review</div>}
-        />
+        <Route path="/complete" element={<div data-testid="complete-route">complete</div>} />
+        <Route path="/review" element={<div data-testid="review-route">review</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -153,17 +147,13 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
 
   it('new_user: empty DB renders Start first workout', async () => {
     renderHome()
-    expect(
-      await screen.findByRole('button', { name: /start first workout/i }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /start first workout/i })).toBeInTheDocument()
   })
 
   it('last_complete only: renders Repeat this session', async () => {
     await seedLastComplete('exec-lc')
     renderHome()
-    expect(
-      await screen.findByRole('button', { name: /repeat this session/i }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /repeat this session/i })).toBeInTheDocument()
     // No Today's suggestion (draft) card.
     expect(screen.queryByText(/today.?s suggestion/i)).not.toBeInTheDocument()
   })
@@ -173,9 +163,7 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     await seedLastComplete('exec-lc')
     renderHome()
 
-    expect(
-      await screen.findByRole('button', { name: /start session/i }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /start session/i })).toBeInTheDocument()
     expect(screen.getByText(/solo \+ open/i)).toBeInTheDocument()
 
     // Secondary row references the last completed preset.
@@ -211,9 +199,7 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument()
     })
-    expect(
-      screen.queryByRole('list', { name: /other active actions/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('list', { name: /other active actions/i })).not.toBeInTheDocument()
   })
 
   it('soft-block modal: draft Start with review pending intercepts first tap', async () => {
@@ -233,8 +219,6 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     await user.click(draftOpen)
 
     // D-C1 soft-block modal appears instead of routing to /safety.
-    expect(
-      await screen.findByRole('dialog', { name: /finish.*review first/i }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('dialog', { name: /finish.*review first/i })).toBeInTheDocument()
   })
 })

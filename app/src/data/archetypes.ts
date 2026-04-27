@@ -111,7 +111,8 @@ const wrap = (min: number, max: number): BlockSlot => ({
   type: 'wrap',
   durationMinMinutes: min,
   durationMaxMinutes: max,
-  intent: 'Downshift: transition and comfort, prep review. Not an injury-prevention or recovery claim (D105).',
+  intent:
+    'Downshift: transition and comfort, prep review. Not an injury-prevention or recovery claim (D105).',
   required: true,
   skillTags: ['recovery'],
 })

@@ -180,9 +180,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     // capture card never renders because the screen unmounts before
     // first paint of the body.
     await waitFor(() => {
-      expect(screen.getByTestId('route-probe')).toHaveTextContent(
-        '/run/transition',
-      )
+      expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
     })
     expect(screen.queryByTestId('per-drill-capture')).not.toBeInTheDocument()
   })
@@ -195,9 +193,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     renderAt(execId)
 
     await waitFor(() => {
-      expect(screen.getByTestId('route-probe')).toHaveTextContent(
-        '/run/transition',
-      )
+      expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
     })
     expect(screen.queryByTestId('per-drill-capture')).not.toBeInTheDocument()
   })
@@ -219,9 +215,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     await waitFor(() => {
       expect(cont).not.toBeDisabled()
     })
-    expect(
-      screen.queryByTestId('drill-check-gating-hint'),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByTestId('drill-check-gating-hint')).not.toBeInTheDocument()
   })
 
   it('persists the tapped difficulty into the review draft via saveReviewDraft', async () => {
@@ -235,10 +229,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     fireEvent.click(screen.getByRole('radio', { name: /too hard/i }))
 
     await waitFor(async () => {
-      const draft = await db.sessionReviews
-        .where('executionLogId')
-        .equals(execId)
-        .first()
+      const draft = await db.sessionReviews.where('executionLogId').equals(execId).first()
       expect(draft?.status).toBe('draft')
       expect(draft?.perDrillCaptures).toBeDefined()
       expect(draft?.perDrillCaptures).toHaveLength(1)
@@ -279,13 +270,12 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
 
     await screen.findByTestId('per-drill-capture')
     await waitFor(() => {
-      expect(
-        screen.getByRole('radio', { name: /too easy/i }),
-      ).toHaveAttribute('aria-checked', 'true')
+      expect(screen.getByRole('radio', { name: /too easy/i })).toHaveAttribute(
+        'aria-checked',
+        'true',
+      )
     })
-    expect(
-      screen.queryByTestId('drill-check-gating-hint'),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByTestId('drill-check-gating-hint')).not.toBeInTheDocument()
   })
 
   it('navigates to /run/transition on Continue after a chip is tapped', async () => {
@@ -303,9 +293,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     fireEvent.click(cont)
 
     await waitFor(() => {
-      expect(screen.getByTestId('route-probe')).toHaveTextContent(
-        '/run/transition',
-      )
+      expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
     })
   })
 })

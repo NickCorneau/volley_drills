@@ -15,12 +15,7 @@
  * state space.
  */
 
-export type PrimaryVariant =
-  | 'resume'
-  | 'review_pending'
-  | 'draft'
-  | 'last_complete'
-  | 'new_user'
+export type PrimaryVariant = 'resume' | 'review_pending' | 'draft' | 'last_complete' | 'new_user'
 
 export type SecondaryRow =
   | { kind: 'review_pending_advisory' }

@@ -88,8 +88,7 @@ export function DrillCheckScreen() {
     [captureTarget, playerCount],
   )
   const showCaptureCounts =
-    captureMetricType !== null &&
-    COUNT_BASED_METRIC_TYPES.has(captureMetricType)
+    captureMetricType !== null && COUNT_BASED_METRIC_TYPES.has(captureMetricType)
 
   const [captures, setCaptures] = useState<PerDrillCaptureRecord[]>([])
   const [hydrated, setHydrated] = useState(false)
@@ -179,10 +178,9 @@ export function DrillCheckScreen() {
           : {}),
     }
     setCaptures((prev) => {
-      const merged = [
-        ...prev.filter((c) => c.blockIndex !== prevBlockIdx),
-        next,
-      ].sort((a, b) => a.blockIndex - b.blockIndex)
+      const merged = [...prev.filter((c) => c.blockIndex !== prevBlockIdx), next].sort(
+        (a, b) => a.blockIndex - b.blockIndex,
+      )
       void saveReviewDraft({
         executionLogId,
         sessionRpe: null,
@@ -293,9 +291,7 @@ export function DrillCheckScreen() {
           rather than incidental. */}
       <ScreenShell.Header className="flex items-center justify-between pt-2 pb-3">
         <SafetyIcon />
-        <span className="text-sm font-medium text-text-secondary">
-          Drill check
-        </span>
+        <span className="text-sm font-medium text-text-secondary">Drill check</span>
         <span className="text-sm font-medium text-text-secondary">
           Last: {prevBlockIdx + 1}/{totalBlocks}
         </span>
@@ -325,9 +321,7 @@ export function DrillCheckScreen() {
             </svg>
           </div>
           <div>
-            <p className="font-semibold text-text-primary">
-              {captureTarget.drillName}
-            </p>
+            <p className="font-semibold text-text-primary">{captureTarget.drillName}</p>
             <p className="text-sm text-success">Complete</p>
           </div>
         </div>
@@ -373,12 +367,7 @@ export function DrillCheckScreen() {
             Tag how that drill went to keep going.
           </p>
         )}
-        <Button
-          variant="primary"
-          fullWidth
-          onClick={handleContinue}
-          disabled={!captureSatisfied}
-        >
+        <Button variant="primary" fullWidth onClick={handleContinue} disabled={!captureSatisfied}>
           Continue
         </Button>
       </ScreenShell.Footer>

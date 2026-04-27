@@ -115,9 +115,7 @@ describe('sessionBuilder', () => {
    * catalog so adding or renaming setting drills can't silently let
    * one slip through.
    */
-  const SETTING_DRILL_IDS = DRILLS.filter((d) => d.skillFocus.includes('set')).map(
-    (d) => d.id,
-  )
+  const SETTING_DRILL_IDS = DRILLS.filter((d) => d.skillFocus.includes('set')).map((d) => d.id)
   it.each([
     [
       'solo_wall',
@@ -211,9 +209,7 @@ describe('sessionBuilder', () => {
     })
     const wrap = draft!.blocks.at(-1)
     expect(wrap?.type).toBe('wrap')
-    expect(wrap?.rationale).toBe(
-      'Chosen because: every session closes with a cooldown downshift.',
-    )
+    expect(wrap?.rationale).toBe('Chosen because: every session closes with a cooldown downshift.')
   })
 
   it('deriveBlockRationale is deterministic for the same inputs', () => {
@@ -227,9 +223,7 @@ describe('sessionBuilder', () => {
     const first = deriveBlockRationale('main_skill', drill, context)
     const second = deriveBlockRationale('main_skill', drill, context)
     expect(first).toBe(second)
-    expect(first).toBe(
-      "Chosen because: today's main passing rep.",
-    )
+    expect(first).toBe("Chosen because: today's main passing rep.")
   })
 
   it('buildDraft output is deterministic in its rationale sentences', () => {
@@ -312,10 +306,9 @@ describe('sessionBuilder', () => {
       const draft = buildDraft(context)
       expect(draft).not.toBeNull()
       for (const block of draft!.blocks) {
-        expect(
-          block.rationale,
-          `${block.type} block leaked a substitution rationale`,
-        ).not.toMatch(/is unavailable today, so this keeps/)
+        expect(block.rationale, `${block.type} block leaked a substitution rationale`).not.toMatch(
+          /is unavailable today, so this keeps/,
+        )
       }
     },
   )
@@ -378,10 +371,9 @@ describe('sessionBuilder', () => {
       })
       expect(draft).not.toBeNull()
       for (const block of draft!.blocks) {
-        expect(
-          block.rationale,
-          `${block.type} block leaked a substitution rationale`,
-        ).not.toMatch(/is unavailable today, so this keeps/)
+        expect(block.rationale, `${block.type} block leaked a substitution rationale`).not.toMatch(
+          /is unavailable today, so this keeps/,
+        )
       }
     })
 
@@ -392,10 +384,9 @@ describe('sessionBuilder', () => {
       })
       expect(draft).not.toBeNull()
       for (const block of draft!.blocks) {
-        expect(
-          block.rationale,
-          `${block.type} block leaked a substitution rationale`,
-        ).not.toMatch(/is unavailable today, so this keeps/)
+        expect(block.rationale, `${block.type} block leaked a substitution rationale`).not.toMatch(
+          /is unavailable today, so this keeps/,
+        )
       }
     })
 
@@ -484,11 +475,7 @@ describe('sessionBuilder', () => {
       netAvailable: false,
       wallAvailable: false,
     })
-    expect(recovery?.blocks.map((b) => b.type)).toEqual([
-      'warmup',
-      'technique',
-      'wrap',
-    ])
+    expect(recovery?.blocks.map((b) => b.type)).toEqual(['warmup', 'technique', 'wrap'])
   })
 
   /**
@@ -510,10 +497,7 @@ describe('sessionBuilder', () => {
       wallAvailable: false,
     })
     expect(recovery).not.toBeNull()
-    const total = recovery!.blocks.reduce(
-      (sum, b) => sum + b.durationMinutes,
-      0,
-    )
+    const total = recovery!.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
     expect(total).toBe(15)
 
     const technique = recovery!.blocks.find((b) => b.type === 'technique')
@@ -524,12 +508,8 @@ describe('sessionBuilder', () => {
     expect(wrap).toBeDefined()
     // Technique is strictly longer than either bookend so the Work
     // phase reads as the session, not an intermission.
-    expect(technique!.durationMinutes).toBeGreaterThan(
-      warmup!.durationMinutes,
-    )
-    expect(technique!.durationMinutes).toBeGreaterThan(
-      wrap!.durationMinutes,
-    )
+    expect(technique!.durationMinutes).toBeGreaterThan(warmup!.durationMinutes)
+    expect(technique!.durationMinutes).toBeGreaterThan(wrap!.durationMinutes)
   })
 
   it('25-min recovery fills 25 minutes with technique >= movement_proxy', () => {
@@ -540,10 +520,7 @@ describe('sessionBuilder', () => {
       wallAvailable: false,
     })
     expect(recovery).not.toBeNull()
-    const total = recovery!.blocks.reduce(
-      (sum, b) => sum + b.durationMinutes,
-      0,
-    )
+    const total = recovery!.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
     expect(total).toBe(25)
 
     const technique = recovery!.blocks.find((b) => b.type === 'technique')
@@ -552,9 +529,7 @@ describe('sessionBuilder', () => {
     expect(movement).toBeDefined()
     // 60/40 bias toward technique. Ceiling-rounded so technique wins
     // the odd-minute remainder on allocations like 18/2 → 11/7.
-    expect(technique!.durationMinutes).toBeGreaterThanOrEqual(
-      movement!.durationMinutes,
-    )
+    expect(technique!.durationMinutes).toBeGreaterThanOrEqual(movement!.durationMinutes)
   })
 
   it('40-min recovery fills the full 40 minutes', () => {
@@ -565,10 +540,7 @@ describe('sessionBuilder', () => {
       wallAvailable: false,
     })
     expect(recovery).not.toBeNull()
-    const total = recovery!.blocks.reduce(
-      (sum, b) => sum + b.durationMinutes,
-      0,
-    )
+    const total = recovery!.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
     expect(total).toBe(40)
   })
 

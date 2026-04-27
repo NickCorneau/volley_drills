@@ -11,18 +11,14 @@ class MockWakeLockSentinel {
   addEventListener(type: string, handler: EventListenerOrEventListenerObject) {
     if (type !== 'release') return
     const fn =
-      typeof handler === 'function'
-        ? handler
-        : (event: Event) => handler.handleEvent(event)
+      typeof handler === 'function' ? handler : (event: Event) => handler.handleEvent(event)
     this.releaseHandlers.add(fn)
   }
 
   removeEventListener(type: string, handler: EventListenerOrEventListenerObject) {
     if (type !== 'release') return
     const fn =
-      typeof handler === 'function'
-        ? handler
-        : (event: Event) => handler.handleEvent(event)
+      typeof handler === 'function' ? handler : (event: Event) => handler.handleEvent(event)
     this.releaseHandlers.delete(fn)
   }
 

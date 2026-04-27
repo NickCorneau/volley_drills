@@ -31,10 +31,7 @@ export async function readPersisted(): Promise<boolean> {
   }
 }
 
-export function computePosture(
-  installed: boolean,
-  persisted: boolean,
-): InstallPosture {
+export function computePosture(installed: boolean, persisted: boolean): InstallPosture {
   if (!installed) return 'browser-tab'
   return persisted ? 'installed-persisted' : 'installed-not-persisted'
 }

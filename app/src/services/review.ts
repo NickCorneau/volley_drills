@@ -51,9 +51,7 @@ export interface SubmitReviewData {
 
 export const FINISH_LATER_CAP_MS = POLICY_FINISH_LATER_CAP_MS
 
-export function classifyCaptureWindow(
-  delaySeconds: number,
-): RpeCaptureWindow {
+export function classifyCaptureWindow(delaySeconds: number): RpeCaptureWindow {
   const ms = delaySeconds * 1_000
   if (ms <= CAPTURE_WINDOW_IMMEDIATE_MS) return 'immediate'
   if (ms <= CAPTURE_WINDOW_SAME_SESSION_MS) return 'same_session'
@@ -161,10 +159,7 @@ export function aggregateDrillCaptures(
       drillsNotCaptured += 1
       continue
     }
-    if (
-      typeof capture.goodPasses === 'number' &&
-      typeof capture.attemptCount === 'number'
-    ) {
+    if (typeof capture.goodPasses === 'number' && typeof capture.attemptCount === 'number') {
       goodPasses += capture.goodPasses
       totalAttempts += capture.attemptCount
       drillsWithCounts += 1
@@ -199,9 +194,7 @@ export type SubmitReviewResult =
   | { status: 'ok' }
   | { status: 'refused'; existingStatus: 'submitted' | 'skipped' }
 
-export async function submitReview(
-  data: SubmitReviewData,
-): Promise<SubmitReviewResult> {
+export async function submitReview(data: SubmitReviewData): Promise<SubmitReviewResult> {
   const exec = await db.executionLogs.get(data.executionLogId)
   const now = data.capturedAt ?? Date.now()
   const endAt = exec ? sessionEndTimestamp(exec) : now
@@ -217,9 +210,7 @@ export async function submitReview(
     totalAttempts: data.totalAttempts,
     drillScores: data.drillScores,
     perDrillCaptures:
-      data.perDrillCaptures && data.perDrillCaptures.length > 0
-        ? data.perDrillCaptures
-        : undefined,
+      data.perDrillCaptures && data.perDrillCaptures.length > 0 ? data.perDrillCaptures : undefined,
     borderlineCount: data.borderlineCount,
     incompleteReason: data.incompleteReason,
     quickTags: data.quickTags,
@@ -235,27 +226,16 @@ export async function submitReview(
   // A3 + H17: intra-connection atomic read-decide-write. A7 cleanup
   // (`clearSoftBlockDismissed`) lands in the same transaction so
   // `storageMeta` stays bounded.
-  return db.transaction(
-    'rw',
-    db.sessionReviews,
-    db.storageMeta,
-    async (tx) => {
-      const reviews = tx.table<SessionReview, string>('sessionReviews')
-      const existing = await reviews
-        .where('executionLogId')
-        .equals(data.executionLogId)
-        .first()
-      if (
-        existing &&
-        (existing.status === 'submitted' || existing.status === 'skipped')
-      ) {
-        return { status: 'refused', existingStatus: existing.status } as const
-      }
-      await reviews.put(review)
-      await clearSoftBlockDismissed(data.executionLogId, tx)
-      return { status: 'ok' } as const
-    },
-  )
+  return db.transaction('rw', db.sessionReviews, db.storageMeta, async (tx) => {
+    const reviews = tx.table<SessionReview, string>('sessionReviews')
+    const existing = await reviews.where('executionLogId').equals(data.executionLogId).first()
+    if (existing && (existing.status === 'submitted' || existing.status === 'skipped')) {
+      return { status: 'refused', existingStatus: existing.status } as const
+    }
+    await reviews.put(review)
+    await clearSoftBlockDismissed(data.executionLogId, tx)
+    return { status: 'ok' } as const
+  })
 }
 
 // --- Expire (V0B-31 / D120) ---
@@ -297,59 +277,45 @@ export async function expireReview(data: ExpireReviewData): Promise<void> {
   // (`submitted` or `skipped`) are left untouched; a `draft` record is
   // overwritten by a terminal stub that preserves the draft's user inputs.
   // A7 cleanup lands in the same tx.
-  await db.transaction(
-    'rw',
-    db.sessionReviews,
-    db.storageMeta,
-    async (tx) => {
-      const reviews = tx.table<SessionReview, string>('sessionReviews')
-      const existing = await reviews
-        .where('executionLogId')
-        .equals(data.executionLogId)
-        .first()
-      if (
-        existing &&
-        (existing.status === 'submitted' || existing.status === 'skipped')
-      ) {
-        return
-      }
+  await db.transaction('rw', db.sessionReviews, db.storageMeta, async (tx) => {
+    const reviews = tx.table<SessionReview, string>('sessionReviews')
+    const existing = await reviews.where('executionLogId').equals(data.executionLogId).first()
+    if (existing && (existing.status === 'submitted' || existing.status === 'skipped')) {
+      return
+    }
 
-      // Preserve draft payload when overwriting a draft; otherwise use
-      // neutral zero defaults. In both cases the stub is marked expired.
-      const draft = existing && existing.status === 'draft' ? existing : null
-      const existingTags = draft?.quickTags ?? []
-      const quickTags = existingTags.includes('expired')
-        ? existingTags
-        : [...existingTags, 'expired']
+    // Preserve draft payload when overwriting a draft; otherwise use
+    // neutral zero defaults. In both cases the stub is marked expired.
+    const draft = existing && existing.status === 'draft' ? existing : null
+    const existingTags = draft?.quickTags ?? []
+    const quickTags = existingTags.includes('expired') ? existingTags : [...existingTags, 'expired']
 
-      const stub: SessionReview = {
-        id: `review-${data.executionLogId}`,
-        executionLogId: data.executionLogId,
-        sessionRpe: draft?.sessionRpe ?? null,
-        goodPasses: draft?.goodPasses ?? 0,
-        totalAttempts: draft?.totalAttempts ?? 0,
-        drillScores: draft?.drillScores,
-        // D133: per-drill captures already collected on Transition before
-        // the user dropped off survive into the expired stub for the same
-        // adversarial-finding-adv-1/adv-2 reason as RPE / pain note. The
-        // captures are honest signal at drill grain; nuking them on expire
-        // would silently destroy data the tester explicitly tapped to log.
-        perDrillCaptures: draft?.perDrillCaptures,
-        borderlineCount: draft?.borderlineCount,
-        incompleteReason: draft?.incompleteReason,
-        quickTags,
-        shortNote:
-          draft?.shortNote ?? 'Review expired after Finish Later cap (2 h).',
-        submittedAt: now,
-        captureDelaySeconds,
-        captureWindow: 'expired',
-        eligibleForAdaptation: false,
-        status: 'skipped',
-      }
-      await reviews.put(stub)
-      await clearSoftBlockDismissed(data.executionLogId, tx)
-    },
-  )
+    const stub: SessionReview = {
+      id: `review-${data.executionLogId}`,
+      executionLogId: data.executionLogId,
+      sessionRpe: draft?.sessionRpe ?? null,
+      goodPasses: draft?.goodPasses ?? 0,
+      totalAttempts: draft?.totalAttempts ?? 0,
+      drillScores: draft?.drillScores,
+      // D133: per-drill captures already collected on Transition before
+      // the user dropped off survive into the expired stub for the same
+      // adversarial-finding-adv-1/adv-2 reason as RPE / pain note. The
+      // captures are honest signal at drill grain; nuking them on expire
+      // would silently destroy data the tester explicitly tapped to log.
+      perDrillCaptures: draft?.perDrillCaptures,
+      borderlineCount: draft?.borderlineCount,
+      incompleteReason: draft?.incompleteReason,
+      quickTags,
+      shortNote: draft?.shortNote ?? 'Review expired after Finish Later cap (2 h).',
+      submittedAt: now,
+      captureDelaySeconds,
+      captureWindow: 'expired',
+      eligibleForAdaptation: false,
+      status: 'skipped',
+    }
+    await reviews.put(stub)
+    await clearSoftBlockDismissed(data.executionLogId, tx)
+  })
 }
 
 // --- Counters (C-2 Unit 2) ---
@@ -419,9 +385,7 @@ export interface DraftReviewData {
  * Idempotent for same-shape re-saves; each call updates `submittedAt` so
  * the draft's "last edited" timestamp advances as the user types.
  */
-export async function saveReviewDraft(
-  data: DraftReviewData,
-): Promise<void> {
+export async function saveReviewDraft(data: DraftReviewData): Promise<void> {
   const now = Date.now()
   const draft: SessionReview = {
     id: `review-${data.executionLogId}`,
@@ -431,9 +395,7 @@ export async function saveReviewDraft(
     totalAttempts: data.totalAttempts,
     drillScores: data.drillScores,
     perDrillCaptures:
-      data.perDrillCaptures && data.perDrillCaptures.length > 0
-        ? data.perDrillCaptures
-        : undefined,
+      data.perDrillCaptures && data.perDrillCaptures.length > 0 ? data.perDrillCaptures : undefined,
     borderlineCount: data.borderlineCount,
     incompleteReason: data.incompleteReason,
     quickTags: data.quickTags,
@@ -443,14 +405,8 @@ export async function saveReviewDraft(
   }
   await db.transaction('rw', db.sessionReviews, async (tx) => {
     const reviews = tx.table<SessionReview, string>('sessionReviews')
-    const existing = await reviews
-      .where('executionLogId')
-      .equals(data.executionLogId)
-      .first()
-    if (
-      existing &&
-      (existing.status === 'submitted' || existing.status === 'skipped')
-    ) {
+    const existing = await reviews.where('executionLogId').equals(data.executionLogId).first()
+    if (existing && (existing.status === 'submitted' || existing.status === 'skipped')) {
       return
     }
     await reviews.put(draft)
@@ -463,13 +419,8 @@ export async function saveReviewDraft(
  * terminal (`submitted` / `skipped`). ReviewScreen's Finish Later / home
  * re-entry flow uses this to rehydrate the form state.
  */
-export async function loadReviewDraft(
-  executionLogId: string,
-): Promise<SessionReview | null> {
-  const row = await db.sessionReviews
-    .where('executionLogId')
-    .equals(executionLogId)
-    .first()
+export async function loadReviewDraft(executionLogId: string): Promise<SessionReview | null> {
+  const row = await db.sessionReviews.where('executionLogId').equals(executionLogId).first()
   if (!row) return null
   if (row.status !== 'draft') return null
   return row
@@ -483,9 +434,7 @@ export interface SessionBundle {
   review: SessionReview
 }
 
-export async function loadSessionBundle(
-  execId: string,
-): Promise<SessionBundle | null> {
+export async function loadSessionBundle(execId: string): Promise<SessionBundle | null> {
   const log = await db.executionLogs.get(execId)
   if (!log) return null
   const [plan, review] = await Promise.all([

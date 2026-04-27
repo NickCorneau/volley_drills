@@ -17,9 +17,7 @@ describe('SchemaBlockedOverlay', () => {
       emitSchemaBlocked()
     })
     expect(screen.getByRole('alertdialog')).toBeInTheDocument()
-    expect(
-      screen.getByText(/close other tabs and reload/i),
-    ).toBeInTheDocument()
+    expect(screen.getByText(/close other tabs and reload/i)).toBeInTheDocument()
   })
 
   it('clicking Reload invokes onReload prop', async () => {
@@ -41,8 +39,6 @@ describe('SchemaBlockedOverlay', () => {
     })
     render(<SchemaBlockedOverlay />)
     expect(screen.getByRole('alertdialog')).toBeInTheDocument()
-    expect(
-      screen.getByRole('heading', { name: /reload to continue/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /reload to continue/i })).toBeInTheDocument()
   })
 })

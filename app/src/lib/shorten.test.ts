@@ -29,10 +29,7 @@ describe('computeShortened (red-team bug #2)', () => {
   })
 
   it('never extends the block at exactly the floor', () => {
-    const r = computeShortened(
-      600,
-      SHORTEN_MIN_REMAINING_SECONDS,
-    )
+    const r = computeShortened(600, SHORTEN_MIN_REMAINING_SECONDS)
     expect(r.newRemainingSeconds).toBe(SHORTEN_MIN_REMAINING_SECONDS)
     expect(r.newDurationSeconds).toBe(600)
   })
@@ -46,10 +43,7 @@ describe('computeShortened (red-team bug #2)', () => {
   it('preserves the invariant on back-to-back shortens', () => {
     // Tap Shorten twice from a 10 min block paused at 5 min remaining.
     const first = computeShortened(600, 300)
-    const second = computeShortened(
-      first.newDurationSeconds,
-      first.newRemainingSeconds,
-    )
+    const second = computeShortened(first.newDurationSeconds, first.newRemainingSeconds)
     // 150 -> 75 remaining, total trimmed another 75 s.
     expect(second.newRemainingSeconds).toBe(75)
     expect(second.newDurationSeconds).toBe(375)

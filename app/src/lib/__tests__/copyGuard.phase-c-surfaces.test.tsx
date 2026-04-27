@@ -11,11 +11,7 @@ import { HomeScreen } from '../../screens/HomeScreen'
 import { SettingsScreen } from '../../screens/SettingsScreen'
 import { SkillLevelScreen } from '../../screens/SkillLevelScreen'
 import { TodaysSetupScreen } from '../../screens/TodaysSetupScreen'
-import type {
-  LastCompleteBundle,
-  PendingReview,
-  ResumableSession,
-} from '../../services/session'
+import type { LastCompleteBundle, PendingReview, ResumableSession } from '../../services/session'
 import { scanElementForForbidden } from '../copyGuard'
 
 /**
@@ -115,10 +111,7 @@ const fakeResume: ResumableSession = {
 
 function assertClean(container: HTMLElement, surface: string) {
   const matches = scanElementForForbidden(container)
-  expect(
-    matches,
-    `D86 forbidden vocabulary in ${surface}: ${JSON.stringify(matches)}`,
-  ).toEqual([])
+  expect(matches, `D86 forbidden vocabulary in ${surface}: ${JSON.stringify(matches)}`).toEqual([])
 }
 
 describe('V0B-18 D86 per-surface regression scan', () => {
@@ -145,9 +138,7 @@ describe('V0B-18 D86 per-surface regression scan', () => {
 
   describe('HomePrimaryCard - all variants', () => {
     it('new_user', () => {
-      const { container } = render(
-        <HomePrimaryCard variant="new_user" onStart={() => {}} />,
-      )
+      const { container } = render(<HomePrimaryCard variant="new_user" onStart={() => {}} />)
       assertClean(container, 'HomePrimaryCard.new_user')
     })
 
@@ -176,20 +167,12 @@ describe('V0B-18 D86 per-surface regression scan', () => {
           onCancelSkip={() => {}}
         />,
       )
-      assertClean(
-        confirming.container,
-        'HomePrimaryCard.review_pending confirming',
-      )
+      assertClean(confirming.container, 'HomePrimaryCard.review_pending confirming')
     })
 
     it('draft', () => {
       const { container } = render(
-        <HomePrimaryCard
-          variant="draft"
-          data={fakeDraft}
-          onStart={() => {}}
-          onEdit={() => {}}
-        />,
+        <HomePrimaryCard variant="draft" data={fakeDraft} onStart={() => {}} onEdit={() => {}} />,
       )
       assertClean(container, 'HomePrimaryCard.draft')
     })
@@ -223,10 +206,7 @@ describe('V0B-18 D86 per-surface regression scan', () => {
           onRepeatWhatYouDid={() => {}}
         />,
       )
-      assertClean(
-        endedEarly.container,
-        'HomePrimaryCard.last_complete ended_early',
-      )
+      assertClean(endedEarly.container, 'HomePrimaryCard.last_complete ended_early')
     })
 
     it('resume (ResumePrompt delegated)', () => {
@@ -259,11 +239,7 @@ describe('V0B-18 D86 per-surface regression scan', () => {
     it('draft', () => {
       const { container } = render(
         <ul>
-          <HomeSecondaryRow
-            variant="draft"
-            data={fakeDraft}
-            onOpen={() => {}}
-          />
+          <HomeSecondaryRow variant="draft" data={fakeDraft} onOpen={() => {}} />
         </ul>,
       )
       assertClean(container, 'HomeSecondaryRow.draft')
@@ -272,11 +248,7 @@ describe('V0B-18 D86 per-surface regression scan', () => {
     it('last_complete', () => {
       const { container } = render(
         <ul>
-          <HomeSecondaryRow
-            variant="last_complete"
-            data={fakeLastComplete}
-            onRepeat={() => {}}
-          />
+          <HomeSecondaryRow variant="last_complete" data={fakeLastComplete} onRepeat={() => {}} />
         </ul>,
       )
       assertClean(container, 'HomeSecondaryRow.last_complete')
@@ -322,17 +294,12 @@ describe('V0B-18 D86 per-surface regression scan', () => {
     const { container } = render(
       <MemoryRouter initialEntries={['/onboarding/todays-setup']}>
         <Routes>
-          <Route
-            path="/onboarding/todays-setup"
-            element={<TodaysSetupScreen />}
-          />
+          <Route path="/onboarding/todays-setup" element={<TodaysSetupScreen />} />
         </Routes>
       </MemoryRouter>,
     )
     await waitFor(() =>
-      expect(
-        screen.getByRole('button', { name: /build session/i }),
-      ).toBeInTheDocument(),
+      expect(screen.getByRole('button', { name: /build session/i })).toBeInTheDocument(),
     )
     assertClean(container, 'TodaysSetupScreen')
   })

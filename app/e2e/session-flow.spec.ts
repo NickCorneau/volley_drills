@@ -11,8 +11,14 @@ async function setupAndStart(
   await expect(page.getByText("Today's setup")).toBeVisible()
 
   await page.getByRole('radio', { name: 'Solo' }).click()
-  await page.getByLabel('Net available').getByRole('radio', { name: net ? 'Yes' : 'No' }).click()
-  await page.getByLabel('Wall available').getByRole('radio', { name: wall ? 'Yes' : 'No' }).click()
+  await page
+    .getByLabel('Net available')
+    .getByRole('radio', { name: net ? 'Yes' : 'No' })
+    .click()
+  await page
+    .getByLabel('Wall available')
+    .getByRole('radio', { name: wall ? 'Yes' : 'No' })
+    .click()
   await page.getByRole('radio', { name: time }).click()
   await page.getByRole('button', { name: /build session/i }).click()
 
@@ -40,7 +46,10 @@ async function waitForRunControls(page: import('@playwright/test').Page) {
 async function endSessionEarly(page: import('@playwright/test').Page) {
   await waitForRunControls(page)
   await page.getByRole('button', { name: /pause/i }).click()
-  await page.getByRole('button', { name: /end session/i }).first().click()
+  await page
+    .getByRole('button', { name: /end session/i })
+    .first()
+    .click()
   const confirmDialog = page.locator('.fixed')
   await confirmDialog.getByRole('button', { name: /end session/i }).click()
   await expect(page.getByText(/quick review/i)).toBeVisible({ timeout: 5000 })
@@ -55,9 +64,7 @@ test.describe('v0b session flow', () => {
 
   test('new user can build and start a session', async ({ page }) => {
     // D128: cold-state heading is solo voice.
-    await expect(
-      page.getByRole('heading', { name: /where are you today/i }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: /where are you today/i })).toBeVisible()
     await setupAndStart(page)
     await expect(page.getByText(/Solo \+ Open/)).toBeVisible()
     await passSafety(page)
@@ -84,11 +91,7 @@ test.describe('v0b session flow', () => {
     // C-4 (Surface 2): the review-pending primary card renders "Review
     // your last session" + the plan name instead of the old "You have an
     // unreviewed session" sentence.
-    await expect(
-      page.getByText(/review your last session/i),
-    ).toBeVisible({ timeout: 5000 })
-    await expect(
-      page.getByRole('button', { name: /finish review/i }),
-    ).toBeVisible()
+    await expect(page.getByText(/review your last session/i)).toBeVisible({ timeout: 5000 })
+    await expect(page.getByRole('button', { name: /finish review/i })).toBeVisible()
   })
 })

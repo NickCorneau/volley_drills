@@ -71,9 +71,9 @@
    * rendering if the woff2 is ever missing (offline-first safety).
    * See docs/plans/2026-04-19-feat-phase-f10-timer-display-face-plan.md.
    */
-  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace,
-    SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-    'Courier New', monospace;
+  --font-mono:
+    'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, 'Liberation Mono', 'Courier New', monospace;
 
   /*
    * D127 (2026-04-19): reserved semantic text tokens. Tailwind v4

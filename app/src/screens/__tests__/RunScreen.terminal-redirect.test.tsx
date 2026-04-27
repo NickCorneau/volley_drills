@@ -20,11 +20,7 @@ async function clearDb() {
   ])
 }
 
-async function seedTerminal(
-  execId: string,
-  planId: string,
-  status: 'completed' | 'ended_early',
-) {
+async function seedTerminal(execId: string, planId: string, status: 'completed' | 'ended_early') {
   const now = Date.now()
   await db.sessionPlans.put({
     id: planId,
@@ -55,9 +51,7 @@ async function seedTerminal(
     planId,
     status,
     activeBlockIndex: 0,
-    blockStatuses: [
-      { blockId: 'b-0', status: status === 'completed' ? 'completed' : 'skipped' },
-    ],
+    blockStatuses: [{ blockId: 'b-0', status: status === 'completed' ? 'completed' : 'skipped' }],
     startedAt: now - 10 * 60_000,
     completedAt: now - 5 * 60_000,
   })

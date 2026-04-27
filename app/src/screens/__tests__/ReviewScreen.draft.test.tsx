@@ -128,9 +128,7 @@ describe('ReviewScreen draft persistence (C-1 Unit 7)', () => {
     await screen.findByRole('heading', { name: /quick review/i })
 
     // notCaptured chip lives under the pass-metric input. Tap it.
-    await user.click(
-      await screen.findByRole('button', { name: /couldn.t capture reps/i }),
-    )
+    await user.click(await screen.findByRole('button', { name: /couldn.t capture reps/i }))
 
     // Pick an RPE to trigger the draft write (notCaptured alone is not a
     // "meaningful change" for UX purposes - the tester can un-tap it).
@@ -146,10 +144,7 @@ describe('ReviewScreen draft persistence (C-1 Unit 7)', () => {
 
 async function waitForDraft(execId: string, attempts = 20) {
   for (let i = 0; i < attempts; i += 1) {
-    const row = await db.sessionReviews
-      .where('executionLogId')
-      .equals(execId)
-      .first()
+    const row = await db.sessionReviews.where('executionLogId').equals(execId).first()
     if (row) return row
     await new Promise((r) => setTimeout(r, 25))
   }

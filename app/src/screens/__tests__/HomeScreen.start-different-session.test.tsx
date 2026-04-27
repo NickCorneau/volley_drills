@@ -159,12 +159,8 @@ describe('HomeScreen: Start a different session (Phase F Unit 1)', () => {
 
     await screen.findByRole('button', { name: /repeat this session/i })
 
-    expect(
-      screen.queryByRole('button', { name: /^edit$/i }),
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: /same as last time/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^edit$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /same as last time/i })).not.toBeInTheDocument()
   })
 
   it('review pending: Start a different session fires the soft-block modal', async () => {
@@ -230,9 +226,7 @@ describe('HomeScreen: Start a different session (Phase F Unit 1)', () => {
     await user.click(repeat)
 
     await waitFor(() =>
-      expect(
-        screen.getByRole('dialog', { name: /finish.*review first/i }),
-      ).toBeInTheDocument(),
+      expect(screen.getByRole('dialog', { name: /finish.*review first/i })).toBeInTheDocument(),
     )
   })
 })

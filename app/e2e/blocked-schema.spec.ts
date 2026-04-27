@@ -110,8 +110,6 @@ test.describe('blocked-schema overlay (V0B-22)', () => {
         name: /reload to continue/i,
       }),
     ).toBeVisible()
-    await expect(
-      overlay.getByRole('button', { name: /reload/i }),
-    ).toBeVisible()
+    await expect(overlay.getByRole('button', { name: /reload/i })).toBeVisible()
   })
 })

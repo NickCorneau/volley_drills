@@ -1,9 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 import { emitSchemaBlocked } from '../lib/schema-blocked'
-import {
-  backfillOnboardingCompletedAt,
-  backfillSessionReviewStatus,
-} from './migrations/backfills'
+import { backfillOnboardingCompletedAt, backfillSessionReviewStatus } from './migrations/backfills'
 import type {
   ExecutionLog,
   SessionDraft,

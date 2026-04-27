@@ -158,12 +158,7 @@ describe('useSessionRunner', () => {
 
     expect(sessionService.buildPausedExecution).toHaveBeenCalledWith(inProgressExec)
     expect(sessionService.saveExecution).toHaveBeenCalledWith(paused)
-    expect(timerService.flushTimerForBlock).toHaveBeenCalledWith(
-      inProgressExec,
-      15,
-      180,
-      'paused',
-    )
+    expect(timerService.flushTimerForBlock).toHaveBeenCalledWith(inProgressExec, 15, 180, 'paused')
   })
 
   it('resumeBlock calls buildResumedExecution + saveExecution', async () => {
@@ -287,7 +282,10 @@ describe('useSessionRunner', () => {
   })
 
   it('recoverTimerState delegates to recoverTimer with current exec', async () => {
-    vi.mocked(timerService.recoverTimer).mockResolvedValue({ remaining: 55, effectiveDurationSeconds: 180 })
+    vi.mocked(timerService.recoverTimer).mockResolvedValue({
+      remaining: 55,
+      effectiveDurationSeconds: 180,
+    })
 
     const { result } = renderHook(() => useSessionRunner('exec-1'))
     await waitFor(() => expect(result.current.loaded).toBe(true))

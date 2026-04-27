@@ -108,9 +108,7 @@ describe('HomeScreen recent sessions trailer (Tier 1a Unit 5)', () => {
     renderHome()
     // Wait for Home to leave its loading state.
     await screen.findByRole('button', { name: /start first workout/i })
-    expect(
-      screen.queryByRole('region', { name: /recent sessions/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: /recent sessions/i })).not.toBeInTheDocument()
   })
 
   it('renders three rows in reverse chronological order with focus + completion', async () => {
@@ -205,8 +203,6 @@ describe('HomeScreen recent sessions trailer (Tier 1a Unit 5)', () => {
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument()
     })
-    expect(
-      screen.queryByRole('region', { name: /recent sessions/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: /recent sessions/i })).not.toBeInTheDocument()
   })
 })

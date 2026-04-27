@@ -15,8 +15,7 @@ type ButtonProps = {
   fullWidth?: boolean
 } & ButtonHTMLAttributes<HTMLButtonElement>
 
-const focusRing =
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2'
+const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2'
 
 // Phase F11 (2026-04-19): hover states added to every clickable
 // variant. The Phase F9 rollback correctly removed hover darkening
@@ -140,12 +139,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={cx(
-        'transition-colors',
-        variantStyles[variant],
-        fullWidth && 'w-full',
-        className,
-      )}
+      className={cx('transition-colors', variantStyles[variant], fullWidth && 'w-full', className)}
       {...props}
     >
       {children}

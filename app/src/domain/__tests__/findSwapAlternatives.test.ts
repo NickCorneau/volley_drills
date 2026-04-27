@@ -80,10 +80,7 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
     const firstAlternateName = first[0].drillName
 
     // Second call exclude the alternate we just picked.
-    const next = findSwapAlternatives(
-      { ...block, drillName: firstAlternateName },
-      makeContext(),
-    )
+    const next = findSwapAlternatives({ ...block, drillName: firstAlternateName }, makeContext())
     // Still returns alternates (the pool > 1 for solo+wall main_skill)
     // and does NOT include the excluded drill.
     expect(next.length).toBeGreaterThanOrEqual(0)
@@ -120,9 +117,7 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
         drillId: expect.any(String),
         variantId: expect.any(String),
       })
-      expect(drill?.variants.some((variant) => variant.id === alt.variantId)).toBe(
-        true,
-      )
+      expect(drill?.variants.some((variant) => variant.id === alt.variantId)).toBe(true)
     }
   })
 
@@ -220,9 +215,7 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
       // Passing the current drill's name in excludeDrillNames must
       // not cause the fallback to re-include it - the current
       // drill exclusion is the one invariant that never relaxes.
-      expect(
-        withCurrentInExcludes.every((b) => b.drillName !== currentName),
-      ).toBe(true)
+      expect(withCurrentInExcludes.every((b) => b.drillName !== currentName)).toBe(true)
       expect(withCurrentInExcludes.length).toBe(baseline.length)
     })
 
@@ -239,9 +232,7 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
       const block = makeBlock({ type: 'main_skill' })
       const bare = findSwapAlternatives(block, makeContext())
       const withOpts = findSwapAlternatives(block, makeContext(), {})
-      expect(withOpts.map((b) => b.drillName)).toEqual(
-        bare.map((b) => b.drillName),
-      )
+      expect(withOpts.map((b) => b.drillName)).toEqual(bare.map((b) => b.drillName))
     })
   })
 
@@ -264,9 +255,7 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
 
       expect(out.length).toBeGreaterThan(0)
       expect(out[0].drillId).toBe('d42')
-      expect(out[0].rationale).toBe(
-        "Chosen because: today's main setting rep.",
-      )
+      expect(out[0].rationale).toBe("Chosen because: today's main setting rep.")
     })
 
     it('prioritizes a no-net substitute and explains the blocked preferred path', () => {
@@ -309,9 +298,7 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
 
       expect(out.length).toBeGreaterThan(0)
       expect(out[0].drillId).toBe('d10')
-      expect(out[0].rationale).toBe(
-        "Chosen because: today's main passing rep.",
-      )
+      expect(out[0].rationale).toBe("Chosen because: today's main passing rep.")
     })
 
     /**
@@ -402,8 +389,7 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
       // At least one of d38/d39 should surface - both are solo and have
       // `skillFocus: ['set']`, matching `pressure: ['pass', 'serve', 'set']`.
       expect(
-        names.includes('Bump Set Fundamentals') ||
-          names.includes('Hand Set Fundamentals'),
+        names.includes('Bump Set Fundamentals') || names.includes('Hand Set Fundamentals'),
       ).toBe(true)
     })
   })

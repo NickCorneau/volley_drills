@@ -39,10 +39,7 @@ export function FirstOpenGate({ children }: { children: ReactNode }) {
     let cancelled = false
     ;(async () => {
       try {
-        const completedAt = await getStorageMeta(
-          'onboarding.completedAt',
-          isTimestamp,
-        )
+        const completedAt = await getStorageMeta('onboarding.completedAt', isTimestamp)
         if (cancelled) return
         if (completedAt != null) {
           setResolved(true)
@@ -50,15 +47,10 @@ export function FirstOpenGate({ children }: { children: ReactNode }) {
         }
         // Not yet completed - route to the step the user left off on,
         // defaulting to Skill Level.
-        const step = await getStorageMeta(
-          'onboarding.step',
-          isOnboardingStep,
-        )
+        const step = await getStorageMeta('onboarding.step', isOnboardingStep)
         if (cancelled) return
         const target =
-          step === 'todays_setup'
-            ? routes.onboardingTodaysSetup()
-            : routes.onboardingSkillLevel()
+          step === 'todays_setup' ? routes.onboardingTodaysSetup() : routes.onboardingSkillLevel()
         // R1 (C-3): only `/` is the first-open entry; deep links like `/run`
         // or `/safety` must still resolve so those screens can handle errors
         // and redirects without being forced through onboarding first.

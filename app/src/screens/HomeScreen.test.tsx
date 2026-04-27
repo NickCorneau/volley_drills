@@ -40,18 +40,13 @@ describe('HomeScreen chrome (Brandmark + Settings footer link)', () => {
       <MemoryRouter>
         <Routes>
           <Route path="/" element={<HomeScreen />} />
-          <Route
-            path="/settings"
-            element={<div data-testid="settings-route">settings</div>}
-          />
+          <Route path="/settings" element={<div data-testid="settings-route">settings</div>} />
         </Routes>
       </MemoryRouter>,
     )
 
     await user.click(await screen.findByRole('link', { name: /^settings$/i }))
-    expect(
-      await screen.findByTestId('settings-route'),
-    ).toBeInTheDocument()
+    expect(await screen.findByTestId('settings-route')).toBeInTheDocument()
   })
 })
 
@@ -90,10 +85,7 @@ describe('HomeScreen', () => {
       <MemoryRouter>
         <Routes>
           <Route path="/" element={<HomeScreen />} />
-          <Route
-            path="/complete"
-            element={<div data-testid="complete-route">complete</div>}
-          />
+          <Route path="/complete" element={<div data-testid="complete-route">complete</div>} />
         </Routes>
       </MemoryRouter>,
     )
@@ -102,13 +94,9 @@ describe('HomeScreen', () => {
     // ("Review pending" since 2026-04-26 F11; was "Review your last
     // session" pre-`F11`) + the plan name. Assert both so a future
     // copy change flips the test loudly.
-    expect(
-      await screen.findByText(/^Review pending$/),
-    ).toBeInTheDocument()
+    expect(await screen.findByText(/^Review pending$/)).toBeInTheDocument()
     expect(screen.getByText(/solo \+ wall/i)).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: 'Finish review' }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Finish review' })).toBeInTheDocument()
 
     // V0B / red-team #5: Skip review is a two-step confirm - the first tap
     // opens the confirm row, the "Yes, skip" tap writes the expired stub.

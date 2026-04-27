@@ -72,7 +72,12 @@ async function readAllExecutionLogs(
 
 async function writeSessionReviewDirect(
   page: import('@playwright/test').Page,
-  review: SessionReviewShape & { sessionRpe: number; goodPasses: number; totalAttempts: number; submittedAt: number },
+  review: SessionReviewShape & {
+    sessionRpe: number
+    goodPasses: number
+    totalAttempts: number
+    submittedAt: number
+  },
 ) {
   await page.evaluate((payload) => {
     return new Promise<void>((resolve, reject) => {
@@ -154,7 +159,9 @@ test.describe('Phase A schema verification', () => {
     await page.reload()
   })
 
-  test('actualDurationMinutes is persisted on ended-early ExecutionLog (V0B-23)', async ({ page }) => {
+  test('actualDurationMinutes is persisted on ended-early ExecutionLog (V0B-23)', async ({
+    page,
+  }) => {
     await buildAndStartSoloOpen(page)
     await waitForRunControls(page)
 
@@ -162,7 +169,10 @@ test.describe('Phase A schema verification', () => {
     await page.waitForTimeout(2500)
 
     await page.getByRole('button', { name: /pause/i }).click()
-    await page.getByRole('button', { name: /end session/i }).first().click()
+    await page
+      .getByRole('button', { name: /end session/i })
+      .first()
+      .click()
     const confirmDialog = page.locator('.fixed')
     await confirmDialog.getByRole('button', { name: /end session/i }).click()
     await expect(page.getByText(/quick review/i)).toBeVisible({ timeout: 5000 })
@@ -179,7 +189,9 @@ test.describe('Phase A schema verification', () => {
     expect(Math.abs(scaled - Math.round(scaled))).toBeLessThan(1e-9)
   })
 
-  test('borderlineCount and drillScores round-trip through real IndexedDB (V0B-12, V0B-29)', async ({ page }) => {
+  test('borderlineCount and drillScores round-trip through real IndexedDB (V0B-12, V0B-29)', async ({
+    page,
+  }) => {
     // Phase A does not have a UI path for these fields yet (populated in Phase C).
     // This test writes a review directly through the real browser IndexedDB
     // to confirm the schema accepts and returns both fields intact.

@@ -273,8 +273,7 @@ const chain7: ProgressionChain = {
       toDrillId: 'd42',
       direction: 'progression',
       gatingCriteria: '15-set partner rally with clean target shape in d41',
-      description:
-        'Partner rhythm established → set to named corners with the same clean contact.',
+      description: 'Partner rhythm established → set to named corners with the same clean contact.',
     },
   ],
 }

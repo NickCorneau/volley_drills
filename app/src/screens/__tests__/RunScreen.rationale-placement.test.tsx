@@ -82,19 +82,14 @@ describe('RunScreen: rationale placement + typography (P1-11 / walkthrough 2026-
     await seedPausedSession('exec-ratio', 'plan-ratio')
     renderAt('exec-ratio')
 
-    const rationale = await screen.findByText(
-      /Chosen because: today's main pass rep\./i,
-    )
-    const instructions = await screen.findByText(
-      /Self-toss; forearm pass up and down\./i,
-    )
+    const rationale = await screen.findByText(/Chosen because: today's main pass rep\./i)
+    const instructions = await screen.findByText(/Self-toss; forearm pass up and down\./i)
 
     // `compareDocumentPosition` returns DOCUMENT_POSITION_FOLLOWING (4)
     // when the reference node follows the argument in document order.
     // Rationale must precede instructions.
     expect(
-      rationale.compareDocumentPosition(instructions) &
-        Node.DOCUMENT_POSITION_FOLLOWING,
+      rationale.compareDocumentPosition(instructions) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy()
   })
 
@@ -102,9 +97,7 @@ describe('RunScreen: rationale placement + typography (P1-11 / walkthrough 2026-
     await seedPausedSession('exec-size', 'plan-size')
     renderAt('exec-size')
 
-    const rationale = await screen.findByText(
-      /Chosen because: today's main pass rep\./i,
-    )
+    const rationale = await screen.findByText(/Chosen because: today's main pass rep\./i)
 
     // Tailwind class-presence: rationale is secondary body; ships at
     // `text-sm` (founder 2026-04-22 downshift from 16 px / text-base).
@@ -117,9 +110,7 @@ describe('RunScreen: rationale placement + typography (P1-11 / walkthrough 2026-
     await seedPausedSession('exec-instr', 'plan-instr')
     renderAt('exec-instr')
 
-    const instructions = await screen.findByText(
-      /Self-toss; forearm pass up and down\./i,
-    )
+    const instructions = await screen.findByText(/Self-toss; forearm pass up and down\./i)
 
     // Run keeps 16 px for courtsideInstructions during the block.
     // TransitionScreen (2026-04-22) uses a smaller preview + optional

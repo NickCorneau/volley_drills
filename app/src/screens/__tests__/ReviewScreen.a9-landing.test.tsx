@@ -51,10 +51,7 @@ function renderAt(execId: string) {
     <MemoryRouter initialEntries={[`/review?id=${execId}`]}>
       <Routes>
         <Route path="/review" element={<ReviewScreen />} />
-        <Route
-          path="/complete"
-          element={<div data-testid="complete-route">complete</div>}
-        />
+        <Route path="/complete" element={<div data-testid="complete-route">complete</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -70,9 +67,7 @@ describe('ReviewScreen A9 universal landing on past-cap load', () => {
     renderAt('exec-past')
 
     expect(await screen.findByTestId('complete-route')).toBeInTheDocument()
-    expect(
-      screen.queryByText(/saved too late for planning/i),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByText(/saved too late for planning/i)).not.toBeInTheDocument()
   })
 
   it('writes the expired stub before navigating so CompleteScreen can load the bundle (A9 correctness-1 fix)', async () => {
@@ -87,10 +82,7 @@ describe('ReviewScreen A9 universal landing on past-cap load', () => {
     // record) can render the C-2 Case A summary rather than "Session not
     // found.". Before the fix, the navigate fired BEFORE any write, leaving
     // CompleteScreen with bundle === null.
-    const stub = await db.sessionReviews
-      .where('executionLogId')
-      .equals('exec-past-stub')
-      .first()
+    const stub = await db.sessionReviews.where('executionLogId').equals('exec-past-stub').first()
     expect(stub).toBeDefined()
     expect(stub?.status).toBe('skipped')
     expect(stub?.quickTags).toContain('expired')

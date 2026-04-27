@@ -17,10 +17,7 @@ import { describe, expect, it } from 'vitest'
  *   non-safe-boundary screen.
  */
 
-const SAFE_BOUNDARY_SCREENS = new Set([
-  '../HomeScreen.tsx',
-  '../CompleteScreen.tsx',
-])
+const SAFE_BOUNDARY_SCREENS = new Set(['../HomeScreen.tsx', '../CompleteScreen.tsx'])
 
 const screenSources = import.meta.glob<string>('../*.tsx', {
   eager: true,
@@ -41,18 +38,16 @@ describe('UpdatePrompt safe-boundary policy (V0B-20, D41)', () => {
 
     it(`${file} ${isSafe ? 'mounts' : 'does not mount'} UpdatePrompt`, () => {
       const importsPrompt =
-        /from ['"]\.\.\/components\/UpdatePrompt['"]/.test(source) ||
-        /<UpdatePrompt\b/.test(source)
+        /from ['"]\.\.\/components\/UpdatePrompt['"]/.test(source) || /<UpdatePrompt\b/.test(source)
       const usesHook = /useAppRegisterSW\b/.test(source)
 
       if (isSafe) {
         expect(importsPrompt, `${file} should import UpdatePrompt`).toBe(true)
         expect(usesHook, `${file} should use useAppRegisterSW`).toBe(true)
       } else {
-        expect(
-          importsPrompt,
-          `${file} must NOT mount UpdatePrompt (safe-boundary policy)`,
-        ).toBe(false)
+        expect(importsPrompt, `${file} must NOT mount UpdatePrompt (safe-boundary policy)`).toBe(
+          false,
+        )
         expect(
           usesHook,
           `${file} must NOT call useAppRegisterSW directly (registration is module-scoped)`,

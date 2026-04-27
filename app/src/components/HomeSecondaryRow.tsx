@@ -1,8 +1,5 @@
 import type { SessionDraft } from '../db'
-import type {
-  LastCompleteBundle,
-  PendingReview,
-} from '../services/session'
+import type { LastCompleteBundle, PendingReview } from '../services/session'
 import { Button } from './ui'
 
 /**
@@ -95,9 +92,7 @@ export function HomeSecondaryRow(props: HomeSecondaryRowProps) {
       )
     default: {
       const _exhaustive: never = props
-      throw new Error(
-        `Unhandled HomeSecondaryRow variant: ${JSON.stringify(_exhaustive)}`,
-      )
+      throw new Error(`Unhandled HomeSecondaryRow variant: ${JSON.stringify(_exhaustive)}`)
     }
   }
 }

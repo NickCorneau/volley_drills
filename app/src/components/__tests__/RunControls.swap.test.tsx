@@ -35,25 +35,14 @@ describe('RunControls Swap button (Phase F Unit 4)', () => {
 
   it('active state + onSwap undefined: Swap button is hidden', () => {
     render(<RunControls {...baseProps} isPaused={false} />)
-    expect(
-      screen.queryByRole('button', { name: /swap drill/i }),
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: /^swap$/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /swap drill/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^swap$/i })).not.toBeInTheDocument()
   })
 
   it('paused state + onSwap provided: renders Swap alongside Shorten / Skip / End', async () => {
     const onSwap = vi.fn()
     const user = userEvent.setup()
-    render(
-      <RunControls
-        {...baseProps}
-        isPaused
-        isRequired={false}
-        onSwap={onSwap}
-      />,
-    )
+    render(<RunControls {...baseProps} isPaused isRequired={false} onSwap={onSwap} />)
 
     // Paused row uses the compact "Swap" label, not "Swap drill".
     const swap = screen.getByRole('button', { name: /^swap$/i })
@@ -64,21 +53,13 @@ describe('RunControls Swap button (Phase F Unit 4)', () => {
     // All four divergence affordances render in paused state.
     expect(screen.getByRole('button', { name: /resume/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /shorten/i })).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /skip block/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /end session/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /skip block/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /end session/i })).toBeInTheDocument()
   })
 
   it('paused state + required block + onSwap undefined: Swap and Skip both hidden', () => {
     render(<RunControls {...baseProps} isPaused isRequired />)
-    expect(
-      screen.queryByRole('button', { name: /^swap$/i }),
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: /skip block/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^swap$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /skip block/i })).not.toBeInTheDocument()
   })
 })

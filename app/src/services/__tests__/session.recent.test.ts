@@ -178,11 +178,7 @@ describe('getRecentSessions (Tier 1a Unit 5)', () => {
       completedAt: t - 150_000,
     })
     const recent = await getRecentSessions()
-    expect(recent.map((r) => r.execId)).toEqual([
-      'x-newest',
-      'x-middle',
-      'x-oldest',
-    ])
+    expect(recent.map((r) => r.execId)).toEqual(['x-newest', 'x-middle', 'x-oldest'])
   })
 
   it('falls back to startedAt when completedAt is missing', async () => {

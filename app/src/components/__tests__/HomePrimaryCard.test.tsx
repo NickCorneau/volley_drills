@@ -1,11 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import type {
-  LastCompleteBundle,
-  PendingReview,
-  ResumableSession,
-} from '../../services/session'
+import type { LastCompleteBundle, PendingReview, ResumableSession } from '../../services/session'
 import type { SessionDraft } from '../../db'
 import { HomePrimaryCard } from '../HomePrimaryCard'
 
@@ -98,9 +94,7 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
     const region = screen.getByRole('region')
     expect(region).toHaveAttribute('aria-label', expect.stringMatching(/first/i))
 
-    await user.click(
-      screen.getByRole('button', { name: /start first workout/i }),
-    )
+    await user.click(screen.getByRole('button', { name: /start first workout/i }))
     expect(onStart).toHaveBeenCalledTimes(1)
   })
 
@@ -171,14 +165,7 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
     const onStart = vi.fn()
     const onEdit = vi.fn()
 
-    render(
-      <HomePrimaryCard
-        variant="draft"
-        data={fakeDraft}
-        onStart={onStart}
-        onEdit={onEdit}
-      />,
-    )
+    render(<HomePrimaryCard variant="draft" data={fakeDraft} onStart={onStart} onEdit={onEdit} />)
 
     expect(screen.getByRole('region')).toHaveAttribute(
       'aria-label',
@@ -195,9 +182,7 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
     // labels makes the rename loud.
     await user.click(screen.getByRole('button', { name: /^change setup$/i }))
     expect(onEdit).toHaveBeenCalledTimes(1)
-    expect(
-      screen.queryByRole('button', { name: /^edit$/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^edit$/i })).not.toBeInTheDocument()
   })
 
   it('last_complete ended-early: renders TWO buttons (Repeat full N-min + Repeat what you did M min)', async () => {
@@ -266,15 +251,11 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
     )
 
     // Primary: "Repeat full 25-min plan" (3 + 11 + 11).
-    await user.click(
-      screen.getByRole('button', { name: /repeat full 25-min plan/i }),
-    )
+    await user.click(screen.getByRole('button', { name: /repeat full 25-min plan/i }))
     expect(onRepeat).toHaveBeenCalledTimes(1)
 
     // Secondary: "Repeat what you did (14 min)" (3 + 11).
-    await user.click(
-      screen.getByRole('button', { name: /repeat what you did \(14 min\)/i }),
-    )
+    await user.click(screen.getByRole('button', { name: /repeat what you did \(14 min\)/i }))
     expect(onRepeatWhatYouDid).toHaveBeenCalledTimes(1)
 
     // "ended early" annotation in the body.
@@ -282,9 +263,7 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
 
     // Phase F Unit 1: tertiary "Start a different session" renders on
     // ended-early too (single CTA set across normal + ended-early).
-    expect(
-      screen.getByRole('button', { name: /start a different session/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /start a different session/i })).toBeInTheDocument()
   })
 
   it('last_complete ended-early with zero completed blocks omits the secondary button', () => {
@@ -334,13 +313,9 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
       />,
     )
 
-    expect(
-      screen.queryByRole('button', { name: /repeat what you did/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /repeat what you did/i })).not.toBeInTheDocument()
     // Primary still renders.
-    expect(
-      screen.getByRole('button', { name: /repeat full 14-min plan/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /repeat full 14-min plan/i })).toBeInTheDocument()
   })
 
   it('last_complete (Phase F Unit 1): renders Repeat + Start a different session, no Edit or Same-as-last-time', async () => {
@@ -362,26 +337,18 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
       expect.stringMatching(/last session/i),
     )
 
-    await user.click(
-      screen.getByRole('button', { name: /repeat this session/i }),
-    )
+    await user.click(screen.getByRole('button', { name: /repeat this session/i }))
     expect(onRepeat).toHaveBeenCalledTimes(1)
 
-    await user.click(
-      screen.getByRole('button', { name: /start a different session/i }),
-    )
+    await user.click(screen.getByRole('button', { name: /start a different session/i }))
     expect(onStartDifferent).toHaveBeenCalledTimes(1)
 
     // Phase F Unit 1 regression guard: the pre-Phase-F affordances MUST
     // be gone. `Edit` shared a URL with Repeat (same-URL duplication);
     // `Same as last time` was a one-tap shortcut that bypassed the
     // StaleContextBanner. A future reintroduction should fail loudly.
-    expect(
-      screen.queryByRole('button', { name: /^edit$/i }),
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: /same as last time/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^edit$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /same as last time/i })).not.toBeInTheDocument()
   })
 
   it('resume: delegates to the existing ResumePrompt modal (role=dialog)', async () => {

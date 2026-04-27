@@ -1,8 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import {
-  clearIndexedDB,
-  seedOnboardingAndOpenHome,
-} from './helpers'
+import { clearIndexedDB, seedOnboardingAndOpenHome } from './helpers'
 
 /**
  * Repeat path + Start-a-different-session Playwright smoke.
@@ -167,15 +164,13 @@ test.describe('phase-c5 repeat path', () => {
     await seedOnboardingAndOpenHome(page)
   })
 
-  test('normal case: Repeat -> /safety (defaults per D83) -> /run', async ({
-    page,
-  }) => {
+  test('normal case: Repeat -> /safety (defaults per D83) -> /run', async ({ page }) => {
     await seedLastComplete(page)
     await page.reload()
 
-    await expect(
-      page.getByRole('button', { name: /repeat this session/i }),
-    ).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByRole('button', { name: /repeat this session/i })).toBeVisible({
+      timeout: 10_000,
+    })
 
     await page.getByRole('button', { name: /repeat this session/i }).click()
 
@@ -190,9 +185,7 @@ test.describe('phase-c5 repeat path', () => {
     // is the D83 contract — the Repeat shortcut must not leak any
     // prior safety answers.
     await expect(page.getByText(/any pain that changes/i)).toBeVisible()
-    await expect(
-      page.getByRole('button', { name: /^continue$/i }),
-    ).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /^continue$/i })).toHaveCount(0)
 
     // Answer safety and proceed to /run.
     await page.getByRole('button', { name: 'No' }).click()
@@ -236,22 +229,14 @@ test.describe('phase-c5 repeat path', () => {
     // `Same as last time` affordances must NOT render — the single-
     // choice model (same-as-last or different) is the whole point of
     // the Phase F cleanup.
-    await expect(
-      page.getByRole('button', { name: /repeat this session/i }),
-    ).toBeVisible({ timeout: 10_000 })
-    await expect(
-      page.getByRole('button', { name: /start a different session/i }),
-    ).toBeVisible()
-    await expect(
-      page.getByRole('button', { name: /^edit$/i }),
-    ).toHaveCount(0)
-    await expect(
-      page.getByRole('button', { name: /same as last time/i }),
-    ).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /repeat this session/i })).toBeVisible({
+      timeout: 10_000,
+    })
+    await expect(page.getByRole('button', { name: /start a different session/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /^edit$/i })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /same as last time/i })).toHaveCount(0)
 
-    await page
-      .getByRole('button', { name: /start a different session/i })
-      .click()
+    await page.getByRole('button', { name: /start a different session/i }).click()
 
     // Lands on fresh /setup (no banner). The stale-context banner
     // was retired in the 2026-04-22 one-tap Repeat pass — this is

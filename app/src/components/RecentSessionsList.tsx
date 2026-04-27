@@ -67,13 +67,8 @@ export function RecentSessionsList({ entries, now }: RecentSessionsListProps) {
   if (entries.length === 0) return null
 
   return (
-    <section
-      aria-label="Recent sessions"
-      className="flex flex-col gap-2 px-1 pt-2"
-    >
-      <h2 className="text-sm font-semibold text-text-primary">
-        Your recent workouts
-      </h2>
+    <section aria-label="Recent sessions" className="flex flex-col gap-2 px-1 pt-2">
+      <h2 className="text-sm font-semibold text-text-primary">Your recent workouts</h2>
       <ul role="list" className="divide-y divide-text-primary/5">
         {entries.map((entry) => {
           const focus = inferSessionFocus(entry.plan.blocks)
@@ -82,13 +77,9 @@ export function RecentSessionsList({ entries, now }: RecentSessionsListProps) {
               key={entry.execId}
               className="grid grid-cols-[auto_1fr_auto] items-baseline gap-3 py-2 text-sm text-text-primary"
             >
-              <span className="text-text-secondary">
-                {formatDayName(entry.endedAt, now)}
-              </span>
+              <span className="text-text-secondary">{formatDayName(entry.endedAt, now)}</span>
               <span>{focusLabel(focus)}</span>
-              <span className="text-text-secondary">
-                {entry.completed ? 'Done' : 'Partial'}
-              </span>
+              <span className="text-text-secondary">{entry.completed ? 'Done' : 'Partial'}</span>
             </li>
           )
         })}

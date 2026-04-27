@@ -42,10 +42,7 @@ export async function getStorageMeta<T>(
  * Write (or overwrite) a single `storageMeta` key. Single-key writes are
  * atomic via IDB per-operation transaction semantics.
  */
-export async function setStorageMeta(
-  key: string,
-  value: unknown,
-): Promise<void> {
+export async function setStorageMeta(key: string, value: unknown): Promise<void> {
   const now = Date.now()
   await db.storageMeta.put({ key, value, updatedAt: now })
 }
@@ -57,9 +54,7 @@ export async function setStorageMeta(
  * An empty entries object is a no-op (resolves without opening a
  * transaction).
  */
-export async function setStorageMetaMany(
-  entries: Record<string, unknown>,
-): Promise<void> {
+export async function setStorageMetaMany(entries: Record<string, unknown>): Promise<void> {
   const keys = Object.keys(entries)
   if (keys.length === 0) return
   const now = Date.now()

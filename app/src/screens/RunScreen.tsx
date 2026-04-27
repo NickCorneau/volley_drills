@@ -10,11 +10,7 @@ import { useTimer } from '../hooks/useTimer'
 import { useWakeLock } from '../hooks/useWakeLock'
 import { useSessionRunner } from '../hooks/useSessionRunner'
 import { findSwapAlternatives } from '../domain/sessionBuilder'
-import {
-  playBlockEndBeep,
-  playPrerollTick,
-  playSubBlockTick,
-} from '../lib/audio'
+import { playBlockEndBeep, playPrerollTick, playSubBlockTick } from '../lib/audio'
 import { phaseLabel } from '../lib/format'
 import { computeShortened } from '../lib/shorten'
 import { isSchemaBlocked } from '../lib/schema-blocked'
@@ -26,16 +22,13 @@ export function RunScreen() {
   const [searchParams] = useSearchParams()
   const location = useLocation()
   const executionLogId = searchParams.get('id') ?? ''
-  const shortened =
-    (location.state as { shortened?: boolean } | null)?.shortened ?? false
+  const shortened = (location.state as { shortened?: boolean } | null)?.shortened ?? false
 
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   // `ux.prerollHintDismissed` gate: the "Keep the phone unlocked" line
   // shows until the first preroll completes, then never again. `null`
   // while the read is in flight (hint stays hidden - fail-quiet).
-  const [prerollHintDismissed, setPrerollHintDismissed] = useState<
-    boolean | null
-  >(null)
+  const [prerollHintDismissed, setPrerollHintDismissed] = useState<boolean | null>(null)
   const blockDurRef = useRef(0)
   const remainingRef = useRef(0)
 
@@ -66,14 +59,10 @@ export function RunScreen() {
     recoverTimerState,
   } = runner
 
-  const defaultDuration = currentBlock
-    ? currentBlock.durationMinutes * (shortened ? 30 : 60)
-    : 0
+  const defaultDuration = currentBlock ? currentBlock.durationMinutes * (shortened ? 30 : 60) : 0
 
   const [activeDuration, setActiveDuration] = useState(defaultDuration)
-  const [prevBlockId, setPrevBlockId] = useState<string | null>(
-    currentBlock?.id ?? null,
-  )
+  const [prevBlockId, setPrevBlockId] = useState<string | null>(currentBlock?.id ?? null)
 
   if (currentBlock && currentBlock.id !== prevBlockId) {
     // Sync per-block UI state to the new block identity in one pass
@@ -165,9 +154,7 @@ export function RunScreen() {
           (v): v is boolean => typeof v === 'boolean',
         )
         if (cancelled) return
-        setPrerollHintDismissed((prev) =>
-          prev === true ? true : dismissed === true,
-        )
+        setPrerollHintDismissed((prev) => (prev === true ? true : dismissed === true))
       } catch (err) {
         if (cancelled) return
         if (isSchemaBlocked()) return
@@ -224,7 +211,15 @@ export function RunScreen() {
     } else if (bs.status === 'planned' || execution.status === 'not_started') {
       queueMicrotask(startWithPreroll)
     }
-  }, [execution, currentBlock, defaultDuration, recoverTimerState, timer, wakeLock, startWithPreroll])
+  }, [
+    execution,
+    currentBlock,
+    defaultDuration,
+    recoverTimerState,
+    timer,
+    wakeLock,
+    startWithPreroll,
+  ])
 
   useEffect(() => {
     if (!timer.isRunning || !currentBlock) return
@@ -354,10 +349,7 @@ export function RunScreen() {
     if (timer.isRunning) {
       setWasRunning(true)
       timer.pause()
-      pauseBlock(
-        activeDuration - remainingRef.current,
-        activeDuration,
-      )
+      pauseBlock(activeDuration - remainingRef.current, activeDuration)
     } else {
       setWasRunning(false)
     }
@@ -393,11 +385,7 @@ export function RunScreen() {
     // multi-tab race where tab A discards while tab B is still parked on
     // /run - without the guard, tab B would keep ticking and eventually
     // overwrite the ended-early record via advanceBlock. Red-team pass 2.
-    if (
-      execution &&
-      (execution.status === 'completed' ||
-        execution.status === 'ended_early')
-    ) {
+    if (execution && (execution.status === 'completed' || execution.status === 'ended_early')) {
       navigate(routes.review(executionLogId), { replace: true })
     }
   }, [executionLogId, execution, plan, navigate])
@@ -460,9 +448,7 @@ export function RunScreen() {
       */}
       <ScreenShell.Header className="flex items-center justify-between pt-2 pb-3">
         <SafetyIcon />
-        <span className="text-sm font-semibold text-accent">
-          {phaseLabel(currentBlock.type)}
-        </span>
+        <span className="text-sm font-semibold text-accent">{phaseLabel(currentBlock.type)}</span>
         <span className="text-sm font-medium text-text-secondary">
           {currentBlockIndex + 1}/{totalBlocks}
         </span>
@@ -573,9 +559,7 @@ export function RunScreen() {
             >
               {prerollCount}
             </span>
-            <p className="text-sm font-medium text-text-secondary">
-              Get ready&hellip;
-            </p>
+            <p className="text-sm font-medium text-text-secondary">Get ready&hellip;</p>
             {/* iOS Safari PWA suspends AudioContext on lock, so the
                 block-end beep won't fire through a locked screen. The
                 full lock-screen presence spike is post-D91 backlog. Until
@@ -618,9 +602,7 @@ export function RunScreen() {
       {showEndConfirm && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-8">
           <div className="w-full max-w-[390px] rounded-[16px] bg-bg-primary p-6 shadow-lg">
-            <h2 className="text-lg font-bold text-text-primary">
-              End session early?
-            </h2>
+            <h2 className="text-lg font-bold text-text-primary">End session early?</h2>
             <p className="mt-2 text-sm text-text-secondary">
               {currentBlock.type === 'wrap'
                 ? 'You\u2019re in your downshift. Two or three minutes of easy walking before you leave is an honest finish. Your progress will be saved.'
@@ -631,18 +613,10 @@ export function RunScreen() {
                 action-sheet convention, and prevents an accidental end of
                 session from the paused-timer state. Red-team UX #6. */}
             <div className="mt-6 flex flex-col gap-3">
-              <Button
-                variant="primary"
-                fullWidth
-                onClick={handleEndSessionCancel}
-              >
+              <Button variant="primary" fullWidth onClick={handleEndSessionCancel}>
                 Go back
               </Button>
-              <Button
-                variant="danger"
-                fullWidth
-                onClick={() => void handleEndSessionConfirm()}
-              >
+              <Button variant="danger" fullWidth onClick={() => void handleEndSessionConfirm()}>
                 End session
               </Button>
             </div>

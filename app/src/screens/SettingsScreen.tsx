@@ -1,12 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  BackButton,
-  Button,
-  Card,
-  ScreenShell,
-  StatusMessage,
-} from '../components/ui'
+import { BackButton, Button, Card, ScreenShell, StatusMessage } from '../components/ui'
 import { useInstallPosture } from '../hooks/useInstallPosture'
 import { BUILD_DATE, BUILD_SHA } from '../lib/buildInfo'
 import { isSchemaBlocked } from '../lib/schema-blocked'
@@ -70,8 +64,7 @@ export function SettingsScreen() {
       console.error('Export failed:', err)
       setState({
         kind: 'error',
-        message:
-          'Export failed. If this keeps happening let the founder know.',
+        message: 'Export failed. If this keeps happening let the founder know.',
       })
       return
     }
@@ -99,9 +92,7 @@ export function SettingsScreen() {
       <ScreenShell.Body className="gap-8 pb-4">
         <Card variant="focal">
           <div>
-            <h2 className="text-sm font-semibold text-text-primary">
-              Export training records
-            </h2>
+            <h2 className="text-sm font-semibold text-text-primary">Export training records</h2>
             <p className="mt-1 text-sm text-text-secondary">
               Downloads your session history as a JSON file you can share.
             </p>
@@ -123,9 +114,7 @@ export function SettingsScreen() {
               Export saved. Check your downloads.
             </p>
           )}
-          {state.kind === 'error' && (
-            <StatusMessage variant="error" message={state.message} />
-          )}
+          {state.kind === 'error' && <StatusMessage variant="error" message={state.message} />}
         </Card>
 
         {/* 2026-04-23 walkthrough closeout polish item 3: About local
@@ -148,21 +137,14 @@ export function SettingsScreen() {
           data-posture={posture}
           className="flex flex-col gap-2 rounded-[12px] border border-text-secondary/15 bg-bg-warm/40 p-4"
         >
-          <h2
-            id="settings-storage-heading"
-            className="text-sm font-semibold text-text-primary"
-          >
+          <h2 id="settings-storage-heading" className="text-sm font-semibold text-text-primary">
             About local storage
           </h2>
-          <p className="text-sm font-medium text-text-primary">
-            {storageCopy.primary}
-          </p>
+          <p className="text-sm font-medium text-text-primary">{storageCopy.primary}</p>
+          <p className="text-sm leading-relaxed text-text-secondary">{storageCopy.secondary}</p>
           <p className="text-sm leading-relaxed text-text-secondary">
-            {storageCopy.secondary}
-          </p>
-          <p className="text-sm leading-relaxed text-text-secondary">
-            Use Export training records above to move your history
-            between devices or keep a copy off-device.
+            Use Export training records above to move your history between devices or keep a copy
+            off-device.
           </p>
         </section>
       </ScreenShell.Body>

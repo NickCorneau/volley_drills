@@ -1,9 +1,5 @@
 import { test, expect } from '@playwright/test'
-import {
-  clearIndexedDB,
-  goToOnboardingTodaysSetup,
-  seedOnboardingAndOpenHome,
-} from './helpers'
+import { clearIndexedDB, goToOnboardingTodaysSetup, seedOnboardingAndOpenHome } from './helpers'
 
 async function buildSoloOpenSession(page: import('@playwright/test').Page) {
   await goToOnboardingTodaysSetup(page)
@@ -72,7 +68,13 @@ test.describe('edge cases', () => {
     await buildSoloOpenSession(page)
 
     for (let i = 0; i < 24; i++) {
-      if (await page.getByText(/quick review/i).isVisible().catch(() => false)) break
+      if (
+        await page
+          .getByText(/quick review/i)
+          .isVisible()
+          .catch(() => false)
+      )
+        break
 
       const startNext = page.getByRole('button', { name: /start next block/i })
       if (await startNext.isVisible().catch(() => false)) {

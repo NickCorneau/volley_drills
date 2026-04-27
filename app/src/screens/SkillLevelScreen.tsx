@@ -3,11 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ScreenShell } from '../components/ui'
 import { FOCAL_SURFACE_CLASS } from '../components/ui/Card'
 import { isSchemaBlocked } from '../lib/schema-blocked'
-import {
-  SKILL_LEVEL_LABEL,
-  SKILL_LEVELS,
-  type SkillLevel,
-} from '../lib/skillLevel'
+import { SKILL_LEVEL_LABEL, SKILL_LEVELS, type SkillLevel } from '../lib/skillLevel'
 import { loadVoiceFromStorage, type Voice } from '../lib/voiceFromContext'
 import { routes } from '../routes'
 import { setStorageMetaMany } from '../services/storageMeta'
@@ -57,7 +53,7 @@ interface Copy {
 }
 
 const PAIR_COPY: Copy = {
-  heading: "Where\u2019s the pair today?",
+  heading: 'Where\u2019s the pair today?',
   descriptors: {
     foundations: 'Keeping a friendly toss alive.',
     rally_builders: 'Pass easy serves, short rallies.',
@@ -88,9 +84,7 @@ function copyForVoice(voice: Voice): Copy {
   return voice === 'solo' ? SOLO_COPY : PAIR_COPY
 }
 
-const BANDS = SKILL_LEVELS.filter(
-  (l): l is Exclude<SkillLevel, 'unsure'> => l !== 'unsure',
-)
+const BANDS = SKILL_LEVELS.filter((l): l is Exclude<SkillLevel, 'unsure'> => l !== 'unsure')
 
 export function SkillLevelScreen() {
   const navigate = useNavigate()
@@ -157,17 +151,14 @@ export function SkillLevelScreen() {
         the rest of the chrome offscreen.
       */}
       <ScreenShell.Header className="flex flex-col gap-2 pt-8 pb-4">
-        <h1 className="text-xl font-semibold tracking-tight text-text-primary">
-          {copy.heading}
-        </h1>
+        <h1 className="text-xl font-semibold tracking-tight text-text-primary">{copy.heading}</h1>
         <p className="text-sm text-text-secondary">
           Your rough current level. We size today&apos;s drills to match. Change anytime.
         </p>
       </ScreenShell.Header>
 
       <ScreenShell.Body className="pb-6">
-
-      {/* Phase F2 (2026-04-19): option cards now use the same calm
+        {/* Phase F2 (2026-04-19): option cards now use the same calm
           focal-surface language as HomePrimaryCard / SettingsScreen -
           soft shadow + hairline ring instead of a hard `border-2`, a
           touch more vertical breathing between options, and slightly
@@ -186,41 +177,36 @@ export function SkillLevelScreen() {
           leaving the reader to guess. The taxonomy enum is unchanged
           (still writes `skillLevel: 'unsure'` atomically via
           `setStorageMetaMany`). */}
-      <ul
-        className="flex flex-col gap-4"
-        aria-label="Skill level options"
-      >
-        {BANDS.map((level) => (
-          <li key={level}>
+        <ul className="flex flex-col gap-4" aria-label="Skill level options">
+          {BANDS.map((level) => (
+            <li key={level}>
+              <button
+                type="button"
+                onClick={() => void handlePick(level)}
+                className={`flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent hover:bg-bg-warm active:bg-bg-warm ${FOCAL_SURFACE_CLASS}`}
+              >
+                <span className="text-sm font-semibold text-text-primary">
+                  {SKILL_LEVEL_LABEL[level]}
+                </span>
+                <span className="text-sm text-text-secondary">{copy.descriptors[level]}</span>
+              </button>
+            </li>
+          ))}
+          <li>
             <button
               type="button"
-              onClick={() => void handlePick(level)}
+              onClick={() => void handlePick('unsure')}
               className={`flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent hover:bg-bg-warm active:bg-bg-warm ${FOCAL_SURFACE_CLASS}`}
             >
               <span className="text-sm font-semibold text-text-primary">
-                {SKILL_LEVEL_LABEL[level]}
+                {SKILL_LEVEL_LABEL.unsure}
               </span>
               <span className="text-sm text-text-secondary">
-                {copy.descriptors[level]}
+                We'll size a light starter - you can change this after.
               </span>
             </button>
           </li>
-        ))}
-        <li>
-          <button
-            type="button"
-            onClick={() => void handlePick('unsure')}
-            className={`flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent hover:bg-bg-warm active:bg-bg-warm ${FOCAL_SURFACE_CLASS}`}
-          >
-            <span className="text-sm font-semibold text-text-primary">
-              {SKILL_LEVEL_LABEL.unsure}
-            </span>
-            <span className="text-sm text-text-secondary">
-              We'll size a light starter - you can change this after.
-            </span>
-          </button>
-        </li>
-      </ul>
+        </ul>
       </ScreenShell.Body>
     </ScreenShell>
   )

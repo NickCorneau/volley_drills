@@ -40,37 +40,28 @@ describe('formatDayName (C-5 Unit 1)', () => {
   const ONE_DAY_MS = 24 * 60 * 60 * 1000
 
   it('returns "Today" for the same calendar date', () => {
-    expect(formatDayName(FRIDAY_2026_04_17_NOON_LOCAL, FRIDAY_2026_04_17_NOON_LOCAL))
-      .toBe('Today')
+    expect(formatDayName(FRIDAY_2026_04_17_NOON_LOCAL, FRIDAY_2026_04_17_NOON_LOCAL)).toBe('Today')
   })
 
   it('returns "Today" even if the timestamp is earlier in the same calendar day', () => {
     const earlierToday = FRIDAY_2026_04_17_NOON_LOCAL - 10 * 60 * 60 * 1000 // 2 am
-    expect(formatDayName(earlierToday, FRIDAY_2026_04_17_NOON_LOCAL)).toBe(
-      'Today',
-    )
+    expect(formatDayName(earlierToday, FRIDAY_2026_04_17_NOON_LOCAL)).toBe('Today')
   })
 
   it('returns "Yesterday" for the previous calendar date', () => {
     const thursdayNoon = FRIDAY_2026_04_17_NOON_LOCAL - ONE_DAY_MS
-    expect(formatDayName(thursdayNoon, FRIDAY_2026_04_17_NOON_LOCAL)).toBe(
-      'Yesterday',
-    )
+    expect(formatDayName(thursdayNoon, FRIDAY_2026_04_17_NOON_LOCAL)).toBe('Yesterday')
   })
 
   it('returns the weekday name for 3 days ago (within the last 7)', () => {
     const tuesdayNoon = FRIDAY_2026_04_17_NOON_LOCAL - 3 * ONE_DAY_MS
     // Tuesday when the reference is Friday.
-    expect(formatDayName(tuesdayNoon, FRIDAY_2026_04_17_NOON_LOCAL)).toBe(
-      'Tuesday',
-    )
+    expect(formatDayName(tuesdayNoon, FRIDAY_2026_04_17_NOON_LOCAL)).toBe('Tuesday')
   })
 
   it('returns the weekday name for 6 days ago (within the last 7)', () => {
     const saturdayPriorNoon = FRIDAY_2026_04_17_NOON_LOCAL - 6 * ONE_DAY_MS
-    expect(
-      formatDayName(saturdayPriorNoon, FRIDAY_2026_04_17_NOON_LOCAL),
-    ).toBe('Saturday')
+    expect(formatDayName(saturdayPriorNoon, FRIDAY_2026_04_17_NOON_LOCAL)).toBe('Saturday')
   })
 
   it('falls back to a short date for anything older than 7 days', () => {
@@ -87,19 +78,9 @@ describe('formatDayName (C-5 Unit 1)', () => {
 
   it('handles near-midnight boundaries in local time correctly', () => {
     const fridayJustAfterMidnight = new Date(2026, 3, 17, 0, 5, 0, 0).getTime()
-    const thursdayJustBeforeMidnight = new Date(
-      2026,
-      3,
-      16,
-      23,
-      55,
-      0,
-      0,
-    ).getTime()
+    const thursdayJustBeforeMidnight = new Date(2026, 3, 16, 23, 55, 0, 0).getTime()
     // Across midnight in local time these are different calendar days,
     // so the 10-minute-older timestamp reads as "Yesterday".
-    expect(
-      formatDayName(thursdayJustBeforeMidnight, fridayJustAfterMidnight),
-    ).toBe('Yesterday')
+    expect(formatDayName(thursdayJustBeforeMidnight, fridayJustAfterMidnight)).toBe('Yesterday')
   })
 })

@@ -66,22 +66,13 @@ export function PerDrillCapture({
       data-testid="per-drill-capture"
     >
       <div className="flex flex-col gap-1">
-        <p className="text-xs font-medium uppercase tracking-wide text-accent">
-          Quick tag
-        </p>
-        <h2
-          id="per-drill-heading"
-          className="text-sm font-semibold text-text-primary"
-        >
+        <p className="text-xs font-medium uppercase tracking-wide text-accent">Quick tag</p>
+        <h2 id="per-drill-heading" className="text-sm font-semibold text-text-primary">
           How was {drillName}?
         </h2>
       </div>
 
-      <div
-        className="grid grid-cols-3 gap-2"
-        role="radiogroup"
-        aria-labelledby="per-drill-heading"
-      >
+      <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-labelledby="per-drill-heading">
         {DIFFICULTY_CHIPS.map((chip) => {
           const selected = difficulty === chip.value
           return (
@@ -100,9 +91,7 @@ export function PerDrillCapture({
                   : 'border border-text-secondary/25 bg-bg-primary text-text-primary hover:brightness-95 active:brightness-90',
               ].join(' ')}
             >
-              <span className="text-sm font-semibold leading-tight">
-                {chip.label}
-              </span>
+              <span className="text-sm font-semibold leading-tight">{chip.label}</span>
             </button>
           )
         })}

@@ -1,9 +1,4 @@
-import type {
-  ExecutionLog,
-  SessionPlan,
-  SessionReview,
-  StorageMetaEntry,
-} from '../db/types'
+import type { ExecutionLog, SessionPlan, SessionReview, StorageMetaEntry } from '../db/types'
 import { db } from '../db'
 
 /**
@@ -44,13 +39,12 @@ export interface ExportPayload {
  * accidentally mutate the live Dexie rows.
  */
 export async function buildExportPayload(): Promise<ExportPayload> {
-  const [sessionPlans, executionLogs, sessionReviews, storageMeta] =
-    await Promise.all([
-      db.sessionPlans.toArray(),
-      db.executionLogs.toArray(),
-      db.sessionReviews.toArray(),
-      db.storageMeta.toArray(),
-    ])
+  const [sessionPlans, executionLogs, sessionReviews, storageMeta] = await Promise.all([
+    db.sessionPlans.toArray(),
+    db.executionLogs.toArray(),
+    db.sessionReviews.toArray(),
+    db.storageMeta.toArray(),
+  ])
   // `structuredClone` isolates the returned payload from the backing
   // Dexie rows. Without it, mutating `payload.sessionPlans[0]` in
   // consumer code would silently leak into the next Dexie fetch.

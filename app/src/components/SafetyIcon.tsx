@@ -63,9 +63,7 @@ export function SafetyIcon() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning-surface text-warning">
                   <ShieldSvg size={24} />
                 </div>
-                <h2 className="text-lg font-bold text-text-primary">
-                  Stop &amp; Seek Help
-                </h2>
+                <h2 className="text-lg font-bold text-text-primary">Stop &amp; Seek Help</h2>
               </div>
               <div className="flex flex-col gap-3 text-sm leading-relaxed text-text-secondary">
                 <div>
@@ -73,30 +71,21 @@ export function SafetyIcon() {
                     Stop and call emergency services (911 / 999 / 112) for:
                   </p>
                   <ul className="mt-1 flex flex-col gap-1 pl-4">
+                    <li className="list-disc">Chest pain, fainting, or unusual breathlessness</li>
                     <li className="list-disc">
-                      Chest pain, fainting, or unusual breathlessness
+                      Heat emergency: confusion, stopped sweating, severe headache, or vomiting
                     </li>
                     <li className="list-disc">
-                      Heat emergency: confusion, stopped sweating,
-                      severe headache, or vomiting
-                    </li>
-                    <li className="list-disc">
-                      A hard hit to the head, or feeling confused or
-                      off-balance after one
+                      A hard hit to the head, or feeling confused or off-balance after one
                     </li>
                   </ul>
                 </div>
                 <p>
-                  For pain that is persistent, worsening, or you&apos;re
-                  unsure about, see a qualified clinician.
+                  For pain that is persistent, worsening, or you&apos;re unsure about, see a
+                  qualified clinician.
                 </p>
               </div>
-              <Button
-                variant="soft"
-                fullWidth
-                className="mt-2"
-                onClick={() => setOpen(false)}
-              >
+              <Button variant="soft" fullWidth className="mt-2" onClick={() => setOpen(false)}>
                 Got it
               </Button>
             </div>

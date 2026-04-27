@@ -5,9 +5,7 @@ import { UpdatePrompt } from '../UpdatePrompt'
 
 describe('UpdatePrompt', () => {
   it('renders nothing when needRefresh is false', () => {
-    const { container } = render(
-      <UpdatePrompt needRefresh={false} onUpdate={vi.fn()} />,
-    )
+    const { container } = render(<UpdatePrompt needRefresh={false} onUpdate={vi.fn()} />)
     expect(container).toBeEmptyDOMElement()
     expect(screen.queryByText(/update/i)).not.toBeInTheDocument()
   })

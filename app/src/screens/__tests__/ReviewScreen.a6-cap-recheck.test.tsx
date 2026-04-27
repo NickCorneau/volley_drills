@@ -1,14 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../db'
 import { FINISH_LATER_CAP_MS } from '../../services/review'
 import { ReviewScreen } from '../ReviewScreen'
@@ -57,10 +50,7 @@ function renderAt(execId: string) {
     <MemoryRouter initialEntries={[`/review?id=${execId}`]}>
       <Routes>
         <Route path="/review" element={<ReviewScreen />} />
-        <Route
-          path="/complete"
-          element={<div data-testid="complete-route">complete</div>}
-        />
+        <Route path="/complete" element={<div data-testid="complete-route">complete</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -95,10 +85,7 @@ describe('ReviewScreen A6 submit-time cap re-check', () => {
 
     await screen.findByTestId('complete-route')
 
-    const stored = await db.sessionReviews
-      .where('executionLogId')
-      .equals('exec-inside')
-      .first()
+    const stored = await db.sessionReviews.where('executionLogId').equals('exec-inside').first()
     expect(stored?.status).toBe('submitted')
     expect(stored?.sessionRpe).toBe(5)
   })
@@ -120,18 +107,13 @@ describe('ReviewScreen A6 submit-time cap re-check', () => {
     // Simulate the tester sitting through the 2 h cap: bump the clock so
     // Date.now() now reports past-cap while the form-state render is
     // still mounted with `loaded.status === 'ready'`.
-    dateNowSpy = vi
-      .spyOn(Date, 'now')
-      .mockReturnValue(completedAt + FINISH_LATER_CAP_MS + 60_000)
+    dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(completedAt + FINISH_LATER_CAP_MS + 60_000)
 
     await user.click(screen.getByRole('button', { name: /^done$/i }))
 
     await screen.findByTestId('complete-route')
 
-    const stored = await db.sessionReviews
-      .where('executionLogId')
-      .equals('exec-crosscap')
-      .first()
+    const stored = await db.sessionReviews.where('executionLogId').equals('exec-crosscap').first()
     // Terminal markers: the record is expired and NOT eligible for
     // adaptation, so the engine ignores it - exactly the correctness bar
     // A6 was designed to enforce.

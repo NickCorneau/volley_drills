@@ -4,17 +4,8 @@
  * `commands.ts`.
  */
 import { db } from '../../db'
-import type {
-  ExecutionLog,
-  SessionDraft,
-  SessionPlan,
-  SessionReview,
-} from '../../db'
-import {
-  byRecentEndedAt,
-  endedAt,
-  isTerminalSession,
-} from '../../domain/executionPredicates'
+import type { ExecutionLog, SessionDraft, SessionPlan, SessionReview } from '../../db'
+import { byRecentEndedAt, endedAt, isTerminalSession } from '../../domain/executionPredicates'
 import type { BlockSlotType } from '../../types/session'
 import { FINISH_LATER_CAP_MS } from '../../domain/policies'
 import { buildEndedSession } from '../../domain/executionState'
@@ -30,10 +21,7 @@ export async function findResumableSession(): Promise<ResumableSession | null> {
   const logs = await db.executionLogs.toArray()
   const resumable = logs
     .filter(
-      (l) =>
-        l.status === 'not_started' ||
-        l.status === 'in_progress' ||
-        l.status === 'paused',
+      (l) => l.status === 'not_started' || l.status === 'in_progress' || l.status === 'paused',
     )
     .sort((a, b) => b.startedAt - a.startedAt)
   const exec = resumable[0]
@@ -84,9 +72,7 @@ export interface PendingReview {
  * inside the 2 h Finish Later cap. Sessions past the cap are NOT
  * returned; call `expireStaleReviews()` first to auto-finalize them.
  */
-export async function findPendingReview(
-  now: number = Date.now(),
-): Promise<PendingReview | null> {
+export async function findPendingReview(now: number = Date.now()): Promise<PendingReview | null> {
   const logs = await db.executionLogs.toArray()
   const terminal = logs.filter(isTerminalSession)
 
@@ -97,9 +83,7 @@ export async function findPendingReview(
       .map((r) => r.executionLogId),
   )
 
-  const unreviewed = terminal
-    .filter((l) => !reviewedIds.has(l.id))
-    .sort(byRecentEndedAt)
+  const unreviewed = terminal.filter((l) => !reviewedIds.has(l.id)).sort(byRecentEndedAt)
 
   for (const exec of unreviewed) {
     const endAt = endedAt(exec)
@@ -137,9 +121,7 @@ export async function getLastComplete(): Promise<LastCompleteBundle | null> {
     finalizedReviewByExec.set(r.executionLogId, r)
   }
 
-  const candidates = logs.filter(
-    (l) => isTerminalSession(l) && finalizedReviewByExec.has(l.id),
-  )
+  const candidates = logs.filter((l) => isTerminalSession(l) && finalizedReviewByExec.has(l.id))
   if (candidates.length === 0) return null
 
   candidates.sort(byRecentEndedAt)
@@ -166,9 +148,7 @@ export interface RecentSessionEntry {
  * Does NOT require a finalized review — history shows what happened,
  * not what's actionable.
  */
-export async function getRecentSessions(
-  limit: number = 3,
-): Promise<RecentSessionEntry[]> {
+export async function getRecentSessions(limit: number = 3): Promise<RecentSessionEntry[]> {
   if (limit <= 0) return []
   const logs = await db.executionLogs.toArray()
   const terminal = logs.filter(isTerminalSession).sort(byRecentEndedAt)
@@ -252,9 +232,7 @@ export async function findLastCompletedDrillIdsByType(
   if (terminal.length === 0) return {}
 
   const recent =
-    recencyLimit > 0 && terminal.length > recencyLimit
-      ? terminal.slice(0, recencyLimit)
-      : terminal
+    recencyLimit > 0 && terminal.length > recencyLimit ? terminal.slice(0, recencyLimit) : terminal
 
   const planIds = Array.from(new Set(recent.map((exec) => exec.planId)))
   const plans = await db.sessionPlans.bulkGet(planIds)
@@ -271,9 +249,7 @@ export async function findLastCompletedDrillIdsByType(
     const plan = planById.get(exec.planId)
     if (!plan) continue
     const sessionEnd = endedAt(exec)
-    const statusByBlockId = new Map(
-      exec.blockStatuses.map((s) => [s.blockId, s] as const),
-    )
+    const statusByBlockId = new Map(exec.blockStatuses.map((s) => [s.blockId, s] as const))
     for (const block of plan.blocks) {
       if (!block.drillId) continue
       const status = statusByBlockId.get(block.id)

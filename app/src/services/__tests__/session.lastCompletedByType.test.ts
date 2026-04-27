@@ -52,11 +52,7 @@ function makeBlock(overrides: Partial<SessionPlanBlock>): SessionPlanBlock {
   }
 }
 
-function makePlan(
-  id: string,
-  blocks: SessionPlanBlock[],
-  createdAt: number = 0,
-): SessionPlan {
+function makePlan(id: string, blocks: SessionPlanBlock[], createdAt: number = 0): SessionPlan {
   return {
     id,
     presetId: 'solo_wall',
@@ -168,9 +164,7 @@ describe('findLastCompletedDrillIdsByType', () => {
       status: 'completed',
       startedAt: 1000,
       completedAt: 2000,
-      blockStatuses: [
-        { blockId: 'p1-b1', status: 'completed', completedAt: 1500 },
-      ],
+      blockStatuses: [{ blockId: 'p1-b1', status: 'completed', completedAt: 1500 }],
     })
 
     expect(await findLastCompletedDrillIdsByType()).toEqual({})
@@ -243,9 +237,7 @@ describe('findLastCompletedDrillIdsByType', () => {
       status: 'completed',
       startedAt: 1000,
       completedAt: 2000,
-      blockStatuses: [
-        { blockId: 'p1-b1', status: 'completed', completedAt: 1500 },
-      ],
+      blockStatuses: [{ blockId: 'p1-b1', status: 'completed', completedAt: 1500 }],
     })
     await seedExec({
       id: 'e-new',
@@ -253,9 +245,7 @@ describe('findLastCompletedDrillIdsByType', () => {
       status: 'completed',
       startedAt: 5000,
       completedAt: 6000,
-      blockStatuses: [
-        { blockId: 'p2-b1', status: 'completed', completedAt: 5500 },
-      ],
+      blockStatuses: [{ blockId: 'p2-b1', status: 'completed', completedAt: 5500 }],
     })
 
     const result = await findLastCompletedDrillIdsByType()
@@ -280,9 +270,7 @@ describe('findLastCompletedDrillIdsByType', () => {
       endedEarlyReason: 'discarded_resume',
       startedAt: 1000,
       completedAt: 2000,
-      blockStatuses: [
-        { blockId: 'p1-b1', status: 'completed', completedAt: 1500 },
-      ],
+      blockStatuses: [{ blockId: 'p1-b1', status: 'completed', completedAt: 1500 }],
     })
 
     expect(await findLastCompletedDrillIdsByType()).toEqual({})
@@ -304,9 +292,7 @@ describe('findLastCompletedDrillIdsByType', () => {
       planId: 'p1',
       status: 'in_progress',
       startedAt: 1000,
-      blockStatuses: [
-        { blockId: 'p1-b1', status: 'completed', completedAt: 1500 },
-      ],
+      blockStatuses: [{ blockId: 'p1-b1', status: 'completed', completedAt: 1500 }],
     })
 
     expect(await findLastCompletedDrillIdsByType()).toEqual({})
@@ -382,9 +368,7 @@ describe('findLastCompletedDrillIdsByType', () => {
       status: 'completed',
       startedAt: 1000,
       completedAt: 2000,
-      blockStatuses: [
-        { blockId: 'po-b1', status: 'completed', completedAt: 1500 },
-      ],
+      blockStatuses: [{ blockId: 'po-b1', status: 'completed', completedAt: 1500 }],
     })
     await seedExec({
       id: 'e-new',
@@ -392,9 +376,7 @@ describe('findLastCompletedDrillIdsByType', () => {
       status: 'completed',
       startedAt: 5000,
       completedAt: 6000,
-      blockStatuses: [
-        { blockId: 'pn-b1', status: 'completed', completedAt: 5500 },
-      ],
+      blockStatuses: [{ blockId: 'pn-b1', status: 'completed', completedAt: 5500 }],
     })
 
     const limited = await findLastCompletedDrillIdsByType(1)
@@ -424,9 +406,7 @@ describe('findLastCompletedDrillIdsByType', () => {
       status: 'completed',
       startedAt: 1000,
       completedAt: 2000,
-      blockStatuses: [
-        { blockId: 'phantom', status: 'completed', completedAt: 1500 },
-      ],
+      blockStatuses: [{ blockId: 'phantom', status: 'completed', completedAt: 1500 }],
     })
     await seedExec({
       id: 'e-good',
@@ -434,9 +414,7 @@ describe('findLastCompletedDrillIdsByType', () => {
       status: 'completed',
       startedAt: 5000,
       completedAt: 6000,
-      blockStatuses: [
-        { blockId: 'pg-b1', status: 'completed', completedAt: 5500 },
-      ],
+      blockStatuses: [{ blockId: 'pg-b1', status: 'completed', completedAt: 5500 }],
     })
 
     const result = await findLastCompletedDrillIdsByType()

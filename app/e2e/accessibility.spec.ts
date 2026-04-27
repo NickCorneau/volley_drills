@@ -22,9 +22,7 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
 
   test('onboarding – skill level (first-run)', async ({ page }) => {
     // D128: cold-state heading is solo voice.
-    await expect(
-      page.getByRole('heading', { name: /where are you today/i }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: /where are you today/i })).toBeVisible()
     await checkA11y(page, 'onboarding – skill level')
   })
 
@@ -130,11 +128,7 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
           const open = indexedDB.open(dbName)
           open.onsuccess = () => {
             const dbInst = open.result
-            const stores = [
-              'sessionPlans',
-              'executionLogs',
-              'sessionReviews',
-            ] as const
+            const stores = ['sessionPlans', 'executionLogs', 'sessionReviews'] as const
             if (!stores.every((s) => dbInst.objectStoreNames.contains(s))) {
               dbInst.close()
               resolve()
@@ -209,12 +203,8 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
     // heading-outline page (HTML5 permits `<h2>` as the document's
     // top heading). a11y scan must continue to pass with this
     // structure.
-    await expect(
-      page.getByRole('heading', { name: /today's verdict/i, level: 1 }),
-    ).toHaveCount(0)
-    await expect(
-      page.getByRole('heading', { name: /keep building/i, level: 2 }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: /today's verdict/i, level: 1 })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: /keep building/i, level: 2 })).toBeVisible()
     await checkA11y(page, 'complete – solo submitted verdict')
   })
 })

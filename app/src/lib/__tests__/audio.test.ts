@@ -97,9 +97,7 @@ function makeCtorMock(factory: () => FakeContext): ReturnType<typeof vi.fn> {
   })
 }
 
-function stubAudioContextCtor(
-  Ctor: ReturnType<typeof vi.fn> | undefined,
-): void {
+function stubAudioContextCtor(Ctor: ReturnType<typeof vi.fn> | undefined): void {
   vi.stubGlobal('AudioContext', Ctor)
   vi.stubGlobal('webkitAudioContext', undefined)
 }

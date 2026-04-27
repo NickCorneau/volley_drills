@@ -37,10 +37,7 @@ function renderScreen() {
   return render(
     <MemoryRouter initialEntries={['/onboarding/skill-level']}>
       <Routes>
-        <Route
-          path="/onboarding/skill-level"
-          element={<SkillLevelScreen />}
-        />
+        <Route path="/onboarding/skill-level" element={<SkillLevelScreen />} />
         <Route
           path="/onboarding/todays-setup"
           element={<div data-testid="todays-setup-route">next</div>}
@@ -78,9 +75,7 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
     expect(
       screen.queryByRole('heading', { name: /where.?s the pair today\?/i }),
     ).not.toBeInTheDocument()
-    expect(
-      screen.getByText(/your rough current level/i),
-    ).toBeInTheDocument()
+    expect(screen.getByText(/your rough current level/i)).toBeInTheDocument()
     expect(screen.getByText(/change anytime/i)).toBeInTheDocument()
   })
 
@@ -92,21 +87,11 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
     // plus the escape -> 5 interactive total. If a back arrow were
     // accidentally added, the count would exceed 5.
     expect(buttons).toHaveLength(5)
-    expect(
-      screen.getByRole('button', { name: /foundations/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /rally builders/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /side-out builders/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /competitive pair/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /not sure yet/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /foundations/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /rally builders/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /side-out builders/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /competitive pair/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /not sure yet/i })).toBeInTheDocument()
   })
 
   it('each band button renders its short action-anchored descriptor', async () => {
@@ -114,41 +99,26 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
     const foundations = await screen.findByRole('button', {
       name: /foundations/i,
     })
-    expect(
-      within(foundations).getByText(/keeping a friendly toss alive/i),
-    ).toBeInTheDocument()
+    expect(within(foundations).getByText(/keeping a friendly toss alive/i)).toBeInTheDocument()
 
     const rally = screen.getByRole('button', { name: /rally builders/i })
-    expect(
-      within(rally).getByText(/pass easy serves, short rallies/i),
-    ).toBeInTheDocument()
+    expect(within(rally).getByText(/pass easy serves, short rallies/i)).toBeInTheDocument()
 
     const sideOut = screen.getByRole('button', { name: /side-out builders/i })
-    expect(
-      within(sideOut).getByText(/pass to target, attack the 3rd/i),
-    ).toBeInTheDocument()
+    expect(within(sideOut).getByText(/pass to target, attack the 3rd/i)).toBeInTheDocument()
 
     const comp = screen.getByRole('button', { name: /competitive pair/i })
-    expect(
-      within(comp).getByText(/tougher serves, game-like play/i),
-    ).toBeInTheDocument()
+    expect(within(comp).getByText(/tougher serves, game-like play/i)).toBeInTheDocument()
   })
 
   it('tapping "Foundations" atomically writes skillLevel + step and navigates to /onboarding/todays-setup', async () => {
     const user = userEvent.setup()
     renderScreen()
-    await user.click(
-      await screen.findByRole('button', { name: /foundations/i }),
-    )
+    await user.click(await screen.findByRole('button', { name: /foundations/i }))
 
-    expect(
-      await screen.findByTestId('todays-setup-route'),
-    ).toBeInTheDocument()
+    expect(await screen.findByTestId('todays-setup-route')).toBeInTheDocument()
 
-    const skillLevel = await getStorageMeta(
-      'onboarding.skillLevel',
-      isSkillLevel,
-    )
+    const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
     const step = await getStorageMeta('onboarding.step', isOnboardingStep)
     expect(skillLevel).toBe('foundations')
     expect(step).toBe('todays_setup')
@@ -157,60 +127,36 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
   it('tapping "Rally builders" writes skillLevel === "rally_builders"', async () => {
     const user = userEvent.setup()
     renderScreen()
-    await user.click(
-      await screen.findByRole('button', { name: /rally builders/i }),
-    )
+    await user.click(await screen.findByRole('button', { name: /rally builders/i }))
 
-    expect(
-      await screen.findByTestId('todays-setup-route'),
-    ).toBeInTheDocument()
-    const skillLevel = await getStorageMeta(
-      'onboarding.skillLevel',
-      isSkillLevel,
-    )
+    expect(await screen.findByTestId('todays-setup-route')).toBeInTheDocument()
+    const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
     expect(skillLevel).toBe('rally_builders')
   })
 
   it('tapping "Side-out builders" writes skillLevel === "side_out_builders"', async () => {
     const user = userEvent.setup()
     renderScreen()
-    await user.click(
-      await screen.findByRole('button', { name: /side-out builders/i }),
-    )
-    const skillLevel = await getStorageMeta(
-      'onboarding.skillLevel',
-      isSkillLevel,
-    )
+    await user.click(await screen.findByRole('button', { name: /side-out builders/i }))
+    const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
     expect(skillLevel).toBe('side_out_builders')
   })
 
   it('tapping "Competitive pair" writes skillLevel === "competitive_pair"', async () => {
     const user = userEvent.setup()
     renderScreen()
-    await user.click(
-      await screen.findByRole('button', { name: /competitive pair/i }),
-    )
-    const skillLevel = await getStorageMeta(
-      'onboarding.skillLevel',
-      isSkillLevel,
-    )
+    await user.click(await screen.findByRole('button', { name: /competitive pair/i }))
+    const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
     expect(skillLevel).toBe('competitive_pair')
   })
 
   it('tapping "Not sure yet" writes skillLevel === "unsure" (explicit opt-out, not a sentinel)', async () => {
     const user = userEvent.setup()
     renderScreen()
-    await user.click(
-      await screen.findByRole('button', { name: /not sure yet/i }),
-    )
+    await user.click(await screen.findByRole('button', { name: /not sure yet/i }))
 
-    expect(
-      await screen.findByTestId('todays-setup-route'),
-    ).toBeInTheDocument()
-    const skillLevel = await getStorageMeta(
-      'onboarding.skillLevel',
-      isSkillLevel,
-    )
+    expect(await screen.findByTestId('todays-setup-route')).toBeInTheDocument()
+    const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
     const step = await getStorageMeta('onboarding.step', isOnboardingStep)
     expect(skillLevel).toBe('unsure')
     expect(step).toBe('todays_setup')
@@ -233,9 +179,7 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
     // The descriptor states the recommend-first promise directly -
     // not reassurance-only ("you can change this later") but what the
     // app will do on behalf of the reader who can't self-classify.
-    expect(
-      within(notSureYet).getByText(/light starter/i),
-    ).toBeInTheDocument()
+    expect(within(notSureYet).getByText(/light starter/i)).toBeInTheDocument()
   })
 
   it('"Not sure yet" is in the same <ul> as the four bands (visual parity, P1-1)', async () => {
@@ -253,9 +197,7 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
   it('writes skillLevel and step ATOMICALLY (multi-key transaction, not two separate writes)', async () => {
     const user = userEvent.setup()
     renderScreen()
-    await user.click(
-      await screen.findByRole('button', { name: /foundations/i }),
-    )
+    await user.click(await screen.findByRole('button', { name: /foundations/i }))
     await screen.findByTestId('todays-setup-route')
 
     // Read both rows; their `updatedAt` should match (single
@@ -270,9 +212,7 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
   it('renders no back arrow (first-open = no prior screen per H9)', async () => {
     renderScreen()
     await screen.findByRole('heading', { level: 1, name: /today\?/i })
-    expect(
-      screen.queryByRole('button', { name: /back/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /back/i })).not.toBeInTheDocument()
   })
 
   // Phase F Unit 2 (2026-04-19) + D128 - voice-aware header copy.
@@ -333,14 +273,9 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
     renderScreen()
 
     await screen.findByRole('heading', { name: /where are you today\?/i })
-    await user.click(
-      screen.getByRole('button', { name: /foundations/i }),
-    )
+    await user.click(screen.getByRole('button', { name: /foundations/i }))
 
-    const skillLevel = await getStorageMeta(
-      'onboarding.skillLevel',
-      isSkillLevel,
-    )
+    const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
     // Enum persisted is identical across voices - D121 taxonomy is
     // untouched by Phase F.
     expect(skillLevel).toBe('foundations')

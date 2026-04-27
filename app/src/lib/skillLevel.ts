@@ -116,8 +116,5 @@ export function skillLevelToDrillBand(level: SkillLevel): PlayerLevel {
  * storage was hand-edited.
  */
 export function isSkillLevel(value: unknown): value is SkillLevel {
-  return (
-    typeof value === 'string' &&
-    (SKILL_LEVELS as readonly string[]).includes(value)
-  )
+  return typeof value === 'string' && (SKILL_LEVELS as readonly string[]).includes(value)
 }

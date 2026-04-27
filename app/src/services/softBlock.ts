@@ -27,17 +27,13 @@ const isTrueValue = (v: unknown): v is true => v === true
  * Returns true iff the soft-block modal has been dismissed for this
  * execId (for example by tapping "Skip review and continue" on D-C1).
  */
-export async function readSoftBlockDismissed(
-  execId: string,
-): Promise<boolean> {
+export async function readSoftBlockDismissed(execId: string): Promise<boolean> {
   const value = await getStorageMeta(key(execId), isTrueValue)
   return value === true
 }
 
 /** Persist that the user dismissed the modal for this execId. */
-export async function markSoftBlockDismissed(
-  execId: string,
-): Promise<void> {
+export async function markSoftBlockDismissed(execId: string): Promise<void> {
   await setStorageMeta(key(execId), true)
 }
 
@@ -47,10 +43,7 @@ export async function markSoftBlockDismissed(
  * the terminal-review write; the C-4 modal calls this without a `tx`
  * when it cleans up after an interactive dismiss/resolve cycle.
  */
-export async function clearSoftBlockDismissed(
-  execId: string,
-  tx?: Transaction,
-): Promise<void> {
+export async function clearSoftBlockDismissed(execId: string, tx?: Transaction): Promise<void> {
   if (tx) {
     const table = tx.table<StorageMetaEntry, string>('storageMeta')
     await table.delete(key(execId))

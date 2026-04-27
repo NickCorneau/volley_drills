@@ -1327,8 +1327,10 @@ const d31: Drill = {
     'Use the same toss height each time.',
     'Watch the ball land before judging the rep.',
   ],
-  progressionDescription: 'Shrink the target circle or move it deeper once 8 of 10 serves land nearby.',
-  regressionDescription: 'Move closer, make the target bigger, or count clean contact before accuracy.',
+  progressionDescription:
+    'Shrink the target circle or move it deeper once 8 of 10 serves land nearby.',
+  regressionDescription:
+    'Move closer, make the target bigger, or count clean contact before accuracy.',
   variants: [
     {
       id: 'd31-solo-open',
@@ -1352,11 +1354,7 @@ const d31: Drill = {
       },
       courtsideInstructions:
         'Mark a 2 m target circle. Self-toss and serve or strike toward it. Count only balls landing in or brushing the circle. Reset your routine before every rep.',
-      coachingCues: [
-        'One target before each serve.',
-        'Same toss height.',
-        'Watch the landing.',
-      ],
+      coachingCues: ['One target before each serve.', 'Same toss height.', 'Watch the landing.'],
     },
   ],
 }
@@ -1408,11 +1406,7 @@ const d33: Drill = {
       },
       courtsideInstructions:
         'Solo: serve through six zones in order — front-left, front-middle, front-right, back-left, back-middle, back-right. Misses repeat the same zone. Pair: alternate servers each rep; one shags between rounds.',
-      coachingCues: [
-        'Name the zone first.',
-        'High arc for deep zones.',
-        'Reset after each miss.',
-      ],
+      coachingCues: ['Name the zone first.', 'High arc for deep zones.', 'Reset after each miss.'],
     },
   ],
 }
@@ -1543,10 +1537,8 @@ const d26: Drill = {
   chainId: 'chain-cooldown',
   m001Candidate: true,
   teachingPoints: ['Breathe.', 'Avoid pain.', 'Hold steady.'],
-  progressionDescription:
-    'When wrap runs 5+ minutes, add second sides, glutes, or adductors.',
-  regressionDescription:
-    'Two moves only (calf + hamstring) if you are pressed for time.',
+  progressionDescription: 'When wrap runs 5+ minutes, add second sides, glutes, or adductors.',
+  regressionDescription: 'Two moves only (calf + hamstring) if you are pressed for time.',
   variants: [
     {
       // 2026-04-22 copy pass: six 20 to 30 s segments read as ~6 to 12
@@ -1634,7 +1626,8 @@ const d38: Drill = {
     'Legs drive the set - the arms aim, the legs lift.',
   ],
   progressionDescription: 'Add a moving bump-set (one step in, one step back) between reps.',
-  regressionDescription: 'Shorten target distance and reduce height; catch-and-reset instead of continuous.',
+  regressionDescription:
+    'Shorten target distance and reduce height; catch-and-reset instead of continuous.',
   variants: [
     {
       id: 'd38-solo',
@@ -1653,7 +1646,8 @@ const d38: Drill = {
       },
       successMetric: {
         type: 'reps-successful',
-        description: 'Bump-sets reaching target height (~1.5 m above head) and landing within 1 m of start.',
+        description:
+          'Bump-sets reaching target height (~1.5 m above head) and landing within 1 m of start.',
         target: '15 controlled sets',
       },
       courtsideInstructions:
@@ -1761,11 +1755,7 @@ const d40: Drill = {
       },
       courtsideInstructions:
         'Mark a 1 m landing circle. Self-toss, take one small move, plant both feet, then set into the circle. Reset if you drift during contact.',
-      coachingCues: [
-        'Move first.',
-        'Plant both feet.',
-        'Face the target.',
-      ],
+      coachingCues: ['Move first.', 'Plant both feet.', 'Face the target.'],
     },
   ],
 }
@@ -1780,7 +1770,8 @@ const d41: Drill = {
   name: 'Partner Set Back-and-Forth',
   shortName: 'Set B&F',
   skillFocus: ['set'],
-  objective: 'Continuous hand-setting with a partner; timing, target, and clean contact under rhythm.',
+  objective:
+    'Continuous hand-setting with a partner; timing, target, and clean contact under rhythm.',
   levelMin: 'beginner',
   levelMax: 'intermediate',
   chainId: 'chain-7-setting',
@@ -1791,7 +1782,8 @@ const d41: Drill = {
     'Arc the ball ~1.5 m above reach height so your partner has time to square up.',
   ],
   progressionDescription: 'Add a lateral step between sets - set, shuffle one step, set again.',
-  regressionDescription: 'Catch and re-set (reset the rhythm) if the ball lands more than one step away.',
+  regressionDescription:
+    'Catch and re-set (reset the rhythm) if the ball lands more than one step away.',
   variants: [
     {
       id: 'd41-pair',
@@ -1840,8 +1832,10 @@ const d42: Drill = {
     'Square up: face the target with feet and shoulders.',
     'Give enough arc for your partner to arrive early.',
   ],
-  progressionDescription: 'Move the target corner farther away or require two clean sets per corner.',
-  regressionDescription: 'Shorten the distance and allow catch-reset when either player travels too far.',
+  progressionDescription:
+    'Move the target corner farther away or require two clean sets per corner.',
+  regressionDescription:
+    'Shorten the distance and allow catch-reset when either player travels too far.',
   variants: [
     {
       id: 'd42-pair',
@@ -1865,11 +1859,7 @@ const d42: Drill = {
       },
       courtsideInstructions:
         'Mark two target corners 3 m apart. Partner tosses; setter plants and sets to the named corner. Switch setter after 6 clean sets.',
-      coachingCues: [
-        'Set your partner.',
-        'Face the target.',
-        'Arc above reach height.',
-      ],
+      coachingCues: ['Set your partner.', 'Face the target.', 'Arc above reach height.'],
     },
   ],
 }

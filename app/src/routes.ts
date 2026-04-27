@@ -26,16 +26,11 @@ export const routes = {
   home: () => routePaths.home,
   setup: () => routePaths.setup,
   safety: () => routePaths.safety,
-  run: (execId: string) =>
-    `${routePaths.run}?id=${encodeURIComponent(execId)}`,
-  drillCheck: (execId: string) =>
-    `${routePaths.drillCheck}?id=${encodeURIComponent(execId)}`,
-  transition: (execId: string) =>
-    `${routePaths.transition}?id=${encodeURIComponent(execId)}`,
-  review: (execId: string) =>
-    `${routePaths.review}?id=${encodeURIComponent(execId)}`,
-  complete: (execId: string) =>
-    `${routePaths.complete}?id=${encodeURIComponent(execId)}`,
+  run: (execId: string) => `${routePaths.run}?id=${encodeURIComponent(execId)}`,
+  drillCheck: (execId: string) => `${routePaths.drillCheck}?id=${encodeURIComponent(execId)}`,
+  transition: (execId: string) => `${routePaths.transition}?id=${encodeURIComponent(execId)}`,
+  review: (execId: string) => `${routePaths.review}?id=${encodeURIComponent(execId)}`,
+  complete: (execId: string) => `${routePaths.complete}?id=${encodeURIComponent(execId)}`,
   settings: () => routePaths.settings,
   onboardingSkillLevel: () => routePaths.onboardingSkillLevel,
   onboardingTodaysSetup: () => routePaths.onboardingTodaysSetup,

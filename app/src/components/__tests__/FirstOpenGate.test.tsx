@@ -85,9 +85,7 @@ describe('FirstOpenGate (C-3 Unit 1)', () => {
     renderAt('/onboarding/skill-level')
     expect(await screen.findByTestId('skill-level')).toBeInTheDocument()
     // Path probe shows we did not bounce around.
-    expect(screen.getByTestId('current-path').textContent).toBe(
-      '/onboarding/skill-level',
-    )
+    expect(screen.getByTestId('current-path').textContent).toBe('/onboarding/skill-level')
   })
 
   it('respects the C-0 backfill: ExecutionLog existed + completedAt backfilled -> children render', async () => {

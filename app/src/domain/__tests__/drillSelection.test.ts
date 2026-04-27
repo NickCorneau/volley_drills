@@ -111,29 +111,21 @@ describe('findSubstitute', () => {
   it('iterates substituteDrillIds in authored order; first match wins', () => {
     const second = candidateForVariant('d11-pair')
     const first = candidateForVariant('d10-pair')
-    const result = findSubstitute(
-      'd03',
-      [second, first],
-      makeContext({ netAvailable: false }),
-      [
-        {
-          fromDrillId: 'd03',
-          preferredToDrillId: 'd04',
-          blockedBy: 'needsNet',
-          substituteDrillIds: ['d10', 'd11'],
-          preservedIntent: 'synthetic ordered substitute test',
-          transfer: 'partial',
-        },
-      ],
-    )
+    const result = findSubstitute('d03', [second, first], makeContext({ netAvailable: false }), [
+      {
+        fromDrillId: 'd03',
+        preferredToDrillId: 'd04',
+        blockedBy: 'needsNet',
+        substituteDrillIds: ['d10', 'd11'],
+        preservedIntent: 'synthetic ordered substitute test',
+        transfer: 'partial',
+      },
+    ])
     expect(result?.candidate.drill.id).toBe('d10')
   })
 
   it('is deterministic across repeated calls with identical inputs', () => {
-    const candidates = [
-      candidateForVariant('d11-pair'),
-      candidateForVariant('d10-pair'),
-    ]
+    const candidates = [candidateForVariant('d11-pair'), candidateForVariant('d10-pair')]
     const ctx = makeContext({ netAvailable: false })
 
     const a = findSubstitute('d03', candidates, ctx, SUBSTITUTION_RULES)
@@ -149,12 +141,7 @@ describe('findSubstitute', () => {
       netAvailable: true,
       wallAvailable: false,
     })
-    const result = findSubstitute(
-      'd03',
-      [candidate],
-      onlyWallBlocked,
-      SUBSTITUTION_RULES,
-    )
+    const result = findSubstitute('d03', [candidate], onlyWallBlocked, SUBSTITUTION_RULES)
     expect(result).toBeUndefined()
   })
 })

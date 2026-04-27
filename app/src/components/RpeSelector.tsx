@@ -55,18 +55,10 @@ type RpeSelectorProps = {
   ariaLabelledBy?: string
 }
 
-export function RpeSelector({
-  value,
-  onChange,
-  ariaLabelledBy = 'rpe-heading',
-}: RpeSelectorProps) {
+export function RpeSelector({ value, onChange, ariaLabelledBy = 'rpe-heading' }: RpeSelectorProps) {
   const selectedValue = pickChipForRpe(value)
   return (
-    <div
-      className="grid grid-cols-3 gap-2"
-      role="radiogroup"
-      aria-labelledby={ariaLabelledBy}
-    >
+    <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-labelledby={ariaLabelledBy}>
       {EFFORT_CHIPS.map((chip) => {
         const selected = selectedValue === chip.value
         return (
@@ -91,9 +83,7 @@ export function RpeSelector({
                 : 'border border-text-secondary/25 bg-bg-primary text-text-primary hover:brightness-95 active:brightness-90',
             ].join(' ')}
           >
-            <span className="text-base font-semibold leading-none">
-              {chip.label}
-            </span>
+            <span className="text-base font-semibold leading-none">{chip.label}</span>
           </button>
         )
       })}

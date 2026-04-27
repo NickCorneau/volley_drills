@@ -35,11 +35,7 @@ const LONG_CUE =
   'through the pass. Eyes to target early. Hips before arms. ' +
   'Finish tall. CUEFULLMARKER_9f3a.'
 
-async function seedPausedSession(
-  execId: string,
-  planId: string,
-  coachingCue: string,
-) {
+async function seedPausedSession(execId: string, planId: string, coachingCue: string) {
   const now = Date.now()
   await db.sessionPlans.put({
     id: planId,
@@ -98,9 +94,7 @@ describe('RunScreen: coaching note renders in full (no expand toggle)', () => {
     expect(
       screen.queryByRole('button', { name: /show full coaching note/i }),
     ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: /show less/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /show less/i })).not.toBeInTheDocument()
   })
 
   it('short cue: renders in full with no toggle (same surface as long)', async () => {

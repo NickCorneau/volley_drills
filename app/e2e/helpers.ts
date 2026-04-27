@@ -64,6 +64,9 @@ export async function seedOnboardingAndOpenHome(page: Page) {
 /** C-3 first-run: Skill Level → Today's Setup (URL), ready for the usual setup taps. */
 export async function goToOnboardingTodaysSetup(page: Page) {
   await page.waitForURL(/\/onboarding\/skill-level/, { timeout: 15_000 })
-  await page.getByRole('button', { name: /Foundations/i }).first().click()
+  await page
+    .getByRole('button', { name: /Foundations/i })
+    .first()
+    .click()
   await page.getByText("Today's setup").waitFor({ state: 'visible', timeout: 10_000 })
 }

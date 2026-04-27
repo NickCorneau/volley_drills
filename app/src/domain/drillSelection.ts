@@ -22,10 +22,7 @@ export interface SubstituteSelection {
  * adding a new `BlockedConstraint` value at the data layer fails the
  * type-check until the gating field exists on `SetupContext`.
  */
-export function isConstraintActive(
-  constraint: BlockedConstraint,
-  context: SetupContext,
-): boolean {
+export function isConstraintActive(constraint: BlockedConstraint, context: SetupContext): boolean {
   switch (constraint) {
     case 'needsNet':
       return !context.netAvailable

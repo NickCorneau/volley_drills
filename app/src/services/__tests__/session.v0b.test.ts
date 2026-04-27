@@ -64,12 +64,8 @@ describe('v0b session services', () => {
     expect(plan[0].context).toEqual(draft!.context)
     expect(plan[0].safetyCheck.trainingRecency).toBe('1 day')
     expect(execution[0].blockStatuses).toHaveLength(draft!.blocks.length)
-    expect(plan[0].blocks.map((b) => b.drillId)).toEqual(
-      draft!.blocks.map((b) => b.drillId),
-    )
-    expect(plan[0].blocks.map((b) => b.variantId)).toEqual(
-      draft!.blocks.map((b) => b.variantId),
-    )
+    expect(plan[0].blocks.map((b) => b.drillId)).toEqual(draft!.blocks.map((b) => b.drillId))
+    expect(plan[0].blocks.map((b) => b.variantId)).toEqual(draft!.blocks.map((b) => b.variantId))
 
     const resumable = await findResumableSession()
     expect(resumable?.execution.id).toBe(execId)
@@ -321,25 +317,20 @@ describe('v0b session services', () => {
     const reviewModule = await import('../review')
     const realExpire = expireReview
     let calls = 0
-    const spy = vi
-      .spyOn(reviewModule, 'expireReview')
-      .mockImplementation(async (data) => {
-        calls += 1
-        if (calls === 1) {
-          throw new Error('simulated transient IDB failure on exec-a')
-        }
-        return realExpire(data)
-      })
+    const spy = vi.spyOn(reviewModule, 'expireReview').mockImplementation(async (data) => {
+      calls += 1
+      if (calls === 1) {
+        throw new Error('simulated transient IDB failure on exec-a')
+      }
+      return realExpire(data)
+    })
 
     try {
       const expired = await expireStaleReviews(now)
       // The second log must have been processed despite the first failure.
       expect(calls).toBe(2)
       expect(expired).toBe(1) // second call succeeded; first rejected
-      const recordB = await db.sessionReviews
-        .where('executionLogId')
-        .equals('exec-b')
-        .first()
+      const recordB = await db.sessionReviews.where('executionLogId').equals('exec-b').first()
       expect(recordB?.status).toBe('skipped')
     } finally {
       spy.mockRestore()

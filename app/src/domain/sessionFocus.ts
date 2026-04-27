@@ -29,9 +29,7 @@ import type { SkillFocus } from '../types/drill'
  *
  * See `docs/plans/2026-04-20-m001-tier1-implementation.md` Unit 5.
  */
-export function inferSessionFocus(
-  blocks: readonly SessionPlanBlock[],
-): SkillFocus | 'partial' {
+export function inferSessionFocus(blocks: readonly SessionPlanBlock[]): SkillFocus | 'partial' {
   const mainSkillBlock = blocks.find((b) => b.type === 'main_skill')
   if (!mainSkillBlock) return 'partial'
   const drill = DRILLS.find((d) => d.name === mainSkillBlock.drillName)

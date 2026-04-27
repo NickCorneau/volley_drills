@@ -88,12 +88,8 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
         name: /any pain.*sharp/i,
       }),
     ).toBeInTheDocument()
-    expect(
-      screen.getByText(/regular muscle soreness is fine/i),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText(/we.?ll switch to a lighter session if yes/i),
-    ).toBeInTheDocument()
+    expect(screen.getByText(/regular muscle soreness is fine/i)).toBeInTheDocument()
+    expect(screen.getByText(/we.?ll switch to a lighter session if yes/i)).toBeInTheDocument()
   })
 
   it('renders the recency consequence line under the recency chips', async () => {
@@ -124,9 +120,7 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     // hasEverStartedSession returns false.
     renderScreen()
 
-    expect(
-      await screen.findByRole('radio', { name: /first time/i }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('radio', { name: /first time/i })).toBeInTheDocument()
     expect(
       screen.getByText(/today or first time.*shorter.*lower-intensity start/i),
     ).toBeInTheDocument()
@@ -153,28 +147,16 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     // ToggleChip uses role="radio" inside a role="radiogroup" container,
     // which is the accessible semantics for single-select chip rows.
     await screen.findByRole('radio', { name: /^today$/i })
-    expect(
-      screen.queryByRole('radio', { name: /first time/i }),
-    ).not.toBeInTheDocument()
-    expect(
-      screen.getByRole('radio', { name: /^today$/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('radio', { name: /^yesterday$/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('radio', { name: /^2\+ days ago$/i }),
-    ).toBeInTheDocument()
+    expect(screen.queryByRole('radio', { name: /first time/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /^today$/i })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /^yesterday$/i })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /^2\+ days ago$/i })).toBeInTheDocument()
     // Description drops the "or First time" clause so it matches the
     // rendered chip set. Copy-polish pass (2026-04-19) replaced the
     // `->` arrow with natural prose (`means a ... start.`); regex
     // stays flexible on the connecting phrase.
-    expect(
-      screen.getByText(/today\s+.*shorter.*lower-intensity start/i),
-    ).toBeInTheDocument()
-    expect(
-      screen.queryByText(/first time/i),
-    ).not.toBeInTheDocument()
+    expect(screen.getByText(/today\s+.*shorter.*lower-intensity start/i)).toBeInTheDocument()
+    expect(screen.queryByText(/first time/i)).not.toBeInTheDocument()
   })
 
   it('renders Recency first, Pain second (dogfeed UX reorder 2026-04-19)', async () => {

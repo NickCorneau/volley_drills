@@ -1,10 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import type {
-  LastCompleteBundle,
-  PendingReview,
-} from '../../services/session'
+import type { LastCompleteBundle, PendingReview } from '../../services/session'
 import type { SessionDraft } from '../../db'
 import { HomeSecondaryRow } from '../HomeSecondaryRow'
 
@@ -72,11 +69,7 @@ describe('HomeSecondaryRow (C-4 Unit 3)', () => {
 
     render(
       <ul>
-        <HomeSecondaryRow
-          variant="review_pending_advisory"
-          data={pr}
-          onFinish={onFinish}
-        />
+        <HomeSecondaryRow variant="review_pending_advisory" data={pr} onFinish={onFinish} />
       </ul>,
     )
 
@@ -106,11 +99,7 @@ describe('HomeSecondaryRow (C-4 Unit 3)', () => {
 
     render(
       <ul>
-        <HomeSecondaryRow
-          variant="last_complete"
-          data={lc}
-          onRepeat={onRepeat}
-        />
+        <HomeSecondaryRow variant="last_complete" data={lc} onRepeat={onRepeat} />
       </ul>,
     )
 

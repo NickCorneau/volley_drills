@@ -180,9 +180,7 @@ describe('buildDraftFromCompletedBlocks (C-5 Unit 3)', () => {
     expect(draft).not.toBeNull()
     expect(draft!.blocks[1].drillId).toBe('d03')
     expect(draft!.blocks[1].variantId).toBe('d03-pair')
-    expect(draft!.blocks[1].rationale).toBe(
-      "Chosen because: today's main passing rep.",
-    )
+    expect(draft!.blocks[1].rationale).toBe("Chosen because: today's main passing rep.")
     for (const block of draft!.blocks) {
       expect(
         block.rationale ?? '',

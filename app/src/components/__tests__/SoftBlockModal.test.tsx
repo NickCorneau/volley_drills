@@ -36,9 +36,7 @@ describe('SoftBlockModal (C-4 Unit 4 / D-C1)', () => {
 
     const dialog = screen.getByRole('dialog')
     expect(dialog).toHaveAttribute('aria-modal', 'true')
-    expect(
-      screen.getByRole('heading', { name: /finish.*review first/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /finish.*review first/i })).toBeInTheDocument()
     // Copy mentions the specific session so the tester knows which
     // review is blocking them.
     expect(screen.getByText(/pair \+ net/i)).toBeInTheDocument()
@@ -76,9 +74,7 @@ describe('SoftBlockModal (C-4 Unit 4 / D-C1)', () => {
       />,
     )
 
-    await user.click(
-      screen.getByRole('button', { name: /skip review and continue/i }),
-    )
+    await user.click(screen.getByRole('button', { name: /skip review and continue/i }))
     expect(onSkip).toHaveBeenCalledTimes(1)
   })
 

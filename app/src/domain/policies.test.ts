@@ -16,12 +16,8 @@ describe('policies', () => {
   })
 
   it('capture window boundaries are strictly ascending', () => {
-    expect(CAPTURE_WINDOW_IMMEDIATE_MS).toBeLessThan(
-      CAPTURE_WINDOW_SAME_SESSION_MS,
-    )
-    expect(CAPTURE_WINDOW_SAME_SESSION_MS).toBeLessThan(
-      CAPTURE_WINDOW_SAME_DAY_MS,
-    )
+    expect(CAPTURE_WINDOW_IMMEDIATE_MS).toBeLessThan(CAPTURE_WINDOW_SAME_SESSION_MS)
+    expect(CAPTURE_WINDOW_SAME_SESSION_MS).toBeLessThan(CAPTURE_WINDOW_SAME_DAY_MS)
   })
 
   it('tuning floor is the attempt threshold below which rate is unstable', () => {

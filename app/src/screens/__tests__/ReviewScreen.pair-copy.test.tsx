@@ -63,9 +63,7 @@ describe('ReviewScreen RPE prompt (V0B-32 / D120)', () => {
         name: /how hard was your session\?/i,
       }),
     ).toBeInTheDocument()
-    expect(
-      screen.queryByText(/one rating per device/i),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByText(/one rating per device/i)).not.toBeInTheDocument()
   })
 
   it('pair mode reads "How hard was this session for you?" plus helper', async () => {
@@ -88,11 +86,7 @@ describe('ReviewScreen RPE prompt (V0B-32 / D120)', () => {
     // 2026-04-24 founder design note: `Done` remains the primary action,
     // while `Finish later` returns to the lower-emphasis escape hatch
     // treatment so the two choices do not look equivalent.
-    expect(
-      await screen.findByRole('button', { name: /^done$/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /finish later/i }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /^done$/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /finish later/i })).toBeInTheDocument()
   })
 })

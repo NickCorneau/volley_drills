@@ -31,20 +31,13 @@ describe('TodaysSetupScreen (C-3 wrapper)', () => {
     render(
       <MemoryRouter initialEntries={['/onboarding/todays-setup']}>
         <Routes>
-          <Route
-            path="/onboarding/todays-setup"
-            element={<TodaysSetupScreen />}
-          />
+          <Route path="/onboarding/todays-setup" element={<TodaysSetupScreen />} />
         </Routes>
       </MemoryRouter>,
     )
 
-    expect(
-      await screen.findByRole('button', { name: /skill level/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('heading', { level: 1, name: /today.?s setup/i }),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /skill level/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: /today.?s setup/i })).toBeInTheDocument()
     // Wind row renders as part of the onboarding flow.
     expect(screen.getByRole('radio', { name: 'Calm' })).toBeInTheDocument()
   })

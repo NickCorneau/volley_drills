@@ -51,8 +51,7 @@ type BlockTimerProps = {
 
 export function BlockTimer({ remainingSeconds, totalSeconds, isPaused }: BlockTimerProps) {
   const progress = totalSeconds > 0 ? 1 - remainingSeconds / totalSeconds : 0
-  const isCountingDown =
-    !isPaused && remainingSeconds > 0 && remainingSeconds <= 3.5
+  const isCountingDown = !isPaused && remainingSeconds > 0 && remainingSeconds <= 3.5
 
   return (
     <div className="flex flex-col items-center gap-3" role="timer" aria-live="polite">
@@ -77,12 +76,8 @@ export function BlockTimer({ remainingSeconds, totalSeconds, isPaused }: BlockTi
         // the same recovery instruction. See
         // `docs/research/2026-04-19-v0b-starter-loop-feedback.md`.
         <div className="flex flex-col items-center gap-1">
-          <span className="text-sm font-semibold uppercase tracking-wide text-accent">
-            Paused
-          </span>
-          <span className="text-xs text-text-secondary">
-            Tap Resume to continue
-          </span>
+          <span className="text-sm font-semibold uppercase tracking-wide text-accent">Paused</span>
+          <span className="text-xs text-text-secondary">Tap Resume to continue</span>
         </div>
       )}
       <div

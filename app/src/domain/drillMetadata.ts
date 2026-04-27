@@ -28,9 +28,7 @@ export function getBlockMetricType(
   if (!drill) return null
   const variant =
     drill.variants.find(
-      (v) =>
-        v.participants.min <= playerCount &&
-        playerCount <= v.participants.max,
+      (v) => v.participants.min <= playerCount && playerCount <= v.participants.max,
     ) ?? drill.variants[0]
   return variant?.successMetric.type ?? null
 }

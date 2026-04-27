@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  AVOID_PHRASES,
-  FORBIDDEN_RE,
-  scanElementForForbidden,
-  scanForForbidden,
-} from './copyGuard'
+import { AVOID_PHRASES, FORBIDDEN_RE, scanElementForForbidden, scanForForbidden } from './copyGuard'
 
 describe('copyGuard (V0B-18)', () => {
   describe('FORBIDDEN_RE positive cases', () => {
@@ -45,20 +40,14 @@ describe('copyGuard (V0B-18)', () => {
     })
 
     it('does NOT match on innocuous session copy', () => {
-      expect(
-        FORBIDDEN_RE.test('Set your RPE when the session is over.'),
-      ).toBe(false)
-      expect(
-        FORBIDDEN_RE.test('Finish Review / Skip review / Same as last time'),
-      ).toBe(false)
+      expect(FORBIDDEN_RE.test('Set your RPE when the session is over.')).toBe(false)
+      expect(FORBIDDEN_RE.test('Finish Review / Skip review / Same as last time')).toBe(false)
     })
   })
 
   describe('scanForForbidden', () => {
     it('returns every match, not just the first', () => {
-      const matches = scanForForbidden(
-        'This is a spike and an overload warning.',
-      )
+      const matches = scanForForbidden('This is a spike and an overload warning.')
       expect(matches.map((m) => m.toLowerCase())).toEqual(['spike', 'overload'])
     })
 
@@ -77,9 +66,7 @@ describe('copyGuard (V0B-18)', () => {
       // textContent misses aria-label.
       expect(scanForForbidden(el.textContent ?? '')).toEqual([])
       // scanElementForForbidden catches it.
-      expect(scanElementForForbidden(el).map((m) => m.toLowerCase())).toContain(
-        'progress',
-      )
+      expect(scanElementForForbidden(el).map((m) => m.toLowerCase())).toContain('progress')
     })
 
     it('catches matches in title and alt attributes too', () => {

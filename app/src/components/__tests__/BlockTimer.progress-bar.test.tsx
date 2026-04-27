@@ -39,18 +39,14 @@ import { BlockTimer } from '../BlockTimer'
  */
 describe('BlockTimer progress bar (visual half of #8 / A4, chip reverted)', () => {
   it('progress bar uses h-3 (thicker than the pre-2026-04-26 h-2)', () => {
-    render(
-      <BlockTimer remainingSeconds={47} totalSeconds={120} isPaused={false} />,
-    )
+    render(<BlockTimer remainingSeconds={47} totalSeconds={120} isPaused={false} />)
     const bar = screen.getByTestId('block-timer-bar')
     expect(bar.className).toContain('h-3')
     expect(bar.className).not.toContain('h-2')
   })
 
   it('progress fill width tracks completed fraction at the same h-3 thickness', () => {
-    render(
-      <BlockTimer remainingSeconds={30} totalSeconds={60} isPaused={false} />,
-    )
+    render(<BlockTimer remainingSeconds={30} totalSeconds={60} isPaused={false} />)
     const bar = screen.getByTestId('block-timer-bar')
     const fill = bar.firstElementChild as HTMLElement
     expect(bar.className).toContain('h-3')
@@ -60,9 +56,7 @@ describe('BlockTimer progress bar (visual half of #8 / A4, chip reverted)', () =
   })
 
   it('paused state still renders the bar at frozen fill (no animation, no suppression)', () => {
-    render(
-      <BlockTimer remainingSeconds={20} totalSeconds={60} isPaused={true} />,
-    )
+    render(<BlockTimer remainingSeconds={20} totalSeconds={60} isPaused={true} />)
     const bar = screen.getByTestId('block-timer-bar')
     const fill = bar.firstElementChild as HTMLElement
     // 60s total, 20s remaining → 40s completed → 66.6...%
@@ -75,9 +69,7 @@ describe('BlockTimer progress bar (visual half of #8 / A4, chip reverted)', () =
   // reversal rationale before deciding whether the new evidence
   // earns the chip back.
   it('does NOT render a sibling "left" chip alongside the bar (chip reverted 2026-04-26)', () => {
-    render(
-      <BlockTimer remainingSeconds={47} totalSeconds={120} isPaused={false} />,
-    )
+    render(<BlockTimer remainingSeconds={47} totalSeconds={120} isPaused={false} />)
     expect(screen.queryByTestId('block-timer-chip')).toBeNull()
     expect(screen.queryByText(/left$/i)).toBeNull()
   })

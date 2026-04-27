@@ -39,9 +39,7 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
 
   it('Export button calls downloadExport exactly once per tap', async () => {
     const user = userEvent.setup()
-    const downloadSpy = vi
-      .spyOn(exportService, 'downloadExport')
-      .mockResolvedValue(undefined)
+    const downloadSpy = vi.spyOn(exportService, 'downloadExport').mockResolvedValue(undefined)
 
     render(
       <MemoryRouter initialEntries={['/settings']}>
@@ -60,9 +58,7 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
 
   it('renders success copy after a completed export', async () => {
     const user = userEvent.setup()
-    const downloadSpy = vi
-      .spyOn(exportService, 'downloadExport')
-      .mockResolvedValue(undefined)
+    const downloadSpy = vi.spyOn(exportService, 'downloadExport').mockResolvedValue(undefined)
 
     render(
       <MemoryRouter initialEntries={['/settings']}>
@@ -72,13 +68,9 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
       </MemoryRouter>,
     )
 
-    await user.click(
-      screen.getByRole('button', { name: /export training records/i }),
-    )
+    await user.click(screen.getByRole('button', { name: /export training records/i }))
 
-    expect(
-      await screen.findByText(/export saved.*check your downloads/i),
-    ).toBeInTheDocument()
+    expect(await screen.findByText(/export saved.*check your downloads/i)).toBeInTheDocument()
 
     downloadSpy.mockRestore()
   })
@@ -98,13 +90,9 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
       </MemoryRouter>,
     )
 
-    await user.click(
-      screen.getByRole('button', { name: /export training records/i }),
-    )
+    await user.click(screen.getByRole('button', { name: /export training records/i }))
 
-    expect(
-      await screen.findByText(/export failed/i),
-    ).toBeInTheDocument()
+    expect(await screen.findByText(/export failed/i)).toBeInTheDocument()
 
     downloadSpy.mockRestore()
     consoleSpy.mockRestore()
@@ -135,14 +123,12 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
   it('double-tap guard: a second tap while exporting does NOT trigger a second download', async () => {
     const user = userEvent.setup()
     let resolveDownload: () => void = () => {}
-    const downloadSpy = vi
-      .spyOn(exportService, 'downloadExport')
-      .mockImplementation(
-        () =>
-          new Promise<void>((resolve) => {
-            resolveDownload = resolve
-          }),
-      )
+    const downloadSpy = vi.spyOn(exportService, 'downloadExport').mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveDownload = resolve
+        }),
+    )
 
     render(
       <MemoryRouter initialEntries={['/settings']}>
@@ -155,9 +141,7 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
     const btn = screen.getByRole('button', { name: /export training records/i })
     await user.click(btn)
     // Button should flip to "Exporting…" (state.kind === 'exporting' -> disabled)
-    expect(
-      screen.getByRole('button', { name: /exporting/i }),
-    ).toBeDisabled()
+    expect(screen.getByRole('button', { name: /exporting/i })).toBeDisabled()
 
     // A racing tap during the in-flight export is blocked by both the
     // acting.current guard AND the disabled state; simulate the worst

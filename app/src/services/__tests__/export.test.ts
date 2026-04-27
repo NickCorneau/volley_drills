@@ -111,10 +111,7 @@ describe('buildExportPayload (V0B-15)', () => {
     const payload = await buildExportPayload()
 
     expect(payload.sessionPlans).toHaveLength(2)
-    expect(payload.sessionPlans.map((p) => p.id).sort()).toEqual([
-      'plan-a',
-      'plan-b',
-    ])
+    expect(payload.sessionPlans.map((p) => p.id).sort()).toEqual(['plan-a', 'plan-b'])
     expect(payload.executionLogs).toHaveLength(1)
     expect(payload.executionLogs[0].id).toBe('exec-a')
     // V0B-23: actualDurationMinutes round-trips.
@@ -192,12 +189,10 @@ describe('downloadExport (V0B-15)', () => {
     // Spy on URL.createObjectURL + revokeObjectURL. We can read the Blob
     // directly via FileReader in JSDOM.
     const blobs: Blob[] = []
-    const createSpy = vi
-      .spyOn(URL, 'createObjectURL')
-      .mockImplementation((blob) => {
-        if (blob instanceof Blob) blobs.push(blob)
-        return 'blob:mock://test'
-      })
+    const createSpy = vi.spyOn(URL, 'createObjectURL').mockImplementation((blob) => {
+      if (blob instanceof Blob) blobs.push(blob)
+      return 'blob:mock://test'
+    })
     const revokeSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
 
     // Seed one plan so the payload isn't pathologically empty.
@@ -236,29 +231,23 @@ describe('downloadExport (V0B-15)', () => {
   })
 
   it('file name follows volley-drills-export-YYYY-MM-DD.json format', async () => {
-    const createSpy = vi
-      .spyOn(URL, 'createObjectURL')
-      .mockReturnValue('blob:mock://test')
-    const revokeSpy = vi
-      .spyOn(URL, 'revokeObjectURL')
-      .mockImplementation(() => {})
+    const createSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock://test')
+    const revokeSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
     // Intercept anchor creation so we can read the `download` attribute.
     const clicks: string[] = []
     const originalCreate = document.createElement.bind(document)
-    const createElSpy = vi
-      .spyOn(document, 'createElement')
-      .mockImplementation((tag: string) => {
-        const el = originalCreate(tag)
-        if (tag === 'a') {
-          const anchor = el as HTMLAnchorElement
-          const origClick = anchor.click.bind(anchor)
-          anchor.click = () => {
-            clicks.push(anchor.download)
-            origClick()
-          }
+    const createElSpy = vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+      const el = originalCreate(tag)
+      if (tag === 'a') {
+        const anchor = el as HTMLAnchorElement
+        const origClick = anchor.click.bind(anchor)
+        anchor.click = () => {
+          clicks.push(anchor.download)
+          origClick()
         }
-        return el
-      })
+      }
+      return el
+    })
 
     try {
       await downloadExport()

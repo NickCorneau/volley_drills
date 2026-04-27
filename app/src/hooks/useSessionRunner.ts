@@ -12,7 +12,12 @@ import {
   saveExecution,
   swapActiveBlock,
 } from '../services/session'
-import { clearTimerState, flushTimerForBlock, readTimerState, recoverTimer } from '../services/timer'
+import {
+  clearTimerState,
+  flushTimerForBlock,
+  readTimerState,
+  recoverTimer,
+} from '../services/timer'
 
 export type SessionRunnerOptions = {
   getAccumulatedElapsed?: () => number
@@ -26,10 +31,7 @@ export type SessionRunnerOptions = {
   getEffectiveDurationSeconds?: () => number | undefined
 }
 
-export function useSessionRunner(
-  executionLogId: string,
-  options?: SessionRunnerOptions,
-) {
+export function useSessionRunner(executionLogId: string, options?: SessionRunnerOptions) {
   const [execution, setExecution] = useState<ExecutionLog | null>(null)
   const [plan, setPlan] = useState<SessionPlan | null>(null)
   const [loaded, setLoaded] = useState(false)
@@ -61,8 +63,7 @@ export function useSessionRunner(
   }, [executionLogId])
 
   const currentBlockIndex = execution?.activeBlockIndex ?? 0
-  const currentBlock: SessionPlanBlock | null =
-    plan?.blocks[currentBlockIndex] ?? null
+  const currentBlock: SessionPlanBlock | null = plan?.blocks[currentBlockIndex] ?? null
   const totalBlocks = plan?.blocks.length ?? 0
   const isPaused = execution?.status === 'paused'
 
@@ -81,20 +82,12 @@ export function useSessionRunner(
   }, [persist])
 
   const pauseBlock = useCallback(
-    async (
-      accumulatedElapsed: number,
-      effectiveDurationSeconds?: number,
-    ) => {
+    async (accumulatedElapsed: number, effectiveDurationSeconds?: number) => {
       const exec = executionRef.current
       if (!exec) return
       const updated = buildPausedExecution(exec)
       await persist(updated)
-      await flushTimerForBlock(
-        exec,
-        accumulatedElapsed,
-        effectiveDurationSeconds,
-        'paused',
-      )
+      await flushTimerForBlock(exec, accumulatedElapsed, effectiveDurationSeconds, 'paused')
     },
     [persist],
   )
@@ -111,16 +104,11 @@ export function useSessionRunner(
       const p = planRef.current
       if (!exec || !p) return false
       const onLastBlock = exec.activeBlockIndex >= p.blocks.length - 1
-      const timer =
-        onLastBlock && status === 'skipped'
-          ? await readTimerState()
-          : undefined
+      const timer = onLastBlock && status === 'skipped' ? await readTimerState() : undefined
       const { execution: updated, isLast } = buildAdvancedBlock(exec, p, status)
       if (isLast) {
         const partialSeconds =
-          timer?.executionLogId === exec.id
-            ? timer.accumulatedElapsed
-            : undefined
+          timer?.executionLogId === exec.id ? timer.accumulatedElapsed : undefined
         updated.actualDurationMinutes = computeActualDurationMinutes(updated, p, partialSeconds)
       }
       await persist(updated)
@@ -130,15 +118,9 @@ export function useSessionRunner(
     [persist],
   )
 
-  const completeBlock = useCallback(
-    () => advanceBlock('completed'),
-    [advanceBlock],
-  )
+  const completeBlock = useCallback(() => advanceBlock('completed'), [advanceBlock])
 
-  const skipBlock = useCallback(
-    () => advanceBlock('skipped'),
-    [advanceBlock],
-  )
+  const skipBlock = useCallback(() => advanceBlock('skipped'), [advanceBlock])
 
   const endSession = useCallback(
     async (reason?: string) => {
@@ -147,13 +129,8 @@ export function useSessionRunner(
       if (!exec || !p) return
       const timer = await readTimerState()
       const ended = buildEndedSession(exec, reason)
-      const ownedElapsed =
-        timer?.executionLogId === exec.id ? timer.accumulatedElapsed : undefined
-      ended.actualDurationMinutes = computeActualDurationMinutes(
-        ended,
-        p,
-        ownedElapsed,
-      )
+      const ownedElapsed = timer?.executionLogId === exec.id ? timer.accumulatedElapsed : undefined
+      ended.actualDurationMinutes = computeActualDurationMinutes(ended, p, ownedElapsed)
       await persist(ended)
       await clearTimerState()
     },
@@ -197,11 +174,7 @@ export function useSessionRunner(
     })
     if (alternates.length === 0) return false
     const next = alternates[0]
-    const { updatedExecution, updatedPlan } = await swapActiveBlock(
-      exec,
-      p,
-      next,
-    )
+    const { updatedExecution, updatedPlan } = await swapActiveBlock(exec, p, next)
     executionRef.current = updatedExecution
     planRef.current = updatedPlan
     setExecution(updatedExecution)
@@ -210,10 +183,7 @@ export function useSessionRunner(
   }, [])
 
   const flushTimer = useCallback(
-    async (
-      accumulatedElapsed: number,
-      effectiveDurationSeconds?: number,
-    ) => {
+    async (accumulatedElapsed: number, effectiveDurationSeconds?: number) => {
       const exec = executionRef.current
       if (!exec) return
       await flushTimerForBlock(exec, accumulatedElapsed, effectiveDurationSeconds)
@@ -230,11 +200,7 @@ export function useSessionRunner(
     } | null> => {
       const exec = executionRef.current
       if (!exec) return null
-      return recoverTimer(
-        exec.id,
-        exec.activeBlockIndex,
-        blockDurationSeconds,
-      )
+      return recoverTimer(exec.id, exec.activeBlockIndex, blockDurationSeconds)
     },
     [],
   )

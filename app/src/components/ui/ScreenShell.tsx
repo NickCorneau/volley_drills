@@ -74,10 +74,7 @@ function Root({ children, className }: ScreenShellProps) {
   return (
     <div
       data-screen-shell
-      className={cx(
-        'mx-auto flex min-h-0 w-full max-w-[390px] flex-1 flex-col',
-        className,
-      )}
+      className={cx('mx-auto flex min-h-0 w-full max-w-[390px] flex-1 flex-col', className)}
     >
       {children}
     </div>

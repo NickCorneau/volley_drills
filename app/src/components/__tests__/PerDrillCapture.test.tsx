@@ -35,9 +35,7 @@ describe('PerDrillCapture', () => {
     const chips = screen.getAllByRole('radio')
     expect(chips).toHaveLength(3)
     expect(screen.getByRole('radio', { name: /^too hard$/i })).toBeInTheDocument()
-    expect(
-      screen.getByRole('radio', { name: /^still learning$/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /^still learning$/i })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: /^too easy$/i })).toBeInTheDocument()
   })
 
@@ -74,9 +72,10 @@ describe('PerDrillCapture', () => {
         onToggleNotCaptured={noop}
       />,
     )
-    expect(
-      screen.getByRole('radio', { name: /still learning/i }),
-    ).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('radio', { name: /still learning/i })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    )
     expect(screen.getByRole('radio', { name: /too hard/i })).toHaveAttribute(
       'aria-checked',
       'false',
@@ -120,9 +119,7 @@ describe('PerDrillCapture', () => {
       />,
     )
 
-    expect(
-      screen.queryByTestId('per-drill-add-counts'),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByTestId('per-drill-add-counts')).not.toBeInTheDocument()
     expect(screen.queryByTestId('per-drill-counts')).not.toBeInTheDocument()
   })
 
@@ -164,8 +161,6 @@ describe('PerDrillCapture', () => {
 
     fireEvent.click(screen.getByTestId('per-drill-add-counts'))
     expect(screen.getByTestId('per-drill-counts')).toBeInTheDocument()
-    expect(
-      screen.queryByTestId('per-drill-add-counts'),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByTestId('per-drill-add-counts')).not.toBeInTheDocument()
   })
 })

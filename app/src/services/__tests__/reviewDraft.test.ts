@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
-import {
-  loadReviewDraft,
-  saveReviewDraft,
-  submitReview,
-} from '../review'
+import { loadReviewDraft, saveReviewDraft, submitReview } from '../review'
 
 /**
  * Review draft persistence (C-1 Unit 7 / R7 / R8).
@@ -85,10 +81,7 @@ describe('saveReviewDraft / loadReviewDraft', () => {
       totalAttempts: 7,
     })
 
-    const stored = await db.sessionReviews
-      .where('executionLogId')
-      .equals(EXEC)
-      .first()
+    const stored = await db.sessionReviews.where('executionLogId').equals(EXEC).first()
     expect(stored?.status).toBe('draft')
     expect(stored?.sessionRpe).toBe(6)
     expect(stored?.goodPasses).toBe(3)
@@ -134,10 +127,7 @@ describe('saveReviewDraft / loadReviewDraft', () => {
     expect(draft?.sessionRpe).toBe(8)
     expect(draft?.goodPasses).toBe(20)
 
-    const count = await db.sessionReviews
-      .where('executionLogId')
-      .equals(EXEC)
-      .count()
+    const count = await db.sessionReviews.where('executionLogId').equals(EXEC).count()
     expect(count).toBe(1)
   })
 
@@ -156,10 +146,7 @@ describe('saveReviewDraft / loadReviewDraft', () => {
       totalAttempts: 99,
     })
 
-    const stored = await db.sessionReviews
-      .where('executionLogId')
-      .equals(EXEC)
-      .first()
+    const stored = await db.sessionReviews.where('executionLogId').equals(EXEC).first()
     expect(stored?.status).toBe('submitted')
     expect(stored?.sessionRpe).toBe(6)
     expect(stored?.goodPasses).toBe(10)
@@ -184,10 +171,7 @@ describe('saveReviewDraft / loadReviewDraft', () => {
       totalAttempts: 3,
     })
 
-    const stored = await db.sessionReviews
-      .where('executionLogId')
-      .equals(EXEC)
-      .first()
+    const stored = await db.sessionReviews.where('executionLogId').equals(EXEC).first()
     expect(stored?.status).toBe('skipped')
     expect(stored?.sessionRpe).toBeNull()
   })

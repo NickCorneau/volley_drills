@@ -61,10 +61,7 @@ function renderAt(execId: string) {
 
 async function waitForDraft(execId: string, attempts = 20) {
   for (let i = 0; i < attempts; i += 1) {
-    const row = await db.sessionReviews
-      .where('executionLogId')
-      .equals(execId)
-      .first()
+    const row = await db.sessionReviews.where('executionLogId').equals(execId).first()
     if (row) return row
     await new Promise((r) => setTimeout(r, 25))
   }

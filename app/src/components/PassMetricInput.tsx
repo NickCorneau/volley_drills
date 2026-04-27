@@ -68,9 +68,7 @@ export function PassMetricInput({
         />
       </div>
       {rate != null && !notCaptured && (
-        <p className="text-center text-sm font-semibold text-accent">
-          {rate}% good pass rate
-        </p>
+        <p className="text-center text-sm font-semibold text-accent">{rate}% good pass rate</p>
       )}
       {onToggleNotCaptured && (
         <button
@@ -167,10 +165,7 @@ function NumberCell({
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <label
-        htmlFor={id}
-        className="text-sm font-medium text-text-primary"
-      >
+      <label htmlFor={id} className="text-sm font-medium text-text-primary">
         {label}
       </label>
       <input

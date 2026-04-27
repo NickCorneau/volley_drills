@@ -46,7 +46,7 @@ beforeEach(async () => {
   await clearDb()
 })
 
-describe("writer contract: status emission (A5 / D-C7)", () => {
+describe('writer contract: status emission (A5 / D-C7)', () => {
   it("submitReview writes status === 'submitted'", async () => {
     await seedTerminalExec('exec-submit')
 
@@ -57,10 +57,7 @@ describe("writer contract: status emission (A5 / D-C7)", () => {
       totalAttempts: 25,
     })
 
-    const review = await db.sessionReviews
-      .where('executionLogId')
-      .equals('exec-submit')
-      .first()
+    const review = await db.sessionReviews.where('executionLogId').equals('exec-submit').first()
     expect(review?.status).toBe('submitted')
   })
 
@@ -69,10 +66,7 @@ describe("writer contract: status emission (A5 / D-C7)", () => {
 
     await expireReview({ executionLogId: 'exec-expire' })
 
-    const review = await db.sessionReviews
-      .where('executionLogId')
-      .equals('exec-expire')
-      .first()
+    const review = await db.sessionReviews.where('executionLogId').equals('exec-expire').first()
     expect(review?.status).toBe('skipped')
     expect(review?.quickTags).toEqual(['expired'])
   })
@@ -82,10 +76,7 @@ describe("writer contract: status emission (A5 / D-C7)", () => {
 
     await skipReview('exec-skip')
 
-    const review = await db.sessionReviews
-      .where('executionLogId')
-      .equals('exec-skip')
-      .first()
+    const review = await db.sessionReviews.where('executionLogId').equals('exec-skip').first()
     expect(review?.status).toBe('skipped')
     expect(review?.quickTags).toEqual(['skipped'])
   })

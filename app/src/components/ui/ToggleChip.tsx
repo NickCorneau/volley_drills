@@ -21,10 +21,8 @@ const SIZE_CLASSES: Record<ToggleChipSize, string> = {
 }
 
 const SELECTED_TONE: Record<ToggleChipTone, string> = {
-  accent:
-    'border border-accent bg-info-surface text-accent focus-visible:ring-accent',
-  warning:
-    'border border-warning bg-warning-surface text-warning focus-visible:ring-warning',
+  accent: 'border border-accent bg-info-surface text-accent focus-visible:ring-accent',
+  warning: 'border border-warning bg-warning-surface text-warning focus-visible:ring-warning',
 }
 
 const UNSELECTED_TONE: Record<ToggleChipTone, string> = {

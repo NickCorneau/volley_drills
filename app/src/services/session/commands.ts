@@ -12,10 +12,7 @@ import type {
   SessionPlanSafetyCheck,
   SessionReview,
 } from '../../db'
-import {
-  endedAt,
-  isTerminalSession,
-} from '../../domain/executionPredicates'
+import { endedAt, isTerminalSession } from '../../domain/executionPredicates'
 import { buildEndedSession } from '../../domain/executionState'
 import { FINISH_LATER_CAP_MS } from '../../domain/policies'
 import { expireReview } from '../review'
@@ -91,8 +88,7 @@ export async function createSessionFromDraft(
   // Phase F Unit 2 / D122: persist `lastPlayerMode` voice signal
   // atomically with the session-create so it cannot diverge from
   // the plan's playerCount.
-  const lastPlayerMode: 'solo' | 'pair' =
-    plan.playerCount === 1 ? 'solo' : 'pair'
+  const lastPlayerMode: 'solo' | 'pair' = plan.playerCount === 1 ? 'solo' : 'pair'
   const playerModeStamp = now
 
   await db.transaction(
@@ -168,9 +164,7 @@ export async function swapActiveBlock(
  * Per-record try/catch (rel-6): one corrupted record must not abort the
  * whole sweep.
  */
-export async function expireStaleReviews(
-  now: number = Date.now(),
-): Promise<number> {
+export async function expireStaleReviews(now: number = Date.now()): Promise<number> {
   const logs = await db.executionLogs.toArray()
   const terminal = logs.filter(isTerminalSession)
   const finalizedIds = new Set(
@@ -186,10 +180,7 @@ export async function expireStaleReviews(
       await expireReview({ executionLogId: exec.id, now })
       expired += 1
     } catch (err) {
-      console.error(
-        `expireStaleReviews: failed to expire ${exec.id}; continuing sweep`,
-        err,
-      )
+      console.error(`expireStaleReviews: failed to expire ${exec.id}; continuing sweep`, err)
     }
   }
   return expired
@@ -220,24 +211,13 @@ export async function skipReview(executionId: string): Promise<void> {
     status: 'skipped',
   }
 
-  await db.transaction(
-    'rw',
-    db.sessionReviews,
-    db.storageMeta,
-    async (tx) => {
-      const reviews = tx.table<SessionReview, string>('sessionReviews')
-      const existing = await reviews
-        .where('executionLogId')
-        .equals(executionId)
-        .first()
-      if (
-        existing &&
-        (existing.status === 'submitted' || existing.status === 'skipped')
-      ) {
-        return
-      }
-      await reviews.put(stub)
-      await clearSoftBlockDismissed(executionId, tx)
-    },
-  )
+  await db.transaction('rw', db.sessionReviews, db.storageMeta, async (tx) => {
+    const reviews = tx.table<SessionReview, string>('sessionReviews')
+    const existing = await reviews.where('executionLogId').equals(executionId).first()
+    if (existing && (existing.status === 'submitted' || existing.status === 'skipped')) {
+      return
+    }
+    await reviews.put(stub)
+    await clearSoftBlockDismissed(executionId, tx)
+  })
 }

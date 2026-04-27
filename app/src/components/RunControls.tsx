@@ -87,12 +87,7 @@ export function RunControls({
         </Button>
       </div>
       {onSwap && (
-        <Button
-          variant="secondary"
-          fullWidth
-          onClick={onSwap}
-          aria-label="Swap drill"
-        >
+        <Button variant="secondary" fullWidth onClick={onSwap} aria-label="Swap drill">
           Swap drill
         </Button>
       )}

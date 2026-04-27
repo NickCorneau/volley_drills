@@ -56,17 +56,11 @@ async function main() {
   // than a lenient one here; if the source structure changes, this line
   // throws loudly rather than silently emitting a misaligned icon.
   if (!svg.includes('rx="108"')) {
-    throw new Error(
-      'icon.svg no longer contains rx="108"; update generate-icons.mjs',
-    )
+    throw new Error('icon.svg no longer contains rx="108"; update generate-icons.mjs')
   }
   const maskableSvg = svg.replace('rx="108"', 'rx="0"')
   const maskableBuffer = Buffer.from(maskableSvg, 'utf8')
-  await rasterize(
-    maskableBuffer,
-    path.join(PUBLIC, 'icon-512-maskable.png'),
-    512,
-  )
+  await rasterize(maskableBuffer, path.join(PUBLIC, 'icon-512-maskable.png'), 512)
 
   // Also write the intermediate maskable SVG alongside the PNGs so a
   // future regeneration doesn't silently diverge from what shipped.

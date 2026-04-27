@@ -47,8 +47,7 @@ export function BackButton({
   className,
   'aria-label': ariaLabel,
 }: BackButtonProps) {
-  const accessibleName =
-    ariaLabel ?? (label === 'Back' ? 'Back' : `Back to ${label}`)
+  const accessibleName = ariaLabel ?? (label === 'Back' ? 'Back' : `Back to ${label}`)
 
   return (
     <button

@@ -26,9 +26,7 @@ import {
 } from '../services/review'
 import { loadSession } from '../services/session'
 
-function inferMainSkillMetricType(
-  plan: SessionPlan | null,
-): ReturnType<typeof getBlockMetricType> {
+function inferMainSkillMetricType(plan: SessionPlan | null): ReturnType<typeof getBlockMetricType> {
   if (!plan) return null
   const mainSkill = plan.blocks.find((b) => b.type === 'main_skill')
   if (!mainSkill) return null
@@ -57,11 +55,7 @@ function isPastDeferralCap(log: ExecutionLog, now: number): boolean {
 // `expireStaleReviews` sweep) still fires on the same cap, users just
 // are not counted-down at. D118 durability posture is unchanged.
 
-function ReviewSessionContent({
-  executionLogId,
-}: {
-  executionLogId: string
-}) {
+function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
   const navigate = useNavigate()
 
   const [loaded, setLoaded] = useState<LoadedSession>({ status: 'loading' })
@@ -72,15 +66,12 @@ function ReviewSessionContent({
   // Home-skip, past-cap auto-expire). The `existingStatus` field lets the
   // conflict copy differentiate "already reviewed" from "already skipped"
   // so the tester sees honest UX in both cases (adv-3 fix).
-  const [conflictedWith, setConflictedWith] = useState<
-    'submitted' | 'skipped' | null
-  >(null)
+  const [conflictedWith, setConflictedWith] = useState<'submitted' | 'skipped' | null>(null)
 
   const [sessionRpe, setSessionRpe] = useState<number | null>(null)
   const [good, setGood] = useState(0)
   const [total, setTotal] = useState(0)
-  const [incompleteReason, setIncompleteReason] =
-    useState<IncompleteReason | null>(null)
+  const [incompleteReason, setIncompleteReason] = useState<IncompleteReason | null>(null)
   const [quickTags, setQuickTags] = useState<string[]>([])
   const [shortNote, setShortNote] = useState('')
   // D133 (2026-04-26): captures recorded between blocks on the
@@ -93,9 +84,7 @@ function ReviewSessionContent({
   // aggregate when at least one capture exists. Empty array == legacy
   // session (no per-drill captures); the session-level UI then stays
   // in its pre-D133 shape.
-  const [perDrillCaptures, setPerDrillCaptures] = useState<
-    PerDrillCaptureRecord[]
-  >([])
+  const [perDrillCaptures, setPerDrillCaptures] = useState<PerDrillCaptureRecord[]>([])
   // C-1 Unit 7 plan calls for 200 ms debounce on the note field (every
   // keystroke is expensive on Dexie) while RPE / pass metric / quickTags
   // commit immediately. `debouncedShortNote` is the value the auto-save
@@ -149,10 +138,7 @@ function ReviewSessionContent({
             await expireReview({ executionLogId })
           } catch (err) {
             if (!isSchemaBlocked()) {
-              console.error(
-                'A9 mount-time expireReview failed; continuing to /complete',
-                err,
-              )
+              console.error('A9 mount-time expireReview failed; continuing to /complete', err)
             }
           }
           if (cancelled) return
@@ -246,8 +232,7 @@ function ReviewSessionContent({
       // (Item 9, 2026-04-27; previously TransitionScreen) so a
       // Finish-Later round-trip on a different device or after a
       // refresh doesn't silently drop per-drill rows.
-      perDrillCaptures:
-        perDrillCaptures.length > 0 ? perDrillCaptures : undefined,
+      perDrillCaptures: perDrillCaptures.length > 0 ? perDrillCaptures : undefined,
     }).catch((err) => {
       if (isSchemaBlocked()) return
       console.error('Review draft save failed:', err)
@@ -282,8 +267,7 @@ function ReviewSessionContent({
     if (loaded.status !== 'ready' || sessionRpe == null || isSubmitting) return
     const { log } = loaded
     const isEndedEarly = log.status === 'ended_early'
-    const submitWasDiscarded =
-      isEndedEarly && log.endedEarlyReason === 'discarded_resume'
+    const submitWasDiscarded = isEndedEarly && log.endedEarlyReason === 'discarded_resume'
     const submitNeedsReason = isEndedEarly && !submitWasDiscarded
     if (submitNeedsReason && incompleteReason == null) return
 
@@ -310,33 +294,19 @@ function ReviewSessionContent({
       // consumers (CompleteScreen, summary composer, future D104
       // adaptation engine). Pre-D133 sessions and non-count drills
       // continue to use the in-state `good` / `total` values.
-      const usingPerDrillAggregate =
-        showMetrics && perDrillCaptures.length > 0
-      const aggregate = usingPerDrillAggregate
-        ? aggregateDrillCaptures(perDrillCaptures)
-        : null
-      const submitGood = aggregate
-        ? aggregate.goodPasses
-        : showMetrics
-          ? good
-          : 0
-      const submitTotal = aggregate
-        ? aggregate.totalAttempts
-        : showMetrics
-          ? total
-          : 0
+      const usingPerDrillAggregate = showMetrics && perDrillCaptures.length > 0
+      const aggregate = usingPerDrillAggregate ? aggregateDrillCaptures(perDrillCaptures) : null
+      const submitGood = aggregate ? aggregate.goodPasses : showMetrics ? good : 0
+      const submitTotal = aggregate ? aggregate.totalAttempts : showMetrics ? total : 0
       const result = await submitReview({
         executionLogId,
         sessionRpe,
         goodPasses: submitGood,
         totalAttempts: submitTotal,
-        incompleteReason: submitNeedsReason
-          ? (incompleteReason ?? undefined)
-          : undefined,
+        incompleteReason: submitNeedsReason ? (incompleteReason ?? undefined) : undefined,
         quickTags: quickTags.length > 0 ? quickTags : undefined,
         shortNote: shortNote.trim() || undefined,
-        perDrillCaptures:
-          perDrillCaptures.length > 0 ? perDrillCaptures : undefined,
+        perDrillCaptures: perDrillCaptures.length > 0 ? perDrillCaptures : undefined,
       })
       // H19 (adv-3 fix + K-TS-1 exhaustive-switch fix): the A3 transaction
       // refuses silently when a terminal record already exists for this
@@ -355,9 +325,7 @@ function ReviewSessionContent({
           return
         default: {
           const _exhaustive: never = result
-          throw new Error(
-            `Unhandled submitReview result: ${JSON.stringify(_exhaustive)}`,
-          )
+          throw new Error(`Unhandled submitReview result: ${JSON.stringify(_exhaustive)}`)
         }
       }
     } catch (err) {
@@ -367,9 +335,7 @@ function ReviewSessionContent({
       // "Something went wrong" behind the overlay. Matches HomeScreen.
       if (isSchemaBlocked()) return
       console.error('Review submit failed:', err)
-      setSubmitError(
-        'Something went wrong saving your review. Please try again.',
-      )
+      setSubmitError('Something went wrong saving your review. Please try again.')
       setIsSubmitting(false)
     }
   }
@@ -413,9 +379,7 @@ function ReviewSessionContent({
         action={
           <Button
             variant="primary"
-            onClick={() =>
-              navigate(routes.complete(executionLogId), { replace: true })
-            }
+            onClick={() => navigate(routes.complete(executionLogId), { replace: true })}
           >
             View saved review
           </Button>
@@ -425,16 +389,14 @@ function ReviewSessionContent({
   }
 
   const { log, plan } = loaded
-  const hasSkillBlocks = plan?.blocks.some(
-    (b) => b.type === 'main_skill' || b.type === 'pressure',
-  ) ?? false
+  const hasSkillBlocks =
+    plan?.blocks.some((b) => b.type === 'main_skill' || b.type === 'pressure') ?? false
 
   const sessionTitle = plan?.presetName ?? 'Session'
   const durationPart = formatDurationLine(log)
   const statusPart = statusLabel(log.status)
   const isEndedEarly = log.status === 'ended_early'
-  const wasDiscarded =
-    isEndedEarly && log.endedEarlyReason === 'discarded_resume'
+  const wasDiscarded = isEndedEarly && log.endedEarlyReason === 'discarded_resume'
   const needsIncompleteReason = isEndedEarly && !wasDiscarded
   // 2026-04-23 walkthrough closeout polish item 2 (merged Review
   // proposal per `docs/plans/2026-04-23-walkthrough-closeout-polish.md`
@@ -449,8 +411,7 @@ function ReviewSessionContent({
   // unknown drills so tests seeded with arbitrary drill names do not
   // silently lose their capture surface.
   const metricType = inferMainSkillMetricType(plan)
-  const metricCountsByRule =
-    metricType == null || COUNT_BASED_METRIC_TYPES.has(metricType)
+  const metricCountsByRule = metricType == null || COUNT_BASED_METRIC_TYPES.has(metricType)
   const showMetrics = !wasDiscarded && hasSkillBlocks && metricCountsByRule
   // D133 (2026-04-26) read-only aggregate: when at least one
   // Transition-screen capture has a difficulty tag (the required
@@ -462,17 +423,11 @@ function ReviewSessionContent({
   // any flow where the tester skipped the Transition tag continue to
   // work unchanged.
   const captureAggregate =
-    showMetrics && perDrillCaptures.length > 0
-      ? aggregateDrillCaptures(perDrillCaptures)
-      : null
-  const useAggregateSummary =
-    captureAggregate !== null && captureAggregate.drillsTagged > 0
+    showMetrics && perDrillCaptures.length > 0 ? aggregateDrillCaptures(perDrillCaptures) : null
+  const useAggregateSummary = captureAggregate !== null && captureAggregate.drillsTagged > 0
   const isPairMode = plan?.playerCount === 2
-  const rpePrompt = isPairMode
-    ? 'How hard was this session for you?'
-    : 'How hard was your session?'
-  const canSubmit =
-    sessionRpe != null && (!needsIncompleteReason || incompleteReason != null)
+  const rpePrompt = isPairMode ? 'How hard was this session for you?' : 'How hard was your session?'
+  const canSubmit = sessionRpe != null && (!needsIncompleteReason || incompleteReason != null)
 
   // Surface exactly what's blocking submission instead of leaving the
   // button grey and silent. Red-team UX #9. Order matches reading order of
@@ -508,8 +463,7 @@ function ReviewSessionContent({
           incompleteReason: incompleteReason ?? undefined,
           quickTags: quickTags.length > 0 ? quickTags : undefined,
           shortNote: shortNote.trim() || undefined,
-          perDrillCaptures:
-            perDrillCaptures.length > 0 ? perDrillCaptures : undefined,
+          perDrillCaptures: perDrillCaptures.length > 0 ? perDrillCaptures : undefined,
         })
       } catch (err) {
         // Reliability finding rel-4: silent-navigate on save failure
@@ -520,9 +474,7 @@ function ReviewSessionContent({
         // tester can retry Finish Later or Submit.
         if (!isSchemaBlocked()) {
           console.error('Review draft save on Finish Later failed:', err)
-          setSubmitError(
-            "Couldn't save your draft. Please try again or Submit now.",
-          )
+          setSubmitError("Couldn't save your draft. Please try again or Submit now.")
           return
         }
       }
@@ -567,9 +519,7 @@ function ReviewSessionContent({
               display sizes reads as techy-SaaS; 600 is the weight
               the typeface is tuned for at headings. Unified with
               every other page-title h1 across the app. */}
-          <h1 className="text-xl font-semibold tracking-tight text-text-primary">
-            Quick review
-          </h1>
+          <h1 className="text-xl font-semibold tracking-tight text-text-primary">Quick review</h1>
           <div className="h-14 w-14 shrink-0" aria-hidden />
         </div>
         <p className="text-sm text-text-secondary">
@@ -578,25 +528,21 @@ function ReviewSessionContent({
       </ScreenShell.Header>
 
       <ScreenShell.Body className="gap-6 pb-4">
+        <Card className="flex flex-col gap-3">
+          <h2 id="rpe-heading" className="text-sm font-semibold text-text-primary">
+            {rpePrompt}
+          </h2>
+          {isPairMode && (
+            <p className="text-sm text-text-secondary">
+              One rating per device. Partner&rsquo;s score isn&rsquo;t required.
+            </p>
+          )}
+          <RpeSelector value={sessionRpe} onChange={setSessionRpe} />
+        </Card>
 
-      <Card className="flex flex-col gap-3">
-        <h2
-          id="rpe-heading"
-          className="text-sm font-semibold text-text-primary"
-        >
-          {rpePrompt}
-        </h2>
-        {isPairMode && (
-          <p className="text-sm text-text-secondary">
-            One rating per device. Partner&rsquo;s score isn&rsquo;t required.
-          </p>
-        )}
-        <RpeSelector value={sessionRpe} onChange={setSessionRpe} />
-      </Card>
-
-      {showMetrics && (
-        <>
-          {/* 2026-04-23 walkthrough closeout polish item 2: divider
+        {showMetrics && (
+          <>
+            {/* 2026-04-23 walkthrough closeout polish item 2: divider
               between the RPE card and the Good-passes card. Per the
               design review recommendation cited in the merged Review
               proposal in
@@ -608,52 +554,48 @@ function ReviewSessionContent({
               cards of equal visual weight. The hairline keeps the
               `Card` container intact (no token / layout refactor)
               while separating the two questions. */}
-          <div
-            className="h-px w-full bg-text-secondary/15"
-            role="presentation"
-            aria-hidden="true"
-          />
-        <Card className="flex flex-col gap-3">
-          {useAggregateSummary && captureAggregate ? (
-            // D133 (2026-04-26) per-drill aggregate read-out: the
-            // tester captured difficulty (and optionally counts)
-            // between blocks on Transition; we show the rolled-up
-            // numbers here without an input affordance so the tester
-            // doesn't get asked the same question twice. The copy
-            // says "captured" not "you logged" because some drills
-            // may have been tagged-only (no counts) — `Good / Total`
-            // still summarizes only the count-bearing rows.
-            <>
-              <h2 className="text-sm font-semibold text-text-primary">
-                Good passes
-              </h2>
-              <p className="text-sm text-text-secondary">
-                Captured between blocks on{' '}
-                <span className="font-medium text-text-primary">
-                  {captureAggregate.drillsTagged}
-                </span>{' '}
-                drill
-                {captureAggregate.drillsTagged === 1 ? '' : 's'}.
-              </p>
-              <p
-                className="text-base font-semibold text-text-primary"
-                data-testid="per-drill-aggregate"
-              >
-                {captureAggregate.drillsWithCounts > 0
-                  ? formatPassRateLine(
-                      captureAggregate.goodPasses,
-                      captureAggregate.totalAttempts,
-                    )
-                  : 'Counts not logged for any drill.'}
-              </p>
-            </>
-          ) : (
-            <>
-              <div>
-                <h2 className="text-sm font-semibold text-text-primary">
-                  Good passes
-                </h2>
-                {/* 2026-04-19 non-player tester note: the original phrasing
+            <div
+              className="h-px w-full bg-text-secondary/15"
+              role="presentation"
+              aria-hidden="true"
+            />
+            <Card className="flex flex-col gap-3">
+              {useAggregateSummary && captureAggregate ? (
+                // D133 (2026-04-26) per-drill aggregate read-out: the
+                // tester captured difficulty (and optionally counts)
+                // between blocks on Transition; we show the rolled-up
+                // numbers here without an input affordance so the tester
+                // doesn't get asked the same question twice. The copy
+                // says "captured" not "you logged" because some drills
+                // may have been tagged-only (no counts) — `Good / Total`
+                // still summarizes only the count-bearing rows.
+                <>
+                  <h2 className="text-sm font-semibold text-text-primary">Good passes</h2>
+                  <p className="text-sm text-text-secondary">
+                    Captured between blocks on{' '}
+                    <span className="font-medium text-text-primary">
+                      {captureAggregate.drillsTagged}
+                    </span>{' '}
+                    drill
+                    {captureAggregate.drillsTagged === 1 ? '' : 's'}.
+                  </p>
+                  <p
+                    className="text-base font-semibold text-text-primary"
+                    data-testid="per-drill-aggregate"
+                  >
+                    {captureAggregate.drillsWithCounts > 0
+                      ? formatPassRateLine(
+                          captureAggregate.goodPasses,
+                          captureAggregate.totalAttempts,
+                        )
+                      : 'Counts not logged for any drill.'}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <h2 className="text-sm font-semibold text-text-primary">Good passes</h2>
+                    {/* 2026-04-19 non-player tester note: the original phrasing
                     ("count it as Not Good") implied a phantom "Not Good"
                     control because the binary `good | not-good` vocabulary
                     lives in `BinaryPassScore` but never surfaces as a UI
@@ -666,44 +608,36 @@ function ReviewSessionContent({
                     present; only the clause's wording changed. See
                     `docs/research/2026-04-19-v0b-starter-loop-feedback.md`
                     and `docs/specs/m001-review-micro-spec.md` §Required. */}
-                <p className="mt-1 text-sm text-text-secondary">
-                  <span className="font-medium text-text-primary">
-                    Success rule:
-                  </span>{' '}
-                  ball reached the target zone or the next contact was
-                  playable.{' '}
-                  <span className="font-medium text-text-primary">
-                    If unsure, don&rsquo;t count it as Good.
-                  </span>
-                </p>
-              </div>
-              <PassMetricInput
-                good={good}
-                total={total}
-                onGoodChange={setGood}
-                onTotalChange={setTotal}
-                notCaptured={quickTags.includes('notCaptured')}
-                onToggleNotCaptured={handleToggleNotCaptured}
-              />
-            </>
-          )}
-        </Card>
-        </>
-      )}
+                    <p className="mt-1 text-sm text-text-secondary">
+                      <span className="font-medium text-text-primary">Success rule:</span> ball
+                      reached the target zone or the next contact was playable.{' '}
+                      <span className="font-medium text-text-primary">
+                        If unsure, don&rsquo;t count it as Good.
+                      </span>
+                    </p>
+                  </div>
+                  <PassMetricInput
+                    good={good}
+                    total={total}
+                    onGoodChange={setGood}
+                    onTotalChange={setTotal}
+                    notCaptured={quickTags.includes('notCaptured')}
+                    onToggleNotCaptured={handleToggleNotCaptured}
+                  />
+                </>
+              )}
+            </Card>
+          </>
+        )}
 
-      {needsIncompleteReason && (
-        <Card className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-text-primary">
-            Why did you end early?
-          </h2>
-          <IncompleteReasonChips
-            value={incompleteReason}
-            onChange={setIncompleteReason}
-          />
-        </Card>
-      )}
+        {needsIncompleteReason && (
+          <Card className="flex flex-col gap-3">
+            <h2 className="text-sm font-semibold text-text-primary">Why did you end early?</h2>
+            <IncompleteReasonChips value={incompleteReason} onChange={setIncompleteReason} />
+          </Card>
+        )}
 
-      {/* 2026-04-23 walkthrough closeout polish item 2: the Quick tags
+        {/* 2026-04-23 walkthrough closeout polish item 2: the Quick tags
           card was deleted per the merged Review proposal in
           `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`.
           The four 2026-04-22 passes converged that Too easy / About
@@ -717,33 +651,25 @@ function ReviewSessionContent({
           historical draft rehydration preserves the field for
           round-trip fidelity. */}
 
-      <section className="flex flex-col gap-2">
-        <label
-          htmlFor="review-note"
-          className="text-sm font-semibold text-text-primary"
-        >
-          Short note{' '}
-          <span className="font-normal text-text-secondary">(optional)</span>
-        </label>
-        <textarea
-          id="review-note"
-          rows={3}
-          value={shortNote}
-          onChange={(e) => setShortNote(e.target.value)}
-          placeholder="Anything else?"
-          className="min-h-[88px] w-full resize-y rounded-[12px] border border-text-primary/10 bg-bg-primary px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-        />
-      </section>
-
+        <section className="flex flex-col gap-2">
+          <label htmlFor="review-note" className="text-sm font-semibold text-text-primary">
+            Short note <span className="font-normal text-text-secondary">(optional)</span>
+          </label>
+          <textarea
+            id="review-note"
+            rows={3}
+            value={shortNote}
+            onChange={(e) => setShortNote(e.target.value)}
+            placeholder="Anything else?"
+            className="min-h-[88px] w-full resize-y rounded-[12px] border border-text-primary/10 bg-bg-primary px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          />
+        </section>
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="flex flex-col gap-3 pt-4">
         {submitError && <StatusMessage variant="error" message={submitError} />}
         {missingHint && (
-          <p
-            className="text-center text-sm text-text-secondary"
-            aria-live="polite"
-          >
+          <p className="text-center text-sm text-text-secondary" aria-live="polite">
             {missingHint}
           </p>
         )}
@@ -763,11 +689,7 @@ function ReviewSessionContent({
         >
           {isSubmitting ? 'Saving\u2026' : 'Done'}
         </Button>
-        <Button
-          variant="link"
-          onClick={() => void handleFinishLater()}
-          disabled={isSubmitting}
-        >
+        <Button variant="link" onClick={() => void handleFinishLater()} disabled={isSubmitting}>
           Finish later
         </Button>
       </ScreenShell.Footer>
@@ -796,10 +718,5 @@ export function ReviewScreen() {
     )
   }
 
-  return (
-    <ReviewSessionContent
-      key={executionLogId}
-      executionLogId={executionLogId}
-    />
-  )
+  return <ReviewSessionContent key={executionLogId} executionLogId={executionLogId} />
 }

@@ -23,11 +23,7 @@ export function ReviewPendingCard({
   onCancelSkip,
 }: ReviewPendingCardProps) {
   return (
-    <section
-      role="region"
-      aria-label="Review pending"
-      className={PRIMARY_CARD_CLASS}
-    >
+    <section role="region" aria-label="Review pending" className={PRIMARY_CARD_CLASS}>
       <div>
         {/* 2026-04-26 pre-D91 editorial polish (F11): eyebrow voice
             aligned with the card's `aria-label="Review pending"` and
@@ -36,22 +32,14 @@ export function ReviewPendingCard({
             polite invitation rather than the unfinished-obligation
             state this card actually represents. See
             `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 1. */}
-        <p className="text-sm font-medium text-text-secondary">
-          Review pending
-        </p>
-        <p className="mt-1 text-sm font-medium text-text-primary">
-          {data.planName}
-        </p>
+        <p className="text-sm font-medium text-text-secondary">Review pending</p>
+        <p className="mt-1 text-sm font-medium text-text-primary">{data.planName}</p>
       </div>
       <Button variant="primary" fullWidth onClick={onFinish}>
         Finish review
       </Button>
       {!confirmingSkip ? (
-        <Button
-          variant="link"
-          onClick={onSkip}
-          className={LINK_BELOW_PRIMARY_CLASS}
-        >
+        <Button variant="link" onClick={onSkip} className={LINK_BELOW_PRIMARY_CLASS}>
           Skip review
         </Button>
       ) : (

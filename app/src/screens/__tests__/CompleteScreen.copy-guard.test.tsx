@@ -158,12 +158,10 @@ function scanBodyAndAttributes(): string {
   ]
   const attrValues: string[] = []
   for (const attr of attrNames) {
-    document.body
-      .querySelectorAll(`[${attr}]`)
-      .forEach((el) => {
-        const v = el.getAttribute(attr)
-        if (v) attrValues.push(v)
-      })
+    document.body.querySelectorAll(`[${attr}]`).forEach((el) => {
+      const v = el.getAttribute(attr)
+      if (v) attrValues.push(v)
+    })
   }
   return `${text}\n${attrValues.join('\n')}`
 }

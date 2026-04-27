@@ -47,9 +47,7 @@ describe('RpeSelector 3-chip picker', () => {
   it('does not render any numeric 0-10 chip label (post-collapse regression guard)', () => {
     render(<Harness />)
     for (const n of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
-      expect(
-        screen.queryByRole('radio', { name: new RegExp(`^${n}$`) }),
-      ).not.toBeInTheDocument()
+      expect(screen.queryByRole('radio', { name: new RegExp(`^${n}$`) })).not.toBeInTheDocument()
     }
   })
 
@@ -78,15 +76,9 @@ describe('RpeSelector 3-chip picker', () => {
     const user = userEvent.setup()
     render(<Harness />)
     await user.click(screen.getByRole('radio', { name: /^right$/i }))
-    expect(
-      screen.getByRole('radio', { name: /^right$/i }),
-    ).toHaveAttribute('aria-checked', 'true')
-    expect(
-      screen.getByRole('radio', { name: /^easy$/i }),
-    ).toHaveAttribute('aria-checked', 'false')
-    expect(
-      screen.getByRole('radio', { name: /^hard$/i }),
-    ).toHaveAttribute('aria-checked', 'false')
+    expect(screen.getByRole('radio', { name: /^right$/i })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('radio', { name: /^easy$/i })).toHaveAttribute('aria-checked', 'false')
+    expect(screen.getByRole('radio', { name: /^hard$/i })).toHaveAttribute('aria-checked', 'false')
   })
 
   describe('pickChipForRpe (historical value rehydration)', () => {
@@ -106,21 +98,16 @@ describe('RpeSelector 3-chip picker', () => {
       { stored: 8, snapped: 7 },
       { stored: 9, snapped: 7 },
       { stored: 10, snapped: 7 },
-    ])(
-      'snaps historical sessionRpe=$stored to chip value $snapped',
-      ({ stored, snapped }) => {
-        expect(pickChipForRpe(stored)).toBe(snapped)
-      },
-    )
+    ])('snaps historical sessionRpe=$stored to chip value $snapped', ({ stored, snapped }) => {
+      expect(pickChipForRpe(stored)).toBe(snapped)
+    })
   })
 
   it('rehydrates from a non-canonical historical value by snapping to the nearest chip', () => {
     render(<Harness initial={8} />)
     // Stored value 8 is preserved in the harness state, but the UI
     // shows Hard (7) as checked.
-    expect(
-      screen.getByRole('radio', { name: /^hard$/i }),
-    ).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('radio', { name: /^hard$/i })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByTestId('captured')).toHaveTextContent('8')
   })
 })

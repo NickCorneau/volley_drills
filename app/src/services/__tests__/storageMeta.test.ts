@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
-import {
-  getStorageMeta,
-  setStorageMeta,
-  setStorageMetaMany,
-} from '../storageMeta'
+import { getStorageMeta, setStorageMeta, setStorageMetaMany } from '../storageMeta'
 
 beforeEach(async () => {
   await db.storageMeta.clear()
