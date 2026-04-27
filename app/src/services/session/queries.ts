@@ -9,6 +9,7 @@ import { byRecentEndedAt, endedAt, isTerminalSession } from '../../domain/execut
 import type { BlockSlotType } from '../../types/session'
 import { FINISH_LATER_CAP_MS } from '../../domain/policies'
 import { buildEndedSession } from '../../domain/executionState'
+import { applyBlockOverrides } from '../../domain/sessionProjection'
 import { clearTimerState, readTimerState } from '../timer'
 
 export interface ResumableSession {
@@ -47,7 +48,7 @@ export async function findResumableSession(): Promise<ResumableSession | null> {
     (timer?.executionLogId === exec.id ? timer.lastFlushedAt : undefined) ??
     exec.startedAt
 
-  return { execution: exec, plan, interruptedAt }
+  return { execution: exec, plan: applyBlockOverrides(plan, exec), interruptedAt }
 }
 
 export async function loadSession(
@@ -56,7 +57,7 @@ export async function loadSession(
   const execution = await db.executionLogs.get(execId)
   if (!execution) return null
   const plan = (await db.sessionPlans.get(execution.planId)) ?? null
-  return { execution, plan }
+  return { execution, plan: plan ? applyBlockOverrides(plan, execution) : null }
 }
 
 export interface PendingReview {
@@ -129,7 +130,7 @@ export async function getLastComplete(): Promise<LastCompleteBundle | null> {
   const review = finalizedReviewByExec.get(log.id)!
   const plan = await db.sessionPlans.get(log.planId)
   if (!plan) return null
-  return { log, plan, review }
+  return { log, plan: applyBlockOverrides(plan, log), review }
 }
 
 /**
@@ -161,7 +162,7 @@ export async function getRecentSessions(limit: number = 3): Promise<RecentSessio
     entries.push({
       execId: exec.id,
       endedAt: endedAt(exec),
-      plan,
+      plan: applyBlockOverrides(plan, exec),
       completed: exec.status === 'completed',
     })
   }
@@ -246,7 +247,8 @@ export async function findLastCompletedDrillIdsByType(
   const bestByType = new Map<BlockSlotType, Candidate>()
 
   for (const exec of recent) {
-    const plan = planById.get(exec.planId)
+    const storedPlan = planById.get(exec.planId)
+    const plan = storedPlan ? applyBlockOverrides(storedPlan, exec) : undefined
     if (!plan) continue
     const sessionEnd = endedAt(exec)
     const statusByBlockId = new Map(exec.blockStatuses.map((s) => [s.blockId, s] as const))

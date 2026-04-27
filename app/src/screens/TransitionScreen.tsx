@@ -62,10 +62,9 @@ export function TransitionScreen() {
    * Pre-start Swap: the tester realizes on Transition they want a
    * different drill before committing to the next block. Same
    * underlying call as RunScreen's mid-block Swap (`runner.swapBlock`)
-   * which handles the plan mutation + swapCount increment atomically.
+   * which handles the override + swapCount increment atomically.
    * No timer pause / resume dance here because the block hasn't
-   * started; the new `nextBlock` appears in the UI the moment Dexie's
-   * live query refreshes.
+   * started; the effective `nextBlock` appears in the UI immediately.
    */
   const handleSwap = useCallback(async () => {
     setSwapError(null)

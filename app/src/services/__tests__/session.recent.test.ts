@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
-import type { SessionPlan, ExecutionStatus } from '../../db'
+import type { ExecutionLog, SessionPlan, ExecutionStatus, SessionPlanBlock } from '../../db'
 import { getRecentSessions } from '../session'
 
 /**
@@ -59,6 +59,7 @@ interface ExecOpts {
   startedAt: number
   completedAt?: number
   endedEarlyReason?: string
+  blockOverrides?: ExecutionLog['blockOverrides']
 }
 
 async function seedExec(opts: ExecOpts) {
@@ -71,6 +72,7 @@ async function seedExec(opts: ExecOpts) {
     startedAt: opts.startedAt,
     completedAt: opts.completedAt,
     endedEarlyReason: opts.endedEarlyReason,
+    blockOverrides: opts.blockOverrides,
   })
 }
 
@@ -266,5 +268,32 @@ describe('getRecentSessions (Tier 1a Unit 5)', () => {
     const recent = await getRecentSessions(3)
     // Orphan drops; the two valid records remain in desc order.
     expect(recent.map((r) => r.execId)).toEqual(['x-ok-a', 'x-ok-b'])
+  })
+
+  it('projects block overrides for history while preserving the stored original plan', async () => {
+    const t = Date.now()
+    const plan = makePlan('p1')
+    const override: SessionPlanBlock = {
+      ...plan.blocks[0],
+      drillId: 'd99',
+      variantId: 'd99-solo',
+      drillName: 'Swapped Drill',
+      shortName: 'Swap',
+    }
+    await db.sessionPlans.put(plan)
+    await seedExec({
+      id: 'x-swapped',
+      planId: 'p1',
+      status: 'completed',
+      startedAt: t - 10_000,
+      completedAt: t - 5_000,
+      blockOverrides: { 0: override },
+    })
+
+    const recent = await getRecentSessions(1)
+    expect(recent[0]?.plan.blocks[0]).toEqual(override)
+
+    const stored = await db.sessionPlans.get('p1')
+    expect(stored?.blocks[0].drillName).toBe('Beach Prep Three')
   })
 })

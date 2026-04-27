@@ -141,8 +141,8 @@ export function useSessionRunner(executionLogId: string, options?: SessionRunner
    * Phase F Unit 4 (2026-04-19): mid-run drill Swap.
    *
    * Picks the next-ranked alternate for the active block slot (via
-   * `findSwapAlternatives`) and persists the plan mutation + swap
-   * counter atomically through `swapActiveBlock`. Returns `false` in
+   * `findSwapAlternatives`) and persists the effective block override
+   * + swap counter atomically through `swapActiveBlock`. Returns `false` in
    * the no-op cases (no context, no alternates, warmup/wrap) so the
    * caller can surface an error if the UI somehow let the tap through
    * despite the no-alternates state.

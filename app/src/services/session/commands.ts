@@ -15,6 +15,7 @@ import type {
 import { endedAt, isTerminalSession } from '../../domain/executionPredicates'
 import { buildEndedSession } from '../../domain/executionState'
 import { FINISH_LATER_CAP_MS } from '../../domain/policies'
+import { applyBlockOverrides } from '../../domain/sessionProjection'
 import { expireReview } from '../review'
 import { clearSoftBlockDismissed } from '../softBlock'
 import { clearTimerState } from '../timer'
@@ -133,9 +134,9 @@ export async function discardSession(exec: ExecutionLog): Promise<void> {
 }
 
 /**
- * Phase F Unit 4: mid-run Swap divergence writer. Replaces the active
- * plan block and increments `execution.swapCount` inside a single rw
- * transaction so the UI never sees a mismatched plan/counter state.
+ * Phase F Unit 4: mid-run Swap divergence writer. Records an active
+ * block override and increments `execution.swapCount` inside a single
+ * rw transaction so the UI never sees a mismatched override/counter state.
  *
  * Caller contract (see `useSessionRunner.swapBlock`): `nextBlock` MUST
  * come from `findSwapAlternatives` so drill identity invariants hold.
@@ -145,18 +146,18 @@ export async function swapActiveBlock(
   plan: SessionPlan,
   nextBlock: SessionPlanBlock,
 ): Promise<{ updatedExecution: ExecutionLog; updatedPlan: SessionPlan }> {
-  const updatedBlocks = [...plan.blocks]
-  updatedBlocks[execution.activeBlockIndex] = nextBlock
-  const updatedPlan: SessionPlan = { ...plan, blocks: updatedBlocks }
   const updatedExecution: ExecutionLog = {
     ...execution,
+    blockOverrides: {
+      ...(execution.blockOverrides ?? {}),
+      [execution.activeBlockIndex]: nextBlock,
+    },
     swapCount: (execution.swapCount ?? 0) + 1,
   }
-  await db.transaction('rw', db.sessionPlans, db.executionLogs, async () => {
-    await db.sessionPlans.put(updatedPlan)
+  await db.transaction('rw', db.executionLogs, async () => {
     await db.executionLogs.put(updatedExecution)
   })
-  return { updatedExecution, updatedPlan }
+  return { updatedExecution, updatedPlan: applyBlockOverrides(plan, updatedExecution) }
 }
 
 /**

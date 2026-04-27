@@ -71,6 +71,7 @@ interface ExecOpts {
   startedAt: number
   completedAt?: number
   endedEarlyReason?: string
+  blockOverrides?: Record<number, SessionPlanBlock>
   blockStatuses: ExecutionLogBlockStatus[]
 }
 
@@ -84,6 +85,7 @@ async function seedExec(opts: ExecOpts) {
     startedAt: opts.startedAt,
     completedAt: opts.completedAt,
     endedEarlyReason: opts.endedEarlyReason,
+    blockOverrides: opts.blockOverrides,
   })
 }
 
@@ -419,5 +421,38 @@ describe('findLastCompletedDrillIdsByType', () => {
 
     const result = await findLastCompletedDrillIdsByType()
     expect(result.main_skill).toBe('d03')
+  })
+
+  it('uses block overrides when identifying the most recently completed drill', async () => {
+    const original = makeBlock({
+      id: 'p1-b1',
+      type: 'main_skill',
+      drillId: 'd03',
+      variantId: 'd03-pair',
+    })
+    const override = makeBlock({
+      id: 'p1-b1',
+      type: 'main_skill',
+      drillId: 'd99',
+      variantId: 'd99-solo',
+      drillName: 'Swapped Drill',
+    })
+    await db.sessionPlans.put(makePlan('p1', [original]))
+    await seedExec({
+      id: 'e-swapped',
+      planId: 'p1',
+      status: 'completed',
+      startedAt: 1000,
+      completedAt: 2000,
+      blockOverrides: { 0: override },
+      blockStatuses: [{ blockId: 'p1-b1', status: 'completed', completedAt: 1500 }],
+    })
+
+    expect(await findLastCompletedDrillIdsByType()).toEqual({
+      main_skill: 'd99',
+    })
+
+    const stored = await db.sessionPlans.get('p1')
+    expect(stored?.blocks[0].drillId).toBe('d03')
   })
 })

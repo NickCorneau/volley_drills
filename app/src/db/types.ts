@@ -137,6 +137,13 @@ export interface ExecutionLog {
    * warrant before/after attribution.
    */
   swapCount?: number
+  /**
+   * Architecture cleanup U7: active-work overrides keyed by plan block index.
+   * New swaps write here instead of mutating `SessionPlan.blocks`, preserving
+   * the original plan while allowing read paths to project what the tester
+   * actually did. Optional for legacy rows and sessions with no swaps.
+   */
+  blockOverrides?: Record<number, SessionPlanBlock>
 }
 
 export type IncompleteReason = 'time' | 'fatigue' | 'pain' | 'other'

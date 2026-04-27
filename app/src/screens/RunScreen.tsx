@@ -322,7 +322,7 @@ export function RunScreen() {
 
   /**
    * Mid-run drill Swap. Pauses the timer (same pattern as Shorten);
-   * delegates the atomic plan mutation + `swapCount` increment to
+   * delegates the atomic block override + `swapCount` increment to
    * `useSessionRunner.swapBlock`. The no-alternates path is a belt
    * under suspenders — the UI already hides the button in that case.
    */

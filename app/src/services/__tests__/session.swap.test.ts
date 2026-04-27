@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
 import type { ExecutionLog, SessionPlan, SessionPlanBlock } from '../../db'
-import { swapActiveBlock } from '../session'
+import { loadSession, swapActiveBlock } from '../session'
 
 /**
- * Phase F Unit 4 (2026-04-19): `swapActiveBlock` atomically replaces
- * `plan.blocks[activeBlockIndex]` with the caller-supplied alternate
- * and increments `execution.swapCount`.
+ * Phase F Unit 4 started by mutating `SessionPlan.blocks`; the architecture
+ * cleanup now preserves the original plan and records the active block override
+ * on `ExecutionLog`.
  *
- * Both writes (the plan mutation and the counter bump) land inside a
- * single `rw` transaction so the UI never observes a state where the
- * counter is ahead of the plan or vice versa.
+ * The override and counter bump land inside a single `rw` transaction so the
+ * UI never observes a state where the counter is ahead of the effective plan
+ * or vice versa.
  */
 
 async function clearDb() {
@@ -99,7 +99,7 @@ describe('swapActiveBlock (Phase F Unit 4)', () => {
     await clearDb()
   })
 
-  it('replaces plan.blocks[activeBlockIndex] with the supplied alternate', async () => {
+  it('returns an effective plan with the supplied alternate without mutating the persisted plan', async () => {
     const plan = makePlan()
     const exec = makeExec(1)
     await db.sessionPlans.put(plan)
@@ -114,9 +114,13 @@ describe('swapActiveBlock (Phase F Unit 4)', () => {
 
     // Persisted shape matches.
     const persisted = await db.sessionPlans.get('plan-swap')
-    expect(persisted!.blocks[1].drillName).toBe('Swapped Drill')
-    expect(persisted!.blocks[1].drillId).toBe('d99')
-    expect(persisted!.blocks[1].variantId).toBe('d99-solo')
+    expect(persisted!.blocks[1].drillName).toBe('Original Drill')
+
+    const persistedExec = await db.executionLogs.get('exec-swap')
+    expect(persistedExec!.blockOverrides?.[1]).toEqual(REPLACEMENT)
+
+    const loaded = await loadSession('exec-swap')
+    expect(loaded?.plan?.blocks[1]).toEqual(REPLACEMENT)
   })
 
   it('increments execution.swapCount from undefined (first swap) to 1', async () => {
@@ -178,7 +182,7 @@ describe('swapActiveBlock (Phase F Unit 4)', () => {
     expect(updatedExecution.blockStatuses[1].blockId).toBe('b-1')
   })
 
-  it('atomic write: plan mutation and swapCount bump land together on the same call', async () => {
+  it('atomic write: block override and swapCount bump land together on the same call', async () => {
     const plan = makePlan()
     const exec = makeExec(1)
     await db.sessionPlans.put(plan)
@@ -188,9 +192,10 @@ describe('swapActiveBlock (Phase F Unit 4)', () => {
 
     const persistedPlan = await db.sessionPlans.get('plan-swap')
     const persistedExec = await db.executionLogs.get('exec-swap')
-    // If the transaction failed mid-flight we would see one updated and
-    // the other stale. Both reads confirm the atomic write succeeded.
-    expect(persistedPlan!.blocks[1].drillName).toBe('Swapped Drill')
+    // If the transaction failed mid-flight we would see the counter without
+    // the override or vice versa.
+    expect(persistedPlan!.blocks[1].drillName).toBe('Original Drill')
+    expect(persistedExec!.blockOverrides?.[1]?.drillName).toBe('Swapped Drill')
     expect(persistedExec!.swapCount).toBe(1)
   })
 })
