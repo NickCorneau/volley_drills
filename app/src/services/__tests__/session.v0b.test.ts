@@ -62,6 +62,8 @@ describe('v0b session services', () => {
     expect(plan).toHaveLength(1)
     expect(execution).toHaveLength(1)
     expect(plan[0].context).toEqual(draft!.context)
+    expect(plan[0].assemblySeed).toBe(draft!.assemblySeed)
+    expect(plan[0].assemblyAlgorithmVersion).toBe(draft!.assemblyAlgorithmVersion)
     expect(plan[0].safetyCheck.trainingRecency).toBe('1 day')
     expect(execution[0].blockStatuses).toHaveLength(draft!.blocks.length)
     expect(plan[0].blocks.map((b) => b.drillId)).toEqual(draft!.blocks.map((b) => b.drillId))

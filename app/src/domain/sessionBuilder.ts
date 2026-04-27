@@ -25,10 +25,40 @@ interface CandidateVariant {
   variant: DrillVariant
 }
 
-function shuffle<T>(arr: T[]): T[] {
+export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 1
+
+type RandomSource = () => number
+
+function createAssemblySeed(): string {
+  const randomUuid = globalThis.crypto?.randomUUID?.()
+  if (randomUuid) return randomUuid
+  return `seed-${Date.now()}`
+}
+
+function hashSeed(seed: string): number {
+  let hash = 0x811c9dc5
+  for (let i = 0; i < seed.length; i++) {
+    hash ^= seed.charCodeAt(i)
+    hash = Math.imul(hash, 0x01000193)
+  }
+  return hash >>> 0
+}
+
+function createSeededRandom(seed: string): RandomSource {
+  let state = hashSeed(seed)
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0
+    let value = state
+    value = Math.imul(value ^ (value >>> 15), value | 1)
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61)
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+function shuffle<T>(arr: T[], random: RandomSource): T[] {
   const out = [...arr]
   for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
+    const j = Math.floor(random() * (i + 1))
     ;[out[i], out[j]] = [out[j], out[i]]
   }
   return out
@@ -85,11 +115,12 @@ function pickForSlot(
   slot: BlockSlot,
   context: SetupContext,
   usedDrillIds: Set<string>,
+  random: RandomSource,
 ): CandidateVariant | undefined {
   const candidates = findCandidates(slot, context)
 
   const unused = candidates.filter((c) => !usedDrillIds.has(c.drill.id))
-  const pool = shuffle(unused.length > 0 ? unused : candidates)
+  const pool = shuffle(unused.length > 0 ? unused : candidates, random)
 
   if (pool.length === 0) return undefined
 
@@ -242,6 +273,7 @@ function allocateDurations(layout: BlockSlot[], totalMinutes: number): number[] 
  */
 export interface BuildDraftOptions {
   readonly lastCompletedByType?: Partial<Record<BlockSlotType, string>>
+  readonly assemblySeed?: string
 }
 
 export function buildDraft(
@@ -250,6 +282,8 @@ export function buildDraft(
 ): SessionDraft | null {
   const archetype = selectArchetype(context)
   if (!archetype) return null
+  const assemblySeed = options?.assemblySeed ?? createAssemblySeed()
+  const random = createSeededRandom(assemblySeed)
 
   const layout = archetype.layouts[context.timeProfile]
   if (!layout || layout.length === 0) return null
@@ -264,9 +298,9 @@ export function buildDraft(
   // substitute drillId so earlier slots in the layout (e.g.,
   // `technique`, `movement_proxy`) can't shuffle-claim it before the
   // main_skill slot is reached. Without the reservation the
-  // technique slot's `Math.random()` shuffle determines whether the
-  // substitute survives, which surfaces as a flaky main_skill drill
-  // identity across repeated `buildDraft` calls.
+  // technique slot's seeded shuffle determines whether the substitute
+  // survives, so reservation keeps main_skill identity stable for a
+  // given seed.
   let mainSkillSubstitute: { candidate: CandidateVariant; rationale: string } | undefined
   const lastMainSkillDrillId = options?.lastCompletedByType?.main_skill
   if (lastMainSkillDrillId) {
@@ -296,7 +330,7 @@ export function buildDraft(
     }
 
     if (!pick) {
-      pick = pickForSlot(slot, context, usedDrillIds)
+      pick = pickForSlot(slot, context, usedDrillIds, random)
     }
 
     if (!pick) {
@@ -332,6 +366,8 @@ export function buildDraft(
     context,
     archetypeId: archetype.id,
     archetypeName: archetype.name,
+    assemblySeed,
+    assemblyAlgorithmVersion: SESSION_ASSEMBLY_ALGORITHM_VERSION,
     blocks,
     updatedAt: Date.now(),
   }
@@ -398,12 +434,9 @@ function pickMainSkillSubstitute(
  * - Does NOT carry `SessionPlan.safetyCheck` values onto the draft -
  *   the draft doesn't encode safety (that happens on Safety screen
  *   mount), and D83 makes that a per-session decision anyway.
- * - `drillId` / `variantId` are left as empty strings: `SessionPlanBlock`
- *   drops them when the plan was materialized from the original draft
- *   (see `createSessionFromDraft`), and no runtime consumer reads them
- *   off `DraftBlock` after the plan is regenerated. Keeping them as
- *   empty strings beats introducing a schema change just for this
- *   backfill-adjacent path.
+ * - `drillId` / `variantId` are preserved when the plan carries them;
+ *   legacy plans fall back to empty strings so the draft shape remains
+ *   valid without guessing catalog identity from display names.
  */
 export function buildDraftFromCompletedBlocks(
   log: ExecutionLog,
@@ -452,6 +485,8 @@ export function buildDraftFromCompletedBlocks(
     context: plan.context,
     archetypeId: plan.presetId as SessionDraft['archetypeId'],
     archetypeName: plan.presetName,
+    assemblySeed: plan.assemblySeed ?? createAssemblySeed(),
+    assemblyAlgorithmVersion: plan.assemblyAlgorithmVersion ?? SESSION_ASSEMBLY_ALGORITHM_VERSION,
     blocks: completedBlocks,
     updatedAt: Date.now(),
   }
@@ -558,6 +593,8 @@ function allocateRecoveryDurations(layout: BlockSlot[], totalMinutes: number): n
 export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
   const archetype = selectArchetype(context)
   if (!archetype) return null
+  const assemblySeed = createAssemblySeed()
+  const random = createSeededRandom(assemblySeed)
 
   const layout = archetype.layouts[context.timeProfile]
   if (!layout) return null
@@ -578,7 +615,7 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
 
   for (let i = 0; i < recoveryLayout.length; i++) {
     const slot = recoveryLayout[i]
-    const pick = pickForSlot(slot, context, usedDrillIds)
+    const pick = pickForSlot(slot, context, usedDrillIds, random)
     if (!pick) continue
 
     usedDrillIds.add(pick.drill.id)
@@ -609,6 +646,8 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
     context,
     archetypeId: archetype.id,
     archetypeName: archetype.name,
+    assemblySeed,
+    assemblyAlgorithmVersion: SESSION_ASSEMBLY_ALGORITHM_VERSION,
     blocks,
     updatedAt: Date.now(),
   }
@@ -736,10 +775,8 @@ export function findSwapAlternatives(
   const candidates = findCandidates(slot, context)
 
   // Base exclusion (always on): the drill currently in this slot.
-  // SessionPlanBlock doesn't carry drillId (that field is stripped
-  // when the plan is materialized from the draft - see
-  // createSessionFromDraft in services/session.ts), so name is the
-  // available identity.
+  // Legacy SessionPlanBlock rows may lack drillId, so name remains the
+  // defensive exclusion fallback for old persisted plans.
   const baseFiltered = candidates.filter((c) => c.drill.name !== block.drillName)
 
   // Neighbor-aware exclusion (VB-FL-7): try to also drop any drill

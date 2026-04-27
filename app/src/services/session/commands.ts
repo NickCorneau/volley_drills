@@ -54,6 +54,8 @@ export async function createSessionFromDraft(
     presetId: draft.archetypeId,
     presetName: draft.archetypeName,
     playerCount: draft.context.playerMode === 'solo' ? 1 : 2,
+    assemblySeed: draft.assemblySeed,
+    assemblyAlgorithmVersion: draft.assemblyAlgorithmVersion,
     blocks: draft.blocks.map((b) => ({
       id: b.id,
       type: b.type,

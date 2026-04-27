@@ -478,6 +478,26 @@ describe('sessionBuilder', () => {
     expect(recovery?.blocks.map((b) => b.type)).toEqual(['warmup', 'technique', 'wrap'])
   })
 
+  it('persists assembly seed metadata and replays the same block identities for the same seed', () => {
+    const context = {
+      playerMode: 'pair' as const,
+      timeProfile: 25 as const,
+      netAvailable: true,
+      wallAvailable: false,
+    }
+
+    const first = buildDraft(context, { assemblySeed: 'seed-replay' })
+    const second = buildDraft(context, { assemblySeed: 'seed-replay' })
+
+    expect(first).not.toBeNull()
+    expect(second).not.toBeNull()
+    expect(first?.assemblySeed).toBe('seed-replay')
+    expect(first?.assemblyAlgorithmVersion).toBe(1)
+    expect(second?.blocks.map((block) => [block.drillId, block.variantId])).toEqual(
+      first?.blocks.map((block) => [block.drillId, block.variantId]),
+    )
+  })
+
   /**
    * 2026-04-21: recovery respects the user's chosen `timeProfile`
    * instead of the sum-of-mins of kept slots. Pre-2026-04-21, a

@@ -57,6 +57,8 @@ export interface SessionPlan {
   presetId: string
   presetName: string
   playerCount: 1 | 2
+  assemblySeed?: string
+  assemblyAlgorithmVersion?: number
   blocks: SessionPlanBlock[]
   safetyCheck: SessionPlanSafetyCheck
   context?: SetupContext
@@ -85,6 +87,8 @@ export interface SessionDraft {
   context: SetupContext
   archetypeId: ArchetypeId
   archetypeName: string
+  assemblySeed?: string
+  assemblyAlgorithmVersion?: number
   blocks: DraftBlock[]
   updatedAt: number
   /**
