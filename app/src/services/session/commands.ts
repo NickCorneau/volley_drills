@@ -60,6 +60,8 @@ export async function createSessionFromDraft(
     blocks: draft.blocks.map((b) => ({
       id: b.id,
       type: b.type,
+      drillId: b.drillId,
+      variantId: b.variantId,
       drillName: b.drillName,
       shortName: b.shortName,
       durationMinutes: b.durationMinutes,

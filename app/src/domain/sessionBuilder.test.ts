@@ -111,21 +111,52 @@ describe('sessionBuilder', () => {
    * so default (non-Swap) session assembly preserves the
    * single-focus-per-session invariant (archetype invariants header
    * point 1). A setting drill must never surface in the main_skill
-   * slot of a default solo_wall 15-min build.
+   * slot of a default build. The exclusion list is derived from the
+   * catalog so adding or renaming setting drills can't silently let
+   * one slip through.
    */
-  it('default solo_wall 15-min build does not pick a setting drill in main_skill (single-focus invariant)', () => {
-    const draft = buildDraft({
-      playerMode: 'solo',
-      timeProfile: 15,
-      netAvailable: false,
-      wallAvailable: true,
-    })
-    expect(draft).not.toBeNull()
-    const mainSkill = draft!.blocks.find((b) => b.type === 'main_skill')
-    if (mainSkill !== undefined) {
-      expect(['d38', 'd39', 'd41']).not.toContain(mainSkill.drillId)
-    }
-  })
+  const SETTING_DRILL_IDS = DRILLS.filter((d) => d.skillFocus.includes('set')).map(
+    (d) => d.id,
+  )
+  it.each([
+    [
+      'solo_wall',
+      {
+        playerMode: 'solo',
+        timeProfile: 15,
+        netAvailable: false,
+        wallAvailable: true,
+      } satisfies SetupContext,
+    ],
+    [
+      'solo_open',
+      {
+        playerMode: 'solo',
+        timeProfile: 25,
+        netAvailable: false,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+    [
+      'pair_net',
+      {
+        playerMode: 'pair',
+        timeProfile: 25,
+        netAvailable: true,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+  ])(
+    'default %s build does not pick a setting drill in main_skill (single-focus invariant)',
+    (_label, context) => {
+      const draft = buildDraft(context)
+      expect(draft).not.toBeNull()
+      const mainSkill = draft!.blocks.find((b) => b.type === 'main_skill')
+      if (mainSkill !== undefined) {
+        expect(SETTING_DRILL_IDS).not.toContain(mainSkill.drillId)
+      }
+    },
+  )
 
   /**
    * Tier 1a Unit 4 (Chosen-because rationale): every block on a default
@@ -221,6 +252,215 @@ describe('sessionBuilder', () => {
     expect(a?.blocks.find((x) => x.type === 'wrap')?.rationale).toBe(
       b?.blocks.find((x) => x.type === 'wrap')?.rationale,
     )
+  })
+
+  /**
+   * Red-team remediation Phase 1.2 / 2.3 / 3.2: bound the build-path
+   * substitution surface. Phase 1 pinned that buildDraft NEVER
+   * substitutes; Phase 2 promoted substitution to build-time but
+   * scoped it to a single trigger; Phase 3 generalised the API from
+   * a single key to a per-slot map without widening the trigger:
+   *   1. caller passes `lastCompletedByType.main_skill`, AND
+   *   2. that drill has a `SUBSTITUTION_RULE`, AND
+   *   3. the rule's `blockedBy` constraint is active in this context, AND
+   *   4. the slot is `main_skill`.
+   *
+   * Without all four, no substitution rationale should appear. Sweep
+   * across representative contexts with no `lastCompletedByType` to
+   * pin that the default build path stays untouched.
+   */
+  it.each([
+    [
+      'solo wall',
+      {
+        playerMode: 'solo',
+        timeProfile: 15,
+        netAvailable: false,
+        wallAvailable: true,
+      } satisfies SetupContext,
+    ],
+    [
+      'solo open (no net, no wall)',
+      {
+        playerMode: 'solo',
+        timeProfile: 25,
+        netAvailable: false,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+    [
+      'pair net',
+      {
+        playerMode: 'pair',
+        timeProfile: 25,
+        netAvailable: true,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+    [
+      'pair open',
+      {
+        playerMode: 'pair',
+        timeProfile: 15,
+        netAvailable: false,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+  ])(
+    'buildDraft does not apply substitution rationales in %s without lastCompletedByType',
+    (_label, context) => {
+      const draft = buildDraft(context)
+      expect(draft).not.toBeNull()
+      for (const block of draft!.blocks) {
+        expect(
+          block.rationale,
+          `${block.type} block leaked a substitution rationale`,
+        ).not.toMatch(/is unavailable today, so this keeps/)
+      }
+    },
+  )
+
+  /**
+   * Phase 2.2 build-time substitution: when the caller passes the
+   * user's last completed `main_skill` drill AND a substitution rule
+   * fires for the current context, the main_skill block must be the
+   * substitute drill with the substitution rationale. No other slot
+   * is affected.
+   */
+  describe('build-time main_skill substitution (Phase 2.2)', () => {
+    const pairOpen: SetupContext = {
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+    }
+    const pairNet: SetupContext = {
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: true,
+      wallAvailable: false,
+    }
+
+    it('promotes the explicit substitute drill into the main_skill slot', () => {
+      const draft = buildDraft(pairOpen, {
+        lastCompletedByType: { main_skill: 'd03' },
+      })
+      expect(draft).not.toBeNull()
+      const main = draft!.blocks.find((b) => b.type === 'main_skill')
+      expect(main).toBeDefined()
+      expect(main!.drillId).toBe('d10')
+      expect(main!.variantId).toBe('d10-pair')
+      expect(main!.rationale).toBe(
+        'Chosen because: the next net drill is unavailable today, so this keeps partner-fed platform control without a net.',
+      )
+    })
+
+    it('only the main_skill block carries the substitution rationale', () => {
+      const draft = buildDraft(pairOpen, {
+        lastCompletedByType: { main_skill: 'd03' },
+      })
+      expect(draft).not.toBeNull()
+      for (const block of draft!.blocks) {
+        if (block.type === 'main_skill') continue
+        expect(
+          block.rationale,
+          `${block.type} block should not carry a substitution rationale`,
+        ).not.toMatch(/is unavailable today, so this keeps/)
+      }
+    })
+
+    it('does not substitute when the preferred progression target is reachable', () => {
+      // Same last main_skill drill, but `netAvailable: true` means the
+      // rule's `blockedBy: 'needsNet'` is inactive. Substitution must
+      // not fire even though the rule exists.
+      const draft = buildDraft(pairNet, {
+        lastCompletedByType: { main_skill: 'd03' },
+      })
+      expect(draft).not.toBeNull()
+      for (const block of draft!.blocks) {
+        expect(
+          block.rationale,
+          `${block.type} block leaked a substitution rationale`,
+        ).not.toMatch(/is unavailable today, so this keeps/)
+      }
+    })
+
+    it('does not substitute when the last drill has no matching rule', () => {
+      // d05 has a progression to d06 but no SUBSTITUTION_RULE entry.
+      const draft = buildDraft(pairOpen, {
+        lastCompletedByType: { main_skill: 'd05' },
+      })
+      expect(draft).not.toBeNull()
+      for (const block of draft!.blocks) {
+        expect(
+          block.rationale,
+          `${block.type} block leaked a substitution rationale`,
+        ).not.toMatch(/is unavailable today, so this keeps/)
+      }
+    })
+
+    it('does not substitute when the substitute drill is not in the candidate pool', () => {
+      // Solo mode disqualifies d10-pair (pair-only variant), so the
+      // substitute is unreachable. The build path must fall through
+      // to the default selection rather than picking a nonsensical
+      // drill or surfacing a misleading rationale.
+      const soloOpen: SetupContext = {
+        playerMode: 'solo',
+        timeProfile: 25,
+        netAvailable: false,
+        wallAvailable: false,
+      }
+      const draft = buildDraft(soloOpen, {
+        lastCompletedByType: { main_skill: 'd03' },
+      })
+      expect(draft).not.toBeNull()
+      const main = draft!.blocks.find((b) => b.type === 'main_skill')
+      if (main !== undefined) {
+        expect(main.drillId).not.toBe('d10')
+        expect(main.rationale).not.toMatch(/is unavailable today, so this keeps/)
+      }
+    })
+
+    it('build-time substitution is deterministic across repeated calls', () => {
+      const opts = { lastCompletedByType: { main_skill: 'd03' } }
+      const a = buildDraft(pairOpen, opts)
+      const b = buildDraft(pairOpen, opts)
+      const aMain = a!.blocks.find((blk) => blk.type === 'main_skill')
+      const bMain = b!.blocks.find((blk) => blk.type === 'main_skill')
+      expect(aMain?.drillId).toBe(bMain?.drillId)
+      expect(aMain?.variantId).toBe(bMain?.variantId)
+      expect(aMain?.rationale).toBe(bMain?.rationale)
+    })
+
+    it('omitted lastCompletedByType leaves the existing build path untouched', () => {
+      const draft = buildDraft(pairOpen)
+      expect(draft).not.toBeNull()
+      const main = draft!.blocks.find((b) => b.type === 'main_skill')
+      if (main !== undefined) {
+        expect(main.rationale).not.toMatch(/is unavailable today, so this keeps/)
+      }
+    })
+
+    it('ignores non-main_skill keys on the lastCompletedByType map', () => {
+      // Forward-compat: extra keys (e.g., technique, pressure) on the
+      // map must not implicitly trigger substitution on those slots.
+      // Today only the main_skill key participates; widening that
+      // surface should be an explicit follow-up, not an accident.
+      const draft = buildDraft(pairOpen, {
+        lastCompletedByType: {
+          technique: 'd03',
+          pressure: 'd03',
+          main_skill: undefined,
+        },
+      })
+      expect(draft).not.toBeNull()
+      for (const block of draft!.blocks) {
+        expect(
+          block.rationale,
+          `${block.type} block leaked a substitution rationale via a non-main_skill key`,
+        ).not.toMatch(/is unavailable today, so this keeps/)
+      }
+    })
   })
 
   it('buildRecoveryDraft keeps low-load slots and drops main_skill and pressure', () => {

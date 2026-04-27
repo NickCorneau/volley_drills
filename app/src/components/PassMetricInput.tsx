@@ -92,6 +92,17 @@ export function PassMetricInput({
   )
 }
 
+/**
+ * 2026-04-26 pre-D91 editorial polish (`F7`): `0` renders as an
+ * empty input + `placeholder="0"`; any other numeric value renders
+ * as its decimal string. Centralized so the `useState` initializer
+ * and the `useEffect` resync use exactly the same mapping (and so
+ * the rule reads in one place if the contract is ever revisited).
+ */
+function valueToDisplayText(value: number): string {
+  return value === 0 ? '' : String(value)
+}
+
 function NumberCell({
   label,
   value,
@@ -106,23 +117,47 @@ function NumberCell({
   const id = useId()
   // Local text state so the user can type a partial value (empty string,
   // leading zero, etc.) without the parent's `value` fighting them mid-edit.
-  const [text, setText] = useState(() => String(value))
+  //
+  // 2026-04-26 pre-D91 editorial polish (`F7`): zero is rendered as
+  // an empty input with `placeholder="0"` instead of the literal
+  // string `"0"`. Pre-fix, a fresh Review screen rendered "0" / "0"
+  // centered in both Good and Total cells, which on first glance
+  // read as "the user already entered zero" rather than "no value
+  // yet" (a recurring partner-walkthrough misread that made the
+  // screen feel prefilled).
+  //
+  // The empty-string-commits-to-0 invariant is preserved by
+  // `commit()` below: an empty blur calls `onCommit(0)` so the
+  // parent's domain value lands at `0` even though the field stays
+  // visually empty. Whenever the parent reports `value === 0` —
+  // first mount, notCaptured toggle, negative clamp, draft
+  // rehydration, or auto-bump — we render the placeholder. The
+  // placeholder text is itself "0", so a courtside reader still
+  // sees a "0" sign in the field; only the visual weight changes
+  // (greyed placeholder vs. bold typed text). See
+  // `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 3.
+  const [text, setText] = useState(() => valueToDisplayText(value))
 
   // Keep local text in sync when the parent's value changes (e.g.
   // notCaptured toggled, Good auto-bumped Total, or draft rehydration).
+  // The eslint `react-hooks/set-state-in-effect` rule accepts this
+  // shape (deriving the next state purely from a prop, not from
+  // `prev`); the previous callback-form variant tripped the rule.
   useEffect(() => {
-    setText(String(value))
+    setText(valueToDisplayText(value))
   }, [value])
 
   const commit = () => {
     if (text.trim() === '') {
       onCommit(0)
-      setText(String(0))
+      // Stay empty-rendered: the parent will re-push `value === 0`
+      // through the effect above, which `valueToDisplayText` maps to
+      // `''` so the placeholder remains visible.
       return
     }
     const parsed = Number.parseInt(text, 10)
     if (Number.isNaN(parsed)) {
-      setText(String(value))
+      setText(valueToDisplayText(value))
       return
     }
     onCommit(parsed)
@@ -144,6 +179,7 @@ function NumberCell({
         inputMode="numeric"
         pattern="[0-9]*"
         value={text}
+        placeholder="0"
         disabled={disabled}
         min={0}
         onChange={(e) => setText(e.target.value)}
@@ -154,7 +190,7 @@ function NumberCell({
             ;(e.target as HTMLInputElement).blur()
           }
         }}
-        className="h-16 w-28 rounded-[12px] border-2 border-text-primary/20 bg-bg-primary text-center text-3xl font-bold tabular-nums text-text-primary focus-visible:border-accent focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+        className="h-16 w-28 rounded-[12px] border-2 border-text-primary/20 bg-bg-primary text-center text-3xl font-bold tabular-nums text-text-primary placeholder:text-text-primary/30 focus-visible:border-accent focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
       />
     </div>
   )

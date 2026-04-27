@@ -1,4 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
+import { __resetScreenWakeLockForTesting } from '../../lib/screenWakeLock'
 import { useWakeLock } from '../useWakeLock'
 
 type ReleaseHandler = EventListener
@@ -64,6 +65,7 @@ describe('useWakeLock', () => {
   })
 
   afterEach(() => {
+    __resetScreenWakeLockForTesting()
     vi.restoreAllMocks()
     Reflect.deleteProperty(navigator, 'wakeLock')
   })

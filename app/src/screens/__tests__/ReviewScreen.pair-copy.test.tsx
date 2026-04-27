@@ -85,11 +85,9 @@ describe('ReviewScreen RPE prompt (V0B-32 / D120)', () => {
     await seed(1, 'exec-link', 'plan-link')
     renderAt('exec-link')
 
-    // 2026-04-23 walkthrough closeout polish: the prior `Submit review`
-    // + underlined `Finish later` pair was replaced by two
-    // equal-weight primary buttons (`Done` on top, `Finish later`
-    // below) per the merged Review proposal in
-    // `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`.
+    // 2026-04-24 founder design note: `Done` remains the primary action,
+    // while `Finish later` returns to the lower-emphasis escape hatch
+    // treatment so the two choices do not look equivalent.
     expect(
       await screen.findByRole('button', { name: /^done$/i }),
     ).toBeInTheDocument()

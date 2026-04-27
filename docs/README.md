@@ -6,7 +6,7 @@ stage: validation
 type: index
 summary: "Editorial index for the docs tree: what each doc family owns and where to route changes."
 authority: documentation structure and editorial routing
-last_updated: 2026-04-19
+last_updated: 2026-04-26
 depends_on:
   - docs/catalog.json
   - docs/ops/agent-documentation-contract.md
@@ -60,6 +60,7 @@ Provide the prose editorial index for the docs system:
 | `milestones/` | thin-slice charters | checking scope and evidence for a milestone |
 | `specs/` | milestone behavior details | clarifying implementation behavior |
 | `research/` | curated supporting evidence | when canon needs evidence or rationale |
+| `design/` | design / UX hub: pointer index for guidelines + dated UI/UX review passes | starting a UI/UX change or writing a design review |
 | `ops/` | doc-surface and agent operating guidance | changing repo process or routing |
 
 ## Fast Path

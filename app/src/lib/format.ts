@@ -65,6 +65,78 @@ export function formatPassRateLine(good: number, total: number): string {
 }
 
 /**
+ * 2026-04-27 pre-D91 editorial polish (plan Item 8): compose the
+ * Complete-recap "Difficulty" row from a per-drill tag breakdown.
+ *
+ * The user taps a difficulty chip on the new `/run/check` screen after
+ * each main-skill / pressure block; today those taps are persisted into
+ * `perDrillCaptures[].difficulty` and consumed only by the adaptation
+ * engine. Without a recap row the user-visible flow swallows the input
+ * and the chip taps feel like data extraction. This formatter closes
+ * the loop with one quiet line.
+ *
+ * Rendering rules:
+ *   - Returns `null` when no chips were tapped (`drillsTagged === 0`);
+ *     the consumer hides the row entirely. Pre-Tier-1b sessions and
+ *     legacy reviews fall through this path unchanged.
+ *   - Collapses to `"All <bucket>"` (e.g. `"All still learning"`) when
+ *     every tapped chip went to the same bucket. Reads as a single
+ *     courtside read instead of a numbered tally for the very common
+ *     "I tapped the same chip on every drill" pattern.
+ *   - Otherwise emits a dot-separated tally, omitting zero buckets and
+ *     ordering by tag severity (`too_hard` first, then `still_learning`,
+ *     then `too_easy`) so an at-a-glance scan surfaces the most
+ *     actionable signal first. Example: `"2 too hard · 1 still learning"`.
+ *
+ * The tag labels here intentionally mirror the chip vocabulary used on
+ * `PerDrillCapture` (`Too hard / Still learning / Too easy`); lowercase
+ * because the recap line is sentence-case prose, not a chip label.
+ */
+type TagBreakdown = {
+  too_hard: number
+  still_learning: number
+  too_easy: number
+}
+
+const DIFFICULTY_LINE_ORDER: ReadonlyArray<{
+  key: keyof TagBreakdown
+  singular: string
+}> = [
+  { key: 'too_hard', singular: 'too hard' },
+  { key: 'still_learning', singular: 'still learning' },
+  { key: 'too_easy', singular: 'too easy' },
+]
+
+export function formatDifficultyBreakdownLine(
+  breakdown: TagBreakdown,
+): string | null {
+  const total =
+    breakdown.too_hard + breakdown.still_learning + breakdown.too_easy
+  if (total === 0) return null
+
+  // Single-bucket collapse: when every tap landed on one chip, "All X"
+  // reads as a single observation rather than a tally. Falls back to
+  // the dot-separated form for any mixed distribution.
+  for (const { key, singular } of DIFFICULTY_LINE_ORDER) {
+    if (breakdown[key] === total) {
+      return `All ${singular}`
+    }
+  }
+
+  // Mixed: dot-separated, omit zeros, ordered by severity. Uses a
+  // middle-dot ("·") rather than a comma to match the existing
+  // multi-fact pattern in the recap card and to read as a glanceable
+  // visual rhythm at courtside type sizes.
+  const parts: string[] = []
+  for (const { key, singular } of DIFFICULTY_LINE_ORDER) {
+    const count = breakdown[key]
+    if (count === 0) continue
+    parts.push(`${count} ${singular}`)
+  }
+  return parts.join(' · ')
+}
+
+/**
  * C-5 Unit 1: human day name for the stale-context banner ("Setup
  * pre-filled from {dayName}"). Uses the host's LOCAL timezone because
  * calendar boundaries matter more than UTC windows for "Today" /

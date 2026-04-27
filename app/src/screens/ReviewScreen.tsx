@@ -5,13 +5,19 @@ import { PassMetricInput } from '../components/PassMetricInput'
 import { RpeSelector } from '../components/RpeSelector'
 import { SafetyIcon } from '../components/SafetyIcon'
 import { Button, Card, ScreenShell, StatusMessage } from '../components/ui'
-import { DRILLS } from '../data/drills'
-import type { ExecutionLog, IncompleteReason, SessionPlan } from '../db'
+import type {
+  ExecutionLog,
+  IncompleteReason,
+  PerDrillCapture as PerDrillCaptureRecord,
+  SessionPlan,
+} from '../db'
+import { getBlockMetricType } from '../domain/drillMetadata'
 import { COUNT_BASED_METRIC_TYPES } from '../domain/policies'
-import { formatDurationLine, statusLabel } from '../lib/format'
+import { formatDurationLine, formatPassRateLine, statusLabel } from '../lib/format'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { routes } from '../routes'
 import {
+  aggregateDrillCaptures,
   expireReview,
   FINISH_LATER_CAP_MS,
   loadReviewDraft,
@@ -19,29 +25,14 @@ import {
   submitReview,
 } from '../services/review'
 import { loadSession } from '../services/session'
-import type { MetricType } from '../types/drill'
 
-function inferMainSkillMetricType(plan: SessionPlan | null): MetricType | null {
+function inferMainSkillMetricType(
+  plan: SessionPlan | null,
+): ReturnType<typeof getBlockMetricType> {
   if (!plan) return null
   const mainSkill = plan.blocks.find((b) => b.type === 'main_skill')
   if (!mainSkill) return null
-  // SessionPlanBlock doesn't carry drillId (stripped at plan
-  // materialization per createSessionFromDraft). Drill names are the
-  // stable identifier that survives, per the Tier 1a Unit 3 vocab
-  // sweep: names are NOT renamed on existing drills precisely because
-  // historical session records reference them.
-  const drill = DRILLS.find((d) => d.name === mainSkill.drillName)
-  if (!drill) return null
-  // Prefer the variant whose participants bracket the plan's player
-  // count; fall back to the first variant if nothing brackets
-  // (defensive - shouldn't happen on a plan the builder produced).
-  const variant =
-    drill.variants.find(
-      (v) =>
-        v.participants.min <= plan.playerCount &&
-        plan.playerCount <= v.participants.max,
-    ) ?? drill.variants[0]
-  return variant?.successMetric.type ?? null
+  return getBlockMetricType(mainSkill, plan.playerCount)
 }
 
 type LoadedSession =
@@ -92,6 +83,19 @@ function ReviewSessionContent({
     useState<IncompleteReason | null>(null)
   const [quickTags, setQuickTags] = useState<string[]>([])
   const [shortNote, setShortNote] = useState('')
+  // D133 (2026-04-26): captures recorded between blocks on the
+  // dedicated `/run/check` reflective beat (`DrillCheckScreen`,
+  // 2026-04-27 plan Item 9; previously hosted on TransitionScreen).
+  // ReviewScreen is a downstream reader — it only re-persists what
+  // DrillCheckScreen wrote so a Finish-Later round trip + a manual
+  // edit on Review do not silently drop the per-drill payload, and so
+  // the session-level Good-passes card collapses into a read-only
+  // aggregate when at least one capture exists. Empty array == legacy
+  // session (no per-drill captures); the session-level UI then stays
+  // in its pre-D133 shape.
+  const [perDrillCaptures, setPerDrillCaptures] = useState<
+    PerDrillCaptureRecord[]
+  >([])
   // C-1 Unit 7 plan calls for 200 ms debounce on the note field (every
   // keystroke is expensive on Dexie) while RPE / pass metric / quickTags
   // commit immediately. `debouncedShortNote` is the value the auto-save
@@ -181,6 +185,7 @@ function ReviewSessionContent({
           setIncompleteReason(draft.incompleteReason ?? null)
           setQuickTags(draft.quickTags ?? [])
           setShortNote(draft.shortNote ?? '')
+          setPerDrillCaptures(draft.perDrillCaptures ?? [])
         }
         setLoaded({
           status: 'ready',
@@ -237,6 +242,12 @@ function ReviewSessionContent({
       incompleteReason: incompleteReason ?? undefined,
       quickTags: quickTags.length > 0 ? quickTags : undefined,
       shortNote: debouncedShortNote.trim() || undefined,
+      // D133 round-trip: re-persist whatever DrillCheckScreen captured
+      // (Item 9, 2026-04-27; previously TransitionScreen) so a
+      // Finish-Later round-trip on a different device or after a
+      // refresh doesn't silently drop per-drill rows.
+      perDrillCaptures:
+        perDrillCaptures.length > 0 ? perDrillCaptures : undefined,
     }).catch((err) => {
       if (isSchemaBlocked()) return
       console.error('Review draft save failed:', err)
@@ -251,6 +262,7 @@ function ReviewSessionContent({
     incompleteReason,
     quickTags,
     debouncedShortNote,
+    perDrillCaptures,
   ])
 
   const handleToggleNotCaptured = () => {
@@ -289,16 +301,42 @@ function ReviewSessionContent({
         navigate(routes.complete(executionLogId), { replace: true })
         return
       }
+      // D133 (2026-04-26) submit shape: when per-drill captures
+      // exist, the session-level Good/Total fields are derived from
+      // them rather than collected on Review (the card is hidden
+      // below). `aggregateDrillCaptures` produces the same numerator
+      // / denominator a session-level entry would have, keeping the
+      // existing review payload contract intact for downstream
+      // consumers (CompleteScreen, summary composer, future D104
+      // adaptation engine). Pre-D133 sessions and non-count drills
+      // continue to use the in-state `good` / `total` values.
+      const usingPerDrillAggregate =
+        showMetrics && perDrillCaptures.length > 0
+      const aggregate = usingPerDrillAggregate
+        ? aggregateDrillCaptures(perDrillCaptures)
+        : null
+      const submitGood = aggregate
+        ? aggregate.goodPasses
+        : showMetrics
+          ? good
+          : 0
+      const submitTotal = aggregate
+        ? aggregate.totalAttempts
+        : showMetrics
+          ? total
+          : 0
       const result = await submitReview({
         executionLogId,
         sessionRpe,
-        goodPasses: showMetrics ? good : 0,
-        totalAttempts: showMetrics ? total : 0,
+        goodPasses: submitGood,
+        totalAttempts: submitTotal,
         incompleteReason: submitNeedsReason
           ? (incompleteReason ?? undefined)
           : undefined,
         quickTags: quickTags.length > 0 ? quickTags : undefined,
         shortNote: shortNote.trim() || undefined,
+        perDrillCaptures:
+          perDrillCaptures.length > 0 ? perDrillCaptures : undefined,
       })
       // H19 (adv-3 fix + K-TS-1 exhaustive-switch fix): the A3 transaction
       // refuses silently when a terminal record already exists for this
@@ -414,6 +452,21 @@ function ReviewSessionContent({
   const metricCountsByRule =
     metricType == null || COUNT_BASED_METRIC_TYPES.has(metricType)
   const showMetrics = !wasDiscarded && hasSkillBlocks && metricCountsByRule
+  // D133 (2026-04-26) read-only aggregate: when at least one
+  // Transition-screen capture has a difficulty tag (the required
+  // field), the session-level Good-passes input collapses into a
+  // read-only line that surfaces the per-drill aggregate so the
+  // tester sees their session-wide rate without having to re-key
+  // anything. Sessions with zero captures fall back to the
+  // pre-D133 session-level input — pre-existing partner sessions and
+  // any flow where the tester skipped the Transition tag continue to
+  // work unchanged.
+  const captureAggregate =
+    showMetrics && perDrillCaptures.length > 0
+      ? aggregateDrillCaptures(perDrillCaptures)
+      : null
+  const useAggregateSummary =
+    captureAggregate !== null && captureAggregate.drillsTagged > 0
   const isPairMode = plan?.playerCount === 2
   const rpePrompt = isPairMode
     ? 'How hard was this session for you?'
@@ -455,6 +508,8 @@ function ReviewSessionContent({
           incompleteReason: incompleteReason ?? undefined,
           quickTags: quickTags.length > 0 ? quickTags : undefined,
           shortNote: shortNote.trim() || undefined,
+          perDrillCaptures:
+            perDrillCaptures.length > 0 ? perDrillCaptures : undefined,
         })
       } catch (err) {
         // Reliability finding rel-4: silent-navigate on save failure
@@ -485,7 +540,7 @@ function ReviewSessionContent({
         tags card, the cap-countdown subtitle, and the RPE 11-chip
         grid were removed on 2026-04-23 per
         `docs/plans/2026-04-23-walkthrough-closeout-polish.md`.
-        `ScreenShell` still pins the Done + Finish later pair to the
+        `ScreenShell` still pins Done + Finish later to the
         footer so the terminal decision surface stays in the same
         thumb zone on a 390 × 844 iPhone as the body scrolls.
       */}
@@ -559,41 +614,79 @@ function ReviewSessionContent({
             aria-hidden="true"
           />
         <Card className="flex flex-col gap-3">
-          <div>
-            <h2 className="text-sm font-semibold text-text-primary">
-              Good passes
-            </h2>
-            {/* 2026-04-19 non-player tester note: the original phrasing
-                ("count it as Not Good") implied a phantom "Not Good"
-                control because the binary `good | not-good` vocabulary
-                lives in `BinaryPassScore` but never surfaces as a UI
-                button - the only controls here are the Good / Total
-                numeric cells. Reformulated to preserve the V0B-28
-                anti-generosity nudge (D104 layer-1 forced-criterion
-                correction) while matching the actual affordance. The
-                "Success rule: …" scaffold, the one-sentence rule, and
-                the follow-up anti-generosity clause are all still
-                present; only the clause's wording changed. See
-                `docs/research/2026-04-19-v0b-starter-loop-feedback.md`
-                and `docs/specs/m001-review-micro-spec.md` §Required. */}
-            <p className="mt-1 text-sm text-text-secondary">
-              <span className="font-medium text-text-primary">
-                Success rule:
-              </span>{' '}
-              ball reached the target zone or the next contact was playable.{' '}
-              <span className="font-medium text-text-primary">
-                If unsure, don&rsquo;t count it as Good.
-              </span>
-            </p>
-          </div>
-          <PassMetricInput
-            good={good}
-            total={total}
-            onGoodChange={setGood}
-            onTotalChange={setTotal}
-            notCaptured={quickTags.includes('notCaptured')}
-            onToggleNotCaptured={handleToggleNotCaptured}
-          />
+          {useAggregateSummary && captureAggregate ? (
+            // D133 (2026-04-26) per-drill aggregate read-out: the
+            // tester captured difficulty (and optionally counts)
+            // between blocks on Transition; we show the rolled-up
+            // numbers here without an input affordance so the tester
+            // doesn't get asked the same question twice. The copy
+            // says "captured" not "you logged" because some drills
+            // may have been tagged-only (no counts) — `Good / Total`
+            // still summarizes only the count-bearing rows.
+            <>
+              <h2 className="text-sm font-semibold text-text-primary">
+                Good passes
+              </h2>
+              <p className="text-sm text-text-secondary">
+                Captured between blocks on{' '}
+                <span className="font-medium text-text-primary">
+                  {captureAggregate.drillsTagged}
+                </span>{' '}
+                drill
+                {captureAggregate.drillsTagged === 1 ? '' : 's'}.
+              </p>
+              <p
+                className="text-base font-semibold text-text-primary"
+                data-testid="per-drill-aggregate"
+              >
+                {captureAggregate.drillsWithCounts > 0
+                  ? formatPassRateLine(
+                      captureAggregate.goodPasses,
+                      captureAggregate.totalAttempts,
+                    )
+                  : 'Counts not logged for any drill.'}
+              </p>
+            </>
+          ) : (
+            <>
+              <div>
+                <h2 className="text-sm font-semibold text-text-primary">
+                  Good passes
+                </h2>
+                {/* 2026-04-19 non-player tester note: the original phrasing
+                    ("count it as Not Good") implied a phantom "Not Good"
+                    control because the binary `good | not-good` vocabulary
+                    lives in `BinaryPassScore` but never surfaces as a UI
+                    button - the only controls here are the Good / Total
+                    numeric cells. Reformulated to preserve the V0B-28
+                    anti-generosity nudge (D104 layer-1 forced-criterion
+                    correction) while matching the actual affordance. The
+                    "Success rule: …" scaffold, the one-sentence rule, and
+                    the follow-up anti-generosity clause are all still
+                    present; only the clause's wording changed. See
+                    `docs/research/2026-04-19-v0b-starter-loop-feedback.md`
+                    and `docs/specs/m001-review-micro-spec.md` §Required. */}
+                <p className="mt-1 text-sm text-text-secondary">
+                  <span className="font-medium text-text-primary">
+                    Success rule:
+                  </span>{' '}
+                  ball reached the target zone or the next contact was
+                  playable.{' '}
+                  <span className="font-medium text-text-primary">
+                    If unsure, don&rsquo;t count it as Good.
+                  </span>
+                </p>
+              </div>
+              <PassMetricInput
+                good={good}
+                total={total}
+                onGoodChange={setGood}
+                onTotalChange={setTotal}
+                notCaptured={quickTags.includes('notCaptured')}
+                onToggleNotCaptured={handleToggleNotCaptured}
+              />
+            </>
+          )}
         </Card>
         </>
       )}
@@ -654,27 +747,14 @@ function ReviewSessionContent({
             {missingHint}
           </p>
         )}
-        {/* 2026-04-23 walkthrough closeout polish item 2 (merged
-            Review proposal in
-            `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`
-            + plan
-            `docs/plans/2026-04-23-walkthrough-closeout-polish.md`):
-            Done and Finish later render as equal-weight primary
-            buttons, differentiated only by position (Done on top =
-            forward motion; Finish later below = escape-hatch) and
-            label. The prior styling treated Done (then labelled
-            `Submit review`) as a primary CTA and Finish later as an
-            underlined tertiary link, which read as reprimanding the
-            Finish Later path. Two full-width primary buttons is
-            intentional per the merged proposal — the footer is the
-            session's terminal decision surface, both answers are
-            honest and adaptation-valid inside the 2 h Finish Later
-            cap, and neutral disabled styling (polish pass 2026-04-22)
-            prevents the Done button from looking active-but-inert
-            before effort is picked. `Submit review` rename to `Done`
-            matches the post-session voice (cf. CompleteScreen `Back
-            to home`) and the Transition `Up next` family rather than
-            the old form-centric `Submit` voice. */}
+        {/* 2026-04-24 founder design note: the equal-weight Done /
+            Finish later pair made the forward action ambiguous.
+            Restore the clearer hierarchy: `Done` is the full-width
+            primary CTA, while `Finish later` returns to the existing
+            lower-emphasis link-style escape hatch. The `Submit review`
+            rename to `Done` stays because it matches the post-session
+            voice (cf. CompleteScreen `Back to home`) rather than the
+            old form-centric `Submit` voice. */}
         <Button
           variant="primary"
           fullWidth
@@ -684,8 +764,7 @@ function ReviewSessionContent({
           {isSubmitting ? 'Saving\u2026' : 'Done'}
         </Button>
         <Button
-          variant="primary"
-          fullWidth
+          variant="link"
           onClick={() => void handleFinishLater()}
           disabled={isSubmitting}
         >

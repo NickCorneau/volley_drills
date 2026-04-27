@@ -13,6 +13,7 @@ export type {
   ResumableSession,
 } from './queries'
 export {
+  findLastCompletedDrillIdsByType,
   findPendingReview,
   findResumableSession,
   getCurrentDraft,

@@ -6,7 +6,7 @@ stage: validation
 type: agent-contract
 summary: "Canonical prose repo contract: current state, read order, source-of-truth order, and repo-wide working constraints."
 authority: repo-wide routing, working constraints, and agent-facing orientation
-last_updated: 2026-04-22
+last_updated: 2026-04-26
 depends_on:
   - docs/catalog.json
   - docs/vision.md
@@ -75,12 +75,13 @@ Read only as much as the task needs.
 1. `AGENTS.md`
 2. `docs/catalog.json`
 3. Load the smallest relevant pack:
-  - Product direction: `docs/vision.md` -> `docs/decisions.md` -> `docs/prd-foundation.md`
-  - Milestone/spec work: `docs/milestones/m001-solo-session-loop.md` -> relevant `docs/specs/`
-  - Prototype work: `docs/research/2026-04-12-v0a-runner-probe-feedback.md` -> `app/README.md`
-  - Research: `docs/research/README.md` -> narrowest relevant note
-  - Docs editing: `docs/README.md` -> `docs/ops/agent-documentation-contract.md`
-  - Agent/runtime guidance: `docs/ops/agent-operations.md`
+ - Product direction: `docs/vision.md` -> `docs/decisions.md` -> `docs/prd-foundation.md`
+ - Milestone/spec work: `docs/milestones/m001-solo-session-loop.md` -> relevant `docs/specs/`
+ - Prototype work: `docs/research/2026-04-12-v0a-runner-probe-feedback.md` -> `app/README.md`
+ - Research: `docs/research/README.md` -> narrowest relevant note
+ - Design / UX work: `docs/design/README.md` -> referenced design-canonical doc (brand / visual / outdoor)
+ - Docs editing: `docs/README.md` -> `docs/ops/agent-documentation-contract.md`
+ - Agent/runtime guidance: `docs/ops/agent-operations.md`
 
 ## Source-of-Truth Order
 

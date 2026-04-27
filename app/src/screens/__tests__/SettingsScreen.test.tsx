@@ -110,6 +110,28 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
     consoleSpy.mockRestore()
   })
 
+  // 2026-04-26 pre-D91 editorial polish (`F14`): a small build-id
+  // row in the footer surfaces a copy-pasteable build identifier so
+  // the founder can answer "what build are you on?" in one tap when
+  // a D91 field-test tester reports a bug. Values come from the
+  // Vite `define` injection in `vite.config.ts`; the test runtime
+  // pins them to `'test'` / `'test'` via `src/test-setup.ts` so this
+  // assertion is stable across machines and git states. See
+  // `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 6.
+  it('renders the build-id row in the footer', () => {
+    render(
+      <MemoryRouter initialEntries={['/settings']}>
+        <Routes>
+          <Route path="/settings" element={<SettingsScreen />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    const buildRow = screen.getByTestId('settings-build-id')
+    expect(buildRow).toBeInTheDocument()
+    expect(buildRow).toHaveTextContent(/^Build test · test$/)
+  })
+
   it('double-tap guard: a second tap while exporting does NOT trigger a second download', async () => {
     const user = userEvent.setup()
     let resolveDownload: () => void = () => {}

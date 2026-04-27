@@ -29,8 +29,15 @@ export function ReviewPendingCard({
       className={PRIMARY_CARD_CLASS}
     >
       <div>
+        {/* 2026-04-26 pre-D91 editorial polish (F11): eyebrow voice
+            aligned with the card's `aria-label="Review pending"` and
+            the SoftBlockModal "review pending for {planName}" copy.
+            The previous "Review your last session" string read as a
+            polite invitation rather than the unfinished-obligation
+            state this card actually represents. See
+            `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 1. */}
         <p className="text-sm font-medium text-text-secondary">
-          Review your last session
+          Review pending
         </p>
         <p className="mt-1 text-sm font-medium text-text-primary">
           {data.planName}

@@ -200,9 +200,18 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
     )
 
     await page.goto(`/complete?id=${execId}`)
+    // 2026-04-26 pre-D91 editorial polish (`F10`): the solo eyebrow
+    // `Today's verdict` <h1> was dropped to let the verdict word
+    // stand alone (the eyebrow was redundant with the giant <h2>
+    // verdict word below). Pair sessions still render the
+    // `Today's pair verdict` <h1>. On solo, the verdict <h2>
+    // remains the focal heading; the page is a valid single-
+    // heading-outline page (HTML5 permits `<h2>` as the document's
+    // top heading). a11y scan must continue to pass with this
+    // structure.
     await expect(
       page.getByRole('heading', { name: /today's verdict/i, level: 1 }),
-    ).toBeVisible()
+    ).toHaveCount(0)
     await expect(
       page.getByRole('heading', { name: /keep building/i, level: 2 }),
     ).toBeVisible()

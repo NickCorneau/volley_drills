@@ -68,6 +68,52 @@ describe('PassMetricInput (V0B-02 / H13 tap-to-type)', () => {
     expect(total.value).toBe('5')
   })
 
+  // 2026-04-26 pre-D91 editorial polish (`F7`): a fresh Review
+  // screen used to render the literal "0" inside both the Good and
+  // Total inputs, which read as "the user already entered zero"
+  // rather than "no value yet". The fix renders the untouched-zero
+  // state as empty + `placeholder="0"` so the field looks unfilled
+  // until the user actually commits a value. The internal domain
+  // values (`good` / `total`) are unchanged. See
+  // `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 3.
+  it('renders untouched zero values as empty + placeholder="0" (not literal "0")', () => {
+    render(<Harness initialGood={0} initialTotal={0} />)
+
+    const good = screen.getByLabelText(/good/i) as HTMLInputElement
+    const total = screen.getByLabelText(/total/i) as HTMLInputElement
+
+    expect(good.value).toBe('')
+    expect(good).toHaveAttribute('placeholder', '0')
+
+    expect(total.value).toBe('')
+    expect(total).toHaveAttribute('placeholder', '0')
+  })
+
+  // Empty-string-commits-to-0 invariant (preserved across `F7`):
+  // a user who clears a value and blurs ends up at 0, even though
+  // the field re-renders empty (with the placeholder) so they see
+  // exactly the same untouched-zero state as a fresh load. The
+  // domain value committed by the parent is `0`, which is what
+  // the auto-save / submit path needs.
+  it('treats an empty blur as a commit to 0 and keeps placeholder visible', async () => {
+    const user = userEvent.setup()
+    render(<Harness initialGood={5} initialTotal={10} />)
+
+    const good = screen.getByLabelText(/good/i) as HTMLInputElement
+    expect(good.value).toBe('5')
+
+    await user.clear(good)
+    await user.tab()
+
+    expect(good.value).toBe('')
+    expect(good).toHaveAttribute('placeholder', '0')
+    // The pass-rate still computes against the parent's domain value
+    // (good === 0, total === 10 → 0% good pass rate). The visible
+    // 0% line confirms the empty input committed to 0 even though
+    // the field rendered empty.
+    expect(screen.getByText(/^0% good pass rate$/i)).toBeInTheDocument()
+  })
+
   it('typing a Good value commits the new number on blur', async () => {
     const user = userEvent.setup()
     render(<Harness />)
@@ -103,7 +149,18 @@ describe('PassMetricInput (V0B-02 / H13 tap-to-type)', () => {
     await user.type(good, '-2')
     await user.tab()
 
-    expect((screen.getByLabelText(/good/i) as HTMLInputElement).value).toBe('0')
+    // 2026-04-26 pre-D91 editorial polish (`F7`): zero is now
+    // uniformly rendered as an empty input + `placeholder="0"`,
+    // regardless of how the value got to zero (clamp, clear-and-blur,
+    // notCaptured, fresh mount). The clamp behavior itself is the
+    // contract under test — the parent received `0` after the user
+    // typed `-2` — and the visible "0" still comes through (as the
+    // placeholder). The pass-rate line confirms the parent's domain
+    // value: `good=0 / total=5 = 0%`.
+    const goodInput = screen.getByLabelText(/good/i) as HTMLInputElement
+    expect(goodInput.value).toBe('')
+    expect(goodInput).toHaveAttribute('placeholder', '0')
+    expect(screen.getByText(/^0% good pass rate$/i)).toBeInTheDocument()
   })
 
   it('shows pass-rate line when Total > 0 and notCaptured is off', () => {

@@ -1,5 +1,6 @@
 export { db } from './schema'
 export type {
+  DifficultyTag,
   DraftBlock,
   DrillVariantScore,
   ExecutionBlockStatus,
@@ -7,6 +8,7 @@ export type {
   ExecutionLogBlockStatus,
   ExecutionStatus,
   IncompleteReason,
+  PerDrillCapture,
   RpeCaptureWindow,
   SessionDraft,
   SessionPlan,

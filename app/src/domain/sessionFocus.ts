@@ -58,14 +58,22 @@ export function inferSessionFocus(
  * traced to courtside-copy rule §2 ("one-season rec player test").
  *
  * Why only the three volleyball-skill cases? `Movement` /
- * `Conditioning` / `Recovery` / `Warm up` / `Partial` are already
+ * `Conditioning` / `Recovery` / `Warm up` / `Mixed` are already
  * shape-disambiguated from the status column — none of them collides
- * with "Done" / "Partial" (except `Partial` itself, which is both a
- * valid focus fallback *and* the status value, and is allowed to
- * coincide because the fallback means "we couldn't pin a focus" which
- * is close enough to "the session ran partial" that either read is
- * informative rather than wrong). Only the three volleyball nouns
- * needed the gerund disambiguation.
+ * with "Done" / "Partial".
+ *
+ * 2026-04-26 pre-D91 editorial polish (`F12`): the `'partial'` focus
+ * fallback (no main-skill block found, or no focus on the main-skill
+ * drill) now renders as `Mixed` instead of `Partial`. The original
+ * choice tolerated the `Yesterday Partial Partial` collision on
+ * partially-completed mixed sessions because either read was
+ * "informative rather than wrong" — but a partner-walkthrough
+ * tester reads the duplicated word as a glitch first. `Mixed`
+ * matches the actual semantic ("we couldn't pin a single focus →
+ * the session represents multiple skills") and cannot collide with
+ * the `Done` / `Partial` status column. The internal enum key
+ * `'partial'` is unchanged so this is a render-only edit. See
+ * `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 2.
  */
 export function focusLabel(focus: SkillFocus | 'partial'): string {
   switch (focus) {
@@ -84,7 +92,7 @@ export function focusLabel(focus: SkillFocus | 'partial'): string {
     case 'warmup':
       return 'Warm up'
     case 'partial':
-      return 'Partial'
+      return 'Mixed'
     default: {
       const _exhaustive: never = focus
       return _exhaustive

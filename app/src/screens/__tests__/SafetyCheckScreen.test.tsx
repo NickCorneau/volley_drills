@@ -77,6 +77,7 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    Reflect.deleteProperty(navigator, 'wakeLock')
   })
 
   it('renders the pain consequence line under the pain question', async () => {
@@ -222,6 +223,42 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     await user.click(screen.getByRole('button', { name: /^continue$/i }))
 
     expect(audioContextCtor).toHaveBeenCalledTimes(1)
+    expect(await screen.findByTestId('run-route')).toBeInTheDocument()
+  })
+
+  it('requests screen wake lock from the Continue tap before routing to Run (iOS auto-lock guard)', async () => {
+    const user = userEvent.setup()
+    const sentinel = {
+      released: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      release: vi.fn(() => Promise.resolve()),
+    }
+    const request = vi.fn(() => Promise.resolve(sentinel))
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      value: 'visible',
+    })
+    Object.defineProperty(navigator, 'wakeLock', {
+      configurable: true,
+      value: { request },
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/safety']}>
+        <Routes>
+          <Route path="/safety" element={<SafetyCheckScreen />} />
+          <Route path="/run" element={<div data-testid="run-route">run</div>} />
+          <Route path="/setup" element={<div data-testid="setup">setup</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await user.click(await screen.findByRole('radio', { name: /^today$/i }))
+    await user.click(screen.getByRole('button', { name: /^no$/i }))
+    await user.click(screen.getByRole('button', { name: /^continue$/i }))
+
+    expect(request).toHaveBeenCalledWith('screen')
     expect(await screen.findByTestId('run-route')).toBeInTheDocument()
   })
 })

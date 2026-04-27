@@ -98,11 +98,12 @@ describe('HomeScreen', () => {
       </MemoryRouter>,
     )
 
-    // C-4 copy: review-pending primary card renders "Review your last
-    // session" + the plan name. Assert both so a future copy change
-    // flips the test loudly.
+    // C-4 copy: review-pending primary card renders the eyebrow
+    // ("Review pending" since 2026-04-26 F11; was "Review your last
+    // session" pre-`F11`) + the plan name. Assert both so a future
+    // copy change flips the test loudly.
     expect(
-      await screen.findByText(/review your last session/i),
+      await screen.findByText(/^Review pending$/),
     ).toBeInTheDocument()
     expect(screen.getByText(/solo \+ wall/i)).toBeInTheDocument()
     expect(

@@ -8,6 +8,7 @@ import {
   StatusMessage,
 } from '../components/ui'
 import { useInstallPosture } from '../hooks/useInstallPosture'
+import { BUILD_DATE, BUILD_SHA } from '../lib/buildInfo'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { getStorageCopy } from '../lib/storageCopy'
 import { downloadExport } from '../services/export'
@@ -167,8 +168,23 @@ export function SettingsScreen() {
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="pt-3">
-        <p className="pb-3 text-center text-xs text-text-secondary">
+        <p className="pb-2 text-center text-xs text-text-secondary">
           Your data stays on this device.
+        </p>
+        {/* 2026-04-26 pre-D91 editorial polish (`F14`): build-id row
+            for D91 field-test debugging hygiene. When a tester reports
+            a bug, the founder's first triage question is "what build
+            are you on?" — this row is the answer. Monospace so the
+            short SHA reads as a copyable identifier rather than human
+            prose. Values come from Vite `define` injection in
+            `vite.config.ts` via the typed `lib/buildInfo.ts` accessor.
+            See `docs/plans/2026-04-26-pre-d91-editorial-polish.md`
+            Item 6. */}
+        <p
+          className="pb-3 text-center font-mono text-[11px] text-text-secondary/80"
+          data-testid="settings-build-id"
+        >
+          Build {BUILD_SHA} · {BUILD_DATE}
         </p>
       </ScreenShell.Footer>
     </ScreenShell>

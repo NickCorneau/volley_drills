@@ -212,37 +212,71 @@ const chain5: ProgressionChain = {
   ],
 }
 
+// Tier 1b-A serving wave. Authored as a small branching graph rather
+// than a fixed linear ladder: planners (and the founder reading the
+// catalog) should be able to choose alternative rungs based on
+// available context (net vs no-net, ball count, fatigue) instead of
+// walking a single predetermined path. d31 is the no-net entry point;
+// d22 and d33 sit on the net branch. d23 (Serve & Dash) is in the
+// chain for grouping but is `m001Candidate: false` and intentionally
+// has no link in the M001 graph today. As the catalog grows, prefer
+// adding lateral and alternative-progression links over chaining new
+// drills onto a single line.
 const chain6: ProgressionChain = {
   id: 'chain-6-serving',
   name: 'Serving as the Enabling Skill',
-  focus: 'Serve consistency, zone targeting, transition movement, and wall fallback.',
-  drillIds: ['d22', 'd23'],
+  focus: 'Serve consistency, zone targeting, and transition movement.',
+  drillIds: ['d22', 'd31', 'd23', 'd33'],
   defaultGatingThreshold: 0.7,
   links: [
     {
       fromDrillId: 'd22',
-      toDrillId: 'd23',
+      toDrillId: 'd33',
       direction: 'progression',
       gatingCriteria: 'Reach 10 points with acceptable error count in d22',
-      description: 'Zone accuracy established → add serve-and-dash transition conditioning.',
+      description:
+        'Zone scoring reliable → expand accuracy across the named six-zone serving grid.',
+    },
+    {
+      fromDrillId: 'd31',
+      toDrillId: 'd33',
+      direction: 'progression',
+      gatingCriteria: '8 of 10 serves land in or near the target circle in d31',
+      description:
+        'Target contact reliable on the no-net target → when a net is available, expand to the six-zone grid.',
+    },
+    {
+      fromDrillId: 'd22',
+      toDrillId: 'd31',
+      direction: 'lateral',
+      description:
+        'Alternative entry point for ball-light or no-net sessions: tighten one small target instead of running zone scoring.',
     },
   ],
 }
 
-// Tier 1a Unit 2: minimum probe - 3 rungs, no progression links. Tier 1b
-// adds links when dogfood surfaces which pairs actually chain. Bump Set
-// and Hand Set are intentionally both default-unlocked as fundamentals,
-// per BAB Beginner's Guide Lesson 2. See
-// docs/plans/2026-04-20-m001-tier1-implementation.md Unit 2.
+// Tier 1b-A setting wave. Bump Set, Hand Set, and Footwork stay
+// default-unlocked as fundamentals per BAB Beginner's Guide Lesson 2;
+// pair setting progresses from d41 partner rhythm to d42 named corner
+// targets. d43 Triangle Setting and other 3-player BAB drills are
+// deferred to D101 3+ player support; we do not force a two-player
+// adaptation when the source form is genuinely 3+.
 const chain7: ProgressionChain = {
   id: 'chain-7-setting',
   name: 'Setting Fundamentals',
-  focus: 'Bump-set shape, hand-set contact, partner rhythm. Minimum setting probe for Tier 1a.',
-  drillIds: ['d38', 'd39', 'd41'],
+  focus: 'Bump-set shape, hand-set contact, footwork, and pair rhythm.',
+  drillIds: ['d38', 'd39', 'd40', 'd41', 'd42'],
   defaultGatingThreshold: 0.7,
-  // No forward progression links. No regression links. Tier 1b authors
-  // these once founder / partner data shows which pairs actually chain.
-  links: [],
+  links: [
+    {
+      fromDrillId: 'd41',
+      toDrillId: 'd42',
+      direction: 'progression',
+      gatingCriteria: '15-set partner rally with clean target shape in d41',
+      description:
+        'Partner rhythm established → set to named corners with the same clean contact.',
+    },
+  ],
 }
 
 // chainCooldown is the Downshift chain (D105). Framed as transition/comfort, not

@@ -1311,6 +1311,112 @@ const d23: Drill = {
   ],
 }
 
+// BAB Beginner's Guide, Serving Mission homework drill.
+const d31: Drill = {
+  id: 'd31',
+  name: 'Self Toss Target Practice',
+  shortName: 'Target Serve',
+  skillFocus: ['serve'],
+  objective: 'Build a repeatable serve toss and contact by aiming at one small landing target.',
+  levelMin: 'beginner',
+  levelMax: 'beginner',
+  chainId: 'chain-6-serving',
+  m001Candidate: true,
+  teachingPoints: [
+    'Pick one small target before every rep.',
+    'Use the same toss height each time.',
+    'Watch the ball land before judging the rep.',
+  ],
+  progressionDescription: 'Shrink the target circle or move it deeper once 8 of 10 serves land nearby.',
+  regressionDescription: 'Move closer, make the target bigger, or count clean contact before accuracy.',
+  variants: [
+    {
+      id: 'd31-solo-open',
+      drillId: 'd31',
+      label: 'Solo open target',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 4,
+        durationMaxMinutes: 8,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 20, maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Serves or serve-toss contacts landing in or near a marked target circle.',
+        target: '8 of 10 near the target',
+      },
+      courtsideInstructions:
+        'Mark a 2 m target circle. Self-toss and serve or strike toward it. Count only balls landing in or brushing the circle. Reset your routine before every rep.',
+      coachingCues: [
+        'One target before each serve.',
+        'Same toss height.',
+        'Watch the landing.',
+      ],
+    },
+  ],
+}
+
+// BAB Drill Book / Beginner's Guide - Around the World serving convention:
+// 6 serving zones, not the 7-zone attacking version.
+const d33: Drill = {
+  id: 'd33',
+  name: 'Around the World Serving',
+  shortName: 'World Serve',
+  skillFocus: ['serve'],
+  objective: 'Serve to six court zones in order so accuracy expands beyond one favorite spot.',
+  levelMin: 'beginner',
+  levelMax: 'intermediate',
+  chainId: 'chain-6-serving',
+  m001Candidate: true,
+  teachingPoints: [
+    'Name the zone before you serve.',
+    'Serve high and deep when targeting the back zones.',
+    'Into-wind serves are more predictable than with-wind serves.',
+  ],
+  progressionDescription: 'Require two makes per zone, then shrink each zone.',
+  regressionDescription: 'Use three large zones: left, middle, right.',
+  variants: [
+    {
+      id: 'd33-solo-net',
+      drillId: 'd33',
+      label: 'Solo or pair with net',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 2 },
+      environmentFlags: env({
+        needsNet: true,
+        windFriendly: true,
+        lowScreenTime: true,
+      }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 6,
+        durationMaxMinutes: 10,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxReps: 24, maxMinutes: 10 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description:
+          'Serves landing in the named 6-zone serving grid: front-left, front-middle, front-right, back-left, back-middle, back-right.',
+        target: 'Hit all 6 zones once',
+      },
+      courtsideInstructions:
+        'Solo: serve through six zones in order — front-left, front-middle, front-right, back-left, back-middle, back-right. Misses repeat the same zone. Pair: alternate servers each rep; one shags between rounds.',
+      coachingCues: [
+        'Name the zone first.',
+        'High arc for deep zones.',
+        'Reset after each miss.',
+      ],
+    },
+  ],
+}
+
 const d24: Drill = {
   id: 'd24',
   name: 'Pass into a Corner',
@@ -1450,6 +1556,14 @@ const d26: Drill = {
       // time; mirror or add moves if the block runs long). Keeps the
       // P2-2 sub-block pacing tick at 30 s so the beep still lands
       // during cool-down without implying six separate holds.
+      //
+      // 2026-04-26 jargon-gloss pass (founder-use ledger 2026-04-26
+      // pair session reported `hip flexor`, `half-kneel`, `tuck
+      // pelvis`, `hinge from the hips` as unparseable to a one-season
+      // rec-player partner). Glossed inline per courtside-copy.mdc
+      // invariants 2 (one-season rec player test) + 5 (cool-down
+      // gets equal review weight). Structure (intro + 3 staples) and
+      // 30 s sub-block tick unchanged.
       id: 'd26-solo',
       drillId: 'd26',
       label: 'Solo',
@@ -1472,8 +1586,12 @@ const d26: Drill = {
       // Transition preserves newlines. No em-dashes (dogfeed-polish
       // sweep). Timing voice matches short wrap slots on 15/25 min
       // archetypes while progressionDescription covers longer wraps.
+      // Anatomy terms glossed inline (`back of thigh`, `front of
+      // upper thigh`, `one knee on the ground, other foot in front`)
+      // and movement cues stated in plain language (`tip your hips
+      // back`, `squeeze the back-leg glute`).
       courtsideInstructions:
-        'Short wrap (~3 min on the timer): three moves, about 45 to 60 s each, one side (mirror if time remains). No bouncing; firm tension, never sharp pain.\n\n1. Calf: straight back leg, heel down, lean in; soften the back knee for the lower calf.\n2. Hamstring: front leg heel down, toes up; hinge from the hips.\n3. Hip flexor: half-kneel, tuck pelvis, lean into the front leg.',
+        'Short wrap (~3 min on the timer): three moves, about 45 to 60 s each, one side (mirror if time remains). No bouncing; firm tension, never sharp pain.\n\n1. Calf: straight back leg, heel down, lean in; soften the back knee for the lower calf.\n2. Hamstring (back of thigh): front leg heel down, toes up; tip your hips back and lean your chest toward the front leg, back flat.\n3. Hip flexor (front of upper thigh): half-kneel (one knee on the ground, other foot in front), squeeze the back-leg glute, lean gently into the front leg.',
       coachingCues: ['Breathe.', 'Avoid pain.', 'Hold steady.'],
       subBlockIntervalSeconds: 30,
     },
@@ -1481,15 +1599,16 @@ const d26: Drill = {
 }
 
 // ---------------------------------------------------------------------------
-// Chain 7: Setting fundamentals (Tier 1a Unit 2 minimum probe)
+// Chain 7: Setting fundamentals (Tier 1b-A setting wave)
 // ---------------------------------------------------------------------------
 //
-// Three drills authored as a minimum setting probe (BAB Beginner's Guide
-// Lesson 2). No progression links in Tier 1a - Bump Set and Hand Set are
-// fundamentals, not rungs gated on each other. Tier 1b adds links once
-// founder dogfood and the partner walkthrough surface which pairs chain
-// in practice. See
-// docs/plans/2026-04-20-m001-tier1-implementation.md Unit 2.
+// d38, d39, and d40 are the default-unlocked fundamentals (Bump Set,
+// Hand Set, Footwork) - they are not gated on each other. d41 is the
+// pair entry (Partner Set Back-and-Forth); d42 (Corner to Corner)
+// extends pair setting to named targets. The chain currently links
+// only `d41 -> d42`; d43 Triangle Setting and other 3-player BAB
+// drills are deferred to D101 3+ player support rather than being
+// forced into two-player adaptations.
 //
 // Swap-only reachability: archetypes.ts main_skill / pressure block
 // skillTags stay at `['pass', 'serve']`, so default (non-Swap) session
@@ -1601,6 +1720,56 @@ const d39: Drill = {
   ],
 }
 
+// BAB Beginner's Guide, Lesson 2 - Footwork for Setting.
+const d40: Drill = {
+  id: 'd40',
+  name: 'Footwork for Setting',
+  shortName: 'Set Feet',
+  skillFocus: ['set'],
+  objective: 'Move, stop, and set from a balanced base instead of reaching while drifting.',
+  levelMin: 'beginner',
+  levelMax: 'intermediate',
+  chainId: 'chain-7-setting',
+  m001Candidate: true,
+  teachingPoints: [
+    'Move first, set second.',
+    'Plant both feet before contact.',
+    'Finish facing the target.',
+  ],
+  progressionDescription: 'Add one step forward, back, left, and right before each set.',
+  regressionDescription: 'Catch in the setting window, plant, then re-toss and set.',
+  variants: [
+    {
+      id: 'd40-solo',
+      drillId: 'd40',
+      label: 'Solo',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 10,
+        rpeMin: 3,
+        rpeMax: 5,
+        fatigueCap: { maxReps: 30, maxMinutes: 10 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Sets released after a clean plant with the ball landing inside a 1 m circle.',
+        target: '20 balanced sets',
+      },
+      courtsideInstructions:
+        'Mark a 1 m landing circle. Self-toss, take one small move, plant both feet, then set into the circle. Reset if you drift during contact.',
+      coachingCues: [
+        'Move first.',
+        'Plant both feet.',
+        'Face the target.',
+      ],
+    },
+  ],
+}
+
 // BAB 2024 Drill Book - Plan 1 Drill 1, warm-up element "set back and
 // forth". Authored as the Tier 1a pair setting probe; the lightest-weight
 // pair setting rung (no triangle geometry, no window target). Chosen
@@ -1654,6 +1823,63 @@ const d41: Drill = {
     },
   ],
 }
+
+// BAB Beginner's Guide, Lesson 2 - Corner to Corner Setting.
+const d42: Drill = {
+  id: 'd42',
+  name: 'Corner to Corner Setting',
+  shortName: 'Corner Set',
+  skillFocus: ['set'],
+  objective: 'Set a partner to useful beach targets from changing court positions.',
+  levelMin: 'intermediate',
+  levelMax: 'intermediate',
+  chainId: 'chain-7-setting',
+  m001Candidate: true,
+  teachingPoints: [
+    'Set your partner, not an empty spot.',
+    'Square up: face the target with feet and shoulders.',
+    'Give enough arc for your partner to arrive early.',
+  ],
+  progressionDescription: 'Move the target corner farther away or require two clean sets per corner.',
+  regressionDescription: 'Shorten the distance and allow catch-reset when either player travels too far.',
+  variants: [
+    {
+      id: 'd42-pair',
+      drillId: 'd42',
+      label: 'Pair',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2 },
+      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 10,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 24, maxMinutes: 10 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Sets your partner can reach within one step at the named corner target.',
+        target: '3 clean sets to each corner',
+      },
+      courtsideInstructions:
+        'Mark two target corners 3 m apart. Partner tosses; setter plants and sets to the named corner. Switch setter after 6 clean sets.',
+      coachingCues: [
+        'Set your partner.',
+        'Face the target.',
+        'Arc above reach height.',
+      ],
+    },
+  ],
+}
+
+// `d43 Triangle Setting` (BAB Drill Book Plans 5-7, 10, 11) is intentionally
+// not authored here. The source drill is a 3-player triangle route; the
+// honest M001 stance is that drills whose source form needs three or more
+// players wait for D101 3+ player support rather than getting forced into a
+// two-player adaptation. Same deferral applies to BAB triangle/queue
+// drills d44 and d45. See docs/decisions.md D101 and the Tier 1b-A plan.
 
 // ---------------------------------------------------------------------------
 // Chain warmup: Beach Prep (default warmup, D105 + BAB 2024)
@@ -1758,14 +1984,18 @@ export const DRILLS: readonly Drill[] = [
   d20,
   d21,
   d22,
+  d31,
   d23,
+  d33,
   d24,
   d25,
   d26,
   d28,
   d38,
   d39,
+  d40,
   d41,
+  d42,
 ] as const
 
 export const M001_DRILL_IDS: readonly string[] = DRILLS.filter((d) => d.m001Candidate).map(

@@ -115,9 +115,15 @@ describe('composeSummary: Case C (default)', () => {
     // Phase F4 (2026-04-19): default reason ends with "Ready when you
     // are." so Complete reads as a handoff rather than a flat verdict.
     // Low-N case keeps its own forward-looking suffix (tested below).
+    //
+    // 2026-04-26 pre-D91 editorial polish (`F9`): the
+    // `Completed session N:` ordinal prefix was dropped — the reason
+    // line now leads with the stats sentence directly. See
+    // `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 4.
     expect(out.reason).toBe(
-      'Completed session 3: 40 good passes today out of 60 attempts. Ready when you are.',
+      '40 good passes today out of 60 attempts. Ready when you are.',
     )
+    expect(out.reason).not.toContain('Completed session')
   })
 
   // 2026-04-22 honest-copy pass: the prior low-N branch cited a
@@ -141,7 +147,7 @@ describe('composeSummary: Case C (default)', () => {
       sessionCount: 1,
     })
     expect(out.reason).toBe(
-      'Completed session 1: 10 good passes today out of 20 attempts. Ready when you are.',
+      '10 good passes today out of 20 attempts. Ready when you are.',
     )
     expect(out.reason).not.toMatch(/tuning|more attempt/i)
   })
@@ -158,7 +164,7 @@ describe('composeSummary: Case C (default)', () => {
       sessionCount: 10,
     })
     expect(out.reason).toBe(
-      'Completed session 10: 1 good pass today out of 1 attempt. Ready when you are.',
+      '1 good pass today out of 1 attempt. Ready when you are.',
     )
   })
 
@@ -174,7 +180,7 @@ describe('composeSummary: Case C (default)', () => {
       sessionCount: 4,
     })
     expect(out.reason).toBe(
-      'Completed session 4: 30 good passes today out of 50 attempts. Ready when you are.',
+      '30 good passes today out of 50 attempts. Ready when you are.',
     )
   })
 
@@ -190,7 +196,7 @@ describe('composeSummary: Case C (default)', () => {
       sessionCount: 2,
     })
     expect(out.reason).toBe(
-      'Completed session 2: 0 good passes today out of 10 attempts. Ready when you are.',
+      '0 good passes today out of 10 attempts. Ready when you are.',
     )
   })
 
@@ -206,14 +212,15 @@ describe('composeSummary: Case C (default)', () => {
       sessionCount: 5,
     })
     expect(out.reason).toBe(
-      'Completed session 5. One more in the book. Ready when you are.',
+      'One more in the book. Ready when you are.',
     )
+    expect(out.reason).not.toContain('Completed session')
   })
 
   // Partner-walkthrough polish 2026-04-22 (design review T3 / trifold T3):
   // a first-ever session deserves a subtly milestone-ish reason line,
-  // not the pattern-matched `Completed session 1. One more in the book.` that
-  // reads identical to session 2, 5, 20 on the same path. Shape: single
+  // not the pattern-matched `One more in the book.` that reads
+  // identical to session 2, 5, 20 on the same path. Shape: single
   // string, same voice, no celebration theatrics, no streak claim.
   // See `docs/plans/2026-04-22-partner-walkthrough-polish.md` item 4.
   it('uses a distinct first-session milestone line when sessionCount === 1 and totalAttempts === 0', () => {
@@ -232,8 +239,10 @@ describe('composeSummary: Case C (default)', () => {
     expect(out.reason).toBe(
       'First one\u2019s in the book. Ready when you are.',
     )
-    // Explicitly NOT the session-2+ template.
-    expect(out.reason).not.toContain('Completed session 1')
+    // Explicitly NOT the session-2+ template (and not the dropped
+    // `Completed session N` ordinal prefix per `F9` 2026-04-26).
+    expect(out.reason).not.toContain('Completed session')
+    expect(out.reason).not.toContain('One more in the book')
   })
 
   it('uses the stats + forward hook line for sessionCount === 1 when attempts were recorded', () => {
@@ -241,6 +250,10 @@ describe('composeSummary: Case C (default)', () => {
     // first-timer who actually logged reps gets the standard stats
     // line + `FORWARD_HOOK`. (No tuning-engine claim in v0b — see
     // sessionSummary.ts honest-copy comment.)
+    //
+    // 2026-04-26 pre-D91 editorial polish (`F9`): no `Completed
+    // session N:` ordinal prefix; the line leads with the stats
+    // sentence.
     const review = makeReview({
       status: 'submitted',
       goodPasses: 3,
@@ -252,9 +265,10 @@ describe('composeSummary: Case C (default)', () => {
       sessionCount: 1,
     })
     expect(out.reason).toBe(
-      'Completed session 1: 3 good passes today out of 5 attempts. Ready when you are.',
+      '3 good passes today out of 5 attempts. Ready when you are.',
     )
     expect(out.reason).not.toContain('First session')
+    expect(out.reason).not.toContain('Completed session')
     expect(out.reason).not.toMatch(/tuning|more attempt/i)
   })
 })

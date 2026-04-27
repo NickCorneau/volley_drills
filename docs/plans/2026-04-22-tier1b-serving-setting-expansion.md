@@ -5,8 +5,8 @@ type: plan
 status: draft
 stage: planning
 authority: "Tier 1b drill content expansion per `docs/plans/2026-04-20-m001-tier1-implementation.md` lines 218-224 and 270-285. Layer A only — drill authoring and progression-link work with correct level metadata. No `pickForSlot` filter changes, no `findSwapAlternatives` filter changes, no progression-follow level gating, no SetupScreen surfaces, no `archetypes.ts` skillTags widening, no Dexie migration. Any 'Layer B' or 'Layer C' work (level-aware assembly / progression filtering) is NOT in this plan and requires a separate decision per the 2026-04-22 red-team of the prior Tier 1b+ draft."
-summary: "6 new drill records (serving ladder: `d31`, `d33`, `d36`; setting chain: `d40`, `d42`, `d43`), progression links on `chain-6-serving` and `chain-7-setting` with the red-team-identified dead-end fixes, plus BAB-vocabulary discipline applied to the new drills. Each drill carries correct `levelMin` / `levelMax` from FIVB + BAB cross-reference; the drill-level audit at `docs/reviews/2026-04-22-drill-level-audit.md` confirms the data layer is clean enough to trust. Implementation is GATED on the Tier 1b trigger in `docs/plans/2026-04-20-m001-tier1-implementation.md` lines 270-276: founder has attempted to substitute from existing library AND logged the attempt, AND (partner walkthrough ≥P1 that Tier 1b addresses OR ≥3 founder sessions describing specific content gaps). Gate status at plan authoring: NOT MET (founder-use-ledger at 0 logged rows). This plan lands so implementation is zero-lag when the trigger fires."
-last_updated: 2026-04-22
+summary: "5 new drill records (serving ladder: `d31`, `d33`; setting chain: `d40`, `d42`, `d43`), progression links on `chain-6-serving` and `chain-7-setting` with the red-team-identified dead-end fixes, plus BAB-vocabulary discipline applied to the new drills. Each drill carries correct `levelMin` / `levelMax` from FIVB + BAB cross-reference; the drill-level audit at `docs/reviews/2026-04-22-drill-level-audit.md` confirms the data layer is clean enough to trust. Implementation is GATED on the Tier 1b trigger in `docs/plans/2026-04-20-m001-tier1-implementation.md` lines 270-276: founder has attempted to substitute from existing library AND logged the attempt, AND (partner walkthrough ≥P1 that Tier 1b addresses OR ≥3 founder sessions describing specific content gaps). Trigger formally met 2026-04-24 per `docs/research/founder-use-ledger.md` ledger backfill + founder-named serving-content gap. **§R7 exit-3 applied 2026-04-26: `d36 Jump Float Introduction` deferred from Tier 1b entirely; re-enters under `O7` track 2 (sports-medicine / PT review) — see `docs/research/2026-04-22-research-sweep-meta-synthesis.md` §R7 and `docs/decisions.md` `O7` for the gate.** Original 6-drill scope drops to 5; authoring-budget cap consumption drops 6/10 → 5/10."
+last_updated: 2026-04-26
 depends_on:
   - docs/plans/2026-04-20-m001-tier1-implementation.md
   - docs/plans/2026-04-20-m001-adversarial-memo.md
@@ -29,11 +29,19 @@ decision_refs:
 
 # Tier 1b: Serving + Setting content expansion
 
+## §R7 exit-3 applied 2026-04-26
+
+**`d36 Jump Float Introduction` is deferred from Tier 1b entirely** and re-enters under `O7` track 2 (sports-medicine / PT review of the 8 "do not ship without physio input" items enumerated in `docs/research/jump-float-amateur-beach.md`). Layer A scope drops from 6 drills to 5. Authoring-budget cap consumption drops 6/10 → 5/10. Five records remain under the cap for any follow-on Tier 1b wave.
+
+The deferred drill, its source citation, and its red-team-flagged exit options (1 / 2 / 3) are preserved in the source notes — see `docs/research/2026-04-22-research-sweep-meta-synthesis.md` §R7. This plan no longer authors `d36`; the chain-6-serving rung-4 → rung-5 link to `d36` is removed, leaving `d33 Around the World Serving` as the temporary leaf of the authored serving ladder. When `O7` track 2 delivers, `d36` re-enters via a new authoring plan that wires the prerequisite-gate questions, the warm-up dependency, and the conservative-anchor volume defaults the §R7 memo specifies.
+
+The earlier "D7 pointer-only" treatment of `d36` (constraining first-exposure volume to 3 × 4 = 12) is now moot for Tier 1b — it remains relevant only for the future `O7`-track-2-gated authoring plan.
+
 ## Agent Quick Scan
 
-- **Layer A only.** Six new drill records + progression links + vocabulary sweep applied to new drills. No assembly filter changes. No progression-follow level gating. No SetupScreen. No `archetypes.ts` widening. No Dexie migration.
-- **Gated on the Tier 1b trigger** (`docs/plans/2026-04-20-m001-tier1-implementation.md` lines 270-276). **Gate status at plan authoring (2026-04-22): NOT MET.** Founder-use-ledger has 0 logged rows. Implementation starts when the trigger fires per the documented conditions; plan is ready-to-execute in the meantime.
-- **Capped at ≤10 new drills** per the authoring-budget cap (`docs/plans/2026-04-20-m001-adversarial-memo.md` §Authoring-budget cap, lines 145-155). This plan authors 6. Four records remain under the cap for any follow-on Tier 1b wave.
+- **Layer A only.** Five new drill records + progression links + vocabulary sweep applied to new drills. No assembly filter changes. No progression-follow level gating. No SetupScreen. No `archetypes.ts` widening. No Dexie migration.
+- **Gated on the Tier 1b trigger** (`docs/plans/2026-04-20-m001-tier1-implementation.md` lines 270-276). **Trigger formally met 2026-04-24** via the 2026-04-21 joint-session ledger backfill + founder-named serving-content gap (`docs/research/founder-use-ledger.md` §"Content gaps surfaced on the 2026-04-21 sessions").
+- **Capped at ≤10 new drills** per the authoring-budget cap (`docs/plans/2026-04-20-m001-adversarial-memo.md` §Authoring-budget cap, lines 145-155). This plan authors 5 (after §R7 exit-3 deferred `d36`). Five records remain under the cap for any follow-on Tier 1b wave.
 - **Drill-level audit precedes this plan.** `docs/reviews/2026-04-22-drill-level-audit.md` confirmed the existing 26-drill library's level tags are clean enough to trust for future filter decisions (minor mismatches flagged, not fixed here). New drills in this plan carry correct `levelMin` / `levelMax` from FIVB + BAB cross-reference so the audit stays clean post-ship.
 - **Estimated effort when gate fires: 2-3 days of focused work.** Content research is pre-paid in `docs/research/bab-source-material.md` and `docs/research/fivb-source-material.md`; progression-link logic is contained; test surface is finite.
 
@@ -59,17 +67,18 @@ Per `docs/plans/2026-04-20-m001-tier1-implementation.md` lines 270-276, Tier 1b 
 
 ## Scope
 
-### Content: 6 new drill records
+### Content: 5 new drill records
 
 All authored into `app/src/data/drills.ts` with inline source comments per `docs/research/fivb-source-material.md` line 470 citation convention (`// FIVB Drill-book <chapter>.<index>`) and `docs/research/bab-source-material.md` convention.
 
-**Serving (3 drills, chain `chain-6-serving`):**
+**Serving (2 drills, chain `chain-6-serving`):**
 
 | ID | Name | Mode | `skillFocus` | `levelMin → levelMax` | Source |
 |---|---|---|---|---|---|
 | `d31` | Self Toss Target Practice | Solo | `['serve']` | `beginner → beginner` | BAB Serving Rung 1 solo alternative + FIVB 2.1 Serve and Get Into Position (`beginner`) |
 | `d33` | Around the World Serving | Solo + Pair | `['serve']` | `beginner → intermediate` | BAB Serving Rung 3 + FIVB 2.5 Serving Variety Drill (`intermediate / advanced` in FIVB; BAB places the variant more accessibly; level span reflects both sources) |
-| `d36` | Jump Float Introduction | Solo | `['serve']` | `intermediate → advanced` | BAB Serving Rung 5 (jump-float entry) + FIVB post-float placement in the serving chapter progression. **Authoring-input constraint (added 2026-04-22-c per `docs/research/2026-04-22-research-sweep-meta-synthesis.md` delta D7):** when `courtsideInstructions` is authored, default volume is **3 × 4 = 12 reps first-exposure**, progressing to **4 × 4 = 16** after two clean sessions — NOT 3 × 12 = 36. Source: `docs/research/jump-float-amateur-beach.md` §Product defaults. The 3 × 12 = 36 number is a documented later-wave steady-state target for a post-`d36` follow-on drill, not a `d36` default. Warning-sign panel copy + cue triplet + prerequisite-gate framing also draw from the jump-float synthesis note. **Scope note:** this row specifies authoring *inputs*; it does NOT unlock `d36` for shipping inside Tier 1b Layer A. The jump-float synthesis memo implies session-builder wiring (mandatory warm-up before unlock; 2-question prerequisite gate) that Tier 1b scope explicitly excludes. See `docs/research/2026-04-22-research-sweep-meta-synthesis.md` §R7 for the alternative "defer `d36` past Tier 1b entirely and re-enter under `O7` track 2" option; pointer-only version of D7 is applied here as the minimum-honest move, the full §R7 exit-3 upgrade remains available if the founder chooses it. |
+
+**Deferred from Tier 1b: `d36 Jump Float Introduction`** (§R7 exit-3 applied 2026-04-26). The drill remains a future Tier 1b candidate but cannot ship until `O7` track 2 (sports-medicine / PT review) delivers a physio sign-off on the 8 "do not ship without physio input" items enumerated in `docs/research/jump-float-amateur-beach.md`. Source citation, exit-options, and authoring-input constraints (3 × 4 = 12 reps first-exposure under the conservative-wins-on-safety principle) are preserved in `docs/research/2026-04-22-research-sweep-meta-synthesis.md` §R7 for re-entry. Until then the chain-6-serving ladder ends at `d33`.
 
 **Setting (3 drills, chain `chain-7-setting`):**
 
@@ -83,9 +92,9 @@ Each drill's `courtsideInstructions` applies the Tier 1a Unit 3 vocabulary disci
 
 Specific new-term coverage expected:
 
-- `d36` — "Jump Float (float serve with vertical jump entry)" on first occurrence in `courtsideInstructions`.
 - `d43` — "Triangle (setter-hitter-hitter positioning)" on first occurrence.
 - `d33` — zone-count clarification: our implementation uses BAB's 6-zone convention for serving Around the World (not FIVB 5.6's 5-zone attack-chapter convention — `docs/research/fivb-source-material.md` line 370 notes the three conflicting conventions and recommends picking one).
+- "Jump Float" is **not** introduced in this Tier 1b wave (deferred with `d36` per §R7 exit-3 applied 2026-04-26); the term will land alongside `d36` re-entry under `O7` track 2.
 
 ### Progression links
 
@@ -95,7 +104,7 @@ Specific new-term coverage expected:
 - Rung 1 → Rung 2 **branching**: `d22` unlocks BOTH `d32 Step Back Partner Serving` (pair) — authored later if/when pair Tier 1b trigger fires — AND `d31 Self Toss Target Practice` (solo). This is the red-team dead-end fix: solo users have a path forward without depending on an unauthored pair drill.
 - Rung 2 → Rung 3: `d31` (or future `d32`) → `d23 Serve & Dash`.
 - Rung 3 → Rung 4 (parallel branching): `d23` → {`d33 Around the World Serving` (solo+pair), existing `d24 Pass into a Corner`}. The `d24` branch stays (existing content); `d33` adds the zone-scoring ladder.
-- Rung 4 → Rung 5 **parallel unlock**: `d33` → `d36 Jump Float Introduction`. Parallel with any future float-technique rung, NOT linearly gated on it. This is the red-team's jump-float parallel-unlock fix.
+- **Rung 4 leaf**: `d33` is the temporary leaf of the authored serving ladder. The originally-planned Rung 4 → Rung 5 parallel unlock (`d33` → `d36 Jump Float Introduction`) is **removed** per §R7 exit-3 applied 2026-04-26. `d36` re-enters under `O7` track 2; that authoring plan will re-introduce the parallel-unlock link from `d33`.
 - `defaultGatingThreshold: 0.7` (unchanged, consistent with other chains).
 
 **`chain-7-setting`** (currently `d38`, `d39`, `d41` with zero links, per Tier 1a Unit 2):
@@ -163,7 +172,7 @@ Expected vocabulary additions from these 6 drills:
 
 1. `chain-6-serving` has Rung 1 branching: `d22` has forward links to both `d31` and (placeholder / commented) `d32`. If `d32` is not authored, assert the solo path to `d31` exists as a valid forward link.
 2. `chain-6-serving` Rung 3 → Rung 4 parallel unlock: `d23` has forward links to both `d33` and existing `d24`.
-3. `chain-6-serving` Rung 4 → Rung 5 parallel unlock: `d33` has forward link to `d36`.
+3. `chain-6-serving` Rung 4 leaf: `d33` is the temporary leaf with no forward link. Assert `chain.drillIds` does **not** contain `d36` (deferred per §R7 exit-3 applied 2026-04-26; re-enters under `O7` track 2).
 4. `chain-7-setting` fundamentals (`d38`, `d39`, `d40`) are default-unlocked (no prerequisite links).
 5. `chain-7-setting` Rung 4 → Rung 5 → Rung 6 linear pair progression: `d41 → d42 → d43`.
 6. No dead-end: every rung is reachable from Rung 1 in at least one mode (solo-only path for setting ends at fundamentals rung 3, authored and documented; this is not a defect).
@@ -178,9 +187,10 @@ Expected vocabulary additions from these 6 drills:
 **`findSwapAlternatives.test.ts`** (extend):
 
 11. `d33 Around the World Serving` surfaces in `main_skill` Swap alternatives on both `solo_open` and `pair_net` contexts.
-12. `d36 Jump Float Introduction` surfaces in `main_skill` Swap alternatives on `solo_open` only (solo-mode drill).
-13. `d42 Corner to Corner Setting` and `d43 Triangle Setting` surface in `main_skill` Swap alternatives on `pair_net` only (pair-mode drills).
-14. `d40 Footwork for Setting` surfaces in `main_skill` Swap alternatives on `solo_wall` and `solo_open`.
+12. `d42 Corner to Corner Setting` and `d43 Triangle Setting` surface in `main_skill` Swap alternatives on `pair_net` only (pair-mode drills).
+13. `d40 Footwork for Setting` surfaces in `main_skill` Swap alternatives on `solo_wall` and `solo_open`.
+
+(Originally planned `d36` Swap-surface case is removed; `d36` is deferred per §R7 exit-3 and will re-enter with its own Swap test under the `O7` track 2 authoring plan.)
 
 **Regression suite** (no new tests, just pass):
 
@@ -192,26 +202,27 @@ Expected vocabulary additions from these 6 drills:
 
 Tier 1b ships when **all** of the following hold:
 
-1. **Trigger fires** per `docs/plans/2026-04-20-m001-tier1-implementation.md` lines 270-276. Not yet met at plan authoring.
-2. 6 new drill records committed with inline source citations.
-3. Progression links land in `progressions.ts` with the dead-end fixes described above.
+1. **Trigger fires** per `docs/plans/2026-04-20-m001-tier1-implementation.md` lines 270-276. **Met 2026-04-24** (founder-use-ledger backfill + named serving-content gap).
+2. 5 new drill records committed with inline source citations (`d31`, `d33`, `d40`, `d42`, `d43`). `d36 Jump Float Introduction` is **out of scope** per §R7 exit-3 applied 2026-04-26.
+3. Progression links land in `progressions.ts` with the dead-end fixes described above; the chain-6-serving rung-4 leaf is `d33` (no rung-5 link until `d36` re-enters under `O7` track 2).
 4. All new + regression tests pass locally.
 5. `npm run lint` and `npm run build` clean.
 6. Tier 1a acceptance items remain unaffected: `d28` in warmup, Chosen-because annotations on every block, 3-row Home trailer, `SKILL_TAGS_BY_TYPE` still includes `'set'`.
 7. No SetupScreen changes. No `archetypes.ts` skillTags widening. No schema migration.
-8. Authoring-budget cap: 6 / 10 drills consumed; 4 remain for any follow-on Tier 1b wave.
+8. Authoring-budget cap: 5 / 10 drills consumed; 5 remain for any follow-on Tier 1b wave.
 9. Drill-level audit file (`docs/reviews/2026-04-22-drill-level-audit.md`) remains consistent — new drills' level tags match the expected tags documented in this plan's §Content table.
 
 ## Post-ship follow-ups (track, do not bundle into this plan)
 
 - **Update `docs/research/founder-use-ledger.md`** with any sessions that used the new drills, to keep the weekly adversarial-memo review sourced from real behavior.
-- **Monitor authoring-budget cap.** Second Tier 1b wave (if any) draws from the remaining 4 records, still gated on logged demand.
-- **Partner walkthrough re-run candidate.** The open-list at `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md` §"Updated pre-D91 discipline checklist" includes "repeat pair session on sand" and exercising BAB vocabulary not covered in Seb's `solo_open` + `pair_open` passes. The new drills (`d36`, `d43`) introduce terms that haven't been walkthrough-exercised.
-- **Layer B re-evaluation.** After a few founder sessions that use the new drills, revisit whether level-aware filtering would add real signal. Gate the conversation on (a) ≥3 ledger rows flagging level-mismatch friction, AND (b) advanced-band skill-slot population ≥2 drills (satisfied post-Tier-1b by `d36` and `d43`).
+- **Monitor authoring-budget cap.** Second Tier 1b wave (if any) draws from the remaining 5 records, still gated on logged demand. `d36 Jump Float Introduction` does **not** count against the Tier 1b cap; it re-enters under its own `O7` track 2 authoring plan.
+- **Partner walkthrough re-run candidate.** The open-list at `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md` §"Updated pre-D91 discipline checklist" includes "repeat pair session on sand" and exercising BAB vocabulary not covered in Seb's `solo_open` + `pair_open` passes. The new drills (`d33`, `d43`) introduce terms that haven't been walkthrough-exercised.
+- **Layer B re-evaluation.** After a few founder sessions that use the new drills, revisit whether level-aware filtering would add real signal. Gate the conversation on (a) ≥3 ledger rows flagging level-mismatch friction, AND (b) advanced-band skill-slot population ≥2 drills (post-Tier-1b reaches 1 — `d43` only — until `d36` re-enters; the threshold itself can be revisited if Layer B becomes attractive on other grounds).
+- **`O7` track 2 readiness for `d36` re-entry.** When the founder moves toward friends-of-friends or stranger cohort under `D130` re-eval, or when behavioral evidence (founder ledger; partner usage) surfaces explicit demand for jump-float content, open the `O7` track 2 work item: physio review of the 8 do-not-ship-without-physio-input items in `docs/research/jump-float-amateur-beach.md`, prerequisite-gate engine wiring (warm-up dependency + 2-question gate), and the conservative-anchor first-exposure volume defaults from §R7.
 
 ## For agents
 
-- **Authoritative for**: Tier 1b Layer A scope (6 drills + progression links + vocabulary discipline), gate status, and the explicit not-in-scope list.
+- **Authoritative for**: Tier 1b Layer A scope (5 drills + progression links + vocabulary discipline, post-§R7 exit-3), gate status, and the explicit not-in-scope list. **Not authoritative for `d36 Jump Float Introduction`** — that drill is deferred to an `O7` track 2 authoring plan (not yet authored); the source notes in `docs/research/jump-float-amateur-beach.md` and `docs/research/2026-04-22-research-sweep-meta-synthesis.md` §R7 carry the inputs.
 - **Edit when**: the trigger fires and implementation begins (update gate-status section); a second Tier 1b wave is planned (extend scope, keeping the ≤10 authoring-budget cap visible); drill-level audit is re-run and its findings change any assumption this plan leaned on.
 - **Belongs elsewhere**: the Tier 1b trigger itself (`docs/plans/2026-04-20-m001-tier1-implementation.md`); the authoring-budget cap (`docs/plans/2026-04-20-m001-adversarial-memo.md`); founder-session behavioral data (`docs/research/founder-use-ledger.md`); drill-level audit findings (`docs/reviews/2026-04-22-drill-level-audit.md`); any future Layer B / Layer C architecture plan (when that plan exists).
 - **Outranked by**: `docs/plans/2026-04-20-m001-tier1-implementation.md` (Tier 1b trigger conditions), `docs/plans/2026-04-20-m001-adversarial-memo.md` (authoring-budget cap, falsification conditions), `docs/decisions.md` (any D# that supersedes).

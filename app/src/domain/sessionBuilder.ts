@@ -1,5 +1,15 @@
 import { DRILLS } from '../data/drills'
 import { selectArchetype } from '../data/archetypes'
+import { PROGRESSION_CHAINS } from '../data/progressions'
+import {
+  SUBSTITUTION_RULES,
+  type BlockedConstraint,
+  type SubstitutionRule,
+} from '../data/substitutionRules'
+import {
+  findPreferredCandidate,
+  findSubstitute,
+} from './drillSelection'
 import type { Drill, DrillVariant } from '../types/drill'
 import type { BlockSlot, BlockSlotType } from '../types/session'
 import type {
@@ -210,7 +220,42 @@ function allocateDurations(layout: BlockSlot[], totalMinutes: number): number[] 
   return durations
 }
 
-export function buildDraft(context: SetupContext): SessionDraft | null {
+/**
+ * Optional inputs that scope build-time drill substitution.
+ *
+ * Phase 2 of the 2026-04-26 red-team remediation promotes substitution
+ * out of `findSwapAlternatives` and into `buildDraft`. The caller MUST
+ * opt in by passing `lastCompletedByType.main_skill`; without it
+ * `buildDraft` keeps the legacy default selection path so existing
+ * call sites (Repeat-this-session, Repeat-what-you-did, tests) stay
+ * untouched.
+ *
+ * Substitution fires only on the `main_skill` slot, only when ALL of:
+ *   1. `lastCompletedByType.main_skill` resolves to a drill id,
+ *   2. a `SUBSTITUTION_RULE` exists for that drill id, AND
+ *   3. that rule's `blockedBy` constraint is active in today's
+ *      context, AND
+ *   4. one of the rule's `substituteDrillIds` is in the slot's
+ *      candidate pool.
+ *
+ * Otherwise the slot falls through to the default selection. See the
+ * 2026-04-26 red-team remediation plan for why this surface is
+ * intentionally narrow.
+ *
+ * Per-slot history is passed as a map so adding a new substitution
+ * path (D60 ranked-fill, additional slot rules) doesn't require an
+ * API shape change. The shape mirrors `findLastCompletedDrillIdsByType`
+ * in `services/session/queries.ts` so the call site can pass the
+ * query result through without reshaping.
+ */
+export interface BuildDraftOptions {
+  readonly lastCompletedByType?: Partial<Record<BlockSlotType, string>>
+}
+
+export function buildDraft(
+  context: SetupContext,
+  options?: BuildDraftOptions,
+): SessionDraft | null {
   const archetype = selectArchetype(context)
   if (!archetype) return null
 
@@ -223,9 +268,46 @@ export function buildDraft(context: SetupContext): SessionDraft | null {
   const blocks: DraftBlock[] = []
   let blockIndex = 0
 
+  // Decide build-time substitution UP FRONT and reserve the
+  // substitute drillId so earlier slots in the layout (e.g.,
+  // `technique`, `movement_proxy`) can't shuffle-claim it before the
+  // main_skill slot is reached. Without the reservation the
+  // technique slot's `Math.random()` shuffle determines whether the
+  // substitute survives, which surfaces as a flaky main_skill drill
+  // identity across repeated `buildDraft` calls.
+  let mainSkillSubstitute:
+    | { candidate: CandidateVariant; rationale: string }
+    | undefined
+  const lastMainSkillDrillId = options?.lastCompletedByType?.main_skill
+  if (lastMainSkillDrillId) {
+    const mainSkillSlot = layout.find((s) => s.type === 'main_skill')
+    if (mainSkillSlot) {
+      mainSkillSubstitute = pickMainSkillSubstitute(
+        mainSkillSlot,
+        context,
+        usedDrillIds,
+        lastMainSkillDrillId,
+      )
+      if (mainSkillSubstitute) {
+        usedDrillIds.add(mainSkillSubstitute.candidate.drill.id)
+      }
+    }
+  }
+
   for (let i = 0; i < layout.length; i++) {
     const slot = layout[i]
-    const pick = pickForSlot(slot, context, usedDrillIds)
+
+    let pick: CandidateVariant | undefined
+    let substitutionRationale: string | undefined
+
+    if (slot.type === 'main_skill' && mainSkillSubstitute) {
+      pick = mainSkillSubstitute.candidate
+      substitutionRationale = mainSkillSubstitute.rationale
+    }
+
+    if (!pick) {
+      pick = pickForSlot(slot, context, usedDrillIds)
+    }
 
     if (!pick) {
       if (slot.required) return null
@@ -248,7 +330,9 @@ export function buildDraft(context: SetupContext): SessionDraft | null {
           : pick.drill.name,
       courtsideInstructions: pick.variant.courtsideInstructions,
       required: slot.required,
-      rationale: deriveBlockRationale(slot.type, pick.drill, context),
+      rationale:
+        substitutionRationale ??
+        deriveBlockRationale(slot.type, pick.drill, context),
       subBlockIntervalSeconds: pick.variant.subBlockIntervalSeconds,
     })
   }
@@ -262,6 +346,54 @@ export function buildDraft(context: SetupContext): SessionDraft | null {
     archetypeName: archetype.name,
     blocks,
     updatedAt: Date.now(),
+  }
+}
+
+/**
+ * Phase 2.2 build-time substitution helper. Returns a (candidate,
+ * rationale) pair when ALL of:
+ *   1. A `SUBSTITUTION_RULE` exists with `fromDrillId ===
+ *      lastMainSkillDrillId`,
+ *   2. that rule's `blockedBy` constraint is active in today's
+ *      context, AND
+ *   3. one of the rule's `substituteDrillIds` is present in the
+ *      slot's candidate pool.
+ *
+ * Returns `undefined` otherwise so the caller falls through to the
+ * default `pickForSlot` path. Deterministic by construction: candidates
+ * come straight from `findCandidates` (no shuffle), rule iteration
+ * follows the authored `substituteDrillIds` order, and `findSubstitute`
+ * returns the first match.
+ *
+ * The build path intentionally skips chain-based "preferred-promotion"
+ * (i.e., forcing the natural next drill when it IS available). The
+ * default `pickForSlot` already handles "what to pick when not
+ * blocked"; layering a chain-driven override on top of it would
+ * silently re-rank ranked-fill behavior without explicit rules. Swap
+ * keeps the preferred-promotion path because it's a user-initiated
+ * "show me what's next" action; build does not.
+ */
+function pickMainSkillSubstitute(
+  slot: BlockSlot,
+  context: SetupContext,
+  usedDrillIds: Set<string>,
+  lastMainSkillDrillId: string,
+): { candidate: CandidateVariant; rationale: string } | undefined {
+  const candidates = findCandidates(slot, context)
+  const unused = candidates.filter((c) => !usedDrillIds.has(c.drill.id))
+  const pool = unused.length > 0 ? unused : candidates
+
+  const result = findSubstitute(
+    lastMainSkillDrillId,
+    pool,
+    context,
+    SUBSTITUTION_RULES,
+  )
+  if (!result) return undefined
+
+  return {
+    candidate: result.candidate,
+    rationale: deriveSubstitutionRationale(result.rule),
   }
 }
 
@@ -309,11 +441,11 @@ export function buildDraftFromCompletedBlocks(
     completedBlocks.push({
       id: planBlock.id,
       type: planBlock.type,
-      // Plan blocks don't carry drillId/variantId - they were stripped
-      // when the plan was materialized from the original draft. See
-      // JSDoc above.
-      drillId: '',
-      variantId: '',
+      // Legacy plans may not carry drill identity; keep those identity-
+      // empty while preserving stable IDs on plans created after the
+      // drill-intent substitution work.
+      drillId: planBlock.drillId ?? '',
+      variantId: planBlock.variantId ?? '',
       drillName: planBlock.drillName,
       shortName: planBlock.shortName,
       durationMinutes: planBlock.durationMinutes,
@@ -586,6 +718,33 @@ export type FindSwapAlternativesOptions = {
   readonly excludeDrillNames?: readonly string[]
 }
 
+function findPreferredProgressionTarget(drillId: string): string | undefined {
+  for (const chain of PROGRESSION_CHAINS) {
+    const link = chain.links.find(
+      (candidate) =>
+        candidate.direction === 'progression' &&
+        candidate.fromDrillId === drillId,
+    )
+    if (link) return link.toDrillId
+  }
+  return undefined
+}
+
+function blockedConstraintPhrase(blockedConstraint: BlockedConstraint): string {
+  switch (blockedConstraint) {
+    case 'needsNet':
+      return 'net drill'
+    case 'needsWall':
+      return 'wall drill'
+  }
+}
+
+function deriveSubstitutionRationale(rule: SubstitutionRule): string {
+  return `Chosen because: the next ${blockedConstraintPhrase(
+    rule.blockedBy,
+  )} is unavailable today, so this keeps ${rule.preservedIntent}.`
+}
+
 export function findSwapAlternatives(
   block: SessionPlanBlock,
   context: SetupContext,
@@ -635,11 +794,56 @@ export function findSwapAlternatives(
   // so successive taps walk the list in a stable order.
   filtered.sort((a, b) => a.drill.id.localeCompare(b.drill.id))
 
+  // Two promotion paths, in priority order:
+  //   1. Preferred-promotion (chain-based): if the natural next drill
+  //      from `block.drillId` is in the swap pool today, surface it
+  //      first with the slot's normal rationale. This is the "your
+  //      progression is available, here it is first" UX that the
+  //      build path intentionally does NOT replicate.
+  //   2. Substitute-promotion (rules-based): if the preferred drill
+  //      is blocked AND a `SUBSTITUTION_RULE` exists, surface the
+  //      authored substitute with a "Chosen because: the next [...] is
+  //      unavailable today" rationale. Rules are the single source of
+  //      truth for blocked-progression substitution; the build path
+  //      uses the same `findSubstitute` helper.
+  const rationaleByDrillId = new Map<string, string>()
+  if (block.drillId) {
+    const preferredToDrillId = findPreferredProgressionTarget(block.drillId)
+    const preferred = preferredToDrillId
+      ? findPreferredCandidate(preferredToDrillId, filtered)
+      : undefined
+    if (preferred) {
+      filtered = [
+        preferred,
+        ...filtered.filter((candidate) => candidate !== preferred),
+      ]
+    } else {
+      const substitute = findSubstitute(
+        block.drillId,
+        filtered,
+        context,
+        SUBSTITUTION_RULES,
+      )
+      if (substitute) {
+        filtered = [
+          substitute.candidate,
+          ...filtered.filter((candidate) => candidate !== substitute.candidate),
+        ]
+        rationaleByDrillId.set(
+          substitute.candidate.drill.id,
+          deriveSubstitutionRationale(substitute.rule),
+        )
+      }
+    }
+  }
+
   return filtered.map((c) => ({
     // Keep the block id stable so ExecutionLog.blockStatuses[i].blockId
     // still points at this slot after swap.
     id: block.id,
     type: block.type,
+    drillId: c.drill.id,
+    variantId: c.variant.id,
     drillName: c.drill.name,
     shortName: c.drill.shortName,
     durationMinutes: block.durationMinutes,
@@ -653,7 +857,9 @@ export function findSwapAlternatives(
     // so RunScreen's "Chosen because:" line stays truthful after a
     // mid-run Swap. Without this, the rationale would keep reading
     // "pass focus" even after the user swapped to a serve drill.
-    rationale: deriveBlockRationale(block.type, c.drill, context),
+    rationale:
+      rationaleByDrillId.get(c.drill.id) ??
+      deriveBlockRationale(block.type, c.drill, context),
     // Pre-close 2026-04-21 (P2-2): carry the swapped variant's sub-block
     // pacing (if any) through the swap. In practice the Swap button is
     // hidden on warmup/wrap per D85/D105 and the main_skill variants

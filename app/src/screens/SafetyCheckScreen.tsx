@@ -20,6 +20,10 @@ import {
   getCurrentDraft,
   hasEverStartedSession,
 } from '../services/session'
+import {
+  primeScreenWakeLockForGesture,
+  releaseScreenWakeLock,
+} from '../lib/screenWakeLock'
 
 // Primary recency chips. `2+` is an intermediate value - tapping it
 // reveals a sub-row of granular buckets (post-physio-review 2026-04-20,
@@ -178,6 +182,7 @@ export function SafetyCheckScreen() {
     // the shared AudioContext here while the Continue tap is still the
     // active gesture. No audible tone is scheduled.
     primeAudioForGesture()
+    primeScreenWakeLockForGesture()
     creating.current = true
     setIsCreating(true)
     setCreateError(null)
@@ -188,6 +193,7 @@ export function SafetyCheckScreen() {
         const recovery = buildRecoveryDraft(draft.context)
         if (!recovery) {
           setCreateError('Could not build a lighter session. Try changing your setup.')
+          void releaseScreenWakeLock()
           return
         }
         sessionDraft = recovery
@@ -203,6 +209,7 @@ export function SafetyCheckScreen() {
 
       navigate(routes.run(execId))
     } catch (err) {
+      void releaseScreenWakeLock()
       console.error('Session creation failed:', err)
       setCreateError('Something went wrong creating your session. Please try again.')
     } finally {

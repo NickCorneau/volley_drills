@@ -61,6 +61,22 @@ describe('inferSessionFocus (Tier 1a Unit 5)', () => {
     expect(inferSessionFocus(blocks)).toBe('set')
   })
 
+  it('returns set when main_skill resolves to a Tier 1b setting drill', () => {
+    const blocks = [
+      block({ type: 'warmup', drillName: 'Beach Prep Three' }),
+      block({ type: 'main_skill', drillName: 'Corner to Corner Setting' }),
+    ]
+    expect(inferSessionFocus(blocks)).toBe('set')
+  })
+
+  it('returns serve when main_skill resolves to a Tier 1b serving drill', () => {
+    const blocks = [
+      block({ type: 'warmup', drillName: 'Beach Prep Three' }),
+      block({ type: 'main_skill', drillName: 'Self Toss Target Practice' }),
+    ]
+    expect(inferSessionFocus(blocks)).toBe('serve')
+  })
+
   it('returns pass when main_skill resolves to a pass-focus catalog drill', () => {
     // d01 Pass & Slap Hands has skillFocus: ['pass'].
     const blocks = [
@@ -82,6 +98,14 @@ describe('focusLabel (Tier 1a Unit 5)', () => {
    * rule §2 ("one-season rec player test"). See `sessionFocus.ts`
    * for the full rationale on why only the three volleyball cases
    * needed the rewrite.
+   *
+   * 2026-04-26 pre-D91 editorial polish (`F12`): the `'partial'`
+   * focus fallback now renders as `Mixed` (not `Partial`) so a
+   * partially-completed mixed-focus session does not render as the
+   * visually-jarring `Yesterday Partial Partial` on the Home recent
+   * row. Internal enum key `'partial'` is unchanged; only the
+   * rendered label diverges. See
+   * `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 2.
    */
   it('renders skill focuses as gerunds and fallbacks in sentence case', () => {
     expect(focusLabel('pass')).toBe('Passing')
@@ -91,6 +115,6 @@ describe('focusLabel (Tier 1a Unit 5)', () => {
     expect(focusLabel('conditioning')).toBe('Conditioning')
     expect(focusLabel('recovery')).toBe('Recovery')
     expect(focusLabel('warmup')).toBe('Warm up')
-    expect(focusLabel('partial')).toBe('Partial')
+    expect(focusLabel('partial')).toBe('Mixed')
   })
 })

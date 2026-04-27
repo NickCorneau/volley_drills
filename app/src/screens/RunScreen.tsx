@@ -99,7 +99,13 @@ export function RunScreen() {
       if (isLast) {
         navigate(routes.review(executionLogId), { replace: true })
       } else {
-        navigate(routes.transition(executionLogId))
+        // 2026-04-27 plan Item 9: Run hands off to /run/check (the
+        // dedicated reflective beat) instead of jumping straight to
+        // Transition. DrillCheckScreen owns the redirect-to-Transition
+        // bypass when the just-finished block isn't capture-eligible
+        // (warmup / technique / skipped), so this call site stays
+        // symmetric with `handleNext` and `handleSkip` below.
+        navigate(routes.drillCheck(executionLogId))
       }
     } catch (err) {
       console.error('Block complete failed:', err)
@@ -274,7 +280,10 @@ export function RunScreen() {
       if (isLast) {
         navigate(routes.review(executionLogId), { replace: true })
       } else {
-        navigate(routes.transition(executionLogId))
+        // 2026-04-27 plan Item 9: hand off to /run/check; see
+        // `handleBlockComplete` above for the bypass-on-non-eligible
+        // rationale.
+        navigate(routes.drillCheck(executionLogId))
       }
     } catch (err) {
       console.error('Next block failed:', err)
@@ -293,7 +302,11 @@ export function RunScreen() {
       if (isLast) {
         navigate(routes.review(executionLogId), { replace: true })
       } else {
-        navigate(routes.transition(executionLogId))
+        // 2026-04-27 plan Item 9: hand off to /run/check. A skipped
+        // block is not capture-eligible (`prevBlockStatus` is
+        // 'skipped', not 'completed'), so DrillCheckScreen will
+        // replace-redirect straight to Transition with no flicker.
+        navigate(routes.drillCheck(executionLogId))
       }
     } catch (err) {
       console.error('Skip block failed:', err)
@@ -593,6 +606,11 @@ export function RunScreen() {
               onEndSession={handleEndSessionRequest}
               onSwap={hasAlternates ? () => void handleSwap() : undefined}
             />
+            {timer.isRunning && !wakeLock.isLocked && (
+              <p className="px-2 text-center text-xs leading-snug text-text-secondary">
+                Keep the screen on; locking your phone pauses the timer and sound.
+              </p>
+            )}
           </>
         )}
       </ScreenShell.Footer>

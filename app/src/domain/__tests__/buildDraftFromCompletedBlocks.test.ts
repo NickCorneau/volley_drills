@@ -81,6 +81,28 @@ describe('buildDraftFromCompletedBlocks (C-5 Unit 3)', () => {
     expect(draft!.blocks[1].durationMinutes).toBe(10)
   })
 
+  it('preserves stable drill and variant identity for completed blocks', () => {
+    const plan = makePlan([{ id: 'b-1', minutes: 10, type: 'main_skill' }])
+    plan.blocks[0].drillId = 'd03'
+    plan.blocks[0].variantId = 'd03-pair'
+    const log = makeLog(['completed'], ['b-1'])
+
+    const draft = buildDraftFromCompletedBlocks(log, plan)
+
+    expect(draft?.blocks[0].drillId).toBe('d03')
+    expect(draft?.blocks[0].variantId).toBe('d03-pair')
+  })
+
+  it('keeps legacy completed blocks identity-empty when plan blocks have no ids', () => {
+    const plan = makePlan([{ id: 'b-1', minutes: 10, type: 'main_skill' }])
+    const log = makeLog(['completed'], ['b-1'])
+
+    const draft = buildDraftFromCompletedBlocks(log, plan)
+
+    expect(draft?.blocks[0].drillId).toBe('')
+    expect(draft?.blocks[0].variantId).toBe('')
+  })
+
   it('preserves original block order even when completed blocks are non-contiguous', () => {
     const plan = makePlan([
       { id: 'b-1', minutes: 3 },
@@ -126,6 +148,47 @@ describe('buildDraftFromCompletedBlocks (C-5 Unit 3)', () => {
     expect(draft!.context.playerMode).toBe('solo')
     expect(draft!.context.timeProfile).toBe(25)
     expect(draft!.context.wallAvailable).toBe(true)
+  })
+
+  /**
+   * Phase 2.4 regression guard: build-time substitution lives only on
+   * `buildDraft` (Phase 2.2). `buildDraftFromCompletedBlocks` is
+   * "Repeat what you did" - it must reproduce the plan's actual
+   * blocks verbatim, including their original rationales, even when
+   * the inputs that would normally trigger substitution
+   * (`drillId === 'd03'` with `netAvailable: false` blocking the
+   * preferred d04 progression) are all present. Substituting here
+   * would silently rewrite history.
+   */
+  it('preserves the plan\u2019s rationale verbatim and never re-runs substitution', () => {
+    const plan = makePlan([
+      { id: 'b-1', minutes: 3, type: 'warmup' },
+      { id: 'b-2', minutes: 10, type: 'main_skill' },
+    ])
+    plan.blocks[1].drillId = 'd03'
+    plan.blocks[1].variantId = 'd03-pair'
+    plan.blocks[1].rationale = "Chosen because: today's main passing rep."
+    plan.context = {
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+    }
+    const log = makeLog(['completed', 'completed'], ['b-1', 'b-2'])
+
+    const draft = buildDraftFromCompletedBlocks(log, plan)
+    expect(draft).not.toBeNull()
+    expect(draft!.blocks[1].drillId).toBe('d03')
+    expect(draft!.blocks[1].variantId).toBe('d03-pair')
+    expect(draft!.blocks[1].rationale).toBe(
+      "Chosen because: today's main passing rep.",
+    )
+    for (const block of draft!.blocks) {
+      expect(
+        block.rationale ?? '',
+        `${block.type} block leaked a substitution rationale`,
+      ).not.toMatch(/is unavailable today, so this keeps/)
+    }
   })
 
   it('is resilient to blockStatuses entries that don\u2019t match plan block IDs', () => {

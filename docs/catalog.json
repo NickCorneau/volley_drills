@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
   "repo_id": "volley_drills",
-  "last_updated": "2026-04-22-h",
+  "last_updated": "2026-04-26-b",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -73,6 +73,16 @@
       "use_when": [
         "finding the narrowest research note",
         "deciding whether a finding belongs in canon or research"
+      ]
+    },
+    {
+      "path": "docs/design/README.md",
+      "kind": "design_index",
+      "always_read": false,
+      "use_when": [
+        "starting a UI / UX change",
+        "writing a new design or UX review pass",
+        "looking for prior design reviews and their recommendations"
       ]
     },
     {
@@ -148,6 +158,13 @@
       "docs/catalog.json",
       "docs/README.md",
       "docs/ops/agent-documentation-contract.md"
+    ],
+    "design_or_ux_change": [
+      "docs/design/README.md",
+      "docs/research/brand-ux-guidelines.md",
+      "docs/research/japanese-inspired-visual-direction.md",
+      "docs/research/outdoor-courtside-ui-brief.md",
+      ".cursor/rules/courtside-copy.mdc"
     ],
     "agent_ops": [
       "AGENTS.md",
@@ -276,6 +293,20 @@
       "path": "docs/milestones/README.md",
       "type": "index",
       "status": "active"
+    },
+    {
+      "id": "design-index",
+      "path": "docs/design/README.md",
+      "type": "index",
+      "status": "active",
+      "canonical_for": "discovery surface for design and UX guidelines and review history; pointer-only (does not move existing canonical design docs)"
+    },
+    {
+      "id": "2026-04-26-agent-ux-review",
+      "path": "docs/design/reviews/2026-04-26-agent-ux-review.md",
+      "type": "design-review",
+      "status": "active",
+      "canonical_for": "point-in-time UX baseline of the v0b Starter Loop after the 2026-04-22 partner-walkthrough polish and the 2026-04-23 walkthrough-closeout polish; classifies findings as editorial-class, founder-session-trigger-gated Tier 1b, D91-field, or decision-blocked; does not unlock Tier 1b and does not modify D86, D91, D119, D125, D129, D130, or D132"
     },
     {
       "id": "M001",
@@ -552,6 +583,13 @@
       "canonical_for": "cross-topic readout of the 2026-04-22 three-wave research day (skill correlation + per-skill baseline-tests + jump-float); names the conservative-wins-on-safety principle the jump-float wave forced explicit, with scope (safety-bearing ship specs only; mechanism citation required on conservative anchor) and falsification conditions; names the research-velocity substitution failure mode (research-heavy periods with zero founder-use ledger advance are Condition 1 / Condition 2 warning signs per the adversarial memo); applies D1 (this catalog + docs/research/README.md pointer entries), D2 (founder-use-ledger red-team reminder), D3 (docs/roadmap.md Phase 1.5 baseline-tests spec-input pointer), D4 (docs/roadmap.md Risks-and-mitigations research-substitution + safety-spec-vendor-outlier rows); D5 (O21 partial narrowing), D6 (binary-scoring-progression biphasic + outlier-anchoring flag), D7 (Tier 1b d36 authoring pointer) are flagged needs-review and are not applied by the note alone; ranked next-steps table aligned to current goal (advance founder-use ledger -> 2026-05-21 Condition 3 final close -> 2026-07-20 D130 re-eval); explicit restraint list (no Tier 1b unblock, no Phase 1.5 activation, no new O# IDs, no re-parameterization of D80 / D104 / D121)"
     },
     {
+      "id": "2026-04-26-pair-rep-capture-options",
+      "path": "docs/research/2026-04-26-pair-rep-capture-options.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "decision input for the post-2026-04-26 pair rep-capture question (Tier 1b P2-3 trigger fired by the founder pair pass session). Lays out four framings (A per-drill difficulty tag at Transition; B per-drill Good/Total at Transition; C in-session running tally on RunScreen; D hybrid tag-required + counts-optional) and scores each against six decision criteria (D104 50-contact math preservation, RunScreen attention cost, post-session typing pain, authoring-budget consumption, pair/solo voice asymmetry per D125 + D132, honesty test). Names the cross-cutting facts the framing decision must not forget (today's UI already deviates from V0B-12 drill-variant-grain spec, the 2026-04-23 QuickTagChips deletion is grain-different from the proposed per-drill tag, the full successMetric.type enum needs a coherent capture story, D131 telemetry stays off so a Dexie migration is in scope, and contract-changing framings need a D### proposed-decision row before the spec patch). Does not pick a framing and does not propose label vocabulary; the recommendation lives in docs/decisions.md (new D### row) and the spec patch lands in docs/specs/m001-review-micro-spec.md."
+    },
+    {
       "id": "agent-documentation-contract",
       "path": "docs/ops/agent-documentation-contract.md",
       "type": "ops",
@@ -610,6 +648,19 @@
       "path": "docs/plans/2026-04-23-walkthrough-closeout-polish.md",
       "type": "plan",
       "status": "complete"
+    },
+    {
+      "id": "pre-d91-editorial-polish-2026-04-26",
+      "path": "docs/plans/2026-04-26-pre-d91-editorial-polish.md",
+      "type": "plan",
+      "status": "draft"
+    },
+    {
+      "id": "pair-rep-capture-tier1b-2026-04-26",
+      "path": "docs/plans/2026-04-26-pair-rep-capture-tier1b.md",
+      "type": "plan",
+      "status": "draft",
+      "canonical_for": "Tier 1b implementation plan for the post-2026-04-26 pair rep-capture work unlocked by the P2-3 founder-session trigger (`docs/research/founder-use-ledger.md` 2026-04-26 row). Implements `D133` (Framing D from `docs/research/2026-04-26-pair-rep-capture-options.md`): per-drill **Difficulty tag** required on Transition + collapsed-by-default optional **Add counts** affordance, plus Review-screen card removal for count drills, plus drill-grain aggregation on Complete, plus a forward-only Dexie migration (`perDrillCaptures: PerDrillCapture[]`). Authors zero new drill records (does not consume the drill-record cap; sibling `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md` continues to hold 5/10). Consumes one Tier 1b authoring-attention slot. Estimated ~5 days when gate fires. Defers Framing C (in-session counter on RunScreen) under explicit re-trigger condition. Spec contract in `docs/specs/m001-review-micro-spec.md` §'Per-drill capture at Transition (D133)'."
     },
     {
       "id": "blocker-report-template",
@@ -686,6 +737,10 @@
     {
       "trigger": "agent-facing doc or routing guidance changed",
       "update": "docs/ops/agent-documentation-contract.md"
+    },
+    {
+      "trigger": "new design / UX review pass written",
+      "update": "docs/design/reviews/ + docs/design/README.md (Reviews table)"
     }
   ],
   "research_routing": [

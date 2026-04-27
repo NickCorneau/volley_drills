@@ -78,6 +78,27 @@ export class VolleycraftDB extends Dexie {
         await backfillSessionReviewStatus(tx)
         await backfillOnboardingCompletedAt(tx)
       })
+
+    // Tier 1b D133 (2026-04-26): adds `SessionReview.perDrillCaptures`,
+    // captured on the Transition screen between blocks. Forward-only,
+    // no data transform — `perDrillCaptures` is optional on the type and
+    // every legacy v4 record reads cleanly as "no per-drill data" (the
+    // ReviewScreen/CompleteScreen aggregation paths fall back to the
+    // session-level Good/Total fields). The version bump exists so
+    // Dexie's open() opens at v5 in v0b deployments and so that any
+    // future v6 migration that wants to derive defaults from this
+    // version's records has a labelled boundary to read from. See
+    // `docs/plans/2026-04-26-pair-rep-capture-tier1b.md`.
+    this.version(5)
+      .stores({
+        sessionPlans: 'id',
+        executionLogs: 'id, planId, status',
+        sessionReviews: 'id, executionLogId',
+        timerState: 'id',
+        sessionDrafts: 'id',
+        storageMeta: 'key',
+      })
+      .upgrade(() => {})
   }
 }
 

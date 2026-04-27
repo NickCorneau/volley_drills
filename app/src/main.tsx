@@ -20,8 +20,21 @@ import '@fontsource-variable/inter'
 import '@fontsource-variable/jetbrains-mono'
 import './index.css'
 import './lib/pwa-register'
+import { startAppHeightTracking } from './lib/appHeight'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary'
+
+// Begin --app-height tracking BEFORE React mounts so the locked
+// shell in `App.tsx` (`h-[var(--app-height,100dvh)]`) reads a real
+// viewport measurement on first paint, not the `100dvh` fallback.
+// The Android-PWA bug this guards against is documented in
+// `lib/appHeight.ts`; in short, a service-worker-driven reload can
+// briefly resolve `100dvh` to a value larger than the actually
+// visible area, which traps the bottom CTA row off-screen until the
+// user force-quits the PWA. Reading from `visualViewport` here and
+// re-applying on resize/orientation/pageshow makes the layout
+// self-correct within a frame.
+startAppHeightTracking()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

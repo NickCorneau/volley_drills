@@ -108,6 +108,16 @@ export function TransitionScreen() {
   return (
     <ScreenShell>
       {/*
+        2026-04-27 plan Item 9: TransitionScreen is now the rehearsal
+        beat only. The reflective beat (per-drill chip + optional
+        counts) lives on `/run/check` upstream of this screen, so this
+        body is single-purpose: just-finished pill (provenance), Up
+        Next briefing (drill name + rationale + full prep + cue), and
+        the action footer. The capture state, draft persistence
+        effects, capture-target derivation, and "Tag how that drill
+        went" gating hint moved verbatim into `DrillCheckScreen`. See
+        `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 9.
+
         2026-04-22 iPhone-viewport layout pass: the prior `mt-auto`
         on the button row was decorative — it only activated when the
         screen div happened to fill main, which it rarely did because
@@ -250,7 +260,11 @@ export function TransitionScreen() {
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="flex flex-col gap-3 pt-4">
-        <Button variant="primary" fullWidth onClick={handleStartNext}>
+        <Button
+          variant="primary"
+          fullWidth
+          onClick={handleStartNext}
+        >
           Start next block
         </Button>
         {/* Secondary row: Swap + Shorten side-by-side when both are
@@ -288,7 +302,11 @@ export function TransitionScreen() {
             </Button>
           </div>
         ) : (
-          <Button variant="outline" fullWidth onClick={handleStartShortened}>
+          <Button
+            variant="outline"
+            fullWidth
+            onClick={handleStartShortened}
+          >
             Shorten block
           </Button>
         )}

@@ -6,7 +6,12 @@ import type { SetupContext } from '../db/types'
 import { buildDraft } from '../domain/sessionBuilder'
 import { isOnboardingStep } from '../lib/onboarding'
 import { isSchemaBlocked } from '../lib/schema-blocked'
-import { getLastContext, saveDraft } from '../services/session'
+import {
+  findLastCompletedDrillIdsByType,
+  getLastContext,
+  saveDraft,
+} from '../services/session'
+import type { BlockSlotType } from '../types/session'
 import { getStorageMeta, setStorageMeta } from '../services/storageMeta'
 import { routes } from '../routes'
 
@@ -115,7 +120,23 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       if (wind === 'light') context.wind = 'light'
       else if (wind === 'strong') context.wind = 'strong'
 
-      const draft = buildDraft(context)
+      // Phase 2.2 / 3.2 build-time substitution input. A fresh Setup
+      // means the user is moving forward from their last main_skill
+      // rep, so pass the recent completion map (per-slot drill ids)
+      // to enable substitution when today's context blocks the
+      // preferred progression (e.g., d03 done last time, no net today
+      // blocks d04 -> substitute d10). Best-effort: if the lookup
+      // fails (Dexie schema-blocked, etc.) we fall back to the legacy
+      // default selection path - substitution is an enhancement, not
+      // a requirement for build to proceed.
+      let lastCompletedByType: Partial<Record<BlockSlotType, string>> = {}
+      try {
+        lastCompletedByType = await findLastCompletedDrillIdsByType()
+      } catch {
+        if (isSchemaBlocked()) return
+      }
+
+      const draft = buildDraft(context, { lastCompletedByType })
       if (!draft) {
         setError("Can't build a session for these constraints. Try different options.")
         return

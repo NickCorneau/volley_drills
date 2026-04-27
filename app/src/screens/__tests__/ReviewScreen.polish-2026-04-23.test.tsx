@@ -26,7 +26,7 @@ import { ReviewScreen } from '../ReviewScreen'
  *   (c) A hairline divider separates the RPE card from the
  *       Good-passes card (visible on count drills).
  *   (d) The primary action reads "Done" and Finish later renders as
- *       an equal-weight primary button.
+ *       a lower-emphasis link below it.
  *   (e) Good-passes card is hidden on non-count drills (the main
  *       skill's `successMetric.type` is non-count), not just
  *       pre-selected to `notCaptured`.
@@ -148,7 +148,7 @@ describe('ReviewScreen 2026-04-23 polish (merged proposal)', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('(d) footer exposes Done and Finish later as two equal-weight primary buttons', async () => {
+  it('(d) footer exposes Done as primary and Finish later as a lower-emphasis link', async () => {
     await seedCompletedWithBlock('exec-buttons', makeSkillBlock())
     renderAt('exec-buttons')
 
@@ -160,10 +160,10 @@ describe('ReviewScreen 2026-04-23 polish (merged proposal)', () => {
     expect(
       screen.queryByRole('button', { name: /^submit review$/i }),
     ).not.toBeInTheDocument()
-    // Both carry the `bg-accent` primary class — i.e., Finish later is
-    // no longer a subordinated underlined link.
     expect(done.className).toMatch(/bg-accent/)
-    expect(finishLater.className).toMatch(/bg-accent/)
+    expect(finishLater.className).not.toMatch(/bg-accent/)
+    expect(finishLater.className).toMatch(/underline/)
+    expect(finishLater.className).toMatch(/text-text-secondary/)
   })
 
   it('(f) no 2-hour / "stops counting" countdown subtitle is rendered on the footer', async () => {
@@ -251,6 +251,36 @@ describe('ReviewScreen 2026-04-23 polish (merged proposal)', () => {
       expect(
         await screen.findByRole('heading', { name: /^good passes$/i }),
       ).toBeInTheDocument()
+    })
+
+    it('uses stable drillId before drillName when deciding count capture visibility', async () => {
+      await seedCompletedWithBlock(
+        'exec-id-first-noncount',
+        makeSkillBlock({
+          drillId: 'd01',
+          variantId: 'd01-solo',
+          drillName: '__stale_or_renamed_drill__',
+        }),
+      )
+      renderAt('exec-id-first-noncount')
+
+      await screen.findByRole('heading', { name: /quick review/i })
+      expect(
+        screen.queryByRole('heading', { name: /^good passes$/i }),
+      ).not.toBeInTheDocument()
+    })
+
+    it('falls back to drillName for legacy plans without stable drillId', async () => {
+      await seedCompletedWithBlock(
+        'exec-legacy-name-fallback',
+        makeSkillBlock({ drillName: 'Pass & Slap Hands' }),
+      )
+      renderAt('exec-legacy-name-fallback')
+
+      await screen.findByRole('heading', { name: /quick review/i })
+      expect(
+        screen.queryByRole('heading', { name: /^good passes$/i }),
+      ).not.toBeInTheDocument()
     })
   })
 })

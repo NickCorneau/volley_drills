@@ -132,9 +132,13 @@ test.describe('warm-offline PWA shell (V0B-21)', () => {
 
       await expect(page.getByText(/Volleycraft/i)).toBeVisible({ timeout: 10_000 })
       // C-4 (Surface 2): see note above — review-pending primary card
-      // uses "Review your last session" + plan name.
+      // uses "Review pending" eyebrow + plan name. Eyebrow voice was
+      // tightened on 2026-04-26 (`F11`) to match the card's
+      // `aria-label` and the SoftBlockModal copy; the original
+      // "Review your last session" wording read as a polite
+      // invitation instead of an unfinished-obligation state.
       await expect(
-        page.getByText(/review your last session/i),
+        page.getByText(/^Review pending$/),
       ).toBeVisible({ timeout: 5000 })
       await expect(
         page.getByRole('button', { name: /finish review/i }),

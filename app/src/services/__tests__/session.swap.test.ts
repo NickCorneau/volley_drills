@@ -87,6 +87,8 @@ function makeExec(activeBlockIndex = 1): ExecutionLog {
 const REPLACEMENT: SessionPlanBlock = {
   id: 'b-1',
   type: 'main_skill',
+  drillId: 'd99',
+  variantId: 'd99-solo',
   drillName: 'Swapped Drill',
   shortName: 'Swap',
   durationMinutes: 10,
@@ -116,6 +118,8 @@ describe('swapActiveBlock (Phase F Unit 4)', () => {
     // Persisted shape matches.
     const persisted = await db.sessionPlans.get('plan-swap')
     expect(persisted!.blocks[1].drillName).toBe('Swapped Drill')
+    expect(persisted!.blocks[1].drillId).toBe('d99')
+    expect(persisted!.blocks[1].variantId).toBe('d99-solo')
   })
 
   it('increments execution.swapCount from undefined (first swap) to 1', async () => {

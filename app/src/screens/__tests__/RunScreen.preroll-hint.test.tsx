@@ -68,6 +68,44 @@ async function seedPrerollSession(execId: string, planId: string) {
   })
 }
 
+async function seedRunningSession(execId: string, planId: string) {
+  const now = Date.now()
+  await db.sessionPlans.put({
+    id: planId,
+    presetId: 'solo_open',
+    presetName: 'Solo + Open',
+    playerCount: 1,
+    blocks: [
+      {
+        id: 'b-0',
+        type: 'main_skill',
+        drillName: 'Self-Toss Pass',
+        shortName: 'Pass',
+        durationMinutes: 3,
+        coachingCue: 'Quiet platform.',
+        courtsideInstructions: 'Pass to a steady target.',
+        required: true,
+      },
+    ],
+    safetyCheck: { painFlag: false, heatCta: false, painOverridden: false },
+    createdAt: now - 1_000,
+  })
+  await db.executionLogs.put({
+    id: execId,
+    planId,
+    status: 'in_progress',
+    activeBlockIndex: 0,
+    blockStatuses: [
+      {
+        blockId: 'b-0',
+        status: 'in_progress',
+        startedAt: now - 1_000,
+      },
+    ],
+    startedAt: now - 1_000,
+  })
+}
+
 function renderAt(execId: string) {
   return render(
     <MemoryRouter initialEntries={[`/run?id=${execId}`]}>
@@ -126,5 +164,21 @@ describe('RunScreen preroll hint gate (partner-walkthrough polish item 5)', () =
 
     await screen.findByText(/get ready/i)
     expect(screen.queryByText(HINT_TEXT)).not.toBeInTheDocument()
+  })
+})
+
+describe('RunScreen lock-screen limitation copy', () => {
+  beforeEach(async () => {
+    await clearDb()
+    Reflect.deleteProperty(navigator, 'wakeLock')
+  })
+
+  it('warns during a running block when wake lock is unavailable', async () => {
+    await seedRunningSession('exec-running-no-lock', 'plan-running-no-lock')
+    renderAt('exec-running-no-lock')
+
+    expect(
+      await screen.findByText(/locking your phone pauses the timer and sound/i),
+    ).toBeInTheDocument()
   })
 })

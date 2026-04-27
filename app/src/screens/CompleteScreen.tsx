@@ -5,12 +5,17 @@ import { UpdatePrompt } from '../components/UpdatePrompt'
 import { Button, Card, ScreenShell, StatusMessage } from '../components/ui'
 import { composeSummary, type SummaryOutput } from '../domain'
 import { useInstallPosture } from '../hooks/useInstallPosture'
-import { effortLabel, formatPassRateLine } from '../lib/format'
+import {
+  effortLabel,
+  formatDifficultyBreakdownLine,
+  formatPassRateLine,
+} from '../lib/format'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { getStorageCopy } from '../lib/storageCopy'
 import { useAppRegisterSW } from '../lib/pwa-register'
 import { routes } from '../routes'
 import {
+  aggregateDrillCaptures,
   countSubmittedReviews,
   loadSessionBundle,
   type SessionBundle,
@@ -170,6 +175,36 @@ export function CompleteScreen() {
     (b) => b.status === 'completed',
   ).length
 
+  // D133 (2026-04-26) recap aggregation: when the session was reviewed
+  // with per-drill captures, prefer those numbers over the
+  // session-level `goodPasses` / `totalAttempts` — this preserves
+  // tagged-but-uncounted information ("3 drills tagged, counts not
+  // logged") that the session-level fields collapse to 0/0 (which
+  // formats as the dash placeholder). Pre-D133 sessions and tag-free
+  // submissions fall through to the legacy session-level fields
+  // unchanged, so this is a no-op for everything that already
+  // shipped.
+  const captureAggregate = aggregateDrillCaptures(review.perDrillCaptures)
+  const recapHasCaptures = captureAggregate.drillsTagged > 0
+  const recapGood = recapHasCaptures
+    ? captureAggregate.goodPasses
+    : review.goodPasses
+  const recapTotal = recapHasCaptures
+    ? captureAggregate.totalAttempts
+    : review.totalAttempts
+  const recapTaggedOnly = recapHasCaptures && captureAggregate.drillsWithCounts === 0
+
+  // 2026-04-27 pre-D91 editorial polish (plan Item 8): close the loop
+  // on the per-drill chip taps by surfacing the tag distribution on
+  // the Complete recap. Returns `null` for pre-Tier-1b sessions and any
+  // submission with no chips tapped, in which case the consumer hides
+  // the row entirely (no zero-state placeholder — restraint per Shibui).
+  // See `lib/format.ts` `formatDifficultyBreakdownLine` for the
+  // collapse-to-"All X" / dot-separated rendering rules.
+  const difficultyLine = formatDifficultyBreakdownLine(
+    captureAggregate.tagBreakdown,
+  )
+
   // Field-test feedback 2026-04-21: the terminal verdict screen read as
   // "weirdly dense / compact" because the previous layout stacked every
   // section with a flat `gap-8` and floated the cluster inside the main
@@ -186,9 +221,28 @@ export function CompleteScreen() {
   // `[shield | center label | right meta]` pattern: the eyebrow is the
   // centered page label, and an invisible spacer of the SafetyIcon's
   // 56×56 footprint balances the right column so the eyebrow is
-  // optically centered. This also cleans up the heading outline -
-  // `<h1>` (page title) lives in the top bar; `<h2>` (verdict word)
-  // stays the focal sub-heading below.
+  // optically centered.
+  //
+  // 2026-04-26 pre-D91 editorial polish (`F10`, `D125` / `D132` pair-
+  // first vision-stance check): the eyebrow is now rendered ONLY in
+  // the pair case ("Today's pair verdict"). On solo, the centered
+  // `<h1>` slot is intentionally empty — the giant verdict word
+  // (`<h2>` below) and the eyebrow `Today's verdict` were saying the
+  // same thing, so the eyebrow was a label-on-the-data-the-data-
+  // already-labels-itself. Dropping it on solo lets the verdict word
+  // stand alone, which is more *Ma*. Pair keeps the eyebrow because
+  // `Today's pair verdict` carries the only pair-context signal on
+  // the screen — the verdict word ("Keep building" / "Lighter next" /
+  // "No change") does not say "pair" anywhere. The asymmetry is the
+  // point: the eyebrow becomes information when it carries
+  // information, and absent when it doesn't. Heading-outline note:
+  // the page's only `<h1>` is now removed on solo; the verdict
+  // `<h2>` continues to announce via `aria-live="polite"` and is the
+  // de facto page heading on solo. Single-heading-outline pages are
+  // valid HTML5 — confirm before "fixing" by re-adding the solo
+  // eyebrow. Future contributors: do NOT re-add the solo eyebrow.
+  // See `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 5.
+  const isPairSummary = summary.header === "Today's pair verdict"
   return (
     <ScreenShell>
       {/*
@@ -208,10 +262,18 @@ export function CompleteScreen() {
             to `<h1>` so the page has a valid heading outline (was h2-only
             before) and dropped the uppercase-eyebrow voice. The verdict
             `<h2>` below is unchanged - still the focal sub-heading. See
-            `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
-        <h1 className="text-sm font-medium text-text-secondary">
-          {summary.header}
-        </h1>
+            `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`.
+
+            2026-04-26 pre-D91 editorial polish (`F10`): conditional
+            on pair — the solo case omits the eyebrow entirely so the
+            verdict word stands alone. */}
+        {isPairSummary ? (
+          <h1 className="text-sm font-medium text-text-secondary">
+            {summary.header}
+          </h1>
+        ) : (
+          <span aria-hidden />
+        )}
         <div className="h-14 w-14 shrink-0" aria-hidden />
       </ScreenShell.Header>
 
@@ -284,11 +346,36 @@ export function CompleteScreen() {
           <div className="flex items-center justify-between gap-4">
             <dt className="text-text-secondary">Good passes</dt>
             <dd
-              className={`font-medium tabular-nums ${review.totalAttempts > 0 ? 'text-success' : 'text-text-secondary'}`}
+              className={`font-medium tabular-nums ${recapTotal > 0 ? 'text-success' : 'text-text-secondary'}`}
+              data-testid="recap-good-passes"
             >
-              {formatPassRateLine(review.goodPasses, review.totalAttempts)}
+              {recapTaggedOnly
+                ? 'Tagged, counts not logged'
+                : formatPassRateLine(recapGood, recapTotal)}
             </dd>
           </div>
+          {/* 2026-04-27 pre-D91 editorial polish (plan Item 8): the
+              Difficulty row closes the loop on the per-drill chip taps.
+              Hidden entirely (not rendered) when no chips were tapped —
+              pre-Tier-1b sessions, all-warmup sessions, and any future
+              capture-skip mode falls through this branch unchanged. The
+              text-primary color matches "Effort" below so the two
+              tester-supplied signals share visual weight; "Drills
+              completed" / "Good passes" are auto-derived and stay
+              quieter. The breakdown line itself is non-tabular (prose,
+              not a number column) so courtside readers parse it as a
+              short observation rather than a metric. */}
+          {difficultyLine !== null && (
+            <div
+              className="flex items-center justify-between gap-4"
+              data-testid="recap-difficulty"
+            >
+              <dt className="text-text-secondary">Difficulty</dt>
+              <dd className="text-right font-medium text-text-primary">
+                {difficultyLine}
+              </dd>
+            </div>
+          )}
           <div className="flex items-center justify-between gap-4">
             <dt className="text-text-secondary">Effort</dt>
             <dd className="font-medium text-text-primary">

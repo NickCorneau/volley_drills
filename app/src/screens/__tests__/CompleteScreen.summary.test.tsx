@@ -108,7 +108,21 @@ describe('CompleteScreen summary (C-2 Unit 3)', () => {
     await clearDb()
   })
 
-  it("solo + submitted renders 'Today's verdict' header and 'Keep building' verdict", async () => {
+  it("solo + submitted renders verdict word with no eyebrow above it", async () => {
+    // 2026-04-26 pre-D91 editorial polish (`F10`, `D125` / `D132`
+    // pair-first vision-stance check): the solo eyebrow
+    // `Today's verdict` was redundant with the giant `<h2>` verdict
+    // word below ("Keep building" / "Lighter next" / "No change").
+    // It is now omitted on solo. The pair eyebrow `Today's pair
+    // verdict` still renders because it carries the only pair-
+    // context signal on the screen. Domain-layer `summary.header`
+    // is unchanged (still emits both strings); the omission is
+    // render-time only.
+    //
+    // Future contributors: do NOT re-add the solo eyebrow. The
+    // `composeSummary` test in `sessionSummary.test.ts` confirms
+    // `header === "Today's verdict"` is still emitted at the
+    // domain layer for screen readers / future surfaces.
     await seed({
       execId: 'exec-solo',
       playerCount: 1,
@@ -119,15 +133,18 @@ describe('CompleteScreen summary (C-2 Unit 3)', () => {
 
     renderAt('exec-solo')
 
-    expect(await screen.findByText(/today's verdict/i)).toBeInTheDocument()
+    expect(await screen.findByText('Keep building')).toBeInTheDocument()
+    expect(screen.queryByText(/today's verdict/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/today's pair verdict/i)).not.toBeInTheDocument()
-    expect(screen.getByText('Keep building')).toBeInTheDocument()
-    // sessionCount === 1 (this review is the only submitted one).
+    // 2026-04-26 pre-D91 editorial polish (`F9`): the
+    // `Completed session N:` ordinal prefix was dropped — the reason
+    // line leads with the stats sentence directly.
     expect(
       screen.getByText(
-        /Completed session 1:.*40 good passes today.*60 attempts/i,
+        /^40 good passes today out of 60 attempts\. Ready when you are\.$/,
       ),
     ).toBeInTheDocument()
+    expect(screen.queryByText(/Completed session/i)).not.toBeInTheDocument()
   })
 
   it("pair mode renders 'Today's pair verdict' header", async () => {
@@ -174,18 +191,30 @@ describe('CompleteScreen summary (C-2 Unit 3)', () => {
     expect(screen.getByText(/gentler/i)).toBeInTheDocument()
   })
 
-  it('session counter reflects countSubmittedReviews (this review + extras)', async () => {
+  it('reason line reflects the submitted stats regardless of session count', async () => {
+    // 2026-04-26 pre-D91 editorial polish (`F9`): the
+    // `Completed session N` ordinal was dropped from Complete, so
+    // `countSubmittedReviews` no longer surfaces on this screen.
+    // `sessionCount` still flows through `composeSummary` as data
+    // (other surfaces may want it later), but the rendered reason
+    // line is identical for any sessionCount > 0 + attempts > 0 — it
+    // leads with the stats sentence and ends with the forward hook.
     await seed({
       execId: 'exec-counter',
       playerCount: 1,
       reviewStatus: 'submitted',
       goodPasses: 80,
       totalAttempts: 100,
-      extraSubmittedCount: 2, // 2 prior submitted + this one = completed session 3.
+      extraSubmittedCount: 2, // would have been "Completed session 3" pre-`F9`.
     })
     renderAt('exec-counter')
 
-    expect(await screen.findByText(/Completed session 3:/)).toBeInTheDocument()
+    expect(
+      await screen.findByText(
+        /^80 good passes today out of 100 attempts\. Ready when you are\.$/,
+      ),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/Completed session/i)).not.toBeInTheDocument()
   })
 
   it('verdict line has aria-live=polite for screen-reader priority', async () => {

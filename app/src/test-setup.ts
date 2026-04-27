@@ -4,6 +4,17 @@ import '@testing-library/jest-dom/vitest'
 import { afterEach, beforeEach, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
 
+// 2026-04-26 pre-D91 editorial polish (`F14`): stub the build-id
+// globals that Vite's `define` plugin injects at production /
+// preview / dev build time. The unit test runtime does not go
+// through Vite's bundler step for these constants, so without
+// these stubs `lib/buildInfo.ts` would fall through to its
+// `'dev'` / `'unknown'` defaults. Pinning to deterministic
+// `'test'` / `'test'` values lets a future Settings test assert
+// on the rendered string without snapshot drift across machines.
+;(globalThis as Record<string, unknown>).__VOLLEYCRAFT_BUILD_SHA__ = 'test'
+;(globalThis as Record<string, unknown>).__VOLLEYCRAFT_BUILD_DATE__ = 'test'
+
 // jsdom does not ship `ResizeObserver`. The `ScreenShell.Body` component
 // uses it to keep its top/bottom fade gradients in sync with content
 // reflow — construction alone throws `ReferenceError: ResizeObserver is

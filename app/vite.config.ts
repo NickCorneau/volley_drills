@@ -1,11 +1,52 @@
 /// <reference types="vitest/config" />
+import { execSync } from 'node:child_process'
 import path from 'node:path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+/**
+ * 2026-04-26 pre-D91 editorial polish (`F14`): build-id injection.
+ *
+ * When a D91 field-test tester reports "the timer skipped a beat at
+ * the end of block 2," the founder's first triage question is "what
+ * build are you on?" Without this injection the answer requires
+ * cross-referencing Cloudflare deploy timestamps; with it, the
+ * tester taps Settings and reads back a six-character SHA + ISO
+ * date.
+ *
+ * Both reads are wrapped in try/catch so an unusual git state
+ * (detached HEAD, missing `.git`, build container without git)
+ * cannot fail the build — `'dev'` / `'unknown'` are honest fallback
+ * values. The string forms below get JSON-stringified into the
+ * `define` block so the constants are safe to drop into source as
+ * identifiers (Vite replaces references at build time).
+ *
+ * See `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 6.
+ */
+function readBuildSha(): string {
+  try {
+    return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim()
+  } catch {
+    return 'dev'
+  }
+}
+
+function readBuildDate(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+const BUILD_SHA = readBuildSha()
+const BUILD_DATE = readBuildDate()
+
 export default defineConfig({
+  define: {
+    __VOLLEYCRAFT_BUILD_SHA__: JSON.stringify(BUILD_SHA),
+    __VOLLEYCRAFT_BUILD_DATE__: JSON.stringify(BUILD_DATE),
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

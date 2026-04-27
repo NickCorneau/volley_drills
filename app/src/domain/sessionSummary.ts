@@ -120,8 +120,24 @@ function passAttemptStatsLine(
 // "13 attempts logged" next to the pass-metric line. `sessionCount` is
 // `countSubmittedReviews()` (lifetime submitted reviews since
 // onboarding), not `review.totalAttempts`. Prefix renamed to
-// `Completed session N:` / `Completed session N.` so the ordinal reads
+// `Completed session N:` / `Completed session N.` so the ordinal read
 // as a completion tally, not an attempt counter.
+//
+// 2026-04-26 pre-D91 editorial polish (`F9`): the `Completed session N`
+// ordinal prefix was dropped entirely. The 2026-04-22 disambiguation
+// fixed the *misread* (Session 13 ≠ 13 attempts) but did not answer
+// the deeper question — does a self-coached amateur on a courtside
+// Complete screen need to be told this was their thirteenth session?
+// Field evidence says no: the user reads the verdict word, the rate
+// line, and taps Back to home. The ordinal was informational backfill,
+// not actionable, and contributed to the "weirdly dense" feel that
+// the 2026-04-21 second-pass field-test feedback flagged. The lifetime
+// session-count signal is still surfaced through the Home recent-
+// workouts row's rolling-recency labels; deleting it from Complete
+// preserves the Jo-Ha-Kyu "kyu" beat per the brand's typography brief.
+// `sessionCount` is no longer threaded into `composeDefaultReason`
+// (kept on `SummaryInput` as data only — future surfaces may want
+// it). See `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 4.
 //
 // 2026-04-22 honest-copy pass: the prior low-N branch rendered
 // "Pass-rate tuning waits until this session logs 50 attempts…" below
@@ -132,6 +148,7 @@ function passAttemptStatsLine(
 // progression engine when that ships; Complete copy should not cite
 // it again until then. See decisions.md O12.
 const FIRST_SESSION_NO_ATTEMPTS_REASON = `First one\u2019s in the book. ${FORWARD_HOOK}`
+const REPEAT_NO_ATTEMPTS_REASON = `One more in the book. ${FORWARD_HOOK}`
 
 function composeDefaultReason(
   review: SessionReview,
@@ -141,11 +158,8 @@ function composeDefaultReason(
     if (sessionCount === 1) {
       return FIRST_SESSION_NO_ATTEMPTS_REASON
     }
-    return `Completed session ${sessionCount}. One more in the book. ${FORWARD_HOOK}`
+    return REPEAT_NO_ATTEMPTS_REASON
   }
-  const base = `Completed session ${sessionCount}: ${passAttemptStatsLine(
-    review.goodPasses,
-    review.totalAttempts,
-  )}`
+  const base = passAttemptStatsLine(review.goodPasses, review.totalAttempts)
   return `${base} ${FORWARD_HOOK}`
 }

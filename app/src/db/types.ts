@@ -14,6 +14,13 @@ export type { SetupContext }
 export interface SessionPlanBlock {
   id: string
   type: BlockSlotType
+  /**
+   * Stable catalog identity for this planned block. Optional because
+   * legacy persisted plans pre-date these fields and still render by
+   * name/copy snapshot.
+   */
+  drillId?: string
+  variantId?: string
   drillName: string
   shortName: string
   durationMinutes: number
@@ -142,6 +149,70 @@ export interface DrillVariantScore {
 }
 
 /**
+ * D133 (2026-04-26): per-drill required difficulty enum captured on the
+ * Transition screen between blocks. Distinct vocabulary from the deleted
+ * session-level `QuickTagChips` (`Too easy / About right / Too hard`)
+ * because:
+ * - capture grain is per-drill-variant, not per-session
+ * - the "still_learning" middle anchor names a learning state, not an
+ *   intensity rating, so it does not duplicate the post-session 3-anchor
+ *   RPE (`Easy / Right / Hard`) which lives at session grain
+ *
+ * See `docs/specs/m001-review-micro-spec.md` §"Per-drill capture at
+ * Transition (D133)" and `docs/research/2026-04-26-pair-rep-capture-options.md`
+ * Framing D for the rationale.
+ */
+export type DifficultyTag = 'too_hard' | 'still_learning' | 'too_easy'
+
+/**
+ * D133 (2026-04-26): one entry per completed main-skill / pressure block,
+ * captured on the Transition screen immediately after the block ends.
+ *
+ * Realises `V0B-12`'s drill-variant-grain requirement for the first time
+ * in M001 (Tier 1a was session-level only) and feeds `D104`'s 50-contact
+ * rolling-window math via `goodPasses` / `attemptCount` when those are
+ * captured. When counts are absent, `D104` gracefully degrades to RPE-only
+ * signal for that drill — see decisions.md `D104` and `D133`.
+ */
+export interface PerDrillCapture {
+  /** Stable catalog identity. Mirrors `SessionPlanBlock.drillId`. */
+  drillId: string
+  /** Stable variant identity. Mirrors `SessionPlanBlock.variantId`. */
+  variantId: string
+  /**
+   * Index into `SessionPlan.blocks` of the block this capture belongs to.
+   * Stored so a mid-session Swap that replaces a drill does not collapse
+   * two captures with the same `drillId` into one — a tester who runs the
+   * same drill twice (after a Swap-back) gets two distinct captures keyed
+   * by `blockIndex`, not one merged record.
+   */
+  blockIndex: number
+  /**
+   * Required by D133. The Transition screen cannot advance to the next
+   * block until the user taps one of the three chips.
+   */
+  difficulty: DifficultyTag
+  /**
+   * Optional per-drill Good count. Both `goodPasses` and `attemptCount`
+   * are present-or-both-absent: a writer who has one but not the other
+   * is a contract violation. When absent, `D104` falls back to RPE-only
+   * signal for this drill (see `D133`).
+   */
+  goodPasses?: number
+  /** Optional per-drill Total count. See `goodPasses`. */
+  attemptCount?: number
+  /**
+   * Per-drill mirror of the session-level `notCaptured` quick tag: the
+   * tester explicitly opted out of counting reps for this drill. When
+   * `true`, `goodPasses` and `attemptCount` are `undefined` and the
+   * adaptation engine should treat the drill as RPE-only signal.
+   */
+  notCaptured?: boolean
+  /** Epoch ms at which the capture was tapped on the Transition screen. */
+  capturedAt: number
+}
+
+/**
  * RPE capture-timing window. Persisted on every `SessionReview` so the
  * M001-build adaptation engine (D104 / D113 / D120) can confidence-bucket
  * inputs without re-deriving from timestamps. v0b does not wire these into
@@ -191,6 +262,17 @@ export interface SessionReview {
   goodPasses: number
   totalAttempts: number
   drillScores?: DrillVariantScore[]
+  /**
+   * D133 (2026-04-26): per-drill captures recorded on the Transition
+   * screen between blocks. Optional on the type so legacy v3 / pre-D133
+   * records read cleanly; writers in `submitReview` / `saveReviewDraft`
+   * pass through whatever the Transition flow accumulated. When at least
+   * one entry has a `difficulty` set, ReviewScreen's session-level
+   * Good/Total card hides and CompleteScreen aggregates from this list
+   * via `aggregateDrillCaptures`; when absent or empty, the legacy
+   * session-level fields drive the recap.
+   */
+  perDrillCaptures?: PerDrillCapture[]
   /**
    * Schema-reserved for the three-layer self-scoring bias correction in
    * D104 / docs/research/binary-scoring-progression.md. Captures how many

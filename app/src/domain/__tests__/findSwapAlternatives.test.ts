@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { DRILLS } from '../../data/drills'
 import type { SessionPlanBlock, SetupContext } from '../../db'
 import { findSwapAlternatives } from '../sessionBuilder'
 
@@ -102,6 +103,26 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
       expect(alt.type).toBe('main_skill')
       expect(alt.durationMinutes).toBe(17)
       expect(alt.required).toBe(false)
+    }
+  })
+
+  it('returns stable drill and variant ids on alternates', () => {
+    const block = makeBlock({
+      type: 'main_skill',
+      drillName: 'Does Not Exist',
+    })
+    const out = findSwapAlternatives(block, makeContext())
+
+    expect(out.length).toBeGreaterThan(0)
+    for (const alt of out) {
+      const drill = DRILLS.find((d) => d.id === alt.drillId)
+      expect(alt).toMatchObject({
+        drillId: expect.any(String),
+        variantId: expect.any(String),
+      })
+      expect(drill?.variants.some((variant) => variant.id === alt.variantId)).toBe(
+        true,
+      )
     }
   })
 
@@ -224,6 +245,106 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
     })
   })
 
+  describe('explicit blocked-progression substitutes', () => {
+    it('prioritizes an available preferred progression with the normal rationale', () => {
+      const block = makeBlock({
+        type: 'main_skill',
+        drillId: 'd41',
+        variantId: 'd41-pair',
+        drillName: 'Partner Set Back-and-Forth',
+      })
+      const out = findSwapAlternatives(
+        block,
+        makeContext({
+          playerMode: 'pair',
+          netAvailable: true,
+          wallAvailable: false,
+        }),
+      )
+
+      expect(out.length).toBeGreaterThan(0)
+      expect(out[0].drillId).toBe('d42')
+      expect(out[0].rationale).toBe(
+        "Chosen because: today's main setting rep.",
+      )
+    })
+
+    it('prioritizes a no-net substitute and explains the blocked preferred path', () => {
+      const block = makeBlock({
+        type: 'main_skill',
+        drillId: 'd03',
+        variantId: 'd03-pair',
+        drillName: 'Continuous Passing',
+      })
+      const out = findSwapAlternatives(
+        block,
+        makeContext({
+          playerMode: 'pair',
+          netAvailable: false,
+          wallAvailable: false,
+        }),
+      )
+
+      expect(out.length).toBeGreaterThan(0)
+      expect(out[0].drillId).toBe('d10')
+      expect(out[0].rationale).toBe(
+        'Chosen because: the next net drill is unavailable today, so this keeps partner-fed platform control without a net.',
+      )
+      expect(out[0].rationale).not.toMatch(/progress/i)
+    })
+
+    it('keeps legacy name-only blocks on the normal sorted alternates path', () => {
+      const block = makeBlock({
+        type: 'main_skill',
+        drillName: 'Continuous Passing',
+      })
+      const out = findSwapAlternatives(
+        block,
+        makeContext({
+          playerMode: 'pair',
+          netAvailable: false,
+          wallAvailable: false,
+        }),
+      )
+
+      expect(out.length).toBeGreaterThan(0)
+      expect(out[0].drillId).toBe('d10')
+      expect(out[0].rationale).toBe(
+        "Chosen because: today's main passing rep.",
+      )
+    })
+
+    /**
+     * Red-team remediation Phase 1.4: legacy plans persisted before
+     * `drillId`/`variantId` reached `SessionPlanBlock` cannot key into
+     * `SUBSTITUTION_RULES`. Pin that no alternate produced for a
+     * legacy (no `drillId`) block carries a substitution rationale,
+     * even after the swap path keeps growing.
+     */
+    it('never produces a substitution rationale for a legacy name-only block', () => {
+      const block = makeBlock({
+        type: 'main_skill',
+        drillName: 'Continuous Passing',
+      })
+      const out = findSwapAlternatives(
+        block,
+        makeContext({
+          playerMode: 'pair',
+          netAvailable: false,
+          wallAvailable: false,
+        }),
+      )
+
+      expect(out.length).toBeGreaterThan(0)
+      for (const alternate of out) {
+        expect(
+          alternate.rationale,
+          `legacy block alternate ${alternate.drillId ?? alternate.drillName} leaked a substitution rationale`,
+        ).not.toMatch(/is unavailable today, so this keeps/)
+      }
+    })
+  })
+
   /**
    * Tier 1a Unit 2 (setting minimum probe): `SKILL_TAGS_BY_TYPE`
    * widened `main_skill` and `pressure` to include `'set'` so
@@ -284,6 +405,93 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
         names.includes('Bump Set Fundamentals') ||
           names.includes('Hand Set Fundamentals'),
       ).toBe(true)
+    })
+  })
+
+  /**
+   * Tier 1b-A content surfacing via Swap pools. These tests verify the
+   * eligible-drill pool contents — they do not claim "the user will
+   * see this drill on the first Swap tap"; that depends on Swap
+   * cycling order and is a separate UX concern. Around the World
+   * Serving (`d33`) requires a net, so it must NOT surface in solo
+   * no-net contexts. Triangle Setting (`d43`) is intentionally not in
+   * the catalog (deferred to D101 3+ player support); the negative
+   * assertion guards against a regression that re-introduces it as a
+   * forced two-player adaptation.
+   */
+  describe('Tier 1b-A content eligible in Swap pools', () => {
+    it('solo open main_skill pool includes low-equipment serving and setting fundamentals', () => {
+      const block = makeBlock({ type: 'main_skill', drillName: 'Does Not Exist' })
+      const out = findSwapAlternatives(
+        block,
+        makeContext({
+          playerMode: 'solo',
+          timeProfile: 25,
+          netAvailable: false,
+          wallAvailable: false,
+        }),
+      )
+      const names = out.map((b) => b.drillName)
+
+      expect(names).toContain('Self Toss Target Practice')
+      expect(names).toContain('Footwork for Setting')
+      // Net-required drills must not leak into a no-net context.
+      expect(names).not.toContain('Around the World Serving')
+      // Pair-only drills must not leak into a solo context.
+      expect(names).not.toContain('Corner to Corner Setting')
+      // d43 Triangle Setting is deferred to D101 3+ player support
+      // (see drills.ts). Keep this negative as a regression guard.
+      expect(names).not.toContain('Triangle Setting')
+    })
+
+    it('solo net main_skill pool includes Around the World Serving once a net is available', () => {
+      const block = makeBlock({ type: 'main_skill', drillName: 'Does Not Exist' })
+      const out = findSwapAlternatives(
+        block,
+        makeContext({
+          playerMode: 'solo',
+          timeProfile: 25,
+          netAvailable: true,
+          wallAvailable: false,
+        }),
+      )
+      expect(out.map((b) => b.drillName)).toContain('Around the World Serving')
+    })
+
+    it('pair net main_skill pool includes pair serving and setting progression rungs', () => {
+      const block = makeBlock({ type: 'main_skill', drillName: 'Does Not Exist' })
+      const out = findSwapAlternatives(
+        block,
+        makeContext({
+          playerMode: 'pair',
+          timeProfile: 25,
+          netAvailable: true,
+          wallAvailable: false,
+        }),
+      )
+      const names = out.map((b) => b.drillName)
+
+      expect(names).toContain('Around the World Serving')
+      expect(names).toContain('Corner to Corner Setting')
+      expect(names).not.toContain('Triangle Setting')
+    })
+
+    it('pressure pool can reach Tier 1b serving and setting where context allows', () => {
+      const block = makeBlock({ type: 'pressure', drillName: 'Does Not Exist' })
+      const out = findSwapAlternatives(
+        block,
+        makeContext({
+          playerMode: 'pair',
+          timeProfile: 40,
+          netAvailable: true,
+          wallAvailable: false,
+        }),
+      )
+      const names = out.map((b) => b.drillName)
+
+      expect(names).toContain('Around the World Serving')
+      expect(names).toContain('Corner to Corner Setting')
+      expect(names).not.toContain('Triangle Setting')
     })
   })
 })
