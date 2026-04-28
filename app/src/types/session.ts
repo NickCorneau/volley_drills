@@ -5,6 +5,8 @@
  * D80 (70% gating).
  */
 
+import type { SkillFocus } from './drill'
+
 /**
  * Full 0–3 pass-quality scale with physical set-window definitions (D78).
  *
@@ -77,7 +79,7 @@ export interface BlockSlot {
   durationMaxMinutes: number
   intent: string
   required: boolean
-  skillTags?: string[]
+  skillTags?: readonly SkillFocus[]
 }
 
 export interface SessionArchetype {
@@ -85,5 +87,5 @@ export interface SessionArchetype {
   name: string
   description: string
   requiredContext: Partial<SetupContext>
-  layouts: Partial<Record<TimeProfile, BlockSlot[]>>
+  layouts: Partial<Record<TimeProfile, readonly BlockSlot[]>>
 }

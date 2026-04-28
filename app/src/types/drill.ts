@@ -15,7 +15,7 @@ export type FeedType = 'self-toss' | 'partner-toss' | 'live-serve' | 'wall-rebou
 // builder's warmup slot prefers drills tagged `'warmup'` over the non-
 // `'recovery'` fallback; see the warmup-slot invariant in
 // `app/src/data/archetypes.ts` and `pickForSlot` in
-// `app/src/domain/sessionBuilder.ts`.
+// `app/src/domain/sessionAssembly/candidates.ts`.
 export type SkillFocus =
   | 'pass'
   | 'serve'

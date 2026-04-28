@@ -77,7 +77,7 @@ export class VolleycraftDB extends Dexie {
       })
 
     // Tier 1b D133 (2026-04-26): adds `SessionReview.perDrillCaptures`,
-    // captured on the Transition screen between blocks. Forward-only,
+    // captured on Drill Check (`/run/check`) between blocks. Forward-only,
     // no data transform — `perDrillCaptures` is optional on the type and
     // every legacy v4 record reads cleanly as "no per-drill data" (the
     // ReviewScreen/CompleteScreen aggregation paths fall back to the

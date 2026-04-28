@@ -3,6 +3,9 @@ import { db } from '../../db'
 import { expireReview, submitReview } from '../../services/review'
 import { skipReview } from '../../services/session'
 
+// Historical filename: this started as the Phase C-0 v4 invariant suite.
+// Keep the path stable for older docs, but assert the current v5 boundary.
+
 async function clearDb(): Promise<void> {
   await Promise.all([
     db.sessionPlans.clear(),
@@ -102,10 +105,51 @@ describe('writer contract: status emission (A5 / D-C7)', () => {
   })
 })
 
-describe('fresh v4 DB shape', () => {
+describe('fresh v5 DB shape', () => {
+  it('opens the current Dexie schema at version 5', () => {
+    expect(db.verno).toBe(5)
+  })
+
   it('has an empty storageMeta table', async () => {
     const count = await db.storageMeta.count()
     expect(count).toBe(0)
+  })
+
+  it('round-trips optional perDrillCaptures on SessionReview records', async () => {
+    await seedTerminalExec('exec-per-drill')
+
+    await db.sessionReviews.put({
+      id: 'review-per-drill',
+      executionLogId: 'exec-per-drill',
+      sessionRpe: null,
+      goodPasses: 0,
+      totalAttempts: 0,
+      submittedAt: Date.now(),
+      status: 'draft',
+      perDrillCaptures: [
+        {
+          drillId: 'd03',
+          variantId: 'd03-pair',
+          blockIndex: 1,
+          difficulty: 'still_learning',
+          goodPasses: 7,
+          attemptCount: 10,
+          capturedAt: Date.now(),
+        },
+      ],
+    })
+
+    const review = await db.sessionReviews.where('executionLogId').equals('exec-per-drill').first()
+    expect(review?.perDrillCaptures).toEqual([
+      expect.objectContaining({
+        drillId: 'd03',
+        variantId: 'd03-pair',
+        blockIndex: 1,
+        difficulty: 'still_learning',
+        goodPasses: 7,
+        attemptCount: 10,
+      }),
+    ])
   })
 })
 
