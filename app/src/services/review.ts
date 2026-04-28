@@ -4,20 +4,29 @@ import type {
   ExecutionLog,
   IncompleteReason,
   PerDrillCapture,
-  RpeCaptureWindow,
   SessionPlan,
   SessionReview,
 } from '../db/types'
+import { classifyCaptureWindow, isEligibleForAdaptation } from '../domain/capture'
 import { endedAt } from '../domain/executionPredicates'
-import {
-  CAPTURE_WINDOW_IMMEDIATE_MS,
-  CAPTURE_WINDOW_SAME_DAY_MS,
-  CAPTURE_WINDOW_SAME_SESSION_MS,
-  FINISH_LATER_CAP_MS as POLICY_FINISH_LATER_CAP_MS,
-} from '../domain/policies'
+import { FINISH_LATER_CAP_MS as POLICY_FINISH_LATER_CAP_MS } from '../domain/policies'
 import { applyBlockOverrides } from '../domain/sessionProjection'
 import { clearSoftBlockDismissed } from './softBlock'
 import { getStorageMeta } from './storageMeta'
+
+// Capture-window bucketing, aggregation, and adaptation eligibility live
+// in `domain/capture/` (U2 of the architecture pass). Re-exported here so
+// existing call sites (`ReviewScreen`, `services/session`, tests) keep
+// working through the legacy import path; new code should import from
+// `domain/capture` directly.
+export {
+  aggregateDrillCaptures,
+  classifyCaptureWindow,
+  isEligibleForAdaptation,
+  type AggregateCapturesResult,
+} from '../domain/capture'
+
+export const FINISH_LATER_CAP_MS = POLICY_FINISH_LATER_CAP_MS
 
 export interface SubmitReviewData {
   executionLogId: string
@@ -46,135 +55,9 @@ export interface SubmitReviewData {
   capturedAt?: number
 }
 
-// --- Capture-window bucketing (V0B-30 / D120) ---
-// Policy knobs live in `domain/policies`. Re-exported here so existing
-// call sites (`ReviewScreen`, `services/session`, tests) keep working.
-
-export const FINISH_LATER_CAP_MS = POLICY_FINISH_LATER_CAP_MS
-
-export function classifyCaptureWindow(delaySeconds: number): RpeCaptureWindow {
-  const ms = delaySeconds * 1_000
-  if (ms <= CAPTURE_WINDOW_IMMEDIATE_MS) return 'immediate'
-  if (ms <= CAPTURE_WINDOW_SAME_SESSION_MS) return 'same_session'
-  if (ms <= CAPTURE_WINDOW_SAME_DAY_MS) return 'same_day'
-  return 'next_day_plus'
-}
-
-export function isEligibleForAdaptation(window: RpeCaptureWindow): boolean {
-  switch (window) {
-    case 'immediate':
-    case 'same_session':
-    case 'same_day':
-      return true
-    case 'next_day_plus':
-    case 'expired':
-      return false
-    default: {
-      const _exhaustive: never = window
-      return _exhaustive
-    }
-  }
-}
-
 // Alias retained for local readability; canonical helper is
 // `endedAt` in `domain/executionPredicates`.
 const sessionEndTimestamp = endedAt
-
-// --- D133 per-drill aggregation (2026-04-26) ---
-
-export interface AggregateCapturesResult {
-  /** Sum of `goodPasses` across captures that have counts. */
-  goodPasses: number
-  /** Sum of `attemptCount` across captures that have counts. */
-  totalAttempts: number
-  /** Number of captures that had `goodPasses` + `attemptCount` set. */
-  drillsWithCounts: number
-  /** Number of captures that fired `notCaptured` for this drill. */
-  drillsNotCaptured: number
-  /**
-   * Number of captures whose `difficulty` chip was tapped, regardless of
-   * whether counts were also added. Used by ReviewScreen to decide
-   * whether to hide the session-level Good/Total card.
-   */
-  drillsTagged: number
-  /**
-   * 2026-04-27 pre-D91 editorial polish (`F-recap-tags`, plan Item 8):
-   * frequency of each `DifficultyTag` across the capture set, used by
-   * `CompleteScreen` to render a "Difficulty: 2 too hard · 1 still
-   * learning" recap row that closes the loop on the per-drill tap. The
-   * three keys are always present (zeros included) so the consumer can
-   * iterate without optional-chaining; rendering logic in the consumer
-   * decides which keys to omit / collapse to "All <bucket>". `notCaptured`
-   * rows still receive their tag counted here — the chip was tapped, the
-   * counts were the optional bit. See
-   * `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 8.
-   */
-  tagBreakdown: {
-    too_hard: number
-    still_learning: number
-    too_easy: number
-  }
-}
-
-/**
- * Aggregate per-drill captures into the session-level shape that
- * ReviewScreen / CompleteScreen / `composeSummary` already speak.
- *
- * Sum semantics (D133): only captures that explicitly carry both
- * `goodPasses` and `attemptCount` contribute to the summed counts —
- * captures that are tag-only or `notCaptured: true` are NOT imputed
- * with zeros (which would inflate the denominator and produce a
- * misleadingly low pass rate). Drills the tester chose not to count
- * surface through `drillsNotCaptured` for honest copy on the
- * Complete recap, not through the rate calculation.
- *
- * Returns zeroes when `captures` is `undefined` or empty so callers can
- * treat the result as a no-op fallback.
- */
-export function aggregateDrillCaptures(
-  captures: PerDrillCapture[] | undefined,
-): AggregateCapturesResult {
-  if (!captures || captures.length === 0) {
-    return {
-      goodPasses: 0,
-      totalAttempts: 0,
-      drillsWithCounts: 0,
-      drillsNotCaptured: 0,
-      drillsTagged: 0,
-      tagBreakdown: { too_hard: 0, still_learning: 0, too_easy: 0 },
-    }
-  }
-  let goodPasses = 0
-  let totalAttempts = 0
-  let drillsWithCounts = 0
-  let drillsNotCaptured = 0
-  // Tag distribution accumulator. The three buckets exhaust the
-  // `DifficultyTag` union (`too_hard | still_learning | too_easy`); a
-  // future fourth tag would surface as a TS compile error here, which
-  // is the intended forcing function so the recap row gets updated in
-  // lockstep with the capture vocabulary.
-  const tagBreakdown = { too_hard: 0, still_learning: 0, too_easy: 0 }
-  for (const capture of captures) {
-    tagBreakdown[capture.difficulty] += 1
-    if (capture.notCaptured) {
-      drillsNotCaptured += 1
-      continue
-    }
-    if (typeof capture.goodPasses === 'number' && typeof capture.attemptCount === 'number') {
-      goodPasses += capture.goodPasses
-      totalAttempts += capture.attemptCount
-      drillsWithCounts += 1
-    }
-  }
-  return {
-    goodPasses,
-    totalAttempts,
-    drillsWithCounts,
-    drillsNotCaptured,
-    drillsTagged: captures.length,
-    tagBreakdown,
-  }
-}
 
 // --- Submit ---
 

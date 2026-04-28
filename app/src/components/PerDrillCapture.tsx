@@ -23,7 +23,8 @@ import { PassMetricInput } from './PassMetricInput'
  *    behind a collapsed "Add counts" affordance. Only rendered when
  *    `showCounts` is `true` (the Drill Check screen passes `true` only
  *    for count-based main-skill drills, see
- *    `domain/policies.ts` `COUNT_BASED_METRIC_TYPES`).
+ *    `domain/capture/metricStrategies.ts`'s `metricCapturesCounts`
+ *    predicate via the strategy registry).
  *
  * **V0B-28 forced-criterion prompt (2026-04-27)**: when the user opens
  * the optional `Add counts` body, render the per-drill success rule

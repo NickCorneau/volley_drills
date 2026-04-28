@@ -3,7 +3,6 @@ import {
   CAPTURE_WINDOW_IMMEDIATE_MS,
   CAPTURE_WINDOW_SAME_DAY_MS,
   CAPTURE_WINDOW_SAME_SESSION_MS,
-  COUNT_BASED_METRIC_TYPES,
   CUE_COMPACT_MAX,
   FINISH_LATER_CAP_MS,
   TUNING_FLOOR_ATTEMPTS,
@@ -29,14 +28,7 @@ describe('policies', () => {
     expect(CUE_COMPACT_MAX).toBeGreaterThan(0)
   })
 
-  it('count-based metric types include the binary pass-rate and rep counters', () => {
-    expect(COUNT_BASED_METRIC_TYPES.has('pass-rate-good')).toBe(true)
-    expect(COUNT_BASED_METRIC_TYPES.has('reps-successful')).toBe(true)
-  })
-
-  it('count-based metric types exclude non-count shapes', () => {
-    expect(COUNT_BASED_METRIC_TYPES.has('streak')).toBe(false)
-    expect(COUNT_BASED_METRIC_TYPES.has('composite')).toBe(false)
-    expect(COUNT_BASED_METRIC_TYPES.has('pass-grade-avg')).toBe(false)
-  })
+  // Per-`MetricType` capture knobs moved into `domain/capture/metricStrategies.ts`
+  // under U2 of the architecture pass. Coverage now lives in
+  // `domain/capture/__tests__/metricStrategies.test.ts`.
 })

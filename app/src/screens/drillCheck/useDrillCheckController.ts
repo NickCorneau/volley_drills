@@ -7,7 +7,7 @@ import type {
 import {
   mergePerDrillCaptures,
   resolveDrillCheckCaptureEligibility,
-} from '../../domain/drillCheckCapture'
+} from '../../domain/capture'
 import { useSessionRunner } from '../../hooks/useSessionRunner'
 import { isSchemaBlocked } from '../../lib/schema-blocked'
 import { routes } from '../../routes'

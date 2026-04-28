@@ -10,12 +10,8 @@ import { isSchemaBlocked } from '../lib/schema-blocked'
 import { getStorageCopy } from '../lib/storageCopy'
 import { useAppRegisterSW } from '../lib/pwa-register'
 import { routes } from '../routes'
-import {
-  aggregateDrillCaptures,
-  countSubmittedReviews,
-  loadSessionBundle,
-  type SessionBundle,
-} from '../services/review'
+import { aggregateDrillCaptures } from '../domain/capture'
+import { countSubmittedReviews, loadSessionBundle, type SessionBundle } from '../services/review'
 import { clearTimerState } from '../services/timer'
 
 type BundleState =

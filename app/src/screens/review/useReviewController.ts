@@ -6,14 +6,16 @@ import type {
   PerDrillCapture as PerDrillCaptureRecord,
   SessionPlan,
 } from '../../db'
-import { getBlockMetricType } from '../../domain/drillMetadata'
-import { COUNT_BASED_METRIC_TYPES } from '../../domain/policies'
-import { hasMeaningfulReviewDraftInput } from '../../domain/reviewDraft'
+import {
+  aggregateDrillCaptures,
+  hasMeaningfulReviewDraftInput,
+  inferPlanMainMetricType,
+  metricShowsReviewCounts,
+} from '../../domain/capture'
 import { formatDurationLine, statusLabel } from '../../lib/format'
 import { isSchemaBlocked } from '../../lib/schema-blocked'
 import { routes } from '../../routes'
 import {
-  aggregateDrillCaptures,
   expireReview,
   FINISH_LATER_CAP_MS,
   loadReviewDraft,
@@ -21,13 +23,6 @@ import {
   submitReview,
 } from '../../services/review'
 import { loadSession } from '../../services/session'
-
-function inferMainSkillMetricType(plan: SessionPlan | null): ReturnType<typeof getBlockMetricType> {
-  if (!plan) return null
-  const mainSkill = plan.blocks.find((b) => b.type === 'main_skill')
-  if (!mainSkill) return null
-  return getBlockMetricType(mainSkill, plan.playerCount)
-}
 
 type LoadedSession =
   | { status: 'loading' }
@@ -182,9 +177,8 @@ export function useReviewController(executionLogId: string) {
   const isEndedEarly = log?.status === 'ended_early'
   const wasDiscarded = isEndedEarly && log?.endedEarlyReason === 'discarded_resume'
   const needsIncompleteReason = isEndedEarly && !wasDiscarded
-  const metricType = inferMainSkillMetricType(plan)
-  const metricCountsByRule = metricType == null || COUNT_BASED_METRIC_TYPES.has(metricType)
-  const showMetrics = !wasDiscarded && hasSkillBlocks && metricCountsByRule
+  const metricType = inferPlanMainMetricType(plan)
+  const showMetrics = !wasDiscarded && hasSkillBlocks && metricShowsReviewCounts(metricType)
   const captureAggregate =
     perDrillCaptures.length > 0 ? aggregateDrillCaptures(perDrillCaptures) : null
   const useAggregateSummary = captureAggregate !== null && captureAggregate.drillsTagged > 0

@@ -2,12 +2,19 @@
  * Product tuning knobs that cross module boundaries.
  *
  * Centralising these here means any single-place audit ("what's our
- * Finish Later cap? what counts as a count-based metric?") reads one
- * file. Module-internal constants (e.g. sessionBuilder's DURATION_PRIORITY)
- * stay local - those are assembly implementation details, not product
- * tuning.
+ * Finish Later cap?") reads one file. Module-internal constants
+ * (e.g. sessionBuilder's DURATION_PRIORITY) stay local — those are
+ * assembly implementation details, not product tuning.
+ *
+ * Per-`MetricType` capture knobs (which types prompt for counts on
+ * Drill Check, which types show counts on Review, which types
+ * participate in `aggregateDrillCaptures` sums) used to live here as
+ * `COUNT_BASED_METRIC_TYPES`. Under U2 of the architecture pass that
+ * decision moved into `domain/capture/metricStrategies.ts` so each
+ * shipped metric type has one closed strategy entry. Drill Check,
+ * Review, and the aggregator now consult the strategy registry instead
+ * of branching on a separate `Set`.
  */
-import type { MetricType } from '../types/drill'
 
 // --- Review capture windows (V0B-30 / D120) ---
 //
@@ -54,19 +61,3 @@ export const TUNING_FLOOR_ATTEMPTS = 50
 
 /** Cues this length or under read as a single breath and render un-truncated. */
 export const CUE_COMPACT_MAX = 100
-
-// --- Review pass-metric capture ---
-
-/**
- * Main-skill drill `successMetric.type` values where asking for
- * Good / Total attempts courtside makes sense. Drills with non-count
- * shapes (`streak`, `points-to-target`, `pass-grade-avg`, `composite`,
- * `completion`) default the `notCaptured` quick tag on the ReviewScreen
- * so the reviewer isn't guilt-tripped into inventing numbers. See
- * `docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md`
- * P2-3 and the founder pre-close review thought 4.
- */
-export const COUNT_BASED_METRIC_TYPES: ReadonlySet<MetricType> = new Set([
-  'pass-rate-good',
-  'reps-successful',
-])

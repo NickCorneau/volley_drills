@@ -164,10 +164,11 @@ describe('ReviewScreen 2026-04-23 polish (merged proposal)', () => {
   describe('(e) Good-passes card visibility gated on main-skill successMetric.type', () => {
     it('hides the Good-passes card when the main-skill drill is non-count', async () => {
       // Pick the first catalog drill whose first variant uses a
-      // non-count success metric. The `COUNT_BASED_METRIC_TYPES` set
-      // covers `pass-rate-good` and `reps-successful`; anything else
-      // (streak / points-to-target / pass-grade-avg / composite /
-      // completion) should hide the Good-passes card entirely.
+      // non-count success metric. `domain/capture/metricStrategies`
+      // marks `pass-rate-good` and `reps-successful` as
+      // `showsReviewCounts: true`; anything else (streak /
+      // points-to-target / pass-grade-avg / composite / completion)
+      // should hide the Good-passes card entirely.
       const nonCountDrill = DRILLS.find(
         (d) =>
           d.variants[0]?.successMetric.type !== 'pass-rate-good' &&

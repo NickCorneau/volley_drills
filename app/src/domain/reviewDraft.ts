@@ -1,28 +1,9 @@
-import type { IncompleteReason } from '../db'
-
-export interface ReviewDraftSignal {
-  sessionRpe: number | null
-  goodPasses: number
-  totalAttempts: number
-  quickTags: readonly string[]
-  shortNote: string
-  incompleteReason: IncompleteReason | null
-}
-
-export function hasMeaningfulReviewDraftInput({
-  sessionRpe,
-  goodPasses,
-  totalAttempts,
-  quickTags,
-  shortNote,
-  incompleteReason,
-}: ReviewDraftSignal): boolean {
-  return (
-    sessionRpe != null ||
-    goodPasses !== 0 ||
-    totalAttempts !== 0 ||
-    quickTags.length > 0 ||
-    shortNote.trim() !== '' ||
-    incompleteReason != null
-  )
-}
+/**
+ * Compatibility shim — `hasMeaningfulReviewDraftInput` and
+ * `ReviewDraftSignal` moved into `domain/capture/` under U2 of the
+ * architecture pass. The capture domain is the closed home for every
+ * draft / capture decision; new call sites should import from there.
+ *
+ * NEW CALL SITES MUST IMPORT FROM `domain/capture` directly.
+ */
+export { hasMeaningfulReviewDraftInput, type ReviewDraftSignal } from './capture'

@@ -164,7 +164,7 @@ describe('PassMetricInput (V0B-02 / H13 tap-to-type)', () => {
     // ("% good") because the per-drill success rule renders above the
     // input inside `PerDrillCapture`. The label used to read
     // "% good pass rate", which mis-named the rate on serving and
-    // setting drills that fall under `COUNT_BASED_METRIC_TYPES`.
+    // setting drills that satisfy `metricCapturesCounts`.
     expect(screen.getByText(/^60% good$/i)).toBeInTheDocument()
   })
 
