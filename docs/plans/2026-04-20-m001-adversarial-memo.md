@@ -1,4 +1,5 @@
 ---
+
 id: m001-adversarial-memo
 title: "M001 Adversarial Memo — Pre-Registered Falsification Conditions for D130"
 type: plan
@@ -18,6 +19,8 @@ depends_on:
 - docs/research/partner-walkthrough-script.md
 related:
 - docs/reviews/2026-04-20-m001-red-team.md
+- docs/research/2026-04-27-cca2-dogfeed-findings.md
+- docs/plans/2026-04-27-per-drill-capture-coverage.md
 decision_refs:
 - D91
 - D123
@@ -25,6 +28,7 @@ decision_refs:
 - D131
 open_question_refs:
 - O5
+
 ---
 
 # M001 Adversarial Memo — Pre-Registered Falsification Conditions for D130
@@ -50,7 +54,7 @@ Each condition states a **specific behavioral threshold** and a **specific conse
 
 **Pre-registered claim.** The product vision and roadmap treat solo-first as the primary activation path (`D22`, `D60`; `docs/vision.md` P-whatever on solo-first; `docs/roadmap.md` Phase 0 solo-first anchor). Founder-use mode's validity as a stand-in for real validation depends on the founder actually training solo a majority of the time.
 
-**`D132` re-reading (2026-04-22, no threshold change).** After `D132` landed in `docs/decisions.md`, the product's strategic framing is *pair-first with solo-accommodating tactics*, not solo-first simpliciter. This changes the interpretation of Condition 1, not the threshold itself: the ≥40% solo-share bar measures whether the accommodated solo case works well enough for founder-use-mode validity, not whether solo-first is the strategic north star (it isn't). The falsification consequence below still fires on the same behavioral signal — a founder who cannot / will not train solo meaningfully invalidates founder-use mode as a stand-in for real validation, regardless of whether solo is strategic or tactical. The consequence's specific repoint remains correct under pair-first: if solo share falls below 40%, the `D123` "recommendation-first first-run" polish repoints at pair-default, which is *more* aligned with pair-first strategy, not less. See `docs/research/2026-04-22-research-sweep-meta-synthesis.md` §R10 for the companion dissolution of the prior "partner-mode data vs solo-first vision" structural tension.
+`**D132` re-reading (2026-04-22, no threshold change).** After `D132` landed in `docs/decisions.md`, the product's strategic framing is *pair-first with solo-accommodating tactics*, not solo-first simpliciter. This changes the interpretation of Condition 1, not the threshold itself: the ≥40% solo-share bar measures whether the accommodated solo case works well enough for founder-use-mode validity, not whether solo-first is the strategic north star (it isn't). The falsification consequence below still fires on the same behavioral signal — a founder who cannot / will not train solo meaningfully invalidates founder-use mode as a stand-in for real validation, regardless of whether solo is strategic or tactical. The consequence's specific repoint remains correct under pair-first: if solo share falls below 40%, the `D123` "recommendation-first first-run" polish repoints at pair-default, which is *more* aligned with pair-first strategy, not less. See `docs/research/2026-04-22-research-sweep-meta-synthesis.md` §R10 for the companion dissolution of the prior "partner-mode data vs solo-first vision" structural tension.
 
 **Threshold.** Across the 90-day re-eval window (2026-04-20 → 2026-07-20):
 
@@ -274,6 +278,71 @@ This entry does not alter Condition 3's 2026-05-21 close date or the re-eval dec
 
 **Re-eval impact.** None. The Condition 3 2026-05-21 close date, the decision rule at the 2026-07-20 re-eval, and the three falsification conditions are untouched. The ship is evidence *for* Condition 3 provisional pass holding — a cleaner product through the remaining quiet window reduces the likelihood of a late-window regression on Seb's unprompted-open signal — but it does not change any threshold.
 
+### Amendment log entry for 2026-04-27 cca2 dogfeed bundle
+
+**2026-04-27 — cca2 dogfeed synthesis ship.** Founder + Seb pair pass session on the latest build (`pair_open` 25 min, plan `4212f2a3-…`, `swapCount: 10`, main_skill swapped to `d38-pair` Bump Set). Six validated findings landed in `docs/research/2026-04-27-cca2-dogfeed-findings.md`; one founder-use-ledger row (2026-04-27, pair / pass / 25 min / Y / RPE 5) appended; spec contract amended in `docs/specs/m001-review-micro-spec.md` §"Per-drill required field" + §"Non-count drills at main_skill / pressure (gap 2a)"; new implementation plan `docs/plans/2026-04-27-per-drill-capture-coverage.md` authored to route gap 2a + 2b; the Tier 1c trigger evidence block in `docs/plans/2026-04-20-m001-tier1-implementation.md` updated with the second-hit signals (founder + partner) and the *separate* skill-level-mutability surface recorded as its own line item; same-day code fixes shipped for `d26` cooldown copy (3-6 min range) and `pickForSlot` `movement_proxy` slot-fill preference.
+
+**Justification.** All canonical-doc edits qualify as `Accept (pre-close)` / `Accept (landed)` class per the 2026-04-22 / 2026-04-23 / 2026-04-26 polish-pass precedent. The spec amendment widens (does not weaken) `D133`'s Drill Check capture surface to include count-eligible drills at non-main_skill slots — strictly an *increase* in surface coverage, not a contract weakening. The new plan authors zero drill records (no authoring-budget cap consumption). The Tier 1c trigger update **records evidence accumulating, does not declare the strict trigger met** — the ≥8-session ledger threshold remains binding; the partner-walkthrough OR clause is documented as "arguably met by Seb's voice memo, founder reading is to keep the strict ≥8-session count as the safest bar," with no tier change applied. None of the three falsification conditions is weakened. Authoring-budget cap respected (still 4 / 10 from Tier 1b Layer A; this ship adds 0). Co-signer requirement waived per the amendment rule (no falsification condition weakened, no threshold shifted, no decision rule changed).
+
+**Trigger-status updates from this ship:**
+
+- **Tier 1b Framing C re-trigger (in-session running rep counter on `RunScreen.tsx`).** Pre-2026-04-27: 0 of ≥2 hits. Post-2026-04-27: **1 of ≥2 hits.** Cca2 dogfeed produced a "not sold on counting passes because of memory/awareness" report on a session where the founder *would have* wanted the data. One more independent session with the same flag formally fires the re-trigger.
+- **Tier 1c trigger (focus-picker / `sessionFocus` routing architecture).** Pre-2026-04-27: founder-side ledger evidence accumulating (3 gaps from the 2026-04-21 row, well below the ≥8-session strict count). Post-2026-04-27: same threshold, **partner-side evidence added** — Seb's voice memo contains a Task-B-class focus-picker ask. Strict reading of the ≥8-session OR clause is unchanged; the partner-walkthrough OR clause is now arguably met but the founder's reading at this update is to keep the strict count as the safest bar pending one more independent partner-walkthrough or ≥6 more founder-side intent-mismatch notes.
+- **Skill-level mutability — new line item.** Recorded in `docs/plans/2026-04-20-m001-tier1-implementation.md` §"Skill-level mutability — separate surface, separate trigger." Trigger threshold: ≥2 founder-ledger sessions with explicit skill-level mismatch notes, OR partner walkthrough ≥P1 about skill-level inflexibility, OR Tier 1c ships first and reveals focus-mismatch was masking skill-level-mismatch. Status: 1 partner-side ask, 0 founder-side hits. Below threshold; recorded only.
+
+**Re-eval impact.** None. The Condition 3 2026-05-21 close date, the decision rule at the 2026-07-20 re-eval, and the three falsification conditions are untouched. The ship is evidence *toward* Tier 1b Framing C and Tier 1c eventually firing under their pre-registered triggers; it does not advance any tier.
+
+**Validation expectations.** `npm run lint`, `npm run build`, `npm test -- --run` clean. `bash scripts/validate-agent-docs.sh` clean against the new research note + new plan + amended spec + updated Tier 1a plan + updated catalog + updated AGENTS.md current-state line.
+
+### Amendment log entry for 2026-04-27 cca2 dogfeed F1 follow-up — block-role tags + rationale deletion
+
+**2026-04-27 — Block-role tags + rationale deletion (editorial + typography class).** Following the cca2 dogfeed synthesis ship above, the founder named "lots of text to read between each drill" as the structural friction the F1 finding pointed at. Two coupled changes shipped same-day:
+
+1. `**phaseLabel` un-collapsed.** `app/src/lib/format.ts` extended from the F8-era three-label shape (`Warm up` / `Work` / `Downshift`) to the full six-label shape (`Warm up` / `Technique` / `Movement` / `Main drill` / `Pressure` / `Downshift`). Sentence case preserved (the F8 calm-voice thesis); accent-color treatment preserved; no new visual chrome added. The eyebrow now carries six labels instead of three. Renders on `RunScreen.tsx` header eyebrow (existing) and on `TransitionScreen.tsx` `Up next · {phaseLabel}` line (extended in this ship).
+2. **Per-block `rationale` prose deleted from run-flow surfaces.** `RunScreen.tsx` and `TransitionScreen.tsx` no longer render the `Chosen because: …` italic line under the drill name. Role information now rides on the eyebrow per change 1 above. The `block.rationale` data field is preserved on the data record (`deriveBlockRationale` still writes it) so future surfaces — Swap sheet, See-Why modal in Tier 2 — can reach for it. Tests updated: the two rationale-rendering invariants in `RunScreen.rationale-placement.test.tsx` were removed and replaced with two negative-assertion invariants (rationale prose absent from the run card; role label `Main drill` present in the eyebrow); the courtside-instructions and coaching-cue typography invariants stay unchanged. New `format.phaseLabel.test.ts` pins all 6 slot labels exactly so the un-collapse can't silently regress.
+
+**Two pre-registered triggers fired by this ship:**
+
+- **Trifold-T1 ("`Chosen because:` deletion from Run + Swap-sheet re-home").** Pre-registered trigger condition (per the 2026-04-22 amendment-log entry above): "≥1 founder-use-ledger entry flagging the line as 'coach footnoting.'" Strict reading: today's cca2 dogfeed didn't use the literal phrase "coach footnoting"; founder said "lots of text to read between each drill," which is the structural equivalent (the rationale is per-block prose that adds reading load between drills, exactly what "coach footnoting" names). Founder reading at this update is to **treat the trigger as fired** by the cca2 dogfeed evidence, ship the deletion, and record the structural-equivalence reading inline so the next reviewer can falsify the call. Swap-sheet re-home is **not** part of this ship (no Swap UI changes); the data field is preserved precisely so a Swap-sheet re-home in a later pass can pull `block.rationale` back without re-deriving it.
+- **F8 collapse reversed.** Phase F8 (2026-04-19, `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`) deliberately collapsed the four mid-session slot types to `Work` on calm-voice / shibui-direction grounds. The cca2 dogfeed F1 evidence ("a 25-min session with three different work-block types and the user can't tell them apart from the eyebrow; only the main_skill block got the post-block Difficulty chip and the chip-asymmetry felt arbitrary because the role wasn't visible upstream") is the cited reversal evidence. The reversal is **not a thesis change** — sentence case kept, accent-color kept, no all-caps reintroduced, no new chrome — it is a label-set expansion under courtside legibility evidence. F8 plan doc is unchanged for now (the reversal logic lives here in the amendment log + in the `phaseLabel` source comments); future F8-class typography passes can cite this entry.
+
+**Justification.** Editorial + typography class. No drill-record authoring (cap consumed: still 4/10 from Tier 1b Layer A). No Dexie migration. No spec contract change (the `block.rationale` field stays on the data record per the 2026-04-21 Tier 1a Unit 4 spec; only the UI surfaces stop rendering it). No falsification-condition change. No threshold shift. No decision-rule change. Co-signer requirement waived per the amendment rule.
+
+**Trigger-status update for the post-ship landscape:**
+
+- Trifold-T1 marked **fired** with structural-equivalence reasoning. The Swap-sheet re-home half of the trigger remains open (not done in this ship) — if a future founder-use-ledger entry flags rationale-as-noise on the Swap sheet specifically, that surface re-homes there, and the trigger's second half closes.
+- F8 reversed for `phaseLabel` only. Other F8-era typography decisions (sentence case in source, accent eyebrow, body type unification at `text-base`) are unchanged.
+
+**Re-eval impact.** None. Condition 3 close date 2026-05-21 unchanged; 2026-07-20 re-eval decision rule unchanged; three falsification conditions unchanged.
+
+**Validation.** `npm run lint`, `npm run build`, `npm test -- --run` clean (866 tests, 104 files — up from 858/103 at the cca2 dogfeed bundle baseline). `bash scripts/validate-agent-docs.sh` clean. ReadLints clean on the 5 edited files.
+
+### Amendment log entry for 2026-04-27 cca2 dogfeed F8 follow-up — eyebrow skill marker + lead-with-skill catalog sweep
+
+**2026-04-27 — Eyebrow skill compose + courtside-copy rule 6 + 17-variant catalog sweep (editorial + structural class).** Founder report on `d33-pair`: *"is this a serving drill? It's really not that clear."* Two compounding gaps surfaced (cca2 dogfeed F8 in `docs/research/2026-04-27-cca2-dogfeed-findings.md`):
+
+1. Run-flow eyebrow showed only the slot role (`Main drill`) with no skill marker, so a glancing reader had no upstream signal of which skill the drill works.
+2. Most M001 skill drills' `courtsideInstructions` led with logistics ("Stand 3 m apart…", "Mark a target circle…") and buried the skill verb in subordinate clauses or in the second sentence.
+
+**Three coupled changes shipped same-day:**
+
+1. **Eyebrow composes skill into the role marker.** New `getBlockSkillFocus(block, playerCount)` helper in `app/src/domain/drillMetadata.ts` resolves drills' primary `skillFocus[0]` to one of `'pass' | 'serve' | 'set'` (or null for warmup/recovery and unknown drills). New `skillLabel(skill)` and `blockEyebrowLabel(blockType, skill)` helpers in `app/src/lib/format.ts` compose the eyebrow as `{phaseLabel} · {skillLabel}` for skill blocks. Run + Transition both consume `blockEyebrowLabel`; Transition prepends `Up next ·` so its eyebrow reads `Up next · Main drill · Serve` (three parts, founder vocab call `trans_full` over `trans_skill_only`).
+2. **Courtside-copy rule 6 (lead-with-skill).** Added to `.cursor/rules/courtside-copy.mdc`: *"For every drill whose `skillFocus[0]` is one of `pass | serve | set`, the first sentence of `courtsideInstructions` must contain the skill verb (or an unambiguous compound — `bump-set`, `hand-set`, `forearm-pass`)."* Authoring checklist updated; rationale ties to F8 finding.
+3. **Catalog sweep of all 17 m001Candidate skill-drill variants.** `app/src/data/drills.ts` `courtsideInstructions` rewritten to lead with the skill verb on `d01`/`d03`/`d05`/`d09`/`d10`/`d11`/`d15`/`d18` (pass), `d22`/`d31`/`d33` (serve), `d38`/`d39`/`d40`/`d41`/`d42` (set). Trigger drill `d33-pair`: *"Take turns. Each partner works the full 6-zone order…"* → *"Serve through the same 6-zone order as Solo, taking turns…"*
+
+**Plus a structural visual fix discovered during the same dogfeed:** Run-flow header layout switched from `flex items-center justify-between` to `grid grid-cols-3 items-center` with `justify-self-{start,center,end}` per cell, fixing the +17 px right-drift of the middle eyebrow caused by `SafetyIcon`'s 56 px touch-target width vs. the right counter's ~22 px (`flex justify-between` keeps gap-left = gap-right but does NOT center the middle item relative to the container). Applied to Run + Transition + DrillCheck for run-flow consistency.
+
+**Justification.** Editorial + structural class. Zero new drill records authored (cap consumed: still 4/10 from Tier 1b Layer A). Zero Dexie migration. No spec contract change. No falsification-condition change. No threshold shift. No decision-rule change. Co-signer requirement waived per the amendment rule.
+
+**Trigger reads from this ship:**
+
+- **Trifold-T1 ("`Chosen because:` deletion") second-half status update.** The Swap-sheet re-home is still open (not done in this ship). The cca2 dogfeed F8 finding does NOT re-trigger the deletion-half (the rationale is already deleted from Run + Transition); it adds an evidence-gathering layer on top.
+- **Tier 1c trigger evidence stays at "accumulating, not formally met."** F8 surfaces the per-block skill from the drill catalog, not a user-selected `sessionFocus`. When Tier 1c lands, the eyebrow can additionally cite the user-selected focus and verify it matches the resolved per-block skillFocus. F8 is forward-compatible with Tier 1c, not a substitute.
+
+**Re-eval impact.** None. Condition 3 close date 2026-05-21 unchanged; 2026-07-20 re-eval decision rule unchanged; three falsification conditions unchanged.
+
+**Validation.** `npm run lint`, `npm run build`, `npm test -- --run` clean (954 tests, 106 files — up from 892/105 at the prior F1 follow-up baseline; net +62 tests across `format.phaseLabel.test.ts`, new `drillMetadata.skillFocus.test.ts`, `RunScreen.rationale-placement.test.tsx`, `TransitionScreen.role-eyebrow.test.tsx`, and `drillCopyRegressions.test.ts`). `bash scripts/validate-agent-docs.sh` clean. ReadLints clean on all 10 edited files.
+
 ## What falsifies *this memo*
 
 Meta-check: the memo itself has failure modes.
@@ -334,7 +403,7 @@ After the initial 2026-04-24 addendum above landed, the founder added two artifa
   - **Clause (i) — founder has attempted to substitute from the existing library AND logged the attempt.** The solo row records an attempted solo-on-solo_open session where the founder could not find serving content via Swap (ledger gap 2). Logged.
   - **Clause (ii) — partner walkthrough ≥P1 that Tier 1b content would address, OR founder has logged ≥3 sessions describing a specific content gap.** Partner walkthrough half already satisfied (P1-3, P1-4, P1-5, P1-6, P1-7, P1-8, P2-2 — multiple ≥P1 findings Tier 1b serving/setting content addresses). Founder-logged-content-gap half now also satisfied by the same solo row plus the explicit gap list appended below the rows.
 - **Condition 1 interim read after backfill.** Founder-side solo share: 1 of 2 logged rows = 50% (above the ≥40% bar). Set-focused session floor: still 0 of 3. Cadence: 2 sessions logged, both from 2026-04-21, with 3 days elapsed — not on a regression signal.
-- **`focus: pass` on both backfill rows is accurate to what the builder produced; the note field documents that the founder did not user-select the focus because no UI for focus-picking exists.** This is the first behavioral data point against the Tier 1c trigger (≥8 ledger rows flagging explicit intent mismatch per `docs/plans/2026-04-20-m001-tier1-implementation.md` line 293). One row is not 8 rows; the Tier 1c trigger is NOT met. Flagged so future sessions can be watched for the same gap and so the signal is not lost.
+- `**focus: pass` on both backfill rows is accurate to what the builder produced; the note field documents that the founder did not user-select the focus because no UI for focus-picking exists.** This is the first behavioral data point against the Tier 1c trigger (≥8 ledger rows flagging explicit intent mismatch per `docs/plans/2026-04-20-m001-tier1-implementation.md` line 293). One row is not 8 rows; the Tier 1c trigger is NOT met. Flagged so future sessions can be watched for the same gap and so the signal is not lost.
 - **New finding not on prior lists: timer-end screen-off anxiety / audio-suspend-on-lock** (ledger gap 4). The 2026-04-22 preroll hint was gated first-time-only in the polish ship, which means the founder + Seb have both dismissed it and no longer see the "keep phone unlocked" reminder. iOS Safari PWA suspends audio on screen-lock; the block-end beep cannot be relied on if the screen turns off mid-session. The fix is structural (Screen Wake Lock API), not copy-level, and is flagged as a new item in `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md` §"Genuinely-open Tier 1b bundle." This is the kind of finding that only surfaces on real agent-free courtside use — the A3 ligament and trigger (e) are exactly working as designed.
 - **Authoring-budget cap status change.** Cap still at 0 / 10 (no drill records authored this week), but the cap-gating condition has moved: Tier 1b authoring is now **unlocked** by the trigger above. The cap's "5th session" gate (line 151) still applies to Tier 1b's second wave; the first wave is ready to ship per `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md`. **§R7 exit-3 decision discharged 2026-04-26.** Founder chose exit-3: `d36 Jump Float Introduction` is removed from Tier 1b entirely and re-enters under `O7` track 2 (sports-medicine / PT review). **2026-04-27 source red-team correction:** `d43 Triangle Setting` is also deferred to `D101` 3+ player support because the BAB source geometry is 3-player. Tier 1b Layer A now ships 4 drills (`d31`, `d33`, `d40`, `d42`), not 6; cap consumption when Layer A lands is 4/10, not 6/10. The freed cap slots are not auto-backfilled and stay open for evidence-gated future waves. No falsification-condition change, no threshold shift, no decision-rule change — the cap arithmetic and authoring-budget posture are restated, not relaxed.
 - **Amendment-log co-signer status.** None of the adjustments above weaken any falsification condition, no threshold is shifted, no decision rule changes. The Tier 1b trigger's formal satisfaction is a state-update, not a threshold-change; co-signer requirement does not apply.

@@ -100,7 +100,7 @@ These are on the roadmap but deliberately not in F8:
   - `npm run test` passes unchanged.
   - Manual viewport walk (Home, Transition, Run → block end, Complete): the eight labels render as sentence-case support copy instead of uppercase eyebrows; hierarchy on Home now puts the content line above the label line in visual weight.
 
-- [x] **Unit 2: `phaseLabel()` sentence case + RunScreen phase pill** *(landed 2026-04-19)*
+- [x] **Unit 2: `phaseLabel()` sentence case + RunScreen phase pill** *(landed 2026-04-19; expanded label set 2026-04-27 — see post-ship amendment below)*
 
   **Files:**
   - Modify: `app/src/lib/format.ts`
@@ -115,6 +115,8 @@ These are on the roadmap but deliberately not in F8:
   - `rg "'WARM UP'|'DOWNSHIFT'|'WORK'" app` returns no matches.
   - Run flow walk shows `Warm up` / `Work` / `Downshift` in accent color without the uppercase eyebrow voice.
   - No test file asserts on the old uppercase strings; repo-wide grep (2026-04-19) confirmed.
+
+  **Post-ship amendment (2026-04-27 cca2 dogfeed F1 follow-up).** The F8 collapse of `technique | movement_proxy | main_skill | pressure` into a single `Work` label was reversed: `phaseLabel()` now returns the full six-label shape `'Warm up' | 'Technique' | 'Movement' | 'Main drill' | 'Pressure' | 'Downshift'`. Sentence case kept, accent-color treatment kept, no all-caps reintroduced — the reversal is a label-set expansion under courtside legibility evidence, not a thesis change. Citation: `docs/research/2026-04-27-cca2-dogfeed-findings.md` F1 (a 25-min pair pass session landed three different work-block types and the user couldn't tell them apart from the eyebrow; only the main_skill block triggered the `D133` post-block Difficulty chip and the chip-asymmetry felt arbitrary because role wasn't visible upstream). Vocabulary call (founder, 2026-04-27): direct over softer (`Technique` over `Foundation`, `Movement` over `Footwork`, `Main drill` over `Today's main`, `Pressure` over `Challenge`). Same ship deleted the per-block `rationale` italic subtitle from `RunScreen` and `TransitionScreen` — role information now rides on the eyebrow alone. Full ship rationale + trigger-fire reading: `docs/plans/2026-04-20-m001-adversarial-memo.md` §"Amendment log entry for 2026-04-27 cca2 dogfeed F1 follow-up". New regression guard: `app/src/lib/__tests__/format.phaseLabel.test.ts` pins all 6 labels exactly + asserts the F8-era `Work` is never returned for any mid-session slot.
 
 - [x] **Unit 3: Heading consistency triple** *(landed 2026-04-19)*
 

@@ -138,6 +138,40 @@ function pickForSlot(
     if (warmup) return warmup
   }
 
+  // 2026-04-27 cca2 dogfeed F6 (`docs/research/2026-04-27-cca2-dogfeed-
+  // findings.md`): the `movement_proxy` slot's stated intent in
+  // `app/src/data/archetypes.ts` is "Footwork, first-step movement, or
+  // reading proxies before harder block." The slot's `skillTags:
+  // ['pass', 'movement']` are inclusive (any drill carrying `pass` OR
+  // `movement` in `skillFocus` matches), which let stationary pass
+  // drills like `d03` Continuous Passing (`skillFocus: ['pass']`, base
+  // drill is kneel→stand→repeat) land at the movement_proxy slot while
+  // the more movement-heavy `d10` 6-Legged Monster (`skillFocus:
+  // ['pass', 'movement']`, six directional shuffles) ended up at the
+  // technique slot. The 2026-04-27 dogfeed surfaced that inversion as
+  // a real felt-in-courtside problem.
+  //
+  // Fix is symmetric: `technique` prefers pass-only drills (so
+  // movement-tagged drills stay available for movement_proxy
+  // downstream); `movement_proxy` prefers movement-tagged drills.
+  // Both fall back to the existing pool-shuffle ordering when the
+  // preferred class is empty, so no slot can produce zero candidates.
+  // Mirrors the warmup branch's prefer-tag-first / fall-back-defensive
+  // shape. The technique branch is processed before movement_proxy in
+  // the build-time loop iteration order (archetype layouts place
+  // technique before movement_proxy), so without the technique
+  // pre-filter the technique shuffle could exhaust the
+  // movement-tagged pool before movement_proxy runs.
+  if (slot.type === 'technique') {
+    const passOnly = pool.find((c) => !c.drill.skillFocus.includes('movement'))
+    if (passOnly) return passOnly
+  }
+
+  if (slot.type === 'movement_proxy') {
+    const movement = pool.find((c) => c.drill.skillFocus.includes('movement'))
+    if (movement) return movement
+  }
+
   if (slot.type === 'wrap') {
     const recovery = pool.find((c) => c.drill.skillFocus.includes('recovery'))
     if (recovery) return recovery

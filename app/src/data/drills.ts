@@ -94,7 +94,7 @@ const d01: Drill = {
         target: '≥ 20 consecutive clean contacts',
       },
       courtsideInstructions:
-        'Toss up, forearm-pass up to yourself. Between each contact, clap behind your back, then rebuild your platform. Mix low, medium, and high arcs.',
+        'Pass up to yourself off your own toss. Between each contact, clap behind your back, then rebuild your platform. Mix low, medium, and high arcs.',
       coachingCues: [
         'Athletic posture.',
         'Contact between wrists and elbows.',
@@ -128,7 +128,7 @@ const d01: Drill = {
         target: '≥ 15 consecutive clean passes',
       },
       courtsideInstructions:
-        'Stand 3 m apart. Tosser sends an easy arc to the passer. Passer forearm-passes back at catchable height, then claps behind the back while the tosser catches. Reset and repeat. Switch roles after every 10 reps or every miss.',
+        'Forearm-pass back to your partner with a clap reset. Stand 3 m apart; tosser sends an easy arc to the passer; passer forearm-passes back at catchable height, then claps behind the back while the tosser catches. Reset and repeat. Switch roles after every 10 reps or every miss.',
       coachingCues: [
         'Athletic posture.',
         'Contact between wrists and elbows.',
@@ -228,7 +228,7 @@ const d03: Drill = {
         target: '20/20 or ≥ 70% graded 2+',
       },
       courtsideInstructions:
-        'Start kneeling. Partner tosses; receiver passes back 10 reps. Then stand in serve-receive stance and repeat.',
+        'Pass back to your partner from a kneel, then stand. Start kneeling; partner tosses; receiver passes back 10 reps. Then stand in serve-receive stance and repeat.',
       coachingCues: [
         'Arms straight.',
         'Shoulder shrug assist.',
@@ -361,7 +361,7 @@ const d05: Drill = {
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'Set a marker as your set window (where the setter would stand, ~3 m off the net). Self-toss slightly in front; pass to land within that zone; retrieve quickly and repeat. Use 20 total reps.',
+        'Pass into your set window off a self-toss. Place a marker at the set window (where the setter would stand, ~3 m off the net). Self-toss slightly in front; pass to land within that zone; retrieve quickly and repeat. Use 20 total reps.',
       coachingCues: [
         'Get behind ball horizontally.',
         'Brake-step.',
@@ -397,7 +397,7 @@ const d05: Drill = {
         target: '≥ 70% over 20 partner tosses',
       },
       courtsideInstructions:
-        'Partner stands at the set window (where the setter would stand, ~3 m off the net) and tosses an arc 2–3 m in front of the passer. Passer passes back so partner catches without moving more than one step. Switch roles after 20 tosses.',
+        'Pass back to your partner at the set window. Partner stands at the set window (where the setter would stand, ~3 m off the net) and tosses an arc 2–3 m in front of the passer. Passer passes back so partner catches without moving more than one step. Switch roles after 20 tosses.',
       coachingCues: [
         'Get behind ball horizontally.',
         'Brake-step.',
@@ -609,7 +609,7 @@ const d09: Drill = {
         target: '2 full laps with ≤ 3 errors',
       },
       courtsideInstructions:
-        'Partners pass while shuffling down sideline to service line, across, and back - keeping rally alive.',
+        'Pass back and forth with your partner while shuffling along the sideline to the service line, across, and back. Keep the rally alive.',
       coachingCues: [
         'Wide base.',
         'Do not cross legs while shuffling.',
@@ -663,7 +663,7 @@ const d10: Drill = {
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'Tosser at net (or 2 to 3 m away). Six tosses total, one to each spot below. Receiver passes each back to the set window (where the setter would stand, about 3 m off the net): front-left, side-left, behind-left, front-right, side-right, behind-right.',
+        'Pass back to the set window from six spots in turn. Tosser at net (or 2 to 3 m away) feeds six tosses, one to each spot below. Receiver passes each back to the set window (where the setter would stand, about 3 m off the net): front-left, side-left, behind-left, front-right, side-right, behind-right.',
       coachingCues: [
         'Point shoulders to target.',
         'Drop near shoulder, lift far shoulder on wide passes.',
@@ -717,7 +717,7 @@ const d11: Drill = {
         target: '8/10 each side',
       },
       courtsideInstructions:
-        'Feeder tosses wide to sideline. Pass back using only your near arm (the one closer to the ball); repeat with the far arm; then both arms.',
+        'Pass back using only your near arm (the one closer to the ball). Feeder tosses wide to the sideline; pass with the near arm, then with the far arm, then with both arms.',
       coachingCues: [
         'Arm behind ball.',
         'Move through ball.',
@@ -745,7 +745,7 @@ const d11: Drill = {
         target: '8/10 each side',
       },
       courtsideInstructions:
-        'Self-toss wide to left, then right. Pass using only your near arm (the one closer to the ball); repeat with the far arm; then both arms.',
+        'Pass with only your near arm (the one closer to the ball). Self-toss wide to the left, then to the right; pass with the near arm each time, then with the far arm, then with both arms.',
       coachingCues: [
         'Arm behind ball.',
         'Move through ball.',
@@ -799,7 +799,7 @@ const d12: Drill = {
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'Feeder at net tosses ~3 m up. Passer starts back at cone, moves in, passes straight up/down to target area, retreats around cone, repeats (6–12 contacts).',
+        'Pass straight up/down between cone moves. Feeder at net tosses ~3 m up. Passer starts back at cone, moves in, passes to the target area, retreats around the cone, and repeats (6–12 contacts).',
       coachingCues: [
         'Outside leg forward.',
         'Arms close to perpendicular to net for quick retreat.',
@@ -960,7 +960,7 @@ const d15: Drill = {
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'Server/coach delivers short or deep balls. Passer reads early, moves, passes to the set window (where the setter would stand, ~3 m off the net).',
+        'Pass to the set window after reading short vs deep balls. Server/coach delivers short or deep balls; passer reads early, moves, and passes to the set window (where the setter would stand, ~3 m off the net).',
       coachingCues: [
         'Centered ready position enables quick forward/back.',
         "Read ball early - off the server's hand.",
@@ -1122,7 +1122,7 @@ const d18: Drill = {
         target: '≥ 2.0 average or 7/10 graded 2+',
       },
       courtsideInstructions:
-        'Server gives 10 serves. Passer grades each (0–3) by how close the pass lands to the set window (where the setter would stand, ~3 m off the net). Switch roles. Keep a "best streak of 2+" and "average pass grade."',
+        'Pass and grade your own serve-receive 0–3. Server gives 10 serves; passer grades each (0–3) by how close the pass lands to the set window (where the setter would stand, ~3 m off the net). Switch roles. Keep a "best streak of 2+" and "average pass grade."',
       coachingCues: [
         'Play/let-go discipline matters.',
         'Pass forward and slightly inward.',
@@ -1326,7 +1326,7 @@ const d22: Drill = {
         target: 'Reach 10 points with ≤ X errors (level-dependent)',
       },
       courtsideInstructions:
-        'Assign point values to zones; serve to earn 10 points; serve out loses a point; adjust zone values for your level/objective.',
+        'Serve to earn 10 points across self-assigned zones. Assign point values to zones; each serve in scores those points; a serve out loses a point. Adjust zone values for your level or objective.',
       coachingCues: [
         'Develop a serving routine.',
         'Consistent hand contact.',
@@ -1364,7 +1364,7 @@ const d22: Drill = {
         target: 'First partner to 10 wins',
       },
       courtsideInstructions:
-        'Mark the same zone values for both partners. Alternate serves: each partner serves, scores their own result, then hands the next ball over. Serve out loses a point. First to 10 wins; play a second round if there is time.',
+        'Serve to earn points across shared zones, alternating with your partner. Mark the same zone values for both partners. Alternate serves: each partner serves, scores their own result, then hands the next ball over. A serve out loses a point. First to 10 wins; play a second round if there is time.',
       coachingCues: [
         'Develop a serving routine.',
         'Consistent hand contact.',
@@ -1465,7 +1465,7 @@ const d31: Drill = {
         target: '8 of 10 near the target',
       },
       courtsideInstructions:
-        'Mark a 2 m target circle. Self-toss and serve or strike toward it. Count only balls landing in or brushing the circle. Reset your routine before every rep.',
+        'Serve into a 2 m target circle. Mark the circle. Self-toss and serve toward it. Count only balls landing in or brushing the circle. Reset your routine before every rep.',
       coachingCues: ['One target before each serve.', 'Same toss height.', 'Watch the landing.'],
     },
     // 2026-04-27 solo-vs-pair sweep. Pair variant: server serves to a
@@ -1502,7 +1502,7 @@ const d31: Drill = {
         target: '8 of 10 near the called target',
       },
       courtsideInstructions:
-        'Mark a 2 m target circle. Shagger stands across the net and calls the target out loud before the server tosses. Server resets routine, tosses, and serves toward the called circle. Shagger collects balls between rounds. Switch after 10 serves.',
+        'Serve toward a partner-called 2 m target circle. Mark the circle. Shagger stands across the net and calls the target out loud before the server tosses. Server resets routine, tosses, and serves toward the called circle. Shagger collects balls between rounds. Switch after 10 serves.',
       coachingCues: [
         'Call the target before you toss.',
         'Same toss height.',
@@ -1621,7 +1621,7 @@ const d33: Drill = {
       // "Shag between rounds." voice. Em-dashes replaced with periods
       // per `.cursor/rules/courtside-copy.mdc` §Invariant 4.
       courtsideInstructions:
-        'Take turns. Each partner works the full 6-zone order: front-left, front-middle, front-right, back-left, back-middle, back-right. Partner across the net calls the next zone before each serve and shags after the round. A miss repeats the same zone on the next attempt.',
+        'Serve through the same 6-zone order as Solo, taking turns: front-left, front-middle, front-right, back-left, back-middle, back-right. Partner across the net calls the next zone before each serve and shags after the round. A miss repeats the same zone on the next attempt.',
       coachingCues: [
         'Caller names the zone first.',
         'High arc for deep zones.',
@@ -1785,6 +1785,15 @@ const d26: Drill = {
       // 2026-04-27 solo-vs-pair sweep: label 'Solo' → 'Any'. Stretch
       // micro-sequence is run side-by-side regardless of party size;
       // see d25-solo comment for full rationale.
+      // 2026-04-27 cca2 dogfeed F5 (`docs/research/2026-04-27-cca2-
+      // dogfeed-findings.md`): the prior copy hard-coded `~3 min on
+      // the timer` while the workload allows 3-6 min. Today's pair
+      // session ran a 4-min wrap and the copy left a ~1.5 min "what
+      // do I do?" gap. New copy honors the 3-6 min range honestly
+      // (3 moves on one side as the floor; mirror, glutes, adductors
+      // as the ceiling, matching `progressionDescription`). Three-
+      // staple structure and 30 s sub-block tick unchanged. No
+      // variant-id change; pure courtside-copy edit.
       id: 'd26-solo',
       drillId: 'd26',
       label: 'Any',
@@ -1812,7 +1821,7 @@ const d26: Drill = {
       // and movement cues stated in plain language (`tip your hips
       // back`, `squeeze the back-leg glute`).
       courtsideInstructions:
-        'Short wrap (~3 min on the timer): three moves, about 45 to 60 s each, one side (mirror if time remains). No bouncing; firm tension, never sharp pain.\n\n1. Calf: straight back leg, heel down, lean in; soften the back knee for the lower calf.\n2. Hamstring (back of thigh): front leg heel down, toes up; tip your hips back and lean your chest toward the front leg, back flat.\n3. Hip flexor (front of upper thigh): half-kneel (one knee on the ground, other foot in front), squeeze the back-leg glute, lean gently into the front leg.',
+        'Short wrap (3 to 6 minutes on the timer): three moves to start, about 45 to 60 s each on one side. If time remains, mirror to the other side, then add glutes (back of hips) or adductors (inner thighs). No bouncing; firm tension, never sharp pain.\n\n1. Calf: straight back leg, heel down, lean in; soften the back knee for the lower calf.\n2. Hamstring (back of thigh): front leg heel down, toes up; tip your hips back and lean your chest toward the front leg, back flat.\n3. Hip flexor (front of upper thigh): half-kneel (one knee on the ground, other foot in front), squeeze the back-leg glute, lean gently into the front leg.',
       coachingCues: ['Breathe.', 'Avoid pain.', 'Hold steady.'],
       subBlockIntervalSeconds: 30,
     },
@@ -1886,7 +1895,7 @@ const d38: Drill = {
         target: '15 controlled sets',
       },
       courtsideInstructions:
-        'Self-toss to yourself ~1.5 m up. Bump-set the ball back up with platform angled at the sky; aim for a settable arc landing within a 1 m circle around you. Reset and repeat.',
+        'Bump-set off your own toss into a 1 m landing circle around you. Self-toss to yourself ~1.5 m up; bump-set the ball back up with platform angled at the sky; aim for a settable arc landing within the circle. Reset and repeat.',
       coachingCues: [
         'Platform square, not tilted.',
         'Contact on the forearms.',
@@ -1920,7 +1929,7 @@ const d38: Drill = {
         target: '15-set rally',
       },
       courtsideInstructions:
-        'Stand 3 m apart. Partner tosses an arc to the setter; setter bump-sets it back at catchable height. Goal: unbroken rally. If it breaks, restart and count the new streak. Switch tosser and setter every 10 reps.',
+        'Bump-set back to your partner at catchable height. Stand 3 m apart; partner tosses an arc to the setter; setter bump-sets it back. Goal: unbroken rally. If it breaks, restart and count the new streak. Switch tosser and setter every 10 reps.',
       coachingCues: [
         'Platform square, not tilted.',
         'Set to your partner, not past them.',
@@ -1975,7 +1984,7 @@ const d39: Drill = {
         target: '12 clean sets',
       },
       courtsideInstructions:
-        'Self-toss above your forehead. Hand-set it straight back up ~2 m. Both hands release at the same instant. A slap means too low; a pause means you carried.',
+        'Hand-set off your own toss straight back up ~2 m. Self-toss above your forehead; hand-set it straight up; both hands release at the same instant. A slap means too low; a pause means you carried.',
       coachingCues: [
         'Contact above the forehead.',
         'Window between thumbs and forefingers.',
@@ -2010,7 +2019,7 @@ const d39: Drill = {
         target: '12 clean sets to your partner',
       },
       courtsideInstructions:
-        'Stand 3 m apart. Partner tosses an arc above the setter\'s forehead; setter hand-sets it back so the partner catches without moving more than one step. A slap means too low; a pause means you carried. Switch roles after 12 clean sets.',
+        'Hand-set back to your partner so they catch without moving more than one step. Stand 3 m apart; partner tosses an arc above the setter\'s forehead; setter hand-sets it back. A slap means too low; a pause means you carried. Switch roles after 12 clean sets.',
       coachingCues: [
         'Contact above the forehead.',
         'Set to your partner, not past them.',
@@ -2060,7 +2069,7 @@ const d40: Drill = {
         target: '20 balanced sets',
       },
       courtsideInstructions:
-        'Mark a 1 m landing circle. Self-toss, take one small move, plant both feet, then set into the circle. Reset if you drift during contact.',
+        'Set into a 1 m landing circle after one small move. Mark the circle. Self-toss; take one small move; plant both feet; then set into the circle. Reset if you drift during contact.',
       coachingCues: ['Move first.', 'Plant both feet.', 'Face the target.'],
     },
     // 2026-04-27 solo-vs-pair sweep. Pair variant: partner toss
@@ -2090,7 +2099,7 @@ const d40: Drill = {
         target: '20 balanced sets',
       },
       courtsideInstructions:
-        'Tosser stands 3 m from the setter and varies the toss: short, deep, left, right. Setter moves, plants both feet, then sets back so the tosser catches without moving more than one step. Reset if you set while drifting. Switch roles after 20 sets.',
+        'Set back to your tosser after a planted move on a varied toss. Tosser stands 3 m from the setter and varies the toss: short, deep, left, right. Setter moves, plants both feet, then sets back so the tosser catches without moving more than one step. Reset if you set while drifting. Switch roles after 20 sets.',
       coachingCues: ['Move first.', 'Plant both feet.', 'Face your partner.'],
     },
   ],
@@ -2142,7 +2151,7 @@ const d41: Drill = {
         target: '15-set rally',
       },
       courtsideInstructions:
-        'Stand 3 m apart. Toss to start; hand-set back and forth. Goal: unbroken rally. If it breaks, restart and count the new streak. Alternate who tosses after every break.',
+        'Hand-set back and forth with a partner. Stand 3 m apart; toss to start; then hand-set the rally. Goal: unbroken rally. If it breaks, restart and count the new streak. Alternate who tosses after every break.',
       coachingCues: [
         'Set to your partner, not past them.',
         'Plant feet between sets.',
@@ -2194,7 +2203,7 @@ const d42: Drill = {
         target: '3 clean sets to each corner',
       },
       courtsideInstructions:
-        'Mark two target corners 3 m apart. Partner tosses; setter plants and sets to the named corner. Switch setter after 6 clean sets.',
+        'Set to a partner-named corner across two targets 3 m apart. Mark the corners. Partner tosses; setter plants and sets to the named corner. Switch setter after 6 clean sets.',
       coachingCues: ['Set your partner.', 'Face the target.', 'Arc above reach height.'],
     },
   ],

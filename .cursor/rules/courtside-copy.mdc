@@ -79,7 +79,35 @@ The lowest-engagement block is where jargon hides most. Authors spend attention 
 - Every wrap/cooldown `courtsideInstructions` must pass the same jargon gate as main-skill blocks.
 - Stretches named by anatomical target must either (a) include a one-sentence execution cue inline, or (b) link to a tappable per-stretch description once that component ships (Tier 1b).
 
-### 6. Timed sub-blocks need audible structure (shipping gap)
+### 6. Lead with the skill verb in courtside instructions
+
+Origin: 2026-04-27 cca2 dogfeed F8 (`docs/research/2026-04-27-cca2-dogfeed-findings.md`). Founder report on `d33-pair`: *"Take turns. Each partner works the full 6-zone order... Partner across the net calls the next zone before each serve and shags after the round."* — followed by *"is this a serving drill? It's really not that clear."* The skill word ("serve") was buried in a subordinate clause inside a logistics-led paragraph. The same pattern recurred across most M001 skill drills (paired sweep landed 2026-04-27).
+
+**Rule.** For every drill whose `skillFocus[0]` is one of `pass | serve | set`, the **first sentence of `courtsideInstructions`** must contain the skill verb (or an unambiguous compound — `bump-set`, `hand-set`, `forearm-pass`). Setup that does not include the skill verb belongs in the second sentence onward.
+
+**Vocabulary alignment.** Use the same root the eyebrow's `skillLabel()` shows:
+
+- pass drills → `Pass …` (or `Forearm-pass …`)
+- serve drills → `Serve …`
+- set drills → `Set …`, `Bump-set …`, or `Hand-set …`
+
+Setup-led paragraphs that read as *"Stand 3 m apart. Partner tosses…"* or *"Mark a target circle…"* must be rewritten so the action verb is in the first clause.
+
+**Examples (from the 2026-04-27 sweep):**
+
+- **Bad** — `"Take turns. Each partner works the full 6-zone order: front-left, …"` (`d33-pair` pre-sweep). Skill word "serve" appears mid-sentence in the third clause.
+- **Good** — `"Serve through the same 6-zone order as Solo, taking turns. Front-left, front-middle, front-right, back-left, back-middle, back-right. Partner across the net calls the next zone before each serve and shags after the round."` Verb leads.
+
+- **Bad** — `"Stand 3 m apart. Partner tosses an arc to the setter; setter bump-sets it back at catchable height."` (`d38-pair` pre-sweep). Setup-led; action arrives 9 words in.
+- **Good** — `"Bump-set with a partner. Stand 3 m apart; partner tosses an arc to the setter; setter bump-sets it back at catchable height."` Verb leads; setup follows.
+
+**Test verification.** Each rewritten drill has a regression test in `app/src/data/__tests__/drillCopyRegressions.test.ts` pinning that its `courtsideInstructions` first sentence contains the expected skill verb.
+
+**Out of scope for this rule.** Warmup (`skillFocus: ['warmup']`) and recovery (`skillFocus: ['recovery']`) drills have no skill verb to lead with. They follow rule 5 (cool-down equal review weight) and the existing courtside-copy invariants but not this one.
+
+**Why the rule exists structurally.** The eyebrow now composes `{slot} · {skill}` (e.g., `Main drill · Serve`) so the skill is visible before the body is read — see `app/src/lib/format.ts::blockEyebrowLabel`. The structural marker is the primary win; this rule aligns the body copy so the two reads stay in sync. A drill that violates this rule reads as "wait, why is the eyebrow saying Serve?" — the body copy must back the eyebrow's claim.
+
+### 7. Timed sub-blocks need audible structure (shipping gap)
 
 This is documented here because it recurs in drill copy (warm-up 4×45s sub-blocks, cool-down 6×20–30s stretches, pair role-swap) and because the copy cannot compensate for the missing capability. Partner ask in P2-2.
 
@@ -97,6 +125,7 @@ When pacing-audio infra ships, its spec owns the cross-drill invariant and this 
 - [ ] No combinatoric descriptions; enumerate.
 - [ ] No em-dashes (`—`, `U+2014`) in user-visible prose. En-dashes (`–`, `U+2013`) allowed only inside numeric ranges (`2–3 m`, `1–4 wks`); in prose, convert to "to" or rewrite.
 - [ ] Wrap/cooldown text has been read with the same attention as main-skill text.
+- [ ] If `skillFocus[0]` is `pass | serve | set`, the first sentence of `courtsideInstructions` contains the skill verb (rule 6). Pin with a `drillCopyRegressions.test.ts` case for any new authoring.
 - [ ] Any timed sub-blocks are described in firing order and the variant carries the audio-gap comment (until audio ships).
 
 ## What this rule is not

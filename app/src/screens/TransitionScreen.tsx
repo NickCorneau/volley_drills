@@ -2,9 +2,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { SafetyIcon } from '../components/SafetyIcon'
 import { Button, ScreenShell, StatusMessage } from '../components/ui'
+import { getBlockSkillFocus } from '../domain/drillMetadata'
 import { findSwapAlternatives } from '../domain/sessionBuilder'
 import { useSessionRunner } from '../hooks/useSessionRunner'
-import { formatDuration } from '../lib/format'
+import { blockEyebrowLabel, formatDuration } from '../lib/format'
 import { routes } from '../routes'
 
 export function TransitionScreen() {
@@ -111,11 +112,27 @@ export function TransitionScreen() {
         beat only. The reflective beat (per-drill chip + optional
         counts) lives on `/run/check` upstream of this screen, so this
         body is single-purpose: just-finished pill (provenance), Up
-        Next briefing (drill name + rationale + full prep + cue), and
-        the action footer. The capture state, draft persistence
-        effects, capture-target derivation, and "Tag how that drill
-        went" gating hint moved verbatim into `DrillCheckScreen`. See
+        Next briefing (drill name + full prep + cue), and the action
+        footer. The capture state, draft persistence effects,
+        capture-target derivation, and "Tag how that drill went"
+        gating hint moved verbatim into `DrillCheckScreen`. See
         `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 9.
+
+        2026-04-27 cca2 dogfeed F1 follow-up
+        (`docs/research/2026-04-27-cca2-dogfeed-findings.md`): the
+        per-block `rationale` ("Chosen because: …") prose was deleted
+        from the Up next briefing here in parallel with RunScreen's
+        deletion (the trifold-T1 trigger fires once for both surfaces;
+        keeping rationale on Transition while deleting from Run would
+        re-fragment voice across the run-flow rhythm). Role
+        information now rides on the `Up next · {phaseLabel}` eyebrow
+        below — same role labels as the RunScreen header eyebrow
+        (`Technique` / `Movement` / `Main drill` / `Pressure` /
+        `Downshift`), so the user sees the same role identity in
+        Transition's preview that they'll see in Run's header on the
+        very next screen. The `block.rationale` field is preserved on
+        the data record for future surfaces (Swap sheet, See-Why
+        modal in Tier 2).
 
         2026-04-22 iPhone-viewport layout pass: the prior `mt-auto`
         on the button row was decorative — it only activated when the
@@ -134,21 +151,34 @@ export function TransitionScreen() {
         That failure mode is worse than "scroll on long drills":
         short drills got truncated even though they fit, and long
         drills lost the expand affordance. The body now mirrors Run's
-        treatment (full title, rationale, instructions, coaching cue
-        — same typography, same colors) so Transition reads as a
-        quiet dress-rehearsal of Run. The CTA stack in the footer is
-        the only thing that differs between the two surfaces: decide
+        treatment (full title, instructions, coaching cue — same
+        typography, same colors) so Transition reads as a quiet
+        dress-rehearsal of Run. The CTA stack in the footer is the
+        only thing that differs between the two surfaces: decide
         here, execute there.
       */}
-      <ScreenShell.Header className="flex items-center justify-between pt-2 pb-3">
-        <SafetyIcon />
+      {/*
+        Header layout: 3-column grid for true center-alignment of
+        the middle eyebrow. See `RunScreen.tsx`'s header block
+        comment for the math on why `flex justify-between` drifts
+        the middle item off-center when SafetyIcon (56 px) and the
+        counter have asymmetric widths. Same fix applied here for
+        run-flow visual consistency across Run / Transition /
+        DrillCheck.
+      */}
+      <ScreenShell.Header className="grid grid-cols-3 items-center pt-2 pb-3">
+        <div className="justify-self-start">
+          <SafetyIcon />
+        </div>
         {/* Phase F8 (2026-04-19): was `text-sm font-bold uppercase
             tracking-wider`. Dropped the dashboard-eyebrow voice to
             `text-sm font-medium` sentence case; the "Transition"
             label is a calm status marker, not a hero. See
             `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
-        <span className="text-sm font-medium text-text-secondary">Transition</span>
-        <span className="text-sm font-medium text-text-secondary">
+        <span className="justify-self-center text-sm font-medium text-text-secondary">
+          Transition
+        </span>
+        <span className="justify-self-end text-sm font-medium text-text-secondary">
           Next: {currentBlockIndex + 1}/{totalBlocks}
         </span>
       </ScreenShell.Header>
@@ -201,19 +231,28 @@ export function TransitionScreen() {
         {swapError && <StatusMessage variant="error" message={swapError} />}
 
         <div className="flex flex-col gap-1.5">
-          {/* "Up next" eyebrow keeps the pause-before-action framing so
+          {/*
+            "Up next" eyebrow keeps the pause-before-action framing so
             Transition doesn't read as "you're already on Run." Quiet
             `text-xs font-medium` so the drill title below carries the
-            focal weight (Phase F8 typography). */}
-          <p className="text-xs font-medium text-text-secondary">Up next</p>
+            focal weight (Phase F8 typography).
+
+            2026-04-27 cca2 dogfeed F1 follow-up: extended the eyebrow
+            with the role label (`Up next · Technique` etc.) so the
+            structural role of the next block is visible at preview
+            time. The temporal cue (`Up next`) and the role cue
+            (`{phaseLabel}`) compose with a thin `·` separator so the
+            two reads stay in one quiet line — no new vertical
+            chrome, no eyebrow stack, just a slightly richer single
+            line. Mirrors RunScreen's header eyebrow vocabulary.
+          */}
+          <p className="text-xs font-medium text-text-secondary">
+            Up next ·{' '}
+            {blockEyebrowLabel(nextBlock.type, getBlockSkillFocus(nextBlock, plan.playerCount))}
+          </p>
           <h1 className="text-xl font-semibold tracking-tight text-text-primary">
             {nextBlock.drillName}
           </h1>
-          {nextBlock.rationale && (
-            <p className="mt-0.5 text-sm italic leading-snug text-text-secondary">
-              {nextBlock.rationale}
-            </p>
-          )}
           <p className="mt-1 text-sm text-text-secondary">
             {formatDuration(nextBlock.durationMinutes)}
           </p>

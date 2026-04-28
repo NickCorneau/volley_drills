@@ -26,12 +26,29 @@ export interface SessionPlanBlock {
   /**
    * Tier 1a Unit 4: one-sentence deterministic rationale for why this
    * block landed on the user's session ("Chosen because: ..."). Optional
-   * because legacy v3 / v0a plans do not carry it; RunScreen renders it
-   * quietly below the coaching cue when present. Not persisted to Dexie
+   * because legacy v3 / v0a plans do not carry it; the
+   * `deriveBlockRationale` builder writes it onto every block produced
+   * by `buildDraft` / `findSwapAlternatives`. Not persisted to Dexie
    * explicitly - the plan object is stored as a whole, so the field
    * rides along automatically once a plan is rebuilt by the current
-   * `createSessionFromDraft`. Tier 2 decides whether to surface it
-   * through a richer "See why this session was chosen" modal.
+   * `createSessionFromDraft`.
+   *
+   * **Render surface (2026-04-21 -> 2026-04-27).** Tier 1a Unit 4
+   * shipped this string as an italic subtitle on RunScreen + later on
+   * TransitionScreen. The 2026-04-27 cca2 dogfeed F1 follow-up deleted
+   * both UI surfaces (the founder reported "lots of text to read
+   * between each drill" and the trifold-T1 "Chosen because deletion"
+   * trigger fired). Role identity now rides on the run-flow header
+   * eyebrow via `phaseLabel(block.type)`. The data field is preserved
+   * here precisely so future surfaces can reach for it without re-
+   * deriving:
+   *   - Swap-sheet re-home (the trifold-T1 trigger's second half is
+   *     still open).
+   *   - Tier 2 "See why this session was chosen" modal (M001-build).
+   * If a third surface ends up wanting this string, add it; if the
+   * second surface above never needs it after another founder-use
+   * cycle, the field can be dropped from the schema in a forward-only
+   * migration.
    */
   rationale?: string
   /**

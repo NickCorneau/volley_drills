@@ -91,7 +91,7 @@ New-user secondary actions:
 
 - `Change level or today's player count`
 
-(The `See why this session was chosen` affordance is **not in v0b** per `H7` in the approved red-team fix plan; the `SessionDraft.rationale` schema field is reserved for M001-build UI.)
+(The `See why this session was chosen` affordance is **not in v0b** per `H7` in the approved red-team fix plan. The `SessionDraft.rationale` / `SessionPlanBlock.rationale` schema field was authored under Tier 1a Unit 4 and rendered as an italic subtitle on Run + Transition between 2026-04-21 and 2026-04-27; the **2026-04-27 cca2 dogfeed F1 follow-up deleted both render surfaces** because the founder reported the per-block prose as "lots of text to read between each drill," firing the partner-walkthrough trifold-T1 "Chosen because deletion" trigger with structural-equivalence reasoning. Role identity now rides on the run-flow header eyebrow via `phaseLabel(block.type)` — un-collapsed from the F8-era three-label shape (`Warm up` / `Work` / `Downshift`) to the full six-label shape (`Warm up` / `Technique` / `Movement` / `Main drill` / `Pressure` / `Downshift`). The schema field stays preserved on `SessionPlanBlock` so the M001-build See-Why modal can reach for it without re-deriving, and so a possible Swap-sheet re-home (the trifold-T1 trigger's second half) can pull the same string. See `docs/plans/2026-04-20-m001-adversarial-memo.md` §"Amendment log entry for 2026-04-27 cca2 dogfeed F1 follow-up" for the full ship rationale and the trigger-fire reading.)
 
 Repeat-user secondary actions:
 

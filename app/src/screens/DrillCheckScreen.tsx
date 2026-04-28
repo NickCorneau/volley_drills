@@ -348,10 +348,23 @@ export function DrillCheckScreen() {
           immediately downstream looks forward to block N+1. The pair
           (Last → Next) makes the run-flow rhythm feel intentional
           rather than incidental. */}
-      <ScreenShell.Header className="flex items-center justify-between pt-2 pb-3">
-        <SafetyIcon />
-        <span className="text-sm font-medium text-text-secondary">Drill check</span>
-        <span className="text-sm font-medium text-text-secondary">
+      {/*
+        Header layout: 3-column grid for true center-alignment of
+        the middle eyebrow. See `RunScreen.tsx`'s header block
+        comment for the math on why `flex justify-between` drifts
+        the middle item off-center when SafetyIcon (56 px) and the
+        counter have asymmetric widths. Same fix applied here for
+        run-flow visual consistency across Run / Transition /
+        DrillCheck.
+      */}
+      <ScreenShell.Header className="grid grid-cols-3 items-center pt-2 pb-3">
+        <div className="justify-self-start">
+          <SafetyIcon />
+        </div>
+        <span className="justify-self-center text-sm font-medium text-text-secondary">
+          Drill check
+        </span>
+        <span className="justify-self-end text-sm font-medium text-text-secondary">
           Last: {prevBlockIdx + 1}/{totalBlocks}
         </span>
       </ScreenShell.Header>

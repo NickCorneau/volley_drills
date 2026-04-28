@@ -9,9 +9,10 @@ import { usePreroll } from '../hooks/usePreroll'
 import { useTimer } from '../hooks/useTimer'
 import { useWakeLock } from '../hooks/useWakeLock'
 import { useSessionRunner } from '../hooks/useSessionRunner'
+import { getBlockSkillFocus } from '../domain/drillMetadata'
 import { findSwapAlternatives } from '../domain/sessionBuilder'
 import { playBlockEndBeep, playPrerollTick, playSubBlockTick } from '../lib/audio'
-import { phaseLabel } from '../lib/format'
+import { blockEyebrowLabel } from '../lib/format'
 import { computeShortened } from '../lib/shorten'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { routes } from '../routes'
@@ -478,33 +479,89 @@ export function RunScreen() {
       {/*
         2026-04-22 iPhone-viewport layout pass: RunScreen moved to the
         `ScreenShell` three-zone layout (Header / Body / Footer). The
-        drill name, rationale, instructions, and coaching cue live in
-        the scrollable body; the timer + controls pin to the footer
-        as a single "cockpit" that never slips below the fold, no
-        matter how long `courtsideInstructions` runs (d26 stretch
-        list, expanded coaching cue) or how the Safari URL bar resizes
-        the viewport mid-block. The old layout let the document scroll
-        at the root and dropped the timer off the bottom on long
-        drills — testers reported hunting for Next / Pause. See
+        drill name, instructions, and coaching cue live in the
+        scrollable body; the timer + controls pin to the footer as a
+        single "cockpit" that never slips below the fold, no matter
+        how long `courtsideInstructions` runs (d26 stretch list,
+        expanded coaching cue) or how the Safari URL bar resizes the
+        viewport mid-block. The old layout let the document scroll at
+        the root and dropped the timer off the bottom on long drills —
+        testers reported hunting for Next / Pause. See
         `docs/research/partner-walkthrough-results/2026-04-21-iphone-viewport-design-review.md`
         "Vertical dead space on tall viewports" for the originating
         signal.
 
         Density also tightened in the same pass (founder prompt
         2026-04-22 "too much text on drills"):
-        - rationale demoted to a small italic line tucked under the
-          drill name instead of a full muted paragraph block;
         - coaching-cue card chrome (accent border + `bg-info-surface`
           fill + `h2 "Coaching note"`) replaced with a quiet left-rule
           treatment + short "Cue" label so the cue reads as a
           sidebar-voiced aside rather than a second focal card;
         - body inner gap shrunk from `gap-5` (20 px) to `gap-4` (16 px)
-          for a calmer rhythm between what/why/how/cue.
+          for a calmer rhythm between what/how/cue.
+
+        2026-04-27 cca2 dogfeed F1 follow-up
+        (`docs/research/2026-04-27-cca2-dogfeed-findings.md`): the
+        per-block `rationale` ("Chosen because: …") prose was deleted
+        from the run-card body. The role information it carried now
+        rides on the header eyebrow via `phaseLabel(currentBlock.type)`
+        (un-collapsed in the same ship from the F8-era `Work` label
+        to `Technique` / `Movement` / `Main drill` / `Pressure`). This
+        fires the partner-walkthrough trifold-T1 trigger ("`Chosen
+        because:` deletion from Run + Swap-sheet re-home") that was
+        gated on a founder-use-ledger entry flagging the line as
+        "coach footnoting" — the cca2 dogfeed's "lots of text to read
+        between each drill" report is the structural equivalent. The
+        `block.rationale` field is preserved on the data record (the
+        `deriveBlockRationale` builder still writes it onto every
+        block) so future surfaces — Swap sheet, See-Why modal in Tier
+        2 — can reach for it; the run/transition cards just stop
+        rendering it.
       */}
-      <ScreenShell.Header className="flex items-center justify-between pt-2 pb-3">
-        <SafetyIcon />
-        <span className="text-sm font-semibold text-accent">{phaseLabel(currentBlock.type)}</span>
-        <span className="text-sm font-medium text-text-secondary">
+      {/*
+        Header layout: 3-column grid, NOT flex justify-between.
+        2026-04-27 cca2 dogfeed visual catch: the prior `flex
+        justify-between` pattern keeps the gap-left of the middle
+        item equal to the gap-right, but does NOT center the middle
+        item relative to the container — so the eyebrow drifts
+        right of true center by `(left_child_width -
+        right_child_width) / 2`. With `SafetyIcon` at `h-14 w-14`
+        (56 px touch target) and a short counter `N/M` (~22 px),
+        the math is `+17 px` right of center on RunScreen — visible
+        as misalignment when comparing to TransitionScreen (which
+        has the wider `Next: N/M` counter and reads visually
+        centered by accident).
+
+        `grid-cols-3` + per-cell `justify-self-{start,center,end}`
+        forces the middle column to center on the container regardless
+        of side-cell widths. Symmetric column widths also let the
+        eyebrow auto-truncate cleanly if a future label (e.g. Tier
+        1c `Main drill · serve` composition) ever exceeds the
+        column width — the `truncate` class is reserved for that
+        eventuality without changing this layout.
+      */}
+      <ScreenShell.Header className="grid grid-cols-3 items-center pt-2 pb-3">
+        <div className="justify-self-start">
+          <SafetyIcon />
+        </div>
+        {/*
+          2026-04-27 cca2 dogfeed F8 follow-up: eyebrow now composes
+          slot role + drill skill (`Main drill · Serve`) via
+          `blockEyebrowLabel` so the courtside reader sees the skill
+          on first glance, not buried in the body. Skill omitted for
+          warmup / wrap by design (no per-skill identity). Falls back
+          to bare `phaseLabel` when the drill is unknown (synthetic
+          test, legacy plan, or non-pass/serve/set drill). Centralised
+          composition keeps Run + Transition in sync on separator and
+          vocabulary.
+        */}
+        <span className="justify-self-center text-sm font-semibold text-accent">
+          {blockEyebrowLabel(
+            currentBlock.type,
+            getBlockSkillFocus(currentBlock, plan?.playerCount ?? 1),
+          )}
+        </span>
+        <span className="justify-self-end text-sm font-medium text-text-secondary">
           {currentBlockIndex + 1}/{totalBlocks}
         </span>
       </ScreenShell.Header>
@@ -514,19 +571,6 @@ export function RunScreen() {
           <h1 className="text-xl font-semibold tracking-tight text-text-primary">
             {currentBlock.drillName}
           </h1>
-          {/* Rationale: one-sentence "why this block" (Tier 1a Unit 4).
-              2026-04-22: demoted from a standalone `text-sm` muted
-              paragraph to a tucked-in italic suffix directly under the
-              title, so the reading weight on Run goes to instructions
-              + cue (what / how) and the why sits as a subtitle-voiced
-              aside. Saves ~28–40 px of vertical space per block and
-              makes the drill title plus rationale read as one unit.
-              Legacy plans without a rationale render nothing. */}
-          {currentBlock.rationale && (
-            <p className="mt-1 text-sm italic leading-snug text-text-secondary">
-              {currentBlock.rationale}
-            </p>
-          )}
         </div>
         {/* `whitespace-pre-line` preserves `\n` in
             `courtsideInstructions` for drills with naturally list-shaped

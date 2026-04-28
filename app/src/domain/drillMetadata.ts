@@ -1,6 +1,6 @@
 import { DRILLS } from '../data/drills'
 import type { SessionPlanBlock } from '../db/types'
-import type { DrillVariant, MetricType } from '../types/drill'
+import type { Drill, DrillVariant, MetricType } from '../types/drill'
 
 /**
  * Resolve the variant a planned block would render under.
@@ -81,4 +81,75 @@ export function getBlockSuccessRule(
   playerCount: 1 | 2,
 ): string | null {
   return resolveBlockVariant(block, playerCount)?.successMetric.description ?? null
+}
+
+/**
+ * Resolve the drill catalog row (not the variant) for a planned block.
+ * Returns `null` when no drill matches the block's `drillId`.
+ *
+ * Used by `getBlockSkillFocus` (the run-flow eyebrow's skill marker)
+ * because the **drill-level** `skillFocus` is the source-of-truth for
+ * "what skill is this drill working" (D105 architectural invariant
+ * 1: single skillFocus per drill). The variant carries
+ * `participants` / `feedType` / `equipment` overrides but inherits
+ * skill identity from the drill row above it.
+ */
+function resolveBlockDrill(
+  block: SessionPlanBlock | null | undefined,
+): Drill | null {
+  if (!block) return null
+  return (
+    DRILLS.find((d) => (block.drillId ? d.id === block.drillId : d.name === block.drillName)) ??
+    null
+  )
+}
+
+/**
+ * Resolve the run-flow eyebrow's **primary skill focus** for a planned
+ * block. Returns one of `'pass' | 'serve' | 'set'` when the block's
+ * drill carries that skill as its first `skillFocus` entry, or `null`
+ * when:
+ *   - The drill is unknown (synthetic test, legacy plan, missing
+ *     drillId).
+ *   - The drill's primary `skillFocus` is non-skill (`'warmup'`,
+ *     `'recovery'`, `'movement'` standalone — though `movement`
+ *     standalone doesn't ship in M001; `pass + movement` drills'
+ *     primary is `pass`).
+ *   - The drill carries a skill we don't yet surface in the eyebrow
+ *     vocabulary (`'attack'`, `'block'`, `'dig'`, `'conditioning'`).
+ *
+ * Used by `RunScreen` and `TransitionScreen` to compose the header
+ * eyebrow as `{phaseLabel} · {skillLabel}` for skill-bearing blocks
+ * (the **2026-04-27 cca2 dogfeed F8 follow-up**: the founder asked
+ * "is this a serving drill?" while looking at a setup-led courtside
+ * paragraph; making the skill visible at the eyebrow answers it
+ * before any body copy is read). Warmup / wrap blocks return `null`
+ * here so the eyebrow stays just `Warm up` / `Downshift`.
+ *
+ * Returns the **drill-level** primary skillFocus, not a session-wide
+ * focus, because v0b doesn't yet carry an explicit `sessionFocus`
+ * field (Tier 1c). When Tier 1c lands, the eyebrow can additionally
+ * cite the user-selected `sessionFocus` and verify it matches the
+ * resolved per-block skillFocus.
+ */
+export type EyebrowSkillFocus = 'pass' | 'serve' | 'set'
+
+const EYEBROW_SKILL_FOCUSES: ReadonlySet<string> = new Set(['pass', 'serve', 'set'])
+
+export function getBlockSkillFocus(
+  block: SessionPlanBlock | null | undefined,
+  playerCount: 1 | 2,
+): EyebrowSkillFocus | null {
+  // Variant-level resolution stays for parity with the other
+  // `getBlockX` helpers, even though variants don't override
+  // skillFocus today. If a future variant ever carries its own
+  // skill override, the lookup happens at the same grain as the
+  // success-rule and metric-type lookups.
+  void resolveBlockVariant(block, playerCount)
+  const drill = resolveBlockDrill(block)
+  const primary = drill?.skillFocus[0]
+  if (primary && EYEBROW_SKILL_FOCUSES.has(primary)) {
+    return primary as EyebrowSkillFocus
+  }
+  return null
 }

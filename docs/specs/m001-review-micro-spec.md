@@ -20,6 +20,9 @@ decision_refs:
   - D104
   - D120
   - D133
+related:
+  - docs/research/2026-04-27-cca2-dogfeed-findings.md
+  - docs/plans/2026-04-27-per-drill-capture-coverage.md
 ---
 
 # M001 Review Micro-Spec
@@ -122,7 +125,7 @@ Per `D133` (2026-04-26), the post-session payload includes a **per drill-variant
 ### Per-drill required field
 
 - `perDrillDifficulty: 'too_hard' | 'still_learning' | 'too_easy'`
-  - **Required** on the Drill Check screen for every completed drill block (not warmup, not cooldown — only main-skill blocks). The block cannot advance until the user taps one of the three chips.
+  - **Required** on the Drill Check screen for every completed count-eligible drill block (`successMetric.type` ∈ `pass-rate-good` / `reps-successful`) **regardless of slot type** (technique / movement_proxy / main_skill / pressure), and for every completed main_skill / pressure block regardless of metric type. Warmup and wrap blocks never capture. The block cannot advance past Drill Check until the user taps one of the three chips. **Surface coverage history (2026-04-27)**: pre-2026-04-27 the gate read "main_skill / pressure block-types only," which silently dropped Difficulty capture on count-eligible technique and movement_proxy drills (e.g., `d10-pair` at the technique slot, `d03-pair` at the movement_proxy slot in a pair pass session — both `pass-rate-good`). The 2026-04-27 cca2 dogfeed (`docs/research/2026-04-27-cca2-dogfeed-findings.md` F1 + F2 gap 2b) made the gap concrete: a 25-min pair pass session with three count-eligible passing drills produced one capture. The widened gate above lets *drill metric type* (not slot label) drive capture eligibility for the count-eligible class. See `docs/plans/2026-04-27-per-drill-capture-coverage.md` for implementation routing.
   - Three values, one tap. Labels are 3-anchor (matches the `Easy / Right / Hard` shape of the post-session RPE chips at session grain) but **labels and meaning differ deliberately** from the deleted session-level `QuickTagChips`:
     - `too_hard` reads as "the drill outpaced me on this block."
     - `still_learning` reads as "I am acquiring this — stage, not load." Distinct from the deleted `about right` because it carries an *acquisition-stage* meaning, not a *load-rightness* meaning.
@@ -142,6 +145,10 @@ Below the required Difficulty tag, a single `Add counts` affordance expands to r
   - Per drill-variant, optional. Mirrors the existing session-level `notCaptured` toggle. Defaults to `true` for non-count drills (`successMetric.type` ∈ `streak` / `points-to-target` / `pass-grade-avg` / `composite` / `completion`) so the user is never asked to invent counts on drills where counts are semantically wrong, consistent with the 2026-04-22 `notCaptured`-default landing.
 
 When the optional counts are filled, the values aggregate into the session-level `goodPasses` / `attemptCount` displayed on `CompleteScreen.tsx` and into `D104`'s rolling-window math at drill-variant grain. When they are skipped, `D104` does not advance progression on that drill-variant for that session (per the *graceful-degradation rule* under `primarySkillMetric` above). The session-level RPE chip on Review still drives load adaptation independently.
+
+### Non-count drills at main_skill / pressure (gap 2a)
+
+For drills whose `successMetric.type` is **not** in `COUNT_BASED_METRIC_TYPES` (`streak` / `points-to-target` / `pass-grade-avg` / `composite` / `completion`), the Drill Check screen renders the **Difficulty chips only**; the `Add counts` affordance does not render at all. This is the correct posture (`docs/research/2026-04-26-pair-rep-capture-options.md` honesty test: never ask the user to invent count-shaped data on a drill where counts are semantically wrong), but it leaves a coverage gap: a session with a `streak` main_skill drill (e.g., `d38-pair` Bump Set Fundamentals at chain-7) produces no rep-grain data at all — only a difficulty tag. **2026-04-27 cca2 dogfeed F2 gap 2a (`docs/research/2026-04-27-cca2-dogfeed-findings.md`)** named this concretely. Resolution: a per-`successMetric.type` capture story (e.g., a single longest-streak number for `streak` drills; a single 0-3 grade for `pass-grade-avg`; a yes/no for `completion` already exists implicitly via "did the block complete") is in scope for `docs/plans/2026-04-27-per-drill-capture-coverage.md`. Until that plan ships, `streak` / `points-to-target` / `pass-grade-avg` / `composite` drills capture Difficulty only.
 
 ### Why Drill Check, not Review
 

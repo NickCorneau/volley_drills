@@ -157,6 +157,196 @@ describe('sessionBuilder', () => {
   )
 
   /**
+   * 2026-04-27 cca2 dogfeed F6 (`docs/research/2026-04-27-cca2-dogfeed-
+   * findings.md`): the `movement_proxy` slot must prefer drills carrying
+   * `'movement'` in `skillFocus` over drills with only `'pass'`. Pre-fix,
+   * a 25-min `pair_open` build placed the stationary `d03 Continuous
+   * Passing` (`skillFocus: ['pass']`, base drill kneel→stand→repeat) at
+   * the movement_proxy slot and inverted the more movement-heavy `d10 6-
+   * Legged Monster` (`skillFocus: ['pass', 'movement']`, six directional
+   * shuffles) into the technique slot. The fix mirrors the warmup
+   * branch's prefer-tag-first / fall-back-defensive shape.
+   *
+   * Symmetric: the `technique` slot prefers pass-only drills so that
+   * movement-tagged drills stay available for movement_proxy
+   * downstream. The technique pre-filter is necessary because
+   * archetype layouts iterate technique BEFORE movement_proxy (per
+   * `app/src/data/archetypes.ts`); without it, the technique shuffle
+   * could exhaust the movement-tagged pool before movement_proxy ran.
+   *
+   * Verifies determinism by sweep across seeds: `assemblySeed` rotated
+   * across 16 distinct values; every build that contains a
+   * movement_proxy block must place a movement-tagged drill there.
+   * Parametrized across every archetype × time-profile combination
+   * that has a movement_proxy slot in the layout (per archetypes.ts:
+   * 25-min layouts on solo_wall / solo_net / solo_open / pair_open;
+   * 40-min layouts on solo_wall / solo_net / solo_open / pair_net /
+   * pair_open). pair_net 25-min has no movement_proxy slot so it is
+   * intentionally excluded.
+   */
+  /**
+   * Pair archetypes have movement-tagged M001 candidates available
+   * (`d10` 6-Legged Monster, `d09` Passing Around the Lines, `d15`
+   * Short/Deep Reaction — all `m001Candidate: true` with pair
+   * variants). The fix must place one of those at the movement_proxy
+   * slot whenever a pair build runs through a layout that has the
+   * slot. Sweep across 8 seeds × pair_open 25 + pair_open 40.
+   */
+  it.each<[string, SetupContext]>([
+    [
+      'pair_open 25',
+      {
+        playerMode: 'pair',
+        timeProfile: 25,
+        netAvailable: false,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+    [
+      'pair_open 40',
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+  ])('%s movement_proxy slot prefers a movement-tagged drill', (label, context) => {
+    const drillById = new Map(DRILLS.map((d) => [d.id, d] as const))
+    let foundAny = false
+    for (let i = 0; i < 8; i++) {
+      const draft = buildDraft(context, { assemblySeed: `${label}-seed-${i}` })
+      expect(draft).not.toBeNull()
+      const movementProxy = draft!.blocks.find((b) => b.type === 'movement_proxy')
+      if (movementProxy === undefined) continue
+      foundAny = true
+      const drill = drillById.get(movementProxy.drillId!)
+      expect(drill).toBeDefined()
+      expect(
+        drill!.skillFocus.includes('movement'),
+        `${label} seed-${i}: movement_proxy slot got ${movementProxy.drillId} with skillFocus ${JSON.stringify(drill!.skillFocus)}; expected a 'movement'-tagged drill`,
+      ).toBe(true)
+    }
+    expect(foundAny, `${label}: no seed produced a movement_proxy block; test ran vacuously`).toBe(
+      true,
+    )
+  })
+
+  /**
+   * **Solo content-gap finding (red-team 2026-04-27).** Solo
+   * archetypes (`solo_wall` / `solo_net` / `solo_open`) have a
+   * `movement_proxy` slot in their 25-min and 40-min layouts, but
+   * **no `m001Candidate: true` drill carries `'movement'` in
+   * `skillFocus` AND a solo-compatible variant**:
+   *
+   *   - `d09` (`['pass', 'movement']`, m001=true) — pair-only.
+   *   - `d10` (`['pass', 'movement']`, m001=true) — pair-only.
+   *   - `d15` (`['pass', 'movement']`, m001=true) — pair-only.
+   *   - All other movement-tagged drills are `m001Candidate: false`.
+   *
+   * As a result, the cca2 dogfeed F6 fix's prefer-`'movement'` branch
+   * has no candidate to prefer in solo builds, and the slot falls
+   * through to a pass-only drill via `pool[0]`. This is **not** the
+   * F6 inversion bug — it is a content-authoring gap. The slot still
+   * resolves cleanly (drillId / variantId / drillName populated), it
+   * just doesn't carry a movement-tagged drill.
+   *
+   * The test below pins the current behavior (slot is filled, build
+   * succeeds, but movement-tag is absent) so future Tier 1b authoring
+   * (a solo variant on `d09` / `d10` / `d15` or a new solo
+   * movement-tagged drill) can flip the assertion when that content
+   * lands. Until then this test is the named-flag-on-the-content-gap
+   * artifact.
+   */
+  it.each<[string, SetupContext]>([
+    [
+      'solo_wall 25',
+      {
+        playerMode: 'solo',
+        timeProfile: 25,
+        netAvailable: false,
+        wallAvailable: true,
+      } satisfies SetupContext,
+    ],
+    [
+      'solo_net 25',
+      {
+        playerMode: 'solo',
+        timeProfile: 25,
+        netAvailable: true,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+    [
+      'solo_open 25',
+      {
+        playerMode: 'solo',
+        timeProfile: 25,
+        netAvailable: false,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+  ])(
+    '%s movement_proxy slot resolves cleanly even though no movement-tagged drill is reachable (solo content gap)',
+    (label, context) => {
+      const drillById = new Map(DRILLS.map((d) => [d.id, d] as const))
+      let foundAny = false
+      for (let i = 0; i < 8; i++) {
+        const draft = buildDraft(context, { assemblySeed: `${label}-seed-${i}` })
+        expect(draft).not.toBeNull()
+        const movementProxy = draft!.blocks.find((b) => b.type === 'movement_proxy')
+        if (movementProxy === undefined) continue
+        foundAny = true
+        // Slot resolves cleanly (drillId/variantId/drillName populated).
+        expect(movementProxy.drillId).toBeTruthy()
+        expect(movementProxy.variantId).toBeTruthy()
+        expect(movementProxy.drillName).toBeTruthy()
+        // The drill exists in the catalog.
+        const drill = drillById.get(movementProxy.drillId!)
+        expect(drill).toBeDefined()
+        // Pass tag is required (the slot's `skillTags` includes 'pass'
+        // for a reason).
+        expect(drill!.skillFocus.includes('pass')).toBe(true)
+      }
+      expect(
+        foundAny,
+        `${label}: no seed produced a movement_proxy block; test ran vacuously`,
+      ).toBe(true)
+    },
+  )
+
+  /**
+   * 2026-04-27 cca2 dogfeed F6 sibling: the technique slot's
+   * prefer-pass-only branch must NOT break archetypes whose layout
+   * has no movement_proxy slot (the pre-filter then has no downstream
+   * consumer, but it still applies; pass-only is preferred regardless).
+   * Solo wall 15-min layout is `[warmup, technique, mainSkill, wrap]`
+   * — no movement_proxy. The technique slot must still resolve to a
+   * non-empty drill, and the build must complete cleanly across seeds.
+   */
+  it('solo_wall 15 (no movement_proxy slot) still resolves the technique slot', () => {
+    const context: SetupContext = {
+      playerMode: 'solo',
+      timeProfile: 15,
+      netAvailable: false,
+      wallAvailable: true,
+    }
+    for (let i = 0; i < 8; i++) {
+      const draft = buildDraft(context, { assemblySeed: `solo_wall_15-seed-${i}` })
+      expect(draft).not.toBeNull()
+      // No movement_proxy slot in this layout.
+      expect(draft!.blocks.some((b) => b.type === 'movement_proxy')).toBe(false)
+      const technique = draft!.blocks.find((b) => b.type === 'technique')
+      expect(technique).toBeDefined()
+      // Drill resolved cleanly (drillId, drillName, variantId all
+      // populated) — no fall-through to undefined.
+      expect(technique!.drillId).toBeTruthy()
+      expect(technique!.variantId).toBeTruthy()
+      expect(technique!.drillName).toBeTruthy()
+    }
+  })
+
+  /**
    * Tier 1a Unit 4 (Chosen-because rationale): every block on a default
    * buildDraft result carries a one-sentence rationale.
    *

@@ -1,4 +1,5 @@
 import type { ExecutionLog, ExecutionStatus } from '../db'
+import type { EyebrowSkillFocus } from '../domain/drillMetadata'
 import type { BlockSlotType } from '../types/session'
 
 export function formatTime(seconds: number): string {
@@ -204,19 +205,114 @@ export function phaseLabel(type: BlockSlotType): string {
   // shibui-leaning direction. Case is the source of truth now; the
   // pill drops its `uppercase` utility in the same pass. See
   // `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`.
+  //
+  // 2026-04-27 cca2 dogfeed F1 (`docs/research/2026-04-27-cca2-dogfeed-
+  // findings.md`): the F8 collapse of `technique | movement_proxy |
+  // main_skill | pressure` to a single `Work` label hid structural
+  // role from the courtside reader. The 25-min pair pass session
+  // landed three count-eligible passing reps and one streak setting
+  // rep across four slots labeled identically — and only the main_skill
+  // slot got the post-block Difficulty chip. Without the role label,
+  // the chip-asymmetry felt arbitrary; with role labels visible
+  // throughout the run, it reads as "this is the main drill, of
+  // course it gets a check-in." Un-collapsing here is the F8-era
+  // typography call revisited under courtside legibility evidence,
+  // not a reversal of the calm-voice thesis (sentence case kept;
+  // accent-color treatment kept; no new visual chrome added — the
+  // eyebrow now just carries six labels instead of three).
+  //
+  // Vocabulary chosen for direct read: `Technique` / `Movement` /
+  // `Main drill` / `Pressure` over softer alternatives (`Foundation` /
+  // `Footwork` / `Today's main` / `Challenge`) per founder vocabulary
+  // call 2026-04-27. `Movement` over `Footwork` keeps the slot label
+  // generic enough to host non-footwork reading-and-cover proxies
+  // without re-naming later.
   switch (type) {
     case 'warmup':
       return 'Warm up'
     case 'wrap':
       return 'Downshift'
     case 'technique':
+      return 'Technique'
     case 'movement_proxy':
+      return 'Movement'
     case 'main_skill':
+      return 'Main drill'
     case 'pressure':
-      return 'Work'
+      return 'Pressure'
     default: {
       const _exhaustive: never = type
       return _exhaustive
     }
   }
+}
+
+/**
+ * 2026-04-27 cca2 dogfeed F8 follow-up (`docs/research/2026-04-27-cca2-
+ * dogfeed-findings.md`): user-facing label for the per-block
+ * **skill focus** that composes onto the `phaseLabel` eyebrow. The
+ * founder report ("is this a serving drill? it's really not that
+ * clear" while looking at `d33-pair`'s setup-led courtside paragraph)
+ * named two compounding gaps: (a) several drill names trail with
+ * the skill word ("Around the World **Serving**", "Corner to Corner
+ * **Setting**") which the eye misses on first scan, and (b) the
+ * eyebrow above the drill carries no skill information so the
+ * structural role marker (`Main drill`) reads ambiguous on
+ * skill-mixed catalogs. The fix composes skill into the eyebrow as
+ * a structural marker: `Main drill · Serve`. Lead-with-skill
+ * courtside-copy invariant ships in parallel under
+ * `.cursor/rules/courtside-copy.mdc` to address (a).
+ *
+ * Vocabulary aligned with `phaseLabel` (sentence case, single word).
+ * Pass / Serve / Set are the only three skills currently in M001
+ * scope; `EyebrowSkillFocus` in `domain/drillMetadata.ts` is the
+ * type-level guard that prevents non-skill `skillFocus` values
+ * (`'movement'` / `'attack'` / `'block'` / `'dig'` /
+ * `'conditioning'` / `'warmup'` / `'recovery'`) from reaching this
+ * function.
+ */
+export function skillLabel(skill: EyebrowSkillFocus): string {
+  switch (skill) {
+    case 'pass':
+      return 'Pass'
+    case 'serve':
+      return 'Serve'
+    case 'set':
+      return 'Set'
+    default: {
+      const _exhaustive: never = skill
+      return _exhaustive
+    }
+  }
+}
+
+/**
+ * Compose the run-flow eyebrow label from a block's slot type and
+ * its drill's primary skill focus. Returns one of:
+ *   - `Warm up` (warmup block; skill omitted by design)
+ *   - `Downshift` (wrap block; skill omitted by design)
+ *   - `Technique`, `Movement`, `Main drill`, `Pressure` (skill block
+ *     whose drill resolves to no eyebrow-eligible skill — synthetic
+ *     test, legacy plan, or a non-pass/serve/set drill)
+ *   - `Technique · Pass`, `Movement · Pass`, `Main drill · Serve`,
+ *     `Pressure · Set` (skill block with a resolved skill focus)
+ *
+ * Used by `RunScreen.tsx` (header eyebrow) and indirectly by
+ * `TransitionScreen.tsx` (which composes `Up next · {label}` on top
+ * of this). Centralising here means the two call sites can't drift
+ * apart on separator (`·`) or vocabulary; future surfaces (Swap
+ * sheet, Tier 2 See-Why modal) can reach for the same composer.
+ *
+ * Skill is intentionally OMITTED for warmup / wrap because those
+ * blocks have no per-skill identity (warmup primes the body;
+ * cooldown unloads it; both are skill-agnostic).
+ */
+export function blockEyebrowLabel(
+  blockType: BlockSlotType,
+  skill: EyebrowSkillFocus | null,
+): string {
+  const phase = phaseLabel(blockType)
+  if (blockType === 'warmup' || blockType === 'wrap') return phase
+  if (skill === null) return phase
+  return `${phase} · ${skillLabel(skill)}`
 }
