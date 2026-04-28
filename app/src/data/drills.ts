@@ -1476,7 +1476,7 @@ const d31: Drill = {
     // 2026-04-27 solo-vs-pair sweep: equipment.balls = 1 (not 'many')
     // to match d31-solo-open and stay inside the engine's
     // unmodeled-requirements filter (`hasUnmodeledRequirements` in
-    // sessionBuilder.ts excludes `balls === 'many'` and `balls > 1`,
+    // sessionAssembly/candidates.ts excludes `balls === 'many'` and `balls > 1`,
     // pending D102 equipment-context resolution). Pair execution
     // still works with one ball: shagger throws it back between
     // serves.
@@ -1589,7 +1589,7 @@ const d33: Drill = {
         lowScreenTime: true,
       }),
       // 2026-04-27 solo-vs-pair sweep: balls = 1 (not 'many') to stay
-      // shippable. `hasUnmodeledRequirements` in sessionBuilder.ts
+      // shippable. `hasUnmodeledRequirements` in sessionAssembly/candidates.ts
       // excludes `balls === 'many'` and `balls > 1` pending D102
       // equipment-context resolution. Pair cadence below is honest
       // about the one-ball reality: round-based switching (each
@@ -1844,7 +1844,7 @@ const d26: Drill = {
 // skillTags stay at `['pass', 'serve']`, so default (non-Swap) session
 // assembly preserves the single-focus-per-session invariant (archetype
 // invariants header point 1). `SKILL_TAGS_BY_TYPE.main_skill` and
-// `.pressure` in sessionBuilder.ts widen to include 'set' so
+// `.pressure` in sessionAssembly/swapAlternatives.ts widen to include 'set' so
 // user-initiated Swap can reach these drills.
 
 // BAB Beginner's Guide, Lesson 2 - Bump Set tutorial.

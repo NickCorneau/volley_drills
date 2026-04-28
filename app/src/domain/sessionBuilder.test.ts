@@ -13,6 +13,59 @@ const variantById = new Map(
 )
 
 describe('sessionBuilder', () => {
+  it('pins fixed-seed session assembly output while algorithm version stays stable', () => {
+    const draft = buildDraft(
+      {
+        playerMode: 'pair',
+        timeProfile: 25,
+        netAvailable: false,
+        wallAvailable: false,
+      },
+      { assemblySeed: 'batch3-golden-pair-open-25' },
+    )
+
+    expect(draft?.assemblyAlgorithmVersion).toBe(1)
+    expect(
+      draft?.blocks.map((block) => ({
+        type: block.type,
+        durationMinutes: block.durationMinutes,
+        drillId: block.drillId,
+        variantId: block.variantId,
+      })),
+    ).toEqual([
+      {
+        type: 'warmup',
+        durationMinutes: 3,
+        drillId: 'd28',
+        variantId: 'd28-solo',
+      },
+      {
+        type: 'technique',
+        durationMinutes: 6,
+        drillId: 'd05',
+        variantId: 'd05-pair',
+      },
+      {
+        type: 'movement_proxy',
+        durationMinutes: 5,
+        drillId: 'd10',
+        variantId: 'd10-pair',
+      },
+      {
+        type: 'main_skill',
+        durationMinutes: 7,
+        drillId: 'd11',
+        variantId: 'd11-pair',
+      },
+      {
+        type: 'wrap',
+        durationMinutes: 4,
+        drillId: 'd26',
+        variantId: 'd26-solo',
+      },
+    ])
+  })
+
   it.each([
     [
       'solo wall',
