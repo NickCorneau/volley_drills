@@ -1,15 +1,21 @@
 import { test, expect, type BrowserContext, type Page } from '@playwright/test'
 
 /**
- * Phase C-0 schema verification (D-C7 / A5 / H15).
+ * Current schema verification (D-C7 / A5 / H15 / D133).
  *
- * Real-browser proof that the v4 Dexie upgrade:
+ * This file keeps its historical `schema-v4` filename because older docs
+ * route to the original Phase C-0 migration smoke. The assertions below
+ * intentionally pin the current v5 boundary.
+ *
+ * Real-browser proof that the current v5 Dexie boundary:
  * - backfills `SessionReview.status` from legacy `sessionRpe` values,
  *   preserving the critical `sessionRpe === 0 -> 'submitted'` edge,
  * - creates the `storageMeta` table,
  * - backfills `storageMeta.onboarding.completedAt` when an `ExecutionLog`
- *   exists (H15 defense-in-depth), and skips the onboarding backfill when
- *   no `ExecutionLog` is present.
+ *   exists (H15 defense-in-depth), skips the onboarding backfill when
+ *   no `ExecutionLog` is present,
+ * - opens at schema version 5, and
+ * - preserves v4 records carrying optional `perDrillCaptures` data.
  *
  * Unit tests cover the backfill logic directly against `fake-indexeddb`;
  * this spec catches real-browser IDB semantics the unit tests cannot.
@@ -19,7 +25,7 @@ import { test, expect, type BrowserContext, type Page } from '@playwright/test'
  * version and blocks the seed). We accomplish this by intercepting the
  * HTML document request via `page.route()` and serving a blank page on
  * the first navigation; the seed runs there, then we unroute and
- * navigate to `/` to trigger the real v4 upgrade.
+ * navigate to `/` to trigger the real v3/v4 -> v5 upgrade path.
  *
  * We also clear IndexedDB at the CDP level per test so accumulated state
  * from prior `npx playwright test` invocations (for example the elevated
@@ -78,15 +84,57 @@ interface V3ExecLogSeed {
   completedAt: number
 }
 
+interface V4ReviewSeed extends V3ReviewSeed {
+  status?: string
+  perDrillCaptures?: unknown[]
+}
+
+interface V4StorageMetaSeed {
+  key: string
+  value: unknown
+  updatedAt: number
+}
+
 async function seedV3Database(
   page: Page,
   { reviews, execLogs }: { reviews: V3ReviewSeed[]; execLogs: V3ExecLogSeed[] },
 ): Promise<void> {
+  await seedDatabaseVersion(page, { version: 3, reviews, execLogs, storageMeta: [] })
+}
+
+async function seedV4Database(
+  page: Page,
+  {
+    reviews,
+    execLogs,
+    storageMeta,
+  }: {
+    reviews: V4ReviewSeed[]
+    execLogs: V3ExecLogSeed[]
+    storageMeta: V4StorageMetaSeed[]
+  },
+): Promise<void> {
+  await seedDatabaseVersion(page, { version: 4, reviews, execLogs, storageMeta })
+}
+
+async function seedDatabaseVersion(
+  page: Page,
+  {
+    version,
+    reviews,
+    execLogs,
+    storageMeta,
+  }: {
+    version: 3 | 4
+    reviews: Array<V3ReviewSeed | V4ReviewSeed>
+    execLogs: V3ExecLogSeed[]
+    storageMeta: V4StorageMetaSeed[]
+  },
+): Promise<void> {
   await page.evaluate(
-    async ({ dbName, reviews, execLogs }) => {
-      // Step 1: open at version 3 and create the v3 store shape.
+    async ({ dbName, version, reviews, execLogs, storageMeta }) => {
       const dbInstance = await new Promise<IDBDatabase>((resolve, reject) => {
-        const req = indexedDB.open(dbName, 3)
+        const req = indexedDB.open(dbName, version)
         req.onupgradeneeded = () => {
           const dbInst = req.result
           dbInst.createObjectStore('sessionPlans', { keyPath: 'id' })
@@ -101,30 +149,37 @@ async function seedV3Database(
           r.createIndex('executionLogId', 'executionLogId')
           dbInst.createObjectStore('timerState', { keyPath: 'id' })
           dbInst.createObjectStore('sessionDrafts', { keyPath: 'id' })
+          if (version >= 4) {
+            dbInst.createObjectStore('storageMeta', { keyPath: 'key' })
+          }
         }
         req.onsuccess = () => resolve(req.result)
         req.onerror = () => reject(req.error)
       })
 
-      // Step 2: seed review + exec log fixtures inside a single tx.
       await new Promise<void>((resolve, reject) => {
-        const tx = dbInstance.transaction(['sessionReviews', 'executionLogs'], 'readwrite')
+        const storeNames = ['sessionReviews', 'executionLogs']
+        if (version >= 4) storeNames.push('storageMeta')
+        const tx = dbInstance.transaction(storeNames, 'readwrite')
         tx.oncomplete = () => resolve()
         tx.onerror = () => reject(tx.error)
         const reviewStore = tx.objectStore('sessionReviews')
         for (const r of reviews) reviewStore.put(r)
         const execStore = tx.objectStore('executionLogs')
         for (const e of execLogs) execStore.put(e)
+        if (version >= 4) {
+          const metaStore = tx.objectStore('storageMeta')
+          for (const row of storageMeta) metaStore.put(row)
+        }
       })
 
-      // Step 3: close so the next page-load can run the v4 upgrade.
       dbInstance.close()
     },
-    { dbName: DB_NAME, reviews, execLogs },
+    { dbName: DB_NAME, version, reviews, execLogs, storageMeta },
   )
 }
 
-async function waitForV4(page: Page): Promise<void> {
+async function waitForV5(page: Page): Promise<void> {
   await page.waitForFunction(
     async (dbName) => {
       const version = await new Promise<number>((resolve, reject) => {
@@ -136,7 +191,7 @@ async function waitForV4(page: Page): Promise<void> {
         }
         req.onerror = () => reject(req.error)
       })
-      return version === 4
+      return version === 5
     },
     DB_NAME,
     { timeout: 5000 },
@@ -145,7 +200,14 @@ async function waitForV4(page: Page): Promise<void> {
 
 async function readAllReviews(
   page: Page,
-): Promise<Array<{ id: string; status?: string; sessionRpe: number | null }>> {
+): Promise<
+  Array<{
+    id: string
+    status?: string
+    sessionRpe: number | null
+    perDrillCaptures?: unknown[]
+  }>
+> {
   return page.evaluate((dbName) => {
     return new Promise((resolve, reject) => {
       const open = indexedDB.open(dbName)
@@ -160,6 +222,7 @@ async function readAllReviews(
               id: string
               status?: string
               sessionRpe: number | null
+              perDrillCaptures?: unknown[]
             }>,
           )
           dbInst.close()
@@ -210,13 +273,13 @@ async function readStorageMetaKey(
   )
 }
 
-test.describe('Phase C-0 schema v4 migration', () => {
+test.describe('current schema v5 migration', () => {
   test.beforeEach(async ({ context, page }) => {
     // Land on the app origin via a blank shell so IndexedDB is reachable
     // without the React bundle opening Dexie.
     await gotoBlankOnAppOrigin(page)
     // Wipe any IDB state accumulated from prior spec runs (blocked-schema
-    // leaves the DB at version 99; other specs leave it at v4 with
+    // leaves the DB at version 99; other specs leave it at v5 with
     // records).
     await clearOriginStorage(context, page)
   })
@@ -274,7 +337,7 @@ test.describe('Phase C-0 schema v4 migration', () => {
     })
 
     await page.reload()
-    await waitForV4(page)
+    await waitForV5(page)
 
     const reviews = await readAllReviews(page)
     const byId = new Map(reviews.map((r) => [r.id, r]))
@@ -306,12 +369,59 @@ test.describe('Phase C-0 schema v4 migration', () => {
     })
 
     await page.reload()
-    await waitForV4(page)
+    await waitForV5(page)
 
     const completedAt = await readStorageMetaKey(page, 'onboarding.completedAt')
     expect(completedAt).toBeUndefined()
 
     const reviews = await readAllReviews(page)
     expect(reviews[0]?.status).toBe('submitted')
+  })
+
+  test('preserves v4 perDrillCaptures while opening at v5', async ({ page }) => {
+    const now = 1_700_000_000_000
+    const capture = {
+      drillId: 'd03',
+      variantId: 'd03-pair',
+      blockIndex: 2,
+      difficulty: 'still_learning',
+      goodPasses: 9,
+      attemptCount: 12,
+      capturedAt: now,
+    }
+
+    await seedV4Database(page, {
+      reviews: [
+        {
+          id: 'review-draft-captures',
+          executionLogId: 'exec-captures',
+          sessionRpe: null,
+          goodPasses: 0,
+          totalAttempts: 0,
+          submittedAt: now,
+          status: 'draft',
+          perDrillCaptures: [capture],
+        },
+      ],
+      execLogs: [
+        {
+          id: 'exec-captures',
+          planId: 'plan-captures',
+          status: 'completed',
+          activeBlockIndex: 0,
+          blockStatuses: [],
+          startedAt: now - 60_000,
+          completedAt: now,
+        },
+      ],
+      storageMeta: [],
+    })
+
+    await page.reload()
+    await waitForV5(page)
+
+    const reviews = await readAllReviews(page)
+    expect(reviews[0]?.status).toBe('draft')
+    expect(reviews[0]?.perDrillCaptures).toEqual([capture])
   })
 })

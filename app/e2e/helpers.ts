@@ -2,16 +2,25 @@ import type { Page } from '@playwright/test'
 
 const DB_NAME = 'volley-drills'
 
-/** Clears the app IndexedDB (same pattern as existing specs). */
-export async function clearIndexedDB(page: import('@playwright/test').Page) {
-  await page.evaluate((name) => {
-    const req = indexedDB.deleteDatabase(name)
-    return new Promise<void>((resolve, reject) => {
-      req.onsuccess = () => resolve()
-      req.onerror = () => reject(req.error)
-      req.onblocked = () => resolve()
+/**
+ * Clears the app IndexedDB for the current origin.
+ *
+ * Use CDP instead of `indexedDB.deleteDatabase()`: the app opens Dexie during
+ * boot, so deleteDatabase can hit `onblocked` and leave the DB intact while
+ * the helper reports success. CDP origin clearing matches the schema e2e spec
+ * and gives every flow test a real cold start.
+ */
+export async function clearIndexedDB(page: Page) {
+  const origin = new URL(page.url() !== 'about:blank' ? page.url() : 'http://127.0.0.1:4173').origin
+  const client = await page.context().newCDPSession(page)
+  try {
+    await client.send('Storage.clearDataForOrigin', {
+      origin,
+      storageTypes: 'indexeddb',
     })
-  }, DB_NAME)
+  } finally {
+    await client.detach()
+  }
 }
 
 /**

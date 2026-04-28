@@ -43,6 +43,35 @@ async function waitForRunControls(page: import('@playwright/test').Page) {
   }
 }
 
+async function completeCurrentBlock(page: import('@playwright/test').Page) {
+  await waitForRunControls(page)
+  await page.getByRole('button', { name: /^next$/i }).click()
+}
+
+async function startNextBlock(page: import('@playwright/test').Page) {
+  const startNext = page.getByRole('button', { name: /start next block/i })
+  await expect(startNext).toBeVisible({ timeout: 10_000 })
+  await startNext.click()
+  await expect(startNext).toBeHidden({ timeout: 5_000 })
+}
+
+async function completeDrillCheck(page: import('@playwright/test').Page) {
+  await expect(page.getByText('Drill check')).toBeVisible({ timeout: 10_000 })
+  await page.getByRole('radio', { name: /still learning/i }).click()
+  await page.getByRole('button', { name: /^continue$/i }).click()
+}
+
+async function completeDrillCheckIfPresent(page: import('@playwright/test').Page) {
+  const drillCheck = page.getByText('Drill check')
+  try {
+    await expect(drillCheck).toBeVisible({ timeout: 1_000 })
+  } catch {
+    return
+  }
+  await page.getByRole('radio', { name: /still learning/i }).click()
+  await page.getByRole('button', { name: /^continue$/i }).click()
+}
+
 async function endSessionEarly(page: import('@playwright/test').Page) {
   await waitForRunControls(page)
   await page.getByRole('button', { name: /pause/i }).click()
@@ -92,5 +121,36 @@ test.describe('v0b session flow', () => {
     // "Review pending" eyebrow + the plan name.
     await expect(page.getByText(/^Review pending$/)).toBeVisible({ timeout: 5000 })
     await expect(page.getByRole('button', { name: /finish review/i })).toBeVisible()
+  })
+
+  test('can complete through Run, Drill Check, Review, and Complete', async ({ page }) => {
+    await setupAndStart(page)
+    await passSafety(page)
+
+    // 15-min solo sessions run warmup -> technique -> main_skill -> wrap.
+    // Warmup bypasses Drill Check; count-eligible support slots may now
+    // capture there too, and main_skill always renders the capture beat.
+    await completeCurrentBlock(page)
+    await completeDrillCheckIfPresent(page)
+    await startNextBlock(page)
+
+    await completeCurrentBlock(page)
+    await completeDrillCheckIfPresent(page)
+    await startNextBlock(page)
+
+    await completeCurrentBlock(page)
+    await completeDrillCheck(page)
+
+    await startNextBlock(page)
+    await completeCurrentBlock(page)
+
+    await expect(page.getByRole('heading', { name: /quick review/i })).toBeVisible({
+      timeout: 10_000,
+    })
+    await page.getByRole('radio', { name: /^right$/i }).click()
+    await page.getByRole('button', { name: /^done$/i }).click()
+
+    await expect(page.getByText('Session recap')).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByTestId('recap-difficulty')).toContainText(/still learning/i)
   })
 })
