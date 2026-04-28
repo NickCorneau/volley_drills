@@ -133,4 +133,18 @@ describe('getBlockSuccessRule', () => {
     delete (block as { variantId?: string }).variantId
     expect(getBlockSuccessRule(block, 2)).toMatch(/named by the shagger/)
   })
+
+  it('falls back to the first variant when no participant envelope matches', () => {
+    const block: SessionPlanBlock = {
+      ...makeBlock({
+        drillId: 'd10',
+        drillName: 'The 6-Legged Monster',
+        shortName: '6-Leg Monster',
+      }),
+    }
+    delete (block as { variantId?: string }).variantId
+
+    expect(getBlockMetricType(block, 1)).toBe('pass-rate-good')
+    expect(getBlockSuccessRule(block, 1)).toBe('Passes graded 2+ across 24 tosses.')
+  })
 })

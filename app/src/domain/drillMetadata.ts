@@ -1,66 +1,17 @@
-import { DRILLS } from '../data/drills'
 import type { SessionPlanBlock } from '../db/types'
-import type { Drill, DrillVariant, MetricType } from '../types/drill'
-
-/**
- * Resolve the variant a planned block would render under.
- *
- * Resolution order (red-team adversarial finding, 2026-04-27):
- *   1. Exact `block.variantId` match. The session builder writes the
- *      chosen variant's id onto every block; downstream lookups must
- *      respect that decision rather than re-deriving from the
- *      participants envelope. Without this, the new pair variants land
- *      a participants envelope of `{ min: 2, max: 2 }` and the legacy
- *      solo variant a `{ min: 1, max: 1 }` envelope - so a stored
- *      `variantId: 'd38-pair'` block on a `playerCount = 1` projection
- *      (mid-session player-count switch, restored solo plan, exporter
- *      hydration) would silently flip to `d38-solo` and quietly change
- *      the success-metric type the tester is being scored against.
- *   2. Participants-envelope bracket against `playerCount` (legacy
- *      blocks with no `variantId`).
- *   3. First variant on the drill (synthetic / legacy fallback).
- *
- * Returns `null` when the block is unknown (synthetic drill names in
- * tests, legacy plans with no `drillId`, or a drillId that no longer
- * exists in `DRILLS`).
- *
- * Centralized here so the per-block lookup in `getBlockMetricType` and
- * `getBlockSuccessRule` cannot drift apart - the V0B-28 forced-criterion
- * prompt's correctness depends on the rule and the metric type both
- * coming from the same variant.
- */
-function resolveBlockVariant(
-  block: SessionPlanBlock | null | undefined,
-  playerCount: 1 | 2,
-): DrillVariant | null {
-  if (!block) return null
-  const drill = DRILLS.find((d) =>
-    block.drillId ? d.id === block.drillId : d.name === block.drillName,
-  )
-  if (!drill) return null
-  if (block.variantId) {
-    const exact = drill.variants.find((v) => v.id === block.variantId)
-    if (exact) return exact
-  }
-  return (
-    drill.variants.find(
-      (v) => v.participants.min <= playerCount && playerCount <= v.participants.max,
-    ) ??
-    drill.variants[0] ??
-    null
-  )
-}
+import type { MetricType } from '../types/drill'
+import { drillForBlock, variantForBlock } from './catalogLookup'
 
 /**
  * Resolve the success-metric type for a planned block by walking the
- * drill catalog. See `resolveBlockVariant` for the selection rule and
+ * drill catalog. See `variantForBlock` for the selection rule and
  * null-return contract.
  */
 export function getBlockMetricType(
   block: SessionPlanBlock | null | undefined,
   playerCount: 1 | 2,
 ): MetricType | null {
-  return resolveBlockVariant(block, playerCount)?.successMetric.type ?? null
+  return variantForBlock(block, playerCount)?.successMetric.type ?? null
 }
 
 /**
@@ -80,28 +31,7 @@ export function getBlockSuccessRule(
   block: SessionPlanBlock | null | undefined,
   playerCount: 1 | 2,
 ): string | null {
-  return resolveBlockVariant(block, playerCount)?.successMetric.description ?? null
-}
-
-/**
- * Resolve the drill catalog row (not the variant) for a planned block.
- * Returns `null` when no drill matches the block's `drillId`.
- *
- * Used by `getBlockSkillFocus` (the run-flow eyebrow's skill marker)
- * because the **drill-level** `skillFocus` is the source-of-truth for
- * "what skill is this drill working" (D105 architectural invariant
- * 1: single skillFocus per drill). The variant carries
- * `participants` / `feedType` / `equipment` overrides but inherits
- * skill identity from the drill row above it.
- */
-function resolveBlockDrill(
-  block: SessionPlanBlock | null | undefined,
-): Drill | null {
-  if (!block) return null
-  return (
-    DRILLS.find((d) => (block.drillId ? d.id === block.drillId : d.name === block.drillName)) ??
-    null
-  )
+  return variantForBlock(block, playerCount)?.successMetric.description ?? null
 }
 
 /**
@@ -145,8 +75,8 @@ export function getBlockSkillFocus(
   // skillFocus today. If a future variant ever carries its own
   // skill override, the lookup happens at the same grain as the
   // success-rule and metric-type lookups.
-  void resolveBlockVariant(block, playerCount)
-  const drill = resolveBlockDrill(block)
+  void variantForBlock(block, playerCount)
+  const drill = drillForBlock(block)
   const primary = drill?.skillFocus[0]
   if (primary && EYEBROW_SKILL_FOCUSES.has(primary)) {
     return primary as EyebrowSkillFocus
