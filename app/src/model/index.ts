@@ -32,6 +32,15 @@ export type {
 } from './review'
 export type { TimerRunStatus, TimerState } from './timer'
 export type { StorageMetaEntry } from './storage'
+export type { SessionParticipant, SessionParticipantRole } from './participant'
+export type { SkillSample, SkillVector } from './skillVector'
+export type {
+  CoachBlockSummary,
+  CoachPayload,
+  CoachPerDrillCapture,
+  CoachReviewSummary,
+  CoachSessionHeader,
+} from './coachPayload'
 
 // Catalog and setup types live in `app/src/types/` and stay there
 // (older code base; many imports). Re-exported here so domain code

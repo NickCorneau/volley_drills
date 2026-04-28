@@ -9,6 +9,7 @@
  * extended interface lives in `db/`, not here.
  */
 import type { BlockSlotType, SetupContext } from '../types/session'
+import type { SessionParticipant } from './participant'
 
 export interface SessionPlanBlock {
   id: string
@@ -36,7 +37,24 @@ export interface SessionPlan {
   id: string
   presetId: string
   presetName: string
+  /**
+   * Legacy denormalized participant count. v0b keeps writing it so
+   * existing readers (HomeScreen tally, services tests) continue to
+   * resolve without churn. New code SHOULD prefer
+   * `getSessionParticipants(plan).length` or read `participants`
+   * directly. The `participants.length === playerCount` invariant is
+   * upheld by `createSessionFromDraft` and asserted in
+   * `participants.test.ts` (U6 of the architecture pass).
+   */
   playerCount: 1 | 2
+  /**
+   * Forward-compatibility seam for `D115`/`D116`/`D117` (U6). Optional
+   * for now so legacy persisted rows that pre-date the seam still
+   * type-check. v0b sessions populate this on create; downstream
+   * reads project through `getSessionParticipants` which falls back
+   * to `playerCount` when absent.
+   */
+  participants?: SessionParticipant[]
   assemblySeed?: string
   assemblyAlgorithmVersion?: number
   blocks: SessionPlanBlock[]

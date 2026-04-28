@@ -16,6 +16,7 @@ import { endedAt, isTerminalSession } from '../../domain/executionPredicates'
 import { buildEndedSession } from '../../domain/executionState'
 import { FINISH_LATER_CAP_MS } from '../../domain/policies'
 import { applyBlockOverrides } from '../../domain/sessionProjection'
+import { defaultParticipantsForPlayerCount } from '../../domain/sessionParticipants'
 import { expireReview } from '../review'
 import { clearSoftBlockDismissed } from '../softBlock'
 import { clearTimerState } from '../timer'
@@ -51,11 +52,18 @@ export async function createSessionFromDraft(
     painOverridden: params.painOverridden,
   }
 
+  const playerCount: SessionPlan['playerCount'] = draft.context.playerMode === 'solo' ? 1 : 2
   const plan: SessionPlan = {
     id: planId,
     presetId: draft.archetypeId,
     presetName: draft.archetypeName,
-    playerCount: draft.context.playerMode === 'solo' ? 1 : 2,
+    playerCount,
+    // U6 seam (`D115`/`D116`/`D117`): every new plan persists the
+    // participants array so future readers can drop `playerCount`.
+    // Derived from the same input that drives `playerCount` so the
+    // `participants.length === playerCount` invariant is true by
+    // construction.
+    participants: defaultParticipantsForPlayerCount(playerCount),
     assemblySeed: draft.assemblySeed,
     assemblyAlgorithmVersion: draft.assemblyAlgorithmVersion,
     blocks: draft.blocks.map((b) => ({

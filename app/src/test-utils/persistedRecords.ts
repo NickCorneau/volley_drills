@@ -58,7 +58,7 @@ function legacyBlock(overrides: BlockOverrides = {}): SessionPlanBlock {
 }
 
 export function currentPersistedPlan(overrides: PlanOverrides = {}): SessionPlan {
-  return {
+  const plan: SessionPlan = {
     id: overrides.id ?? 'plan-current',
     presetId: overrides.presetId ?? 'pair_net_25',
     presetName: overrides.presetName ?? 'Pair net 25',
@@ -78,6 +78,14 @@ export function currentPersistedPlan(overrides: PlanOverrides = {}): SessionPlan
     },
     createdAt: overrides.createdAt ?? 1000,
   }
+  // U6 seam: respect an explicit override (including `undefined` /
+  // empty-array variants used by participant fallback tests). Default
+  // behavior leaves `participants` undefined so older tests that do
+  // not assert on it stay unchanged.
+  if ('participants' in overrides) {
+    plan.participants = overrides.participants
+  }
+  return plan
 }
 
 export function legacyPersistedPlan(overrides: PlanOverrides = {}): SessionPlan {

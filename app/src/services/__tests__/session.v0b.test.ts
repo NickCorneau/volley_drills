@@ -72,6 +72,33 @@ describe('v0b session services', () => {
     const resumable = await findResumableSession()
     expect(resumable?.execution.id).toBe(execId)
     expect(resumable?.plan.id).toBe(plan[0].id)
+
+    // U6 forward-compat seam: createSessionFromDraft populates the
+    // participants array so future readers stop relying on
+    // playerCount alone. Invariant: participants.length === playerCount.
+    expect(plan[0].participants).toEqual([{ role: 'self' }])
+    expect(plan[0].participants?.length).toBe(plan[0].playerCount)
+  })
+
+  it('persists a self+partner participants array for pair-mode drafts (U6 invariant)', async () => {
+    const draft = buildDraft({
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: true,
+      wallAvailable: false,
+    })
+    expect(draft).not.toBeNull()
+
+    await createSessionFromDraft({
+      draft: draft!,
+      painFlag: false,
+      heatCta: false,
+      painOverridden: false,
+    })
+    const [persistedPlan] = await db.sessionPlans.toArray()
+    expect(persistedPlan.playerCount).toBe(2)
+    expect(persistedPlan.participants).toEqual([{ role: 'self' }, { role: 'partner' }])
+    expect(persistedPlan.participants?.length).toBe(persistedPlan.playerCount)
   })
 
   it('returns the newest saved context even when the newest plan lacks context', async () => {
