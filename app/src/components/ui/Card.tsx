@@ -5,9 +5,11 @@ import { cx } from '../../lib/cn'
  * Phase F2 (2026-04-19): shared focal-card surface token.
  *
  * Canonical calm-pass surface used across the app's primary content
- * blocks: white surface on the body background, subtle `shadow-sm` +
- * hairline `ring-1 ring-text-primary/5` instead of a hard border, and
- * `rounded-[16px]` corners. Consumers add their own padding / flex /
+ * blocks: white surface on the body background, hairline
+ * `border-text-primary/10` plus `shadow-sm` only (no `ring`: ring and
+ * shadow both paint via `box-shadow` and stack badly at large radii,
+ * producing grey corner wedges in WebKit / Chrome). Consumers add
+ * their own padding / flex /
  * gap because usages differ (the Home secondary list, for example,
  * owns its own padding via `divide-y` child rows; a content card adds
  * `p-6 flex flex-col gap-4`).
@@ -24,7 +26,7 @@ import { cx } from '../../lib/cn'
  * settings / onboarding surfaces but wrong for glare-readable run mode.
  */
 export const FOCAL_SURFACE_CLASS =
-  'rounded-[16px] bg-bg-primary shadow-sm ring-1 ring-text-primary/5'
+  'rounded-[16px] bg-bg-primary border border-text-primary/10 shadow-sm'
 
 type CardVariant = 'soft' | 'focal'
 
