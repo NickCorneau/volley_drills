@@ -1,344 +1,46 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+﻿import { Link, useSearchParams } from 'react-router-dom'
 import { IncompleteReasonChips } from '../components/IncompleteReasonChips'
 import { PassMetricInput } from '../components/PassMetricInput'
 import { RpeSelector } from '../components/RpeSelector'
 import { SafetyIcon } from '../components/SafetyIcon'
 import { Button, Card, ScreenShell, StatusMessage } from '../components/ui'
-import type {
-  ExecutionLog,
-  IncompleteReason,
-  PerDrillCapture as PerDrillCaptureRecord,
-  SessionPlan,
-} from '../db'
-import { getBlockMetricType } from '../domain/drillMetadata'
-import { COUNT_BASED_METRIC_TYPES } from '../domain/policies'
-import { formatDurationLine, formatPassRateLine, statusLabel } from '../lib/format'
-import { isSchemaBlocked } from '../lib/schema-blocked'
+import { formatPassRateLine } from '../lib/format'
 import { routes } from '../routes'
-import {
-  aggregateDrillCaptures,
-  expireReview,
-  FINISH_LATER_CAP_MS,
-  loadReviewDraft,
-  saveReviewDraft,
-  submitReview,
-} from '../services/review'
-import { loadSession } from '../services/session'
-
-function inferMainSkillMetricType(plan: SessionPlan | null): ReturnType<typeof getBlockMetricType> {
-  if (!plan) return null
-  const mainSkill = plan.blocks.find((b) => b.type === 'main_skill')
-  if (!mainSkill) return null
-  return getBlockMetricType(mainSkill, plan.playerCount)
-}
-
-type LoadedSession =
-  | { status: 'loading' }
-  | { status: 'ready'; log: ExecutionLog; plan: SessionPlan | null }
-  | { status: 'missing' }
-
-function isPastDeferralCap(log: ExecutionLog, now: number): boolean {
-  const endAt = log.completedAt ?? log.startedAt
-  return now - endAt >= FINISH_LATER_CAP_MS
-}
-
-// 2026-04-23 walkthrough closeout polish: the "stops counting in about
-// N hr M min" subtitle was removed from the Review footer per the
-// merged proposal in
-// `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`
-// and the closeout polish plan
-// `docs/plans/2026-04-23-walkthrough-closeout-polish.md` item 3. The
-// four 2026-04-22 passes (workflow / shibui / design review / trifold)
-// converged that the countdown read as pressure, not helpfulness; the
-// expired-stub behavior (A6 / A9 past-cap re-routes + the
-// `expireStaleReviews` sweep) still fires on the same cap, users just
-// are not counted-down at. D118 durability posture is unchanged.
+import { useReviewController } from './review/useReviewController'
 
 function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
-  const navigate = useNavigate()
-
-  const [loaded, setLoaded] = useState<LoadedSession>({ status: 'loading' })
-  const [submitError, setSubmitError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  // H19 (red-team fix plan v3): flips to a non-null value when submitReview
-  // refuses because a terminal record already exists (concurrent-tab submit,
-  // Home-skip, past-cap auto-expire). The `existingStatus` field lets the
-  // conflict copy differentiate "already reviewed" from "already skipped"
-  // so the tester sees honest UX in both cases (adv-3 fix).
-  const [conflictedWith, setConflictedWith] = useState<'submitted' | 'skipped' | null>(null)
-
-  const [sessionRpe, setSessionRpe] = useState<number | null>(null)
-  const [good, setGood] = useState(0)
-  const [total, setTotal] = useState(0)
-  const [incompleteReason, setIncompleteReason] = useState<IncompleteReason | null>(null)
-  const [quickTags, setQuickTags] = useState<string[]>([])
-  const [shortNote, setShortNote] = useState('')
-  // D133 (2026-04-26): captures recorded between blocks on the
-  // dedicated `/run/check` reflective beat (`DrillCheckScreen`,
-  // 2026-04-27 plan Item 9; previously hosted on TransitionScreen).
-  // ReviewScreen is a downstream reader — it only re-persists what
-  // DrillCheckScreen wrote so a Finish-Later round trip + a manual
-  // edit on Review do not silently drop the per-drill payload, and so
-  // the session-level Good-passes card collapses into a read-only
-  // aggregate when at least one capture exists. Empty array == legacy
-  // session (no per-drill captures); the session-level UI then stays
-  // in its pre-D133 shape.
-  const [perDrillCaptures, setPerDrillCaptures] = useState<PerDrillCaptureRecord[]>([])
-  // C-1 Unit 7 plan calls for 200 ms debounce on the note field (every
-  // keystroke is expensive on Dexie) while RPE / pass metric / quickTags
-  // commit immediately. `debouncedShortNote` is the value the auto-save
-  // effect reads; it lags `shortNote` by 200 ms. Adversarial finding
-  // adv-6 fix.
-  const [debouncedShortNote, setDebouncedShortNote] = useState('')
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedShortNote(shortNote), 200)
-    return () => clearTimeout(t)
-  }, [shortNote])
-  // Flip to true after `loadSession` + `loadReviewDraft` have resolved
-  // (whether or not a draft existed). Until then we must NOT persist a
-  // draft, otherwise the pre-hydration zeros would clobber any real
-  // draft already on disk. C-1 Unit 7.
-  const [hydrated, setHydrated] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const result = await loadSession(executionLogId)
-        if (cancelled) return
-        if (!result) {
-          setLoaded({ status: 'missing' })
-          setHydrated(true)
-          return
-        }
-        // A8 belt (red-team fix plan v3 §A8): a discarded-resume session
-        // is never a valid review target. The service-layer A1 filters
-        // keep these out of `findPendingReview` / `expireStaleReviews`;
-        // this guard catches any stale URL tap that lands here for such
-        // a log.
-        if (result.execution.endedEarlyReason === 'discarded_resume') {
-          navigate(routes.home(), { replace: true })
-          return
-        }
-        // A9 (red-team fix plan v3 §A9 / H16): if the log is already past
-        // the 2 h Finish Later cap at mount, write the expired stub here
-        // BEFORE routing - CompleteScreen's loadSessionBundle requires a
-        // review record to render. Relying on "the next Home-resolve sweep
-        // will write it" is a dead-end race: a tester who lands on
-        // `/review?id=X` directly (deep link, PWA resume, bookmark) never
-        // bounces through Home first, so without an inline write they
-        // would see "Session not found." on CompleteScreen.
-        //
-        // `expireReview` preserves any existing draft payload so the
-        // tester's RPE + pain note + metrics survive into the terminal
-        // skipped stub (red-team adversarial findings adv-1 / adv-2).
-        if (isPastDeferralCap(result.execution, Date.now())) {
-          try {
-            await expireReview({ executionLogId })
-          } catch (err) {
-            if (!isSchemaBlocked()) {
-              console.error('A9 mount-time expireReview failed; continuing to /complete', err)
-            }
-          }
-          if (cancelled) return
-          navigate(routes.complete(executionLogId), { replace: true })
-          return
-        }
-
-        // Rehydrate form state from any persisted draft BEFORE marking
-        // `hydrated`. The save-effect is gated on `hydrated`, so this
-        // ensures no pre-hydration zero-state write races with the real
-        // draft.
-        //
-        // 2026-04-23 walkthrough closeout polish: the prior branch that
-        // pre-selected `quickTags: ['notCaptured']` for non-count
-        // drills was removed because the Good-passes card is now
-        // hidden entirely on non-count drills (see `showMetrics`
-        // below). The downstream `notCaptured` signal is carried by
-        // `totalAttempts === 0` on submission, which `composeSummary`
-        // already reads as the notCaptured state (see
-        // `app/src/domain/sessionSummary.test.ts`
-        // "returns the notCaptured copy when totalAttempts === 0").
-        // Historical records that still carry the tag continue to
-        // survive round-trips unchanged.
-        const draft = await loadReviewDraft(executionLogId)
-        if (cancelled) return
-        if (draft) {
-          setSessionRpe(draft.sessionRpe)
-          setGood(draft.goodPasses)
-          setTotal(draft.totalAttempts)
-          setIncompleteReason(draft.incompleteReason ?? null)
-          setQuickTags(draft.quickTags ?? [])
-          setShortNote(draft.shortNote ?? '')
-          setPerDrillCaptures(draft.perDrillCaptures ?? [])
-        }
-        setLoaded({
-          status: 'ready',
-          log: result.execution,
-          plan: result.plan,
-        })
-        setHydrated(true)
-      } catch (err) {
-        // Reliability finding rel-1: a rejected Dexie read here (quota,
-        // corruption, transient InvalidStateError) would otherwise strand
-        // the tester on the loading spinner indefinitely. When the schema
-        // upgrade is mid-flight, SchemaBlockedOverlay already owns the
-        // UI so we suppress our own fallback. Otherwise drop into the
-        // `missing` variant - same recoverable UX as "record not found",
-        // with a Back-to-start escape hatch.
-        if (cancelled) return
-        if (isSchemaBlocked()) return
-        console.error('ReviewScreen mount failed:', err)
-        setLoaded({ status: 'missing' })
-        setHydrated(true)
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [executionLogId, navigate])
-
-  // Persist draft on every meaningful form-state change (A3 envelope
-  // via `saveReviewDraft`). Gated on `hydrated` so we don't overwrite a
-  // real draft with pre-load zeros. Fire-and-forget; `isSchemaBlocked`
-  // is handled inside `saveReviewDraft`'s A3 transaction (which is a
-  // Dexie write and errors with `DatabaseClosedError` when blocked -
-  // we swallow the error here because the overlay owns the UI). C-1 R7.
-  useEffect(() => {
-    if (!hydrated) return
-    if (loaded.status !== 'ready') return
-    // First-meaningful-change gate: require either an RPE set OR some
-    // pass-metric activity OR quickTag OR note. All-zero/all-default
-    // is treated as "no edits yet" and no draft write happens.
-    const meaningful =
-      sessionRpe != null ||
-      good !== 0 ||
-      total !== 0 ||
-      quickTags.length > 0 ||
-      debouncedShortNote.trim() !== '' ||
-      incompleteReason != null
-    if (!meaningful) return
-
-    void saveReviewDraft({
-      executionLogId,
-      sessionRpe,
-      goodPasses: good,
-      totalAttempts: total,
-      incompleteReason: incompleteReason ?? undefined,
-      quickTags: quickTags.length > 0 ? quickTags : undefined,
-      shortNote: debouncedShortNote.trim() || undefined,
-      // D133 round-trip: re-persist whatever DrillCheckScreen captured
-      // (Item 9, 2026-04-27; previously TransitionScreen) so a
-      // Finish-Later round-trip on a different device or after a
-      // refresh doesn't silently drop per-drill rows.
-      perDrillCaptures: perDrillCaptures.length > 0 ? perDrillCaptures : undefined,
-    }).catch((err) => {
-      if (isSchemaBlocked()) return
-      console.error('Review draft save failed:', err)
-    })
-  }, [
-    hydrated,
-    loaded.status,
-    executionLogId,
+  const {
+    loaded,
+    conflictedWith,
+    submitError,
+    isSubmitting,
     sessionRpe,
+    setSessionRpe,
     good,
+    setGood,
     total,
+    setTotal,
     incompleteReason,
+    setIncompleteReason,
     quickTags,
-    debouncedShortNote,
-    perDrillCaptures,
-  ])
-
-  const handleToggleNotCaptured = () => {
-    const hasTag = quickTags.includes('notCaptured')
-    if (hasTag) {
-      setQuickTags(quickTags.filter((t) => t !== 'notCaptured'))
-      return
-    }
-    // Tap-on: zero the metric + tag. Un-tap leaves the zeros (per plan
-    // Key Decision #5); the tester can adjust afterwards if they want.
-    setGood(0)
-    setTotal(0)
-    setQuickTags([...quickTags, 'notCaptured'])
-  }
-
-  const handleSubmit = async () => {
-    if (loaded.status !== 'ready' || sessionRpe == null || isSubmitting) return
-    const { log } = loaded
-    const isEndedEarly = log.status === 'ended_early'
-    const submitWasDiscarded = isEndedEarly && log.endedEarlyReason === 'discarded_resume'
-    const submitNeedsReason = isEndedEarly && !submitWasDiscarded
-    if (submitNeedsReason && incompleteReason == null) return
-
-    setSubmitError(null)
-    setIsSubmitting(true)
-    try {
-      // A6 (red-team fix plan v3 §A6) + D120: re-check the 2 h Finish
-      // Later cap at the moment the user tapped Submit. A tester who sat
-      // on the form past the cap never produces a valid adaptation
-      // input, so we write a terminal expired stub (skipped) and route
-      // to /complete instead of submitting. The C-2 Case A summary
-      // ("No change") renders there because the stub is status:'skipped'.
-      if (isPastDeferralCap(log, Date.now())) {
-        await expireReview({ executionLogId })
-        navigate(routes.complete(executionLogId), { replace: true })
-        return
-      }
-      // D133 (2026-04-26) submit shape: when per-drill captures
-      // exist, the session-level Good/Total fields are derived from
-      // them rather than collected on Review (the card is hidden
-      // below). `aggregateDrillCaptures` produces the same numerator
-      // / denominator a session-level entry would have, keeping the
-      // existing review payload contract intact for downstream
-      // consumers (CompleteScreen, summary composer, future D104
-      // adaptation engine). Pre-D133 sessions and non-count drills
-      // continue to use the in-state `good` / `total` values.
-      const usingPerDrillAggregate = showMetrics && perDrillCaptures.length > 0
-      const aggregate = usingPerDrillAggregate ? aggregateDrillCaptures(perDrillCaptures) : null
-      const submitGood = aggregate ? aggregate.goodPasses : showMetrics ? good : 0
-      const submitTotal = aggregate ? aggregate.totalAttempts : showMetrics ? total : 0
-      const result = await submitReview({
-        executionLogId,
-        sessionRpe,
-        goodPasses: submitGood,
-        totalAttempts: submitTotal,
-        incompleteReason: submitNeedsReason ? (incompleteReason ?? undefined) : undefined,
-        quickTags: quickTags.length > 0 ? quickTags : undefined,
-        shortNote: shortNote.trim() || undefined,
-        perDrillCaptures: perDrillCaptures.length > 0 ? perDrillCaptures : undefined,
-      })
-      // H19 (adv-3 fix + K-TS-1 exhaustive-switch fix): the A3 transaction
-      // refuses silently when a terminal record already exists for this
-      // execId. `existingStatus` tells us whether the conflict is
-      // "submitted" (different surface finalized the review) or "skipped"
-      // (user tapped Home's Skip Review). Different copy on each case.
-      // Exhaustive switch so a new `SubmitReviewResult` variant fails to
-      // compile rather than silently falling through to "success".
-      switch (result.status) {
-        case 'ok':
-          navigate(routes.complete(executionLogId), { replace: true })
-          return
-        case 'refused':
-          setConflictedWith(result.existingStatus)
-          setIsSubmitting(false)
-          return
-        default: {
-          const _exhaustive: never = result
-          throw new Error(`Unhandled submitReview result: ${JSON.stringify(_exhaustive)}`)
-        }
-      }
-    } catch (err) {
-      // When another tab has triggered a schema upgrade, `db.close()` rejects
-      // the in-flight put. The `SchemaBlockedOverlay` is already taking over
-      // the UI, so suppress our own error state to avoid a flash of
-      // "Something went wrong" behind the overlay. Matches HomeScreen.
-      if (isSchemaBlocked()) return
-      console.error('Review submit failed:', err)
-      setSubmitError('Something went wrong saving your review. Please try again.')
-      setIsSubmitting(false)
-    }
-  }
+    shortNote,
+    setShortNote,
+    sessionTitle,
+    durationPart,
+    statusPart,
+    needsIncompleteReason,
+    showMetricsCard,
+    useAggregateSummary,
+    captureAggregate,
+    isPairMode,
+    rpePrompt,
+    canSubmit,
+    missingHint,
+    handleToggleNotCaptured,
+    handleSubmit,
+    handleFinishLater,
+    handleViewSavedReview,
+  } = useReviewController(executionLogId)
 
   if (loaded.status === 'loading') {
     return <StatusMessage variant="loading" />
@@ -362,12 +64,6 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
   }
 
   if (conflictedWith !== null) {
-    // H19 (red-team fix plan v3 + adv-3 differentiation fix): a terminal
-    // record already exists. Copy differentiates "already reviewed"
-    // (someone else submitted) from "already skipped" (user tapped Skip
-    // Review from Home, possibly by mistake, then returned). Claiming
-    // "already reviewed" for a skipped session is a false statement that
-    // adv-3 flagged as dishonest UX.
     const message =
       conflictedWith === 'submitted'
         ? 'This session was already reviewed. Showing what we saved.'
@@ -377,10 +73,7 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
         variant="empty"
         message={message}
         action={
-          <Button
-            variant="primary"
-            onClick={() => navigate(routes.complete(executionLogId), { replace: true })}
-          >
+          <Button variant="primary" onClick={handleViewSavedReview}>
             View saved review
           </Button>
         }
@@ -388,137 +81,11 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
     )
   }
 
-  const { log, plan } = loaded
-  const hasSkillBlocks =
-    plan?.blocks.some((b) => b.type === 'main_skill' || b.type === 'pressure') ?? false
-
-  const sessionTitle = plan?.presetName ?? 'Session'
-  const durationPart = formatDurationLine(log)
-  const statusPart = statusLabel(log.status)
-  const isEndedEarly = log.status === 'ended_early'
-  const wasDiscarded = isEndedEarly && log.endedEarlyReason === 'discarded_resume'
-  const needsIncompleteReason = isEndedEarly && !wasDiscarded
-  // 2026-04-23 walkthrough closeout polish item 2 (merged Review
-  // proposal per `docs/plans/2026-04-23-walkthrough-closeout-polish.md`
-  // + `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`):
-  // hide the Good-passes card entirely when the main-skill drill's
-  // success metric is non-count-based (streak / points-to-target /
-  // pass-grade-avg / composite / completion), rather than showing the
-  // card in a pre-selected `notCaptured` state. The pre-close
-  // 2026-04-21 default-to-notCaptured fix (thought 4) was necessary
-  // but not sufficient — testers still read the empty card as an open
-  // ask. `metricType === null` keeps the card visible for synthetic /
-  // unknown drills so tests seeded with arbitrary drill names do not
-  // silently lose their capture surface.
-  const metricType = inferMainSkillMetricType(plan)
-  const metricCountsByRule = metricType == null || COUNT_BASED_METRIC_TYPES.has(metricType)
-  const showMetrics = !wasDiscarded && hasSkillBlocks && metricCountsByRule
-  // D133 (2026-04-26) read-only aggregate: when at least one
-  // Transition-screen capture has a difficulty tag (the required
-  // field), the session-level Good-passes input collapses into a
-  // read-only line that surfaces the per-drill aggregate so the
-  // tester sees their session-wide rate without having to re-key
-  // anything. Sessions with zero captures fall back to the
-  // pre-D133 session-level input — pre-existing partner sessions and
-  // any flow where the tester skipped the Transition tag continue to
-  // work unchanged.
-  const captureAggregate =
-    showMetrics && perDrillCaptures.length > 0 ? aggregateDrillCaptures(perDrillCaptures) : null
-  const useAggregateSummary = captureAggregate !== null && captureAggregate.drillsTagged > 0
-  const isPairMode = plan?.playerCount === 2
-  const rpePrompt = isPairMode ? 'How hard was this session for you?' : 'How hard was your session?'
-  const canSubmit = sessionRpe != null && (!needsIncompleteReason || incompleteReason != null)
-
-  // Surface exactly what's blocking submission instead of leaving the
-  // button grey and silent. Red-team UX #9. Order matches reading order of
-  // the form so the hint points at the first missing field.
-  const missingHint: string | null = isSubmitting
-    ? null
-    : sessionRpe == null
-      ? 'Rate your effort above to submit.'
-      : needsIncompleteReason && incompleteReason == null
-        ? 'Pick a reason you ended early to submit.'
-        : null
-
-  const handleFinishLater = async () => {
-    if (isSubmitting) return
-    // C-1 Unit 8: belt-and-suspenders over the auto-save effect - flush
-    // the latest form state to the draft before navigating away. A3
-    // semantics: this is a no-op if a terminal record somehow already
-    // exists on this execId (Unit 7's `saveReviewDraft`).
-    const meaningful =
-      sessionRpe != null ||
-      good !== 0 ||
-      total !== 0 ||
-      quickTags.length > 0 ||
-      shortNote.trim() !== '' ||
-      incompleteReason != null
-    if (meaningful) {
-      try {
-        await saveReviewDraft({
-          executionLogId,
-          sessionRpe,
-          goodPasses: good,
-          totalAttempts: total,
-          incompleteReason: incompleteReason ?? undefined,
-          quickTags: quickTags.length > 0 ? quickTags : undefined,
-          shortNote: shortNote.trim() || undefined,
-          perDrillCaptures: perDrillCaptures.length > 0 ? perDrillCaptures : undefined,
-        })
-      } catch (err) {
-        // Reliability finding rel-4: silent-navigate on save failure
-        // violates the Finish-Later contract - tester believes the draft
-        // was persisted, comes back to a blank form. When the schema is
-        // upgrading, SchemaBlockedOverlay owns the UI (let it through).
-        // Otherwise stay on the screen and surface the error so the
-        // tester can retry Finish Later or Submit.
-        if (!isSchemaBlocked()) {
-          console.error('Review draft save on Finish Later failed:', err)
-          setSubmitError("Couldn't save your draft. Please try again or Submit now.")
-          return
-        }
-      }
-    }
-    navigate(routes.home())
-  }
-
   return (
     <ScreenShell>
-      {/*
-        2026-04-22 iPhone-viewport layout pass + 2026-04-23 walkthrough
-        closeout polish: Review fits the merged-proposal shape — effort
-        (RPE 3-anchor) + optional Good passes (count drills only) +
-        optional Ended-early reason + optional Short note. The Quick
-        tags card, the cap-countdown subtitle, and the RPE 11-chip
-        grid were removed on 2026-04-23 per
-        `docs/plans/2026-04-23-walkthrough-closeout-polish.md`.
-        `ScreenShell` still pins Done + Finish later to the
-        footer so the terminal decision surface stays in the same
-        thumb zone on a 390 × 844 iPhone as the body scrolls.
-      */}
       <ScreenShell.Header className="flex flex-col items-center gap-1 pt-2 pb-3">
-        {/* Founder test-run feedback 2026-04-21 (round 2): the prior
-            header placed the SafetyIcon on the RIGHT while every other
-            screen (CompleteScreen / RunScreen / TransitionScreen / Setup
-            / Safety) puts the shield on the LEFT. Small thing, but the
-            eye had to re-learn the top-bar pattern on Review only. The
-            title stack was also a left-aligned block (`h1` + secondary
-            `<p>` eyebrow), whereas Safety's pattern - which Review is
-            structurally most similar to - uses centered title + centered
-            eyebrow below. Harmonize on Safety's pattern: three-column
-            top row `[shield | "Quick review" | 56×56 spacer]` with the
-            session eyebrow centered below. Same shibui restraint, same
-            thumb-zone shape across the app. */}
         <div className="flex w-full items-center justify-between">
           <SafetyIcon />
-          {/* Phase F12 (2026-04-19): sentence case (was "Quick
-              Review" Title Case) per brand-ux guidelines §1.4.
-              Founder test-run feedback 2026-04-21 (round 3): dropped
-              from `text-2xl font-bold` (24 px / 700) to `text-xl
-              font-semibold` (20 px / 600). Inter's 700 weight at
-              display sizes reads as techy-SaaS; 600 is the weight
-              the typeface is tuned for at headings. Unified with
-              every other page-title h1 across the app. */}
           <h1 className="text-xl font-semibold tracking-tight text-text-primary">Quick review</h1>
           <div className="h-14 w-14 shrink-0" aria-hidden />
         </div>
@@ -540,20 +107,8 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
           <RpeSelector value={sessionRpe} onChange={setSessionRpe} />
         </Card>
 
-        {showMetrics && (
+        {showMetricsCard && (
           <>
-            {/* 2026-04-23 walkthrough closeout polish item 2: divider
-              between the RPE card and the Good-passes card. Per the
-              design review recommendation cited in the merged Review
-              proposal in
-              `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`
-              and the closeout plan
-              `docs/plans/2026-04-23-walkthrough-closeout-polish.md`,
-              the two primary captures (effort + count) should read as
-              distinct-but-related sections rather than as two stacked
-              cards of equal visual weight. The hairline keeps the
-              `Card` container intact (no token / layout refactor)
-              while separating the two questions. */}
             <div
               className="h-px w-full bg-text-secondary/15"
               role="presentation"
@@ -561,14 +116,6 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
             />
             <Card className="flex flex-col gap-3">
               {useAggregateSummary && captureAggregate ? (
-                // D133 (2026-04-26) per-drill aggregate read-out: the
-                // tester captured difficulty (and optionally counts)
-                // between blocks on Transition; we show the rolled-up
-                // numbers here without an input affordance so the tester
-                // doesn't get asked the same question twice. The copy
-                // says "captured" not "you logged" because some drills
-                // may have been tagged-only (no counts) — `Good / Total`
-                // still summarizes only the count-bearing rows.
                 <>
                   <h2 className="text-sm font-semibold text-text-primary">Good passes</h2>
                   <p className="text-sm text-text-secondary">
@@ -595,19 +142,6 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
                 <>
                   <div>
                     <h2 className="text-sm font-semibold text-text-primary">Good passes</h2>
-                    {/* 2026-04-19 non-player tester note: the original phrasing
-                    ("count it as Not Good") implied a phantom "Not Good"
-                    control because the binary `good | not-good` vocabulary
-                    lives in `BinaryPassScore` but never surfaces as a UI
-                    button - the only controls here are the Good / Total
-                    numeric cells. Reformulated to preserve the V0B-28
-                    anti-generosity nudge (D104 layer-1 forced-criterion
-                    correction) while matching the actual affordance. The
-                    "Success rule: …" scaffold, the one-sentence rule, and
-                    the follow-up anti-generosity clause are all still
-                    present; only the clause's wording changed. See
-                    `docs/research/2026-04-19-v0b-starter-loop-feedback.md`
-                    and `docs/specs/m001-review-micro-spec.md` §Required. */}
                     <p className="mt-1 text-sm text-text-secondary">
                       <span className="font-medium text-text-primary">Success rule:</span> ball
                       reached the target zone or the next contact was playable.{' '}
@@ -637,20 +171,6 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
           </Card>
         )}
 
-        {/* 2026-04-23 walkthrough closeout polish item 2: the Quick tags
-          card was deleted per the merged Review proposal in
-          `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`.
-          The four 2026-04-22 passes converged that Too easy / About
-          right / Too hard duplicate the RPE signal now that RPE
-          collapsed to a 3-anchor picker (Easy / Right / Hard), and
-          `Need partner` belongs on the next session's setup, not
-          last session's review. `quickTags` state is retained because
-          (a) the `notCaptured` chip inside `PassMetricInput` still
-          writes it for count drills, (b) the A6 / A9 expired-stub
-          paths still need to merge `'expired'` into it, and (c)
-          historical draft rehydration preserves the field for
-          round-trip fidelity. */}
-
         <section className="flex flex-col gap-2">
           <label htmlFor="review-note" className="text-sm font-semibold text-text-primary">
             Short note <span className="font-normal text-text-secondary">(optional)</span>
@@ -673,21 +193,13 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
             {missingHint}
           </p>
         )}
-        {/* 2026-04-24 founder design note: the equal-weight Done /
-            Finish later pair made the forward action ambiguous.
-            Restore the clearer hierarchy: `Done` is the full-width
-            primary CTA, while `Finish later` returns to the existing
-            lower-emphasis link-style escape hatch. The `Submit review`
-            rename to `Done` stays because it matches the post-session
-            voice (cf. CompleteScreen `Back to home`) rather than the
-            old form-centric `Submit` voice. */}
         <Button
           variant="primary"
           fullWidth
           onClick={() => void handleSubmit()}
           disabled={!canSubmit || isSubmitting}
         >
-          {isSubmitting ? 'Saving\u2026' : 'Done'}
+          {isSubmitting ? 'Saving…' : 'Done'}
         </Button>
         <Button variant="link" onClick={() => void handleFinishLater()} disabled={isSubmitting}>
           Finish later

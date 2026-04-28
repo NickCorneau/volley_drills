@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
+import type { PerDrillCapture } from '../../db'
 import { CompleteScreen } from '../CompleteScreen'
 
 /**
@@ -9,7 +10,7 @@ import { CompleteScreen } from '../CompleteScreen'
  * per-drill captures are present on the submitted review.
  *
  * Sources:
- *   docs/specs/m001-review-micro-spec.md §"Per-drill capture at Transition (D133)"
+ *   docs/specs/m001-review-micro-spec.md §"Per-drill capture at Drill Check (D133)"
  *   docs/plans/2026-04-26-pair-rep-capture-tier1b.md
  *
  * What this file pins:
@@ -36,16 +37,7 @@ interface SeedOpts {
   execId: string
   goodPasses: number
   totalAttempts: number
-  perDrillCaptures?: Array<{
-    drillId: string
-    variantId: string
-    blockIndex: number
-    difficulty: 'too_hard' | 'still_learning' | 'too_easy'
-    goodPasses?: number
-    attemptCount?: number
-    notCaptured?: boolean
-    capturedAt: number
-  }>
+  perDrillCaptures?: PerDrillCapture[]
 }
 
 async function seed(opts: SeedOpts) {

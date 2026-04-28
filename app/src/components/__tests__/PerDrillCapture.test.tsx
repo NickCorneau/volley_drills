@@ -3,12 +3,12 @@ import { describe, expect, it, vi } from 'vitest'
 import { PerDrillCapture } from '../PerDrillCapture'
 
 /**
- * Tier 1b D133 (2026-04-26): per-drill capture surface lives on the
- * Transition screen between blocks. This file pins the component
+ * Tier 1b D133 (2026-04-26): per-drill capture surface lives on
+ * Drill Check (`/run/check`) between blocks. This file pins the component
  * contract: required difficulty chips + optional collapsed counts.
  *
  * Sources:
- *   docs/specs/m001-review-micro-spec.md §"Per-drill capture at Transition (D133)"
+ *   docs/specs/m001-review-micro-spec.md §"Per-drill capture at Drill Check (D133)"
  *   docs/research/2026-04-26-pair-rep-capture-options.md (Framing D)
  *   docs/plans/2026-04-26-pair-rep-capture-tier1b.md
  */

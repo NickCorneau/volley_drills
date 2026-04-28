@@ -1,85 +1,32 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { SafetyIcon } from '../components/SafetyIcon'
 import { Button, ScreenShell, StatusMessage } from '../components/ui'
 import { getBlockSkillFocus } from '../domain/drillMetadata'
-import { findSwapAlternatives } from '../domain/sessionBuilder'
-import { useSessionRunner } from '../hooks/useSessionRunner'
 import { blockEyebrowLabel, formatDuration } from '../lib/format'
 import { routes } from '../routes'
+import { useTransitionController } from './transition/useTransitionController'
 
 export function TransitionScreen() {
-  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const executionLogId = searchParams.get('id') ?? ''
 
-  const runner = useSessionRunner(executionLogId)
-  const { plan, execution, loaded, currentBlockIndex, totalBlocks } = runner
-
-  const prevBlockIdx = currentBlockIndex - 1
-  const prevBlock = plan?.blocks[prevBlockIdx] ?? null
-  const prevBlockStatus = execution?.blockStatuses[prevBlockIdx] ?? null
-  const nextBlock = plan?.blocks[currentBlockIndex] ?? null
-  const hasNextBlock = currentBlockIndex < totalBlocks
-
-  useEffect(() => {
-    if (!execution) return
-    if (execution.status === 'completed' || !hasNextBlock) {
-      navigate(routes.review(executionLogId), { replace: true })
-    }
-  }, [execution, hasNextBlock, executionLogId, navigate])
-
-  const handleStartNext = useCallback(() => {
-    if (navigator.vibrate) navigator.vibrate(100)
-    navigate(routes.run(executionLogId))
-  }, [navigate, executionLogId])
-
-  const handleStartShortened = useCallback(() => {
-    if (navigator.vibrate) navigator.vibrate(100)
-    navigate(routes.run(executionLogId), { state: { shortened: true } })
-  }, [navigate, executionLogId])
-
-  const [isSkipping, setIsSkipping] = useState(false)
-  const [skipError, setSkipError] = useState<string | null>(null)
-  const [swapError, setSwapError] = useState<string | null>(null)
-
-  const handleSkip = useCallback(async () => {
-    if (isSkipping) return
-    setIsSkipping(true)
-    try {
-      if (navigator.vibrate) navigator.vibrate(100)
-      const isLast = await runner.skipBlock()
-      if (isLast) {
-        navigate(routes.review(executionLogId), { replace: true })
-      }
-    } catch (err) {
-      console.error('Skip block failed:', err)
-      setSkipError('Something went wrong. Try again.')
-      setIsSkipping(false)
-    }
-  }, [runner, navigate, executionLogId, isSkipping])
-
-  /**
-   * Pre-start Swap: the tester realizes on Transition they want a
-   * different drill before committing to the next block. Same
-   * underlying call as RunScreen's mid-block Swap (`runner.swapBlock`)
-   * which handles the override + swapCount increment atomically.
-   * No timer pause / resume dance here because the block hasn't
-   * started; the effective `nextBlock` appears in the UI immediately.
-   */
-  const handleSwap = useCallback(async () => {
-    setSwapError(null)
-    try {
-      if (navigator.vibrate) navigator.vibrate(100)
-      const ok = await runner.swapBlock()
-      if (!ok) {
-        setSwapError('No alternate drills available for this block.')
-      }
-    } catch (err) {
-      console.error('Swap failed:', err)
-      setSwapError('Something went wrong. Try again.')
-    }
-  }, [runner])
+  const {
+    plan,
+    execution,
+    loaded,
+    currentBlockIndex,
+    totalBlocks,
+    prevBlock,
+    prevBlockStatus,
+    nextBlock,
+    skipError,
+    swapError,
+    hasAlternates,
+    handleStartNext,
+    handleStartShortened,
+    handleSkip,
+    handleSwap,
+  } = useTransitionController(executionLogId)
 
   if (!plan || !execution || !nextBlock) {
     if (loaded) {
@@ -101,10 +48,6 @@ export function TransitionScreen() {
     return <StatusMessage variant="loading" />
   }
 
-  const hasAlternates = plan.context
-    ? findSwapAlternatives(nextBlock, plan.context).length > 0
-    : false
-
   return (
     <ScreenShell>
       {/*
@@ -113,9 +56,9 @@ export function TransitionScreen() {
         counts) lives on `/run/check` upstream of this screen, so this
         body is single-purpose: just-finished pill (provenance), Up
         Next briefing (drill name + full prep + cue), and the action
-        footer. The capture state, draft persistence effects,
-        capture-target derivation, and "Tag how that drill went"
-        gating hint moved verbatim into `DrillCheckScreen`. See
+        footer. The capture state, draft persistence effects, and
+        capture-target derivation now live in `useDrillCheckController`;
+        this surface only previews the upcoming block. See
         `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 9.
 
         2026-04-27 cca2 dogfeed F1 follow-up

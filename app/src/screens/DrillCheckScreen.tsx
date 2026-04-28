@@ -1,19 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { PerDrillCapture } from '../components/PerDrillCapture'
 import { SafetyIcon } from '../components/SafetyIcon'
 import { Button, ScreenShell, StatusMessage } from '../components/ui'
-import type {
-  DifficultyTag,
-  PerDrillCapture as PerDrillCaptureRecord,
-  SessionPlanBlock,
-} from '../db'
-import { getBlockMetricType, getBlockSuccessRule } from '../domain/drillMetadata'
-import { COUNT_BASED_METRIC_TYPES } from '../domain/policies'
-import { useSessionRunner } from '../hooks/useSessionRunner'
-import { isSchemaBlocked } from '../lib/schema-blocked'
 import { routes } from '../routes'
-import { loadReviewDraft, saveReviewDraft } from '../services/review'
+import { useDrillCheckController } from './drillCheck/useDrillCheckController'
 
 /**
  * 2026-04-27 pre-D91 editorial polish (plan Item 9): dedicated reflective
@@ -36,271 +26,36 @@ import { loadReviewDraft, saveReviewDraft } from '../services/review'
  *   - The Jo-Ha-Kyu cadence reads naturally: "you finished" → "what was
  *     that?" → "here's what's next" → "go." Two screens, one job each.
  *
- * Bypass logic: when the just-finished block was not a count-eligible
- * main_skill / pressure block (warmup, technique, wrap, or skipped),
- * the user has nothing to reflect on, so the screen redirects to
- * `/run/transition` immediately on mount via `replace` so the back
- * button does not land on a blank reflective beat. The bypass keeps
- * `RunScreen` callers symmetric: every block-end navigates to
- * `routes.drillCheck(...)` regardless of capture eligibility, and this
- * screen owns the decision.
- *
- * Capture state lifecycle is lifted verbatim from the previous
- * `TransitionScreen` implementation (D133, 2026-04-26). The component
- * tree, draft persistence rules, and capture-target derivation are
- * unchanged; only the host surface moved. See
- * `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 9.
+ * Behavior-sensitive capture eligibility, bypass routing, hydration, and
+ * draft persistence live in `useDrillCheckController`; this screen owns
+ * only the reflective layout and presentational wiring.
  */
 
-function mergePerDrillCapture(
-  captures: PerDrillCaptureRecord[],
-  next: PerDrillCaptureRecord,
-): PerDrillCaptureRecord[] {
-  return [...captures.filter((c) => c.blockIndex !== next.blockIndex), next].sort(
-    (a, b) => a.blockIndex - b.blockIndex,
-  )
-}
-
 export function DrillCheckScreen() {
-  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const executionLogId = searchParams.get('id') ?? ''
-  const pendingCaptureSave = useRef<Promise<boolean> | null>(null)
-
-  const runner = useSessionRunner(executionLogId)
-  const { plan, execution, loaded, currentBlockIndex, totalBlocks } = runner
-
-  // The reflective beat is about the *just-finished* block, which is
-  // one index behind the runner's `currentBlockIndex` after the Run
-  // screen advances on block-end. When the block was not advanced (mid-
-  // session error, hard refresh on /run/check) the previous block may
-  // not exist; the bypass below catches that.
-  const prevBlockIdx = currentBlockIndex - 1
-  const prevBlock = plan?.blocks[prevBlockIdx] ?? null
-  const prevBlockStatus = execution?.blockStatuses[prevBlockIdx] ?? null
-
-  // Capture target = the just-finished block, IFF it was a main_skill /
-  // pressure block that completed (not skipped) and is identifiable in
-  // the drill catalog. Warmup, movement_proxy, technique, and wrap
-  // blocks do not capture; skipped blocks do not capture. Same gate as
-  // the pre-Item-9 TransitionScreen logic.
-  const captureTarget: SessionPlanBlock | null =
-    prevBlock &&
-    prevBlockStatus?.status === 'completed' &&
-    (prevBlock.type === 'main_skill' || prevBlock.type === 'pressure') &&
-    prevBlock.drillId &&
-    prevBlock.variantId
-      ? prevBlock
-      : null
-
-  const playerCount = plan?.playerCount ?? 1
-  const captureMetricType = useMemo(
-    () => getBlockMetricType(captureTarget, playerCount),
-    [captureTarget, playerCount],
-  )
-  const showCaptureCounts =
-    captureMetricType !== null && COUNT_BASED_METRIC_TYPES.has(captureMetricType)
-  // V0B-28 forced-criterion prompt source (D104 layer-1). Resolved
-  // alongside the metric type from the same variant so the rule and
-  // the count-eligibility decision can never disagree. Renders inside
-  // the expanded `Add counts` body inside `PerDrillCapture`.
-  const captureSuccessRule = useMemo(
-    () => getBlockSuccessRule(captureTarget, playerCount),
-    [captureTarget, playerCount],
-  )
-
-  const [captures, setCaptures] = useState<PerDrillCaptureRecord[]>([])
-  const [hydrated, setHydrated] = useState(false)
-  const [difficulty, setDifficulty] = useState<DifficultyTag | null>(null)
-  const [captureGood, setCaptureGood] = useState(0)
-  const [captureTotal, setCaptureTotal] = useState(0)
-  const [captureNotCaptured, setCaptureNotCaptured] = useState(false)
-  const [captureSaveError, setCaptureSaveError] = useState<string | null>(null)
-
-  // Rehydrate the full captures list from any existing review draft on
-  // mount. Tier 1b drafts hold per-drill captures across the whole
-  // session so a tester who Finishes Later, closes the tab, and resumes
-  // does not lose tags they already tapped.
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const draft = await loadReviewDraft(executionLogId)
-        if (cancelled) return
-        setCaptures(draft?.perDrillCaptures ?? [])
-        setHydrated(true)
-      } catch (err) {
-        if (cancelled) return
-        if (isSchemaBlocked()) {
-          setHydrated(true)
-          return
-        }
-        console.error('DrillCheck draft load failed:', err)
-        setHydrated(true)
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [executionLogId])
-
-  // When the capture target shifts (Finish-Later resume on a different
-  // block) mirror the existing capture's values into the input state,
-  // or reset to empty defaults if no capture exists yet for this block.
-  useEffect(() => {
-    if (!hydrated) return
-    if (!captureTarget) {
-      setDifficulty(null)
-      setCaptureGood(0)
-      setCaptureTotal(0)
-      setCaptureNotCaptured(false)
-      return
-    }
-    const existing = captures.find((c) => c.blockIndex === prevBlockIdx)
-    if (existing) {
-      setDifficulty(existing.difficulty)
-      setCaptureGood(existing.goodPasses ?? 0)
-      setCaptureTotal(existing.attemptCount ?? 0)
-      setCaptureNotCaptured(existing.notCaptured === true)
-    } else {
-      setDifficulty(null)
-      setCaptureGood(0)
-      setCaptureTotal(0)
-      setCaptureNotCaptured(false)
-    }
-    // `captures` deliberately omitted: the merge effect below feeds back
-    // into `captures`; including it here would re-clobber the very edit
-    // the user just made.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrated, captureTarget, prevBlockIdx])
-
-  const buildCurrentCapture = useCallback((): PerDrillCaptureRecord | null => {
-    if (!captureTarget) return null
-    if (difficulty == null) return null
-    if (!captureTarget.drillId || !captureTarget.variantId) return null
-    return {
-      drillId: captureTarget.drillId,
-      variantId: captureTarget.variantId,
-      blockIndex: prevBlockIdx,
-      difficulty,
-      capturedAt: Date.now(),
-      ...(captureNotCaptured
-        ? { notCaptured: true }
-        : showCaptureCounts && (captureGood > 0 || captureTotal > 0)
-          ? {
-              goodPasses: captureGood,
-              attemptCount: captureTotal,
-            }
-          : {}),
-    }
-  }, [
-    captureGood,
-    captureNotCaptured,
-    captureTarget,
-    captureTotal,
-    difficulty,
-    prevBlockIdx,
-    showCaptureCounts,
-  ])
-
-  const persistMergedCaptures = useCallback(
-    (merged: PerDrillCaptureRecord[]): Promise<boolean> => {
-      const pending = saveReviewDraft({
-        executionLogId,
-        sessionRpe: null,
-        goodPasses: 0,
-        totalAttempts: 0,
-        perDrillCaptures: merged,
-      })
-        .then(() => {
-          setCaptureSaveError(null)
-          return true
-        })
-        .catch((err) => {
-          if (!isSchemaBlocked()) {
-            console.error('DrillCheck draft save failed:', err)
-            setCaptureSaveError('Could not save this drill check. Try again.')
-          }
-          return false
-        })
-
-      pendingCaptureSave.current = pending
-      void pending.then(() => {
-        if (pendingCaptureSave.current === pending) {
-          pendingCaptureSave.current = null
-        }
-      })
-      return pending
-    },
-    [executionLogId],
-  )
-
-  const flushCurrentCapture = useCallback(async (): Promise<boolean> => {
-    const next = buildCurrentCapture()
-    if (!next) return false
-    const merged = mergePerDrillCapture(captures, next)
-    setCaptures(merged)
-    return persistMergedCaptures(merged)
-  }, [buildCurrentCapture, captures, persistMergedCaptures])
-
-  // Persist every meaningful per-drill change immediately. Difficulty
-  // is the gate: until the user taps a chip there is nothing honest to
-  // record (D133 mandates difficulty as the required field).
-  useEffect(() => {
-    if (!hydrated) return
-    const next = buildCurrentCapture()
-    if (!next) return
-    setCaptures((prev) => {
-      const merged = mergePerDrillCapture(prev, next)
-      void persistMergedCaptures(merged)
-      return merged
-    })
-    // `captures` intentionally not in deps: setCaptures uses the prev
-    // callback so we don't need to re-run when captures change.
-  }, [hydrated, buildCurrentCapture, persistMergedCaptures])
-
-  // Bypass: no capture target → the user has nothing to reflect on for
-  // the previous block (warmup → main, technique block, skipped block,
-  // or first block where there is no previous block). Forward to
-  // Transition immediately so the user never sees a blank reflective
-  // beat. `replace: true` keeps the back button pointing at Run, not
-  // at this skipped beat. Gated on `loaded` so we don't redirect before
-  // the runner has resolved the plan / execution.
-  useEffect(() => {
-    if (!loaded) return
-    if (!plan || !execution) return
-    if (execution.status === 'completed' || currentBlockIndex >= totalBlocks) {
-      navigate(routes.review(executionLogId), { replace: true })
-      return
-    }
-    if (!captureTarget) {
-      navigate(routes.transition(executionLogId), { replace: true })
-    }
-  }, [
-    loaded,
+  const {
     plan,
     execution,
-    captureTarget,
-    currentBlockIndex,
+    loaded,
     totalBlocks,
-    executionLogId,
-    navigate,
-  ])
-
-  const captureSatisfied = difficulty !== null
-
-  const handleContinue = useCallback(async () => {
-    if (!captureSatisfied) return
-    const pending = pendingCaptureSave.current
-    if (pending) {
-      const saved = await pending
-      if (!saved) return
-    }
-    const saved = await flushCurrentCapture()
-    if (!saved) return
-    if (navigator.vibrate) navigator.vibrate(50)
-    navigate(routes.transition(executionLogId))
-  }, [captureSatisfied, executionLogId, flushCurrentCapture, navigate])
+    prevBlockIdx,
+    captureTarget,
+    showCaptureCounts,
+    captureSuccessRule,
+    difficulty,
+    setDifficulty,
+    captureGood,
+    setCaptureGood,
+    captureTotal,
+    setCaptureTotal,
+    captureNotCaptured,
+    captureSaveError,
+    hydrated,
+    captureSatisfied,
+    handleContinue,
+    toggleNotCaptured,
+  } = useDrillCheckController(executionLogId)
 
   if (!plan || !execution) {
     if (loaded) {
@@ -326,6 +81,13 @@ export function DrillCheckScreen() {
   // the loading spinner so the next paint is the redirected screen
   // rather than a brief flash of an empty drill-check body.
   if (!captureTarget) {
+    return <StatusMessage variant="loading" />
+  }
+
+  // The capture UI must not accept taps before draft hydration has
+  // mirrored existing rows into local state; otherwise a slow IndexedDB
+  // read could clobber the first chip tap.
+  if (!hydrated) {
     return <StatusMessage variant="loading" />
   }
 
@@ -416,16 +178,7 @@ export function DrillCheckScreen() {
           notCaptured={captureNotCaptured}
           onGoodChange={setCaptureGood}
           onAttemptChange={setCaptureTotal}
-          onToggleNotCaptured={() => {
-            setCaptureNotCaptured((prev) => {
-              const next = !prev
-              if (next) {
-                setCaptureGood(0)
-                setCaptureTotal(0)
-              }
-              return next
-            })
-          }}
+          onToggleNotCaptured={toggleNotCaptured}
         />
       </ScreenShell.Body>
 

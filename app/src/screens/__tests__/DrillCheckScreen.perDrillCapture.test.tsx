@@ -3,7 +3,8 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../db'
 import { DRILLS } from '../../data/drills'
-import { saveReviewDraft } from '../../services/review'
+import { loadReviewDraft, saveReviewDraft } from '../../services/review'
+import type { BlockSlotType } from '../../types/session'
 import { DrillCheckScreen } from '../DrillCheckScreen'
 
 vi.mock('../../services/review', async () => {
@@ -12,6 +13,7 @@ vi.mock('../../services/review', async () => {
   )
   return {
     ...actual,
+    loadReviewDraft: vi.fn(actual.loadReviewDraft),
     saveReviewDraft: vi.fn(actual.saveReviewDraft),
   }
 })
@@ -27,13 +29,13 @@ vi.mock('../../services/review', async () => {
  *
  * Sources:
  *   docs/plans/2026-04-26-pre-d91-editorial-polish.md Item 9
- *   docs/specs/m001-review-micro-spec.md §"Per-drill capture at Transition (D133)"
+ *   docs/specs/m001-review-micro-spec.md §"Per-drill capture at Drill Check (D133)"
  *   docs/research/2026-04-26-pair-rep-capture-options.md (Framing D)
  *
  * What this file pins:
- *   - Capture surface only renders when the prev block is a completed
- *     main_skill / pressure block. Warmup, technique, movement_proxy,
- *     and skipped blocks bypass to /run/transition immediately.
+ *   - Capture surface renders when the prev block is completed and either
+ *     main_skill / pressure, or count-eligible regardless of slot type.
+ *     Warmup, wrap, non-count support slots, and skipped blocks bypass.
  *   - The "Continue" CTA stays disabled until a difficulty chip is
  *     tapped; the gating hint is visible while disabled.
  *   - A tap on a chip persists a `perDrillCaptures` row through
@@ -54,6 +56,25 @@ const COUNT_DRILL = (() => {
 
 const COUNT_VARIANT = COUNT_DRILL.variants[0]!
 
+function drillById(id: string) {
+  const drill = DRILLS.find((candidate) => candidate.id === id)
+  if (!drill) throw new Error(`test fixture: missing drill ${id}`)
+  return drill
+}
+
+function variantById(drill: (typeof DRILLS)[number], id: string) {
+  const variant = drill.variants.find((candidate) => candidate.id === id)
+  if (!variant) throw new Error(`test fixture: missing variant ${id}`)
+  return variant
+}
+
+const TECHNIQUE_COUNT_DRILL = drillById('d10')
+const TECHNIQUE_COUNT_VARIANT = variantById(TECHNIQUE_COUNT_DRILL, 'd10-pair')
+const MOVEMENT_COUNT_DRILL = drillById('d03')
+const MOVEMENT_COUNT_VARIANT = variantById(MOVEMENT_COUNT_DRILL, 'd03-pair')
+const NON_COUNT_DRILL = drillById('d38')
+const NON_COUNT_VARIANT = variantById(NON_COUNT_DRILL, 'd38-pair')
+
 async function clearDb() {
   await Promise.all([
     db.sessionPlans.clear(),
@@ -68,27 +89,48 @@ async function clearDb() {
 async function seedTwoBlockSession({
   prevType,
   prevCompleted,
+  prevDrill = COUNT_DRILL,
+  prevVariant = COUNT_VARIANT,
+  playerCount = 1,
+  prevBlockIndex = 0,
 }: {
-  prevType: 'main_skill' | 'warmup'
+  prevType: BlockSlotType
   prevCompleted: boolean
+  prevDrill?: (typeof DRILLS)[number]
+  prevVariant?: (typeof DRILLS)[number]['variants'][number]
+  playerCount?: 1 | 2
+  prevBlockIndex?: number
 }) {
   const execId = 'exec-drillcheck-test'
   const planId = `plan-${execId}`
   const now = Date.now()
+  const priorBlocks = Array.from({ length: prevBlockIndex }, (_, index) => ({
+    id: `block-prior-${index}`,
+    type: 'technique' as const,
+    drillId: COUNT_DRILL.id,
+    variantId: COUNT_VARIANT.id,
+    drillName: COUNT_DRILL.name,
+    shortName: COUNT_DRILL.shortName ?? COUNT_DRILL.name,
+    durationMinutes: 4,
+    coachingCue: '',
+    courtsideInstructions: '',
+    required: true,
+  }))
 
   await db.sessionPlans.put({
     id: planId,
     presetId: 'solo_wall',
     presetName: 'Solo + Wall',
-    playerCount: 1,
+    playerCount,
     blocks: [
+      ...priorBlocks,
       {
         id: 'block-prev',
         type: prevType,
-        drillId: COUNT_DRILL.id,
-        variantId: COUNT_VARIANT.id,
-        drillName: COUNT_DRILL.name,
-        shortName: COUNT_DRILL.shortName ?? COUNT_DRILL.name,
+        drillId: prevDrill.id,
+        variantId: prevVariant.id,
+        drillName: prevDrill.name,
+        shortName: prevDrill.shortName ?? prevDrill.name,
         durationMinutes: 5,
         coachingCue: '',
         courtsideInstructions: '',
@@ -115,8 +157,12 @@ async function seedTwoBlockSession({
     id: execId,
     planId,
     status: 'in_progress',
-    activeBlockIndex: 1,
+    activeBlockIndex: prevBlockIndex + 1,
     blockStatuses: [
+      ...priorBlocks.map((block) => ({
+        blockId: block.id,
+        status: 'completed' as const,
+      })),
       {
         blockId: 'block-prev',
         status: prevCompleted ? 'completed' : 'skipped',
@@ -184,6 +230,11 @@ function renderAt(execId: string) {
 }
 
 beforeEach(async () => {
+  const actualReview = await vi.importActual<typeof import('../../services/review')>(
+    '../../services/review',
+  )
+  vi.mocked(loadReviewDraft).mockImplementation(actualReview.loadReviewDraft)
+  vi.mocked(saveReviewDraft).mockImplementation(actualReview.saveReviewDraft)
   vi.clearAllMocks()
   await clearDb()
 })
@@ -205,6 +256,19 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     expect(screen.queryByTestId('per-drill-capture')).not.toBeInTheDocument()
   })
 
+  it('bypasses to /run/transition when the prev block was a wrap', async () => {
+    const execId = await seedTwoBlockSession({
+      prevType: 'wrap',
+      prevCompleted: true,
+    })
+    renderAt(execId)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
+    })
+    expect(screen.queryByTestId('per-drill-capture')).not.toBeInTheDocument()
+  })
+
   it('bypasses to /run/transition when the prev block was skipped', async () => {
     const execId = await seedTwoBlockSession({
       prevType: 'main_skill',
@@ -216,6 +280,64 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
       expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
     })
     expect(screen.queryByTestId('per-drill-capture')).not.toBeInTheDocument()
+  })
+
+  it('renders capture with counts for a count-eligible technique block', async () => {
+    const execId = await seedTwoBlockSession({
+      prevType: 'technique',
+      prevCompleted: true,
+      prevDrill: TECHNIQUE_COUNT_DRILL,
+      prevVariant: TECHNIQUE_COUNT_VARIANT,
+      playerCount: 2,
+    })
+    renderAt(execId)
+
+    await screen.findByTestId('per-drill-capture')
+    expect(screen.getByTestId('per-drill-add-counts')).toBeInTheDocument()
+  })
+
+  it('renders capture with counts for a count-eligible movement_proxy block', async () => {
+    const execId = await seedTwoBlockSession({
+      prevType: 'movement_proxy',
+      prevCompleted: true,
+      prevDrill: MOVEMENT_COUNT_DRILL,
+      prevVariant: MOVEMENT_COUNT_VARIANT,
+      playerCount: 2,
+    })
+    renderAt(execId)
+
+    await screen.findByTestId('per-drill-capture')
+    expect(screen.getByTestId('per-drill-add-counts')).toBeInTheDocument()
+  })
+
+  it('bypasses a non-count technique block until per-metric capture shapes ship', async () => {
+    const execId = await seedTwoBlockSession({
+      prevType: 'technique',
+      prevCompleted: true,
+      prevDrill: NON_COUNT_DRILL,
+      prevVariant: NON_COUNT_VARIANT,
+      playerCount: 2,
+    })
+    renderAt(execId)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
+    })
+    expect(screen.queryByTestId('per-drill-capture')).not.toBeInTheDocument()
+  })
+
+  it('keeps main_skill non-count drills on the difficulty-only capture path', async () => {
+    const execId = await seedTwoBlockSession({
+      prevType: 'main_skill',
+      prevCompleted: true,
+      prevDrill: NON_COUNT_DRILL,
+      prevVariant: NON_COUNT_VARIANT,
+      playerCount: 2,
+    })
+    renderAt(execId)
+
+    await screen.findByTestId('per-drill-capture')
+    expect(screen.queryByTestId('per-drill-add-counts')).not.toBeInTheDocument()
   })
 
   it('renders the capture card and gates Continue until a chip is tapped', async () => {
@@ -238,6 +360,29 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     expect(screen.queryByTestId('drill-check-gating-hint')).not.toBeInTheDocument()
   })
 
+  it('does not render the capture card until draft hydration has completed', async () => {
+    let resolveDraft!: (draft: Awaited<ReturnType<typeof loadReviewDraft>>) => void
+    const pendingDraft = new Promise<Awaited<ReturnType<typeof loadReviewDraft>>>((resolve) => {
+      resolveDraft = resolve
+    })
+    vi.mocked(loadReviewDraft).mockReturnValueOnce(pendingDraft)
+
+    const execId = await seedTwoBlockSession({
+      prevType: 'main_skill',
+      prevCompleted: true,
+    })
+    renderAt(execId)
+
+    expect(screen.queryByTestId('per-drill-capture')).not.toBeInTheDocument()
+
+    await act(async () => {
+      resolveDraft(null)
+      await pendingDraft
+    })
+
+    expect(await screen.findByTestId('per-drill-capture')).toBeInTheDocument()
+  })
+
   it('persists the tapped difficulty into the review draft via saveReviewDraft', async () => {
     const execId = await seedTwoBlockSession({
       prevType: 'main_skill',
@@ -248,16 +393,124 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     await screen.findByTestId('per-drill-capture')
     fireEvent.click(screen.getByRole('radio', { name: /too hard/i }))
 
-    await waitFor(async () => {
-      const draft = await db.sessionReviews.where('executionLogId').equals(execId).first()
-      expect(draft?.status).toBe('draft')
-      expect(draft?.perDrillCaptures).toBeDefined()
-      expect(draft?.perDrillCaptures).toHaveLength(1)
-      const row = draft!.perDrillCaptures![0]
+    await waitFor(() => expect(saveReviewDraft).toHaveBeenCalled())
+    const lastCall = vi.mocked(saveReviewDraft).mock.calls.at(-1)?.[0]
+    expect(lastCall?.executionLogId).toBe(execId)
+    expect(lastCall?.perDrillCaptures).toHaveLength(1)
+    const row = lastCall!.perDrillCaptures![0]
+    expect(row).toBeDefined()
+    if (row) {
       expect(row.difficulty).toBe('too_hard')
       expect(row.drillId).toBe(COUNT_DRILL.id)
       expect(row.variantId).toBe(COUNT_VARIANT.id)
       expect(row.blockIndex).toBe(0)
+    }
+  })
+
+  it('persists optional Good/Total counts from the capture surface', async () => {
+    const execId = await seedTwoBlockSession({
+      prevType: 'movement_proxy',
+      prevCompleted: true,
+      prevDrill: MOVEMENT_COUNT_DRILL,
+      prevVariant: MOVEMENT_COUNT_VARIANT,
+      playerCount: 2,
+    })
+    renderAt(execId)
+
+    await screen.findByTestId('per-drill-capture')
+    fireEvent.click(screen.getByTestId('per-drill-add-counts'))
+    fireEvent.change(screen.getByLabelText(/^good$/i), { target: { value: '7' } })
+    fireEvent.blur(screen.getByLabelText(/^good$/i))
+    fireEvent.change(screen.getByLabelText(/^total$/i), { target: { value: '10' } })
+    fireEvent.blur(screen.getByLabelText(/^total$/i))
+    fireEvent.click(screen.getByRole('radio', { name: /still learning/i }))
+
+    await waitFor(async () => {
+      const draft = await db.sessionReviews.where('executionLogId').equals(execId).first()
+      const row = draft?.perDrillCaptures?.[0]
+      expect(row).toEqual(
+        expect.objectContaining({
+          drillId: MOVEMENT_COUNT_DRILL.id,
+          variantId: MOVEMENT_COUNT_VARIANT.id,
+          blockIndex: 0,
+          difficulty: 'still_learning',
+          goodPasses: 7,
+          attemptCount: 10,
+        }),
+      )
+    })
+  })
+
+  it('preserves earlier captures when saving a later block capture', async () => {
+    const execId = await seedTwoBlockSession({
+      prevType: 'main_skill',
+      prevCompleted: true,
+      prevBlockIndex: 1,
+    })
+    await db.sessionReviews.put({
+      id: `review-${execId}`,
+      executionLogId: execId,
+      sessionRpe: null,
+      goodPasses: 0,
+      totalAttempts: 0,
+      perDrillCaptures: [
+        {
+          drillId: COUNT_DRILL.id,
+          variantId: COUNT_VARIANT.id,
+          blockIndex: 0,
+          difficulty: 'too_easy',
+          capturedAt: Date.now(),
+        },
+      ],
+      submittedAt: Date.now(),
+      status: 'draft',
+    })
+    renderAt(execId)
+
+    await screen.findByTestId('per-drill-capture')
+    fireEvent.click(screen.getByRole('radio', { name: /still learning/i }))
+
+    await waitFor(async () => {
+      const draft = await db.sessionReviews.where('executionLogId').equals(execId).first()
+      expect(draft?.perDrillCaptures?.map((capture) => capture.blockIndex)).toEqual([0, 1])
+      expect(draft?.perDrillCaptures?.[0]?.difficulty).toBe('too_easy')
+      expect(draft?.perDrillCaptures?.[1]?.difficulty).toBe('still_learning')
+    })
+  })
+
+  it('replaces an existing capture for the same block instead of duplicating it', async () => {
+    const execId = await seedTwoBlockSession({
+      prevType: 'main_skill',
+      prevCompleted: true,
+    })
+    await db.sessionReviews.put({
+      id: `review-${execId}`,
+      executionLogId: execId,
+      sessionRpe: null,
+      goodPasses: 0,
+      totalAttempts: 0,
+      perDrillCaptures: [
+        {
+          drillId: COUNT_DRILL.id,
+          variantId: COUNT_VARIANT.id,
+          blockIndex: 0,
+          difficulty: 'too_easy',
+          capturedAt: Date.now(),
+        },
+      ],
+      submittedAt: Date.now(),
+      status: 'draft',
+    })
+    renderAt(execId)
+
+    await screen.findByTestId('per-drill-capture')
+    fireEvent.click(screen.getByRole('radio', { name: /too hard/i }))
+
+    await waitFor(async () => {
+      const draft = await db.sessionReviews.where('executionLogId').equals(execId).first()
+      expect(draft?.perDrillCaptures).toHaveLength(1)
+      expect(draft?.perDrillCaptures?.[0]?.blockIndex).toBe(0)
+      expect(draft?.perDrillCaptures?.[0]?.difficulty).toBe('too_hard')
     })
   })
 
@@ -290,6 +543,58 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     await waitFor(() => {
       expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
     })
+  })
+
+  it('stays on Drill Check and shows an error when a pending capture save rejects', async () => {
+    let rejectSave!: (err: Error) => void
+    const pendingSave = new Promise<void>((_, reject) => {
+      rejectSave = reject
+    })
+    vi.mocked(saveReviewDraft).mockReturnValueOnce(pendingSave)
+
+    const execId = await seedTwoBlockSession({
+      prevType: 'main_skill',
+      prevCompleted: true,
+    })
+    renderAt(execId)
+
+    await screen.findByTestId('per-drill-capture')
+    fireEvent.click(screen.getByRole('radio', { name: /still learning/i }))
+    await waitFor(() => expect(saveReviewDraft).toHaveBeenCalled())
+
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }))
+    expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/check')
+
+    await act(async () => {
+      rejectSave(new Error('save failed'))
+      await pendingSave.catch(() => undefined)
+    })
+
+    expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/check')
+    expect(await screen.findByText(/could not save this drill check/i)).toBeInTheDocument()
+  })
+
+  it('stays on Drill Check and shows an error when the Continue flush rejects', async () => {
+    vi.mocked(saveReviewDraft)
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('flush failed'))
+
+    const execId = await seedTwoBlockSession({
+      prevType: 'main_skill',
+      prevCompleted: true,
+    })
+    renderAt(execId)
+
+    await screen.findByTestId('per-drill-capture')
+    fireEvent.click(screen.getByRole('radio', { name: /still learning/i }))
+    await waitFor(() => expect(saveReviewDraft).toHaveBeenCalledTimes(1))
+
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/check')
+    })
+    expect(await screen.findByText(/could not save this drill check/i)).toBeInTheDocument()
   })
 
   it('rehydrates the tapped chip when an existing draft already has a capture for this block', async () => {
