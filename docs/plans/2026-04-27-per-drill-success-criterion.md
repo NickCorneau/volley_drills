@@ -4,7 +4,7 @@
 
 title: "Per-drill success criterion on /run/check (V0B-28 surface-move) (2026-04-27)"
 type: plan
-status: planned
+status: draft
 stage: validation
 authority: "Spec-gap fix that re-aligns the per-drill capture surface (`DrillCheckScreen` + `PerDrillCapture`) with `docs/specs/m001-review-micro-spec.md` §Required line 78 (V0B-28 forced-criterion prompt). The Review-spec rule was authored when the Good/Total surface lived on `ReviewScreen`; under `D133` (2026-04-27) capture moved to `DrillCheckScreen` but the forced-criterion prompt did not move with it. The hard-coded `% good pass rate` rate label and the missing per-drill rule mean serving and setting drills currently render count fields with no skill-aware criterion, weakening the `D104` layer-1 self-scoring bias correction the prompt was designed to enforce."
 summary: "Three-item structural fix bundle: (1) source the per-drill success rule from `variant.successMetric.description` and render it as a forced-criterion prompt with the spec-mandated `If unsure, don't count it as Good.` anti-generosity nudge above the optional Good/Total counts inside `PerDrillCapture`; (2) soften the rate label inside `PassMetricInput` from the pass-specific `% good pass rate` to the skill-neutral `% good`; (3) re-word `d33 Around the World Serving`'s `successMetric.description` from a session-level checklist (`Serves landing in the named 6-zone serving grid: front-left, ..., back-right.`) to a per-attempt rule that fits the count-bearing capture surface (`Serve lands in the called zone.`). Spec sync to line 78 of the Review micro-spec lands in the same pass."

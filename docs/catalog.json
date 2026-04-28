@@ -11,7 +11,7 @@
   },
   "repo_state": {
     "stage": "validation",
-    "posture": "Operating in D130 founder-use mode (2026-04-20 → 2026-07-20). M001 Tier 1a shipped 2026-04-21; partner-walkthrough polish (2026-04-22), walkthrough closeout polish (2026-04-23), Wake Lock + audio-priming infrastructure (2026-04-24), pre-D91 editorial polish (2026-04-26), D133 pair rep-capture (per-drill Difficulty + optional Good/Total on /run/check, Dexie v5 with perDrillCaptures), Tier 1b Layer A drill authoring (`d31`, `d33`, `d40`, `d42`; `d36` deferred to O7, `d43` deferred to D101), the 2026-04-27 reconciled-list editorial polish (`R11` Skip-review confirm modal lifted into a centered role=dialog matching `End session early?`; `R13` quiet `Logged: N sessions · H:MM total` Settings footer gated on count>0; `R7` and `R14` demoted), the 2026-04-27 solo-vs-pair variant sweep (8 new tuned Pair variants on `d01`/`d05`/`d22`/`d31`/`d38`/`d39`/`d40`/`d33`; `d33-solo-net` split into `d33-solo` + `d33-pair`; `participants.max=1` tightened on `d22-solo`/`d33-solo`/`d38-solo`/`d39-solo`; warmup/cooldown labels relabeled `Solo`→`Any` on `d25`/`d26`/`d28`; new `participants_label_mismatch` catalogValidation rule), the 2026-04-27 cca2 dogfeed synthesis (joint pair pass session with Seb; 6 validated findings in docs/research/2026-04-27-cca2-dogfeed-findings.md; per-drill capture coverage routed to docs/plans/2026-04-27-per-drill-capture-coverage.md; Tier 1c focus-picker trigger second-hit recorded with skill-level-mutability captured as separate line item; same-day code fixes — d26 cooldown copy honors 3-6 min range, sessionBuilder pickForSlot symmetric prefer-pass-only-at-technique + prefer-movement-at-movement_proxy fix the d03/d10 slot inversion), the 2026-04-27 cca2 dogfeed F1 follow-up (per-block role tags ride on the run-flow header eyebrow via phaseLabel un-collapsed from F8-era `Work` to `Technique`/`Movement`/`Main drill`/`Pressure`; per-block rationale prose deleted from RunScreen + TransitionScreen with block.rationale data field preserved on the record for future Swap-sheet re-home / Tier 2 See-Why modal; Transition `Up next · {phaseLabel}` extends temporal eyebrow with role label inline; fires partner-walkthrough trifold-T1 trigger with structural-equivalence reasoning), and the 2026-04-27 cca2 dogfeed F8 follow-up (eyebrow now composes skill into the role marker via new `getBlockSkillFocus`/`skillLabel`/`blockEyebrowLabel` helpers — Run reads `Main drill · Serve` / `Technique · Pass` / `Pressure · Set`; Transition extends to `Up next · Main drill · Serve`; new courtside-copy rule 6 + same-day catalog sweep rewrote all 17 m001Candidate skill-drill variants' `courtsideInstructions` to lead with the skill verb on `d01`/`d03`/`d05`/`d09`/`d10`/`d11`/`d15`/`d18` pass + `d22`/`d31`/`d33` serve + `d38`/`d39`/`d40`/`d41`/`d42` set; Run/Transition/DrillCheck headers also switched from `flex justify-between` to `grid grid-cols-3` with per-cell `justify-self-{start,center,end}` for true center-alignment regardless of side-cell widths) all shipped 2026-04-27. D91 retention gate deferred under D130, not dropped.",
+    "posture": "v0b Starter Loop is the M001 base. See docs/status/current-state.md for live posture, dated history, and active conditions.",
     "runtime": "cursor-first",
     "platform_bias": "wsl-first",
     "environment_contract": {
@@ -22,10 +22,11 @@
     },
     "active_milestone": "M001",
     "stack": "Vite + React + TypeScript + PWA + Dexie (schema v5)",
-    "blocking_gate": "D130 Condition 3 — partner unprompted open within 30 days. Provisional pass (Seb T+1-day open 2026-04-22); final read-out 2026-05-21. Conditions 1 (solo-first ≥40%) and 2 (outside-app planning events) tracked weekly in docs/research/founder-use-ledger.md. D91 retention re-evaluation scheduled 2026-07-20.",
+    "blocking_gate": "D130 founder-use conditions tracked in docs/research/founder-use-ledger.md; D91 retention gate deferred. See docs/status/current-state.md for current reads.",
     "prototype_feedback": "docs/research/2026-04-12-v0a-runner-probe-feedback.md",
     "v0b_field_look_feedback": "docs/research/2026-04-19-v0b-starter-loop-feedback.md",
-    "v0b_status_registry": "docs/plans/2026-04-16-003-rest-of-v0b-plan.md"
+    "v0b_status_registry": "docs/plans/2026-04-16-003-rest-of-v0b-plan.md",
+    "current_state_doc": "docs/status/current-state.md"
   },
   "entrypoints": [
     {
@@ -169,7 +170,8 @@
     "agent_ops": [
       "AGENTS.md",
       "docs/catalog.json",
-      "docs/ops/agent-operations.md"
+      "docs/ops/agent-operations.md",
+      "docs/status/current-state.md"
     ]
   },
   "source_of_truth_order": [
@@ -287,6 +289,13 @@
       "path": "docs/README.md",
       "type": "index",
       "status": "active"
+    },
+    {
+      "id": "current-state",
+      "path": "docs/status/current-state.md",
+      "type": "status",
+      "status": "active",
+      "canonical_for": "current project posture, recent shipped history, and active validation gates"
     },
     {
       "id": "milestones-readme",
@@ -594,7 +603,7 @@
       "path": "docs/research/2026-04-27-cca2-dogfeed-findings.md",
       "type": "research",
       "status": "active",
-      "canonical_for": "Validated findings from the 2026-04-27 founder + Seb pair pass session against the cca2 build (post-`D133` per-drill capture, post-Tier-1b Layer A drill authoring, post-2026-04-27 solo-vs-pair sweep). Six findings: (F1) Difficulty chip surface gates to `main_skill | pressure` block-types, so a 25-min pair pass session with one main_skill swap got exactly one chip — by-spec but under-instrumented; the 'only on new drills' framing was coincidence (the swap landed on a Tier 1b-authored drill). (F2) Pass-counter coverage is two distinct gaps: gap 2a — non-count main-skill drills (streak / points-to-target / pass-grade-avg / composite) capture Difficulty only; gap 2b — count-eligible drills at non-main_skill slots (today's `d10-pair` 6-Leg Monster at technique, `d03-pair` Continuous Pass at movement_proxy) capture nothing at all. (F3) Second confirmation of the Tier 1b in-session running rep counter trigger (1 of ≥2 hits toward the post-`D133` Framing C re-trigger). (F4) Tier 1c focus-picker + skill-level-mutability second hit — Seb's voice memo asks ('30 minutes of serving', 'change my level day-to-day', 'choose what skills to drill') are partner-walkthrough-class evidence; skill-level mutability recorded as separate line item, not bundled into Tier 1c. (F5) `d26` cooldown copy hard-coded ~3 min while workload allows 3-6 min; today's 4-min wrap left a ~1.5 min 'what do I do?' gap. (F6) `d03` Continuous Passing fits movement_proxy slot only nominally; today's session inverted `d10-pair` (movement-tagged) into technique while stationary `d03-pair` landed at movement_proxy. Same-day fixes shipped for F5 + F6; F1/F2 routed to docs/plans/2026-04-27-per-drill-capture-coverage.md. Provenance: founder chat dump + Seb voice memo + Dexie export volley-drills-export-2026-04-27.json."
+      "canonical_for": "Validated findings from the 2026-04-27 founder + Seb pair pass session against the cca2 build (post-`D133` per-drill capture, post-Tier-1b Layer A drill authoring, post-2026-04-27 solo-vs-pair sweep). Eight findings (F1-F8): (F1) Difficulty chip surface gates to `main_skill | pressure` block-types, so a 25-min pair pass session with one main_skill swap got exactly one chip — by-spec but under-instrumented; the 'only on new drills' framing was coincidence (the swap landed on a Tier 1b-authored drill). (F2) Pass-counter coverage is two distinct gaps: gap 2a — non-count main-skill drills (streak / points-to-target / pass-grade-avg / composite) capture Difficulty only; gap 2b — count-eligible drills at non-main_skill slots (today's `d10-pair` 6-Leg Monster at technique, `d03-pair` Continuous Pass at movement_proxy) capture nothing at all. (F3) Second confirmation of the Tier 1b in-session running rep counter trigger (1 of ≥2 hits toward the post-`D133` Framing C re-trigger). (F4) Tier 1c focus-picker + skill-level-mutability second hit — Seb's voice memo asks ('30 minutes of serving', 'change my level day-to-day', 'choose what skills to drill') are partner-walkthrough-class evidence; skill-level mutability recorded as separate line item, not bundled into Tier 1c. (F5) `d26` cooldown copy hard-coded ~3 min while workload allows 3-6 min; today's 4-min wrap left a ~1.5 min 'what do I do?' gap. (F6) `d03` Continuous Passing fits movement_proxy slot only nominally; today's session inverted `d10-pair` (movement-tagged) into technique while stationary `d03-pair` landed at movement_proxy. Two later red-team findings (F7 solo movement_proxy content gap, F8 skill marker absent from per-block eyebrow plus setup-led courtside copy) added the same day. Same-day fixes shipped for F5, F6, and the F1 follow-up role/skill eyebrows; F1/F2 routed to docs/plans/2026-04-27-per-drill-capture-coverage.md. Provenance: founder chat dump + Seb voice memo + Dexie export volley-drills-export-2026-04-27.json."
     },
     {
       "id": "agent-documentation-contract",
@@ -636,7 +645,7 @@
       "id": "v0a-runner-probe-plan",
       "path": "docs/plans/2026-04-12-001-feat-v0a-runner-probe-plan.md",
       "type": "plan",
-      "status": "completed"
+      "status": "complete"
     },
     {
       "id": "v0a-to-v0b-transition",
@@ -708,7 +717,7 @@
       "id": "per-drill-success-criterion-2026-04-27",
       "path": "docs/plans/2026-04-27-per-drill-success-criterion.md",
       "type": "plan",
-      "status": "planned",
+      "status": "draft",
       "canonical_for": "Spec-gap fix that re-aligns the per-drill capture surface (`DrillCheckScreen` + `PerDrillCapture`) with `docs/specs/m001-review-micro-spec.md` §Required line 78 (V0B-28 forced-criterion prompt, D104 layer-1 self-scoring bias correction). Three items: (1) source the per-drill success rule from `variant.successMetric.description` via a new `getBlockSuccessRule` helper in `app/src/domain/drillMetadata.ts` that mirrors the existing `getBlockMetricType` variant-resolution rule, and render it as `Success rule: <rule>. If unsure, don't count it as Good.` inside the expanded `Add counts` body inside `PerDrillCapture` so the chip-only fast path stays calm; (2) soften `PassMetricInput`'s rate label from the pass-specific `% good pass rate` to the skill-neutral `% good` because the criterion above the inputs now carries the skill claim; (3) re-word `d33 Around the World Serving`'s `successMetric.description` from a session-level zone enumeration to the per-attempt rule `Serve lands in the called zone.` (target `Hit all 6 zones once` retained as the session goal). Spec line 78 sync from `the review surface` to `the drill check surface (post-D133)` lands in the same pass; legacy `ReviewScreen` fallback path is intentionally out of scope (reached only by non-D133 legacy sessions). Authors zero new drill records; no Dexie migration; no metadata schema changes."
     },
     {

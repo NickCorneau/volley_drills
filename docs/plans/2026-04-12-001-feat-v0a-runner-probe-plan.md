@@ -2,7 +2,7 @@
 
 ## title: "feat: Build v0a Runner Probe Prototype"
 type: feat
-status: completed
+status: complete
 date: 2026-04-12
 origin: docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md
 

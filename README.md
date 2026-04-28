@@ -6,20 +6,21 @@ stage: validation
 type: hub
 summary: "Repo hub: quick start, top-level layout, and links into the canonical docs."
 authority: repo layout and human-facing orientation
-last_updated: 2026-04-19
+last_updated: 2026-04-27
 depends_on:
   - AGENTS.md
   - docs/catalog.json
+  - docs/status/current-state.md
 ---
 
 # Volleycraft
 
 Volleyball personal training app for self-coached amateurs: structured session planning, courtside run mode, and rules-based adaptation. Beach-first in scope for M001 (see `docs/decisions.md` `D125` for the product-name rationale and beach-first / volleyball-inclusive positioning).
 
-**Stage**: Phase 0 validation.  
-**Build**: v0b Starter Loop is **feature-complete** as the D91 field-test artifact (`D119`) — Phases A, B, C (C-0 → C-5), E, and F (F1 – F12) all landed.  
+**Stage**: Phase 0 validation, operating in `D130` founder-use mode through 2026-07-20.  
+**Build**: v0b Starter Loop is the M001 base. M001 Tier 1a and Tier 1b Layer A have shipped; remaining Tier 1b is gated by logged demand.  
 **Live**: https://volleydrills.nicholascorneau.workers.dev  
-**Gate**: M001 remains blocked on D91 field-test evidence against v0b. Remaining pre-field items are non-code (tester recruitment, founder replay spot-check, the cohort protocol in `docs/research/pre-telemetry-validation-protocol.md`).
+**Status**: detailed posture and recent shipped history live in `docs/status/current-state.md`. The `D91` retention gate is deferred (not dropped); the active read is the `D130` partner-use Condition 3 final close on 2026-05-21.
 
 ## Quick Start
 
@@ -35,6 +36,7 @@ Expected URL: `http://localhost:5173`
 
 - `AGENTS.md` — canonical prose repo contract
 - `docs/catalog.json` — machine-readable doc map and routing
+- `docs/status/current-state.md` — current posture and recent shipped history
 - `docs/README.md` — editorial index for the docs tree
 - `app/README.md` — current prototype workspace status
 

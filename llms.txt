@@ -5,13 +5,14 @@ Volleyball training app for self-coached amateurs (beach-first in M001 scope).
 Start here:
 - `AGENTS.md` for the prose repo contract
 - `docs/catalog.json` for machine-readable routing
+- `docs/status/current-state.md` for current posture and recent shipped history
 - `README.md` for the repo hub
 
 Current state:
-- Phase 0 validation
-- v0b Starter Loop feature-complete under `app/` (Phases A/B/C/E/F landed); live at https://volleydrills.nicholascorneau.workers.dev
-- M001 build gate remains blocked on D91 field-test evidence against v0b (`D119`)
-- remaining pre-field items are non-code: tester recruitment, founder replay spot-check, operational cohort protocol
+- Phase 0 validation, operating in `D130` founder-use mode through 2026-07-20
+- v0b Starter Loop is the M001 base under `app/`; live at https://volleydrills.nicholascorneau.workers.dev
+- Dexie schema is v5; per-drill capture lives on `/run/check`
+- D91 retention gate is deferred, not dropped; details live in `docs/status/current-state.md`
 
 Environment:
 - automation expects `WSL` or Linux with `bash` and `python3`

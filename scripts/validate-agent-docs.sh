@@ -286,6 +286,55 @@ sys.exit(0 if ok else 1)
 " 2>/dev/null; then
       errors+=("agent-manifest.json: entrypoints must point to AGENTS.md, docs/catalog.json, README.md, CLAUDE.md, and llms.txt")
     fi
+
+    local findings
+    findings="$(python3 - "$manifest_path" "$REPO_ROOT" <<'PY' 2>/dev/null || true
+import json
+import sys
+from pathlib import Path
+
+manifest_path = Path(sys.argv[1])
+repo_root = Path(sys.argv[2])
+data = json.loads(manifest_path.read_text(encoding='utf-8'))
+entrypoints = data.get('entrypoints', {}) or {}
+
+# String fields whose values must point at existing files. `current_state` is
+# optional but, when present, must resolve.
+for field in ('prose', 'machine', 'hub', 'current_state'):
+    rel = entrypoints.get(field)
+    if rel is None:
+        continue
+    if not isinstance(rel, str) or not rel:
+        print(f'__bad_entrypoint__:{field}')
+        continue
+    if not (repo_root / rel).exists():
+        print(f'__missing_entrypoint__:{field}:{rel}')
+
+compat = entrypoints.get('compatibility')
+if isinstance(compat, list):
+    for rel in compat:
+        if isinstance(rel, str) and rel and not (repo_root / rel).exists():
+            print(f'__missing_compat__:{rel}')
+PY
+)"
+
+    while IFS= read -r item; do
+      [[ -z "$item" ]] && continue
+      case "$item" in
+        "__bad_entrypoint__:"*)
+          errors+=("agent-manifest.json: entrypoints.${item#__bad_entrypoint__:} must be a non-empty string when present")
+          ;;
+        "__missing_entrypoint__:"*)
+          rest="${item#__missing_entrypoint__:}"
+          field="${rest%%:*}"
+          path="${rest#*:}"
+          errors+=("agent-manifest.json: entrypoints.$field points to missing path '$path'")
+          ;;
+        "__missing_compat__:"*)
+          errors+=("agent-manifest.json: entrypoints.compatibility includes missing path '${item#__missing_compat__:}'")
+          ;;
+      esac
+    done <<< "$findings"
   fi
 }
 
@@ -326,6 +375,98 @@ PY
   return 0
 }
 
+catalog_doc_paths_must_exist_and_use_known_status() {
+  local catalog_path="$REPO_ROOT/docs/catalog.json"
+
+  if [[ -f "$catalog_path" ]]; then
+    local findings
+    findings="$(python3 - "$catalog_path" "$REPO_ROOT" <<'PY' 2>/dev/null || true
+import json
+import sys
+from pathlib import Path
+
+catalog_path = Path(sys.argv[1])
+repo_root = Path(sys.argv[2])
+data = json.loads(catalog_path.read_text(encoding='utf-8'))
+
+raw_vocab = (data.get('status_vocabularies', {}).get('doc_status', {}) or {}).get('values')
+docs_entries = data.get('docs', []) or []
+if raw_vocab is None:
+    # Vocabulary is optional only when no docs[] entries carry statuses to check.
+    if any(('status' in d) for d in docs_entries if isinstance(d, dict)):
+        print('__missing_vocab__:doc_status')
+    allowed_statuses = set()
+elif not isinstance(raw_vocab, list) or not all(isinstance(v, str) for v in raw_vocab):
+    print('__bad_vocab__:doc_status')
+    allowed_statuses = set()
+else:
+    allowed_statuses = set(raw_vocab)
+
+for doc in docs_entries:
+    rel = doc.get('path') if isinstance(doc, dict) else None
+    if not rel:
+        print(f'__missing_path__:{doc.get("id", "<unknown>") if isinstance(doc, dict) else "<unknown>"}')
+        continue
+    full = repo_root / rel
+    if not full.exists():
+        print(f'__missing_doc_path__:{rel}')
+    if 'status' not in doc:
+        # Status field optional unless vocabulary exists — keep silent.
+        pass
+    elif allowed_statuses:
+        status = doc.get('status')
+        if status is None or status == '':
+            print(f'__missing_status__:{rel}')
+        elif status not in allowed_statuses:
+            print(f'__bad_status__:{rel}:{status}')
+
+for entry in data.get('entrypoints', []):
+    rel = entry.get('path')
+    if not rel:
+        print(f'__missing_entrypoint_path_field__:{entry.get("kind", "<unknown>")}')
+        continue
+    if not (repo_root / rel).exists():
+        print(f'__missing_entrypoint_path__:{rel}')
+PY
+)"
+
+    while IFS= read -r item; do
+      [[ -z "$item" ]] && continue
+      case "$item" in
+        "__missing_path__:"*)
+          errors+=("docs/catalog.json: docs entry '${item#__missing_path__:}' has no path")
+          ;;
+        "__missing_doc_path__:"*)
+          errors+=("docs/catalog.json: docs path does not exist on disk: '${item#__missing_doc_path__:}'")
+          ;;
+        "__missing_entrypoint_path_field__:"*)
+          errors+=("docs/catalog.json: entrypoints entry kind='${item#__missing_entrypoint_path_field__:}' is missing 'path'")
+          ;;
+        "__missing_entrypoint_path__:"*)
+          errors+=("docs/catalog.json: entrypoint path does not exist on disk: '${item#__missing_entrypoint_path__:}'")
+          ;;
+        "__missing_status__:"*)
+          errors+=("docs/catalog.json: docs path '${item#__missing_status__:}' is missing 'status' (must match status_vocabularies.doc_status.values)")
+          ;;
+        "__bad_status__:"*)
+          rest="${item#__bad_status__:}"
+          path="${rest%%:*}"
+          status="${rest#*:}"
+          errors+=("docs/catalog.json: docs path '$path' uses unknown status '$status' (must match status_vocabularies.doc_status.values)")
+          ;;
+        "__missing_vocab__:doc_status")
+          errors+=("docs/catalog.json: status_vocabularies.doc_status.values is missing")
+          ;;
+        "__bad_vocab__:doc_status")
+          errors+=("docs/catalog.json: status_vocabularies.doc_status.values must be a list of strings")
+          ;;
+      esac
+    done <<< "$findings"
+  fi
+
+  return 0
+}
+
 for rel_path in "${required_paths[@]}"; do
   require_path "$rel_path"
 done
@@ -335,6 +476,7 @@ json_must_parse "agent-manifest.json"
 agents_frontmatter_must_be_valid
 manifest_must_point_to_canonical_surfaces
 catalog_must_have_keys
+catalog_doc_paths_must_exist_and_use_known_status
 
 for rel_path in "${canonical_frontmatter_docs[@]}"; do
   canonical_frontmatter_must_be_valid "$rel_path"

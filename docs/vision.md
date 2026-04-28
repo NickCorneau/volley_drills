@@ -1,5 +1,6 @@
 ---
-id: vision
+
+## id: vision
 title: Product Vision
 status: active
 stage: planning
@@ -8,7 +9,6 @@ authority: product principles, strategic stance, local-first doctrine, non-goals
 summary: "Product vision, principles, and strategic guardrails for the beach volleyball training OS."
 last_updated: 2026-04-22
 depends_on: []
----
 
 # Vision
 

@@ -1,12 +1,13 @@
 {
   "manifest_version": 2,
   "repo_id": "volley_drills",
-  "generated": "2026-04-15",
+  "generated": "2026-04-27",
   "purpose": "Thin compatibility manifest. Canonical guidance lives in AGENTS.md and docs/catalog.json.",
   "entrypoints": {
     "prose": "AGENTS.md",
     "machine": "docs/catalog.json",
     "hub": "README.md",
+    "current_state": "docs/status/current-state.md",
     "compatibility": [
       "CLAUDE.md",
       "llms.txt"

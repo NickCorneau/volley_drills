@@ -415,6 +415,110 @@ EOF
     bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
 }
 
+test_direct_validator_fails_on_missing_docs_path_on_disk() {
+  make_fixture_root
+  write_common_files
+  python3 -c "
+import json
+from pathlib import Path
+path = Path(r'$CURRENT_FIXTURE/docs/catalog.json')
+data = json.loads(path.read_text(encoding='utf-8'))
+data['docs'] = [
+    {'id': 'ghost', 'path': 'docs/does-not-exist.md', 'type': 'core', 'status': 'active'}
+]
+path.write_text(json.dumps(data, indent=2) + '\\n', encoding='utf-8')
+"
+  assert_command_fails \
+    "validate-agent-docs fails when a docs[] path does not exist on disk" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_direct_validator_fails_on_unknown_doc_status() {
+  make_fixture_root
+  write_common_files
+  python3 -c "
+import json
+from pathlib import Path
+path = Path(r'$CURRENT_FIXTURE/docs/catalog.json')
+data = json.loads(path.read_text(encoding='utf-8'))
+data['status_vocabularies'] = {'doc_status': {'values': ['draft', 'active', 'complete', 'superseded']}}
+data['docs'] = [
+    {'id': 'roadmap', 'path': 'docs/roadmap.md', 'type': 'core', 'status': 'completed'}
+]
+path.write_text(json.dumps(data, indent=2) + '\\n', encoding='utf-8')
+"
+  assert_command_fails \
+    "validate-agent-docs fails when docs[].status is outside the documented vocabulary" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_direct_validator_fails_on_empty_doc_status() {
+  make_fixture_root
+  write_common_files
+  python3 -c "
+import json
+from pathlib import Path
+path = Path(r'$CURRENT_FIXTURE/docs/catalog.json')
+data = json.loads(path.read_text(encoding='utf-8'))
+data['status_vocabularies'] = {'doc_status': {'values': ['draft', 'active', 'complete', 'superseded']}}
+data['docs'] = [
+    {'id': 'roadmap', 'path': 'docs/roadmap.md', 'type': 'core', 'status': ''}
+]
+path.write_text(json.dumps(data, indent=2) + '\\n', encoding='utf-8')
+"
+  assert_command_fails \
+    "validate-agent-docs fails when docs[].status is empty (no longer short-circuits)" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_direct_validator_fails_on_malformed_status_vocab() {
+  make_fixture_root
+  write_common_files
+  python3 -c "
+import json
+from pathlib import Path
+path = Path(r'$CURRENT_FIXTURE/docs/catalog.json')
+data = json.loads(path.read_text(encoding='utf-8'))
+data['status_vocabularies'] = {'doc_status': {'values': 'draft, active, complete'}}
+path.write_text(json.dumps(data, indent=2) + '\\n', encoding='utf-8')
+"
+  assert_command_fails \
+    "validate-agent-docs fails when status_vocabularies.doc_status.values is not a list of strings" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_direct_validator_fails_on_entrypoint_missing_path_field() {
+  make_fixture_root
+  write_common_files
+  python3 -c "
+import json
+from pathlib import Path
+path = Path(r'$CURRENT_FIXTURE/docs/catalog.json')
+data = json.loads(path.read_text(encoding='utf-8'))
+data['entrypoints'].append({'kind': 'orphan_entrypoint'})
+path.write_text(json.dumps(data, indent=2) + '\\n', encoding='utf-8')
+"
+  assert_command_fails \
+    "validate-agent-docs fails when an entrypoints[] entry is missing 'path'" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_direct_validator_fails_on_manifest_current_state_pointing_at_missing_path() {
+  make_fixture_root
+  write_common_files
+  python3 -c "
+import json
+from pathlib import Path
+path = Path(r'$CURRENT_FIXTURE/agent-manifest.json')
+data = json.loads(path.read_text(encoding='utf-8'))
+data.setdefault('entrypoints', {})['current_state'] = 'docs/status/does-not-exist.md'
+path.write_text(json.dumps(data, indent=2) + '\\n', encoding='utf-8')
+"
+  assert_command_fails \
+    "validate-agent-docs fails when manifest entrypoints.current_state points at a missing file" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
 test_direct_validator_passes_on_valid_fixture
 test_direct_validator_fails_on_missing_required_heading
 test_direct_validator_fails_on_pseudo_frontmatter
@@ -423,5 +527,11 @@ test_direct_validator_fails_on_malformed_yaml_frontmatter
 test_direct_validator_fails_on_missing_catalog_entrypoint
 test_direct_validator_fails_on_stale_catalog_schema_version
 test_direct_validator_fails_on_thick_compatibility_surface
+test_direct_validator_fails_on_missing_docs_path_on_disk
+test_direct_validator_fails_on_unknown_doc_status
+test_direct_validator_fails_on_empty_doc_status
+test_direct_validator_fails_on_malformed_status_vocab
+test_direct_validator_fails_on_entrypoint_missing_path_field
+test_direct_validator_fails_on_manifest_current_state_pointing_at_missing_path
 
 echo "All validator tests passed."
