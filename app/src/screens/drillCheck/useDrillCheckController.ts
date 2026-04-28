@@ -11,7 +11,7 @@ import {
 import { useSessionRunner } from '../../hooks/useSessionRunner'
 import { isSchemaBlocked } from '../../lib/schema-blocked'
 import { routes } from '../../routes'
-import { loadReviewDraft, saveReviewDraft } from '../../services/review'
+import { loadReviewDraft, patchReviewDraft } from '../../services/review'
 
 export function useDrillCheckController(executionLogId: string) {
   const navigate = useNavigate()
@@ -136,11 +136,10 @@ export function useDrillCheckController(executionLogId: string) {
 
   const persistMergedCaptures = useCallback(
     (merged: PerDrillCaptureRecord[]): Promise<boolean> => {
-      const pending = saveReviewDraft({
-        executionLogId,
-        sessionRpe: null,
-        goodPasses: 0,
-        totalAttempts: 0,
+      // Drill Check only owns `perDrillCaptures`. Patching just that
+      // key preserves any RPE / note / quickTags / incompleteReason
+      // the user typed on Review (U1 of the architecture pass).
+      const pending = patchReviewDraft(executionLogId, {
         perDrillCaptures: merged,
       })
         .then(() => {

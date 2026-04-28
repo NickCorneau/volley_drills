@@ -110,17 +110,17 @@ describe('ReviewScreen Finish Later (C-1 Unit 8)', () => {
     expect(rpeChip).toHaveAttribute('aria-checked', 'true')
   })
 
-  it('Finish later surfaces an error and stays on the screen when saveReviewDraft rejects (rel-4 fix)', async () => {
+  it('Finish later surfaces an error and stays on the screen when the draft patch rejects (rel-4 fix)', async () => {
     const user = userEvent.setup()
     await seed('exec-save-fail')
 
     // Let the initial draft hydration + form render; then stub
-    // `saveReviewDraft` to reject. The auto-save effect also calls it,
+    // `patchReviewDraft` to reject. The auto-save effect also calls it,
     // but the belt save inside `handleFinishLater` is the one that must
     // surface the failure - silently navigating home on save failure
     // violates the Finish-Later promise.
     const spy = vi
-      .spyOn(reviewService, 'saveReviewDraft')
+      .spyOn(reviewService, 'patchReviewDraft')
       .mockRejectedValue(new Error('simulated quota-exceeded save failure'))
 
     try {

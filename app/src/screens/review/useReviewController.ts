@@ -17,7 +17,7 @@ import {
   expireReview,
   FINISH_LATER_CAP_MS,
   loadReviewDraft,
-  saveReviewDraft,
+  patchReviewDraft,
   submitReview,
 } from '../../services/review'
 import { loadSession } from '../../services/session'
@@ -133,15 +133,16 @@ export function useReviewController(executionLogId: string) {
     })
     if (!meaningful) return
 
-    void saveReviewDraft({
-      executionLogId,
+    // Review owns the form fields. Captures are owned by Drill Check
+    // and are intentionally omitted from the patch so a stale Review
+    // state never blanks captures persisted by Drill Check (U1).
+    void patchReviewDraft(executionLogId, {
       sessionRpe,
       goodPasses: good,
       totalAttempts: total,
       incompleteReason: incompleteReason ?? undefined,
       quickTags: quickTags.length > 0 ? quickTags : undefined,
       shortNote: debouncedShortNote.trim() || undefined,
-      perDrillCaptures: perDrillCaptures.length > 0 ? perDrillCaptures : undefined,
     }).catch((err) => {
       if (isSchemaBlocked()) return
       console.error('Review draft save failed:', err)
@@ -259,15 +260,17 @@ export function useReviewController(executionLogId: string) {
     })
     if (meaningful) {
       try {
-        await saveReviewDraft({
-          executionLogId,
+        // Review's Finish Later path mirrors the autosave: only the
+        // form fields it owns are patched. Drill Check's captures
+        // already live on the row and must not be overwritten by a
+        // stale local snapshot (U1).
+        await patchReviewDraft(executionLogId, {
           sessionRpe,
           goodPasses: good,
           totalAttempts: total,
           incompleteReason: incompleteReason ?? undefined,
           quickTags: quickTags.length > 0 ? quickTags : undefined,
           shortNote: shortNote.trim() || undefined,
-          perDrillCaptures: perDrillCaptures.length > 0 ? perDrillCaptures : undefined,
         })
       } catch (err) {
         if (!isSchemaBlocked()) {
