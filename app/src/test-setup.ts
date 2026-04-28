@@ -12,7 +12,7 @@ import { cleanup } from '@testing-library/react'
 // `'dev'` / `'unknown'` defaults. Pinning to deterministic
 // `'test'` / `'test'` values lets a future Settings test assert
 // on the rendered string without snapshot drift across machines.
-;(globalThis as Record<string, unknown>).__VOLLEYCRAFT_BUILD_SHA__ = 'test'
+;(globalThis as Record<string, unknown>).__VOLLEYCRAFT_BUILD_VERSION__ = 'test'
 ;(globalThis as Record<string, unknown>).__VOLLEYCRAFT_BUILD_DATE__ = 'test'
 
 // jsdom does not ship `ResizeObserver`. The `ScreenShell.Body` component

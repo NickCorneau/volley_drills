@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BackButton, Button, Card, ScreenShell, StatusMessage } from '../components/ui'
 import { useInstallPosture } from '../hooks/useInstallPosture'
-import { BUILD_DATE, BUILD_SHA } from '../lib/buildInfo'
+import { BUILD_DATE, BUILD_VERSION } from '../lib/buildInfo'
 import { formatTotalDurationLine } from '../lib/format'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { getStorageCopy } from '../lib/storageCopy'
@@ -201,16 +201,24 @@ export function SettingsScreen() {
             for D91 field-test debugging hygiene. When a tester reports
             a bug, the founder's first triage question is "what build
             are you on?" — this row is the answer. Monospace so the
-            short SHA reads as a copyable identifier rather than human
-            prose. Values come from Vite `define` injection in
+            identifier reads as copyable rather than human prose.
+            Values come from Vite `define` injection in
             `vite.config.ts` via the typed `lib/buildInfo.ts` accessor.
-            See `docs/plans/2026-04-26-pre-d91-editorial-polish.md`
+
+            2026-04-27 source change: build identifier is now
+            `git describe --tags --always --dirty` output instead of
+            a bare short SHA. On a clean build at a tagged commit this
+            renders as e.g. `Build v0b-alpha.16 · 2026-04-27` —
+            more memorable for triage than `Build 47745e2 · 2026-04-27`
+            and same character budget. Inter-tag commits render as
+            `v0b-alpha.16-3-g1234567`; uncommitted-tree builds append
+            `-dirty`. See `docs/plans/2026-04-26-pre-d91-editorial-polish.md`
             Item 6. */}
         <p
           className="pb-3 text-center font-mono text-[11px] text-text-secondary/80"
           data-testid="settings-build-id"
         >
-          Build {BUILD_SHA} · {BUILD_DATE}
+          Build {BUILD_VERSION} · {BUILD_DATE}
         </p>
       </ScreenShell.Footer>
     </ScreenShell>

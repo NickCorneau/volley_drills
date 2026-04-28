@@ -13,8 +13,26 @@ import { VitePWA } from 'vite-plugin-pwa'
  * the end of block 2," the founder's first triage question is "what
  * build are you on?" Without this injection the answer requires
  * cross-referencing Cloudflare deploy timestamps; with it, the
- * tester taps Settings and reads back a six-character SHA + ISO
- * date.
+ * tester taps Settings and reads back a build identifier + ISO date.
+ *
+ * Build-version resolution (2026-04-27 update). `git describe --tags
+ * --always --dirty` is the source of truth, replacing the original
+ * `git rev-parse --short HEAD`. The original always returned a 7-char
+ * SHA, which is unmemorable for triage ("47745e2" tells the founder
+ * nothing without a SHA-to-tag lookup); a tag-leading identifier
+ * (`v0b-alpha.16`) is the same number of characters and directly
+ * addressable. `git describe --tags --always --dirty` returns:
+ *   - `v0b-alpha.16` on a clean working tree at the tagged commit
+ *   - `v0b-alpha.16-N-gSHORTSHA` when N commits past the latest tag
+ *     (preserves the SHA-leading info for inter-tag triage)
+ *   - `v0b-alpha.16-...-dirty` when the working tree has uncommitted
+ *     changes (catches "I built from a dirty checkout" mistakes
+ *     before they cause silent triage drift)
+ *   - `SHORTSHA` when no reachable tag exists (`--always` fallback)
+ *
+ * `--tags` opts in to lightweight tags (the `v0b-alpha.*` series is
+ * lightweight per the existing release cadence). Without it, only
+ * annotated tags would match.
  *
  * Both reads are wrapped in try/catch so an unusual git state
  * (detached HEAD, missing `.git`, build container without git)
@@ -25,9 +43,11 @@ import { VitePWA } from 'vite-plugin-pwa'
  *
  * See `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 6.
  */
-function readBuildSha(): string {
+function readBuildVersion(): string {
   try {
-    return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] })
+    return execSync('git describe --tags --always --dirty', {
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
       .toString()
       .trim()
   } catch {
@@ -39,12 +59,12 @@ function readBuildDate(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-const BUILD_SHA = readBuildSha()
+const BUILD_VERSION = readBuildVersion()
 const BUILD_DATE = readBuildDate()
 
 export default defineConfig({
   define: {
-    __VOLLEYCRAFT_BUILD_SHA__: JSON.stringify(BUILD_SHA),
+    __VOLLEYCRAFT_BUILD_VERSION__: JSON.stringify(BUILD_VERSION),
     __VOLLEYCRAFT_BUILD_DATE__: JSON.stringify(BUILD_DATE),
   },
   resolve: {
