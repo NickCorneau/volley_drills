@@ -10,6 +10,7 @@ import {
 } from '../../domain/capture'
 import { useSessionRunner } from '../../hooks/useSessionRunner'
 import { isSchemaBlocked } from '../../lib/schema-blocked'
+import { vibrate } from '../../platform'
 import { routes } from '../../routes'
 import { loadReviewDraft, patchReviewDraft } from '../../services/review'
 
@@ -222,7 +223,7 @@ export function useDrillCheckController(executionLogId: string) {
     }
     const saved = await flushCurrentCapture()
     if (!saved) return
-    if (navigator.vibrate) navigator.vibrate(50)
+    vibrate(50)
     navigate(routes.transition(executionLogId))
   }, [captureSatisfied, executionLogId, flushCurrentCapture, navigate])
 

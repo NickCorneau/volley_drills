@@ -1,14 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { postBlockRoute } from '../../domain/runFlow'
 import { findSwapAlternatives } from '../../domain/sessionBuilder'
 import { useBlockPacingTicks } from '../../hooks/useBlockPacingTicks'
 import { usePreroll } from '../../hooks/usePreroll'
 import { useSessionRunner } from '../../hooks/useSessionRunner'
 import { useTimer } from '../../hooks/useTimer'
-import { useWakeLock } from '../../hooks/useWakeLock'
-import { playBlockEndBeep, playPrerollTick, playSubBlockTick } from '../../lib/audio'
 import { computeShortened } from '../../lib/shorten'
 import { isSchemaBlocked } from '../../lib/schema-blocked'
+import {
+  playBlockEndBeep,
+  playPrerollTick,
+  playSubBlockTick,
+  useWakeLock,
+  vibrate,
+} from '../../platform'
 import { routes } from '../../routes'
 import { getStorageMeta, setStorageMeta } from '../../services/storageMeta'
 
@@ -71,13 +77,10 @@ export function useRunController(executionLogId: string, shortened: boolean) {
   const handleBlockComplete = useCallback(async () => {
     try {
       playBlockEndBeep()
-      if (navigator.vibrate) navigator.vibrate([100, 50, 100])
+      vibrate([100, 50, 100])
       const isLast = await completeBlock()
-      if (isLast) {
-        navigate(routes.review(executionLogId), { replace: true })
-      } else {
-        navigate(routes.drillCheck(executionLogId))
-      }
+      const next = postBlockRoute(executionLogId, isLast)
+      navigate(next.path, { replace: next.replace })
     } catch (err) {
       console.error('Block complete failed:', err)
       setRunError('Something went wrong. Try again or end session.')
@@ -111,7 +114,7 @@ export function useRunController(executionLogId: string, shortened: boolean) {
         console.error('Failed to start block:', err)
         navigate(routes.home(), { replace: true })
       })
-    if (navigator.vibrate) navigator.vibrate(100)
+    vibrate(100)
   }, [startBlock, timer, activeDuration, requestWakeLock, navigate])
 
   const preroll = usePreroll({
@@ -240,13 +243,10 @@ export function useRunController(executionLogId: string, shortened: boolean) {
     try {
       timer.pause()
       playBlockEndBeep()
-      if (navigator.vibrate) navigator.vibrate(100)
+      vibrate(100)
       const isLast = await completeBlock()
-      if (isLast) {
-        navigate(routes.review(executionLogId), { replace: true })
-      } else {
-        navigate(routes.drillCheck(executionLogId))
-      }
+      const next = postBlockRoute(executionLogId, isLast)
+      navigate(next.path, { replace: next.replace })
     } catch (err) {
       console.error('Next block failed:', err)
       setRunError('Something went wrong. Try again or end session.')
@@ -257,13 +257,10 @@ export function useRunController(executionLogId: string, shortened: boolean) {
     try {
       timer.pause()
       playBlockEndBeep()
-      if (navigator.vibrate) navigator.vibrate(100)
+      vibrate(100)
       const isLast = await skipBlock()
-      if (isLast) {
-        navigate(routes.review(executionLogId), { replace: true })
-      } else {
-        navigate(routes.drillCheck(executionLogId))
-      }
+      const next = postBlockRoute(executionLogId, isLast)
+      navigate(next.path, { replace: next.replace })
     } catch (err) {
       console.error('Skip block failed:', err)
       setRunError('Something went wrong. Try again or end session.')

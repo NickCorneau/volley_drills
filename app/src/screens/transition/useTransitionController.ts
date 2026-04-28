@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { postBlockRoute } from '../../domain/runFlow'
 import { findSwapAlternatives } from '../../domain/sessionBuilder'
 import { useSessionRunner } from '../../hooks/useSessionRunner'
+import { vibrate } from '../../platform'
 import { routes } from '../../routes'
 
 export function useTransitionController(executionLogId: string) {
@@ -27,12 +29,12 @@ export function useTransitionController(executionLogId: string) {
   }, [execution, hasNextBlock, executionLogId, navigate])
 
   const handleStartNext = useCallback(() => {
-    if (navigator.vibrate) navigator.vibrate(100)
+    vibrate(100)
     navigate(routes.run(executionLogId))
   }, [navigate, executionLogId])
 
   const handleStartShortened = useCallback(() => {
-    if (navigator.vibrate) navigator.vibrate(100)
+    vibrate(100)
     navigate(routes.run(executionLogId), { state: { shortened: true } })
   }, [navigate, executionLogId])
 
@@ -40,10 +42,11 @@ export function useTransitionController(executionLogId: string) {
     if (isSkipping) return
     setIsSkipping(true)
     try {
-      if (navigator.vibrate) navigator.vibrate(100)
+      vibrate(100)
       const isLast = await runner.skipBlock()
       if (isLast) {
-        navigate(routes.review(executionLogId), { replace: true })
+        const next = postBlockRoute(executionLogId, true)
+        navigate(next.path, { replace: next.replace })
       } else {
         setIsSkipping(false)
       }
@@ -57,7 +60,7 @@ export function useTransitionController(executionLogId: string) {
   const handleSwap = useCallback(async () => {
     setSwapError(null)
     try {
-      if (navigator.vibrate) navigator.vibrate(100)
+      vibrate(100)
       const ok = await runner.swapBlock()
       if (!ok) {
         setSwapError('No alternate drills available for this block.')

@@ -4,10 +4,13 @@ import { PainOverrideCard } from '../components/PainOverrideCard'
 import { BackButton, Button, ScreenShell, StatusMessage, ToggleChip } from '../components/ui'
 import type { SessionDraft } from '../db/types'
 import { buildRecoveryDraft, estimateRecoverySessionMinutes } from '../domain/sessionBuilder'
-import { primeAudioForGesture } from '../lib/audio'
+import {
+  primeAudioForGesture,
+  primeScreenWakeLockForGesture,
+  releaseScreenWakeLock,
+} from '../platform'
 import { routes } from '../routes'
 import { createSessionFromDraft, getCurrentDraft, hasEverStartedSession } from '../services/session'
-import { primeScreenWakeLockForGesture, releaseScreenWakeLock } from '../lib/screenWakeLock'
 
 // Primary recency chips. `2+` is an intermediate value - tapping it
 // reveals a sub-row of granular buckets (post-physio-review 2026-04-20,

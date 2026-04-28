@@ -114,7 +114,7 @@ describe('useRunController', () => {
       await result.current.handleSkip()
     })
 
-    expect(navigateMock).toHaveBeenCalledWith(routes.drillCheck('exec-run'))
+    expect(navigateMock).toHaveBeenCalledWith(routes.drillCheck('exec-run'), { replace: false })
   })
 
   it('routes terminal skipped blocks to Review', async () => {
@@ -140,7 +140,7 @@ describe('useRunController', () => {
       await result.current.handleNext()
     })
 
-    expect(navigateMock).toHaveBeenCalledWith(routes.drillCheck('exec-run'))
+    expect(navigateMock).toHaveBeenCalledWith(routes.drillCheck('exec-run'), { replace: false })
   })
 
   it('routes terminal Next to Review', async () => {
@@ -166,7 +166,7 @@ describe('useRunController', () => {
       await timerHarness.onComplete?.()
     })
 
-    expect(navigateMock).toHaveBeenCalledWith(routes.drillCheck('exec-run'))
+    expect(navigateMock).toHaveBeenCalledWith(routes.drillCheck('exec-run'), { replace: false })
   })
 
   it('routes terminal timer completion to Review', async () => {
