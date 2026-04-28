@@ -44,6 +44,12 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          # Shallow default (`fetch-depth: 1`) breaks `git describe` in
+          # `app/vite.config.ts` — Settings shows `v0b-alpha.16-N-g…`
+          # forever because the runner never sees newer tags / history.
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Set up Node
         uses: actions/setup-node@v4
