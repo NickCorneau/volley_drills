@@ -35,7 +35,7 @@ export type HomeState =
   | { kind: 'ready'; flags: HomeFlags }
   | { kind: 'error' }
 
-async function resolveHomeFlags(): Promise<HomeFlags> {
+export async function resolveHomeSnapshot(): Promise<HomeFlags> {
   const resume = await findResumableSession()
   if (resume) {
     return {
@@ -83,7 +83,7 @@ export function useHomeScreenState() {
     let cancelled = false
     ;(async () => {
       try {
-        const flags = await resolveHomeFlags()
+        const flags = await resolveHomeSnapshot()
         if (cancelled) return
         setState({ kind: 'ready', flags })
       } catch {
