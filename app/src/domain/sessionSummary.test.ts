@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { SessionPlan, SessionReview } from '../db'
-import type { IncompleteReason } from '../db'
+import type { IncompleteReason, SessionPlan, SessionReview } from '../model'
 import { FORBIDDEN_RE } from '../lib/copyGuard'
 import { composeSummary, type SummaryCase } from './sessionSummary'
 

@@ -1,6 +1,5 @@
 import type { BlockedConstraint, SubstitutionRule } from '../../data/substitutionRules'
-import type { Drill, SkillFocus } from '../../types/drill'
-import type { BlockSlotType, SetupContext } from '../../types/session'
+import type { BlockSlotType, Drill, SetupContext, SkillFocus } from '../../model'
 
 const SKILL_FOCUS_LABEL: Record<SkillFocus, string> = {
   pass: 'passing',

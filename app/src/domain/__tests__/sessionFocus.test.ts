@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { SessionPlanBlock } from '../../db'
+import type { SessionPlanBlock } from '../../model'
 import { focusLabel, inferSessionFocus } from '../sessionFocus'
 
 /**

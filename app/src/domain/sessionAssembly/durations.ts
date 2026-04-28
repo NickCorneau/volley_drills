@@ -1,4 +1,4 @@
-import type { BlockSlot, BlockSlotType } from '../../types/session'
+import type { BlockSlot, BlockSlotType } from '../../model'
 
 const DURATION_PRIORITY: readonly BlockSlotType[] = [
   'main_skill',

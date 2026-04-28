@@ -1,4 +1,4 @@
-import type { RpeCaptureWindow } from '../../db'
+import type { RpeCaptureWindow } from '../../model'
 import {
   CAPTURE_WINDOW_IMMEDIATE_MS,
   CAPTURE_WINDOW_SAME_DAY_MS,

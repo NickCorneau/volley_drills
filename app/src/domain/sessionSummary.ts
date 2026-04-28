@@ -1,4 +1,4 @@
-import type { SessionPlan, SessionReview } from '../db'
+import type { SessionPlan, SessionReview } from '../model'
 
 /**
  * Session-summary composer (C-2 Unit 1).

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { ExecutionLog } from '../db/types'
+import type { ExecutionLog } from '../model'
 import { byRecentEndedAt, isTerminalSession } from './executionPredicates'
 
 function log(overrides: Partial<ExecutionLog> = {}): ExecutionLog {

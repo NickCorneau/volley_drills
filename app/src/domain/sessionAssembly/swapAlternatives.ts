@@ -1,8 +1,12 @@
 import { PROGRESSION_CHAINS } from '../../data/progressions'
 import { SUBSTITUTION_RULES } from '../../data/substitutionRules'
-import type { SessionPlanBlock, SetupContext } from '../../db/types'
-import type { SkillFocus } from '../../types/drill'
-import type { BlockSlot, BlockSlotType } from '../../types/session'
+import type {
+  BlockSlot,
+  BlockSlotType,
+  SessionPlanBlock,
+  SetupContext,
+  SkillFocus,
+} from '../../model'
 import { findPreferredCandidate, findSubstitute } from '../drillSelection'
 import { findCandidates } from './candidates'
 import { deriveBlockRationale, deriveSubstitutionRationale } from './rationale'

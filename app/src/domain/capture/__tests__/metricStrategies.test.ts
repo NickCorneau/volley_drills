@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { MetricType } from '../../../types/drill'
+import type { MetricType } from '../../../model'
 import {
   getMetricStrategy,
   METRIC_TYPE_STRATEGIES,

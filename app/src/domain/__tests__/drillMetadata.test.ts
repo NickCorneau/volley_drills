@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { SessionPlanBlock } from '../../db/types'
+import type { SessionPlanBlock } from '../../model'
 import { getBlockMetricType, getBlockSuccessRule } from '../drillMetadata'
 
 /**

@@ -1,4 +1,4 @@
-import type { ExecutionLog, SessionPlan } from '../db'
+import type { ExecutionLog, SessionPlan } from '../model'
 
 export function applyBlockOverrides(plan: SessionPlan, execution?: ExecutionLog): SessionPlan {
   const overrides = execution?.blockOverrides

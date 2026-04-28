@@ -1,5 +1,4 @@
-import type { SessionPlanBlock } from '../db/types'
-import type { MetricType } from '../types/drill'
+import type { MetricType, SessionPlanBlock } from '../model'
 import { drillForBlock, variantForBlock } from './catalogLookup'
 
 /**

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { DRILLS } from '../../data/drills'
-import type { SessionPlanBlock, SetupContext } from '../../db'
+import type { SessionPlanBlock, SetupContext } from '../../model'
 import { findSwapAlternatives } from '../sessionBuilder'
 
 /**

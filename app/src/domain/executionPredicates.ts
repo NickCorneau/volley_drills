@@ -6,7 +6,7 @@
  * the A8 "discarded-resume never counts as a real session" rule in one
  * place.
  */
-import type { ExecutionLog } from '../db/types'
+import type { ExecutionLog } from '../model'
 
 /**
  * A session is "terminal" when it has a finalized outcome (`completed` or

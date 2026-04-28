@@ -4,7 +4,7 @@ import type {
   ExecutionLogBlockStatus,
   SessionPlan,
   SessionPlanBlock,
-} from '../db/types'
+} from '../model'
 import {
   buildAdvancedBlock,
   buildEndedSession,

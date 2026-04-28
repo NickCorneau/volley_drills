@@ -1,5 +1,4 @@
-import type { ExecutionLog, SessionPlan, SessionPlanBlock } from '../../db'
-import type { MetricType } from '../../types/drill'
+import type { ExecutionLog, MetricType, SessionPlan, SessionPlanBlock } from '../../model'
 import { getBlockMetricType, getBlockSuccessRule } from '../drillMetadata'
 import { metricCapturesCounts } from './metricStrategies'
 

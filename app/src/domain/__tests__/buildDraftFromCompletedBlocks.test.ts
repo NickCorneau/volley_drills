@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { ExecutionLog, SessionPlan } from '../../db'
+import type { ExecutionLog, SessionPlan } from '../../model'
 import { buildDraftFromCompletedBlocks } from '../sessionBuilder'
 
 /**

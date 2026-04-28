@@ -1,4 +1,4 @@
-import type { IncompleteReason } from '../../db'
+import type { IncompleteReason } from '../../model'
 
 /**
  * Shape of the form-level inputs the autosave / Finish-Later branches

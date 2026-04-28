@@ -1,4 +1,4 @@
-import type { PerDrillCapture } from '../../db'
+import type { PerDrillCapture } from '../../model'
 
 export interface AggregateCapturesResult {
   /** Sum of `goodPasses` across captures that have counts. */

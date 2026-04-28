@@ -3,8 +3,8 @@ import {
   type SubstitutionRule,
   type SubstitutionTransfer,
 } from '../data/substitutionRules'
-import type { Drill, DrillVariant } from '../types/drill'
-import type { SetupContext } from '../db/types'
+import type { Drill, DrillVariant } from '../model'
+import type { SetupContext } from '../model'
 
 export interface SelectionCandidate {
   drill: Drill

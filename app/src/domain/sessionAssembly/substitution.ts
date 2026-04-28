@@ -3,7 +3,7 @@ import {
   type SubstitutionRule,
 } from '../../data/substitutionRules'
 import { findSubstitute } from '../drillSelection'
-import type { BlockSlot, SetupContext } from '../../types/session'
+import type { BlockSlot, SetupContext } from '../../model'
 import type { CandidateVariant } from './candidates'
 import { findCandidates } from './candidates'
 import { deriveSubstitutionRationale } from './rationale'

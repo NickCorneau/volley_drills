@@ -1,6 +1,6 @@
 import { DRILLS } from '../data/drills'
-import type { SessionPlanBlock } from '../db/types'
-import type { Drill, DrillVariant } from '../types/drill'
+import type { SessionPlanBlock } from '../model'
+import type { Drill, DrillVariant } from '../model'
 
 export function drillById(drillId: string): Drill | null {
   return DRILLS.find((drill) => drill.id === drillId) ?? null

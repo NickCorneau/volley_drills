@@ -6,7 +6,7 @@ import {
   deriveBlockRationale,
   estimateRecoverySessionMinutes,
 } from './sessionBuilder'
-import type { SetupContext } from '../db/types'
+import type { SetupContext } from '../model'
 
 const variantById = new Map(
   DRILLS.flatMap((drill) => drill.variants.map((variant) => [variant.id, variant] as const)),

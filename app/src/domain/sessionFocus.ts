@@ -1,6 +1,6 @@
 import { DRILLS } from '../data/drills'
-import type { SessionPlanBlock } from '../db'
-import type { SkillFocus } from '../types/drill'
+import type { SessionPlanBlock } from '../model'
+import type { SkillFocus } from '../model'
 
 /**
  * Tier 1a Unit 5: inferred focus label for the Home last-3-sessions

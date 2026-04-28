@@ -1,4 +1,4 @@
-import type { PerDrillCapture } from '../../db'
+import type { PerDrillCapture } from '../../model'
 
 /**
  * Last-write-wins merge for per-drill captures, keyed by `blockIndex`.

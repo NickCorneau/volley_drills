@@ -6,7 +6,7 @@
  * These used to live in `services/session.ts`; they're domain logic,
  * not persistence, so they belong here.
  */
-import type { ExecutionLog, SessionPlan } from '../db/types'
+import type { ExecutionLog, SessionPlan } from '../model'
 
 export function buildStartedBlock(exec: ExecutionLog, plan: SessionPlan): ExecutionLog | null {
   const idx = exec.activeBlockIndex

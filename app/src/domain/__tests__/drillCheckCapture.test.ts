@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { ExecutionLog, SessionPlan, SessionPlanBlock } from '../../db'
+import type { ExecutionLog, SessionPlan, SessionPlanBlock } from '../../model'
 import { resolveDrillCheckCaptureEligibility } from '../drillCheckCapture'
 
 function block(overrides: Partial<SessionPlanBlock> = {}): SessionPlanBlock {

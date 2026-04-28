@@ -7,7 +7,7 @@ import {
   isConstraintActive,
   type SelectionCandidate,
 } from '../drillSelection'
-import type { SetupContext } from '../../db/types'
+import type { SetupContext } from '../../model'
 
 function candidateForVariant(variantId: string): SelectionCandidate {
   for (const drill of DRILLS) {

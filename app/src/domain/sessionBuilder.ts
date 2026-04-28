@@ -1,12 +1,12 @@
 import { selectArchetype } from '../data/archetypes'
-import type { BlockSlotType } from '../types/session'
 import type {
+  BlockSlotType,
   DraftBlock,
   ExecutionLog,
   SessionDraft,
   SessionPlan,
   SetupContext,
-} from '../db/types'
+} from '../model'
 import { pickForSlot, type CandidateVariant } from './sessionAssembly/candidates'
 import { allocateDurations, allocateRecoveryDurations } from './sessionAssembly/durations'
 import { createAssemblySeed, createSeededRandom } from './sessionAssembly/random'

@@ -24,7 +24,7 @@
  * the forcing function — adding a new metric to the union without a
  * registry entry is a TS compile error.
  */
-import type { MetricType } from '../../types/drill'
+import type { MetricType } from '../../model'
 
 /**
  * Declarative knobs each `MetricType` exposes to the capture surface.

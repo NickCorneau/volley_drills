@@ -1,6 +1,5 @@
 import { DRILLS } from '../../data/drills'
-import type { DrillVariant } from '../../types/drill'
-import type { BlockSlot, SetupContext } from '../../types/session'
+import type { BlockSlot, DrillVariant, SetupContext } from '../../model'
 import type { SelectionCandidate } from '../drillSelection'
 import type { RandomSource } from './random'
 import { shuffle } from './random'

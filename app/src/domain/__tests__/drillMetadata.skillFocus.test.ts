@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { DRILLS } from '../../data/drills'
 import { getBlockSkillFocus } from '../drillMetadata'
-import type { SessionPlanBlock } from '../../db/types'
+import type { SessionPlanBlock } from '../../model'
 
 /**
  * 2026-04-27 cca2 dogfeed F8 follow-up
