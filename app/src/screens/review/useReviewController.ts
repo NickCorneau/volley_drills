@@ -5,7 +5,7 @@ import type {
   IncompleteReason,
   PerDrillCapture as PerDrillCaptureRecord,
   SessionPlan,
-} from '../../db'
+} from '../../model'
 import {
   aggregateDrillCaptures,
   hasMeaningfulReviewDraftInput,

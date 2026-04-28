@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { SessionDraft } from '../../db'
+import type { SessionDraft } from '../../model'
 import { isSchemaBlocked } from '../../lib/schema-blocked'
 import {
   expireStaleReviews,

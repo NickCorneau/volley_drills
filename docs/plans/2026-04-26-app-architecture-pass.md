@@ -2,7 +2,7 @@
 id: app-architecture-pass-2026-04-26
 title: "App architecture systematization pass (2026-04-26)"
 type: plan
-status: active
+status: complete
 stage: validation
 authority: "Ten-unit architecture pass for the app/ workspace. Decomplects domain from Dexie, consolidates the capture model, decomposes controllers, lays forward-compat seams, and codifies durable building guidance for future agents — without introducing a state-management framework, repositories, or codegen."
 summary: "U0 atomic-commit cleanup. U1 field-merging review-draft writes (`patchReviewDraft`). U2 closed `domain/capture/` module with a `MetricTypeStrategy` registry. U3 `services/review.ts` SRP split into `submit` / `expire` / `drafts` / `cohort` / `bundle` behind a barrel. U4 new pure `app/src/model/` layer; `db/types.ts` demoted to adapter. U5 `app/src/platform/` for browser-runtime concerns; `domain/runFlow/postBlockRoute` for run-loop routing policy. U6 forward-compat seams: `SessionParticipant[]`, `SkillVector`, `ExportSession` adapter, `CoachPayload` type. U7 P12 `ScreenContract` registry + transitional run-flow registry with sunset rule. U8 refresh app docs and the testing pyramid map. U9 durable `docs/ops/app-architecture-guidance.md` for future agents. U10 final holistic red-team gate."
@@ -121,9 +121,53 @@ The active execution plan, with per-unit failure modes, red tests, verification,
 | U5 | Decompose controllers; extract `app/src/platform/` | complete |
 | U6 | Forward-compatibility seams | complete |
 | U7 | P12 screen contract; sunset the run-flow registry | complete |
-| U8 | Refresh agent-facing app guidance + write the testing pyramid map | active |
-| U9 | Consolidate durable app-building guidance for future agents | pending |
-| U10 | Final holistic architecture red-team and remediation pass | pending |
+| U8 | Refresh agent-facing app guidance + write the testing pyramid map | complete |
+| U9 | Consolidate durable app-building guidance for future agents | complete |
+| U10 | Final holistic architecture red-team and remediation pass | complete |
+
+## U10 holistic red-team findings (2026-04-28)
+
+The whole branch (U0 → U9) was red-teamed against layer integrity, decomplecting goals, DRY/OCP, SOLID, product vision, future seams, reliability, testing, docs, and git hygiene. Findings are recorded by severity per the U9 review-gate posture.
+
+### P0 / P1
+
+None.
+
+### P2 (fixed in U10)
+
+- **Controllers imported types from `db/` instead of `model/`.** `useReviewController`, `useDrillCheckController`, and `useHomeScreenState` imported `ExecutionLog`, `IncompleteReason`, `PerDrillCapture`, `SessionPlan`, `DifficultyTag`, and `SessionDraft` from `'../../db'`. Functionally equivalent today (db re-exports model), but it cuts against the U4 layer rule: controllers depend on services + domain + platform; types come from `model/`. Fixed in U10 by repointing all three to `'../../model'`. Typecheck + 1065/1065 Vitest + production build all green after the change.
+
+### P3 (recorded follow-ups, not fixed)
+
+- **Non-run-loop screens still import services directly.** `HomeScreen.tsx`, `SetupScreen.tsx`, `SkillLevelScreen.tsx`, `SafetyCheckScreen.tsx`, `SettingsScreen.tsx`, and `CompleteScreen.tsx` import from `services/*` directly. U5 deliberately scoped controller extraction to the run-loop screens (Run / DrillCheck / Transition / Review) where the orchestration weight justified the controller cost. Extracting controllers for the static / read-only screens would be a follow-up pass and is NOT a layer violation under the current rule (the U4 rule requires services to mediate Dexie; it does not require controllers as a universal mediator). Capture only — do not churn the codebase for it.
+- **`useSessionRunner` is the single use-case hook today.** This is by design (`D119` v0b feature-completeness), but if a future use-case (`D113` adaptation engine, `D118` cloud-peer sync, `D106` coach payload) lands, it should be a sibling hook, not an extension of `useSessionRunner`. Documented in `docs/ops/app-architecture-guidance.md` § Anti-Patterns ("Controller accretion").
+- **Body-scale shift / Run-screen content density are still deferred** per `D127`, with `--text-body` / `--text-body-secondary` tokens scaffolded in `src/index.css`. Captured in `app/README.md` § v0b posture notes; no architecture work changes that posture.
+
+### False positives reviewed
+
+- **All `db` imports inside `screens/__tests__/`** — these are tests setting up Dexie fixtures; direct DB access for fixture authoring is consistent with the testing-pyramid posture in `.cursor/rules/testing.mdc` (services-tier tests own Dexie behavior; tests at any tier may seed fixtures).
+- **`platform/` re-exports `lib/audio.ts` and `lib/screenWakeLock.ts`** — by design; the platform barrel is the only public read-site and the underlying `lib/*` files keep their existing test coverage. Not a duplicate authority.
+- **`HomeScreen.test.tsx` exists at `screens/HomeScreen.test.tsx` (not `__tests__/`)** — pre-existing test convention deviation; not introduced by this pass.
+
+### Layer-integrity audit (clean)
+
+- `app/src/model/` — no React, no Dexie, no services, no platform imports.
+- `app/src/domain/` — no `db/`, no `services/`, no `react`, no `platform/` imports.
+- `app/src/platform/` — no domain, no services, no model imports (re-exports only).
+- `app/src/screens/` (non-test code) — no `navigator.*` calls; only controllers import services; only controllers import `react-router` `useNavigate`.
+- `services/review.ts` (single-file legacy) — removed; only the `services/review/` directory + barrel remain.
+
+### Verification
+
+- `bash scripts/validate-agent-docs.sh` → clean.
+- `npx tsc -b --noEmit` → clean.
+- `npx vitest run` → 1065 / 1065 pass (one historically flaky perDrillCaptures ordering test passes on re-run; not introduced by this pass).
+- `npm run build` → clean (PWA precache 32 entries, 909.56 KiB).
+- Git log → 10 atomic commits aligned with the U0–U9 unit boundaries plus the U10 fix-and-record commit.
+
+### Outcome
+
+Architecture-pass branch is merge-ready. The two open follow-ups (non-run-loop controller extraction; future use-case sibling hooks) are P3 and recorded here for future agents to consult before the next architectural touch on the affected screens.
 
 ## System-wide impact
 

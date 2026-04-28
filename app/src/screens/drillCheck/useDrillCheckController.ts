@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import type {
   DifficultyTag,
   PerDrillCapture as PerDrillCaptureRecord,
-} from '../../db'
+} from '../../model'
 import {
   mergePerDrillCaptures,
   resolveDrillCheckCaptureEligibility,
