@@ -7,7 +7,7 @@ import { SettingsScreen } from '../SettingsScreen'
 
 /**
  * 2026-04-23 walkthrough closeout polish plan Item 3 — Complete screen
- * posture-sensitive Safari-eviction footnote moved to Settings; the
+ * posture-sensitive storage footnote moved to Settings; the
  * `✓ Saved on this device` trust line stays, and a small `Why is
  * this?` link carries the tester to the Settings explainer.
  *
@@ -74,7 +74,7 @@ async function seedSubmitted(execId: string) {
   })
 }
 
-describe('CompleteScreen 2026-04-23 polish (Safari caveat compression)', () => {
+describe('CompleteScreen 2026-04-23 polish (storage caveat compression)', () => {
   beforeEach(async () => {
     await clearDb()
   })
@@ -97,7 +97,7 @@ describe('CompleteScreen 2026-04-23 polish (Safari caveat compression)', () => {
     expect(saveStatus.textContent).toMatch(/saved .* on this device/i)
   })
 
-  it('does NOT render the posture-sensitive Safari-eviction secondary detail on Complete', async () => {
+  it('does NOT render the posture-sensitive storage secondary detail on Complete', async () => {
     await seedSubmitted('exec-no-evict-detail')
     render(
       <MemoryRouter initialEntries={['/complete?id=exec-no-evict-detail']}>
@@ -113,7 +113,7 @@ describe('CompleteScreen 2026-04-23 polish (Safari caveat compression)', () => {
     // strings from `storageCopy.ts` that previously rendered below
     // the save line on Complete. After the compression they live in
     // Settings only.
-    expect(body).not.toMatch(/safari can remove browser data/i)
+    expect(body).not.toMatch(/under storage pressure/i)
     expect(body).not.toMatch(/not backed up/i)
     expect(body).not.toMatch(/strongest local durability/i)
   })
@@ -153,10 +153,8 @@ describe('SettingsScreen 2026-04-23 polish (About local storage sub-section)', (
     expect(section).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /about local storage/i })).toBeInTheDocument()
     // In jsdom the install posture defaults to `browser-tab`. The
-    // browser-tab secondary copy calls out iPhone Safari eviction.
-    // Matching on the distinctive token lets the test remain honest
-    // even if the exact sentence is later wordsmithed.
-    expect(section.textContent).toMatch(/safari/i)
+    // browser-tab secondary is browser-neutral but still names the risk.
+    expect(section.textContent).toMatch(/works offline/i)
   })
 
   it('points the Complete "Why is this?" link at a surface that actually carries the explainer', async () => {

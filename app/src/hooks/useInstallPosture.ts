@@ -41,7 +41,7 @@ export interface UseInstallPostureResult {
   refresh: () => void
 }
 
-// Returns the current iPhone durability posture (D118) and a refresh callback
+// Returns the current install / persistence posture (D118) and a refresh callback
 // that re-reads both install posture and `navigator.storage.persisted()`. Until
 // the first async read settles, the hook reports `persisted = false`, which is
 // the safer default for copy purposes (State B rather than State C). Call

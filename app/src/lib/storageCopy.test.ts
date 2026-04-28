@@ -4,11 +4,12 @@ import { getStorageCopy, STORAGE_COPY, type InstallPosture } from './storageCopy
 const POSTURES: InstallPosture[] = ['browser-tab', 'installed-not-persisted', 'installed-persisted']
 
 describe('storageCopy', () => {
-  it('returns browser-tab copy with a 7-day Safari-removal hint', () => {
+  it('returns browser-tab copy with an offline + retention caveat (browser-neutral)', () => {
     const copy = getStorageCopy('browser-tab')
     expect(copy.primary).toBe('Saved in this browser on this device')
-    expect(copy.secondary).toContain('iPhone Safari')
-    expect(copy.secondary).toContain('remove')
+    expect(copy.secondary).toContain('Works offline')
+    expect(copy.secondary).toMatch(/browser/i)
+    expect(copy.secondary).toMatch(/clear|remove/i)
   })
 
   it('returns installed-not-persisted copy with a best-effort caveat', () => {
