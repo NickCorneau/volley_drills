@@ -38,6 +38,11 @@ Each route screen with non-trivial state has a controller hook at `screens/<rout
 
 Controllers MUST NOT branch on `navigator.vibrate` or call Dexie directly. If a new controller would do either, the missing seam belongs in `platform/`, `services/`, or `domain/`, not in the controller.
 
+## Tailwind elevation and focus (pitfalls)
+
+- **Do not stack `ring-*` and `shadow-*` on the same always-on surface** (e.g. a white card with `rounded-[16px]`). In Tailwind, `ring` is implemented with `box-shadow`; combining it with `shadow-sm` / `shadow-lg` applies **two box-shadow layers** and often produces **grey corner wedges** in WebKit / Chrome. Prefer **`border` + a single `shadow-*`** for card edges (see `FOCAL_SURFACE_CLASS` in `components/ui/Card.tsx`).
+- **Focal cards that already use `FOCAL_SURFACE_CLASS` (`border` + `shadow-sm`)** should not add **`focus-visible:ring-*`** on the same element — focus would reintroduce a second shadow stack. Use **`focus-visible:outline-*`** (+ `outline-offset`) for keyboard focus on those surfaces instead (`SkillLevelScreen` option rows are the reference).
+
 ## P12 contract
 
 Every route must have a P12 entry in `app/src/contracts/screenContracts.ts` (`action` / `signal` / `reason`) or an explicit exemption. See `.cursor/rules/routing.mdc` for the registration rule.
