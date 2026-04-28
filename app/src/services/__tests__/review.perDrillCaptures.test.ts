@@ -13,7 +13,7 @@ import {
  * Tier 1b D133 (2026-04-26): per-drill capture write-path coverage.
  *
  * Sources:
- *   docs/specs/m001-review-micro-spec.md §"Per-drill capture at Transition (D133)"
+ *   docs/specs/m001-review-micro-spec.md §"Per-drill capture at Drill Check (D133)"
  *   docs/plans/2026-04-26-pair-rep-capture-tier1b.md
  *
  * What this file pins:
@@ -68,7 +68,7 @@ function makeCapture(overrides: Partial<PerDrillCapture>): PerDrillCapture {
     difficulty: 'still_learning',
     capturedAt: 0,
     ...overrides,
-  }
+  } as PerDrillCapture
 }
 
 beforeEach(async () => {

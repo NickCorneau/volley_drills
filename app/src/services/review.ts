@@ -30,7 +30,7 @@ export interface SubmitReviewData {
    * screen after completed blocks. When present and non-empty, ReviewScreen and
    * CompleteScreen prefer this list over the session-level Good/Total
    * fields. See `docs/specs/m001-review-micro-spec.md` §"Per-drill
-   * capture at Transition (D133)".
+   * capture at Drill Check (D133)".
    */
   perDrillCaptures?: PerDrillCapture[]
   /** Optional pass-through for D104 / V0B-29; v0b does not prompt for this. */
@@ -298,7 +298,7 @@ export async function expireReview(data: ExpireReviewData): Promise<void> {
       goodPasses: draft?.goodPasses ?? 0,
       totalAttempts: draft?.totalAttempts ?? 0,
       drillScores: draft?.drillScores,
-      // D133: per-drill captures already collected on Transition before
+      // D133: per-drill captures already collected on Drill Check before
       // the user dropped off survive into the expired stub for the same
       // adversarial-finding-adv-1/adv-2 reason as RPE / pain note. The
       // captures are honest signal at drill grain; nuking them on expire
@@ -365,8 +365,8 @@ export interface DraftReviewData {
   totalAttempts: number
   drillScores?: DrillVariantScore[]
   /**
-   * D133 (2026-04-26): per-drill captures collected on the Transition
-   * screen between blocks. Persisted incrementally as each drill ends so
+   * D133 (2026-04-26): per-drill captures collected on Drill Check
+   * (`/run/check`) between blocks. Persisted incrementally so
    * that a Finish Later / browser crash mid-session does not lose the
    * tag the user already tapped.
    */
