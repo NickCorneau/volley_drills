@@ -23,8 +23,8 @@
  * Extension point: new `MetricType` values land in
  * `metricStrategies.ts` only — eligibility, aggregation, and review
  * presence flow through the registry without controller / screen
- * edits. See the rules ledger in
- * `docs/ops/agent-operations.md` for the OCP rationale.
+ * edits. See `docs/ops/app-architecture-guidance.md` § DRY & OCP
+ * Posture for the rationale.
  */
 export {
   aggregateDrillCaptures,
