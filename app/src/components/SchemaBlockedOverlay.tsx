@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import { isSchemaBlocked, subscribeSchemaBlocked } from '../lib/schema-blocked'
+import { ELEVATED_PANEL_SURFACE } from './ui/Card'
 import { Button } from './ui'
 
 export interface SchemaBlockedOverlayProps {
@@ -25,7 +26,9 @@ export function SchemaBlockedOverlay({ onReload }: SchemaBlockedOverlayProps = {
       aria-labelledby="schema-blocked-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
     >
-      <div className="mx-auto flex w-full max-w-[390px] flex-col gap-4 rounded-lg bg-bg-primary p-6 shadow-lg">
+      <div
+        className={`mx-auto flex w-full max-w-[390px] flex-col gap-4 rounded-[12px] p-6 ${ELEVATED_PANEL_SURFACE}`}
+      >
         <h2 id="schema-blocked-title" className="text-lg font-bold text-text-primary">
           Reload to continue
         </h2>

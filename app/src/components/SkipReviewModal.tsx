@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 
+import { ELEVATED_PANEL_SURFACE } from './ui/Card'
 import { Button } from './ui'
 
 /**
@@ -120,7 +121,10 @@ export function SkipReviewModal({ planName, onConfirm, onCancel }: Props) {
       aria-modal="true"
       aria-labelledby="skip-review-title"
     >
-      <div ref={panelRef} className="w-full max-w-[340px] rounded-[12px] bg-bg-primary p-6 shadow-lg">
+      <div
+        ref={panelRef}
+        className={`w-full max-w-[340px] rounded-[12px] p-6 ${ELEVATED_PANEL_SURFACE}`}
+      >
         <h2 id="skip-review-title" className="text-lg font-bold text-text-primary">
           Skip review?
         </h2>

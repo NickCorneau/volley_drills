@@ -2,6 +2,7 @@ import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { BlockTimer } from '../components/BlockTimer'
 import { RunControls } from '../components/RunControls'
 import { SafetyIcon } from '../components/SafetyIcon'
+import { ELEVATED_PANEL_SURFACE } from '../components/ui/Card'
 import { Button, ScreenShell, StatusMessage } from '../components/ui'
 import { getBlockSkillFocus } from '../domain/drillMetadata'
 import { blockEyebrowLabel } from '../lib/format'
@@ -291,7 +292,7 @@ export function RunScreen() {
 
       {showEndConfirm && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-8">
-          <div className="w-full max-w-[390px] rounded-[16px] bg-bg-primary p-6 shadow-lg">
+          <div className={`w-full max-w-[390px] rounded-[16px] p-6 ${ELEVATED_PANEL_SURFACE}`}>
             <h2 className="text-lg font-bold text-text-primary">End session early?</h2>
             <p className="mt-2 text-sm text-text-secondary">
               {currentBlock.type === 'wrap'

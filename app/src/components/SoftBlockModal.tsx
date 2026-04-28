@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import type { PendingReview } from '../services/session'
+import { ELEVATED_PANEL_SURFACE } from './ui/Card'
 import { Button } from './ui'
 
 /**
@@ -48,7 +49,7 @@ export function SoftBlockModal({ pendingReview, onFinish, onSkipAndContinue, onC
       aria-modal="true"
       aria-labelledby="softblock-title"
     >
-      <div className="relative w-full max-w-[340px] rounded-[12px] bg-bg-primary p-6 shadow-lg">
+      <div className={`relative w-full max-w-[340px] rounded-[12px] p-6 ${ELEVATED_PANEL_SURFACE}`}>
         <button
           type="button"
           onClick={onClose}

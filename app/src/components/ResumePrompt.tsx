@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ELEVATED_PANEL_SURFACE } from './ui/Card'
 import { Button } from './ui'
 
 type ResumePromptProps = {
@@ -30,7 +31,7 @@ export function ResumePrompt({
       aria-modal="true"
       aria-labelledby="resume-prompt-title"
     >
-      <div className="w-full max-w-[340px] rounded-[12px] bg-bg-primary p-6 shadow-lg">
+      <div className={`w-full max-w-[340px] rounded-[12px] p-6 ${ELEVATED_PANEL_SURFACE}`}>
         <h2 id="resume-prompt-title" className="text-lg font-bold text-text-primary">
           Session in progress
         </h2>

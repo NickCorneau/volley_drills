@@ -28,6 +28,14 @@ import { cx } from '../../lib/cn'
 export const FOCAL_SURFACE_CLASS =
   'rounded-[16px] bg-bg-primary border border-text-primary/10 shadow-sm'
 
+/**
+ * Elevated white panel for modals, bottom sheets, and blocking overlays.
+ * Same hairline border as `FOCAL_SURFACE_CLASS`, stronger `shadow-lg`.
+ * Compose with width / max-width / padding / radius at each call site.
+ * Do not add `ring-*` here — see pitfall note on `FOCAL_SURFACE_CLASS`.
+ */
+export const ELEVATED_PANEL_SURFACE = 'bg-bg-primary border border-text-primary/10 shadow-lg'
+
 type CardVariant = 'soft' | 'focal'
 
 type CardProps = {

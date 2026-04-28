@@ -42,6 +42,7 @@ Controllers MUST NOT branch on `navigator.vibrate` or call Dexie directly. If a 
 
 - **Do not stack `ring-*` and `shadow-*` on the same always-on surface** (e.g. a white card with `rounded-[16px]`). In Tailwind, `ring` is implemented with `box-shadow`; combining it with `shadow-sm` / `shadow-lg` applies **two box-shadow layers** and often produces **grey corner wedges** in WebKit / Chrome. Prefer **`border` + a single `shadow-*`** for card edges (see `FOCAL_SURFACE_CLASS` in `components/ui/Card.tsx`).
 - **Focal cards that already use `FOCAL_SURFACE_CLASS` (`border` + `shadow-sm`)** should not add **`focus-visible:ring-*`** on the same element — focus would reintroduce a second shadow stack. Use **`focus-visible:outline-*`** (+ `outline-offset`) for keyboard focus on those surfaces instead (`SkillLevelScreen` option rows are the reference).
+- **Centered modals and blocking overlays** (`SkipReviewModal`, `SoftBlockModal`, `ResumePrompt`, `SchemaBlockedOverlay`, RunScreen end-session sheet) use **`ELEVATED_PANEL_SURFACE`** from `components/ui/Card.tsx` — same hairline border as focal cards, **`shadow-lg`** instead of `shadow-sm`. Add layout (`max-w`, `rounded-*`, `p-6`, etc.) beside the token; do not one-off `bg-bg-primary shadow-lg` without the border.
 
 ## P12 contract
 
