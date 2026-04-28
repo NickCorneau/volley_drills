@@ -78,6 +78,7 @@ Read only as much as the task needs.
    - Product direction: `docs/vision.md` -> `docs/decisions.md` -> `docs/prd-foundation.md`
    - Milestone/spec work: `docs/milestones/m001-solo-session-loop.md` -> relevant `docs/specs/`
    - Prototype work: `docs/research/2026-04-12-v0a-runner-probe-feedback.md` -> `docs/research/2026-04-19-v0b-starter-loop-feedback.md` -> `app/README.md`
+   - **App architecture / new feature work**: `app/README.md` -> `docs/ops/app-architecture-guidance.md` -> `.cursor/rules/data-access.mdc` / `component-patterns.mdc` / `routing.mdc` / `testing.mdc`
    - Research: `docs/research/README.md` -> narrowest relevant note
    - Design / UX work: `docs/design/README.md` -> referenced design-canonical doc (brand / visual / outdoor)
    - Docs editing: `docs/README.md` -> `docs/ops/agent-documentation-contract.md`

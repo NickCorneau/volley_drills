@@ -618,6 +618,13 @@
       "status": "active"
     },
     {
+      "id": "app-architecture-guidance",
+      "path": "docs/ops/app-architecture-guidance.md",
+      "type": "ops",
+      "status": "active",
+      "canonical_for": "Durable architecture principles, layer rules, extension points, testing posture, review gates, anti-patterns, and a feature-routing checklist for the app/ workspace. Written for future agents adding features or refactors. Routes to canonical product docs (`docs/vision.md`, `docs/decisions.md`, `docs/prd-foundation.md`), `app/README.md` for current state, and `.cursor/rules/*.mdc` for focused rules — does NOT duplicate them. Update only when a layer boundary, extension-point pattern, review gate, or testing pyramid materially changes."
+    },
+    {
       "id": "agent-runtime",
       "path": "docs/ops/agent-runtime.md",
       "type": "ops",
