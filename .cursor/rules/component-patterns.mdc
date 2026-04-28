@@ -25,7 +25,22 @@ Toggle/selection patterns (PlayerToggle, RpeSelector, chips) have selection-spec
 
 ## Screen structure
 
-Screens should be thin: read state from hooks, call services for mutations, render UI. Screens never import `db` directly.
+Screens should be thin: read state from a controller, render UI, dispatch UI events. Screens never import `db` directly, never call `navigator.*` runtime APIs, and never hold product policy in JSX. See `.cursor/rules/data-access.mdc` for the full layer map.
+
+## Controllers
+
+Each route screen with non-trivial state has a controller hook at `screens/<route>/use<Route>Controller.ts` (e.g. `useRunController`, `useDrillCheckController`, `useTransitionController`, `useReviewController`). Controllers are thin assemblers:
+
+- `useSessionRunner` (or another use-case hook) for ordered service calls + serial mutation queue.
+- `app/src/platform/` for browser runtime (`vibrate`, audio cues, wake lock).
+- `app/src/domain/runFlow/` for route-policy decisions (e.g. `postBlockRoute`).
+- Local UI state (modal-open, error footer, etc.).
+
+Controllers MUST NOT branch on `navigator.vibrate` or call Dexie directly. If a new controller would do either, the missing seam belongs in `platform/`, `services/`, or `domain/`, not in the controller.
+
+## P12 contract
+
+Every route must have a P12 entry in `app/src/contracts/screenContracts.ts` (`action` / `signal` / `reason`) or an explicit exemption. See `.cursor/rules/routing.mdc` for the registration rule.
 
 Wrap screen content in `<ScreenShell>` (from `components/ui`) using the Header / Body / Footer zones. This is how the app enforces the iPhone-viewport layout contract: the outer `App` Layout locks the viewport at `h-[100dvh] overflow-hidden`, and `ScreenShell.Body` owns the single scroll container so the pinned footer (Pause/Next on Run, Submit on Review, Continue on Safety, etc.) never slips below the fold. See `app/src/components/ui/ScreenShell.tsx` for the primitive and `app/src/screens/RunScreen.tsx` for the canonical "cockpit footer" usage.
 

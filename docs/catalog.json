@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
   "repo_id": "volley_drills",
-  "last_updated": "2026-04-27",
+  "last_updated": "2026-04-28",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -712,6 +712,13 @@
       "type": "plan",
       "status": "complete",
       "canonical_for": "Post-D133 Layer 2 queue closeout pass. Ships two reliability fixes first (`DrillCheckScreen` waits for per-drill capture persistence before navigating; draft edit Setup hydration reads `getCurrentDraft().context` instead of the last completed context), adds Playwright 375 px /review hit-area coverage against current controls, and demotes only decorative accent/readout uses (`PerDrillCapture` Quick tag eyebrow, `PassMetricInput` % good readout, Safety heat-tip bullets). Records `Beach Prep Three` truncate-with-expand as killed, and auto-fill training recency plus Net/Wall persistence as deferred behavior changes requiring a dedicated setup/safety/defaults spec."
+    },
+    {
+      "id": "app-architecture-pass-2026-04-26",
+      "path": "docs/plans/2026-04-26-app-architecture-pass.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Ten-unit architecture systematization pass for the app/ workspace. Lands the in-flight refactor as atomic commits (U0); fixes the field-merging review-draft write so Drill Check captures and Review form fields cannot clobber each other (U1); consolidates capture eligibility / merge / aggregate / meaningful-draft / window classification into one closed `app/src/domain/capture/` module with a `MetricTypeStrategy` registry (U2); decomposes `services/review.ts` along its true reasons-to-change into `services/review/{submit,expire,drafts,cohort,bundle}` behind a barrel (U3); introduces `app/src/model/` as the pure product-type home and demotes `app/src/db/types.ts` to a thin re-export adapter so `domain/` no longer depends on Dexie row shapes (U4); pulls browser-runtime concerns into `app/src/platform/` and hoists post-block routing into `app/src/domain/runFlow/postBlockRoute.ts` (U5); lays forward-compatibility seams `SessionParticipant[]` (`D115`/`D116`/`D117`), `SkillVector` (`D121`), `ExportSession` adapter (Phase 1.5), and `CoachPayload` type (Phase 2 / `D106`) without shipping new UX (U6); encodes the `docs/vision.md` P12 contract structurally in `app/src/contracts/screenContracts.ts` and reframes `runFlowInteractionContract` as a transitional characterization spec with a written sunset rule (U7); refreshes app-facing docs and the testing pyramid map in `app/README.md` and `.cursor/rules/` (U8); consolidates durable building guidance in `docs/ops/app-architecture-guidance.md` (U9); closes with a holistic red-team gate (U10). No Dexie schema bump, no new state-management framework, no UI changes during the architecture pass itself."
     },
     {
       "id": "per-drill-success-criterion-2026-04-27",

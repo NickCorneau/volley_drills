@@ -1,9 +1,12 @@
 ---
-description: Testing conventions — every new service/hook gets a test
+description: Testing pyramid — prove each behavior at the lowest useful tier
 globs:
   - "app/src/**/*.test.*"
   - "app/src/services/**"
   - "app/src/hooks/**"
+  - "app/src/domain/**"
+  - "app/src/screens/**"
+  - "app/e2e/**"
 alwaysApply: false
 ---
 
@@ -11,31 +14,61 @@ alwaysApply: false
 
 ## Stack
 
-- **Vitest** with `globals: true` — do not import `describe`, `it`, `expect`, `vi`, `beforeEach` etc. from vitest; they are injected globally.
+- **Vitest** with `globals: true` — `describe`, `it`, `expect`, `vi`, `beforeEach`, etc. are injected globally; do not import them.
 - **@testing-library/react** for component and hook tests (`render`, `screen`, `renderHook`, `act`).
 - **@testing-library/user-event** for user interaction simulation.
-- **fake-indexeddb** auto-loaded in `test-setup.ts` for Dexie tests.
+- **fake-indexeddb** auto-loaded in `test-setup.ts` for Dexie-backed services tests.
+- **Playwright** for full route flows and PWA / storage behavior in `app/e2e/`.
+
+## Testing pyramid map (proof-tier policy)
+
+Prove each behavior at the LOWEST useful tier. Higher tiers must not re-assert truths that are already proven below them.
+
+| Tier | Tool | Owns | Examples |
+|------|------|------|----------|
+| **Domain** | Vitest, pure | Capture eligibility / merge / aggregate / window classification / meaningful-draft / route policy / session-assembly / metric-strategy registry / participant projection / export-adapter shape / P12 route exhaustiveness. | `domain/capture/__tests__/*`, `domain/runFlow/__tests__/postBlockRoute.test.ts`, `domain/__tests__/sessionParticipants.test.ts`, `contracts/__tests__/screenContracts.test.ts`. |
+| **Services** | Vitest + `fake-indexeddb` | Dexie write transactions: submit / expire / draft merge / cohort filter / bundle load / schema invariants / model round-trip. | `services/__tests__/review.*.test.ts`, `services/__tests__/reviewDraftMerge.test.ts`, `services/__tests__/modelRoundTrip.test.ts`, `services/__tests__/session.v0b.test.ts`, `db/__tests__/schema-v4-invariants.test.ts`. |
+| **Controllers / use-case hooks** | RTL + mocked `useSessionRunner` | Wiring + route outcomes + error branches. Real `useSessionRunner` only when guarding the serial-queue invariant itself. | `screens/run/__tests__/useRunController.test.tsx`, `screens/transition/__tests__/*`, `screens/review/__tests__/*`, `hooks/useSessionRunner.test.ts`. |
+| **Components** | RTL | UI primitives in `components/ui/` and small composites. | `components/ui/__tests__/Button.test.tsx`. |
+| **Screen integration** | RTL | Optional; reserved for flows where component-level coverage cannot prove the wiring (e.g. preroll hint, draft persistence interlock). Should NOT duplicate domain truths. | `screens/__tests__/RunScreen.preroll-hint.test.tsx`, `screens/__tests__/DrillCheckScreen.perDrillCapture.test.tsx`. |
+| **E2E** | Playwright | Full flows, route transitions, PWA / IndexedDB persistence, Drill Check ↔ Review draft cross-screen invariants. | `app/e2e/session-flow.spec.ts`, `app/e2e/phase-c0-schema-v4.spec.ts`. |
+
+If a behavior can be proven at a lower tier, it MUST be. RTL must not re-assert domain truths. Playwright must not re-prove anything covered by services or domain tests.
 
 ## Test location
 
 Place tests in a `__tests__/` directory next to the module:
 
 ```
-services/__tests__/timer.test.ts
+domain/capture/__tests__/metricStrategies.test.ts
+services/review/__tests__/submit.test.ts
 hooks/__tests__/useTimer.test.ts
 components/ui/__tests__/Button.test.tsx
+screens/run/__tests__/useRunController.test.tsx
+contracts/__tests__/screenContracts.test.ts
 ```
 
 ## When to write tests
 
-- Every new service module gets at least one test covering the primary read/write path.
-- Every new hook gets a test covering initialization and key state transitions.
-- UI primitives in `components/ui/` get render + interaction tests.
-- Screen-level integration tests are optional but encouraged for critical flows.
+- Every new domain rule, service module, controller, and use-case hook gets a test at the lowest tier that can prove it.
+- New `successMetric.type` → register a strategy entry, then prove at the domain tier (capture domain). No screen test required for the new type alone.
+- New route → add a P12 entry to `contracts/screenContracts.ts`; the existing `screenContracts.test.ts` will fail if the entry is missing.
+- New post-block routing variant → extend `domain/runFlow/postBlockRoute.ts` and its pure unit suite first.
+- Bug fix → add a red test at the lowest useful tier that fails before the fix.
 
 ## Running tests
 
 ```bash
-npm test          # single run
-npm run test:watch  # watch mode
+npm test                # single run (Vitest, all tiers)
+npm run test:watch      # watch mode
+npm run test:e2e        # Playwright
+npm run test:e2e:headed # Playwright headed
 ```
+
+## Anti-patterns
+
+- Asserting domain truths through brittle DOM queries in RTL.
+- Stubbing `navigator.vibrate` directly inside controller tests; mock the `platform/` import instead.
+- Adding a Playwright case for behavior already covered by a services test.
+- Service tests that mock another service module instead of using `fake-indexeddb`.
+- Component tests that touch `db/` or `navigator.*` runtime APIs.

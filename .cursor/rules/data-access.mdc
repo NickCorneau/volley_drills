@@ -1,28 +1,73 @@
 ---
-description: Data access layer conventions — screens and hooks never touch db directly
+description: App layer rules — dependencies point inward; screens never touch db directly
 globs:
   - "app/src/**"
 alwaysApply: false
 ---
 
-# Data Access
+# Data Access & Layer Rules
 
-## Layer rules
+The app/ workspace follows the layer model documented in `app/README.md` and codified in `docs/ops/app-architecture-guidance.md`. Dependencies point INWARD. Outer layers depend on inner layers; the reverse is forbidden.
+
+```
+contracts ─┐
+           │
+data ─► model ─► domain ─► services ─► hooks ─► controllers ─► screens / components
+                                              ▲
+                                         platform
+```
+
+## Layer responsibilities
+
+| Layer | Path | Owns | Forbidden imports |
+|-------|------|------|-------------------|
+| **Model** | `app/src/model/` | Pure product types (`SessionPlan`, `PerDrillCapture`, `SessionReview`, forward seams `SessionParticipant[]`, `SkillVector`, `CoachPayload`). | React, Dexie, services, platform. |
+| **Domain** | `app/src/domain/` | Pure rules: capture eligibility / merge / aggregate (`domain/capture/`), route policy (`domain/runFlow/`), session-assembly, executionState, sessionParticipants. | `db/`, `services/`, React, `platform/`. |
+| **Services** | `app/src/services/` | Dexie IO + orchestration. Session: `services/session/`. Review: `services/review/` (submit / drafts / expire / cohort / bundle). Per-session export adapter: `services/export/`. Founder table dump: `services/export.ts`. | React, controllers, screens. |
+| **Platform** | `app/src/platform/` | Browser-runtime APIs only — `vibrate`, audio, screen wake lock. No product semantics. | `db/`, `services/`, `domain/`. |
+| **Use-case hooks** | `app/src/hooks/` (notably `useSessionRunner`) | Ordered service calls + serial mutation queue. | Direct UI policy. |
+| **Controllers** | `app/src/screens/**/use*Controller.ts` | Thin assemblers: route policy + use-case hook + platform hooks + local UI state. | Direct Dexie writes, inline route strings. |
+| **Screens / components** | `app/src/screens/`, `app/src/components/` | Render and dispatch UI events. | `db/`, `services/` (call through controllers / hooks). |
+| **Contracts** | `app/src/contracts/` | P12 `screenContracts.ts`; transitional `runFlowInteractionContract.ts` + `SUNSET_RUN_FLOW_CONTRACT`. | Anything else. |
+
+## Hard rules (CI grep enforces)
 
 - **Screens** and **components** never import from `db/schema` or call Dexie APIs directly.
-- All database reads and writes go through **service functions** in `services/`.
-- **Hooks** may call service functions and manage React state from their return values.
-- `db/` contains only the Dexie schema class and TypeScript type definitions.
-- Types can be imported from `db/types` or from the `db/` barrel export.
+- **Domain** modules never import from `app/src/db/`, `app/src/services/`, `react`, or `app/src/platform/`.
+- **Model** modules never import Dexie or React.
+- **Platform** modules never import services or domain (browser-runtime only).
+- All database reads and writes go through service modules in `app/src/services/`.
+- All `navigator.*` runtime calls (`vibrate`, wake lock) go through `app/src/platform/`. Controllers MUST call `vibrate(pattern)` from `'../../platform'`, never `navigator.vibrate(...)` inline.
 
-## Service modules
+## Service module map
 
 | Module | Responsibility |
 |--------|---------------|
-| `services/session.ts` | Session CRUD, block state builders, resume/discard logic |
-| `services/review.ts` | Review submission, session bundle loading |
-| `services/timer.ts` | Timer flush/recover/clear for block persistence |
+| `services/session/` | Session writes (createSessionFromDraft, swap, discard, expire sweep, skip-review). Re-exported via `services/session/index.ts`. |
+| `services/review/` | Review submit / expire / draft merge / cohort / bundle. Public barrel at `services/review/index.ts`; per-module testable in isolation. |
+| `services/timer.ts` | Timer flush / recover / clear for block persistence. |
+| `services/storageMeta.ts` | Key-value `storageMeta` reads/writes (UX flags, onboarding). |
+| `services/softBlock.ts` | Soft-block dismissal markers per `D-C1`. |
+| `services/export.ts` | Founder table-dump JSON export (`V0B-15`). |
+| `services/export/sessionExport.ts` | Per-session Phase 1.5 adapter (`buildExportSession`). Pure model→JSON. |
 
 ## Pure state builders
 
-`services/session.ts` exports pure functions prefixed with `build*` (e.g., `buildStartedBlock`, `buildPausedExecution`) that compute the next ExecutionLog state without side effects. Hooks call these, then persist via `saveExecution()`.
+`domain/executionState.ts` exports pure functions (`buildStartedBlock`, `buildPausedExecution`, `buildEndedSession`, …) that compute the next `ExecutionLog` state without side effects. Hooks/services call these, then persist via `saveExecution()`.
+
+## Capture domain (single closed home)
+
+All metric-type / capture-window / aggregate logic lives under `app/src/domain/capture/`:
+
+- `metricStrategies.ts` — `MetricTypeStrategy` registry. Adding a new `successMetric.type` = one strategy entry.
+- `eligibility.ts` — `resolveDrillCheckCaptureEligibility` (Drill Check) + `inferPlanMainMetricType` (review side).
+- `merge.ts` — `mergePerDrillCaptures`.
+- `aggregate.ts` — `aggregateDrillCaptures`.
+- `window.ts` — `classifyCaptureWindow`, `isEligibleForAdaptation`.
+- `meaningfulDraft.ts` — `hasMeaningfulReviewDraftInput`.
+
+Anything else in `screens/`, `services/`, or `components/` deciding capture eligibility / aggregation / metric visibility is a layer violation.
+
+## Route policy
+
+The "after a block ends, where do I go?" rule lives in `app/src/domain/runFlow/postBlockRoute.ts` (pure: returns `{ path, replace }`). Controllers delegate. No `useNavigate` import inside `domain/runFlow/`.

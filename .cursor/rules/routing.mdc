@@ -1,8 +1,9 @@
 ---
-description: Centralized routing — never hardcode route strings in screens
+description: Centralized routing — never hardcode route strings; route policy lives in domain/runFlow/
 globs:
   - "app/src/screens/**"
   - "app/src/App.tsx"
+  - "app/src/domain/runFlow/**"
 alwaysApply: false
 ---
 
@@ -17,7 +18,6 @@ import { routes } from '../routes'
 
 navigate(routes.run(execId))
 navigate(routes.review(execId), { replace: true })
-navigate(routes.safety(presetId, playerCount))
 navigate(routes.home())
 ```
 
@@ -33,9 +33,23 @@ import { routePaths } from './routes'
 <Route path={routePaths.run} element={<RunScreen />} />
 ```
 
+## Route policy lives in `domain/runFlow/`
+
+The "where do I go after X happens?" rule is a pure product policy. It MUST live in `app/src/domain/runFlow/`, not inlined in a controller.
+
+- `postBlockRoute(executionLogId, isLast)` returns `{ path, replace }` for the run-flow's "block ended → review or drill check?" decision. Used by `useRunController` (next / skip / timer-complete) and `useTransitionController.handleSkip`.
+- New post-block routing variants → extend the helper and add a pure unit test under `domain/runFlow/__tests__/`. Do not branch on routing in a controller.
+- Domain route-policy modules MUST NOT import `useNavigate` or anything from `react-router`. They return descriptors; controllers apply them.
+
+## P12 screen contract
+
+Every route in `routePaths` MUST have an entry in `app/src/contracts/screenContracts.ts` with a P12 triple (`action` / `signal` / `reason`) or an explicit `exemption` with a written rationale. The TypeScript `Record<RouteKey, ScreenContract>` shape rejects any new route that lacks an entry; the test suite enforces non-empty contracts and rare exemptions.
+
 ## Adding a new route
 
-1. Add the path to `routePaths` in `routes.ts`
-2. Add the URL builder to `routes` in `routes.ts`
-3. Add the `<Route>` in `App.tsx`
-4. Create the screen in `screens/`
+1. Add the path to `routePaths` in `routes.ts`.
+2. Add the URL builder to `routes` in `routes.ts`.
+3. Add the `<Route>` in `App.tsx`.
+4. Add the P12 entry to `app/src/contracts/screenContracts.ts` (or use `exemptScreenContract` with a written rationale).
+5. If new post-block / cross-screen routing decisions land, extend `app/src/domain/runFlow/` rather than inlining `if (isLast) navigate(...)` in the controller.
+6. Create the screen in `screens/`.
