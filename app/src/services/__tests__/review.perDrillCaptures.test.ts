@@ -230,6 +230,84 @@ describe('saveReviewDraft / loadReviewDraft round-trip perDrillCaptures', () => 
   })
 })
 
+// D134 (2026-04-28): Dexie v6 additive `metricCapture?` on
+// `PerDrillCapture`. The field is optional on the row union so v5
+// rows ("no metricCapture key") MUST read cleanly under v6, and a
+// v6 row that carries a streak MUST round-trip through the existing
+// `perDrillCaptures` array path without leaking into count fields.
+// Both directions are pinned here.
+describe('Dexie v6 metricCapture (D134 — Phase 2A streak)', () => {
+  it('round-trips a streak capture through saveReviewDraft / loadReviewDraft', async () => {
+    const captures: PerDrillCapture[] = [
+      makeCapture({
+        blockIndex: 2,
+        difficulty: 'still_learning',
+        metricCapture: { kind: 'streak', longest: 7 },
+      }),
+    ]
+    await saveReviewDraft({
+      executionLogId: EXEC,
+      sessionRpe: null,
+      goodPasses: 0,
+      totalAttempts: 0,
+      perDrillCaptures: captures,
+    })
+    const draft = await loadReviewDraft(EXEC)
+    expect(draft?.perDrillCaptures).toEqual(captures)
+    const streakRow = draft?.perDrillCaptures?.[0]
+    expect(streakRow?.metricCapture).toEqual({ kind: 'streak', longest: 7 })
+    // Mutual exclusion: a streak row never contaminates the count fields.
+    expect(streakRow?.goodPasses).toBeUndefined()
+    expect(streakRow?.attemptCount).toBeUndefined()
+    expect(streakRow?.notCaptured).toBeUndefined()
+  })
+
+  it('reads a legacy v5 row (no metricCapture key) cleanly under v6', async () => {
+    // Construct a row exactly as v5 wrote them — no metricCapture key
+    // at all, just count fields. The v6 reader must not invent a
+    // `metricCapture: undefined` field or reshape the row.
+    const v5Row: PerDrillCapture = makeCapture({
+      blockIndex: 0,
+      goodPasses: 5,
+      attemptCount: 8,
+    })
+    await saveReviewDraft({
+      executionLogId: EXEC,
+      sessionRpe: null,
+      goodPasses: 0,
+      totalAttempts: 0,
+      perDrillCaptures: [v5Row],
+    })
+    const draft = await loadReviewDraft(EXEC)
+    expect(draft?.perDrillCaptures).toHaveLength(1)
+    const persisted = draft?.perDrillCaptures?.[0]
+    expect(persisted?.goodPasses).toBe(5)
+    expect(persisted?.attemptCount).toBe(8)
+    expect(persisted?.metricCapture).toBeUndefined()
+  })
+
+  it('coexists in the same array — count, streak, and difficulty-only rows together', async () => {
+    const captures: PerDrillCapture[] = [
+      makeCapture({ blockIndex: 0, goodPasses: 4, attemptCount: 6 }),
+      makeCapture({
+        blockIndex: 1,
+        difficulty: 'too_easy',
+        metricCapture: { kind: 'streak', longest: 9 },
+      }),
+      makeCapture({ blockIndex: 2, difficulty: 'still_learning' }),
+    ]
+    await saveReviewDraft({
+      executionLogId: EXEC,
+      sessionRpe: null,
+      goodPasses: 0,
+      totalAttempts: 0,
+      perDrillCaptures: captures,
+    })
+    const draft = await loadReviewDraft(EXEC)
+    expect(draft?.perDrillCaptures).toEqual(captures)
+  })
+})
+
 describe('submitReview carries perDrillCaptures onto the terminal record', () => {
   it('persists a non-empty perDrillCaptures array onto the submitted review', async () => {
     const captures: PerDrillCapture[] = [

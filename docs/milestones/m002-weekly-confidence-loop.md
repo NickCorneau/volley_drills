@@ -6,7 +6,7 @@ stage: planning
 type: milestone
 authority: post-M001 self-coached follow-on scope, weekly confidence surfaces, and main-tool evidence bar
 summary: "First post-M001 self-coached layer: visible carry-forward, shallow weekly planning, and minimal accumulation that make the app feel worth returning to."
-last_updated: 2026-04-19
+last_updated: 2026-04-28
 depends_on:
   - docs/vision.md
   - docs/prd-foundation.md
@@ -64,7 +64,7 @@ Define the smallest self-coached follow-on that lets a returning user:
 - Shallow next `2-6` session queue inside the existing flow, not a separate week planner or calendar surface
 - Minimal weekly receipt: planned-vs-completed sessions, one load proxy, one skill proxy
 - Lightweight accumulation surfaces that make "something is in the book" legible without becoming analytics-heavy
-- Reuse existing session and review records to power carry-forward and the weekly receipt, with no standalone history surface in this milestone
+- Reuse existing session and review records to power carry-forward and the weekly receipt, with no standalone history surface in this milestone (the standalone history list is owned by **M001 Tier 2** — see `docs/milestones/m001-solo-session-loop.md` Tier 2 — so M002 layers carry-forward and the next-`N` queue on top of an already-existing list rather than introducing one here)
 - Recommendation-first posture preserved: no new profiling gate that delays a believable next session
 
 ## Minimal surface contract
@@ -74,7 +74,7 @@ Define the smallest self-coached follow-on that lets a returning user:
 - `Queue` owns the shallow next `2-6` sessions view. It is secondary to `Home`, not a new planning destination.
 - `Weekly receipt` owns the "something is in the book" readout: planned vs completed, one load proxy, one skill proxy.
 
-This milestone does **not** add a standalone history route, a calendar planner, or a generalized planning surface.
+This milestone does **not** add a standalone history route, a calendar planner, or a generalized planning surface. The standalone history list is owned by **M001 Tier 2**, not M002.
 
 ## Explicitly out of scope
 

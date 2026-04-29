@@ -1,6 +1,6 @@
 import type { ExecutionLog, MetricType, SessionPlan, SessionPlanBlock } from '../../model'
 import { getBlockMetricType, getBlockSuccessRule } from '../drillMetadata'
-import { metricCapturesCounts } from './metricStrategies'
+import { type CaptureShape, getCaptureShape, metricCapturesCounts } from './metricStrategies'
 
 export type DrillCheckBypassReason =
   | 'missing_session'
@@ -20,11 +20,23 @@ export type DrillCheckCaptureEligibility =
       successRule: string | null
     }
   | {
+      /**
+       * D134 (2026-04-28): the difficulty-only branch now reports an
+       * `optionalCaptureShape` so the controller knows whether to
+       * render the optional `Add longest streak (optional)` drawer
+       * (Phase 2A `streak`) or fall through to the chip-only fast
+       * path. The shape is `{ kind: 'none' }` for non-count
+       * `main_skill` / `pressure` blocks whose drill has no Phase 2A
+       * surface (e.g., `points-to-target` / `pass-grade-avg` /
+       * `composite` — all deferred to Phase 2B), keeping the
+       * difficulty-only experience unchanged for those drills.
+       */
       status: 'eligible_difficulty_only'
       block: SessionPlanBlock
       blockIndex: number
       metricType: MetricType | null
       successRule: string | null
+      optionalCaptureShape: CaptureShape
     }
   | {
       status: 'bypass'
@@ -91,12 +103,18 @@ export function resolveDrillCheckCaptureEligibility({
   }
 
   if (prevBlock.type === 'main_skill' || prevBlock.type === 'pressure') {
+    // D134 (2026-04-28): expose the per-metric `CaptureShape` so the
+    // controller can render the Phase 2A streak drawer for `streak`-
+    // typed drills without widening the slot-type rule. Non-streak
+    // non-count metrics keep `{ kind: 'none' }` and the chip-only
+    // experience until Phase 2B unblocks them.
     return {
       status: 'eligible_difficulty_only',
       block: prevBlock,
       blockIndex: prevBlockIndex,
       metricType,
       successRule,
+      optionalCaptureShape: getCaptureShape(metricType),
     }
   }
 

@@ -96,6 +96,31 @@ export class VolleycraftDB extends Dexie {
         storageMeta: 'key',
       })
       .upgrade(() => {})
+
+    // D134 (2026-04-28): Phase 2A optional streak capture. Adds
+    // `metricCapture?: { kind: 'streak'; longest: number }` to each
+    // entry in `SessionReview.perDrillCaptures`. Purely additive,
+    // forward-only, no data transform — the field is optional on the
+    // model so v5 rows ("no metricCapture key") read cleanly as
+    // "no streak captured" under v6 readers, and a v6 row that does
+    // carry a streak roundtrips through the same `perDrillCaptures`
+    // array path that v5 uses. The version bump exists so Dexie's
+    // open() opens at v6 in v0b deployments and so a future v7
+    // (Phase 2B `points` / `grade` shapes) has a labelled boundary
+    // to read from. Schema rollback to v5 is safe because v5
+    // readers ignore the unknown nested key. See
+    // `docs/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md`
+    // and the `D134` row in `docs/decisions.md`.
+    this.version(6)
+      .stores({
+        sessionPlans: 'id',
+        executionLogs: 'id, planId, status',
+        sessionReviews: 'id, executionLogId',
+        timerState: 'id',
+        sessionDrafts: 'id',
+        storageMeta: 'key',
+      })
+      .upgrade(() => {})
   }
 }
 

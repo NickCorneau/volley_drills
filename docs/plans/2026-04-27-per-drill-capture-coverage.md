@@ -4,9 +4,9 @@ title: "Per-drill capture coverage gaps (post-D133 / cca2 dogfeed)"
 type: plan
 status: active
 stage: build
-authority: "Implementation routing for the two per-drill capture coverage gaps surfaced by the 2026-04-27 cca2 dogfeed: gap 2b (count-eligible drills at non-main_skill slots get no capture surface at all) and gap 2a (non-count main_skill / pressure drills capture Difficulty only, with no rep-shaped data captured even when the drill carries a meaningful per-rep metric like a longest streak or a 0-3 grade). Spec contract amended in `docs/specs/m001-review-micro-spec.md` §'Per-drill required field' and §'Non-count drills at main_skill / pressure (gap 2a)'."
-summary: "Two gaps, two phases. Phase 1 (gap 2b) widens the Drill Check capture gate from `block.type ∈ {main_skill, pressure}` to `block.type ∈ {main_skill, pressure} OR drill.successMetric.type ∈ COUNT_BASED_METRIC_TYPES`, so count-eligible passing drills at technique / movement_proxy slots stop falling silent. Phase 2 (gap 2a) authors per-`successMetric.type` capture stories so streak / points-to-target / pass-grade-avg / composite drills gain a rep-shaped capture surface beyond the Difficulty chip. Phase 1 is small and ships under the existing Tier 1b authoring-attention slot; Phase 2 is a separate spec-shaping pass and is gated on Phase 1 landing first. Trigger evidence: `docs/research/2026-04-27-cca2-dogfeed-findings.md` F1 + F2."
-last_updated: 2026-04-27
+authority: "Implementation routing for the two per-drill capture coverage gaps surfaced by the 2026-04-27 cca2 dogfeed: gap 2b (count-eligible drills at non-main_skill slots get no capture surface at all — **shipped 2026-04-28**) and gap 2a (non-count main_skill / pressure drills capture Difficulty only, with no rep-shaped data captured even when the drill carries a meaningful per-rep metric like a longest streak or a 0-3 grade — **still gated**). Spec contract amended in `docs/specs/m001-review-micro-spec.md` §'Per-drill required field' and §'Non-count drills at main_skill / pressure (gap 2a)'."
+summary: "Two gaps, two phases. Phase 1 (gap 2b) widens the Drill Check capture gate so count-eligible passing drills at technique / movement_proxy slots stop falling silent — **shipped 2026-04-28** as part of the architecture pass U2 (`11fed34`); the gate is now keyed off the metric-type strategy registry in `app/src/domain/capture/eligibility.ts` rather than `block.type ∈ {main_skill, pressure}`. Phase 2 (gap 2a) authors per-`successMetric.type` capture stories so streak / points-to-target / pass-grade-avg / composite drills gain a rep-shaped capture surface beyond the Difficulty chip; **still gated** on (i) Phase 1 live for ≥4 sessions, OR (ii) ≥2 founder-ledger sessions where Difficulty-only is explicitly noted as insufficient, OR (iii) partner walkthrough ≥P1 specifically on the gap. Trigger evidence: `docs/research/2026-04-27-cca2-dogfeed-findings.md` F1 + F2."
+last_updated: 2026-04-28
 depends_on:
   - docs/specs/m001-review-micro-spec.md
   - docs/decisions.md
@@ -46,7 +46,25 @@ The 2026-04-27 cca2 dogfeed (founder + Seb, pair pass session, plan `4212f2a3-�
 
 Net: the founder ran three real passing reps and one setting rep, and the system captured one chip total. The two gaps compounding here are distinct and have distinct fixes.
 
-## Gap 2b — count-eligible drills at non-main_skill slots (Phase 1, ships now)
+## Gap 2b — count-eligible drills at non-main_skill slots (Phase 1, **shipped 2026-04-28**)
+
+### As-built notes (2026-04-28)
+
+Shipped as part of the 2026-04-28 architecture pass U2 capture-domain consolidation (`11fed34`). The implementation diverged from the original plan in one structural way: instead of widening an inline gate inside `DrillCheckScreen.tsx`, U2 lifted the entire eligibility decision into `app/src/domain/capture/eligibility.ts::resolveDrillCheckCaptureEligibility`, keyed off the metric-type strategy registry (`metricCapturesCounts`). The new resolver returns three states:
+
+- `eligible_counts` — drill is count-eligible (`metricCapturesCounts(metricType) === true`); fires regardless of slot type, except `warmup` / `wrap`. This is the gap-2b widening.
+- `eligible_difficulty_only` — drill is `main_skill` or `pressure` but not count-eligible; renders Difficulty chips only. This is the gap-2a holding posture.
+- `bypass` — anything else (warmup / wrap / non-count support slots / skipped / missing catalog ids / completed session).
+
+Net effect: a count-eligible passing drill at the `technique` slot (e.g., `d10-pair` 6-Legged Monster) or the `movement_proxy` slot (e.g., `d03-pair` Continuous Passing) now triggers `eligible_counts` and renders the full Difficulty + optional Good/Total surface. The cca2 dogfeed scenario (`docs/research/2026-04-27-cca2-dogfeed-findings.md` F1 + F2 gap 2b) is closed.
+
+Coverage proven by:
+
+- `app/src/domain/__tests__/drillCheckCapture.test.ts` (8 cases): pins `eligible_counts` for `d10-pair` at `technique`, `d03-pair` at `movement_proxy`, and `d33-pair` at `pressure`; pins `eligible_difficulty_only` for `d38-pair` at `main_skill` (`streak`); pins `bypass` for `d38-pair` at `technique` (non-count support slot), skipped previous block, missing catalog ids, and completed session.
+- `app/src/screens/__tests__/DrillCheckScreen.perDrillCapture.test.tsx`: pins the screen-tier wiring (Continue gating, draft persistence, hydration) using the count-eligible technique fixture (`d10-pair`).
+- `app/src/domain/__tests__/drillMetadata.test.ts`: pins variant-resolution agreement between `getBlockMetricType` and `getBlockSuccessRule` so the count-eligibility decision and the rendered success rule can never disagree.
+
+Spec sync: `docs/specs/m001-review-micro-spec.md` §"Per-drill required field" reads "regardless of slot type (technique / movement_proxy / main_skill / pressure)" and the §"Surface coverage history (2026-04-27)" addendum names the gap and the widened gate.
 
 ### Problem
 
@@ -120,13 +138,13 @@ This keeps warmup and wrap silent (no skill content to score), keeps main_skill 
 ### Acceptance (Phase 1)
 
 - 6-finding ship checklist:
-  - Phase 1 implements gate widening as specified.
-  - Existing tests pass; 5 new test cases land.
-  - `npm run lint` clean; `npm run build` clean.
-  - `docs/specs/m001-review-micro-spec.md` already amended (no further changes needed).
-  - One pair-flow Playwright spec extended at most.
-  - No drill-record authoring-budget consumption (zero new drills).
-  - One Tier 1b authoring-attention slot consumed (acknowledged in next adversarial-memo Weekly Log).
+  - Phase 1 implements gate widening as specified. **Done** (via U2 capture-domain consolidation; resolver lifted into `domain/capture/eligibility.ts`).
+  - Existing tests pass; new test cases land. **Done** (`drillCheckCapture.test.ts` covers all three eligibility branches; 1065/1065 Vitest pass).
+  - `npm run lint` clean; `npm run build` clean. **Done.**
+  - `docs/specs/m001-review-micro-spec.md` already amended (no further changes needed). **Done.**
+  - One pair-flow Playwright spec extended at most. **Not extended** (coverage proven at the domain + screen-integration tier; redundant at e2e).
+  - No drill-record authoring-budget consumption (zero new drills). **Done.**
+  - One Tier 1b authoring-attention slot consumed (acknowledged in next adversarial-memo Weekly Log). **Done.**
 
 ## Gap 2a — non-count main-skill drills capture Difficulty only (Phase 2, gated)
 

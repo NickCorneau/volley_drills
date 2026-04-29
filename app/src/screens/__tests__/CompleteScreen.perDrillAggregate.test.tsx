@@ -271,3 +271,194 @@ describe('CompleteScreen Difficulty recap row (Item 8)', () => {
     expect(screen.queryByTestId('recap-difficulty')).toBeNull()
   })
 })
+
+/**
+ * D134 (2026-04-28) Phase 2A: CompleteScreen streak receipt.
+ *
+ * Sources:
+ *   docs/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md
+ *     §"Receipt-only Complete display"
+ *   docs/decisions.md D134
+ *
+ * What this file pins:
+ *   - When the session has at least one capture with
+ *     `metricCapture: { kind: 'streak', longest: N }`, render a quiet
+ *     "Longest streak" recap row with the value (or dot-separated
+ *     values when multiple streak drills logged a streak in one
+ *     session, in block order).
+ *   - When the session's only captures are streak captures (no count
+ *     drills tagged), the "Good passes" recap row hides entirely so
+ *     the misleading "Tagged, counts not logged" line never renders
+ *     for streak-only sessions.
+ *   - Mixed sessions (some streak captures + some count drills with
+ *     no counts entered) keep the legacy "Tagged, counts not logged"
+ *     line because the count drills genuinely have no count data.
+ *   - Streak does NOT roll up into the session-level Good/Total sum;
+ *     the receipt sits as its own row.
+ */
+describe('CompleteScreen Longest streak recap row (D134)', () => {
+  it('renders a quiet "Longest streak: N" row for a single streak capture', async () => {
+    await seed({
+      execId: 'exec-single-streak',
+      goodPasses: 0,
+      totalAttempts: 0,
+      perDrillCaptures: [
+        {
+          drillId: 'd38',
+          variantId: 'd38-pair',
+          blockIndex: 0,
+          difficulty: 'still_learning',
+          capturedAt: Date.now(),
+          metricCapture: { kind: 'streak', longest: 7 },
+        },
+      ],
+    })
+    renderAt('exec-single-streak')
+
+    const row = await screen.findByTestId('recap-streak')
+    expect(row).toHaveTextContent(/^Longest streak\s*7$/)
+  })
+
+  it('renders dot-separated longest values when multiple streaks were logged', async () => {
+    await seed({
+      execId: 'exec-multi-streak',
+      goodPasses: 0,
+      totalAttempts: 0,
+      perDrillCaptures: [
+        {
+          drillId: 'd38',
+          variantId: 'd38-pair',
+          blockIndex: 0,
+          difficulty: 'still_learning',
+          capturedAt: Date.now(),
+          metricCapture: { kind: 'streak', longest: 5 },
+        },
+        {
+          drillId: 'd01',
+          variantId: 'd01-pair',
+          blockIndex: 1,
+          difficulty: 'too_easy',
+          capturedAt: Date.now(),
+          metricCapture: { kind: 'streak', longest: 12 },
+        },
+      ],
+    })
+    renderAt('exec-multi-streak')
+
+    const row = await screen.findByTestId('recap-streak')
+    expect(row).toHaveTextContent(/^Longest streak\s*5 · 12$/)
+  })
+
+  it('hides the Good passes row when the only captures are streak rows', async () => {
+    await seed({
+      execId: 'exec-streak-only',
+      goodPasses: 0,
+      totalAttempts: 0,
+      perDrillCaptures: [
+        {
+          drillId: 'd38',
+          variantId: 'd38-pair',
+          blockIndex: 0,
+          difficulty: 'still_learning',
+          capturedAt: Date.now(),
+          metricCapture: { kind: 'streak', longest: 4 },
+        },
+      ],
+    })
+    renderAt('exec-streak-only')
+
+    await screen.findByText(/^Effort$/)
+    expect(screen.queryByTestId('recap-good-passes')).toBeNull()
+    expect(screen.queryByText(/tagged, counts not logged/i)).toBeNull()
+    const streakRow = await screen.findByTestId('recap-streak')
+    expect(streakRow).toHaveTextContent(/^Longest streak\s*4$/)
+  })
+
+  it('keeps "Tagged, counts not logged" for mixed sessions (streak + count drill missing counts)', async () => {
+    await seed({
+      execId: 'exec-mixed-streak-count',
+      goodPasses: 0,
+      totalAttempts: 0,
+      perDrillCaptures: [
+        {
+          drillId: 'd38',
+          variantId: 'd38-pair',
+          blockIndex: 0,
+          difficulty: 'still_learning',
+          capturedAt: Date.now(),
+          metricCapture: { kind: 'streak', longest: 6 },
+        },
+        {
+          drillId: 'd02',
+          variantId: 'd02-solo',
+          blockIndex: 1,
+          difficulty: 'too_hard',
+          capturedAt: Date.now(),
+        },
+      ],
+    })
+    renderAt('exec-mixed-streak-count')
+
+    const cell = await screen.findByTestId('recap-good-passes')
+    expect(cell).toHaveTextContent(/tagged, counts not logged/i)
+    const streakRow = await screen.findByTestId('recap-streak')
+    expect(streakRow).toHaveTextContent(/^Longest streak\s*6$/)
+  })
+
+  it('shows the count rate AND the streak row when a session mixes streak + counted drills', async () => {
+    await seed({
+      execId: 'exec-streak-with-counts',
+      goodPasses: 0,
+      totalAttempts: 0,
+      perDrillCaptures: [
+        {
+          drillId: 'd10',
+          variantId: 'd10-pair',
+          blockIndex: 0,
+          difficulty: 'still_learning',
+          goodPasses: 5,
+          attemptCount: 8,
+          capturedAt: Date.now(),
+        },
+        {
+          drillId: 'd38',
+          variantId: 'd38-pair',
+          blockIndex: 1,
+          difficulty: 'too_easy',
+          capturedAt: Date.now(),
+          metricCapture: { kind: 'streak', longest: 9 },
+        },
+      ],
+    })
+    renderAt('exec-streak-with-counts')
+
+    const cell = await screen.findByTestId('recap-good-passes')
+    expect(cell).toHaveTextContent(/5 of 8/)
+    const streakRow = await screen.findByTestId('recap-streak')
+    expect(streakRow).toHaveTextContent(/^Longest streak\s*9$/)
+  })
+
+  it('hides the Longest streak row entirely on legacy reviews (no metricCapture present)', async () => {
+    await seed({
+      execId: 'exec-no-streak',
+      goodPasses: 7,
+      totalAttempts: 10,
+      perDrillCaptures: [
+        {
+          drillId: 'd10',
+          variantId: 'd10-pair',
+          blockIndex: 0,
+          difficulty: 'still_learning',
+          goodPasses: 7,
+          attemptCount: 10,
+          capturedAt: Date.now(),
+        },
+      ],
+    })
+    renderAt('exec-no-streak')
+
+    await screen.findByText(/^Effort$/)
+    expect(screen.queryByTestId('recap-streak')).toBeNull()
+    expect(screen.queryByText(/^Longest streak$/)).toBeNull()
+  })
+})

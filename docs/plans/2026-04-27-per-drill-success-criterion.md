@@ -4,11 +4,11 @@
 
 title: "Per-drill success criterion on /run/check (V0B-28 surface-move) (2026-04-27)"
 type: plan
-status: draft
+status: complete
 stage: validation
-authority: "Spec-gap fix that re-aligns the per-drill capture surface (`DrillCheckScreen` + `PerDrillCapture`) with `docs/specs/m001-review-micro-spec.md` §Required line 78 (V0B-28 forced-criterion prompt). The Review-spec rule was authored when the Good/Total surface lived on `ReviewScreen`; under `D133` (2026-04-27) capture moved to `DrillCheckScreen` but the forced-criterion prompt did not move with it. The hard-coded `% good pass rate` rate label and the missing per-drill rule mean serving and setting drills currently render count fields with no skill-aware criterion, weakening the `D104` layer-1 self-scoring bias correction the prompt was designed to enforce."
-summary: "Three-item structural fix bundle: (1) source the per-drill success rule from `variant.successMetric.description` and render it as a forced-criterion prompt with the spec-mandated `If unsure, don't count it as Good.` anti-generosity nudge above the optional Good/Total counts inside `PerDrillCapture`; (2) soften the rate label inside `PassMetricInput` from the pass-specific `% good pass rate` to the skill-neutral `% good`; (3) re-word `d33 Around the World Serving`'s `successMetric.description` from a session-level checklist (`Serves landing in the named 6-zone serving grid: front-left, ..., back-right.`) to a per-attempt rule that fits the count-bearing capture surface (`Serve lands in the called zone.`). Spec sync to line 78 of the Review micro-spec lands in the same pass."
-last_updated: 2026-04-27
+authority: "Spec-gap fix that re-aligns the per-drill capture surface (`DrillCheckScreen` + `PerDrillCapture`) with `docs/specs/m001-review-micro-spec.md` §Required (V0B-28 forced-criterion prompt). Shipped as part of the 2026-04-28 architecture pass (U2 capture-domain consolidation, `11fed34`). All five items landed: `getBlockSuccessRule` helper in `app/src/domain/drillMetadata.ts`; `successRuleDescription` prop + render in `app/src/components/PerDrillCapture.tsx`; rate label `% good pass rate` → `% good` in `app/src/components/PassMetricInput.tsx`; `d33` `successMetric.description` re-worded to `Serve lands in the called zone.` (both Solo and Pair siblings); `useDrillCheckController` resolves and passes `captureSuccessRule` from `resolveDrillCheckCaptureEligibility`; spec line synced to `the drill check surface (post-D133)` with the source-from-record clause."
+summary: "Three-item structural fix bundle: (1) source the per-drill success rule from `variant.successMetric.description` and render it as a forced-criterion prompt with the spec-mandated `If unsure, don't count it as Good.` anti-generosity nudge above the optional Good/Total counts inside `PerDrillCapture`; (2) soften the rate label inside `PassMetricInput` from the pass-specific `% good pass rate` to the skill-neutral `% good`; (3) re-word `d33 Around the World Serving`'s `successMetric.description` from a session-level checklist to a per-attempt rule that fits the count-bearing capture surface (`Serve lands in the called zone.`). Spec sync to the Review micro-spec lands in the same pass. **Shipped 2026-04-28** with the architecture pass U2 (`11fed34`); 1065/1065 Vitest pass."
+last_updated: 2026-04-28
 depends_on:
 
 - docs/specs/m001-review-micro-spec.md
@@ -170,4 +170,16 @@ Three reasons:
 - `DrillCheckScreen` resolves and passes the success rule for every count-eligible drill in `DRILLS`.
 - Spec line 78 reads "drill check surface" with the source-from-record clause.
 - `AGENTS.md` Current State + Learned Workspace Facts mention the V0B-28 surface-move fix.
+
+## As-built notes (2026-04-28)
+
+Shipped as part of the 2026-04-28 architecture pass (U2 capture-domain consolidation, `11fed34` "consolidate capture domain + add metric-type strategy registry"). All five items landed:
+
+- **Item 1 — success-rule render**: `app/src/components/PerDrillCapture.tsx` now takes an optional `successRuleDescription` prop, renders the rule + anti-generosity nudge inside the expanded `Add counts` body (`data-testid="per-drill-success-rule"`), and omits when undefined or while the counts surface is collapsed. Pinned by `app/src/components/__tests__/PerDrillCapture.test.tsx` (4 cases under `describe('V0B-28 forced-criterion prompt', ...)`).
+- **Item 2 — rate label**: `app/src/components/PassMetricInput.tsx` line 82 reads `{rate}% good`. Three test assertions in `app/src/components/__tests__/PassMetricInput.test.tsx` updated to match.
+- **Item 3 — d33 description**: `app/src/data/drills.ts` `d33-solo-net.successMetric.description` and `d33-pair.successMetric.description` both read `Serve lands in the called zone.`. The session-level "all 6 zones" goal stays in `target` and `courtsideInstructions`. Authoring comments at lines 1561 and 1607 cite `docs/plans/2026-04-27-per-drill-success-criterion.md`.
+- **Item 4 — wire-up**: `getBlockSuccessRule(block, playerCount)` in `app/src/domain/drillMetadata.ts` mirrors the variant-resolution rule of `getBlockMetricType`. The eligibility resolver in `app/src/domain/capture/eligibility.ts` now returns `successRule` on both `eligible_counts` and `eligible_difficulty_only` branches, sourced from `getBlockSuccessRule`. `useDrillCheckController` exposes it as `captureSuccessRule`, and `DrillCheckScreen.tsx` passes it through as `successRuleDescription={captureSuccessRule ?? undefined}`. Pinned by `app/src/domain/__tests__/drillMetadata.test.ts` (`describe('getBlockSuccessRule', ...)`, 7 cases including the variantId-first red-team adversarial finding).
+- **Item 5 — spec sync**: `docs/specs/m001-review-micro-spec.md` `primarySkillMetric` block now reads `the drill check surface (post-D133) must present this as a forced-criterion prompt ... show the one-sentence success rule for that drill sourced from variant.successMetric.description (not hard-coded passing copy)`. The 2026-04-19 phantom-button history note and the V0B-28 reference are preserved; a "Surface-move history (2026-04-27)" addendum names the surface move and points back at this plan.
+
+Verification: 1065/1065 Vitest tests pass; `eslint .` clean; `tsc -b && vite build` clean (chunk-size warning unchanged from before this pass).
 

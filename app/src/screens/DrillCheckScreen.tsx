@@ -41,7 +41,7 @@ export function DrillCheckScreen() {
     totalBlocks,
     prevBlockIdx,
     captureTarget,
-    showCaptureCounts,
+    captureShape,
     captureSuccessRule,
     difficulty,
     setDifficulty,
@@ -50,6 +50,8 @@ export function DrillCheckScreen() {
     captureTotal,
     setCaptureTotal,
     captureNotCaptured,
+    captureStreakLongest,
+    setCaptureStreakLongest,
     captureSaveError,
     hydrated,
     captureSatisfied,
@@ -167,19 +169,52 @@ export function DrillCheckScreen() {
           </div>
         </div>
 
-        <PerDrillCapture
-          drillName={captureTarget.drillName}
-          difficulty={difficulty}
-          onDifficultyChange={setDifficulty}
-          showCounts={showCaptureCounts}
-          successRuleDescription={captureSuccessRule ?? undefined}
-          goodPasses={captureGood}
-          attemptCount={captureTotal}
-          notCaptured={captureNotCaptured}
-          onGoodChange={setCaptureGood}
-          onAttemptChange={setCaptureTotal}
-          onToggleNotCaptured={toggleNotCaptured}
-        />
+        {/*
+          D134 (2026-04-28): the controller exposes a `CaptureShape`
+          discriminator that determines which optional drawer (if any)
+          the component renders. The shape is sourced from the
+          metric-strategy registry on the count branch and from the
+          eligibility resolver's `optionalCaptureShape` on the
+          difficulty-only branch. We pass each branch's props
+          conditionally so the discriminator's mutual-exclusion
+          guarantees on `PerDrillCaptureProps` hold at the type
+          level.
+        */}
+        {captureShape.kind === 'count' && (
+          <PerDrillCapture
+            drillName={captureTarget.drillName}
+            difficulty={difficulty}
+            onDifficultyChange={setDifficulty}
+            captureShape={{ kind: 'count' }}
+            successRuleDescription={captureSuccessRule ?? undefined}
+            goodPasses={captureGood}
+            attemptCount={captureTotal}
+            notCaptured={captureNotCaptured}
+            onGoodChange={setCaptureGood}
+            onAttemptChange={setCaptureTotal}
+            onToggleNotCaptured={toggleNotCaptured}
+          />
+        )}
+        {captureShape.kind === 'streak' && (
+          <PerDrillCapture
+            drillName={captureTarget.drillName}
+            difficulty={difficulty}
+            onDifficultyChange={setDifficulty}
+            captureShape={{ kind: 'streak' }}
+            successRuleDescription={captureSuccessRule ?? undefined}
+            streakLongest={captureStreakLongest}
+            onStreakLongestChange={setCaptureStreakLongest}
+          />
+        )}
+        {captureShape.kind === 'none' && (
+          <PerDrillCapture
+            drillName={captureTarget.drillName}
+            difficulty={difficulty}
+            onDifficultyChange={setDifficulty}
+            captureShape={{ kind: 'none' }}
+            successRuleDescription={captureSuccessRule ?? undefined}
+          />
+        )}
       </ScreenShell.Body>
 
       {/*

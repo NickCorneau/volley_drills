@@ -4,7 +4,10 @@ import { expireReview, submitReview } from '../../services/review'
 import { skipReview } from '../../services/session'
 
 // Historical filename: this started as the Phase C-0 v4 invariant suite.
-// Keep the path stable for older docs, but assert the current v5 boundary.
+// Keep the path stable for older docs, but assert the current v6 boundary
+// (D134 / 2026-04-28 added the Phase 2A `metricCapture` field on a
+// purely additive v6 migration; readers + writers continue to work
+// against the same `perDrillCaptures` array path).
 
 async function clearDb(): Promise<void> {
   await Promise.all([
@@ -105,9 +108,9 @@ describe('writer contract: status emission (A5 / D-C7)', () => {
   })
 })
 
-describe('fresh v5 DB shape', () => {
-  it('opens the current Dexie schema at version 5', () => {
-    expect(db.verno).toBe(5)
+describe('fresh v6 DB shape', () => {
+  it('opens the current Dexie schema at version 6', () => {
+    expect(db.verno).toBe(6)
   })
 
   it('has an empty storageMeta table', async () => {

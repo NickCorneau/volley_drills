@@ -659,4 +659,164 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
       expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
     })
   })
+
+  // D134 (2026-04-28): Phase 2A streak path. The just-finished drill
+  // is a `streak`-typed `main_skill` block (`d38-pair` Bump Set
+  // Fundamentals); the screen renders the `Add longest streak
+  // (optional)` drawer instead of the `Add counts` affordance, and
+  // a typed-and-blurred value persists on the row as
+  // `metricCapture: { kind: 'streak', longest }`. Mutual exclusion
+  // with count fields is enforced at the model layer; this test
+  // verifies the wire-up.
+  describe('Phase 2A streak path (D134)', () => {
+    it('renders the streak drawer for a streak-typed main_skill drill (not the count drawer)', async () => {
+      const execId = await seedTwoBlockSession({
+        prevType: 'main_skill',
+        prevCompleted: true,
+        prevDrill: NON_COUNT_DRILL,
+        prevVariant: NON_COUNT_VARIANT,
+        playerCount: 2,
+      })
+      renderAt(execId)
+
+      await screen.findByTestId('per-drill-capture')
+      expect(screen.getByTestId('per-drill-add-streak')).toBeInTheDocument()
+      expect(screen.queryByTestId('per-drill-add-counts')).not.toBeInTheDocument()
+    })
+
+    it('persists a streak capture as metricCapture: { kind: streak, longest }', async () => {
+      const execId = await seedTwoBlockSession({
+        prevType: 'main_skill',
+        prevCompleted: true,
+        prevDrill: NON_COUNT_DRILL,
+        prevVariant: NON_COUNT_VARIANT,
+        playerCount: 2,
+      })
+      renderAt(execId)
+
+      await screen.findByTestId('per-drill-capture')
+      fireEvent.click(screen.getByRole('radio', { name: /still learning/i }))
+      fireEvent.click(screen.getByTestId('per-drill-add-streak'))
+      const input = screen.getByTestId('per-drill-streak-input')
+      fireEvent.change(input, { target: { value: '7' } })
+      fireEvent.blur(input)
+
+      await waitFor(async () => {
+        const draft = await db.sessionReviews.where('executionLogId').equals(execId).first()
+        const row = draft?.perDrillCaptures?.[0]
+        expect(row).toEqual(
+          expect.objectContaining({
+            drillId: NON_COUNT_DRILL.id,
+            variantId: NON_COUNT_VARIANT.id,
+            blockIndex: 0,
+            difficulty: 'still_learning',
+            metricCapture: { kind: 'streak', longest: 7 },
+          }),
+        )
+        // Mutual exclusion: a streak row never carries count fields.
+        expect(row?.goodPasses).toBeUndefined()
+        expect(row?.attemptCount).toBeUndefined()
+        expect(row?.notCaptured).toBeUndefined()
+      })
+    })
+
+    it('does NOT block Continue when the streak drawer is left blank', async () => {
+      const execId = await seedTwoBlockSession({
+        prevType: 'main_skill',
+        prevCompleted: true,
+        prevDrill: NON_COUNT_DRILL,
+        prevVariant: NON_COUNT_VARIANT,
+        playerCount: 2,
+      })
+      renderAt(execId)
+
+      await screen.findByTestId('per-drill-capture')
+      fireEvent.click(screen.getByRole('radio', { name: /still learning/i }))
+
+      const cont = screen.getByRole('button', { name: /continue/i })
+      await waitFor(() => expect(cont).not.toBeDisabled())
+      fireEvent.click(cont)
+
+      await waitFor(() => {
+        expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
+      })
+    })
+
+    it('does NOT block Continue when the streak drawer holds an invalid value', async () => {
+      const execId = await seedTwoBlockSession({
+        prevType: 'main_skill',
+        prevCompleted: true,
+        prevDrill: NON_COUNT_DRILL,
+        prevVariant: NON_COUNT_VARIANT,
+        playerCount: 2,
+      })
+      renderAt(execId)
+
+      await screen.findByTestId('per-drill-capture')
+      fireEvent.click(screen.getByRole('radio', { name: /still learning/i }))
+      fireEvent.click(screen.getByTestId('per-drill-add-streak'))
+      const input = screen.getByTestId('per-drill-streak-input')
+      fireEvent.change(input, { target: { value: '1.5' } })
+      fireEvent.blur(input)
+
+      const cont = screen.getByRole('button', { name: /continue/i })
+      await waitFor(() => expect(cont).not.toBeDisabled())
+      fireEvent.click(cont)
+
+      await waitFor(() => {
+        expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
+      })
+      // The persisted row collapses to difficulty-only — no
+      // metricCapture, no count fields.
+      const draft = await db.sessionReviews.where('executionLogId').equals(execId).first()
+      const row = draft?.perDrillCaptures?.[0]
+      expect(row?.metricCapture).toBeUndefined()
+      expect(row?.goodPasses).toBeUndefined()
+      expect(row?.attemptCount).toBeUndefined()
+      expect(row?.difficulty).toBe('still_learning')
+    })
+
+    it('rehydrates streakLongest from an existing draft row with metricCapture', async () => {
+      const execId = await seedTwoBlockSession({
+        prevType: 'main_skill',
+        prevCompleted: true,
+        prevDrill: NON_COUNT_DRILL,
+        prevVariant: NON_COUNT_VARIANT,
+        playerCount: 2,
+      })
+      await db.sessionReviews.put({
+        id: `review-${execId}`,
+        executionLogId: execId,
+        sessionRpe: null,
+        goodPasses: 0,
+        totalAttempts: 0,
+        perDrillCaptures: [
+          {
+            drillId: NON_COUNT_DRILL.id,
+            variantId: NON_COUNT_VARIANT.id,
+            blockIndex: 0,
+            difficulty: 'still_learning',
+            capturedAt: Date.now(),
+            metricCapture: { kind: 'streak', longest: 5 },
+          },
+        ],
+        submittedAt: Date.now(),
+        status: 'draft',
+      })
+      renderAt(execId)
+
+      await screen.findByTestId('per-drill-capture')
+      // The chip rehydrates first.
+      await waitFor(() => {
+        expect(screen.getByRole('radio', { name: /still learning/i })).toHaveAttribute(
+          'aria-checked',
+          'true',
+        )
+      })
+      // Open the streak drawer; the input should rehydrate to 5.
+      fireEvent.click(screen.getByTestId('per-drill-add-streak'))
+      const input = screen.getByTestId('per-drill-streak-input') as HTMLInputElement
+      expect(input.value).toBe('5')
+    })
+  })
 })

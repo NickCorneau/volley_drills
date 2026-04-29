@@ -31,6 +31,11 @@ export {
   type AggregateCapturesResult,
 } from './aggregate'
 export {
+  buildPerDrillCaptureRecord,
+  type BuildPerDrillCaptureInput,
+  validateStreakLongest,
+} from './buildPerDrillCapture'
+export {
   inferPlanMainMetricType,
   resolveDrillCheckCaptureEligibility,
   type DrillCheckBypassReason,
@@ -39,6 +44,8 @@ export {
 export { hasMeaningfulReviewDraftInput, type ReviewDraftSignal } from './meaningfulDraft'
 export { mergePerDrillCaptures } from './merge'
 export {
+  type CaptureShape,
+  getCaptureShape,
   getMetricStrategy,
   METRIC_TYPE_STRATEGIES,
   metricCapturesCounts,

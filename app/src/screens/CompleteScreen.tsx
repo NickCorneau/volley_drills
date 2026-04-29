@@ -175,7 +175,40 @@ export function CompleteScreen() {
   const recapHasCaptures = captureAggregate.drillsTagged > 0
   const recapGood = recapHasCaptures ? captureAggregate.goodPasses : review.goodPasses
   const recapTotal = recapHasCaptures ? captureAggregate.totalAttempts : review.totalAttempts
-  const recapTaggedOnly = recapHasCaptures && captureAggregate.drillsWithCounts === 0
+
+  // D134 (2026-04-28): Phase 2A streak presence + receipt. Streak does
+  // NOT roll up into the session-level Good/Total sum
+  // (`aggregateDrillCaptures` ignores `metricCapture` by design — see
+  // the comment in `domain/capture/aggregate.ts`); the receipt is
+  // rendered standalone so it reads as a quiet observation rather
+  // than a metric. Multiple streak captures in one session render
+  // dot-separated in block order, matching the "Difficulty" row's
+  // shape rule. Empty list collapses to `null` so the row hides
+  // entirely on legacy / count-only sessions.
+  const streakValues: number[] =
+    review.perDrillCaptures?.flatMap((capture) =>
+      capture.metricCapture?.kind === 'streak' ? [capture.metricCapture.longest] : [],
+    ) ?? []
+  const hasStreakReceipt = streakValues.length > 0
+
+  // The "Tagged, counts not logged" line surfaces when every captured
+  // drill skipped the optional counts. With Phase 2A, a streak-logged
+  // drill is no longer "tagged but data not logged" — it logged its
+  // shape-appropriate data. When the only captured drills are streak
+  // drills (so `drillsWithCounts === 0` AND every tagged row is a
+  // streak row), the "Good passes" row hides entirely and the
+  // standalone `Longest streak` row below carries the receipt. Mixed
+  // sessions (some streak-logged, some count drills with counts not
+  // entered) keep the legacy "Tagged, counts not logged" line because
+  // the count drills genuinely have no count data.
+  const captureCount = review.perDrillCaptures?.length ?? 0
+  const streakOnlyCaptures =
+    recapHasCaptures &&
+    captureAggregate.drillsWithCounts === 0 &&
+    streakValues.length === captureCount
+  const recapTaggedOnly =
+    recapHasCaptures && captureAggregate.drillsWithCounts === 0 && !streakOnlyCaptures
+  const showRecapGoodPassesRow = !streakOnlyCaptures
 
   // 2026-04-27 pre-D91 editorial polish (plan Item 8): close the loop
   // on the per-drill chip taps by surfacing the tag distribution on
@@ -318,17 +351,38 @@ export function CompleteScreen() {
                 {completedBlocks}/{totalBlocks}
               </dd>
             </div>
-            <div className="flex items-center justify-between gap-4">
-              <dt className="text-text-secondary">Good passes</dt>
-              <dd
-                className={`font-medium tabular-nums ${recapTotal > 0 ? 'text-success' : 'text-text-secondary'}`}
-                data-testid="recap-good-passes"
+            {showRecapGoodPassesRow && (
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-text-secondary">Good passes</dt>
+                <dd
+                  className={`font-medium tabular-nums ${recapTotal > 0 ? 'text-success' : 'text-text-secondary'}`}
+                  data-testid="recap-good-passes"
+                >
+                  {recapTaggedOnly
+                    ? 'Tagged, counts not logged'
+                    : formatPassRateLine(recapGood, recapTotal)}
+                </dd>
+              </div>
+            )}
+            {/* D134 (2026-04-28) Phase 2A streak receipt: rendered
+              quietly (text-primary, tabular-nums) when the session has
+              one or more streak captures. Multiple streaks render
+              dot-separated in block order. No comparison, no badges,
+              no apology when blank — the row hides entirely on
+              legacy / count-only sessions. See plan
+              `docs/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md`
+              §"Receipt-only Complete display". */}
+            {hasStreakReceipt && (
+              <div
+                className="flex items-center justify-between gap-4"
+                data-testid="recap-streak"
               >
-                {recapTaggedOnly
-                  ? 'Tagged, counts not logged'
-                  : formatPassRateLine(recapGood, recapTotal)}
-              </dd>
-            </div>
+                <dt className="text-text-secondary">Longest streak</dt>
+                <dd className="text-right font-medium tabular-nums text-text-primary">
+                  {streakValues.join(' · ')}
+                </dd>
+              </div>
+            )}
             {/* 2026-04-27 pre-D91 editorial polish (plan Item 8): the
               Difficulty row closes the loop on the per-drill chip taps.
               Hidden entirely (not rendered) when no chips were tapped —

@@ -27,6 +27,29 @@
 import type { MetricType } from '../../model'
 
 /**
+ * D134 (2026-04-28): semantic discriminator for the *shape* of optional
+ * per-drill capture a metric type supports on Drill Check
+ * (`/run/check`). Holds **no UI copy** — affordance text, helper copy,
+ * and validation rules live in the consumers (`PerDrillCapture`,
+ * `buildPerDrillCapture`). The registry only declares which shape a
+ * metric type maps to.
+ *
+ * Phase 2A ships `'count'` and `'streak'` as concrete shapes; every
+ * other metric type sits at `{ kind: 'none' }`. Phase 2B re-opens the
+ * union with `'points'` and `'grade'` as one-line additions when their
+ * triggers fire.
+ *
+ * The discriminator pattern is preferred over multiple boolean
+ * predicates so adding a new shape is a single union-member +
+ * registry-entry edit; flat booleans would require a parallel rename
+ * and mutual-exclusion check at every call site.
+ */
+export type CaptureShape =
+  | { kind: 'count' }
+  | { kind: 'streak' }
+  | { kind: 'none' }
+
+/**
  * Declarative knobs each `MetricType` exposes to the capture surface.
  *
  * Keep the shape narrow and additive. New entries should be small data,
@@ -38,13 +61,16 @@ import type { MetricType } from '../../model'
  */
 export interface MetricTypeStrategy {
   /**
-   * Drill Check shows the optional Good / Total rep counter for this
-   * metric type. Difficulty-only metric types (`streak`,
-   * `points-to-target`, `pass-grade-avg`, `completion`, `composite`)
-   * still fire the difficulty chip but skip the counter UI so the
-   * tester isn't asked to invent numbers the rule doesn't define.
+   * D134 (2026-04-28): canonical discriminator for the optional
+   * per-drill capture shape on Drill Check. Replaces the prior
+   * `capturesCounts: boolean` knob — `metricCapturesCounts` is now a
+   * derived predicate (`captureShape.kind === 'count'`) so there is a
+   * single source of truth for whether a metric type captures counts
+   * vs streak vs nothing. Difficulty-only metric types (`completion`,
+   * `composite`, `points-to-target`, `pass-grade-avg`) sit at
+   * `{ kind: 'none' }` until Phase 2B re-opens them.
    */
-  capturesCounts: boolean
+  captureShape: CaptureShape
 
   /**
    * ReviewScreen renders the session-level Good / Total card for plans
@@ -82,37 +108,43 @@ export interface MetricTypeStrategy {
  */
 export const METRIC_TYPE_STRATEGIES: Readonly<Record<MetricType, MetricTypeStrategy>> = {
   'pass-rate-good': {
-    capturesCounts: true,
+    captureShape: { kind: 'count' },
     showsReviewCounts: true,
     participatesInCountSum: true,
   },
   'reps-successful': {
-    capturesCounts: true,
+    captureShape: { kind: 'count' },
     showsReviewCounts: true,
     participatesInCountSum: true,
   },
+  // D134 (2026-04-28): streak drills now declare an optional `streak`
+  // capture shape so the Drill Check screen can render an `Add longest
+  // streak (optional)` drawer for `main_skill` / `pressure` blocks.
+  // Difficulty remains the required focal decision; streak rolls up to
+  // a quiet receipt line on Complete and does NOT participate in the
+  // session-level Good / Total sum.
   streak: {
-    capturesCounts: false,
+    captureShape: { kind: 'streak' },
     showsReviewCounts: false,
     participatesInCountSum: false,
   },
   'points-to-target': {
-    capturesCounts: false,
+    captureShape: { kind: 'none' },
     showsReviewCounts: false,
     participatesInCountSum: false,
   },
   'pass-grade-avg': {
-    capturesCounts: false,
+    captureShape: { kind: 'none' },
     showsReviewCounts: false,
     participatesInCountSum: false,
   },
   completion: {
-    capturesCounts: false,
+    captureShape: { kind: 'none' },
     showsReviewCounts: false,
     participatesInCountSum: false,
   },
   composite: {
-    capturesCounts: false,
+    captureShape: { kind: 'none' },
     showsReviewCounts: false,
     participatesInCountSum: false,
   },
@@ -131,9 +163,28 @@ export function getMetricStrategy(type: MetricType): MetricTypeStrategy {
  * Drill Check count-input predicate. Returns `false` for `null` so
  * blocks whose variant cannot be resolved (synthetic test, legacy
  * plan, missing variantId) default to difficulty-only capture.
+ *
+ * D134 (2026-04-28): derived from `captureShape.kind === 'count'`
+ * rather than a parallel boolean field, so the registry stays a single
+ * source of truth as `streak` (Phase 2A) and future Phase 2B shapes
+ * (`points`, `grade`) land.
  */
 export function metricCapturesCounts(type: MetricType | null): boolean {
-  return type !== null && METRIC_TYPE_STRATEGIES[type].capturesCounts
+  return type !== null && METRIC_TYPE_STRATEGIES[type].captureShape.kind === 'count'
+}
+
+/**
+ * D134 (2026-04-28): exposes the `CaptureShape` discriminator the
+ * Drill Check controller and `PerDrillCapture` UI branch on. Returns
+ * `{ kind: 'none' }` for `null` so unresolved variants default to
+ * difficulty-only capture without rendering any optional drawer.
+ *
+ * Consumers should pattern-match on `kind` rather than testing
+ * `kind === 'count'` and `kind === 'streak'` independently — TS
+ * exhaustiveness over the union is the forcing function for Phase 2B.
+ */
+export function getCaptureShape(type: MetricType | null): CaptureShape {
+  return type === null ? { kind: 'none' } : METRIC_TYPE_STRATEGIES[type].captureShape
 }
 
 /**

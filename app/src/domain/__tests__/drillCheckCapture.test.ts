@@ -124,6 +124,99 @@ describe('resolveDrillCheckCaptureEligibility', () => {
     }
   })
 
+  // D134 (2026-04-28): the difficulty-only branch now exposes a
+  // `CaptureShape` so the controller can render the Phase 2A streak
+  // drawer. Streak shape lights up only for `streak`-typed drills at
+  // `main_skill` / `pressure` slots. Non-streak non-count drills
+  // (Phase 2B-deferred) keep `{ kind: 'none' }` so the chip-only
+  // experience stays unchanged for them.
+  describe('optionalCaptureShape (D134 — Phase 2A)', () => {
+    it('reports streak shape for d38-pair (Bump Set, streak metric) at main_skill', () => {
+      const result = resolveDrillCheckCaptureEligibility({
+        plan: plan(block({ type: 'main_skill', drillId: 'd38', variantId: 'd38-pair' })),
+        execution: execution(),
+        currentBlockIndex: 1,
+      })
+      expect(result.status).toBe('eligible_difficulty_only')
+      if (result.status === 'eligible_difficulty_only') {
+        expect(result.optionalCaptureShape).toEqual({ kind: 'streak' })
+      }
+    })
+
+    it('reports streak shape for d01-pair (Pass & Slap Hands, streak metric) at main_skill', () => {
+      const result = resolveDrillCheckCaptureEligibility({
+        plan: plan(block({ type: 'main_skill', drillId: 'd01', variantId: 'd01-pair' })),
+        execution: execution(),
+        currentBlockIndex: 1,
+      })
+      expect(result.status).toBe('eligible_difficulty_only')
+      if (result.status === 'eligible_difficulty_only') {
+        expect(result.metricType).toBe('streak')
+        expect(result.optionalCaptureShape).toEqual({ kind: 'streak' })
+      }
+    })
+
+    it('reports streak shape for d41-pair (Partner Set, streak metric) at main_skill', () => {
+      const result = resolveDrillCheckCaptureEligibility({
+        plan: plan(block({ type: 'main_skill', drillId: 'd41', variantId: 'd41-pair' })),
+        execution: execution(),
+        currentBlockIndex: 1,
+      })
+      expect(result.status).toBe('eligible_difficulty_only')
+      if (result.status === 'eligible_difficulty_only') {
+        expect(result.metricType).toBe('streak')
+        expect(result.optionalCaptureShape).toEqual({ kind: 'streak' })
+      }
+    })
+
+    it('reports streak shape for d38-pair at the pressure slot too', () => {
+      const result = resolveDrillCheckCaptureEligibility({
+        plan: plan(block({ type: 'pressure', drillId: 'd38', variantId: 'd38-pair' })),
+        execution: execution(),
+        currentBlockIndex: 1,
+      })
+      expect(result.status).toBe('eligible_difficulty_only')
+      if (result.status === 'eligible_difficulty_only') {
+        expect(result.optionalCaptureShape).toEqual({ kind: 'streak' })
+      }
+    })
+
+    it('still bypasses streak drills at non-main_skill / non-pressure slots (no widening)', () => {
+      const result = resolveDrillCheckCaptureEligibility({
+        plan: plan(block({ type: 'technique', drillId: 'd38', variantId: 'd38-pair' })),
+        execution: execution(),
+        currentBlockIndex: 1,
+      })
+      expect(result).toEqual({ status: 'bypass', reason: 'non_count_support_slot' })
+    })
+
+    it('reports none shape for points-to-target drills (Phase 2B-deferred)', () => {
+      const result = resolveDrillCheckCaptureEligibility({
+        plan: plan(block({ type: 'main_skill', drillId: 'd22', variantId: 'd22-pair' })),
+        execution: execution(),
+        currentBlockIndex: 1,
+      })
+      expect(result.status).toBe('eligible_difficulty_only')
+      if (result.status === 'eligible_difficulty_only') {
+        expect(result.metricType).toBe('points-to-target')
+        expect(result.optionalCaptureShape).toEqual({ kind: 'none' })
+      }
+    })
+
+    it('reports none shape for pass-grade-avg drills (Phase 2B-deferred)', () => {
+      const result = resolveDrillCheckCaptureEligibility({
+        plan: plan(block({ type: 'main_skill', drillId: 'd18', variantId: 'd18-pair' })),
+        execution: execution(),
+        currentBlockIndex: 1,
+      })
+      expect(result.status).toBe('eligible_difficulty_only')
+      if (result.status === 'eligible_difficulty_only') {
+        expect(result.metricType).toBe('pass-grade-avg')
+        expect(result.optionalCaptureShape).toEqual({ kind: 'none' })
+      }
+    })
+  })
+
   it('bypasses skipped blocks', () => {
     const result = resolveDrillCheckCaptureEligibility({
       plan: plan(block({ type: 'main_skill', drillId: 'd03', variantId: 'd03-pair' })),

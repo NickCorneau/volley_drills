@@ -23,7 +23,12 @@ export type {
   SessionPlanSafetyCheck,
 } from './session'
 export type { DraftBlock, SessionDraft } from './draft'
-export type { DifficultyTag, PerDrillCapture, RpeCaptureWindow } from './capture'
+export type {
+  DifficultyTag,
+  MetricCapture,
+  PerDrillCapture,
+  RpeCaptureWindow,
+} from './capture'
 export type {
   DrillVariantScore,
   IncompleteReason,
