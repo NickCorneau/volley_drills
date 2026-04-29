@@ -103,6 +103,47 @@ describe('buildDraftFromCompletedBlocks (C-5 Unit 3)', () => {
     expect(draft?.blocks[0].subBlockIntervalSeconds).toBe(45)
   })
 
+  /**
+   * U1 of `docs/plans/2026-04-28-per-move-pacing-indicator.md`: the
+   * `segments` snapshot field rides the same Repeat-what-you-did
+   * carryover as `subBlockIntervalSeconds`. If any link in the
+   * plumbing drops it, the segment indicator silently disappears
+   * for repeated sessions.
+   */
+  it('preserves composed segments and bonus copy for completed blocks', () => {
+    const plan = makePlan([{ id: 'b-1', minutes: 3, type: 'warmup' }])
+    plan.blocks[0].segments = [
+      { id: 'b-1-s1', label: 'Segment one', durationSec: 60 },
+      { id: 'b-1-s2', label: 'Segment two', durationSec: 60 },
+      { id: 'b-1-s3', label: 'Segment three', durationSec: 60 },
+    ]
+    plan.blocks[0].courtsideInstructionsBonus = 'Bonus prose for overflow.'
+    const log = makeLog(['completed'], ['b-1'])
+
+    const draft = buildDraftFromCompletedBlocks(log, plan)
+
+    expect(draft?.blocks[0].segments).toHaveLength(3)
+    expect(draft?.blocks[0].segments?.[0].id).toBe('b-1-s1')
+    expect(draft?.blocks[0].segments?.[1].durationSec).toBe(60)
+    expect(draft?.blocks[0].courtsideInstructionsBonus).toBe('Bonus prose for overflow.')
+  })
+
+  /**
+   * Defensive: a plan-block authored without segments must round-trip
+   * with `segments: undefined` (not null, not []), so the runner's
+   * `currentBlock.segments?.length` guard takes the no-segments
+   * fallback path. AE7 / R5 in the requirements doc.
+   */
+  it('round-trips legacy plans without segments as undefined (no-segments fallback)', () => {
+    const plan = makePlan([{ id: 'b-1', minutes: 5, type: 'main_skill' }])
+    const log = makeLog(['completed'], ['b-1'])
+
+    const draft = buildDraftFromCompletedBlocks(log, plan)
+
+    expect(draft?.blocks[0].segments).toBeUndefined()
+    expect(draft?.blocks[0].courtsideInstructionsBonus).toBeUndefined()
+  })
+
   it('keeps legacy completed blocks identity-empty when plan blocks have no ids', () => {
     const plan = makePlan([{ id: 'b-1', minutes: 10, type: 'main_skill' }])
     const log = makeLog(['completed'], ['b-1'])

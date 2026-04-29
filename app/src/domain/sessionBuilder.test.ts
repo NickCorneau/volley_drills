@@ -842,14 +842,20 @@ describe('sessionBuilder', () => {
 
   /**
    * Pre-close 2026-04-21 (partner walkthrough P2-2 + thought 3b in
-   * founder review): `subBlockIntervalSeconds` pipes from drill variant
-   * onto DraftBlock so `RunScreen` can fire sub-block pacing ticks. If
-   * any link in the plumbing drops it, d28 Beach Prep Three stops
-   * pacing at ~45 s and d26 Stretch Micro-sequence stops at ~30 s, and
-   * the partner's explicit "beep every 30 seconds during the cool down"
+   * founder review): pacing metadata pipes from drill variant onto
+   * DraftBlock so `RunScreen` can fire sub-block pacing ticks. If any
+   * link in the plumbing drops it, d28 Beach Prep Three stops pacing
+   * at ~45 s and d26 Stretch Micro-sequence stops at ~30 s, and the
+   * partner's explicit "beep every 30 seconds during the cool down"
    * ask is silently undone.
+   *
+   * 2026-04-28 (`docs/plans/2026-04-28-per-move-pacing-indicator.md`
+   * U1 + U3): d28-solo migrated from `subBlockIntervalSeconds: 45` to
+   * structured `segments` (4 × 45 s = 180 s). The pipe-through
+   * assertion now covers both fields so a future regression in either
+   * snapshot path fails CI.
    */
-  it('subBlockIntervalSeconds pipes through buildDraft onto warmup + wrap blocks', () => {
+  it('pacing metadata pipes through buildDraft onto warmup + wrap blocks', () => {
     const draft = buildDraft({
       playerMode: 'solo',
       timeProfile: 15,
@@ -860,12 +866,81 @@ describe('sessionBuilder', () => {
 
     const warmup = draft!.blocks.find((b) => b.type === 'warmup')
     expect(warmup?.drillId).toBe('d28')
-    expect(warmup?.subBlockIntervalSeconds).toBe(45)
+    // d28-solo is now segments-driven; uniform tick is retired here.
+    expect(warmup?.subBlockIntervalSeconds).toBeUndefined()
+    expect(warmup?.segments).toBeDefined()
+    expect(warmup?.segments).toHaveLength(4)
+    expect(warmup?.segments?.every((s) => s.durationSec === 45)).toBe(true)
 
     const wrap = draft!.blocks.find((b) => b.type === 'wrap')
     expect(['d25', 'd26']).toContain(wrap?.drillId)
+    // 2026-04-28 ship + each-side iteration: both wrap candidates are
+    // now segments-driven and unilateral-aware.
+    // d26-solo: 3 × 60 s = 180 s, all eachSide (mirror built into floor),
+    //   bonus copy for glutes / adductors only.
+    // d25-solo: 5 segments (60+30+60+30+60) = 240 s, hip + shoulder
+    //   marked eachSide; bonus copy for hydration. durationMinMinutes
+    //   bumped from 3 to 4. Both retire subBlockIntervalSeconds.
     if (wrap?.drillId === 'd26') {
-      expect(wrap.subBlockIntervalSeconds).toBe(30)
+      expect(wrap.subBlockIntervalSeconds).toBeUndefined()
+      expect(wrap.segments).toBeDefined()
+      expect(wrap.segments).toHaveLength(3)
+      expect(wrap.segments?.every((s) => s.durationSec === 60)).toBe(true)
+      expect(wrap.segments?.every((s) => s.eachSide === true)).toBe(true)
+      // Bonus is purely accessory now — the "mirror to the other side"
+      // clause was retired because each segment now does both sides.
+      expect(wrap.courtsideInstructionsBonus).toMatch(/glutes/)
+      expect(wrap.courtsideInstructionsBonus).not.toMatch(/mirror to the other side/)
+    }
+    if (wrap?.drillId === 'd25') {
+      expect(wrap.subBlockIntervalSeconds).toBeUndefined()
+      expect(wrap.segments).toBeDefined()
+      expect(wrap.segments).toHaveLength(5)
+      const sum = (wrap.segments ?? []).reduce((s, x) => s + x.durationSec, 0)
+      expect(sum).toBe(240)
+      // Hip stretch (s3) and shoulder stretch (s5) are unilateral.
+      const eachSideCount = (wrap.segments ?? []).filter((s) => s.eachSide === true).length
+      expect(eachSideCount).toBe(2)
+      expect(wrap.courtsideInstructionsBonus).toMatch(/hydrate/i)
+    }
+  })
+
+  /**
+   * U5 + each-side iteration: wrap drills propagate their (possibly
+   * different) durationMinMinutes through `buildDraft`. d26 stays at
+   * 3-min floor; d25 sits at 4-min floor (each-side stretches add
+   * structural time). Pin sums by drill so a future archetype edit
+   * that introduces a sub-3-min wrap slot or a regression in segment
+   * authoring fails CI rather than silently misaligning.
+   */
+  it('every M001 archetype wrap slot accepts d25 + d26 floors with their respective segment sums', () => {
+    const profiles: Array<{ playerMode: 'solo' | 'pair'; timeProfile: 15 | 25 | 40 }> = [
+      { playerMode: 'solo', timeProfile: 15 },
+      { playerMode: 'solo', timeProfile: 25 },
+      { playerMode: 'solo', timeProfile: 40 },
+      { playerMode: 'pair', timeProfile: 15 },
+      { playerMode: 'pair', timeProfile: 25 },
+      { playerMode: 'pair', timeProfile: 40 },
+    ]
+    for (const profile of profiles) {
+      const draft = buildDraft({
+        ...profile,
+        netAvailable: false,
+        wallAvailable: true,
+      })
+      // Some pair profiles may not produce a draft if no candidates
+      // resolve (e.g., when net required) — skip those for this guard.
+      if (!draft) continue
+      const wrap = draft.blocks.find((b) => b.type === 'wrap')
+      if (!wrap) continue
+      // The wrap drill is one of the recovery candidates.
+      expect(['d25', 'd26']).toContain(wrap.drillId)
+      expect(wrap.segments).toBeDefined()
+      const sum = (wrap.segments ?? []).reduce((s, x) => s + x.durationSec, 0)
+      // Each candidate sums to its own workload floor:
+      // d26 → 180s (3 min), d25 → 240s (4 min).
+      const expected = wrap.drillId === 'd25' ? 240 : 180
+      expect(sum).toBe(expected)
     }
   })
 

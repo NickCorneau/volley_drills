@@ -66,9 +66,12 @@ function fillBlock(overrides: RunnerBlockOverrides, fallback: SessionPlanBlock):
     durationMinutes: overrides.durationMinutes ?? fallback.durationMinutes,
     coachingCue: overrides.coachingCue ?? fallback.coachingCue,
     courtsideInstructions: overrides.courtsideInstructions ?? fallback.courtsideInstructions,
+    courtsideInstructionsBonus:
+      overrides.courtsideInstructionsBonus ?? fallback.courtsideInstructionsBonus,
     required: overrides.required ?? fallback.required,
     rationale: overrides.rationale ?? fallback.rationale,
     subBlockIntervalSeconds: overrides.subBlockIntervalSeconds ?? fallback.subBlockIntervalSeconds,
+    segments: overrides.segments ?? fallback.segments,
   }
 }
 

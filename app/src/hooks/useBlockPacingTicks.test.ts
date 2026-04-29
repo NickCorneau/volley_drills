@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { useBlockPacingTicks } from './useBlockPacingTicks'
+import type { DrillSegment } from '../types/drill'
+import { SEGMENT_INDEX_BONUS, useBlockPacingTicks } from './useBlockPacingTicks'
 
 beforeEach(() => {
   vi.useFakeTimers()
@@ -177,5 +178,225 @@ describe('useBlockPacingTicks', () => {
     unmount()
     vi.advanceTimersByTime(1_000)
     expect(onEndTick).not.toHaveBeenCalled()
+  })
+
+  /**
+   * U6 of `docs/plans/2026-04-28-per-move-pacing-indicator.md`:
+   * the segments-driven path. When `segments` is present, the hook
+   * fires `onSegmentEndTick` at each boundary, suppresses the uniform
+   * `onSubBlockTick`, and reports the active index via
+   * `onSegmentIndexChange`. Block-end 3-2-1 stays unchanged.
+   */
+  describe('segments-driven path', () => {
+    const D28_SEGMENTS: readonly DrillSegment[] = [
+      { id: 's1', label: 'Jog', durationSec: 45 },
+      { id: 's2', label: 'Hops', durationSec: 45 },
+      { id: 's3', label: 'Arms', durationSec: 45 },
+      { id: 's4', label: 'Shuffles', durationSec: 45 },
+    ]
+
+    it('fires onSegmentEndTick once per boundary and suppresses onSubBlockTick', () => {
+      const onSegmentEndTick = vi.fn()
+      const onSubBlockTick = vi.fn()
+      const onSegmentIndexChange = vi.fn<(i: number) => void>()
+      const remainingRef = { current: 180 }
+      const blockDurRef = { current: 180 }
+
+      renderHook(() =>
+        useBlockPacingTicks({
+          running: true,
+          blockId: 'b1',
+          // Both fields present: segments must take precedence.
+          subBlockIntervalSeconds: 45,
+          segments: D28_SEGMENTS,
+          remainingRef,
+          blockDurRef,
+          onEndCountdownTick: vi.fn(),
+          onSubBlockTick,
+          onSegmentEndTick,
+          onSegmentIndexChange,
+        }),
+      )
+
+      // Mid-segment-0: no fire yet.
+      remainingRef.current = 160 // elapsed = 20
+      vi.advanceTimersByTime(250)
+      expect(onSegmentEndTick).not.toHaveBeenCalled()
+
+      // Past first boundary at elapsed=45.
+      remainingRef.current = 134 // elapsed = 46
+      vi.advanceTimersByTime(250)
+      expect(onSegmentEndTick).toHaveBeenCalledTimes(1)
+      expect(onSegmentIndexChange).toHaveBeenCalledWith(1)
+
+      // Same segment, no new fire.
+      remainingRef.current = 100 // elapsed = 80
+      vi.advanceTimersByTime(250)
+      expect(onSegmentEndTick).toHaveBeenCalledTimes(1)
+
+      // Past second boundary at elapsed=90.
+      remainingRef.current = 89 // elapsed = 91
+      vi.advanceTimersByTime(250)
+      expect(onSegmentEndTick).toHaveBeenCalledTimes(2)
+      expect(onSegmentIndexChange).toHaveBeenLastCalledWith(2)
+
+      // Past third boundary at elapsed=135.
+      remainingRef.current = 44 // elapsed = 136
+      vi.advanceTimersByTime(250)
+      expect(onSegmentEndTick).toHaveBeenCalledTimes(3)
+      expect(onSegmentIndexChange).toHaveBeenLastCalledWith(3)
+
+      // Uniform sub-block tick must NOT have fired across this run.
+      expect(onSubBlockTick).not.toHaveBeenCalled()
+    })
+
+    it('suppresses the segment-end fire when remaining < 4 s (collision guard)', () => {
+      const onSegmentEndTick = vi.fn()
+      const remainingRef = { current: 180 }
+      const blockDurRef = { current: 180 }
+
+      renderHook(() =>
+        useBlockPacingTicks({
+          running: true,
+          blockId: 'b1',
+          segments: D28_SEGMENTS,
+          remainingRef,
+          blockDurRef,
+          onEndCountdownTick: vi.fn(),
+          onSubBlockTick: vi.fn(),
+          onSegmentEndTick,
+        }),
+      )
+
+      // Boundary at elapsed=180 (last segment end), remaining=0 → poll
+      // exits early on remaining<=0 anyway. The interesting collision
+      // window is elapsed in [176, 180): boundary check would fire
+      // segment 3 → bonus, but remaining < 4 must suppress.
+      remainingRef.current = 3 // elapsed = 177
+      vi.advanceTimersByTime(250)
+      // No segment-end fire because remaining < 4.
+      expect(onSegmentEndTick).not.toHaveBeenCalled()
+    })
+
+    it('falls back to uniform sub-block tick when segments is undefined', () => {
+      const onSegmentEndTick = vi.fn()
+      const onSubBlockTick = vi.fn()
+      const remainingRef = { current: 60 }
+      const blockDurRef = { current: 60 }
+
+      renderHook(() =>
+        useBlockPacingTicks({
+          running: true,
+          blockId: 'b1',
+          subBlockIntervalSeconds: 30,
+          segments: undefined,
+          remainingRef,
+          blockDurRef,
+          onEndCountdownTick: vi.fn(),
+          onSubBlockTick,
+          onSegmentEndTick,
+        }),
+      )
+
+      remainingRef.current = 29 // elapsed=31, past 30s boundary
+      vi.advanceTimersByTime(250)
+      expect(onSubBlockTick).toHaveBeenCalledTimes(1)
+      expect(onSegmentEndTick).not.toHaveBeenCalled()
+    })
+
+    it('falls back to uniform sub-block tick when segments is an empty array', () => {
+      const onSegmentEndTick = vi.fn()
+      const onSubBlockTick = vi.fn()
+      const remainingRef = { current: 60 }
+      const blockDurRef = { current: 60 }
+
+      renderHook(() =>
+        useBlockPacingTicks({
+          running: true,
+          blockId: 'b1',
+          subBlockIntervalSeconds: 30,
+          segments: [],
+          remainingRef,
+          blockDurRef,
+          onEndCountdownTick: vi.fn(),
+          onSubBlockTick,
+          onSegmentEndTick,
+        }),
+      )
+
+      remainingRef.current = 29
+      vi.advanceTimersByTime(250)
+      expect(onSubBlockTick).toHaveBeenCalledTimes(1)
+      expect(onSegmentEndTick).not.toHaveBeenCalled()
+    })
+
+    it('reports SEGMENT_INDEX_BONUS via onSegmentIndexChange when all segments complete', () => {
+      const onSegmentIndexChange = vi.fn<(i: number) => void>()
+      const remainingRef = { current: 180 }
+      const blockDurRef = { current: 240 } // overflow: 240 - 180 = 60s of bonus territory
+
+      renderHook(() =>
+        useBlockPacingTicks({
+          running: true,
+          blockId: 'b1',
+          segments: D28_SEGMENTS,
+          remainingRef,
+          blockDurRef,
+          onEndCountdownTick: vi.fn(),
+          onSubBlockTick: vi.fn(),
+          onSegmentEndTick: vi.fn(),
+          onSegmentIndexChange,
+        }),
+      )
+
+      // Drive elapsed to 60 (segment 1), 90 (segment 2), 135 (segment
+      // 3), then 180 (bonus territory).
+      remainingRef.current = 240 - 60
+      vi.advanceTimersByTime(250)
+      remainingRef.current = 240 - 90
+      vi.advanceTimersByTime(250)
+      remainingRef.current = 240 - 135
+      vi.advanceTimersByTime(250)
+      remainingRef.current = 240 - 181
+      vi.advanceTimersByTime(250)
+
+      // Final reported index is the bonus sentinel.
+      const lastCall = onSegmentIndexChange.mock.calls.at(-1)
+      expect(lastCall).toBeDefined()
+      expect(lastCall?.[0]).toBe(SEGMENT_INDEX_BONUS)
+    })
+
+    it('resets segment bookkeeping on blockId change', () => {
+      const onSegmentEndTick = vi.fn()
+      const remainingRef = { current: 180 }
+      const blockDurRef = { current: 180 }
+
+      const { rerender } = renderHook(
+        ({ blockId }: { blockId: string }) =>
+          useBlockPacingTicks({
+            running: true,
+            blockId,
+            segments: D28_SEGMENTS,
+            remainingRef,
+            blockDurRef,
+            onEndCountdownTick: vi.fn(),
+            onSubBlockTick: vi.fn(),
+            onSegmentEndTick,
+          }),
+        { initialProps: { blockId: 'b1' } },
+      )
+
+      // Advance into segment 1 on b1.
+      remainingRef.current = 134
+      vi.advanceTimersByTime(250)
+      expect(onSegmentEndTick).toHaveBeenCalledTimes(1)
+
+      // Switch to b2 and rewind to early-segment-0 elapsed; the
+      // bookkeeping ref must reset so segment 1 boundary fires again.
+      rerender({ blockId: 'b2' })
+      remainingRef.current = 134 // elapsed = 46 again
+      vi.advanceTimersByTime(250)
+      expect(onSegmentEndTick).toHaveBeenCalledTimes(2)
+    })
   })
 })

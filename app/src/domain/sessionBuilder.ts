@@ -130,9 +130,11 @@ export function buildDraft(
           ? pick.variant.coachingCues.join(' · ')
           : pick.drill.name,
       courtsideInstructions: pick.variant.courtsideInstructions,
+      courtsideInstructionsBonus: pick.variant.courtsideInstructionsBonus,
       required: slot.required,
       rationale: substitutionRationale ?? deriveBlockRationale(slot.type, pick.drill, context),
       subBlockIntervalSeconds: pick.variant.subBlockIntervalSeconds,
+      segments: pick.variant.segments,
     })
   }
 
@@ -201,11 +203,13 @@ export function buildDraftFromCompletedBlocks(
       durationMinutes: planBlock.durationMinutes,
       coachingCue: planBlock.coachingCue,
       courtsideInstructions: planBlock.courtsideInstructions,
+      courtsideInstructionsBonus: planBlock.courtsideInstructionsBonus,
       required: planBlock.required,
       // Preserve the original rationale as data for future Swap / See-Why
       // surfaces; the current run-flow no longer renders it inline.
       rationale: planBlock.rationale,
       subBlockIntervalSeconds: planBlock.subBlockIntervalSeconds,
+      segments: planBlock.segments,
     })
   })
   if (completedBlocks.length === 0) return null
@@ -312,9 +316,11 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
           ? pick.variant.coachingCues.join(' · ')
           : pick.drill.name,
       courtsideInstructions: pick.variant.courtsideInstructions,
+      courtsideInstructionsBonus: pick.variant.courtsideInstructionsBonus,
       required: slot.required,
       rationale: deriveBlockRationale(slot.type, pick.drill, context),
       subBlockIntervalSeconds: pick.variant.subBlockIntervalSeconds,
+      segments: pick.variant.segments,
     })
   }
 

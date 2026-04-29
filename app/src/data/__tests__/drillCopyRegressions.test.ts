@@ -145,44 +145,177 @@ describe('drill copy regressions', () => {
       expect(text).not.toMatch(/~3 min on the timer/)
     })
 
-    it('names the longer-wrap additions (mirror, glutes, adductors) at courtside', () => {
+    it('names the accessory bonus additions (glutes, adductors) in the bonus copy', () => {
       if (!solo) throw new Error('d26-solo variant missing')
-      const text = solo.courtsideInstructions.toLowerCase()
-      expect(text).toMatch(/mirror to the other side/)
-      expect(text).toMatch(/glutes/)
-      expect(text).toMatch(/adductors/)
+      // 2026-04-28 (`docs/plans/2026-04-28-per-move-pacing-indicator.md`):
+      // the bonus copy renders below the segment list ONLY when all
+      // three segments have completed (overflow / bonus territory).
+      // Post-each-side iteration the bonus dropped the "mirror to
+      // the other side" clause because mirroring is now built into
+      // each segment via `eachSide: true` (~30 s per side within
+      // the 60 s segment time). Bonus is now purely accessory.
+      const bonus = solo.courtsideInstructionsBonus?.toLowerCase() ?? ''
+      expect(bonus).toMatch(/glutes/)
+      expect(bonus).toMatch(/adductors/)
+      // Negative assertion: the "mirror" clause must NOT reappear
+      // post each-side iteration; if it does, the floor and bonus
+      // are out of sync.
+      expect(bonus).not.toMatch(/mirror to the other side/)
     })
 
     it('glosses the anatomy terms inline (one-season rec-player test)', () => {
       if (!solo) throw new Error('d26-solo variant missing')
-      const text = solo.courtsideInstructions
       // `glutes` is glossed as `(back of hips)`; `adductors` is
-      // glossed as `(inner thighs)`. Both glosses match the
-      // courtside-copy.mdc §2 jargon-gate pattern (plain-language
-      // first or jargon-with-paren-gloss).
-      expect(text).toMatch(/glutes \(back of hips\)/)
-      expect(text).toMatch(/adductors \(inner thighs\)/)
+      // glossed as `(inner thighs)` — both inside the bonus copy
+      // post-segment-split. The segment labels gloss `back of thigh`
+      // and `front of upper thigh` for hamstring / hip flexor.
+      // Both follow the courtside-copy.mdc §2 jargon-gate pattern.
+      const bonus = solo.courtsideInstructionsBonus ?? ''
+      expect(bonus).toMatch(/glutes \(back of hips\)/)
+      expect(bonus).toMatch(/adductors \(inner thighs\)/)
+      const segmentLabels = (solo.segments ?? []).map((s) => s.label).join('\n')
+      expect(segmentLabels).toMatch(/Hamstring \(back of thigh\):/)
+      expect(segmentLabels).toMatch(/Hip flexor \(front of upper thigh\):/)
     })
 
-    it('keeps the three-move floor structure (calf / hamstring / hip flexor)', () => {
+    it('marks all three stretches as eachSide (each-side iteration: mirror is built into the floor)', () => {
       if (!solo) throw new Error('d26-solo variant missing')
-      const text = solo.courtsideInstructions
-      // Numbered list still leads with the same three staples.
-      // Anatomy glosses on hamstring / hip flexor stay landed
-      // (per the 2026-04-26 jargon-gloss pass).
-      expect(text).toMatch(/1\. Calf:/)
-      expect(text).toMatch(/2\. Hamstring \(back of thigh\):/)
-      expect(text).toMatch(/3\. Hip flexor \(front of upper thigh\):/)
+      // 2026-04-28 dogfeed: every d26 stretch is unilateral. The
+      // 3-min floor now covers both sides (~30 s per side within
+      // the authored 60 s segment time). SegmentList renders an
+      // "(each side)" suffix so the user knows to switch sides.
+      expect(solo.segments).toBeDefined()
+      for (const seg of solo.segments ?? []) {
+        expect(seg.eachSide).toBe(true)
+      }
     })
 
-    it('uses no em-dashes in user-visible courtside prose', () => {
+    it('keeps the three-move floor structure as authored segments (calf / hamstring / hip flexor)', () => {
+      if (!solo) throw new Error('d26-solo variant missing')
+      // 2026-04-28: the three staples now live on `segments`, each
+      // with its own authored 60 s duration. RunScreen renders them
+      // as a position-aware list with the active row highlighted.
+      // The numbered prose list is no longer authored on
+      // `courtsideInstructions` (that's now intro-only).
+      expect(solo.segments).toBeDefined()
+      expect(solo.segments).toHaveLength(3)
+      expect(solo.segments?.[0].label).toMatch(/^Calf:/)
+      expect(solo.segments?.[1].label).toMatch(/^Hamstring \(back of thigh\):/)
+      expect(solo.segments?.[2].label).toMatch(/^Hip flexor \(front of upper thigh\):/)
+      expect(solo.segments?.every((s) => s.durationSec === 60)).toBe(true)
+    })
+
+    it('uses no em-dashes in user-visible courtside prose (intro, bonus, segment labels)', () => {
       if (!solo) throw new Error('d26-solo variant missing')
       // courtside-copy.mdc §4 forbids em-dashes (U+2014) in
       // user-visible courtside prose. Hyphen-minus (`-`) in compound
-      // words and en-dashes (U+2013) in numeric ranges are allowed,
-      // but neither appears unnecessarily in this drill's copy.
+      // words and en-dashes (U+2013) in numeric ranges are allowed.
+      // Post-split, the check covers the intro, the bonus copy, and
+      // every segment label.
       expect(solo.courtsideInstructions).not.toContain('\u2014')
+      expect(solo.courtsideInstructionsBonus ?? '').not.toContain('\u2014')
+      for (const segment of solo.segments ?? []) {
+        expect(segment.label).not.toContain('\u2014')
+      }
     })
+  })
+
+  describe('active warmup and wrap pacing metadata (build-17 F3, 2026-04-28)', () => {
+    /**
+     * Build-17 pair dogfeed F3 repeated the cooldown / sub-block beep
+     * complaint after the wake-lock + audio-primer work shipped.
+     *
+     * 2026-04-28 ship (`docs/plans/2026-04-28-per-move-pacing-indicator.md`):
+     * the three M001-active timed drills now declare structured
+     * `segments` instead of the uniform `subBlockIntervalSeconds`.
+     * Each segment carries a label + integer duration, the per-segment
+     * end beep replaces the uniform tick, and RunScreen renders the
+     * segments as a position-aware list. Catalog validation enforces
+     * `sum(segments[].durationSec) === workload.durationMinMinutes * 60`,
+     * so this regression test only needs to assert presence + the
+     * authored interval cadence (proxy: every segment's `durationSec`).
+     *
+     * U3 lands `d28-solo`; U4 lands `d26-solo`; U5 lands `d25-solo`.
+     */
+    const segmentCases = [
+      {
+        drillId: 'd28',
+        variantId: 'd28-solo',
+        expectedSegmentCount: 4,
+        expectedDurationSec: 45,
+      },
+      {
+        drillId: 'd26',
+        variantId: 'd26-solo',
+        expectedSegmentCount: 3,
+        expectedDurationSec: 60,
+      },
+      {
+        drillId: 'd25',
+        variantId: 'd25-solo',
+        expectedSegmentCount: 5,
+        // d25-solo segments are not uniform; assertion below uses the
+        // total-sum check instead of the per-segment expectedDurationSec.
+        expectedDurationSec: undefined,
+      },
+    ]
+
+    it.each(segmentCases)(
+      '$variantId declares structured segments and retires subBlockIntervalSeconds',
+      ({ drillId, variantId, expectedSegmentCount, expectedDurationSec }) => {
+        const drill = DRILLS.find((d) => d.id === drillId)
+        const variant = drill?.variants.find((v) => v.id === variantId)
+
+        expect(drill).toBeDefined()
+        expect(variant).toBeDefined()
+        if (!variant) throw new Error(`${variantId} variant missing`)
+
+        expect(variant.subBlockIntervalSeconds).toBeUndefined()
+        expect(variant.segments).toBeDefined()
+        expect(variant.segments).toHaveLength(expectedSegmentCount)
+        for (const segment of variant.segments ?? []) {
+          expect(segment.id.startsWith(`${variantId}-s`)).toBe(true)
+          expect(segment.label.length).toBeGreaterThan(0)
+          expect(Number.isInteger(segment.durationSec) && segment.durationSec > 0).toBe(true)
+          if (expectedDurationSec !== undefined) {
+            expect(segment.durationSec).toBe(expectedDurationSec)
+          }
+        }
+
+        // Catalog-validation also checks this, but pinning it here
+        // makes the per-drill regression self-explanatory.
+        const sum = (variant.segments ?? []).reduce((s, x) => s + x.durationSec, 0)
+        expect(sum).toBe(variant.workload.durationMinMinutes * 60)
+      },
+    )
+
+    /*
+     * Drills that have not yet been migrated to `segments` retain the
+     * legacy `subBlockIntervalSeconds` contract. U4 / U5 will move
+     * these cases into `segmentCases` above as each ships.
+     */
+    /*
+     * All three M001-active timed drills (d25, d26, d28) shipped
+     * structured segments in 2026-04-28's `per-move-pacing-indicator`
+     * plan. There are no remaining drills on the legacy uniform-tick
+     * path. The empty array stays as a placeholder so any future
+     * timed drill that ships pre-segment metadata gets a consistent
+     * regression home; remove it when no future need is anticipated.
+     */
+    const legacyPacingCases: Array<{ drillId: string; variantId: string; interval: number }> = []
+
+    it.each(legacyPacingCases)(
+      '$variantId carries legacy pacing metadata for Run-screen sub-block ticks (pre-segment)',
+      ({ drillId, variantId, interval }) => {
+        const drill = DRILLS.find((d) => d.id === drillId)
+        const variant = drill?.variants.find((v) => v.id === variantId)
+
+        expect(drill).toBeDefined()
+        expect(variant).toBeDefined()
+        if (!variant) throw new Error(`${variantId} variant missing`)
+        expect(variant.subBlockIntervalSeconds).toBe(interval)
+      },
+    )
   })
 
   describe('d33-pair (red-team adversarial finding 2026-04-27)', () => {

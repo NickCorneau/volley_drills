@@ -146,6 +146,179 @@ describe('validateDrillCatalog', () => {
     )
   })
 
+  /*
+   * U2 of `docs/plans/2026-04-28-per-move-pacing-indicator.md`:
+   * structured pacing segments must declare positive integer
+   * durations, unique IDs within the variant, and sum exactly to
+   * `workload.durationMinMinutes * 60`. CI fails on drift so a
+   * future authoring mistake cannot silently misalign the segment
+   * indicator from the authored move list.
+   */
+  describe('segments validation (U2)', () => {
+    it('accepts a well-formed segments array (3 × 60s = 180s, durationMinMinutes 3)', () => {
+      const issues = validateDrillCatalog({
+        drills: [
+          drill({
+            variants: [
+              {
+                ...drill().variants[0],
+                workload: {
+                  durationMinMinutes: 3,
+                  durationMaxMinutes: 5,
+                  rpeMin: 3,
+                  rpeMax: 5,
+                },
+                segments: [
+                  { id: 's1', label: 'One', durationSec: 60 },
+                  { id: 's2', label: 'Two', durationSec: 60 },
+                  { id: 's3', label: 'Three', durationSec: 60 },
+                ],
+              },
+            ],
+          }),
+        ],
+        progressionChains: [chain()],
+      })
+      const segmentIssues = issues.filter((i) => i.code.startsWith('segment_') || i.code.startsWith('duplicate_segment') || i.code.startsWith('invalid_segment'))
+      expect(segmentIssues).toEqual([])
+    })
+
+    it('passes when segments is undefined (no segment validation runs)', () => {
+      const issues = validateDrillCatalog({
+        drills: [
+          drill({
+            variants: [
+              {
+                ...drill().variants[0],
+                // segments intentionally omitted
+              },
+            ],
+          }),
+        ],
+        progressionChains: [chain()],
+      })
+      const segmentIssues = issues.filter((i) =>
+        i.code === 'segment_duration_mismatch' ||
+        i.code === 'duplicate_segment_id' ||
+        i.code === 'invalid_segment_duration',
+      )
+      expect(segmentIssues).toEqual([])
+    })
+
+    it('reports segment_duration_mismatch when the sum does not match durationMinMinutes * 60', () => {
+      const issues = validateDrillCatalog({
+        drills: [
+          drill({
+            variants: [
+              {
+                ...drill().variants[0],
+                workload: {
+                  durationMinMinutes: 3, // expects 180s
+                  durationMaxMinutes: 5,
+                  rpeMin: 3,
+                  rpeMax: 5,
+                },
+                segments: [
+                  { id: 's1', label: 'One', durationSec: 60 },
+                  { id: 's2', label: 'Two', durationSec: 60 },
+                  // sum = 120, expected 180 → mismatch
+                ],
+              },
+            ],
+          }),
+        ],
+        progressionChains: [chain()],
+      })
+      expect(issues.map((i) => i.code)).toEqual(
+        expect.arrayContaining(['segment_duration_mismatch']),
+      )
+    })
+
+    it('reports duplicate_segment_id exactly once per duplicate (regardless of repeat count)', () => {
+      const issues = validateDrillCatalog({
+        drills: [
+          drill({
+            variants: [
+              {
+                ...drill().variants[0],
+                workload: {
+                  durationMinMinutes: 3,
+                  durationMaxMinutes: 5,
+                  rpeMin: 3,
+                  rpeMax: 5,
+                },
+                segments: [
+                  { id: 's-dup', label: 'One', durationSec: 60 },
+                  { id: 's-dup', label: 'Two', durationSec: 60 },
+                  { id: 's-dup', label: 'Three', durationSec: 60 },
+                ],
+              },
+            ],
+          }),
+        ],
+        progressionChains: [chain()],
+      })
+      const dupIssues = issues.filter((i) => i.code === 'duplicate_segment_id')
+      // Two duplicates of `s-dup` after the first occurrence; reporter
+      // emits exactly once per duplicate id (not once per repeat).
+      expect(dupIssues).toHaveLength(1)
+      expect(dupIssues[0].message).toContain('s-dup')
+    })
+
+    it('reports invalid_segment_duration for non-positive or non-integer durations', () => {
+      const issues = validateDrillCatalog({
+        drills: [
+          drill({
+            variants: [
+              {
+                ...drill().variants[0],
+                workload: {
+                  durationMinMinutes: 3,
+                  durationMaxMinutes: 5,
+                  rpeMin: 3,
+                  rpeMax: 5,
+                },
+                segments: [
+                  { id: 's1', label: 'Bad zero', durationSec: 0 },
+                  { id: 's2', label: 'Bad neg', durationSec: -5 },
+                  { id: 's3', label: 'Bad float', durationSec: 30.5 },
+                ],
+              },
+            ],
+          }),
+        ],
+        progressionChains: [chain()],
+      })
+      const invalidIssues = issues.filter((i) => i.code === 'invalid_segment_duration')
+      expect(invalidIssues).toHaveLength(3)
+    })
+
+    it('reports segment_duration_mismatch when segments is an empty array', () => {
+      const issues = validateDrillCatalog({
+        drills: [
+          drill({
+            variants: [
+              {
+                ...drill().variants[0],
+                workload: {
+                  durationMinMinutes: 3,
+                  durationMaxMinutes: 5,
+                  rpeMin: 3,
+                  rpeMax: 5,
+                },
+                segments: [],
+              },
+            ],
+          }),
+        ],
+        progressionChains: [chain()],
+      })
+      expect(issues.map((i) => i.code)).toEqual(
+        expect.arrayContaining(['segment_duration_mismatch']),
+      )
+    })
+  })
+
   it('reports variant drill id mismatches', () => {
     const issues = validateDrillCatalog({
       drills: [

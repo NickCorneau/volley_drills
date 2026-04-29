@@ -112,10 +112,12 @@ export function findSwapAlternatives(
         ? candidate.variant.coachingCues.join(' · ')
         : candidate.drill.name,
     courtsideInstructions: candidate.variant.courtsideInstructions,
+    courtsideInstructionsBonus: candidate.variant.courtsideInstructionsBonus,
     required: block.required,
     rationale:
       rationaleByDrillId.get(candidate.drill.id) ??
       deriveBlockRationale(block.type, candidate.drill, context),
     subBlockIntervalSeconds: candidate.variant.subBlockIntervalSeconds,
+    segments: candidate.variant.segments,
   }))
 }

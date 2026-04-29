@@ -613,6 +613,13 @@
       "canonical_for": "Qualitative field feedback from the 2026-04-28 founder + Seb build-17 no-net pair dogfeed. Positives: drill subcategories / role-skill cues were useful, and optional count capture felt right because counting was not forced. Frictions: cooldown/sub-block pacing beeps were missing or inaudible, and the landing/entry surface still did not make changing difficulty or skill level obvious. Strengthens existing audio-pacing reliability and skill-level-mutability evidence tracks; adds an optionality constraint to any future Framing C live-counter design. Does not fire a new implementation plan by itself."
     },
     {
+      "id": "2026-04-28-audio-pacing-reliability-investigation",
+      "path": "docs/research/2026-04-28-audio-pacing-reliability-investigation.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "Follow-up investigation for the build-17 F3 cooldown/sub-block beep report. Confirms the Safety Continue audio/wake-lock path, the Run preroll wake-lock release regression, active warmup/wrap subBlockIntervalSeconds coverage, and which cooldown audio cues exist. Records the narrow app-side fix and preserves the platform boundary: silent switch, manual lock, and unsupported/denied Wake Lock remain residual."
+    },
+    {
       "id": "agent-documentation-contract",
       "path": "docs/ops/agent-documentation-contract.md",
       "type": "ops",
@@ -740,6 +747,27 @@
       "type": "plan",
       "status": "complete",
       "canonical_for": "Spec-gap fix that re-aligned the per-drill capture surface (`DrillCheckScreen` + `PerDrillCapture`) with `docs/specs/m001-review-micro-spec.md` §Required (V0B-28 forced-criterion prompt, D104 layer-1 self-scoring bias correction). **Shipped 2026-04-28** as part of the architecture pass U2 capture-domain consolidation (`11fed34`). Five items landed: (1) `getBlockSuccessRule` helper in `app/src/domain/drillMetadata.ts` mirrors `getBlockMetricType`'s variant-resolution rule, and the success rule renders as `Success rule: <rule>. If unsure, don't count it as Good.` inside the expanded `Add counts` body inside `PerDrillCapture` so the chip-only fast path stays calm (pinned by `app/src/components/__tests__/PerDrillCapture.test.tsx` `describe('V0B-28 forced-criterion prompt', ...)` and `app/src/domain/__tests__/drillMetadata.test.ts` `describe('getBlockSuccessRule', ...)`); (2) `PassMetricInput`'s rate label changed from the pass-specific `% good pass rate` to the skill-neutral `% good`; (3) `d33 Around the World Serving`'s `successMetric.description` re-worded from a session-level zone enumeration to the per-attempt rule `Serve lands in the called zone.` on both Solo and Pair siblings (`target` retained as the session goal); (4) wire-up — eligibility resolver in `app/src/domain/capture/eligibility.ts` returns `successRule` on both eligible branches, `useDrillCheckController` exposes `captureSuccessRule`, `DrillCheckScreen` passes through; (5) spec sync — `primarySkillMetric` block now reads `the drill check surface (post-D133)` with the source-from-record clause and a 'Surface-move history (2026-04-27)' addendum. Legacy `ReviewScreen` fallback path intentionally out of scope (reached only by non-D133 legacy sessions). Authors zero new drill records; no Dexie migration; no metadata schema changes. Verification: 1065/1065 Vitest, lint clean, build clean."
+    },
+    {
+      "id": "per-move-pacing-indicator-ideation-2026-04-28",
+      "path": "docs/ideation/2026-04-28-per-move-pacing-indicator-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Sub-ideation under S1 of `docs/ideation/2026-04-28-what-to-add-next-ideation.md`. Ranks variant shapes for the per-move visible pacing indicator on RunScreen (visual treatment / data source / overflow reconciliation / scope / audio coupling). 4 survivors; V1 (highlighted current row + structured pacingSegments + per-move boundary beep + bonus-overflow footnote) selected as shibui-and-minimal."
+    },
+    {
+      "id": "per-move-pacing-indicator-requirements-2026-04-28",
+      "path": "docs/brainstorms/2026-04-28-per-move-pacing-indicator-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for the V1 per-move pacing indicator with the user-directed re-framing to model warmup/cooldown drills as composed `DrillSegment[]`. Covers actors A1–A3, flows F1–F8, acceptance examples AE1–AE6 (including AE6 — visible state independent of audio state, the load-bearing cue-stack invariant). Origin doc for the `2026-04-28-per-move-pacing-indicator` plan."
+    },
+    {
+      "id": "per-move-pacing-indicator-2026-04-28",
+      "path": "docs/plans/2026-04-28-per-move-pacing-indicator.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Implementation plan and shipped ledger for the per-move pacing indicator. Adds `DrillSegment` type + `DrillVariant.segments?` + `courtsideInstructionsBonus?`; authors segments on `d28-solo` (4×45s), `d26-solo` (3×60s), `d25-solo` (5 segments / 60+30+30+30+30; durationMinMinutes bumped 2→3); pure helper at `app/src/domain/runFlow/segmentTiming.ts`; `<SegmentList>` at `app/src/components/run/SegmentList.tsx`; controller wiring in `useRunController` + extension of `useBlockPacingTicks` for per-segment end beep; catalog validation rule `segment_duration_mismatch`. Visible-channel half of S1 from `docs/ideation/2026-04-28-what-to-add-next-ideation.md`."
     },
     {
       "id": "per-drill-capture-coverage-phase-2a-streak-2026-04-28",
@@ -953,6 +981,10 @@
     {
       "path": "docs/research/2026-04-28-build17-pair-dogfeed-feedback.md",
       "focus": "qualitative field feedback from the 2026-04-28 build-17 no-net pair dogfeed: drill subcategories / role-skill cues useful, optional count capture appreciated because counting is not forced, cooldown/sub-block beeps missing or inaudible, and the landing/difficulty-setting ask repeated. Strengthens audio-pacing reliability and skill-level-mutability evidence tracks; adds optionality constraint to future Framing C live-counter design; does not fire a new implementation plan by itself"
+    },
+    {
+      "path": "docs/research/2026-04-28-audio-pacing-reliability-investigation.md",
+      "focus": "follow-up investigation for build-17 missing cooldown/sub-block beeps: Safety Continue audio/wake-lock path, Run preroll wake-lock release regression, active warmup/wrap subBlockIntervalSeconds coverage, cooldown cue existence, and platform-boundary residuals (silent switch, manual lock, unsupported/denied Wake Lock)"
     }
   ],
   "status_vocabularies": {

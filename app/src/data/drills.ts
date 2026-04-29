@@ -1725,8 +1725,28 @@ const d25: Drill = {
       participants: { min: 1, ideal: 1, max: 14 },
       environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 0 },
+      // 2026-04-28 (`docs/plans/2026-04-28-per-move-pacing-indicator.md`
+      // U5): `durationMinMinutes` bumped from 2 to 3 so the segment
+      // sum anchors honestly to the workload floor. Safe change
+      // because every authored wrap slot in `archetypes.ts` already
+      // requires `min ≥ 3` (wrap(3,4) on 15-min sessions, wrap(4,5)
+      // on 25-min, wrap(4,6) on 40-min) — the over-permissive 2-min
+      // floor was unreachable anyway.
+      //
+      // 2026-04-28 dogfeed iteration (each-side stretches): the hip
+      // and shoulder stretch segments are unilateral — the user
+      // splits the segment time between two sides. Bumping each from
+      // 30 s to 60 s gives ~30 s per side (the standard stretch
+      // hold). This raises the segment sum from 180 s to 240 s, so
+      // `durationMinMinutes` lifts from 3 to 4. d25 now positions
+      // as the longer-form unilateral cooldown; d26 stays the
+      // compact 3-min option for tight wrap slots. The 15-min
+      // wrap(3,4) slot still picks d25 when allocating 4 min and
+      // falls back to d26 at 3 min. The `progressionDescription`
+      // ("add 30–60 s of easy walking on hot days") still applies
+      // within the 4–5 min envelope.
       workload: {
-        durationMinMinutes: 2,
+        durationMinMinutes: 4,
         durationMaxMinutes: 5,
         rpeMin: 1,
         rpeMax: 2,
@@ -1740,9 +1760,58 @@ const d25: Drill = {
       // paragraph problem as d26; reformatted to newline-separated
       // numbered items with colons, `whitespace-pre-line` rendered by
       // RunScreen + TransitionScreen. "60–90 s" flattened to "60 to
-      // 90 s" to match the SafetyCheck voice.
+      // 90 s" to match the SafetyCheck voice. Build-17 F3 follow-up:
+      // add the same 30 s pacing metadata as d26 so the active
+      // recovery candidates no longer diverge on audible sub-block
+      // support; the first two ticks can both belong to the walking
+      // segment on a 3+ minute wrap.
+      //
+      // 2026-04-28 (`docs/plans/2026-04-28-per-move-pacing-indicator.md`
+      // U5): the prose numbered list is replaced by 5 structured
+      // segments. The "shoulder stretch" line, previously labelled
+      // `Optional`, is authored as a regular segment now; the
+      // `progressionDescription` already covers "add 30–60 s of easy
+      // walking on hot days" so no functionality is lost. The
+      // "Hydrate and note any pain." footnote moves to
+      // `courtsideInstructionsBonus` so RunScreen renders it only
+      // when the wrap exceeds the segment sum (overflow / bonus
+      // territory). `subBlockIntervalSeconds` retired here.
+      //
+      // 2026-04-28 dogfeed iteration (each-side stretches): hip
+      // stretch (s3) and shoulder stretch (s5) are unilateral — the
+      // user splits each 60 s segment between two sides (~30 s per
+      // side). Marked with `eachSide: true`; SegmentList appends a
+      // muted "(each side)" suffix on the label so the user knows
+      // to switch. Sum raised to 240 s = 4 min; workload floor
+      // bumped to 4 (see workload comment above).
       courtsideInstructions:
-        '1. Walk 60 to 90 s with long exhales.\n2. Sit or lean for 30 s to rest calves and feet.\n3. Stretch hips: cross one ankle over the opposite knee and lean forward, 30 s.\n4. Reach arms overhead with a gentle back-bend, 30 s.\n5. Optional shoulder stretch: one arm across chest, 30 s each.\n6. Hydrate and note any pain.',
+        'Walk first, then four short stretch holds. Gentle tension only; skip any move that hurts today.',
+      courtsideInstructionsBonus: 'Hydrate and note any pain.',
+      segments: [
+        { id: 'd25-solo-s1', label: 'Walk with long exhales.', durationSec: 60 },
+        {
+          id: 'd25-solo-s2',
+          label: 'Sit or lean to rest calves and feet.',
+          durationSec: 30,
+        },
+        {
+          id: 'd25-solo-s3',
+          label: 'Hip stretch: cross one ankle over the opposite knee and lean forward.',
+          durationSec: 60,
+          eachSide: true,
+        },
+        {
+          id: 'd25-solo-s4',
+          label: 'Reach arms overhead with a gentle back-bend.',
+          durationSec: 30,
+        },
+        {
+          id: 'd25-solo-s5',
+          label: 'Shoulder stretch: one arm across chest.',
+          durationSec: 60,
+          eachSide: true,
+        },
+      ],
       coachingCues: [
         'Long exhale, let heart rate come down.',
         'Gentle tension only.',
@@ -1820,10 +1889,56 @@ const d26: Drill = {
       // upper thigh`, `one knee on the ground, other foot in front`)
       // and movement cues stated in plain language (`tip your hips
       // back`, `squeeze the back-leg glute`).
+      //
+      // 2026-04-28 (`docs/plans/2026-04-28-per-move-pacing-indicator.md`
+      // U4): the prose numbered list is replaced by structured
+      // `segments` (3 × 60 s = 180 s = workload.durationMinMinutes * 60).
+      // Anatomy glosses, movement cues, and the 3-staple structure
+      // are unchanged. `subBlockIntervalSeconds` retired here;
+      // per-segment end beep replaces the uniform tick.
+      //
+      // 2026-04-28 dogfeed iterations:
+      //  - intro dropped "about 60 s each" because Shorten rescales
+      //    segments proportionally; the segment list is canonical for
+      //    per-move timing. The "3 to 6 minutes on the timer" range
+      //    stays — it sets honest expectations for wrap-slot variance.
+      //  - each-side stretches: ALL three stretches are unilateral.
+      //    Originally the design did one side within the 3-min floor
+      //    and deferred the second side to bonus copy ("mirror to the
+      //    other side"). User dogfeed flagged that a 3-min cooldown
+      //    only stretching one side is incomplete. Now every segment
+      //    is `eachSide: true` (~30 s per side within the 60 s
+      //    segment time); the bonus copy drops the "mirror" clause
+      //    because mirroring is built into the floor. Bonus is now
+      //    purely accessory ("add glutes or adductors").
       courtsideInstructions:
-        'Short wrap (3 to 6 minutes on the timer): three moves to start, about 45 to 60 s each on one side. If time remains, mirror to the other side, then add glutes (back of hips) or adductors (inner thighs). No bouncing; firm tension, never sharp pain.\n\n1. Calf: straight back leg, heel down, lean in; soften the back knee for the lower calf.\n2. Hamstring (back of thigh): front leg heel down, toes up; tip your hips back and lean your chest toward the front leg, back flat.\n3. Hip flexor (front of upper thigh): half-kneel (one knee on the ground, other foot in front), squeeze the back-leg glute, lean gently into the front leg.',
+        'Short wrap (3 to 6 minutes on the timer): three moves to start. No bouncing; firm tension, never sharp pain.',
+      courtsideInstructionsBonus:
+        'If time remains, add glutes (back of hips) or adductors (inner thighs).',
+      segments: [
+        {
+          id: 'd26-solo-s1',
+          label:
+            'Calf: straight back leg, heel down, lean in; soften the back knee for the lower calf.',
+          durationSec: 60,
+          eachSide: true,
+        },
+        {
+          id: 'd26-solo-s2',
+          label:
+            'Hamstring (back of thigh): front leg heel down, toes up; tip your hips back and lean your chest toward the front leg, back flat.',
+          durationSec: 60,
+          eachSide: true,
+        },
+        {
+          id: 'd26-solo-s3',
+          label:
+            'Hip flexor (front of upper thigh): half-kneel (one knee on the ground, other foot in front), squeeze the back-leg glute, lean gently into the front leg.',
+          durationSec: 60,
+          eachSide: true,
+        },
+      ],
       coachingCues: ['Breathe.', 'Avoid pain.', 'Hold steady.'],
-      subBlockIntervalSeconds: 30,
     },
   ],
 }
@@ -2283,14 +2398,40 @@ const d28: Drill = {
       // courtside reader sees a scannable list, not a paragraph. The
       // `subBlockIntervalSeconds: 45` pacing tick already chimes at
       // each segment boundary; the list structure matches the audio.
-      courtsideInstructions:
-        'Four quick blocks, ~45 s each. End warmer than you started.\n\n1. Jog or A-skip around your sand box.\n2. Ankle hops and lateral shuffles.\n3. Arm circles and trunk rotations.\n4. Quick side shuffles and pivot-back starts at game pace.',
+      //
+      // 2026-04-28 (`docs/plans/2026-04-28-per-move-pacing-indicator.md`
+      // U3): the prose numbered list is replaced by structured
+      // `segments` so RunScreen can render a per-move position
+      // indicator beside each move. The intro paragraph stays in
+      // `courtsideInstructions`; the four moves move into `segments`
+      // (sum 180s = workload.durationMinMinutes * 60).
+      // `subBlockIntervalSeconds` retired here because the
+      // per-segment end beep replaces it. RunScreen falls back to
+      // uniform tick only when `segments` is undefined.
+      //
+      // 2026-04-28 dogfeed iteration: dropped the "~45 s each" timing
+      // claim from the intro because Shorten on warmup/cooldown now
+      // scales segment durations down proportionally. The segment
+      // list itself is canonical for per-move timing; the intro
+      // sticks to composition + intent ("four quick movement
+      // blocks") so it stays true regardless of whether the user
+      // shortened the block.
+      courtsideInstructions: 'Four quick movement blocks. End warmer than you started.',
+      segments: [
+        { id: 'd28-solo-s1', label: 'Jog or A-skip around your sand box.', durationSec: 45 },
+        { id: 'd28-solo-s2', label: 'Ankle hops and lateral shuffles.', durationSec: 45 },
+        { id: 'd28-solo-s3', label: 'Arm circles and trunk rotations.', durationSec: 45 },
+        {
+          id: 'd28-solo-s4',
+          label: 'Quick side shuffles and pivot-back starts at game pace.',
+          durationSec: 45,
+        },
+      ],
       coachingCues: [
         'Short hops, loud feet.',
         'Full range on arm swings.',
         'Move your feet - ankles first, then legs.',
       ],
-      subBlockIntervalSeconds: 45,
     },
   ],
 }

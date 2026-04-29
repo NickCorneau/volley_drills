@@ -15,6 +15,7 @@ depends_on:
 - docs/plans/2026-04-26-pair-rep-capture-tier1b.md
 - docs/plans/2026-04-20-m001-tier1-implementation.md
 - docs/research/2026-04-27-cca2-dogfeed-findings.md
+- docs/research/2026-04-28-audio-pacing-reliability-investigation.md
 related:
 - docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md
 - docs/plans/2026-04-27-per-drill-capture-coverage.md
@@ -61,14 +62,15 @@ The memo did not include a Dexie export or exact drill list. Treat this as quali
 
 **Why it matters.** This repeats the older P2-2 pacing-audio complaint, but after the audio-primer/wake-lock and sub-block tick work had supposedly shipped. It could be an implementation regression, a metadata coverage gap, or the known iOS silent-mode / manual-lock boundary.
 
-**Routing.** Investigate only with concrete runtime evidence before changing behavior:
+**Routing.** Follow-up investigation landed in `docs/research/2026-04-28-audio-pacing-reliability-investigation.md`.
+It confirmed two app-side gaps and kept the remaining platform boundary explicit:
 
-- confirm device silent-mode state and whether the app was Home Screen PWA vs browser tab
-- confirm whether the session included `d26` / `d28` variants with `subBlockIntervalSeconds`
-- confirm whether block-end countdown ticks fired while sub-block ticks did not
-- confirm whether the Screen Wake Lock warning appeared
+- `SafetyCheckScreen` primed audio and wake lock from Continue, but Run released wake lock before preroll/timer start.
+- `d25-solo` was an active recovery candidate without `subBlockIntervalSeconds`; `d26-solo` and `d28-solo` were covered.
+- There is no separate cooldown-start cue; cooldown uses the shared preroll, sub-block, end-countdown, and block-end cue system.
+- Silent switch, manual lock, browser tab vs Home Screen PWA, and unsupported/denied Wake Lock remain real-device checks if the symptom repeats.
 
-Until that evidence exists, route this as "audio pacing reliability evidence accumulating," not as a scoped bugfix.
+The narrow app-side fix holds wake lock while the active block is planned/prerolling/running and adds 30 s pacing metadata to `d25-solo`.
 
 ### F4 — Landing page and difficulty/skill-level mutability remain repeated asks
 

@@ -14,6 +14,9 @@ export type DrillCatalogIssueCode =
   | 'link_outside_chain'
   | 'm001_candidate_without_variant'
   | 'participants_label_mismatch'
+  | 'duplicate_segment_id'
+  | 'invalid_segment_duration'
+  | 'segment_duration_mismatch'
 
 export interface DrillCatalogIssue {
   code: DrillCatalogIssueCode
@@ -130,6 +133,65 @@ export function validateDrillCatalog({
             `${variant.id} has an invalid sub-block interval`,
           ),
         )
+      }
+
+      /*
+       * 2026-04-28 (`docs/plans/2026-04-28-per-move-pacing-indicator.md` U2):
+       * structured pacing segments must declare positive integer
+       * durations, unique IDs within the variant, and sum exactly to
+       * `workload.durationMinMinutes * 60`. The min boundary is the
+       * segment-list's natural length; overflow up to durationMaxMinutes
+       * is bonus territory matched by the existing
+       * progressionDescription voice (e.g., d26 mirror / glutes /
+       * adductors). Mirrors the `invalid_sub_block` shape above.
+       */
+      if (variant.segments !== undefined) {
+        const segmentIds = new Set<string>()
+        const reportedDuplicateIds = new Set<string>()
+        let totalSegmentSeconds = 0
+
+        for (let segIndex = 0; segIndex < variant.segments.length; segIndex++) {
+          const segment = variant.segments[segIndex]
+
+          if (segmentIds.has(segment.id) && !reportedDuplicateIds.has(segment.id)) {
+            issues.push(
+              issue(
+                'duplicate_segment_id',
+                `drills.${drill.id}.variants.${variant.id}.segments[${segIndex}].id`,
+                `${variant.id} segment id ${segment.id} is duplicated within the variant`,
+              ),
+            )
+            reportedDuplicateIds.add(segment.id)
+          }
+          segmentIds.add(segment.id)
+
+          if (!Number.isInteger(segment.durationSec) || segment.durationSec <= 0) {
+            issues.push(
+              issue(
+                'invalid_segment_duration',
+                `drills.${drill.id}.variants.${variant.id}.segments[${segIndex}].durationSec`,
+                `${variant.id} segment ${segment.id} has an invalid duration (${segment.durationSec})`,
+              ),
+            )
+          } else {
+            totalSegmentSeconds += segment.durationSec
+          }
+        }
+
+        const expectedSeconds = variant.workload.durationMinMinutes * 60
+        if (
+          Number.isFinite(expectedSeconds) &&
+          expectedSeconds > 0 &&
+          totalSegmentSeconds !== expectedSeconds
+        ) {
+          issues.push(
+            issue(
+              'segment_duration_mismatch',
+              `drills.${drill.id}.variants.${variant.id}.segments`,
+              `${variant.id} segment durations sum to ${totalSegmentSeconds}s but workload.durationMinMinutes implies ${expectedSeconds}s`,
+            ),
+          )
+        }
       }
 
       // 2026-04-27 solo-vs-pair sweep: participants envelope must

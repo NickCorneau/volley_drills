@@ -44,9 +44,11 @@ function currentBlock(overrides: BlockOverrides = {}): SessionPlanBlock {
     durationMinutes: overrides.durationMinutes ?? 8,
     coachingCue: overrides.coachingCue ?? 'Quiet platform.',
     courtsideInstructions: overrides.courtsideInstructions ?? 'Pass controlled balls to target.',
+    courtsideInstructionsBonus: overrides.courtsideInstructionsBonus,
     required: overrides.required ?? true,
     rationale: overrides.rationale,
     subBlockIntervalSeconds: overrides.subBlockIntervalSeconds,
+    segments: overrides.segments,
   }
 }
 

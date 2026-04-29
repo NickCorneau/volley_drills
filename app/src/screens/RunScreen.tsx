@@ -2,6 +2,7 @@ import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { BlockTimer } from '../components/BlockTimer'
 import { RunControls } from '../components/RunControls'
 import { SafetyIcon } from '../components/SafetyIcon'
+import { SegmentList } from '../components/run/SegmentList'
 import { ELEVATED_PANEL_SURFACE } from '../components/ui/Card'
 import { Button, ScreenShell, StatusMessage } from '../components/ui'
 import { getBlockSkillFocus } from '../domain/drillMetadata'
@@ -31,6 +32,8 @@ export function RunScreen() {
     showEndConfirm,
     isWakeLocked,
     hasAlternates,
+    currentSegmentIndex,
+    effectiveSegments,
     handlePause,
     handleResume,
     handleNext,
@@ -178,11 +181,40 @@ export function RunScreen() {
             satisfies Seb P2-1 "readable at arm's length," and lets
             TransitionScreen meet it mid-scale (see its matching
             bump) so the paragraph reads as one voice across both
-            surfaces. */}
+            surfaces.
+
+            2026-04-28 (`docs/plans/2026-04-28-per-move-pacing-indicator.md`
+            U7): when the active block has structured `segments`
+            (warmup `d28-solo`; cooldown `d25-solo`, `d26-solo`),
+            `<SegmentList>` renders the structured per-move indicator
+            with the active row highlighted by a small "NOW" pill.
+            The intro paragraph (everything authored on
+            `courtsideInstructions` for these drills, post-U3/U4/U5
+            split) renders above the list. The bonus paragraph
+            (`courtsideInstructionsBonus`) is rendered by `<SegmentList>`
+            below the list when all segments have completed.
+            For drills without segments (every other timed drill,
+            future or current), the existing prose render is the
+            fallback path — no regression. */}
         {currentBlock.courtsideInstructions && (
           <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
             {currentBlock.courtsideInstructions}
           </p>
+        )}
+        {/*
+         * `effectiveSegments` is the controller's scaled view of
+         * `currentBlock.segments` — same identity when the block runs
+         * at its authored duration, scaled down proportionally when
+         * Shorten brings activeDuration below the segment sum (so the
+         * user does ALL moves at faster timing instead of dropping
+         * the trailing segments off the end).
+         */}
+        {effectiveSegments && effectiveSegments.length > 0 && (
+          <SegmentList
+            segments={effectiveSegments}
+            currentIndex={currentSegmentIndex}
+            bonus={currentBlock.courtsideInstructionsBonus}
+          />
         )}
         {/*
           Coaching cue: 2026-04-22 quieted from the prior chunky card

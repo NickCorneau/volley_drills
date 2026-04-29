@@ -96,6 +96,71 @@ export interface ProgressionLink {
   description: string
 }
 
+/**
+ * A single named, individually-timed move inside a composed warmup or
+ * cooldown drill. Authored on `DrillVariant.segments`; rendered by
+ * RunScreen's `<SegmentList>` as a structured per-move pacing
+ * indicator with the active row highlighted.
+ *
+ * 2026-04-28 ship (`docs/plans/2026-04-28-per-move-pacing-indicator.md`):
+ * the visible-channel half of S1 from
+ * `docs/ideation/2026-04-28-what-to-add-next-ideation.md`. Survives
+ * audio failure (silent switch / lock state / denied Wake Lock) per
+ * the cue-stack invariants in
+ * `docs/research/outdoor-courtside-ui-brief.md`.
+ *
+ * Segments are NOT first-class `Drill` records. They never enter
+ * session assembly, swap, or any drill-level surface (Settings, Home,
+ * Review). They are sub-block authoring structure only.
+ */
+export interface DrillSegment {
+  /** Variant-local stable ID (e.g., `d28-solo-s1`). */
+  id: string
+  /** Courtside-readable move name. Rendered as the row label. */
+  label: string
+  /**
+   * Authored duration in whole seconds. Must be a positive integer.
+   * `sum(segments[].durationSec) === workload.durationMinMinutes * 60`
+   * is enforced by `validateDrillCatalog`.
+   */
+  durationSec: number
+  /**
+   * Reserved forward-seam for a future per-segment cue ship. v1 does
+   * NOT render this field anywhere — see `<SegmentList>` and its
+   * regression test pinning the no-render contract.
+   *
+   * Activates when (a) partner walkthrough or founder-ledger row
+   * explicitly asks for per-segment cue copy on at least one of
+   * `d25-solo` / `d26-solo` / `d28-solo`, OR (b) a non-M001 timed
+   * drill ships requiring per-move cue copy at authoring time. Until
+   * then, do not author the field on any segment, and do not render
+   * it from `<SegmentList>`.
+   *
+   * Precedent: the `SessionParticipant[]` D115/D116/D117 forward-seam
+   * in `app/src/model/session.ts` lines 50–57. Reserved-field
+   * discipline keeps the seam from silently growing into a feature.
+   */
+  cue?: string
+  /**
+   * 2026-04-28 dogfeed iteration: marks unilateral segments where
+   * the user splits `durationSec` between two sides (e.g., d25's
+   * hip stretch + shoulder stretch, every d26 stretch). When `true`,
+   * `<SegmentList>` appends a muted "(each side)" suffix to the
+   * label so the user knows to switch sides during the segment.
+   *
+   * Authoring contract: `durationSec` is ALWAYS the total time on
+   * the timer for the segment, independent of `eachSide`. The
+   * `eachSide` flag is metadata for display + (future) midpoint-cue
+   * runtime behavior; it does NOT multiply the duration. This
+   * keeps catalog validation, scaling math, and pacing math
+   * identical to bilateral segments.
+   *
+   * Default: `false` (bilateral). Omit on bilateral segments — the
+   * field reads cleaner when only unilateral segments declare it.
+   */
+  eachSide?: boolean
+}
+
 /** A single execution mode for a drill family. */
 export interface DrillVariant {
   id: string
@@ -108,6 +173,19 @@ export interface DrillVariant {
   workload: WorkloadEnvelope
   successMetric: SuccessMetric
   courtsideInstructions: string
+  /**
+   * Optional bonus prose rendered by RunScreen below the segment list
+   * ONLY when all segments have completed (i.e., the planned block
+   * duration exceeded `sum(segments[].durationSec)` and the indicator
+   * is in bonus territory). Used today on `d26-solo` to carry the
+   * "if time remains, mirror to the other side, then add glutes /
+   * adductors" expansion that lives outside the structured 3-segment
+   * floor.
+   *
+   * Authoring contract: only meaningful when `segments` is also
+   * present. Renders nothing when `segments` is absent.
+   */
+  courtsideInstructionsBonus?: string
   coachingCues: string[]
   /**
    * Pre-close 2026-04-21 (partner-walkthrough P2-2): drills authored
@@ -125,8 +203,34 @@ export interface DrillVariant {
    * `.cursor/rules/courtside-copy.mdc` §Invariant 5 for the authoring
    * contract ("copy in firing order"); this field is the runtime side
    * of that contract.
+   *
+   * 2026-04-28: superseded on the three timed M001 drills (`d25-solo`,
+   * `d26-solo`, `d28-solo`) by `segments`. Remains the default channel
+   * for any future timed drill that does not author `segments`. When
+   * both `segments` and `subBlockIntervalSeconds` are present, the
+   * runner treats `segments` as the source of truth and ignores the
+   * uniform interval — but that combination is not authored anywhere
+   * today and should be avoided to prevent drift.
    */
   subBlockIntervalSeconds?: number
+  /**
+   * Composed sub-segments for warmup / cooldown drills with internal
+   * timed moves. When present, RunScreen renders a structured
+   * `<SegmentList>` with per-segment indicators and the per-segment
+   * end beep replaces the uniform `subBlockIntervalSeconds` tick. The
+   * sum of `segments[].durationSec` must equal
+   * `workload.durationMinMinutes * 60` (CI-enforced via
+   * `validateDrillCatalog`).
+   *
+   * `readonly` because the runtime never mutates the segment list;
+   * it is snapshotted into `DraftBlock` / `SessionPlanBlock` at
+   * session-create time and read from there for the rest of the
+   * session lifecycle.
+   *
+   * 2026-04-28 ship: see
+   * `docs/plans/2026-04-28-per-move-pacing-indicator.md`.
+   */
+  segments?: readonly DrillSegment[]
 }
 
 /** A drill family - the canonical concept with one or more execution variants. */

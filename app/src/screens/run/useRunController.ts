@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { postBlockRoute } from '../../domain/runFlow'
+import { postBlockRoute, scaleSegmentsForBlockDuration } from '../../domain/runFlow'
 import { findSwapAlternatives } from '../../domain/sessionBuilder'
 import { useBlockPacingTicks } from '../../hooks/useBlockPacingTicks'
 import { usePreroll } from '../../hooks/usePreroll'
@@ -123,6 +123,7 @@ export function useRunController(executionLogId: string, shortened: boolean) {
   })
   const prerollCount = preroll.count
   const startWithPreroll = preroll.start
+  const activeBlockStatus = execution?.blockStatuses[execution.activeBlockIndex]?.status
 
   useEffect(() => {
     let cancelled = false
@@ -204,23 +205,66 @@ export function useRunController(executionLogId: string, shortened: boolean) {
     return () => clearInterval(interval)
   }, [timer.isRunning, activeDuration, currentBlock, flushTimer])
 
+  // 2026-04-28 (`docs/plans/2026-04-28-per-move-pacing-indicator.md` U7):
+  // segment-driven pacing for warmup / cooldown drills with composed
+  // moves. The pacing hook owns the math via `computeSegmentState`;
+  // the controller exposes the active index so RunScreen can render
+  // the highlighted row.
+  //
+  // Always default to `0` so that on the first render after
+  // `currentBlock` loads, RunScreen's `<SegmentList>` shows segment
+  // 1 highlighted (matching the design spec's "Now through preroll"
+  // resolution from OQ-P3). For non-segmented blocks the value is
+  // ignored (RunScreen renders the prose path instead). On block-id
+  // change the effect resets back to `0`; the pacing hook then
+  // advances it via `onSegmentIndexChange` as boundaries elapse.
+  const [currentSegmentIndex, setCurrentSegmentIndex] = useState<number>(0)
+  useEffect(() => {
+    setCurrentSegmentIndex(0)
+  }, [currentBlock?.id])
+
+  // 2026-04-28 dogfeed iteration: when the user shortens a warmup or
+  // cooldown (Transition `Shorten block` → `shortened: true` state, or
+  // mid-block Pause + Shorten → `computeShortened` halves activeDuration),
+  // the authored segment durations no longer fit the block. Scale them
+  // down proportionally so the indicator advances through ALL moves
+  // (preserving warmup component coverage / cooldown stretch coverage)
+  // at proportionally shorter timing. When the block is longer than
+  // the segment sum (e.g., d26 wrap on a 4-min slot), segments stay
+  // unchanged so the bonus paragraph still surfaces in overflow
+  // territory. See `scaleSegmentsForBlockDuration` JSDoc.
+  const effectiveSegments = useMemo(() => {
+    if (!currentBlock?.segments?.length) return undefined
+    if (activeDuration <= 0) return currentBlock.segments
+    return scaleSegmentsForBlockDuration(currentBlock.segments, activeDuration)
+  }, [currentBlock?.segments, activeDuration])
+
   useBlockPacingTicks({
     running: timer.isRunning,
     blockId: currentBlock?.id ?? null,
     subBlockIntervalSeconds: currentBlock?.subBlockIntervalSeconds,
+    segments: effectiveSegments,
     remainingRef,
     blockDurRef,
     onEndCountdownTick: playPrerollTick,
     onSubBlockTick: playSubBlockTick,
+    // End-of-segment beep reuses the existing sub-block tick sound
+    // per U7's design decision (identical timbre keeps audio voice
+    // consistent between drills with and without authored segments).
+    onSegmentEndTick: playSubBlockTick,
+    onSegmentIndexChange: setCurrentSegmentIndex,
   })
 
   useEffect(() => {
-    if (timer.isRunning) {
+    if (!loaded) return
+    const shouldHoldWakeLock =
+      timer.isRunning || prerollCount != null || activeBlockStatus === 'planned'
+    if (shouldHoldWakeLock) {
       requestWakeLock()
     } else {
       releaseWakeLock()
     }
-  }, [timer.isRunning, requestWakeLock, releaseWakeLock])
+  }, [loaded, timer.isRunning, prerollCount, activeBlockStatus, requestWakeLock, releaseWakeLock])
 
   const handlePause = useCallback(() => {
     timer.pause()
@@ -381,6 +425,8 @@ export function useRunController(executionLogId: string, shortened: boolean) {
     showEndConfirm,
     isWakeLocked,
     hasAlternates,
+    currentSegmentIndex,
+    effectiveSegments,
     handlePause,
     handleResume,
     handleNext,

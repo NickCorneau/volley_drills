@@ -8,6 +8,7 @@
  * concerns (audit columns, sentinels) ever need to extend a row, the
  * extended interface lives in `db/`, not here.
  */
+import type { DrillSegment } from '../types/drill'
 import type { BlockSlotType, SetupContext } from '../types/session'
 import type { SessionParticipant } from './participant'
 
@@ -21,9 +22,25 @@ export interface SessionPlanBlock {
   durationMinutes: number
   coachingCue: string
   courtsideInstructions: string
+  /**
+   * Optional bonus prose for warmup / cooldown drills with composed
+   * segments. Rendered by RunScreen below the segment list ONLY when
+   * the planned block duration exceeds `sum(segments[].durationSec)`
+   * and all segments have completed. See
+   * `docs/plans/2026-04-28-per-move-pacing-indicator.md`.
+   */
+  courtsideInstructionsBonus?: string
   required: boolean
   rationale?: string
   subBlockIntervalSeconds?: number
+  /**
+   * Composed sub-segments snapshotted from `DrillVariant.segments` at
+   * session-create time (see `services/session/commands.ts`). The
+   * runner reads this from the plan-block snapshot and never re-reads
+   * the catalog; in-flight sessions keep the pacing they started with
+   * even if the catalog changes mid-session.
+   */
+  segments?: readonly DrillSegment[]
 }
 
 export interface SessionPlanSafetyCheck {
