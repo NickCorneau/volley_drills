@@ -75,7 +75,7 @@ This document defines the **completion bar** for Tune today catalog trust. Plann
 - R1. The readiness audit must cover all visible focus choices: Passing, Serving, and Setting.
 - R2. The readiness audit must cover all skill levels the product can claim or carry in drill metadata: beginner, intermediate, and advanced.
 - R3. The readiness audit must cover the current setup configurations: solo + net, solo + wall/no net, solo open/no net/no wall, pair + net, and pair open/no net. Pair wall is not a separate configuration unless the product later makes wall access meaningful for pair mode.
-- R4. The readiness audit must cover short, standard, and long practice lengths, including an actual generated 45-minute practice. The current 40-minute profile may be used as a comparison point, but it never satisfies 45-minute readiness by proxy if the product offers or claims a 45-minute practice.
+- R4. The readiness audit must cover the current generated practice lengths: short, standard, and the current 40-minute long profile. Manual custom practice lengths such as 90 minutes are useful longer-term, but they are not required for this v1 focus-readiness slice.
 - R5. A focus/configuration/level/duration cell is not covered by raw drill-family count. It is covered only by eligible active variants after participant, equipment, net/wall, and unmodeled-requirement filters are applied.
 
 **Practical depth floor**
@@ -84,7 +84,7 @@ This document defines the **completion bar** for Tune today catalog trust. Plann
 - R7. Each covered cell must have at least one focus-reinforcing support option for technique or movement-style work. Support does not need to share the exact focus tag, but it must clearly reinforce the chosen focus using source-backed rationale and must be selectable by the generator before readiness passes.
 - R8. Each covered cell must have at least one eligible pressure, scoring, or game-like option for the chosen focus when pressure work is applicable.
 - R9. Each covered main-work or pressure slot must have at least one same-focus swap alternative that is not the current drill family. Off-focus swap fallback does not count toward readiness.
-- R10. Long sessions must pass the same floor without feeling like a stretched short session. They should include enough focus-reinforcing variety that a 45-minute Serving, Passing, or Setting practice does not repeat one concept under new names.
+- R10. Long sessions must pass the same floor without feeling like stretched short sessions. The current 40-minute Serving, Passing, or Setting practice should include enough focus-reinforcing variety that it does not repeat one concept under new names.
 
 **Focus contract**
 
@@ -108,7 +108,7 @@ This document defines the **completion bar** for Tune today catalog trust. Plann
 **Readiness mechanics and audit artifact**
 
 - R21. The readiness bar applies to behavior the app can actually express. If skill-level readiness is required, focused generation must consume the existing onboarding skill level, mapped through `skillLevelToDrillBand()`, before that cell can pass final readiness; metadata-only coverage is diagnostic, not sufficient. This slice must not add a new skill-level UI, override, or persistence path.
-- R22. Explicit 45-minute readiness means a generated 45-minute practice can satisfy the same depth floor. Planning may choose the implementation shape, but readiness cannot be declared solely because the 40-minute profile passes or because a 45-minute total is inferred outside generated session behavior.
+- R22. Explicit long-session readiness means an actual generated 40-minute practice can satisfy the same depth floor. Readiness cannot be declared from an external duration estimate or a future manual-duration concept that the app cannot yet generate.
 - R23. Pressure work is required for long sessions and for any session layout with a `pressure` slot. Short or standard layouts without a pressure slot may mark pressure `not_applicable`, but the audit must record the reason instead of silently exempting the cell.
 - R24. Swap coverage is measured per generated focus-controlled slot. If a generated long session has both `main_skill` and `pressure` focus-controlled slots, each slot needs its own same-focus alternative.
 - R25. The audit report should be scan-first: top summary by focus, failing cells grouped by visible user risk, then per-cell details with linked gap cards. Risk buckets are `cannot_generate`, `off_focus_support`, `no_same_focus_swap`, `thin_long_session`, `skill_level_unhonored`, and `source_trace_missing`.
@@ -125,7 +125,7 @@ This document defines the **completion bar** for Tune today catalog trust. Plann
 ## Acceptance Examples
 
 - AE1. **Covers R1, R3, R6, R7, R8, R9, R24, R29, R32.** Given a pair + no-net setup, beginner level, and Serving focus, the readiness audit fails today unless it can find at least two eligible serving main-work options, one serving-reinforcing support option, one serving pressure option when pressure applies, and one same-focus swap for each generated focus-controlled slot.
-- AE2. **Covers R4, R10, R22, R23, R30.** Given a 45-minute Serving practice for one or two players, an actual generated practice has enough serving-reinforcing main/support/pressure variety that it does not feel like a passing session with one serving block.
+- AE2. **Covers R4, R10, R22, R23, R30.** Given a 40-minute Serving practice for one or two players, the actual generated practice has enough serving-reinforcing main/support/pressure variety that it does not feel like a passing session with one serving block.
 - AE3. **Covers R2, R5, R21.** Given an advanced Setting cell, a beginner-only setting drill does not count toward advanced readiness unless its variant or source adaptation is explicitly suitable for advanced use and the generator can honor the effective level from existing onboarding skill level via `skillLevelToDrillBand()`.
 - AE4. **Covers R11, R12, R13.** Given a named focus is visible on Tune today, the app should not knowingly depend on "can't build this focus today" copy for a normal setup. Known unsupported cells are catalog-readiness failures.
 - AE5. **Covers R14, R15, R16, R17.** Given a failing Serving/no-net/pair cell, the first follow-up is to inspect source-backed serving families for valid pair/open or one-ball variants before creating a new drill record; if no variant repair can satisfy the floor, a new source-backed drill may be authorized.
@@ -154,6 +154,7 @@ This document defines the **completion bar** for Tune today catalog trust. Plann
 - No Attack activation.
 - No scenario taxonomy implementation.
 - No hard skill-level UI or skill-level override in this requirements slice; readiness uses the existing onboarding skill level via `skillLevelToDrillBand()` and audits beginner/intermediate/advanced coverage.
+- No manual/custom duration entry in this requirements slice. A future manual duration surface, including longer practices such as 90 minutes, should be planned separately after the fixed-profile readiness bar is trustworthy.
 - No AI-generated drill content.
 - No group or 3+ player support unless a source-backed drill is being logged as a future gap card behind `D101`.
 - No medical or injury-prevention claims in drill copy; safety-bearing changes still route through existing safety guidance.
@@ -163,7 +164,7 @@ This document defines the **completion bar** for Tune today catalog trust. Plann
 ## Key Decisions
 
 - **No thin focus states.** Visible focus choices should be fully supported by the catalog, not presented as best-effort filters.
-- **Maximal v1 readiness matrix.** Coverage includes skill level, current setup configurations, explicit 45-minute readiness, and swap depth.
+- **Maximal v1 readiness matrix.** Coverage includes skill level, current setup configurations, the current 40-minute long profile, and swap depth.
 - **Practical floor.** Each covered cell needs two main options, one support option, one pressure option where applicable, and one same-focus swap per focus-controlled slot.
 - **Support-slot guarantee.** Readiness-counted `technique` and `movement_proxy` blocks must reinforce the selected named focus; `warmup` and `wrap` remain general recommendation-owned slots.
 - **Variant-first expansion.** Prefer adapting or activating source-backed variants before authoring new drill families.
@@ -176,7 +177,7 @@ This document defines the **completion bar** for Tune today catalog trust. Plann
 - The current focus set remains Passing, Serving, and Setting.
 - The source archives (`docs/research/fivb-source-material.md`, `docs/research/bab-source-material.md`, `docs/research/vdm-development-matrix-takeaways.md`, and `docs/research/ltd3-development-matrix-synthesis.md`) are sufficient to seed the first gap-card pass.
 - Advanced-level coverage may expose larger catalog gaps than beginner/intermediate coverage; that is an expected finding, not a reason to weaken the matrix.
-- Planning may decide whether explicit 45-minute support means a new time profile, a stronger long-profile audit, or both.
+- Manual custom practice length, including longer sessions such as 90 minutes, is useful future work but outside this readiness slice.
 
 ---
 
@@ -188,7 +189,6 @@ This document defines the **completion bar** for Tune today catalog trust. Plann
 
 ### Deferred to Planning
 
-- [Affects R4/R22][Technical] Decide the implementation shape for explicit 45-minute readiness, including whether to add a first-class 45-minute time profile or another mechanism that generates an actual 45-minute practice.
 - [Affects R6-R10][Technical] Decide whether the audit should be a docs-only table, a test-backed generated report, or both.
 - [Affects R15-R17][Needs research] For each failing cell, identify the exact FIVB, BAB, Volleyball Canada, or other source material that can safely fill the gap.
 

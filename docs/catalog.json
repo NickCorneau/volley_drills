@@ -833,6 +833,13 @@
       "canonical_for": "Canonical implementation plan (revised 2026-04-30 after agent red-team and user feedback). Ships Tune today MANDATORY between Setup and Safety with four chips (Recommended/Passing/Serving/Setting), all-enabled with fail-on-tap inline copy, source-aware Back ('setup' | 'home'), and the full 2026-04-29-001 architecture: effectiveFocus.ts shared resolver, services/session/regenerateDraftFocus.ts in-transaction use case, stale-write guard, repeat / recovery focus strip. Bundled with three orthogonal pre-run cuts: (1) full Wind delete (field, UI, fixtures, windFriendly catalog cleanup; no Dexie migration); (2) conditional Wall row (only when Solo + No Net) plus Wall-required catalog invariant test; (3) no default Safety focus echo, recovery-override line only when painFlag === true && draft.context.sessionFocus !== undefined. Track 4 ships skill-scope policy as JSDoc on SkillFocus (no D136 decision row). Includes explicit K-ID inheritance matrix from 2026-04-29-001 (K1-K13 with K7 collapsed to two values). Supersedes docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md (its design rationale is inherited; ~6 net-new files ship under this plan)."
     },
     {
+      "id": "focus-coverage-readiness-2026-04-30",
+      "path": "docs/plans/2026-04-30-002-feat-focus-coverage-readiness-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Implementation plan for the focus coverage catalog readiness requirements: test-backed audit model and coverage engine, existing-onboarding skill-level consumption via skillLevelToDrillBand(), current 40-minute long-session readiness, focus-reinforcing support-slot semantics, strict same-focus swap readiness, durable gap-card / activation-manifest artifacts, and docs/verification sync. Origin: docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md."
+    },
+    {
       "id": "per-move-pacing-indicator-ideation-2026-04-28",
       "path": "docs/ideation/2026-04-28-per-move-pacing-indicator-ideation.md",
       "type": "ideation",
