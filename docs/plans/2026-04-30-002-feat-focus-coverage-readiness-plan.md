@@ -246,7 +246,7 @@ flowchart TD
 
 ---
 
-- [ ] U4. **40-minute long-session readiness**
+- [x] U4. **40-minute long-session readiness**
 
 **Goal:** Treat the existing 40-minute generated practice as the long-session readiness target across current archetypes and named focuses.
 

@@ -106,6 +106,10 @@ describe('focus readiness audit engine', () => {
     ).toBe(true)
   })
 
+  it('uses the current fixed profiles and treats 40 as the long-session readiness target', () => {
+    expect(READINESS_DURATIONS).toEqual([15, 25, 40])
+  })
+
   it('records pressure as not applicable when the generated layout has no pressure slot', () => {
     const cell = evaluateFocusReadinessCell({
       focus: 'pass',

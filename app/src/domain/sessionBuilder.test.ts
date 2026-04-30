@@ -157,6 +157,60 @@ describe('sessionBuilder', () => {
     }
   })
 
+  it.each([
+    [
+      'solo wall',
+      {
+        playerMode: 'solo',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: true,
+      } satisfies SetupContext,
+    ],
+    [
+      'solo net',
+      {
+        playerMode: 'solo',
+        timeProfile: 40,
+        netAvailable: true,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+    [
+      'solo open',
+      {
+        playerMode: 'solo',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+    [
+      'pair net',
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: true,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+    [
+      'pair open',
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+  ])('buildDraft creates a pressure-bearing 40-minute %s session', (_label, context) => {
+    const draft = buildDraft(context)
+
+    expect(draft).not.toBeNull()
+    expect(draft!.blocks.reduce((sum, block) => sum + block.durationMinutes, 0)).toBe(40)
+    expect(draft!.blocks.some((block) => block.type === 'pressure')).toBe(true)
+  })
+
   /**
    * Tier 1a Unit 2 regression: Swap-pool expansion widened
    * `SKILL_TAGS_BY_TYPE.main_skill` to include `'set'`, but
