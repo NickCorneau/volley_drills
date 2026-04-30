@@ -360,7 +360,7 @@ flowchart TD
 
 ---
 
-- [ ] U7. **End-to-end verification and docs sync**
+- [x] U7. **End-to-end verification and docs sync**
 
 **Goal:** Verify the implementation, sync docs/catalog routing, and leave a clear readiness state.
 
