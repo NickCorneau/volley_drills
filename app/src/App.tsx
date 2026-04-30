@@ -13,6 +13,7 @@ import { SetupScreen } from './screens/SetupScreen'
 import { SkillLevelScreen } from './screens/SkillLevelScreen'
 import { TodaysSetupScreen } from './screens/TodaysSetupScreen'
 import { TransitionScreen } from './screens/TransitionScreen'
+import { TuneTodayScreen } from './screens/TuneTodayScreen'
 import { routePaths } from './routes'
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -96,6 +97,7 @@ export default function App() {
           <Routes>
             <Route path={routePaths.home} element={<HomeScreen />} />
             <Route path={routePaths.setup} element={<SetupScreen />} />
+            <Route path={routePaths.tuneToday} element={<TuneTodayScreen />} />
             <Route path={routePaths.safety} element={<SafetyCheckScreen />} />
             <Route path={routePaths.run} element={<RunScreen />} />
             <Route path={routePaths.drillCheck} element={<DrillCheckScreen />} />

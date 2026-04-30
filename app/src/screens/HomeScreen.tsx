@@ -135,11 +135,19 @@ export function HomeScreen() {
   // Setup, and matched no industry peer (Spotify / Peloton / Strava /
   // Amazon "Buy it again" all treat Repeat as one-tap-execute). Now
   // it rebuilds a fresh draft from the last plan's `SetupContext`
-  // via `buildDraft()` and routes straight to `/safety`. If
+  // via `buildDraft()` and routes straight to Tune today. If
   // rebuilding fails (archetype or drill catalog drift since the
   // last session) the handler falls back to `/setup` so the tester
   // can still proceed by hand. `Start a different session` is the
   // explicit escape when today's conditions genuinely changed.
+  //
+  // 2026-04-30 focus policy: full Repeat intentionally carries
+  // `priorContext.sessionFocus` forward — "same conditions" includes
+  // yesterday's chosen focus. The user can still override on Tune
+  // today before continuing. Partial repeat
+  // (`buildDraftFromCompletedBlocks`) and the pain-recovery rebuild
+  // (`buildRecoveryDraft`) strip focus by design; do NOT add a strip
+  // here without re-checking that decision.
   const interceptedHandlers = useMemo(() => {
     const intercept = (inner: () => void | Promise<void>) => async () => {
       if (state.kind !== 'ready' || !state.flags.reviewPending) {
@@ -170,10 +178,10 @@ export function HomeScreen() {
       // Start CTA enters the regular Setup flow, which applies the
       // persisted skill level during plan build.
       handleNewUserStart: intercept(() => navigate(routes.setup())),
-      handleDraftStart: intercept(() => navigate(routes.safety())),
+      handleDraftStart: intercept(() => navigate(routes.tuneToday(), { state: { source: 'home' } })),
       handleDraftEdit: intercept(() => navigate(routes.setup(), { state: { editDraft: true } })),
       // One-tap Repeat: rebuild a fresh full-plan draft from the last
-      // session's SetupContext and route straight to `/safety`. No
+      // session's SetupContext and route straight to Tune today. No
       // Setup detour, no stale-context banner, no toggle review. The
       // `Start a different session` CTA right below is the explicit
       // escape hatch when today's conditions changed.
@@ -191,7 +199,7 @@ export function HomeScreen() {
             return
           }
           await saveDraft(draft)
-          navigate(routes.safety())
+          navigate(routes.tuneToday(), { state: { source: 'home' } })
         } catch (err) {
           if (isSchemaBlocked()) return
           console.error('Repeat session failed:', err)
@@ -205,7 +213,7 @@ export function HomeScreen() {
       handleStartDifferentSession: intercept(() => navigate(routes.setup())),
       // C-5 Unit 3: ended-early secondary CTA. Builds a partial draft
       // from only the blocks that actually completed and routes to
-      // /safety. Uses the state-captured `lastComplete` bundle so we
+      // Tune today. Uses the state-captured `lastComplete` bundle so we
       // don't re-query Dexie for consistency with the render.
       handleRepeatWhatYouDid: intercept(async () => {
         if (state.kind !== 'ready' || !state.flags.lastComplete) return
@@ -219,7 +227,7 @@ export function HomeScreen() {
             return
           }
           await saveDraft(draft)
-          navigate(routes.safety())
+          navigate(routes.tuneToday(), { state: { source: 'home' } })
         } catch (err) {
           if (isSchemaBlocked()) return
           console.error('Repeat-what-you-did failed:', err)

@@ -113,23 +113,21 @@ describe('SafetyCheckScreen D83 regression (C-5 Unit 4)', () => {
       </MemoryRouter>,
     )
 
-    // Pain + recency default state is unselected. SafetyCheckScreen
-    // reveals secondary UI only after at least pain is answered:
-    //   - painFlag === true  -> renders `<PainOverrideCard>`
-    //   - painFlag === false -> renders Continue button (when recency set)
-    //
-    // When both fields default to null, neither renders. Asserting
-    // those absences is a stable proxy for "form is in default state"
-    // without coupling the test to className or aria-pressed details
-    // that the screen doesn't currently emit.
+    // Pain + recency default state is unselected. SafetyCheckScreen now
+    // keeps a disabled Start session footer visible as an end-of-form anchor,
+    // so the stable proxy for "not pre-filled" is:
+    //   - the prior recency chip is not checked
+    //   - Start session exists but remains disabled
+    //   - PainOverrideCard is absent
     await screen.findByText(/any pain.*sharp/i)
-    expect(screen.queryByRole('button', { name: /^continue$/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /^today$/i })).not.toBeChecked()
+    expect(screen.getByRole('button', { name: /^start session$/i })).toBeDisabled()
     // PainOverrideCard contains "Lighter session" / "I know my body" copy.
     // Its absence proves painFlag defaulted to null.
     expect(screen.queryByText(/know my body/i)).not.toBeInTheDocument()
     // The prior plan had `trainingRecency: '0 days'` and a true
     // `painFlag` - any regression that leaks those into state would
-    // trigger PainOverrideCard or the Continue button above.
+    // trigger PainOverrideCard or enable the Start session button above.
   })
 
   it('safety answers also NEVER pre-fill from a prior SessionReview or ExecutionLog', async () => {
@@ -210,10 +208,11 @@ describe('SafetyCheckScreen D83 regression (C-5 Unit 4)', () => {
     )
 
     await screen.findByText(/any pain.*sharp/i)
-    // Same default-state proxy as the first test: the reveal-on-answer
-    // UI (PainOverrideCard + Continue) is absent while both fields
-    // default to null.
-    expect(screen.queryByRole('button', { name: /^continue$/i })).not.toBeInTheDocument()
+    // Same default-state proxy as the first test: the CTA can be
+    // visible as a disabled anchor, but it must not become actionable
+    // from stale safety answers.
+    expect(screen.getByRole('radio', { name: /^today$/i })).not.toBeChecked()
+    expect(screen.getByRole('button', { name: /^start session$/i })).toBeDisabled()
     expect(screen.queryByText(/know my body/i)).not.toBeInTheDocument()
   })
 })

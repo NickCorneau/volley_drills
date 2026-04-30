@@ -11,11 +11,22 @@
 /** How the ball is delivered - determines realism and skill-transfer claims. */
 export type FeedType = 'self-toss' | 'partner-toss' | 'live-serve' | 'wall-rebound' | 'coach-serve'
 
-// `'warmup'` is the Tier 1a (D105) tag for Beach Prep content. The session
-// builder's warmup slot prefers drills tagged `'warmup'` over the non-
-// `'recovery'` fallback; see the warmup-slot invariant in
-// `app/src/data/archetypes.ts` and `pickForSlot` in
-// `app/src/domain/sessionAssembly/candidates.ts`.
+/**
+ * Technique-axis taxonomy for drills: the GMP a drill primarily trains.
+ *
+ * New values land only when partner-walkthrough evidence or at least
+ * three founder-ledger rows fire a D135-style trigger. `attack` is a
+ * planned future member that pairs with `serve` as the overhead-striking
+ * cluster, but it is not in the union today. Out-of-system, side-out,
+ * transition, and game-like are scenarios, not skills; they belong on a
+ * future variant-level scenario field, not here.
+ *
+ * `'warmup'` is the Tier 1a (D105) tag for Beach Prep content. The session
+ * builder's warmup slot prefers drills tagged `'warmup'` over the non-
+ * `'recovery'` fallback; see the warmup-slot invariant in
+ * `app/src/data/archetypes.ts` and `pickForSlot` in
+ * `app/src/domain/sessionAssembly/candidates.ts`.
+ */
 export type SkillFocus =
   | 'pass'
   | 'serve'
@@ -33,7 +44,6 @@ export interface EnvironmentFlags {
   needsWall: boolean
   needsLines: boolean
   needsCones: boolean
-  windFriendly: boolean
   lowScreenTime: boolean
 }
 

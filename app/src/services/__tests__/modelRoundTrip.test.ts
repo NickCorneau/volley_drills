@@ -90,7 +90,6 @@ describe('model ↔ persistence round-trip', () => {
         timeProfile: 25,
         netAvailable: false,
         wallAvailable: false,
-        wind: 'calm',
       },
       createdAt: 1_700_000_000_000,
     }

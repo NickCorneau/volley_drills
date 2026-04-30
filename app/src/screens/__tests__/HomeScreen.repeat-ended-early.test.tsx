@@ -8,14 +8,14 @@ import { HomeScreen } from '../HomeScreen'
 /**
  * C-5 Unit 3 integration: ended-early branching on the LastComplete
  * primary card + `handleRepeatWhatYouDid` wires through to a subset
- * draft and /safety.
+ * draft and /tune-today.
  *
  * The shape of the test: seed an ExecutionLog with
  * `status: 'ended_early'` where only 2 of 3 plan blocks completed.
  * Assert the card renders two buttons, assert each button's behavior:
- * - "Repeat full N-min plan" -> /safety with a rebuilt full-plan draft
+ * - "Repeat full N-min plan" -> /tune-today with a rebuilt full-plan draft
  *   (2026-04-22 one-tap Repeat; previously went to /setup?from=repeat)
- * - "Repeat what you did (M min)" -> /safety with partial draft
+ * - "Repeat what you did (M min)" -> /tune-today with partial draft
  */
 
 async function clearDb() {
@@ -112,7 +112,7 @@ function renderHome() {
     <MemoryRouter>
       <Routes>
         <Route path="/" element={<HomeScreen />} />
-        <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
+        <Route path="/tune-today" element={<div data-testid="tune-route">tune</div>} />
         <Route path="/setup" element={<div data-testid="setup-route">setup</div>} />
       </Routes>
     </MemoryRouter>,
@@ -143,7 +143,7 @@ describe('HomeScreen: Repeat on ended-early (C-5 Unit 3)', () => {
     ).toBeInTheDocument()
   })
 
-  it('Repeat what you did -> /safety with a partial draft (2 blocks, not 3)', async () => {
+  it('Repeat what you did -> /tune-today with a partial draft (2 blocks, not 3)', async () => {
     const user = userEvent.setup()
     await seedEndedEarly()
     renderHome()
@@ -154,7 +154,7 @@ describe('HomeScreen: Repeat on ended-early (C-5 Unit 3)', () => {
       }),
     )
 
-    expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
+    expect(await screen.findByTestId('tune-route')).toBeInTheDocument()
 
     const draft = await db.sessionDrafts.get('current')
     expect(draft).toBeDefined()
@@ -166,7 +166,7 @@ describe('HomeScreen: Repeat on ended-early (C-5 Unit 3)', () => {
     expect(draft).not.toHaveProperty('safetyCheck')
   })
 
-  it('Repeat full plan on ended-early -> /safety with a full-plan draft (regression guard: NOT the subset)', async () => {
+  it('Repeat full plan on ended-early -> /tune-today with a full-plan draft (regression guard: NOT the subset)', async () => {
     const user = userEvent.setup()
     await seedEndedEarly()
     renderHome()
@@ -178,11 +178,11 @@ describe('HomeScreen: Repeat on ended-early (C-5 Unit 3)', () => {
     )
     // 2026-04-22 one-tap Repeat: handleRepeat rebuilds a fresh
     // full-plan draft from the last session's SetupContext via
-    // `buildDraft()` and routes straight to /safety. Critically it
+    // `buildDraft()` and routes straight to Tune today. Critically it
     // must NOT use the partial-block subset draft (C-5 plan Unit 3
     // test scenarios), so we assert both the route AND the block
     // count on the written draft below.
-    expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
+    expect(await screen.findByTestId('tune-route')).toBeInTheDocument()
     const draft = await db.sessionDrafts.get('current')
     expect(draft).toBeDefined()
     // Full plan is 25 min / 3 blocks; subset would be 2. The builder

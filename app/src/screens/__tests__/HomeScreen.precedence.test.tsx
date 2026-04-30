@@ -154,8 +154,8 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     await seedLastComplete('exec-lc')
     renderHome()
     expect(await screen.findByRole('button', { name: /repeat this session/i })).toBeInTheDocument()
-    // No Today's suggestion (draft) card.
-    expect(screen.queryByText(/today.?s suggestion/i)).not.toBeInTheDocument()
+    // No Session draft card.
+    expect(screen.queryByText(/session draft/i)).not.toBeInTheDocument()
   })
 
   it('draft + last_complete: draft primary, last_complete as secondary row', async () => {
@@ -163,7 +163,7 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     await seedLastComplete('exec-lc')
     renderHome()
 
-    expect(await screen.findByRole('button', { name: /start session/i })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /review session/i })).toBeInTheDocument()
     expect(screen.getByText(/solo \+ open/i)).toBeInTheDocument()
 
     // Secondary row references the last completed preset.
@@ -213,7 +213,7 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     const secondary = screen.getByRole('list', {
       name: /other active actions/i,
     })
-    const draftOpen = screen.getByRole('button', { name: /^open$/i })
+    const draftOpen = screen.getByRole('button', { name: /^review$/i })
     expect(secondary).toContainElement(draftOpen)
 
     await user.click(draftOpen)

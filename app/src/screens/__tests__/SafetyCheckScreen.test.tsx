@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { db } from '../../db'
+import { db, type SetupContext } from '../../db'
 import { buildDraft } from '../../domain/sessionBuilder'
 import { FORBIDDEN_RE } from '../../lib/copyGuard'
 import { saveDraft } from '../../services/session'
@@ -46,7 +46,7 @@ async function clearDb() {
   ])
 }
 
-async function seedDraft() {
+async function seedDraft(contextOverrides: Partial<SetupContext> = {}) {
   // SafetyCheckScreen loads a SessionDraft on mount; without one it
   // redirects to /setup. Seed a minimal draft so the safety copy renders.
   const draft = buildDraft({
@@ -54,6 +54,7 @@ async function seedDraft() {
     timeProfile: 15,
     netAvailable: false,
     wallAvailable: false,
+    ...contextOverrides,
   })
   if (draft) await saveDraft(draft)
 }
@@ -113,6 +114,46 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     })
     const body = document.body.textContent ?? ''
     expect(body, `forbidden word in: ${body}`).not.toMatch(FORBIDDEN_RE)
+  })
+
+  it('renders a disabled Start session anchor before safety answers are complete', async () => {
+    renderScreen()
+    await screen.findByRole('heading', {
+      level: 2,
+      name: /when did you last train/i,
+    })
+
+    expect(screen.getByRole('button', { name: /^start session$/i })).toBeDisabled()
+  })
+
+  it('does not echo the draft or focus in the default safety header', async () => {
+    await clearDb()
+    await seedDraft({ playerMode: 'pair', netAvailable: true, wallAvailable: false, sessionFocus: 'serve' })
+    renderScreen()
+
+    await screen.findByRole('heading', { name: /before we start/i })
+    expect(screen.queryByText(/pair \+ net/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/serving/i)).not.toBeInTheDocument()
+  })
+
+  it('mentions focus only when pain recovery overrides an explicit focus', async () => {
+    const user = userEvent.setup()
+    await clearDb()
+    await seedDraft({ playerMode: 'pair', netAvailable: true, wallAvailable: false, sessionFocus: 'serve' })
+    renderScreen()
+
+    await user.click(await screen.findByRole('button', { name: /^yes$/i }))
+
+    expect(await screen.findByText(/recovery overrides today's focus/i)).toBeInTheDocument()
+  })
+
+  it('does not mention focus on recovery when no explicit focus was chosen', async () => {
+    const user = userEvent.setup()
+    renderScreen()
+
+    await user.click(await screen.findByRole('button', { name: /^yes$/i }))
+
+    expect(screen.queryByText(/recovery overrides today's focus/i)).not.toBeInTheDocument()
   })
 
   it('first-time user (no ExecutionLog history): First time chip renders AND description mentions it', async () => {
@@ -178,7 +219,7 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     expect(headings[1].textContent).toMatch(/any pain.*sharp/i)
   })
 
-  it('primes audio from the Continue tap before routing to Run (iOS beep unlock)', async () => {
+  it('primes audio from the Start session tap before routing to Run (iOS beep unlock)', async () => {
     const user = userEvent.setup()
     const audioContextCtor = vi.fn(function (this: unknown) {
       return {
@@ -202,13 +243,13 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
 
     await user.click(await screen.findByRole('radio', { name: /^today$/i }))
     await user.click(screen.getByRole('button', { name: /^no$/i }))
-    await user.click(screen.getByRole('button', { name: /^continue$/i }))
+    await user.click(screen.getByRole('button', { name: /^start session$/i }))
 
     expect(audioContextCtor).toHaveBeenCalledTimes(1)
     expect(await screen.findByTestId('run-route')).toBeInTheDocument()
   })
 
-  it('requests screen wake lock from the Continue tap before routing to Run (iOS auto-lock guard)', async () => {
+  it('requests screen wake lock from the Start session tap before routing to Run (iOS auto-lock guard)', async () => {
     const user = userEvent.setup()
     const sentinel = {
       released: false,
@@ -238,7 +279,7 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
 
     await user.click(await screen.findByRole('radio', { name: /^today$/i }))
     await user.click(screen.getByRole('button', { name: /^no$/i }))
-    await user.click(screen.getByRole('button', { name: /^continue$/i }))
+    await user.click(screen.getByRole('button', { name: /^start session$/i }))
 
     expect(request).toHaveBeenCalledWith('screen')
     expect(await screen.findByTestId('run-route')).toBeInTheDocument()

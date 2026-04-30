@@ -72,6 +72,7 @@ export function useDrillCheckController(executionLogId: string) {
 
   const [captures, setCaptures] = useState<PerDrillCaptureRecord[]>([])
   const [hydrated, setHydrated] = useState(false)
+  const [inputsHydrated, setInputsHydrated] = useState(false)
   const [difficulty, setDifficulty] = useState<DifficultyTag | null>(null)
   const [captureGood, setCaptureGood] = useState(0)
   const [captureTotal, setCaptureTotal] = useState(0)
@@ -118,13 +119,17 @@ export function useDrillCheckController(executionLogId: string) {
   // own local state slot so the rehydrated value flows back into the
   // right drawer.
   useEffect(() => {
-    if (!hydrated) return
+    if (!hydrated) {
+      setInputsHydrated(false)
+      return
+    }
     if (!captureTarget) {
       setDifficulty(null)
       setCaptureGood(0)
       setCaptureTotal(0)
       setCaptureNotCaptured(false)
       setCaptureStreakLongest(null)
+      setInputsHydrated(true)
       return
     }
     const existing = captures.find((c) => c.blockIndex === prevBlockIdx)
@@ -143,6 +148,7 @@ export function useDrillCheckController(executionLogId: string) {
       setCaptureNotCaptured(false)
       setCaptureStreakLongest(null)
     }
+    setInputsHydrated(true)
     // `captures` deliberately omitted: the merge effect below feeds back
     // into `captures`; including it here would re-clobber the user's edit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -330,6 +336,7 @@ export function useDrillCheckController(executionLogId: string) {
     setCaptureStreakLongest,
     captureSaveError,
     hydrated,
+    inputsHydrated,
     captureSatisfied,
     handleContinue,
     toggleNotCaptured,

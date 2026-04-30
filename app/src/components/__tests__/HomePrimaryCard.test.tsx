@@ -149,7 +149,7 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('draft: renders Today\u2019s suggestion + Start session + Change setup (Phase F Unit 1 rename)', async () => {
+  it('draft: renders Session draft + Review session + Change setup', async () => {
     const user = userEvent.setup()
     const onStart = vi.fn()
     const onEdit = vi.fn()
@@ -158,11 +158,11 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
 
     expect(screen.getByRole('region')).toHaveAttribute(
       'aria-label',
-      expect.stringMatching(/today.?s suggestion|draft/i),
+      expect.stringMatching(/session draft/i),
     )
     expect(screen.getByText(/solo \+ wall/i)).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /start session/i }))
+    await user.click(screen.getByRole('button', { name: /review session/i }))
     expect(onStart).toHaveBeenCalledTimes(1)
 
     // Phase F Unit 1: button text renamed from "Edit" to "Change setup"

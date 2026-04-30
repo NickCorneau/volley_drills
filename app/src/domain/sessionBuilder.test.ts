@@ -209,6 +209,22 @@ describe('sessionBuilder', () => {
     },
   )
 
+  it('explicit serving focus narrows the main-skill slot to serving drills', () => {
+    const draft = buildDraft({
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: true,
+      wallAvailable: false,
+      sessionFocus: 'serve',
+    })
+
+    expect(draft).not.toBeNull()
+    const mainSkill = draft!.blocks.find((b) => b.type === 'main_skill')
+    expect(mainSkill).toBeDefined()
+    const drill = DRILLS.find((d) => d.id === mainSkill!.drillId)
+    expect(drill?.skillFocus).toContain('serve')
+  })
+
   /**
    * 2026-04-27 cca2 dogfeed F6 (`docs/research/2026-04-27-cca2-dogfeed-
    * findings.md`): the `movement_proxy` slot must prefer drills carrying
@@ -709,6 +725,19 @@ describe('sessionBuilder', () => {
     const types = recovery!.blocks.map((b) => b.type)
     expect(types).toEqual(['warmup', 'technique', 'movement_proxy', 'wrap'])
     expect(types.some((t) => t === 'main_skill' || t === 'pressure')).toBe(false)
+  })
+
+  it('buildRecoveryDraft strips explicit session focus', () => {
+    const recovery = buildRecoveryDraft({
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'serve',
+    })
+
+    expect(recovery).not.toBeNull()
+    expect(recovery!.context.sessionFocus).toBeUndefined()
   })
 
   it('buildRecoveryDraft for 15 min includes technique between warmup and wrap', () => {

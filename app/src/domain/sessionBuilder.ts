@@ -53,6 +53,12 @@ export interface BuildDraftOptions {
   readonly assemblySeed?: string
 }
 
+function stripSessionFocus(context: SetupContext): SetupContext {
+  const next: SetupContext = { ...context }
+  delete next.sessionFocus
+  return next
+}
+
 export function buildDraft(
   context: SetupContext,
   options?: BuildDraftOptions,
@@ -160,10 +166,11 @@ export function buildDraft(
  *
  * Contract:
  * - Preserves the original plan's block order.
- * - Carries forward the plan's `context` onto the new draft (R6). If
- *   the plan has no persisted context (legacy v3 records), returns
- *   `null` so the caller can fall back to "Repeat full plan" /
- *   pre-filled Setup.
+ * - Carries forward the plan's `context` onto the new draft (R6),
+ *   including `sessionFocus` per the 2026-04-30 focus policy: a
+ *   repeat means same conditions, focus included. If the plan has no
+ *   persisted context (legacy v3 records), returns `null` so the
+ *   caller can fall back to "Repeat full plan" / pre-filled Setup.
  * - Returns `null` when zero blocks are completed - the ended-early
  *   typical case has at least a warmup, but this is defensive; the
  *   caller should hide the secondary button in that case.
@@ -173,6 +180,10 @@ export function buildDraft(
  * - `drillId` / `variantId` are preserved when the plan carries them;
  *   legacy plans fall back to empty strings so the draft shape remains
  *   valid without guessing catalog identity from display names.
+ *
+ * Note: pain-recovery rebuild (`buildRecoveryDraft` below) DOES strip
+ * focus — recovery overrides today's focus. Don't reuse this function
+ * for that path.
  */
 export function buildDraftFromCompletedBlocks(
   log: ExecutionLog,
@@ -274,12 +285,13 @@ export function estimateRecoverySessionMinutes(context: SetupContext): number | 
  * warmup, technique, movement proxy (when the template has one), and wrap.
  */
 export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
-  const archetype = selectArchetype(context)
+  const recoveryContext = stripSessionFocus(context)
+  const archetype = selectArchetype(recoveryContext)
   if (!archetype) return null
   const assemblySeed = createAssemblySeed()
   const random = createSeededRandom(assemblySeed)
 
-  const layout = archetype.layouts[context.timeProfile]
+  const layout = archetype.layouts[recoveryContext.timeProfile]
   if (!layout) return null
 
   const recoveryLayout = layout.filter((s) => RECOVERY_BLOCK_SLOT_TYPES.includes(s.type))
@@ -289,7 +301,7 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
   // have claimed in a full session fold into the Work block via
   // `allocateRecoveryDurations` - see that function's JSDoc for why
   // the Work block can legally exceed its full-session max here.
-  const durations = allocateRecoveryDurations(recoveryLayout, context.timeProfile)
+  const durations = allocateRecoveryDurations(recoveryLayout, recoveryContext.timeProfile)
   if (!durations) return null
 
   const usedDrillIds = new Set<string>()
@@ -298,7 +310,7 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
 
   for (let i = 0; i < recoveryLayout.length; i++) {
     const slot = recoveryLayout[i]
-    const pick = pickForSlot(slot, context, usedDrillIds, random)
+    const pick = pickForSlot(slot, recoveryContext, usedDrillIds, random)
     if (!pick) continue
 
     usedDrillIds.add(pick.drill.id)
@@ -318,7 +330,7 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
       courtsideInstructions: pick.variant.courtsideInstructions,
       courtsideInstructionsBonus: pick.variant.courtsideInstructionsBonus,
       required: slot.required,
-      rationale: deriveBlockRationale(slot.type, pick.drill, context),
+      rationale: deriveBlockRationale(slot.type, pick.drill, recoveryContext),
       subBlockIntervalSeconds: pick.variant.subBlockIntervalSeconds,
       segments: pick.variant.segments,
     })
@@ -328,7 +340,7 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
 
   return {
     id: 'current',
-    context,
+    context: recoveryContext,
     archetypeId: archetype.id,
     archetypeName: archetype.name,
     assemblySeed,

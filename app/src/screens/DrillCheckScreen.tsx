@@ -54,6 +54,7 @@ export function DrillCheckScreen() {
     setCaptureStreakLongest,
     captureSaveError,
     hydrated,
+    inputsHydrated,
     captureSatisfied,
     handleContinue,
     toggleNotCaptured,
@@ -87,9 +88,9 @@ export function DrillCheckScreen() {
   }
 
   // The capture UI must not accept taps before draft hydration has
-  // mirrored existing rows into local state; otherwise a slow IndexedDB
-  // read could clobber the first chip tap.
-  if (!hydrated) {
+  // mirrored existing rows into local state; otherwise the mirror
+  // effect can clobber the first chip tap and drop the row.
+  if (!hydrated || !inputsHydrated) {
     return <StatusMessage variant="loading" />
   }
 

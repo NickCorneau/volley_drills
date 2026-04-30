@@ -1,31 +1,31 @@
 ---
-
-## id: what-to-add-next-2026-04-28
-
+id: what-to-add-next-2026-04-28
 title: "Ideation: what to add next (2026-04-28)"
 type: ideation
 status: active
 stage: validation
 authority: "Ranked ideation artifact for the post-Tier-1b-Layer-A 'what's next' question. Identifies the strongest directions worth exploring under the current evidence base, the active D130 founder-use mode (2026-04-20 → 2026-07-20), the 4/10 Tier 1b authoring-budget cap consumption, and the D134 falsification gate read on 2026-05-12. Does not author requirements; ce-brainstorm picks one survivor and defines it."
-summary: "13 candidate clusters generated across 6 ideation frames; 5 survive the evidence-gating critique. None of the top survivors consume the drill-authoring cap — the unmet needs are infrastructure (audio reliability), evidence (ledger + walkthrough), prepay (Tier 1c architecture), and maintenance (m001Candidate:false retirement). Author solo movement-tagged drill (F7) and Tier-1c-lite explicitly rejected as substitution-class moves."
-last_updated: 2026-04-28
+summary: "Original 2026-04-28 ideation plus 2026-04-29 refresh. D135 superseded the pre-D135 Tier 1c-prepay reading: Tier 1c focus picker and skill-level mutability are triggered live implementation, while the catalog reserve audit remains the clean first chunk. Current sequence: catalog reserve audit -> Tier 1c focus picker -> skill-level override -> evidence loop. The 2026-04-29 focus-picker deepening selected the draft-surface decision as the first focus-picker brainstorm target."
+last_updated: 2026-04-29
 related:
-
-- docs/research/founder-use-ledger.md
-- docs/research/2026-04-27-cca2-dogfeed-findings.md
-- docs/research/2026-04-28-build17-pair-dogfeed-feedback.md
-- docs/reviews/2026-04-22-drill-level-audit.md
-- docs/plans/2026-04-22-tier1b-serving-setting-expansion.md
-- docs/plans/2026-04-20-m001-tier1-implementation.md
-- docs/plans/2026-04-20-m001-adversarial-memo.md
-- docs/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md
-- docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md
+  - docs/research/founder-use-ledger.md
+  - docs/research/2026-04-27-cca2-dogfeed-findings.md
+  - docs/research/2026-04-28-build17-pair-dogfeed-feedback.md
+  - docs/reviews/2026-04-22-drill-level-audit.md
+  - docs/plans/2026-04-22-tier1b-serving-setting-expansion.md
+  - docs/plans/2026-04-20-m001-tier1-implementation.md
+  - docs/plans/2026-04-20-m001-adversarial-memo.md
+  - docs/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md
+  - docs/plans/2026-04-28-tier-1c-prepay-and-catalog-audit.md
+  - docs/brainstorms/2026-04-29-session-focus-picker-requirements.md
+  - docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md
 decision_refs:
-- D91
-- D130
-- D131
-- D133
-- D134
+  - D91
+  - D130
+  - D131
+  - D133
+  - D134
+  - D135
 
 # Ideation: what to add next (2026-04-28)
 
@@ -39,6 +39,42 @@ This artifact was anchored on the **pre-D135** reading of the canon. Later the s
 - **Survivors S2, S3, S5** — unaffected by D135 and remain valid as authored.
 
 The post-D135 implementation plan that absorbed S4 + skill-level mutability + S5 is `docs/plans/2026-04-28-tier-1c-prepay-and-catalog-audit.md` (rewritten 2026-04-28 to reflect the trigger fire). The pre-D135 critique below is preserved for historical context — it is correct against the snapshot it read, not against the current canon.
+
+## Refresh note (2026-04-29, post-D135 synthesis)
+
+A fresh six-frame ideation pass on 2026-04-29 cross-checked this artifact against `D135`, the active plan, the founder-use ledger, and external prior art on low-friction training controls. The result did **not** create a new direction; it converged on the active post-D135 bundle and clarified the immediate sequence:
+
+1. **Catalog reserve audit first.** This is the clean next chunk: Stream 3 of `docs/plans/2026-04-28-tier-1c-prepay-and-catalog-audit.md`, producing the `m001Candidate:false` verdict table, applying retire-only changes if any, and adding the `drills.ts` pointer. It is zero-cap, low-risk, and removes catalog ambiguity before focus routing exposes more inventory paths.
+2. **Tier 1c focus picker second.** This is the most obvious product-visible chunk because the D135 trigger fired; it should land as draft-screen focus steering with `sessionFocus`-based routing and swap parity, not as a SetupScreen form.
+3. **Skill-level override third.** This follows the same optional-context pattern after focus is established: per-session `skillLevelOverride`, soft tuning only, no persistent onboarding mutation, no hard level filter.
+4. **Evidence loop after the ship.** Founder/Seb sessions should deliberately exercise focus choice, skill override, eligible streak drills, and iPhone PWA pacing boundaries so D130/D134/D135 reads have real signal.
+
+The pass also reaffirmed the main rejection lines: no new drill authoring without a fresh trigger; no per-drill capture Phase 2B while D134 is gated; no SetupScreen focus/level controls; no hard skill-level filtering; no broad audio rewrite when the remaining failures are platform boundaries; no M002 work while this M001/D130 triggered bundle remains open.
+
+## Deepening note (2026-04-29): session focus picker
+
+A focused six-frame pass on the Tier 1c/session focus picker preserved the existing sequence above but sharpened the first focus-picker question. The strongest finding is that the implementation plan says "draft screen," while the current app route graph has no dedicated draft-review route: `SetupScreen` builds a draft and routes to `/safety`; Home has `DraftCard`; `SafetyCheckScreen` renders only a one-line draft summary. Before button shape, copy, or tests are specified, the requirements need to decide what "draft screen" means in the shipped app.
+
+### Ranked survivors from the focused pass
+
+1. **Decide the draft surface first** - selected for `ce-brainstorm`. Requirements should first choose whether Home `DraftCard` becomes the draft-review surface or whether a new pre-safety "Tune today" step is introduced.
+2. **"Tune today" as a real draft review step** - current brainstorm default. A new pre-safety review/tuning surface keeps the fresh Setup -> recommendation -> Safety flow honest, can hold Focus now and Level later, and avoids routing a newly built draft back to Home.
+3. **Home `DraftCard` as the draft review** - challenger option. It is the strongest no-new-route shape for existing saved drafts, but Home-only misses the primary fresh-build path unless `SetupScreen` routes back to Home after building.
+4. **Recommended vs today's focus vocabulary** - `Recommended` stays visible as the default while explicit focus choices read as today-only intent, not a persistent profile change.
+5. **Shared focus resolver** - one domain decision for effective focus tags so `pickForSlot` and `findSwapAlternatives` cannot drift.
+6. **Regenerate, do not patch** - focus changes rebuild the draft from context and keep the previous draft visible if regeneration fails.
+7. **Focus feasibility contract** - decide whether impossible focus choices are hidden/disabled or allowed with an explicit "can't build that today" message.
+
+### Focus-picker rejections
+
+- **SetupScreen focus picker** - rejected as the known formification failure `P11` and the 2026-04-20 red-team review already stopped.
+- **Editable Safety focus** - rejected because Safety should stay about pain, recency, heat, and readiness, with at most a read-only session echo.
+- **Silent recommended default** - rejected as too undiscoverable for a D135-fired user ask.
+- **Swap-first focus emergence** - rejected because the triggered ask is to choose intent up front, not infer intent after a drill swap.
+- **Pressure-only override** - rejected as under-delivering on "serving/passing/setting today."
+- **Persistent last-used focus** - rejected as out of scope for this chunk; no Dexie migration or profile mutation.
+- **Rich block preview / ten-x polish** - rejected until a simple focus control proves value.
+- **Minimal text link** - rejected as too low-signal for the first product-visible Tier 1c ship.
 
 ## Purpose
 
@@ -153,12 +189,14 @@ The cap discipline asks: did the ideation surface a clever way to ship drill-sha
 
 ## Handoff
 
-ce-brainstorm picks one survivor and produces a requirements doc in `docs/brainstorms/`. Recommended starting candidates:
+ce-brainstorm picks one survivor and produces or updates a requirements doc in `docs/brainstorms/`.
 
-- **S1** if the next ship is code (highest-fired evidence; unblocks the audio-pacing surface)
-- **S2 + S3** if the next move is operational (binds the 2026-05-12 falsification read; updates Condition 3)
-- **S4** if the next ship is design-debt prepay (cheap, no UX risk)
-- **S5** if the next ship is maintenance hygiene (cleanup, low-risk)
+Current recommended sequence after the 2026-04-29 refresh:
+
+1. **S5 / Stream 3 — catalog reserve audit.** Start here. This is the #1 brainstorm target and the first implementation chunk in the active plan.
+2. **S4 rewritten by D135 — Tier 1c focus picker.** Ship as live draft-screen implementation, not spec-only prepay.
+3. **Skill-level mutability sibling.** Ship as a separate but adjacent draft-screen surface after the focus-picker pattern is established.
+4. **S2 + S3 evidence loop.** Run founder/Seb sessions after the live surfaces exist so the next gate reads real behavior.
 
 After ce-brainstorm produces a requirements doc, ce-plan turns it into an implementation plan in `docs/plans/`.
 

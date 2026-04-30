@@ -38,7 +38,6 @@ describe('TodaysSetupScreen (C-3 wrapper)', () => {
 
     expect(await screen.findByRole('button', { name: /skill level/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 1, name: /today.?s setup/i })).toBeInTheDocument()
-    // Wind row renders as part of the onboarding flow.
-    expect(screen.getByRole('radio', { name: 'Calm' })).toBeInTheDocument()
+    expect(screen.queryByRole('radiogroup', { name: 'Wind' })).not.toBeInTheDocument()
   })
 })

@@ -201,6 +201,19 @@ describe('buildDraftFromCompletedBlocks (C-5 Unit 3)', () => {
     expect(draft!.context.wallAvailable).toBe(true)
   })
 
+  it('carries explicit session focus into rebuilt drafts (2026-04-30 focus policy)', () => {
+    // A repeat means same conditions — focus included. Pain-recovery
+    // (`buildRecoveryDraft`) is the only repeat-shaped path that
+    // strips focus, and it has its own test below.
+    const plan = makePlan([{ id: 'b-1', minutes: 5 }])
+    plan.context = { ...plan.context!, sessionFocus: 'serve' }
+    const log = makeLog(['completed'], ['b-1'])
+
+    const draft = buildDraftFromCompletedBlocks(log, plan)
+
+    expect(draft?.context.sessionFocus).toBe('serve')
+  })
+
   /**
    * Phase 2.4 regression guard: build-time substitution lives only on
    * `buildDraft` (Phase 2.2). `buildDraftFromCompletedBlocks` is

@@ -60,7 +60,6 @@ export type {
   SessionArchetype,
   SetupContext,
   TimeProfile,
-  WindLevel,
 } from '../types/session'
 export { PassGrade, toBinary } from '../types/session'
 export type {

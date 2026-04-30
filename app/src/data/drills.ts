@@ -7,6 +7,7 @@
  * M001 minimum set (Tier 1a): d01, d03, d05, d09, d10, d11, d15, d18, d22,
  * d25, d26 (the pre-Tier-1a core), plus d28 (warmup) and d38/d39/d41
  * (setting probe, Swap-only). Full pack ships post-validation (D81).
+ * Reserve drill verdicts: docs/reviews/2026-04-28-m001-candidate-false-audit.md.
  *
  * Content status: needs expert coach review before treating as canonical
  * (set-window geometry, progression dosing, technique cue legality, heat
@@ -37,7 +38,6 @@ const env = (
     needsWall: boolean
     needsLines: boolean
     needsCones: boolean
-    windFriendly: boolean
     lowScreenTime: boolean
   }> = {},
 ) => ({
@@ -45,7 +45,6 @@ const env = (
   needsWall: false,
   needsLines: false,
   needsCones: false,
-  windFriendly: false,
   lowScreenTime: false,
   ...overrides,
 })
@@ -79,7 +78,7 @@ const d01: Drill = {
       label: 'Solo',
       feedType: 'self-toss',
       participants: { min: 1, ideal: 1, max: 1 },
-      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 1 },
       workload: {
         durationMinMinutes: 2,
@@ -112,7 +111,7 @@ const d01: Drill = {
       label: 'Pair',
       feedType: 'partner-toss',
       participants: { min: 2, ideal: 2, max: 2, roles: ['tosser', 'passer'] },
-      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 1 },
       workload: {
         durationMinMinutes: 3,
@@ -163,7 +162,7 @@ const d02: Drill = {
       label: 'Pair',
       feedType: 'partner-toss',
       participants: { min: 2, ideal: 2, max: 2, roles: ['passer', 'tosser'] },
-      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 1, towel: true, markers: true },
       workload: {
         durationMinMinutes: 3,
@@ -263,7 +262,7 @@ const d04: Drill = {
       label: 'Pair',
       feedType: 'partner-toss',
       participants: { min: 2, ideal: 2, max: 2, roles: ['passer', 'feeder'] },
-      environmentFlags: env({ needsNet: true, windFriendly: true }),
+      environmentFlags: env({ needsNet: true }),
       equipment: { balls: 3, markers: true },
       workload: {
         durationMinMinutes: 4,
@@ -291,7 +290,7 @@ const d04: Drill = {
       label: 'Solo (self-feed)',
       feedType: 'self-toss',
       participants: { min: 1, ideal: 1, max: 1 },
-      environmentFlags: env({ needsNet: true, windFriendly: true }),
+      environmentFlags: env({ needsNet: true }),
       equipment: { balls: 1, markers: true },
       workload: {
         durationMinMinutes: 4,
@@ -346,7 +345,7 @@ const d05: Drill = {
       label: 'Solo',
       feedType: 'self-toss',
       participants: { min: 1, ideal: 1, max: 1 },
-      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 1, markers: true },
       workload: {
         durationMinMinutes: 4,
@@ -382,7 +381,7 @@ const d05: Drill = {
       label: 'Pair',
       feedType: 'partner-toss',
       participants: { min: 2, ideal: 2, max: 2, roles: ['tosser', 'passer'] },
-      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 1, markers: true },
       workload: {
         durationMinMinutes: 4,
@@ -432,7 +431,7 @@ const d06: Drill = {
       label: 'Solo',
       feedType: 'self-toss',
       participants: { min: 1, ideal: 1, max: 1 },
-      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 1, markers: true },
       workload: {
         durationMinMinutes: 3,
@@ -1107,7 +1106,7 @@ const d18: Drill = {
         max: 2,
         roles: ['server', 'passer'],
       },
-      environmentFlags: env({ needsNet: true, windFriendly: true }),
+      environmentFlags: env({ needsNet: true }),
       equipment: { balls: 5, markers: true },
       workload: {
         durationMinMinutes: 8,
@@ -1309,7 +1308,6 @@ const d22: Drill = {
       participants: { min: 1, ideal: 1, max: 1 },
       environmentFlags: env({
         needsNet: true,
-        windFriendly: true,
         lowScreenTime: true,
       }),
       equipment: { balls: 'many' },
@@ -1346,7 +1344,6 @@ const d22: Drill = {
       participants: { min: 2, ideal: 2, max: 2, roles: ['server', 'server'] },
       environmentFlags: env({
         needsNet: true,
-        windFriendly: true,
         lowScreenTime: true,
       }),
       equipment: { balls: 'many' },
@@ -1450,7 +1447,7 @@ const d31: Drill = {
       label: 'Solo open target',
       feedType: 'self-toss',
       participants: { min: 1, ideal: 1, max: 1 },
-      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 1, markers: true },
       workload: {
         durationMinMinutes: 4,
@@ -1486,7 +1483,7 @@ const d31: Drill = {
       label: 'Pair',
       feedType: 'self-toss',
       participants: { min: 2, ideal: 2, max: 2, roles: ['server', 'shagger'] },
-      environmentFlags: env({ needsNet: true, windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ needsNet: true, lowScreenTime: true }),
       equipment: { balls: 1, markers: true },
       workload: {
         durationMinMinutes: 4,
@@ -1547,7 +1544,6 @@ const d33: Drill = {
       participants: { min: 1, ideal: 1, max: 1 },
       environmentFlags: env({
         needsNet: true,
-        windFriendly: true,
         lowScreenTime: true,
       }),
       equipment: { balls: 1, markers: true },
@@ -1585,7 +1581,6 @@ const d33: Drill = {
       participants: { min: 2, ideal: 2, max: 2, roles: ['server', 'shagger'] },
       environmentFlags: env({
         needsNet: true,
-        windFriendly: true,
         lowScreenTime: true,
       }),
       // 2026-04-27 solo-vs-pair sweep: balls = 1 (not 'many') to stay
@@ -1994,7 +1989,7 @@ const d38: Drill = {
       label: 'Solo',
       feedType: 'self-toss',
       participants: { min: 1, ideal: 1, max: 1 },
-      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 1 },
       workload: {
         durationMinMinutes: 5,
@@ -2028,7 +2023,7 @@ const d38: Drill = {
       label: 'Pair',
       feedType: 'partner-toss',
       participants: { min: 2, ideal: 2, max: 2, roles: ['tosser', 'setter'] },
-      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 1 },
       workload: {
         durationMinMinutes: 4,
@@ -2084,7 +2079,7 @@ const d39: Drill = {
       label: 'Solo',
       feedType: 'self-toss',
       participants: { min: 1, ideal: 1, max: 1 },
-      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 1 },
       workload: {
         durationMinMinutes: 5,
@@ -2118,7 +2113,7 @@ const d39: Drill = {
       label: 'Pair',
       feedType: 'partner-toss',
       participants: { min: 2, ideal: 2, max: 2, roles: ['tosser', 'setter'] },
-      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 1 },
       workload: {
         durationMinMinutes: 4,
@@ -2169,7 +2164,7 @@ const d40: Drill = {
       label: 'Solo',
       feedType: 'self-toss',
       participants: { min: 1, ideal: 1, max: 1 },
-      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 1, markers: true },
       workload: {
         durationMinMinutes: 5,
@@ -2198,7 +2193,7 @@ const d40: Drill = {
       label: 'Pair',
       feedType: 'partner-toss',
       participants: { min: 2, ideal: 2, max: 2, roles: ['tosser', 'setter'] },
-      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 1, markers: true },
       workload: {
         durationMinMinutes: 5,
@@ -2251,7 +2246,7 @@ const d41: Drill = {
       label: 'Pair',
       feedType: 'partner-toss',
       participants: { min: 2, ideal: 2, max: 2 },
-      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 1 },
       workload: {
         durationMinMinutes: 4,
@@ -2303,7 +2298,7 @@ const d42: Drill = {
       label: 'Pair',
       feedType: 'partner-toss',
       participants: { min: 2, ideal: 2, max: 2 },
-      environmentFlags: env({ windFriendly: true, lowScreenTime: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 1, markers: true },
       workload: {
         durationMinMinutes: 5,
@@ -2380,7 +2375,7 @@ const d28: Drill = {
       label: 'Any',
       feedType: 'self-toss',
       participants: { min: 1, ideal: 1, max: 14 },
-      environmentFlags: env({ lowScreenTime: true, windFriendly: true }),
+      environmentFlags: env({ lowScreenTime: true }),
       equipment: { balls: 0 },
       workload: {
         durationMinMinutes: 3,

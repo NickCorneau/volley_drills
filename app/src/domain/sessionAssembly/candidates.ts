@@ -1,6 +1,7 @@
 import { DRILLS } from '../../data/drills'
 import type { BlockSlot, DrillVariant, SetupContext } from '../../model'
 import type { SelectionCandidate } from '../drillSelection'
+import { effectiveSkillTags } from './effectiveFocus'
 import type { RandomSource } from './random'
 import { shuffle } from './random'
 
@@ -19,14 +20,13 @@ export function hasUnmodeledRequirements(variant: DrillVariant): boolean {
 export function findCandidates(slot: BlockSlot, context: SetupContext): CandidateVariant[] {
   const playerCount = context.playerMode === 'solo' ? 1 : 2
   const candidates: CandidateVariant[] = []
+  const skillTags = effectiveSkillTags(slot.type, context, slot.skillTags)
 
   for (const drill of DRILLS) {
     if (!drill.m001Candidate) continue
 
     const hasMatchingFocus =
-      !slot.skillTags ||
-      slot.skillTags.length === 0 ||
-      slot.skillTags.some((tag) => drill.skillFocus.includes(tag))
+      !skillTags || skillTags.length === 0 || skillTags.some((tag) => drill.skillFocus.includes(tag))
     if (!hasMatchingFocus) continue
 
     for (const variant of drill.variants) {

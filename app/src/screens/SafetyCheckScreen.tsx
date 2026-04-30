@@ -137,10 +137,6 @@ export function SafetyCheckScreen() {
 
   const recoveryMinutes = draft?.context ? (estimateRecoverySessionMinutes(draft.context) ?? 0) : 0
 
-  const sessionSummary = draft
-    ? `${draft.archetypeName} \u00b7 ${draft.blocks.reduce((s, b) => s + b.durationMinutes, 0)} min, ${draft.blocks.length} blocks`
-    : ''
-
   const canContinue = painFlag === false && recencyChosen
 
   async function handleCreateSession(useRecovery: boolean, painOverridden: boolean) {
@@ -149,7 +145,7 @@ export function SafetyCheckScreen() {
     if (!draft) return
     // iOS Safari/PWA only unlocks Web Audio from a real user gesture.
     // RunScreen's preroll starts after routing/effect timing, so prime
-    // the shared AudioContext here while the Continue tap is still the
+    // the shared AudioContext here while the Start session tap is still the
     // active gesture. No audible tone is scheduled.
     primeAudioForGesture()
     primeScreenWakeLockForGesture()
@@ -212,12 +208,13 @@ export function SafetyCheckScreen() {
       {/*
         2026-04-22 iPhone-viewport layout pass: Safety check became
         taller once the heat-expander, pain-override card, and recency
-        sub-row shipped — on a 390 × 844 iPhone the Continue button
-        regularly dropped below the fold. Pin Continue to the footer
-        when `painFlag === false` so the happy path CTA is always in
-        thumb reach; hide the footer when `painFlag !== false` because
-        the `PainOverrideCard` in the body owns the CTAs in that
-        state.
+        sub-row shipped — on a 390 × 844 iPhone the Start session button
+        regularly dropped below the fold. Pin Start session to the footer
+        whenever the pain override is not active so the screen has a
+        visible end point while incomplete and the happy-path CTA stays
+        in thumb reach. Hide the footer only when `painFlag === true`
+        because the `PainOverrideCard` in the body owns the CTAs in
+        that state.
       */}
       <ScreenShell.Header className="pt-2 pb-3">
         {/**
@@ -225,7 +222,7 @@ export function SafetyCheckScreen() {
          * SetupScreen so the "tap to escape" affordance lives in the same
          * thumb zone across the pre-run flow. Leaving SafetyCheck does
          * NOT mutate the persisted draft - SafetyCheckScreen only reads
-         * the draft and writes safety answers inline on Continue - so a
+         * the draft and writes safety answers inline on Start session - so a
          * Back tap returns the user to Home with their draft intact
          * (surfaces there as the Draft primary card per C-4 Surface 2).
          */}
@@ -236,9 +233,6 @@ export function SafetyCheckScreen() {
           </h1>
           <div className="w-12" />
         </div>
-        {sessionSummary && (
-          <p className="mt-1 text-center text-sm font-medium text-accent">{sessionSummary}</p>
-        )}
       </ScreenShell.Header>
 
       <ScreenShell.Body className="gap-6 pb-4">
@@ -359,13 +353,20 @@ export function SafetyCheckScreen() {
         </section>
 
         {painFlag === true && (
-          <PainOverrideCard
-            recoveryMinutes={recoveryMinutes}
-            disabled={isCreating}
-            canAct={recencyChosen}
-            onContinueRecovery={() => void handleCreateSession(true, false)}
-            onOverride={() => void handleCreateSession(false, true)}
-          />
+          <div className="flex flex-col gap-2">
+            {draft.context.sessionFocus && (
+              <p className="text-xs leading-relaxed text-text-secondary">
+                Recovery overrides today&apos;s focus.
+              </p>
+            )}
+            <PainOverrideCard
+              recoveryMinutes={recoveryMinutes}
+              disabled={isCreating}
+              canAct={recencyChosen}
+              onContinueRecovery={() => void handleCreateSession(true, false)}
+              onOverride={() => void handleCreateSession(false, true)}
+            />
+          </div>
         )}
 
         <section>
@@ -451,7 +452,7 @@ export function SafetyCheckScreen() {
         {createError && <StatusMessage variant="error" message={createError} />}
       </ScreenShell.Body>
 
-      {painFlag === false && (
+      {painFlag !== true && (
         <ScreenShell.Footer className="flex flex-col gap-3 pt-4">
           <Button
             variant="primary"
@@ -459,7 +460,7 @@ export function SafetyCheckScreen() {
             onClick={() => void handleCreateSession(false, false)}
             disabled={!canContinue || isCreating}
           >
-            {isCreating ? 'Creating session\u2026' : 'Continue'}
+            {isCreating ? 'Starting session\u2026' : 'Start session'}
           </Button>
         </ScreenShell.Footer>
       )}

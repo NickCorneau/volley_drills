@@ -36,13 +36,14 @@ describe('SetupScreen (C-3)', () => {
     expect(await screen.findByText('skill-level-route')).toBeInTheDocument()
   })
 
-  it('onboarding: light wind is stored on draft and completes onboarding meta', async () => {
+  it('onboarding: builds without a wind choice and routes to Tune today', async () => {
     const user = userEvent.setup()
     render(
       <MemoryRouter initialEntries={['/onboarding/todays-setup']}>
         <Routes>
           <Route path="/onboarding/todays-setup" element={<SetupScreen isOnboarding />} />
-          <Route path="/safety" element={<div>safety</div>} />
+          <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
+          <Route path="/tune-today" element={<div data-testid="tune-route">tune</div>} />
         </Routes>
       </MemoryRouter>,
     )
@@ -53,55 +54,83 @@ describe('SetupScreen (C-3)', () => {
         name: 'No',
       }),
     )
+    expect(screen.queryByRole('radiogroup', { name: 'Wind' })).not.toBeInTheDocument()
     await user.click(
       within(screen.getByRole('radiogroup', { name: 'Wall available' })).getByRole('radio', {
         name: 'No',
       }),
     )
-    await user.click(screen.getByRole('radio', { name: 'Light wind' }))
     await user.click(screen.getByRole('button', { name: /build session/i }))
 
-    expect(await screen.findByText('safety')).toBeInTheDocument()
+    // Setup must hand off to Tune today — never directly to /safety.
+    expect(await screen.findByTestId('tune-route')).toBeInTheDocument()
+    expect(screen.queryByTestId('safety-route')).not.toBeInTheDocument()
 
     const draft = await db.sessionDrafts.get('current')
-    expect(draft?.context.wind).toBe('light')
+    expect(draft?.context.wallAvailable).toBe(false)
 
     const completed = await db.storageMeta.get('onboarding.completedAt')
     expect(typeof completed?.value).toBe('number')
   })
 
-  it("onboarding: 'Calm' (default) wind is NOT persisted on the draft (keeps context lean)", async () => {
+  it('renders Wall only for Solo with no net', async () => {
     const user = userEvent.setup()
     render(
       <MemoryRouter initialEntries={['/onboarding/todays-setup']}>
         <Routes>
           <Route path="/onboarding/todays-setup" element={<SetupScreen isOnboarding />} />
-          <Route path="/safety" element={<div>safety</div>} />
         </Routes>
       </MemoryRouter>,
     )
 
+    expect(screen.queryByRole('radiogroup', { name: 'Wall available' })).not.toBeInTheDocument()
+
     await user.click(screen.getByRole('radio', { name: 'Solo' }))
+    await user.click(
+      within(screen.getByRole('radiogroup', { name: 'Net available' })).getByRole('radio', {
+        name: 'Yes',
+      }),
+    )
+    expect(screen.queryByRole('radiogroup', { name: 'Wall available' })).not.toBeInTheDocument()
+
     await user.click(
       within(screen.getByRole('radiogroup', { name: 'Net available' })).getByRole('radio', {
         name: 'No',
       }),
     )
+    expect(screen.getByRole('radiogroup', { name: 'Wall available' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('radio', { name: 'Pair' }))
+    expect(screen.queryByRole('radiogroup', { name: 'Wall available' })).not.toBeInTheDocument()
+  })
+
+  it('builds with wallAvailable false when Wall is hidden and routes to Tune today', async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter initialEntries={['/onboarding/todays-setup']}>
+        <Routes>
+          <Route path="/onboarding/todays-setup" element={<SetupScreen isOnboarding />} />
+          <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
+          <Route path="/tune-today" element={<div data-testid="tune-route">tune</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await user.click(screen.getByRole('radio', { name: 'Pair' }))
     await user.click(
-      within(screen.getByRole('radiogroup', { name: 'Wall available' })).getByRole('radio', {
-        name: 'No',
+      within(screen.getByRole('radiogroup', { name: 'Net available' })).getByRole('radio', {
+        name: 'Yes',
       }),
     )
-    // Leave wind on the default "Calm".
+    expect(screen.queryByRole('radiogroup', { name: 'Wall available' })).not.toBeInTheDocument()
+
     await user.click(screen.getByRole('button', { name: /build session/i }))
 
-    expect(await screen.findByText('safety')).toBeInTheDocument()
+    expect(await screen.findByTestId('tune-route')).toBeInTheDocument()
+    expect(screen.queryByTestId('safety-route')).not.toBeInTheDocument()
 
     const draft = await db.sessionDrafts.get('current')
-    // C-0 Key Decision #7: callers handle undefined as 'calm'; don't
-    // materialize the default so reads of legacy v3 records remain
-    // undefined-consistent.
-    expect(draft?.context.wind).toBeUndefined()
+    expect(draft?.context.wallAvailable).toBe(false)
   })
 
   it('2026-04-22 one-tap Repeat cleanup: plain /setup never renders the stale-context banner', async () => {
@@ -216,12 +245,7 @@ describe('SetupScreen (C-3)', () => {
         checked: true,
       }),
     ).toBeInTheDocument()
-    expect(
-      within(screen.getByRole('radiogroup', { name: 'Wall available' })).getByRole('radio', {
-        name: 'No',
-        checked: true,
-      }),
-    ).toBeInTheDocument()
+    expect(screen.queryByRole('radiogroup', { name: 'Wall available' })).not.toBeInTheDocument()
     expect(screen.getByRole('radio', { name: '40 min', checked: true })).toBeInTheDocument()
   })
 
@@ -240,7 +264,8 @@ describe('SetupScreen (C-3)', () => {
       <MemoryRouter initialEntries={['/setup']}>
         <Routes>
           <Route path="/setup" element={<SetupScreen />} />
-          <Route path="/safety" element={<div>safety</div>} />
+          <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
+          <Route path="/tune-today" element={<div data-testid="tune-route">tune</div>} />
         </Routes>
       </MemoryRouter>,
     )
@@ -258,7 +283,8 @@ describe('SetupScreen (C-3)', () => {
     )
     await user.click(screen.getByRole('button', { name: /build session/i }))
 
-    expect(await screen.findByText('safety')).toBeInTheDocument()
+    expect(await screen.findByTestId('tune-route')).toBeInTheDocument()
+    expect(screen.queryByTestId('safety-route')).not.toBeInTheDocument()
 
     // Non-onboarding Build must NOT mutate the sentinel - updatedAt
     // unchanged from the seed, value unchanged.

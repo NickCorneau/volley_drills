@@ -4,9 +4,9 @@ title: "Tier 1c architectural prepay + catalog reserve audit (combined)"
 type: requirements
 status: active
 stage: validation
-authority: "Combined requirements doc for two zero-cap, zero-UX moves selected from `docs/ideation/2026-04-28-what-to-add-next-ideation.md` survivors S4 and S5: (1) promote the Tier 1a implementation plan §'Architectural prerequisites' to a durable spec doc that any future agent can ship from when the strict Tier 1c trigger fires; (2) audit each of the 15 `m001Candidate: false` drills against the D81 post-validation graduation logic and produce a per-drill verdict table (graduate-when, hold-pending-Dxxx, demote, retire). Ships as one PR. Does not author new drill records, does not consume the 4/10 Tier 1b authoring-budget cap, does not ship UX, does not amend D81, D101, O7, or D130."
-summary: "Two-stream scope: Tier 1c spec-only prepay (no code) + reserve-pool audit producing a verdict table (no wholesale deletion). Both streams ship as one PR. Spec-only chosen over live scaffold to honor the repo's anti-substitution discipline; audit-first chosen over delete-all to honor D81's intentional reserve. Skill-level mutability is explicitly out-of-scope and stays a separate surface per the 2026-04-28 founder-use-ledger row."
-last_updated: 2026-04-28
+authority: "Historical combined requirements doc for the pre-D135 Tier 1c prepay + catalog reserve audit brainstorm. Post-D135, the active implementation plan supersedes the Tier 1c spec-only framing; the catalog reserve audit requirements survive and are the current #1 brainstorm target."
+summary: "Historical combined brainstorm plus 2026-04-29 focused refresh. The pre-D135 Tier 1c spec-only requirements are superseded by D135 and the active implementation plan; the catalog reserve audit requirements survive and are now the #1 brainstorm target. Current focused scope: per-drill verdict table for the 15 m001Candidate:false records, retire-only application, audit registration, and drills.ts pointer."
+last_updated: 2026-04-29
 related:
   - docs/ideation/2026-04-28-what-to-add-next-ideation.md
   - docs/plans/2026-04-20-m001-tier1-implementation.md
@@ -22,6 +22,7 @@ decision_refs:
   - D121
   - D130
   - D132
+  - D135
 ---
 
 # Tier 1c architectural prepay + catalog reserve audit
@@ -37,6 +38,91 @@ This brainstorm was anchored on the **pre-D135** reading of the canon and treate
 The K-decisions that survive the rewrite unchanged: K2 (audit-first over delete-all — D81 logic untouched by D135), K4 (3-player drills hold-pending-D101), K6 (Mermaid omit-default — vestigial without a spec doc), K7 (verdict vocabulary, burden-of-proof on retire).
 
 The post-D135 implementation plan is `docs/plans/2026-04-28-tier-1c-prepay-and-catalog-audit.md` (rewritten same day). The pre-D135 requirements R1–R17 below are preserved for historical context — they describe the correct shape under the snapshot they read; the implementation plan's R1–R24 supersede them under the current canon.
+
+## Focused refresh (2026-04-29): #1 catalog reserve audit
+
+The 2026-04-29 ideation refresh selected the catalog reserve audit as the next obvious chunk. This section is the active brainstorm output for **#1**. It narrows the surviving part of this combined brainstorm into a standalone requirements brief while preserving the historical pre-D135 body below for provenance.
+
+### Problem Frame
+
+The 15 `m001Candidate:false` drills are intentional reserve inventory under `D81`, but their current state is opaque. Future agents can see that they are inactive, but not why each drill is parked, what evidence would graduate it, whether it is blocked by `D101` / M002 / equipment reachability, or whether any record should actually retire.
+
+The right next chunk is not new drill authoring and not live UX. It is a durable audit that converts reserve inventory into explicit option value.
+
+### Actors
+
+- A1. Future implementation agent: needs a clear per-drill verdict before editing catalog records.
+- A2. Founder / product owner: needs to know which reserve drills still represent useful future scope and which should be removed.
+- A3. Future drill-level auditor: needs stable provenance to avoid re-litigating the same 15 records.
+- A4. Cold repo reader: needs `app/src/data/drills.ts` to point at the audit rather than making the reserve look accidental.
+
+### Requirements
+
+**Audit artifact**
+- R1. A durable audit doc exists at `docs/reviews/2026-04-28-m001-candidate-false-audit.md`.
+- R2. The audit covers all 15 `m001Candidate:false` records: `d02`, `d04`, `d06`, `d07`, `d08`, `d12`, `d13`, `d14`, `d16`, `d17`, `d19`, `d20`, `d21`, `d23`, `d24`.
+- R3. Each row records drill id, name, chain or grouping, `levelMin -> levelMax`, primary `skillFocus`, source citation or citation gap, equipment / participant dependency, verdict, and short rationale.
+- R4. Verdict vocabulary is closed to four shapes: `graduate-when: <condition>`, `hold-pending-<Dxxx-or-milestone>`, `demote-to-archive`, and `retire`.
+
+**Verdict policy**
+- R5. `retire` carries the highest burden of proof: written rationale plus verified zero references outside the retired record and its deliberate audit mentions.
+- R6. `demote-to-archive`, `hold-pending-*`, and `graduate-when:*` do not change `app/src/data/drills.ts` in this chunk.
+- R7. Three-player drills (`d08`, `d14`, `d20`) default to `hold-pending-D101` unless the audit finds a separate retirement reason.
+- R8. Group drills (`d19`, `d20`, `d21`) default to a milestone-gated hold such as `hold-pending-M002` absent stronger evidence.
+- R9. Wall and net-dependent records, especially `d23` and `d24`, are evaluated against actual archetype reachability rather than treated as generically unavailable.
+
+**Application and routing**
+- R10. Retire verdicts, if any, are the only verdicts applied in this implementation chunk.
+- R11. `app/src/data/drills.ts` gains a concise header pointer to the audit doc so future readers find the verdict table from the catalog file.
+- R12. `docs/catalog.json` registers the audit doc in the same pass.
+- R13. No new drill records are authored and the Tier 1b authoring cap remains 4/10 consumed.
+
+### Acceptance Examples
+
+- AE1. **Covers R1-R4.** A future agent opens the audit and can account for every `m001Candidate:false` record without reading the full historical brainstorm.
+- AE2. **Covers R5-R6, R10.** If a drill has a `graduate-when` or `hold-pending-*` verdict, the catalog record stays in place even if it is not currently assembled into sessions.
+- AE3. **Covers R7.** A 3-player source-geometry drill is not deleted merely because M001 currently lacks 3+ player support; it is held behind `D101`.
+- AE4. **Covers R11.** A cold reader of `app/src/data/drills.ts` finds the audit pointer before trying to infer reserve policy from the boolean flag alone.
+
+### Success Criteria
+
+- Every reserve drill has a specific, reviewable verdict and rationale.
+- No active M001 behavior changes unless a `retire` verdict is both justified and reference-checked.
+- Future planning can start from the audit table instead of re-deriving reserve policy.
+- The audit reinforces D130 cap discipline by preserving parked option value without activating new content.
+
+### Scope Boundaries
+
+- No new drill records.
+- No activation of non-M001 drills except a justified `retire` removal.
+- No Tier 1c focus-picker implementation.
+- No skill-level mutability implementation.
+- No hard level filtering.
+- No Dexie migration, telemetry, or session-data export changes.
+- No broad archive/demotion PR unless a separate follow-up explicitly selects that work.
+
+### Key Decisions
+
+- **KD1. Audit first, not delete first.** `D81` makes reserve inventory intentional; deletion requires a stronger burden of proof than inactivity.
+- **KD2. Retire-only application.** Applying every verdict would turn an audit into a behavior-changing catalog project; only retire verdicts are safe to apply immediately.
+- **KD3. Hold real future gates.** Three-player and group drills should be held behind `D101` / M002-style gates when the source geometry is still valid.
+- **KD4. Keep #1 independent.** The catalog audit should remain separately shippable before Tier 1c focus picker and skill-level mutability.
+
+### Outstanding Questions
+
+#### Resolve Before Planning
+
+- None.
+
+#### Deferred to Planning
+
+- Which, if any, of the 15 records meet the `retire` bar.
+- Whether any `retire` candidate has references in `app/src/` that require downgrading the verdict.
+- Whether a `demote-to-archive` verdict should become a separate follow-up PR and where archived provenance should live.
+
+### Next Steps
+
+-> `/ce-plan` for structured implementation planning of the catalog reserve audit.
 
 ## Problem Frame
 

@@ -28,7 +28,6 @@ const defaultContext: SetupContext = {
   timeProfile: 25,
   netAvailable: true,
   wallAvailable: false,
-  wind: 'calm',
 }
 
 const DEFAULT_BLOCK_ID = 'block-main'

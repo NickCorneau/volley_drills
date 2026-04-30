@@ -50,13 +50,6 @@ export type TimeProfile = 15 | 25 | 40
 export type PlayerMode = 'solo' | 'pair'
 
 /**
- * Wind level captured on Today's Setup (C-3 / D93). Optional on
- * `SetupContext` because v3 records pre-date the field; consumers treat
- * `undefined` as `'calm'` per C-0 Key Decision #7.
- */
-export type WindLevel = 'calm' | 'light' | 'strong'
-
-/**
  * Hard-filter context captured before session assembly, persisted on
  * `SessionPlan` and `SessionDraft`. Tap-based inputs only - no typing.
  *
@@ -70,7 +63,7 @@ export interface SetupContext {
   timeProfile: TimeProfile
   netAvailable: boolean
   wallAvailable: boolean
-  wind?: WindLevel
+  sessionFocus?: Extract<SkillFocus, 'pass' | 'serve' | 'set'>
 }
 
 export interface BlockSlot {

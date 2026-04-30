@@ -43,6 +43,13 @@ export const SCREEN_CONTRACTS: Record<RouteKey, ScreenContract> = {
     signal: 'A live preview of the planned blocks for the chosen profile.',
     reason: 'Confidence that the next 25 / 45 minutes will be productive before tapping Start.',
   }),
+  tuneToday: defineScreenContract({
+    route: '/tune-today',
+    screen: 'TuneToday',
+    action: 'Confirm or steer today\'s focus before the safety check.',
+    signal: 'A focal recommendation card and selected focus chip for this session only.',
+    reason: 'Lets the user keep the recommendation or steer the main work without turning Setup into a planner.',
+  }),
   safety: defineScreenContract({
     route: '/safety',
     screen: 'SafetyCheck',

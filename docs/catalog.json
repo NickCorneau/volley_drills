@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
   "repo_id": "volley_drills",
-  "last_updated": "2026-04-28",
+  "last_updated": "2026-04-30",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -316,6 +316,13 @@
       "type": "design-review",
       "status": "active",
       "canonical_for": "point-in-time UX baseline of the v0b Starter Loop after the 2026-04-22 partner-walkthrough polish and the 2026-04-23 walkthrough-closeout polish; classifies findings as editorial-class, founder-session-trigger-gated Tier 1b, D91-field, or decision-blocked; does not unlock Tier 1b and does not modify D86, D91, D119, D125, D129, D130, or D132"
+    },
+    {
+      "id": "m001-candidate-false-audit-2026-04-28",
+      "path": "docs/reviews/2026-04-28-m001-candidate-false-audit.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Per-drill verdict table for the 15 inactive `m001Candidate:false` reserve records in `app/src/data/drills.ts`. Records source / dependency / reachability / reference state, keeps all records parked behind `graduate-when`, `hold-pending-D101`, or `hold-pending-M002` verdicts, and applies no retire removals."
     },
     {
       "id": "M001",
@@ -747,6 +754,83 @@
       "type": "plan",
       "status": "complete",
       "canonical_for": "Spec-gap fix that re-aligned the per-drill capture surface (`DrillCheckScreen` + `PerDrillCapture`) with `docs/specs/m001-review-micro-spec.md` §Required (V0B-28 forced-criterion prompt, D104 layer-1 self-scoring bias correction). **Shipped 2026-04-28** as part of the architecture pass U2 capture-domain consolidation (`11fed34`). Five items landed: (1) `getBlockSuccessRule` helper in `app/src/domain/drillMetadata.ts` mirrors `getBlockMetricType`'s variant-resolution rule, and the success rule renders as `Success rule: <rule>. If unsure, don't count it as Good.` inside the expanded `Add counts` body inside `PerDrillCapture` so the chip-only fast path stays calm (pinned by `app/src/components/__tests__/PerDrillCapture.test.tsx` `describe('V0B-28 forced-criterion prompt', ...)` and `app/src/domain/__tests__/drillMetadata.test.ts` `describe('getBlockSuccessRule', ...)`); (2) `PassMetricInput`'s rate label changed from the pass-specific `% good pass rate` to the skill-neutral `% good`; (3) `d33 Around the World Serving`'s `successMetric.description` re-worded from a session-level zone enumeration to the per-attempt rule `Serve lands in the called zone.` on both Solo and Pair siblings (`target` retained as the session goal); (4) wire-up — eligibility resolver in `app/src/domain/capture/eligibility.ts` returns `successRule` on both eligible branches, `useDrillCheckController` exposes `captureSuccessRule`, `DrillCheckScreen` passes through; (5) spec sync — `primarySkillMetric` block now reads `the drill check surface (post-D133)` with the source-from-record clause and a 'Surface-move history (2026-04-27)' addendum. Legacy `ReviewScreen` fallback path intentionally out of scope (reached only by non-D133 legacy sessions). Authors zero new drill records; no Dexie migration; no metadata schema changes. Verification: 1065/1065 Vitest, lint clean, build clean."
+    },
+    {
+      "id": "what-to-add-next-2026-04-28",
+      "path": "docs/ideation/2026-04-28-what-to-add-next-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Post-Tier-1b-Layer-A next-chunk ideation, refreshed 2026-04-29 after D135. Current sequence: catalog reserve audit first, then Tier 1c focus picker, then skill-level override, then founder/Seb evidence loop. The 2026-04-29 focus-picker deepening selects the draft-surface decision as the first focus-picker brainstorm target. Preserves the pre-D135 survivor list as historical context and records rejection lines for substitution-class work."
+    },
+    {
+      "id": "tier-1c-prepay-and-catalog-audit-2026-04-28",
+      "path": "docs/brainstorms/2026-04-28-tier-1c-prepay-and-catalog-audit-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Historical combined requirements doc for pre-D135 Tier 1c prepay plus catalog reserve audit. Refreshed 2026-04-29 with a focused #1 catalog reserve audit brief: verdict table for the 15 m001Candidate:false records, retire-only application, catalog registration, and drills.ts pointer."
+    },
+    {
+      "id": "session-focus-picker-requirements-2026-04-29",
+      "path": "docs/brainstorms/2026-04-29-session-focus-picker-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for the D135-fired Tier 1c session focus picker. Resolves the draft-screen ambiguity by selecting a Tune today review step as the v1 surface and codifies the architectural rigor (shared focus resolver, in-transaction regeneration use case, stale-write guards, repeat / recovery focus strip, accessibility semantics, privacy boundaries). PARTIALLY SUPERSEDED 2026-04-30 by docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md: R4/R5 (four-chip Recommended-as-peer), R7/R32 (mandatory routing on every pre-run path), R8 (Safety read-only focus echo), R12 (all chips always enabled), R34 four-value source-aware Back. The architectural decisions and remaining R-IDs stay authoritative when Tune today is invoked under the new opt-in posture."
+    },
+    {
+      "id": "tier-1c-impl-skill-level-mutability-and-catalog-audit-2026-04-28",
+      "path": "docs/plans/2026-04-28-tier-1c-prepay-and-catalog-audit.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Post-D135 implementation plan for the triggered bundle: Stream 3 catalog reserve audit (implementation-ready as authored). Stream 1 (Tier 1c focus picker) is owned by docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md; the U1-U5 sketches in this plan are historical and not implementation-ready. Stream 2 skill-level mutability is paused pending Tune today dogfood. Authors zero new drill records and preserves D131 no-telemetry posture."
+    },
+    {
+      "id": "tune-today-focus-picker-2026-04-29",
+      "path": "docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md",
+      "type": "plan",
+      "status": "superseded",
+      "canonical_for": "SUPERSEDED 2026-04-30 by docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md. Originally specced a mandatory pre-safety Tune today route on every pre-run path, optional SetupContext.sessionFocus, a shared focus resolver consumed by initial picks / build-time substitution / swap alternatives, an in-transaction draft regeneration use case, source-aware Back, repeat- and recovery-flow focus stripping, and a calm shibui screen. The architectural pieces (effectiveFocus.ts, services/session/regenerateDraftFocus.ts, stale-write guards, focus strip on buildDraftFromCompletedBlocks and buildRecoveryDraft) are preserved by reference in the 2026-04-30 plan; routing, chip set, and Safety echo are simplified."
+    },
+    {
+      "id": "skill-scope-and-game-layers-2026-04-29",
+      "path": "docs/ideation/2026-04-29-skill-scope-and-game-layers-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked ideation answering 'how and when do we integrate attacking, team tactics, out-of-system, and live/adaptive layers?'. Seven survivors: forward-only `attack` SkillFocus reservation + `scenario` axis (S1), two-axis skill × scenario catalog reframe (S2), surfacing existing `MetricType` game-like patterns (S3), team-tactics deferred to M003+ (S4), attack clustered with serve as overhead-striking continuum (S5), out-of-system as scenario not skill (S6), live/adaptive as runner-surfacing not catalog expansion (S7). Recommended sequence: S1+S2 schema/docs reservation now (zero cap), trigger-gated attack exposure under D135-style discipline, team tactics deferred to M003+. S1+S2 consumed by docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md."
+    },
+    {
+      "id": "focus-picker-drill-depth-2026-04-30",
+      "path": "docs/ideation/2026-04-30-focus-picker-drill-depth-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ground-up audit plus synthesis of recent focus/skill ideation answering whether Tune today has enough active, source-backed drill depth for pass/serve/set practices and swaps across solo/pair, equipment, and long-session contexts. Finds Passing broadly covered, Setting buildable but thin, and Serving fragile (pair/no-net likely unbuildable; long serve sessions still pass-flavored in support slots; skill level not modeled). Recommends a coverage grid, serving-focus credibility pass, focus-aligned support-block definition, thin-focus honesty contract, long-session simulator, source-backed backlog cards, and variant-level provenance/adaptation checklist."
+    },
+    {
+      "id": "skill-scope-reservation-requirements-2026-04-29",
+      "path": "docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md",
+      "type": "requirements",
+      "status": "superseded",
+      "canonical_for": "SUPERSEDED 2026-04-30 by docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md (Track 4: docs-only) on the grounds that types reservation + research note + catalog cross-links spend attention before D135-style trigger evidence has fired. The replacement records the policy ('out-of-system is scenario, not skill; attack is a future skill axis member when trigger fires; no schema changes until then') in a single decision row instead of a types PR. The skill-correlation insight and the cluster-pairing thesis remain valid as a future-state design check; only the implementation cost is deferred."
+    },
+    {
+      "id": "pre-run-simplification-requirements-2026-04-30",
+      "path": "docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Pre-run choice-load simplification across four parallel tracks. Iteration log header (2026-04-30, post-agent-red-team) records: Track 2 reverted from opt-in to MANDATORY Tune today per user feedback (opt-in failed adversarial review on the D135 use case it was built for — 11 taps for first focus session); Track 1 strengthened to FULL Wind delete (field + UI + fixtures + windFriendly catalog cleanup), not 'dead read'; Track 4 demoted from D136 decision row to JSDoc on SkillFocus type union; custom-drill builder captured as post-M001 future exploration. Body below describes the original simplification thesis; the 2026-04-30-001 plan owns what actually ships."
+    },
+    {
+      "id": "focus-coverage-catalog-readiness-requirements-2026-04-30",
+      "path": "docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for making Tune today focus choices fully catalog-backed across pass/serve/set, skill levels, setup configurations, long sessions, and swaps. Establishes that Volleycraft should not have thin or unavailable visible focus states; the catalog must meet a practical floor (2 main options, 1 support option, 1 pressure option where applicable, and 1 same-focus swap per focus-controlled slot) before the focus picker is considered complete. Expansion is variant-first, but catalog readiness overrides the earlier D130 authoring cap when required for focus trust."
+    },
+    {
+      "id": "pre-run-simplification-2026-04-30",
+      "path": "docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Canonical implementation plan (revised 2026-04-30 after agent red-team and user feedback). Ships Tune today MANDATORY between Setup and Safety with four chips (Recommended/Passing/Serving/Setting), all-enabled with fail-on-tap inline copy, source-aware Back ('setup' | 'home'), and the full 2026-04-29-001 architecture: effectiveFocus.ts shared resolver, services/session/regenerateDraftFocus.ts in-transaction use case, stale-write guard, repeat / recovery focus strip. Bundled with three orthogonal pre-run cuts: (1) full Wind delete (field, UI, fixtures, windFriendly catalog cleanup; no Dexie migration); (2) conditional Wall row (only when Solo + No Net) plus Wall-required catalog invariant test; (3) no default Safety focus echo, recovery-override line only when painFlag === true && draft.context.sessionFocus !== undefined. Track 4 ships skill-scope policy as JSDoc on SkillFocus (no D136 decision row). Includes explicit K-ID inheritance matrix from 2026-04-29-001 (K1-K13 with K7 collapsed to two values). Supersedes docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md (its design rationale is inherited; ~6 net-new files ship under this plan)."
     },
     {
       "id": "per-move-pacing-indicator-ideation-2026-04-28",

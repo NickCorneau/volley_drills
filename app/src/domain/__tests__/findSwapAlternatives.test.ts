@@ -73,6 +73,50 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
     expect(out.length).toBeGreaterThan(0)
   })
 
+  it('honors explicit session focus for main-skill alternates', () => {
+    const out = findSwapAlternatives(
+      makeBlock({ type: 'main_skill' }),
+      makeContext({
+        playerMode: 'pair',
+        netAvailable: true,
+        wallAvailable: false,
+        sessionFocus: 'serve',
+      }),
+    )
+
+    expect(out.length).toBeGreaterThan(0)
+    for (const alt of out) {
+      const drill = DRILLS.find((d) => d.id === alt.drillId)
+      expect(drill?.skillFocus).toContain('serve')
+    }
+  })
+
+  it('does not fall back for warmup/wrap blocks (focus does not control them)', () => {
+    const warmupOut = findSwapAlternatives(
+      makeBlock({ type: 'warmup' }),
+      makeContext({ sessionFocus: 'serve' }),
+    )
+    const wrapOut = findSwapAlternatives(
+      makeBlock({ type: 'wrap' }),
+      makeContext({ sessionFocus: 'serve' }),
+    )
+    expect(warmupOut).toEqual([])
+    expect(wrapOut).toEqual([])
+  })
+
+  // Note on the cross-focus fallback in `findSwapAlternatives`:
+  // the function widens the candidate pool past `sessionFocus` only
+  // when the focused pool collapses to exactly the current drill
+  // (so `baseFiltered` is empty). That requires a context+focus pair
+  // where the catalog yields a single eligible drill AND the user is
+  // already on it. Constructing that from outside the catalog ties
+  // tests to specific drill ids that drift over time. The fallback
+  // is defensive code; the existing neighbor-exclusion fallback
+  // covers the common multi-candidate cases, and adding a brittle
+  // catalog-coupled test would lock in identifiers that legitimately
+  // change. If a future bug shows the fallback misbehaving, write a
+  // unit test against a stubbed `findCandidates`, not against DRILLS.
+
   it('excludes the current drillName from the alternate list', () => {
     const block = makeBlock({ type: 'main_skill' })
     // First call returns the full list with a dummy-named block.

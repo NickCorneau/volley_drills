@@ -11,7 +11,7 @@ import { SetupScreen } from './SetupScreen'
  *   onboarded on subsequent opens.
  *
  * Keeping the two surfaces on one component (SetupScreen) avoids a
- * parallel maintenance burden - the wind row, safety-check handoff, and
+ * parallel maintenance burden - the safety-check handoff and
  * escape-to-onboarding logic are shared.
  */
 export function TodaysSetupScreen() {

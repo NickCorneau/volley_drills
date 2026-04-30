@@ -41,6 +41,33 @@ export function findSwapAlternatives(
 ): SessionPlanBlock[] {
   if (block.type === 'warmup' || block.type === 'wrap') return []
 
+  const focused = computeAlternatives(block, context, options)
+  if (focused.length > 0) return focused
+
+  // 2026-04-30 focus fallback: when an explicit `sessionFocus`
+  // narrowed the pool to empty for a focus-controlled slot, retry
+  // with the focus stripped so mid-run Swap stays usable. Without
+  // this, picking 'Setting' on Tune today would silently disable
+  // Swap on `main_skill` / `pressure` blocks whenever the catalog
+  // happens to have only one set drill in the current context. We
+  // accept the small intent-violation (a passing alternate during
+  // a "set session") because no-swap is a worse mid-run outcome and
+  // the user can still see today's focus on the rest of the plan.
+  const isFocusControlled = block.type === 'main_skill' || block.type === 'pressure'
+  if (isFocusControlled && context.sessionFocus !== undefined) {
+    const widenedContext: SetupContext = { ...context }
+    delete widenedContext.sessionFocus
+    return computeAlternatives(block, widenedContext, options)
+  }
+
+  return focused
+}
+
+function computeAlternatives(
+  block: SessionPlanBlock,
+  context: SetupContext,
+  options: FindSwapAlternativesOptions | undefined,
+): SessionPlanBlock[] {
   const slot: BlockSlot = {
     type: block.type,
     durationMinMinutes: block.durationMinutes,

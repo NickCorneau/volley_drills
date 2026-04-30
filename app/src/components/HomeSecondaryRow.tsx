@@ -11,7 +11,7 @@ import { Button } from './ui'
  * Variants mirror `SecondaryRow['kind']` from domain/homePriority.ts:
  * - `review_pending_advisory`: Finish review CTA (tester still has time
  *   on the 2 h cap)
- * - `draft`: Open CTA on Today's suggestion
+ * - `draft`: Review CTA on the saved session draft
  * - `last_complete`: Repeat CTA on the last finalized session
  *
  * Phase F1 (2026-04-19) - Home calm pass:
@@ -75,7 +75,7 @@ export function HomeSecondaryRow(props: HomeSecondaryRowProps) {
             Draft &middot; {props.data.archetypeName}
           </span>
           <Button variant="ghost" onClick={props.onOpen}>
-            Open
+            Review
           </Button>
         </li>
       )

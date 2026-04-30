@@ -9,7 +9,6 @@ const env = {
   needsWall: false,
   needsLines: false,
   needsCones: false,
-  windFriendly: true,
   lowScreenTime: true,
 }
 
@@ -70,6 +69,24 @@ describe('validateDrillCatalog', () => {
     expect(validateDrillCatalog({ drills: DRILLS, progressionChains: PROGRESSION_CHAINS })).toEqual(
       [],
     )
+  })
+
+  it('keeps pair-eligible wall-only drills out of the M001 candidate set', () => {
+    const pairEligibleWallOnly = DRILLS.flatMap((d) =>
+      d.m001Candidate
+        ? d.variants
+            .filter(
+              (v) =>
+                v.environmentFlags.needsWall &&
+                !v.environmentFlags.needsNet &&
+                v.participants.min <= 2 &&
+                v.participants.max >= 2,
+            )
+            .map((v) => `${d.id}:${v.id}`)
+        : [],
+    )
+
+    expect(pairEligibleWallOnly).toEqual([])
   })
 
   it('reports duplicate drill ids and duplicate variant ids', () => {

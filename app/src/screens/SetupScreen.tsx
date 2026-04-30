@@ -18,8 +18,6 @@ import { routes } from '../routes'
 
 const TIME_OPTIONS: TimeProfile[] = [15, 25, 40]
 
-type WindChoice = 'calm' | 'light' | 'strong'
-
 const isTimestamp = (v: unknown): v is number =>
   typeof v === 'number' && Number.isFinite(v) && v > 0
 
@@ -32,7 +30,7 @@ function isSetupLocationState(value: unknown): value is SetupLocationState {
 }
 
 export type SetupScreenProps = {
-  /** C-3: first-run Today's Setup - no last-session prefill, back → Skill Level, wind row, completes onboarding on Build. */
+  /** C-3: first-run Today's Setup - no last-session prefill, back -> Skill Level, completes onboarding on Build. */
   isOnboarding?: boolean
 }
 
@@ -56,7 +54,6 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   const [netAvailable, setNetAvailable] = useState<boolean | null>(null)
   const [wallAvailable, setWallAvailable] = useState<boolean | null>(null)
   const [timeProfile, setTimeProfile] = useState<TimeProfile>(15)
-  const [wind, setWind] = useState<WindChoice>('calm')
   const [prefilled, setPrefilled] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -96,9 +93,6 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           setNetAvailable(ctx.netAvailable)
           setWallAvailable(ctx.wallAvailable)
           setTimeProfile(ctx.timeProfile)
-          if (ctx.wind === 'light' || ctx.wind === 'strong') {
-            setWind(ctx.wind)
-          }
         }
       } catch {
         // Prefill is best-effort; a failed read falls through to defaults.
@@ -111,7 +105,8 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     }
   }, [isOnboarding, navigate, shouldHydrateDraft])
 
-  const isComplete = playerMode !== null && netAvailable !== null && wallAvailable !== null
+  const showWall = playerMode === 'solo' && netAvailable === false
+  const isComplete = playerMode !== null && netAvailable !== null && (!showWall || wallAvailable !== null)
 
   const submitting = useRef(false)
 
@@ -126,10 +121,8 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         playerMode: playerMode!,
         timeProfile,
         netAvailable: netAvailable!,
-        wallAvailable: wallAvailable!,
+        wallAvailable: showWall ? wallAvailable! : false,
       }
-      if (wind === 'light') context.wind = 'light'
-      else if (wind === 'strong') context.wind = 'strong'
 
       // Phase 2.2 / 3.2 build-time substitution input. A fresh Setup
       // means the user is moving forward from their last main_skill
@@ -157,7 +150,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       if (isOnboarding) {
         await setStorageMeta('onboarding.completedAt', Date.now())
       }
-      navigate(routes.safety())
+      navigate(routes.tuneToday(), { state: { source: 'setup' } })
     } catch {
       setError('Failed to save session. Please try again.')
     } finally {
@@ -170,7 +163,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     timeProfile,
     netAvailable,
     wallAvailable,
-    wind,
+    showWall,
     isOnboarding,
     navigate,
   ])
@@ -187,11 +180,8 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     <ScreenShell>
       {/*
         2026-04-22 iPhone-viewport layout pass: pin `Build session` to
-        the footer. With the stale-context banner + five question
-        sections + the 2026-04-21 "Includes warm-up and cool-down"
-        clarifier + the wind row, Setup reliably slips below the fold
-        on a 390 × 844 iPhone when any section expands or a tester
-        re-reads the options.
+        the footer. The setup rows can slip below the fold on a 390 x 844
+        iPhone when any section expands or a tester re-reads the options.
       */}
       <ScreenShell.Header className="flex items-center gap-2 pt-2 pb-3">
         <BackButton
@@ -246,21 +236,23 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           </div>
         </section>
 
-        <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-text-primary">Wall or fence</h2>
-          <div className="flex gap-2" role="radiogroup" aria-label="Wall available">
-            <ToggleChip
-              label="Yes"
-              selected={wallAvailable === true}
-              onTap={() => setWallAvailable(true)}
-            />
-            <ToggleChip
-              label="No"
-              selected={wallAvailable === false}
-              onTap={() => setWallAvailable(false)}
-            />
-          </div>
-        </section>
+        {showWall && (
+          <section className="flex flex-col gap-3">
+            <h2 className="text-sm font-semibold text-text-primary">Wall or fence</h2>
+            <div className="flex gap-2" role="radiogroup" aria-label="Wall available">
+              <ToggleChip
+                label="Yes"
+                selected={wallAvailable === true}
+                onTap={() => setWallAvailable(true)}
+              />
+              <ToggleChip
+                label="No"
+                selected={wallAvailable === false}
+                onTap={() => setWallAvailable(false)}
+              />
+            </div>
+          </section>
+        )}
 
         <section className="flex flex-col gap-3">
           <h2 className="text-sm font-semibold text-text-primary">Time</h2>
@@ -281,23 +273,6 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
             funnel. See
             docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md. */}
           <p className="text-xs text-text-secondary">Includes warm-up and cool-down.</p>
-        </section>
-
-        <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-text-primary">Wind</h2>
-          <div className="flex gap-2" role="radiogroup" aria-label="Wind">
-            <ToggleChip label="Calm" selected={wind === 'calm'} onTap={() => setWind('calm')} />
-            <ToggleChip
-              label="Light wind"
-              selected={wind === 'light'}
-              onTap={() => setWind('light')}
-            />
-            <ToggleChip
-              label="Strong wind"
-              selected={wind === 'strong'}
-              onTap={() => setWind('strong')}
-            />
-          </div>
         </section>
 
         {error && (

@@ -6,7 +6,7 @@ stage: validation
 type: status
 summary: "Canonical current-state snapshot and recent shipped-history log for Volleycraft."
 authority: current project posture, recent shipped history, and active validation gates
-last_updated: 2026-04-28b
+last_updated: 2026-04-30
 depends_on:
   - AGENTS.md
   - docs/catalog.json
@@ -57,6 +57,7 @@ Keep detailed project posture and recent shipped-history out of entry surfaces w
 
 ## Recent Shipped History
 
+- 2026-04-30: pre-run flow simplification shipped (`docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md`, status: active during implementation). Tune today is now the mandatory pre-safety focus step for every pre-run draft path, with four chips (Recommended / Passing / Serving / Setting), shared focus resolution across initial picks / substitution / swaps, in-transaction draft regeneration, and repeat / recovery focus stripping. Setup drops Wind entirely and only asks Wall for Solo + No Net; Safety has no default focus echo and only notes focus when recovery overrides an explicit choice. Skill-scope policy lives as JSDoc on `SkillFocus`; no attack/scenario type reservation shipped.
 - 2026-04-21: M001 Tier 1a landed in `docs/plans/2026-04-20-m001-tier1-implementation.md`.
 - 2026-04-22 to 2026-04-24: partner-walkthrough polish, review closeout polish, and wake-lock/audio-priming infrastructure shipped.
 - 2026-04-26: pre-D91 editorial polish shipped, and the founder pair pass session fired the Tier 1b `P2-3` trigger.
