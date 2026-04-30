@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
+  PLAYER_LEVELS,
+  READINESS_CONFIGURATIONS,
+  READINESS_DURATIONS,
+  VISIBLE_FOCUSES,
+  buildFocusReadinessAudit,
   canTransitionReadinessStatus,
+  evaluateFocusReadinessCell,
   isReadinessRiskBucket,
   isReadinessStatus,
   validateActivationBatchManifest,
@@ -76,5 +82,51 @@ describe('focus readiness model', () => {
     expect(isReadinessStatus('done')).toBe(false)
     expect(isReadinessRiskBucket('no_same_focus_swap')).toBe(true)
     expect(isReadinessRiskBucket('missing_swap')).toBe(false)
+  })
+})
+
+describe('focus readiness audit engine', () => {
+  it('covers every focus, current configuration, level, and fixed duration cell', () => {
+    const audit = buildFocusReadinessAudit()
+
+    expect(audit.cells).toHaveLength(
+      VISIBLE_FOCUSES.length *
+        READINESS_CONFIGURATIONS.length *
+        PLAYER_LEVELS.length *
+        READINESS_DURATIONS.length,
+    )
+    expect(
+      audit.cells.some(
+        (cell) =>
+          cell.focus === 'serve' &&
+          cell.configuration === 'pair_open' &&
+          cell.level === 'beginner' &&
+          cell.duration === 40,
+      ),
+    ).toBe(true)
+  })
+
+  it('records pressure as not applicable when the generated layout has no pressure slot', () => {
+    const cell = evaluateFocusReadinessCell({
+      focus: 'pass',
+      configuration: 'pair_net',
+      level: 'beginner',
+      duration: 15,
+    })
+
+    expect(cell.coverage.pressure.status).toBe('not_applicable')
+    expect(cell.coverage.pressure.reason).toBe('layout_has_no_pressure_slot')
+  })
+
+  it('flags the current pair open serving long-session cell as failing instead of paper-covered', () => {
+    const cell = evaluateFocusReadinessCell({
+      focus: 'serve',
+      configuration: 'pair_open',
+      level: 'beginner',
+      duration: 40,
+    })
+
+    expect(cell.status).toBe('failing')
+    expect(cell.riskBuckets.length).toBeGreaterThan(0)
   })
 })

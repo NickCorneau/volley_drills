@@ -166,7 +166,7 @@ flowchart TD
 
 ---
 
-- [ ] U2. **Eligibility and coverage audit engine**
+- [x] U2. **Eligibility and coverage audit engine**
 
 **Goal:** Build the deterministic audit engine that evaluates the full matrix using the same hard filters as generation.
 
