@@ -321,7 +321,7 @@ flowchart TD
 
 ---
 
-- [ ] U6. **Audit report, gap cards, and activation manifest**
+- [x] U6. **Audit report, gap cards, and activation manifest**
 
 **Goal:** Generate or author the repo-facing readiness artifact, gap cards, and any smallest safe source-backed activation batch manifest.
 

@@ -840,6 +840,20 @@
       "canonical_for": "Implementation plan for the focus coverage catalog readiness requirements: test-backed audit model and coverage engine, existing-onboarding skill-level consumption via skillLevelToDrillBand(), current 40-minute long-session readiness, focus-reinforcing support-slot semantics, strict same-focus swap readiness, durable gap-card / activation-manifest artifacts, and docs/verification sync. Origin: docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md."
     },
     {
+      "id": "focus-coverage-readiness-audit-2026-04-30",
+      "path": "docs/reviews/2026-04-30-focus-coverage-readiness-audit.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Generated-readiness audit snapshot for Tune today named-focus coverage across pass/serve/set, current setup configurations, beginner/intermediate/advanced levels, fixed 15/25/40-minute profiles, focus-reinforcing support, pressure applicability, and strict same-focus swaps. Records 135 cells: pass 30 verified / 15 failing, serve 0 verified / 45 failing, set 0 verified / 45 failing; activation batch intentionally none."
+    },
+    {
+      "id": "focus-coverage-gap-cards-2026-04-30",
+      "path": "docs/reviews/2026-04-30-focus-coverage-gap-cards.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Grouped source-backed gap cards for the focus coverage readiness audit. Tracks advanced focus main coverage, serving support/swap depth, setting support/swap depth, and 40-minute long-session variety. Does not authorize catalog activation until exact source references, adaptation deltas, cap delta, and batch checkpoint criteria are recorded."
+    },
+    {
       "id": "per-move-pacing-indicator-ideation-2026-04-28",
       "path": "docs/ideation/2026-04-28-per-move-pacing-indicator-ideation.md",
       "type": "ideation",
