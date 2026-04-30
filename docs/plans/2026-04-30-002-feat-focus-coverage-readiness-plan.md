@@ -281,7 +281,7 @@ flowchart TD
 
 ---
 
-- [ ] U5. **Focus-reinforcing support slots and strict swap readiness**
+- [x] U5. **Focus-reinforcing support slots and strict swap readiness**
 
 **Goal:** Align generated support behavior and readiness swap checks with the named focus contract while preserving runtime swap usability.
 

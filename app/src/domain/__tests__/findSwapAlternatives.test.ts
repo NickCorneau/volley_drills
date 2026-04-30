@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { DRILLS } from '../../data/drills'
 import type { SessionPlanBlock, SetupContext } from '../../model'
-import { findSwapAlternatives } from '../sessionBuilder'
+import { findStrictSameFocusSwapAlternatives, findSwapAlternatives } from '../sessionBuilder'
 
 /**
  * Phase F Unit 4 (2026-04-19): `findSwapAlternatives` derives the
@@ -89,6 +89,33 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
       const drill = DRILLS.find((d) => d.id === alt.drillId)
       expect(drill?.skillFocus).toContain('serve')
     }
+  })
+
+  it('keeps readiness swap checks strict when runtime swap would widen past focus', () => {
+    const currentServe = makeBlock({
+      type: 'main_skill',
+      drillId: 'd31',
+      variantId: 'd31-solo-open',
+      drillName: 'Self Toss Target Practice',
+    })
+    const context = makeContext({
+      playerMode: 'solo',
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'serve',
+    })
+
+    const strict = findStrictSameFocusSwapAlternatives(currentServe, context)
+    const runtime = findSwapAlternatives(currentServe, context)
+
+    expect(strict).toEqual([])
+    expect(runtime.length).toBeGreaterThan(0)
+    expect(
+      runtime.some((alternate) => {
+        const drill = DRILLS.find((candidate) => candidate.id === alternate.drillId)
+        return drill !== undefined && !drill.skillFocus.includes('serve')
+      }),
+    ).toBe(true)
   })
 
   it('does not fall back for warmup/wrap blocks (focus does not control them)', () => {

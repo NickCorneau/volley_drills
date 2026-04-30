@@ -63,6 +63,15 @@ export function findSwapAlternatives(
   return focused
 }
 
+export function findStrictSameFocusSwapAlternatives(
+  block: SessionPlanBlock,
+  context: SetupContext,
+  options?: FindSwapAlternativesOptions,
+): SessionPlanBlock[] {
+  if (block.type === 'warmup' || block.type === 'wrap') return []
+  return computeAlternatives(block, context, options)
+}
+
 function computeAlternatives(
   block: SessionPlanBlock,
   context: SetupContext,

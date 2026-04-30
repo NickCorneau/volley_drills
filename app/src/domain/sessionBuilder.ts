@@ -14,6 +14,7 @@ import { createAssemblySeed, createSeededRandom } from './sessionAssembly/random
 import { deriveBlockRationale } from './sessionAssembly/rationale'
 import { pickMainSkillSubstitute } from './sessionAssembly/substitution'
 export {
+  findStrictSameFocusSwapAlternatives,
   findSwapAlternatives,
   type FindSwapAlternativesOptions,
 } from './sessionAssembly/swapAlternatives'

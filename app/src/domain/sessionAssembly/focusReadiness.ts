@@ -286,6 +286,26 @@ function risksForCoverage(
   return [...risks]
 }
 
+function swapCoverageForFocusControlledSlots(
+  mainCandidates: readonly CandidateVariant[],
+  pressureCandidates: readonly CandidateVariant[],
+  pressure: SlotReadinessCoverage,
+): SlotReadinessCoverage {
+  const mainFamilies = distinctDrillFamilies(mainCandidates)
+  const pressureFamilies = distinctDrillFamilies(pressureCandidates)
+  const mainCovered = mainFamilies.length >= 2
+  const pressureCovered = pressure.status === 'not_applicable' || pressureFamilies.length >= 2
+  const combinedCandidates =
+    pressure.status === 'not_applicable' ? mainCandidates : [...mainCandidates, ...pressureCandidates]
+
+  return {
+    status: mainCovered && pressureCovered ? 'covered' : 'failing',
+    eligibleDrillFamilies: distinctDrillFamilies(combinedCandidates),
+    eligibleCatalogIds: toCatalogIds(combinedCandidates),
+    reason: mainCovered && pressureCovered ? undefined : 'same_focus_swap_missing',
+  }
+}
+
 export function isReadinessStatus(value: unknown): value is ReadinessStatus {
   return typeof value === 'string' && (READINESS_STATUSES as readonly string[]).includes(value)
 }
@@ -432,11 +452,7 @@ export function evaluateFocusReadinessCell(
       ? emptyCoverage('not_applicable', 'layout_has_no_pressure_slot')
       : coverageFromCandidates(pressureCandidates, 1, 'pressure_floor_missing')
 
-  const swapCandidatePool =
-    pressure.status === 'not_applicable'
-      ? mainCandidates
-      : [...mainCandidates, ...pressureCandidates]
-  const swap = coverageFromCandidates(swapCandidatePool, 2, 'same_focus_swap_missing')
+  const swap = swapCoverageForFocusControlledSlots(mainCandidates, pressureCandidates, pressure)
   const riskBuckets = risksForCoverage(main, support, pressure, swap)
 
   return {
