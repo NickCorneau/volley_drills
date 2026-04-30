@@ -2,6 +2,7 @@ import { db } from '../../db'
 import type { SessionDraft, SetupContext } from '../../db'
 import { buildDraft } from '../../domain/sessionBuilder'
 import { isSchemaBlocked } from '../../lib/schema-blocked'
+import { isSkillLevel, skillLevelToDrillBand } from '../../lib/skillLevel'
 import { findLastCompletedDrillIdsByType } from './queries'
 
 export type RegenerateDraftFocusResult =
@@ -36,44 +37,58 @@ function withFreshTimestamp(draft: SessionDraft): SessionDraft {
   }
 }
 
+async function readEffectivePlayerLevel() {
+  const row = await db.storageMeta.get('onboarding.skillLevel')
+  if (!row || !isSkillLevel(row.value)) return undefined
+  return skillLevelToDrillBand(row.value)
+}
+
 export async function regenerateDraftFocus(
   input: RegenerateDraftFocusInput,
 ): Promise<RegenerateDraftFocusResult> {
   try {
     let result: RegenerateDraftFocusResult | undefined
 
-    await db.transaction('rw', db.sessionDrafts, db.executionLogs, db.sessionPlans, async () => {
-      const current = await db.sessionDrafts.get('current')
-      if (!current) {
-        result = { ok: false, reason: 'load' }
-        return
-      }
+    await db.transaction(
+      'rw',
+      db.sessionDrafts,
+      db.executionLogs,
+      db.sessionPlans,
+      db.storageMeta,
+      async () => {
+        const current = await db.sessionDrafts.get('current')
+        if (!current) {
+          result = { ok: false, reason: 'load' }
+          return
+        }
 
-      if (current.updatedAt !== input.expectedUpdatedAt) {
-        result = { ok: false, reason: 'stale' }
-        return
-      }
+        if (current.updatedAt !== input.expectedUpdatedAt) {
+          result = { ok: false, reason: 'stale' }
+          return
+        }
 
-      if (!input.useBaseline && current.context.sessionFocus === input.sessionFocus) {
-        result = { ok: true, draft: current, changed: false }
-        return
-      }
+        if (!input.useBaseline && current.context.sessionFocus === input.sessionFocus) {
+          result = { ok: true, draft: current, changed: false }
+          return
+        }
 
-      const nextDraft = input.useBaseline
-        ? input.baselineDraft
-        : buildDraft(contextWithFocus(current.context, input.sessionFocus), {
-            lastCompletedByType: await findLastCompletedDrillIdsByType(),
-          })
+        const nextDraft = input.useBaseline
+          ? input.baselineDraft
+          : buildDraft(contextWithFocus(current.context, input.sessionFocus), {
+              lastCompletedByType: await findLastCompletedDrillIdsByType(),
+              playerLevel: await readEffectivePlayerLevel(),
+            })
 
-      if (!nextDraft) {
-        result = { ok: false, reason: 'build' }
-        return
-      }
+        if (!nextDraft) {
+          result = { ok: false, reason: 'build' }
+          return
+        }
 
-      const replacement = withFreshTimestamp(nextDraft)
-      await db.sessionDrafts.put(replacement)
-      result = { ok: true, draft: replacement, changed: true }
-    })
+        const replacement = withFreshTimestamp(nextDraft)
+        await db.sessionDrafts.put(replacement)
+        result = { ok: true, draft: replacement, changed: true }
+      },
+    )
 
     return result ?? { ok: false, reason: 'save' }
   } catch {

@@ -3,6 +3,7 @@ import type {
   BlockSlotType,
   DraftBlock,
   ExecutionLog,
+  PlayerLevel,
   SessionDraft,
   SessionPlan,
   SetupContext,
@@ -51,6 +52,7 @@ export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 1
 export interface BuildDraftOptions {
   readonly lastCompletedByType?: Partial<Record<BlockSlotType, string>>
   readonly assemblySeed?: string
+  readonly playerLevel?: PlayerLevel
 }
 
 function stripSessionFocus(context: SetupContext): SetupContext {
@@ -94,6 +96,8 @@ export function buildDraft(
         context,
         usedDrillIds,
         lastMainSkillDrillId,
+        undefined,
+        { playerLevel: options?.playerLevel },
       )
       if (mainSkillSubstitute) {
         usedDrillIds.add(mainSkillSubstitute.candidate.drill.id)
@@ -113,7 +117,9 @@ export function buildDraft(
     }
 
     if (!pick) {
-      pick = pickForSlot(slot, context, usedDrillIds, random)
+      pick = pickForSlot(slot, context, usedDrillIds, random, {
+        playerLevel: options?.playerLevel,
+      })
     }
 
     if (!pick) {

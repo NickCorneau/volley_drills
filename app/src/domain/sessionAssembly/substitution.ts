@@ -3,8 +3,8 @@ import {
   type SubstitutionRule,
 } from '../../data/substitutionRules'
 import { findSubstitute } from '../drillSelection'
-import type { BlockSlot, SetupContext } from '../../model'
-import type { CandidateVariant } from './candidates'
+import type { BlockSlot, PlayerLevel, SetupContext } from '../../model'
+import type { CandidateVariant, FindCandidatesOptions } from './candidates'
 import { findCandidates } from './candidates'
 import { deriveSubstitutionRationale } from './rationale'
 
@@ -18,8 +18,11 @@ export function pickMainSkillSubstitute(
   usedDrillIds: Set<string>,
   lastMainSkillDrillId: string,
   rules: readonly SubstitutionRule[] = SUBSTITUTION_RULES,
+  options?: { readonly playerLevel?: PlayerLevel },
 ): { candidate: CandidateVariant; rationale: string } | undefined {
-  const candidates = findCandidates(slot, context)
+  const findOptions: FindCandidatesOptions | undefined =
+    options?.playerLevel === undefined ? undefined : { playerLevel: options.playerLevel }
+  const candidates = findCandidates(slot, context, findOptions)
   const unused = candidates.filter((candidate) => !usedDrillIds.has(candidate.drill.id))
   const pool = unused.length > 0 ? unused : candidates
 

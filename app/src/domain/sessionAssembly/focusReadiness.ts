@@ -248,21 +248,25 @@ function coverageFromCandidates(
 function slotCandidates(
   slot: BlockSlot | undefined,
   context: SetupContext,
+  playerLevel: PlayerLevel,
 ): readonly CandidateVariant[] {
   if (!slot) return []
-  return findCandidates(slot, context)
+  return findCandidates(slot, context, { playerLevel })
 }
 
 function supportCandidates(
   layout: readonly BlockSlot[],
   context: SetupContext,
   focus: VisibleFocus,
+  playerLevel: PlayerLevel,
 ): readonly CandidateVariant[] {
   const supportSlots = layout.filter(
     (slot) => slot.type === 'technique' || slot.type === 'movement_proxy',
   )
   return supportSlots.flatMap((slot) =>
-    slotCandidates(slot, context).filter((candidate) => candidate.drill.skillFocus.includes(focus)),
+    slotCandidates(slot, context, playerLevel).filter((candidate) =>
+      candidate.drill.skillFocus.includes(focus),
+    ),
   )
 }
 
@@ -415,11 +419,11 @@ export function evaluateFocusReadinessCell(
 
   const mainSlot = layout.find((slot) => slot.type === 'main_skill')
   const pressureSlot = layout.find((slot) => slot.type === 'pressure')
-  const mainCandidates = slotCandidates(mainSlot, context)
-  const pressureCandidates = slotCandidates(pressureSlot, context)
+  const mainCandidates = slotCandidates(mainSlot, context, input.level)
+  const pressureCandidates = slotCandidates(pressureSlot, context, input.level)
   const main = coverageFromCandidates(mainCandidates, 2, 'main_floor_missing')
   const support = coverageFromCandidates(
-    supportCandidates(layout, context, input.focus),
+    supportCandidates(layout, context, input.focus, input.level),
     1,
     'focus_reinforcing_support_missing',
   )

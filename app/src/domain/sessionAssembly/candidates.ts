@@ -1,11 +1,21 @@
 import { DRILLS } from '../../data/drills'
-import type { BlockSlot, DrillVariant, SetupContext } from '../../model'
+import type { BlockSlot, DrillVariant, PlayerLevel, SetupContext } from '../../model'
 import type { SelectionCandidate } from '../drillSelection'
 import { effectiveSkillTags } from './effectiveFocus'
 import type { RandomSource } from './random'
 import { shuffle } from './random'
 
 export type CandidateVariant = SelectionCandidate
+
+export interface FindCandidatesOptions {
+  readonly playerLevel?: PlayerLevel
+}
+
+const PLAYER_LEVEL_ORDER: Record<PlayerLevel, number> = {
+  beginner: 0,
+  intermediate: 1,
+  advanced: 2,
+}
 
 export function hasUnmodeledRequirements(variant: DrillVariant): boolean {
   return (
@@ -17,13 +27,32 @@ export function hasUnmodeledRequirements(variant: DrillVariant): boolean {
   )
 }
 
-export function findCandidates(slot: BlockSlot, context: SetupContext): CandidateVariant[] {
+function isLevelEligible(
+  drill: { readonly levelMin: PlayerLevel; readonly levelMax: PlayerLevel },
+  level: PlayerLevel | undefined,
+): boolean {
+  if (level === undefined) return true
+  return PLAYER_LEVEL_ORDER[drill.levelMin] <= PLAYER_LEVEL_ORDER[level] &&
+    PLAYER_LEVEL_ORDER[level] <= PLAYER_LEVEL_ORDER[drill.levelMax]
+}
+
+function appliesLevelFilter(slot: BlockSlot): boolean {
+  return slot.type === 'main_skill' || slot.type === 'pressure'
+}
+
+export function findCandidates(
+  slot: BlockSlot,
+  context: SetupContext,
+  options?: FindCandidatesOptions,
+): CandidateVariant[] {
   const playerCount = context.playerMode === 'solo' ? 1 : 2
   const candidates: CandidateVariant[] = []
   const skillTags = effectiveSkillTags(slot.type, context, slot.skillTags)
+  const playerLevel = appliesLevelFilter(slot) ? options?.playerLevel : undefined
 
   for (const drill of DRILLS) {
     if (!drill.m001Candidate) continue
+    if (!isLevelEligible(drill, playerLevel)) continue
 
     const hasMatchingFocus =
       !skillTags || skillTags.length === 0 || skillTags.some((tag) => drill.skillFocus.includes(tag))
@@ -48,8 +77,9 @@ export function pickForSlot(
   context: SetupContext,
   usedDrillIds: Set<string>,
   random: RandomSource,
+  options?: FindCandidatesOptions,
 ): CandidateVariant | undefined {
-  const candidates = findCandidates(slot, context)
+  const candidates = findCandidates(slot, context, options)
   const unused = candidates.filter((candidate) => !usedDrillIds.has(candidate.drill.id))
   const pool = shuffle(unused.length > 0 ? unused : candidates, random)
 

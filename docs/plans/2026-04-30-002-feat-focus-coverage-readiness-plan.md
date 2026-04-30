@@ -204,7 +204,7 @@ flowchart TD
 
 ---
 
-- [ ] U3. **Skill-level-aware generation**
+- [x] U3. **Skill-level-aware generation**
 
 **Goal:** Make generated sessions and readiness consume the existing onboarding skill level through `skillLevelToDrillBand()` without adding UI or persistence.
 

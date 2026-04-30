@@ -6,7 +6,7 @@ import {
   deriveBlockRationale,
   estimateRecoverySessionMinutes,
 } from './sessionBuilder'
-import type { SetupContext } from '../model'
+import type { PlayerLevel, SetupContext } from '../model'
 
 const variantById = new Map(
   DRILLS.flatMap((drill) => drill.variants.map((variant) => [variant.id, variant] as const)),
@@ -223,6 +223,22 @@ describe('sessionBuilder', () => {
     expect(mainSkill).toBeDefined()
     const drill = DRILLS.find((d) => d.id === mainSkill!.drillId)
     expect(drill?.skillFocus).toContain('serve')
+  })
+
+  it('fails instead of falling back to beginner-only main work for an advanced focus', () => {
+    const playerLevel: PlayerLevel = 'advanced'
+    const draft = buildDraft(
+      {
+        playerMode: 'solo',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+        sessionFocus: 'serve',
+      },
+      { assemblySeed: 'advanced-serving-solo-open', playerLevel },
+    )
+
+    expect(draft).toBeNull()
   })
 
   /**

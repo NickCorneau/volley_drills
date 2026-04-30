@@ -129,4 +129,22 @@ describe('focus readiness audit engine', () => {
     expect(cell.status).toBe('failing')
     expect(cell.riskBuckets.length).toBeGreaterThan(0)
   })
+
+  it('applies player level when counting eligible drill families', () => {
+    const beginner = evaluateFocusReadinessCell({
+      focus: 'serve',
+      configuration: 'solo_open',
+      level: 'beginner',
+      duration: 40,
+    })
+    const advanced = evaluateFocusReadinessCell({
+      focus: 'serve',
+      configuration: 'solo_open',
+      level: 'advanced',
+      duration: 40,
+    })
+
+    expect(beginner.coverage.main.eligibleDrillFamilies).toContain('d31')
+    expect(advanced.coverage.main.eligibleDrillFamilies).not.toContain('d31')
+  })
 })

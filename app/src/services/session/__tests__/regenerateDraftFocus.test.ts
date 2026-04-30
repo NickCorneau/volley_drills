@@ -53,6 +53,34 @@ describe('regenerateDraftFocus', () => {
     expect(mainSkill).toBeDefined()
   })
 
+  it('uses the persisted onboarding skill level when regenerating focus', async () => {
+    const draft = buildDraft(
+      {
+        playerMode: 'solo',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+      },
+      { assemblySeed: 'advanced-regenerate-baseline' },
+    )
+    if (!draft) throw new Error('Expected fixture draft to build')
+    await db.sessionDrafts.put({ ...draft, updatedAt: 150 })
+    await db.storageMeta.put({
+      key: 'onboarding.skillLevel',
+      value: 'competitive_pair',
+      updatedAt: 1,
+    })
+
+    const result = await regenerateDraftFocus({
+      expectedUpdatedAt: 150,
+      sessionFocus: 'serve',
+    })
+
+    expect(result).toEqual({ ok: false, reason: 'build' })
+    const saved = await db.sessionDrafts.get('current')
+    expect(saved?.context.sessionFocus).toBeUndefined()
+  })
+
   it('restores a baseline draft through the guarded path', async () => {
     const baseline = makeDraft()
     const focused = {

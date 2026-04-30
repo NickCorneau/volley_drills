@@ -6,6 +6,7 @@ import type { SetupContext } from '../db/types'
 import { buildDraft } from '../domain/sessionBuilder'
 import { isOnboardingStep } from '../lib/onboarding'
 import { isSchemaBlocked } from '../lib/schema-blocked'
+import { isSkillLevel, skillLevelToDrillBand } from '../lib/skillLevel'
 import {
   findLastCompletedDrillIdsByType,
   getCurrentDraft,
@@ -15,6 +16,7 @@ import {
 import type { BlockSlotType } from '../types/session'
 import { getStorageMeta, setStorageMeta } from '../services/storageMeta'
 import { routes } from '../routes'
+import type { PlayerLevel } from '../types/drill'
 
 const TIME_OPTIONS: TimeProfile[] = [15, 25, 40]
 
@@ -134,13 +136,16 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       // default selection path - substitution is an enhancement, not
       // a requirement for build to proceed.
       let lastCompletedByType: Partial<Record<BlockSlotType, string>> = {}
+      let playerLevel: PlayerLevel | undefined
       try {
         lastCompletedByType = await findLastCompletedDrillIdsByType()
+        const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
+        playerLevel = skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
       } catch {
         if (isSchemaBlocked()) return
       }
 
-      const draft = buildDraft(context, { lastCompletedByType })
+      const draft = buildDraft(context, { lastCompletedByType, playerLevel })
       if (!draft) {
         setError("Can't build a session for these constraints. Try different options.")
         return
