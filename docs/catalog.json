@@ -236,7 +236,8 @@
       "path": "docs/ops/",
       "owns": [
         "agent-facing doc rules",
-        "runtime/operations guidance"
+        "runtime/operations guidance",
+        "catalog authoring guidance"
       ]
     },
     {
@@ -646,6 +647,13 @@
       "canonical_for": "Durable architecture principles, layer rules, extension points, testing posture, review gates, anti-patterns, and a feature-routing checklist for the app/ workspace. Written for future agents adding features or refactors. Routes to canonical product docs (`docs/vision.md`, `docs/decisions.md`, `docs/prd-foundation.md`), `app/README.md` for current state, and `.cursor/rules/*.mdc` for focused rules — does NOT duplicate them. Update only when a layer boundary, extension-point pattern, review gate, or testing pyramid materially changes."
     },
     {
+      "id": "workload-envelope-authoring-guide",
+      "path": "docs/ops/workload-envelope-authoring-guide.md",
+      "type": "ops",
+      "status": "active",
+      "canonical_for": "Decision guide for interpreting generated-plan workload envelope observations before catalog metadata, block-shape, source-backed content, U6 preview, or U8 redistribution work. Created from U7 generated diagnostics workload-envelope guidance requirements; does not authorize catalog edits or runtime generator changes."
+    },
+    {
       "id": "agent-runtime",
       "path": "docs/ops/agent-runtime.md",
       "type": "ops",
@@ -851,7 +859,7 @@
       "path": "docs/ideation/2026-05-01-generated-plan-diagnostics-next-steps-ideation.md",
       "type": "ideation",
       "status": "active",
-      "canonical_for": "Ranked ideation for turning the generated-plan diagnostics report into a sequenced next-step program. Six survivors: observation triage workbench, finding graduation ladder, dynamic surface/new focus sentinel, catalog change impact preview, workload envelope authoring guide, and redistribution-free builder comparison. Consumed by docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md."
+      "canonical_for": "Ranked ideation for turning the generated-plan diagnostics report into a sequenced next-step program. Original six survivors: observation triage workbench, finding graduation ladder, dynamic surface/new focus sentinel, catalog change impact preview, workload envelope authoring guide, and redistribution-free builder comparison. 2026-05-01 continuation selects decision-debt compression review after U1-U3 completion; consumed by docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md and docs/brainstorms/2026-05-01-generated-diagnostics-decision-debt-compression-requirements.md."
     },
     {
       "id": "generated-plan-diagnostics-next-steps-requirements-2026-05-01",
@@ -861,11 +869,25 @@
       "canonical_for": "Requirements for taking generated-plan diagnostic findings one by one through routeable observation triage, finding graduation policy, dynamic surface/new-focus gates, catalog impact previews, workload envelope metadata guidance, and diagnostic-only generator redistribution comparisons. First slice recommendation: R1/R2 observation triage workbench plus finding graduation ladder before adding drills or changing generator policy."
     },
     {
+      "id": "generated-diagnostics-decision-debt-compression-requirements-2026-05-01",
+      "path": "docs/brainstorms/2026-05-01-generated-diagnostics-decision-debt-compression-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for compressing generated diagnostics triage rows into human-sized decision prompts after U1-U3. Stages the output as a derived generated docs review aid, a freshness-validated artifact, and a narrow unknown/unclassified lane gate before dynamic surface, workload, redistribution, or concrete-proposal catalog-preview follow-up work."
+    },
+    {
+      "id": "generated-diagnostics-workload-envelope-guidance-requirements-2026-05-01",
+      "path": "docs/brainstorms/2026-05-01-generated-diagnostics-workload-envelope-guidance-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused U7 requirements addendum for a small workload envelope authoring guide covering short-session cooldown minimums, technique under-min review, and workload envelope review before catalog, cap, or generator changes."
+    },
+    {
       "id": "generated-diagnostics-triage-workflow-plan-2026-05-01",
       "path": "docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md",
       "type": "plan",
       "status": "active",
-      "canonical_for": "Implementation plan for the generated diagnostics triage workflow. Sequences the full R1-R6 program from docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md, with the first executable slice focused on stable observation group identity, a triage registry/workbench, and finding graduation gates before dynamic surface sentinels, catalog impact previews, workload envelope guidance, or redistribution comparisons."
+      "canonical_for": "Implementation plan for the generated diagnostics triage workflow. Sequences the R1-R8 program from docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md plus the decision-debt and workload-envelope addenda, with the completed first slices focused on stable observation group identity, triage registry/workbench, and finding graduation gates before derived decision-debt compression, dynamic surface sentinels, concrete-proposal catalog impact previews, workload envelope guidance, or redistribution comparisons."
     },
     {
       "id": "focus-coverage-readiness-audit-2026-04-30",

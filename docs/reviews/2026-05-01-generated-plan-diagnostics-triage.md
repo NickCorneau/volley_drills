@@ -4,8 +4,8 @@ title: "Generated Plan Diagnostics Triage"
 status: active
 stage: validation
 type: review
-summary: "Docs-first triage workbench for generated-plan routeable observation groups."
-authority: "Current triage snapshot for generated-plan diagnostic observation groups; validates stable group identity, conservative routes, and stale fingerprint review."
+summary: "Docs-first triage workbench and decision-debt compression review for generated-plan routeable observation groups."
+authority: "Current triage snapshot for generated-plan diagnostic observation groups; validates stable group identity, conservative routes, stale fingerprint review, and derived decision-debt compression lanes."
 last_updated: 2026-05-01
 depends_on:
   - app/src/domain/generatedPlanDiagnostics.ts
@@ -21,7 +21,7 @@ Record the current docs-first triage workbench for generated-plan routeable obse
 
 ## Interpretation
 
-This workbench does not authorize catalog changes. It routes generated-plan observations into conservative decision lanes so maintainers can decide whether a group is a policy allowance, cap review, block split, source-backed content-depth item, or generator-policy investigation.
+This workbench does not authorize catalog changes. It routes generated-plan observations into conservative decision lanes and compresses unresolved rows into derived human review prompts so maintainers can decide whether a group is a policy allowance, cap review, block split, source-backed content-depth item, or generator-policy investigation.
 
 ## Triage Summary
 
@@ -34,6 +34,72 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 
 - `defer`: 32
 - `generator_policy_investigation`: 21
+
+## Decision-Debt Compression
+
+### Short-session cooldown minimum
+
+- Lane: `short_session_cooldown_minimum`
+- Question: Is the short wrap envelope acceptable, or does this need cap/block/content follow-up?
+- Why this lane: Wrap under-min groups are likely cooldown policy questions before they are catalog gaps.
+- Groups: 1; total affected cells: 87
+- Redistribution-affected cells: 0
+- Non-redistribution over-cap cells: 0
+- Route mix: `defer` 1
+- Disposition: `needs_human_decision`
+- Candidate dispositions: `accepted_policy_allowance`, `metadata_review_needed`, `block_shape_review_needed`
+- Recommended follow-up: U7 workload envelope guidance
+- Guide: `docs/ops/workload-envelope-authoring-guide.md#short-session-cooldown-minimum`
+- Next evidence needed: Review cooldown minimum policy and decide whether U7 workload guidance should encode it.
+- Group keys: `gpdg:v1:d25:d25-solo:wrap:true:under_authored_min`
+
+### Technique under-min review
+
+- Lane: `technique_under_min_review`
+- Question: Are technique slots intentionally below authored minimums, or should catalog depth/block shape change?
+- Why this lane: Technique under-min groups need human review before source-backed content or block-split work.
+- Groups: 12; total affected cells: 121
+- Redistribution-affected cells: 0
+- Non-redistribution over-cap cells: 0
+- Route mix: `defer` 12
+- Disposition: `needs_human_decision`
+- Candidate dispositions: `accepted_policy_allowance`, `metadata_review_needed`, `block_shape_review_needed`, `source_depth_candidate`
+- Recommended follow-up: U7 workload envelope guidance
+- Guide: `docs/ops/workload-envelope-authoring-guide.md#technique-under-min-review`
+- Next evidence needed: Review whether these technique slots are acceptable short-form drills or content-depth candidates.
+- Group keys: `gpdg:v1:d07:d07-solo-open:technique:true:under_authored_min`, `gpdg:v1:d33:d33-solo-open:technique:true:under_authored_min`, `gpdg:v1:d22:d22-solo-open:technique:true:under_authored_min`, `gpdg:v1:d38:d38-solo:technique:true:under_authored_min`, `gpdg:v1:d39:d39-solo:technique:true:under_authored_min`, `gpdg:v1:d48:d48-solo-open:technique:true:under_authored_min`, `gpdg:v1:d33:d33-pair-open:technique:true:under_authored_min`, `gpdg:v1:d07:d07-pair-open:technique:true:under_authored_min`, `gpdg:v1:d22:d22-pair-open:technique:true:under_authored_min`, `gpdg:v1:d48:d48-pair-open:technique:true:under_authored_min`, `gpdg:v1:d33:d33-pair:technique:true:under_authored_min`, `gpdg:v1:d33:d33-solo-net:technique:true:under_authored_min`
+
+### Workload envelope review
+
+- Lane: `workload_envelope_review`
+- Question: Are duration and fatigue envelopes correct for these generated allocations?
+- Why this lane: Over/under envelope pressure is a workload-policy question before catalog edits.
+- Groups: 19; total affected cells: 106
+- Redistribution-affected cells: 0
+- Non-redistribution over-cap cells: 57
+- Route mix: `defer` 19
+- Disposition: `needs_human_decision`
+- Candidate dispositions: `metadata_review_needed`, `block_shape_review_needed`, `requires_U6_preview`, `no_implementation_action_yet`
+- Recommended follow-up: U7 workload envelope guidance
+- Guide: `docs/ops/workload-envelope-authoring-guide.md#workload-envelope-review`
+- Next evidence needed: Review cap policy and block split thresholds for the affected main-skill groups.
+- Group keys: `gpdg:v1:d33:d33-solo-open:main_skill:true:under_authored_min`, `gpdg:v1:d01:d01-solo:technique:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-pair-open:main_skill:true:under_authored_min`, `gpdg:v1:d05:d05-pair:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-solo-open:main_skill:true:under_authored_min`, `gpdg:v1:d01:d01-pair:pressure:false:over_authored_max+over_fatigue_cap`, `gpdg:v1:d01:d01-solo:movement_proxy:false:over_authored_max+over_fatigue_cap`, `gpdg:v1:d11:d11-solo:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-pair-open:main_skill:true:under_authored_min`, `gpdg:v1:d01:d01-pair:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d01:d01-solo:pressure:false:over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-solo-net:main_skill:true:under_authored_min`, `gpdg:v1:d03:d03-pair:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d10:d10-pair:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-pair:main_skill:true:under_authored_min`, `gpdg:v1:d22:d22-solo:main_skill:true:under_authored_min`, `gpdg:v1:d38:d38-pair:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d01:d01-pair:technique:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d11:d11-pair:pressure:false:over_authored_max+over_fatigue_cap`
+
+### Generator redistribution investigation
+
+- Lane: `generator_redistribution_investigation`
+- Question: Would these over-cap groups still exist without optional-slot redistribution?
+- Why this lane: Redistribution evidence means generator policy should be investigated before catalog changes.
+- Groups: 21; total affected cells: 251
+- Redistribution-affected cells: 236
+- Non-redistribution over-cap cells: 15
+- Route mix: `generator_policy_investigation` 21
+- Disposition: `needs_human_decision`
+- Candidate dispositions: `route_to_U8`
+- Recommended follow-up: U8 redistribution comparison
+- Next evidence needed: Compare redistribution-affected cells against non-redistribution over-cap cells.
+- Group keys: `gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d46:d46-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d46:d46-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d47:d47-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d05:d05-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d31:d31-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d40:d40-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d31:d31-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-solo-net:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d31:d31-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`
+
 
 ## New / Untriaged Blockers
 

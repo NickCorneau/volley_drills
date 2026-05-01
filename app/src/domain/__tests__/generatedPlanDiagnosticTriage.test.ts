@@ -6,6 +6,7 @@ import {
   type GeneratedPlanObservationGroup,
 } from '../generatedPlanDiagnostics'
 import {
+  buildGeneratedPlanDecisionDebtPrompts,
   buildGeneratedPlanTriageWorkbenchMarkdown,
   buildInitialGeneratedPlanTriageRegistry,
   conservativeRouteForGeneratedPlanGroup,
@@ -298,5 +299,92 @@ describe('generated plan diagnostic triage registry', () => {
     expect(markdown).toContain('enforced_group_present')
     expect(markdown).toContain('source_depth_missing_evidence')
     expect(markdown).toContain('missing_required_field')
+  })
+
+  it('compresses current triage groups into human-sized decision prompts', () => {
+    const groups = currentGroups()
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const prompts = buildGeneratedPlanDecisionDebtPrompts(groups, registry)
+
+    expect(prompts.length).toBeLessThanOrEqual(10)
+    expect(prompts.map((prompt) => prompt.lane)).toContain('short_session_cooldown_minimum')
+    expect(prompts.map((prompt) => prompt.lane)).toContain(
+      'generator_redistribution_investigation',
+    )
+    expect(prompts.map((prompt) => prompt.lane)).not.toContain('unknown_unclassified')
+
+    const cooldownPrompt = prompts.find((prompt) => prompt.lane === 'short_session_cooldown_minimum')
+    expect(cooldownPrompt).toEqual(
+      expect.objectContaining({
+        recommendedFollowUpUnit: 'U7 workload envelope guidance',
+        disposition: 'needs_human_decision',
+      }),
+    )
+    expect(cooldownPrompt?.groupKeys).toContain(
+      'gpdg:v1:d25:d25-solo:wrap:true:under_authored_min',
+    )
+  })
+
+  it('splits redistribution and non-redistribution over-cap cells in compressed prompts', () => {
+    const groups = currentGroups()
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const prompts = buildGeneratedPlanDecisionDebtPrompts(groups, registry)
+    const redistributionPrompt = prompts.find(
+      (prompt) => prompt.lane === 'generator_redistribution_investigation',
+    )
+
+    expect(redistributionPrompt).toBeDefined()
+    expect(redistributionPrompt?.totalAffectedCellCount).toBeGreaterThan(0)
+    expect(redistributionPrompt?.redistributionAffectedCellCount).toBeGreaterThan(0)
+    expect(redistributionPrompt?.nonRedistributionOverCapCellCount).toBeGreaterThan(0)
+    expect(redistributionPrompt?.totalAffectedCellCount).toBeGreaterThanOrEqual(
+      redistributionPrompt?.redistributionAffectedCellCount ?? 0,
+    )
+  })
+
+  it('fails validation for unexpected unknown compression lanes', () => {
+    const groups = currentGroups()
+    const firstGroup = groups[0]
+    const firstCell = firstGroup?.affectedCells[0]
+    if (!firstGroup || !firstCell) throw new Error('Expected current observation groups.')
+    const unknownGroup: GeneratedPlanObservationGroup = {
+      ...firstGroup,
+      groupKey: 'gpdg:v1:unknown:unknown-variant:pressure:false:repeated_focus_controlled_family',
+      diagnosticFingerprint: `${firstGroup.diagnosticFingerprint}:unknown`,
+      blockType: 'pressure',
+      required: false,
+      affectedCellCount: 4,
+      observationCodes: ['repeated_focus_controlled_family'],
+      affectedCells: Array.from({ length: 4 }, (_, index) => ({
+        ...firstCell,
+        seed: `unknown-${index}`,
+        observationCodes: ['repeated_focus_controlled_family'],
+        redistribution: undefined,
+      })),
+    }
+    const registry = buildInitialGeneratedPlanTriageRegistry([unknownGroup])
+    const validation = validateGeneratedPlanTriageCoverage([unknownGroup], registry)
+
+    expect(validation.blockingIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'unknown_compression_lane',
+          groupKey: unknownGroup.groupKey,
+        }),
+      ]),
+    )
+  })
+
+  it('renders compressed decision prompts in the workbench', () => {
+    const groups = currentGroups()
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const markdown = buildGeneratedPlanTriageWorkbenchMarkdown(groups, registry)
+
+    expect(markdown).toContain('## Decision-Debt Compression')
+    expect(markdown).toContain('Short-session cooldown minimum')
+    expect(markdown).toContain('Generator redistribution investigation')
+    expect(markdown).toContain('redistribution-affected cells')
+    expect(markdown).toContain('docs/ops/workload-envelope-authoring-guide.md#short-session-cooldown-minimum')
+    expect(markdown).toContain('Candidate dispositions: `accepted_policy_allowance`')
   })
 })

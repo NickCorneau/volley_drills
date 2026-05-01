@@ -150,3 +150,37 @@ External grounding:
 5. Write the Workload Envelope Authoring Guide.
 6. Explore Redistribution-Free Builder Comparison.
 
+## Continuation: Post-Triage Workflow Selection
+
+Later on 2026-05-01, the branch state changed: the triage workflow foundation from `docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md` now has U1-U3 implemented.
+
+Updated snapshot:
+
+- U1 stable diagnostic triage identity: complete.
+- U2 triage registry and workbench output: complete.
+- U3 freshness and graduation gates: complete.
+- Current triage workbench: 53 registry entries, 0 blockers, 0 warnings, 32 `defer` groups, and 21 `generator_policy_investigation` groups.
+- Newly selected next plan unit: U4 decision-debt compression review.
+- Remaining follow-up units after compression: U5 dynamic surface/new focus sentinel, U6 catalog change impact preview, U7 workload envelope guide, and U8 redistribution comparison diagnostic.
+
+### Selected Handoff: Decision-Debt Compression Review
+
+**Description:** Group the 32 deferred entries and 21 generator-policy investigations into a smaller set of human-sized decision prompts before any catalog or generator work.
+
+**Rationale:** U1-U3 made observations durable and fail-closed for future drift, but the current workbench still leaves the maintainer with 53 row-level decisions. Compressing those rows by decision type can reveal whether the next meaningful action is human policy review, U5 sentinel work, U7 authoring guidance, or U8 redistribution evidence.
+
+**Downsides:** This is mostly workflow/doc value unless it feeds back into the plan. Avoid turning it into a new UI surface or a broad decision framework.
+
+**Confidence:** 90%
+
+**Complexity:** Low / Medium
+
+**Status:** Explored
+
+### Updated Sequence Hypothesis
+
+1. Close out and verify the completed U1-U3 slice.
+2. Add U4 decision-debt compression before starting the remaining U5-U8 follow-ups.
+3. Use that pass to decide whether the next implementation unit should be U5 dynamic surface sentinel, U8 redistribution comparison, or U7 workload envelope guidance.
+4. Defer U6 catalog impact preview until a concrete gap card, cap edit, or candidate catalog change exists.
+

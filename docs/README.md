@@ -64,7 +64,7 @@ Provide the prose editorial index for the docs system:
 | `research/` | curated supporting evidence | when canon needs evidence or rationale |
 | `design/` | design / UX hub: pointer index for guidelines + dated UI/UX review passes | starting a UI/UX change or writing a design review |
 | `reviews/` | dated audits and review artifacts that inform follow-up plans without becoming product canon; includes the generated-plan diagnostics report validated by `npm run diagnostics:report:check` | checking prior audit findings before changing catalog, metadata, generated-plan diagnostics, or cross-cutting quality surfaces |
-| `ops/` | doc-surface and agent operating guidance | changing repo process or routing |
+| `ops/` | doc-surface, agent operating guidance, and catalog-authoring guidance | changing repo process, routing, or authoring policy |
 | `status/` | current project posture and recent shipped-history snapshot | checking what shipped recently or whether work is in scope |
 
 ## Fast Path

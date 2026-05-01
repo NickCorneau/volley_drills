@@ -110,8 +110,8 @@ title: "Generated Plan Diagnostics Triage"
 status: active
 stage: validation
 type: review
-summary: "Docs-first triage workbench for generated-plan routeable observation groups."
-authority: "Current triage snapshot for generated-plan diagnostic observation groups; validates stable group identity, conservative routes, and stale fingerprint review."
+summary: "Docs-first triage workbench and decision-debt compression review for generated-plan routeable observation groups."
+authority: "Current triage snapshot for generated-plan diagnostic observation groups; validates stable group identity, conservative routes, stale fingerprint review, and derived decision-debt compression lanes."
 last_updated: 2026-05-01
 depends_on:
   - app/src/domain/generatedPlanDiagnostics.ts
@@ -127,7 +127,7 @@ Record the current docs-first triage workbench for generated-plan routeable obse
 
 ## Interpretation
 
-This workbench does not authorize catalog changes. It routes generated-plan observations into conservative decision lanes so maintainers can decide whether a group is a policy allowance, cap review, block split, source-backed content-depth item, or generator-policy investigation.
+This workbench does not authorize catalog changes. It routes generated-plan observations into conservative decision lanes and compresses unresolved rows into derived human review prompts so maintainers can decide whether a group is a policy allowance, cap review, block split, source-backed content-depth item, or generator-policy investigation.
 
 ${workbenchMarkdown}
 ## Machine-Readable Registry
