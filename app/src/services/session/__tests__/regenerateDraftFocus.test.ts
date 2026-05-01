@@ -76,9 +76,12 @@ describe('regenerateDraftFocus', () => {
       sessionFocus: 'serve',
     })
 
-    expect(result).toEqual({ ok: false, reason: 'build' })
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    const mainSkill = result.draft.blocks.find((block) => block.type === 'main_skill')
+    expect(mainSkill?.drillId).not.toBe('d31')
     const saved = await db.sessionDrafts.get('current')
-    expect(saved?.context.sessionFocus).toBeUndefined()
+    expect(saved?.context.sessionFocus).toBe('serve')
   })
 
   it('restores a baseline draft through the guarded path', async () => {

@@ -5,7 +5,7 @@
  * D80 (70% gating).
  */
 
-import type { SkillFocus } from './drill'
+import type { PlayerLevel, SkillFocus } from './drill'
 
 /**
  * Full 0–3 pass-quality scale with physical set-window definitions (D78).
@@ -64,6 +64,12 @@ export interface SetupContext {
   netAvailable: boolean
   wallAvailable: boolean
   sessionFocus?: Extract<SkillFocus, 'pass' | 'serve' | 'set'>
+  /**
+   * Effective drill band used for focus-controlled assembly. Persisting
+   * this on drafts/plans lets runtime Swap use the same catalog filter
+   * as initial generation without re-reading onboarding state mid-run.
+   */
+  playerLevel?: PlayerLevel
 }
 
 export interface BlockSlot {

@@ -4,9 +4,9 @@ title: "Focus Coverage Catalog Readiness Requirements"
 status: active
 stage: validation
 type: requirements
-summary: "Requirements for making Tune today focus choices fully catalog-backed across pass/serve/set, skill levels, setup configurations, long sessions, and swaps. Establishes that Volleycraft should not have thin or unavailable visible focus states; the catalog must meet a practical depth floor before the focus picker is considered complete."
+summary: "Requirements for making Tune today focus choices fully catalog-backed across pass/serve/set, skill levels, setup configurations, long sessions, swaps, and generated-plan stretch-pressure diagnostics. Establishes that Volleycraft should not have thin or unavailable visible focus states; the catalog must meet a practical depth floor before the focus picker is considered complete."
 authority: "Requirements handoff for focus-picker catalog readiness, source-backed gap audit, variant-first expansion, and readiness-over-cap posture."
-last_updated: 2026-04-30
+last_updated: 2026-05-01
 depends_on:
 - docs/ideation/2026-04-30-focus-picker-drill-depth-ideation.md
 - docs/ideation/2026-04-28-what-to-add-next-ideation.md
@@ -65,6 +65,12 @@ This document defines the **completion bar** for Tune today catalog trust. Plann
   - **Steps:** The maintainer first looks for source-backed variant repairs, then activates safe existing reserves, then authors new source-backed drill records only when the gap remains real.
   - **Outcome:** Catalog expansion is disciplined but not blocked by the old cap when coverage is required for focus trust.
   - **Covered by:** R11, R12, R13, R14, R15, R16, R17
+- F4. Generated-plan stretch diagnosis
+  - **Trigger:** A generated draft preserves full duration by stretching selected blocks, especially after optional focus-controlled slots are skipped.
+  - **Actors:** A3, A4
+  - **Steps:** The diagnostic runs real seeded drafts, compares each selected block to the selected variant workload envelope, classifies any overage, and routes policy-relevant pressure into gap cards.
+  - **Outcome:** Full-duration readiness cannot hide one over-stretched drill block; the repo can tell whether a cell is healthy, acceptable-long, or content-thin before authoring more drills.
+  - **Covered by:** R33, R34, R35, R36, R37, R38
 
 ---
 
@@ -120,6 +126,15 @@ This document defines the **completion bar** for Tune today catalog trust. Plann
 - R31. This document inherits Tune today interaction, focus-chip accessibility, and focus-selection flow behavior from `docs/brainstorms/2026-04-29-session-focus-picker-requirements.md` and `docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md`; it does not redefine those UI contracts.
 - R32. Every generated `technique` or `movement_proxy` slot counted by readiness must be focus-reinforcing for the selected named focus. `warmup` and `wrap` remain recommendation-owned and may stay general-purpose unless a later plan explicitly expands the focus contract to them.
 
+**Generated-plan stretch diagnostics**
+
+- R33. The readiness system must distinguish catalog-depth readiness from generated-plan diagnostics. Candidate floors answer whether enough eligible families exist; generated-plan diagnostics answer what real seeded drafts do after selection, optional-slot skipping, and duration redistribution.
+- R34. Generated-plan diagnostics must sweep the supported matrix with a deterministic seed corpus: visible focus, setup configuration, effective player level, duration, and seed. The seed count should be small enough for normal Vitest runs but large enough to catch seeded selection pathologies; a later plan may tune the corpus size.
+- R35. For every generated draft, diagnostics must classify hard failures separately from warnings. Hard failures include no draft, wrong total duration, required slot missing, off-focus focus-controlled work, hard-filter violations, and unclassified stretch pressure. Warnings include known over-`durationMaxMinutes`, over-`fatigueCap.maxMinutes`, optional-slot redistribution, and thin/repetitive generated shape.
+- R36. Stretch diagnostics must compare each generated block's planned minutes to the selected variant's `workload.durationMaxMinutes` and `workload.fatigueCap.maxMinutes` when present. The report must include block type, required flag, drill/variant IDs, planned minutes, authored caps, and whether the overage appears to come from redistribution.
+- R37. Stretch beyond authored caps is not automatically a product failure. The first implementation should make over-cap stretch visible and routeable; product policy can later promote specific overage categories to hard failures after deciding which drills can safely run long, which should split into rounds, and which indicate missing catalog depth.
+- R38. Future curated mixed-focus themes, starting with a likely `Serve + Receive` theme, must enter through an explicit theme contract rather than arbitrary multi-select filtering. A theme contract must name required primary-skill families, allowed dual-skill families, supported setup/level/duration cells, and the stretch-pressure threshold or allowed-overage rationale.
+
 ---
 
 ## Acceptance Examples
@@ -132,6 +147,8 @@ This document defines the **completion bar** for Tune today catalog trust. Plann
 - AE6. **Covers R18, R19, R20.** Given FIVB has rich modified-game content, the work may use those formats to strengthen pressure blocks, but it must not add a "Game-like" chip or turn setup into a custom plan builder.
 - AE7. **Covers R25, R26, R27.** Given the audit is generated or written, a future agent can scan focus-level health first, inspect failing cells by user-risk bucket, then open gap cards that separate candidate source material from exact activation-ready source references and affected catalog IDs.
 - AE8. **Covers R28.** Given three Serving cells fail, planning proposes the smallest source-backed activation batch with a manifest and checkpoint instead of treating every failed cell as blanket permission for unlimited new drills.
+- AE9. **Covers R33-R37.** Given a 40-minute Serving draft where optional focus-controlled slots are skipped and the missing minutes fold into one 24-minute serving block, the generated-plan diagnostic still reports a valid full-duration draft but classifies the over-cap stretch against the selected variant workload envelope.
+- AE10. **Covers R38.** Given a future `Serve + Receive` theme, a drill tagged `['pass', 'serve']` may satisfy a theme slot only if the theme contract permits that dual-skill family; raw "matches either selected focus" filtering is not sufficient.
 
 ---
 
@@ -143,6 +160,8 @@ This document defines the **completion bar** for Tune today catalog trust. Plann
 - Future agents can identify exactly which catalog cells are failing and why before proposing drill authoring.
 - Source-backed expansion grows the catalog without counting ineligible source drills as active coverage.
 - Skill-level and long-session readiness cannot pass on paper while generation still ignores those dimensions.
+- Full-duration generated drafts cannot hide stretch pressure; over-cap blocks are classified and routed before new drill authoring is proposed.
+- Future mixed-focus themes are curated contracts with their own readiness matrix, not arbitrary multi-select tag filters.
 - Planning can proceed without inventing the coverage matrix, the minimum depth bar, or the cap posture.
 
 ---
@@ -155,6 +174,7 @@ This document defines the **completion bar** for Tune today catalog trust. Plann
 - No scenario taxonomy implementation.
 - No hard skill-level UI or skill-level override in this requirements slice; readiness uses the existing onboarding skill level via `skillLevelToDrillBand()` and audits beginner/intermediate/advanced coverage.
 - No manual/custom duration entry in this requirements slice. A future manual duration surface, including longer practices such as 90 minutes, should be planned separately after the fixed-profile readiness bar is trustworthy.
+- No arbitrary multi-select focus picker. Mixed-focus work must use curated session themes with explicit contracts.
 - No AI-generated drill content.
 - No group or 3+ player support unless a source-backed drill is being logged as a future gap card behind `D101`.
 - No medical or injury-prevention claims in drill copy; safety-bearing changes still route through existing safety guidance.
@@ -169,6 +189,8 @@ This document defines the **completion bar** for Tune today catalog trust. Plann
 - **Support-slot guarantee.** Readiness-counted `technique` and `movement_proxy` blocks must reinforce the selected named focus; `warmup` and `wrap` remain general recommendation-owned slots.
 - **Variant-first expansion.** Prefer adapting or activating source-backed variants before authoring new drill families.
 - **Readiness over cap, with a replacement protocol.** The previous authoring cap yields when missing catalog depth prevents Tune today from honoring its visible focus promise, but only through named gap cards, variant-first checks, smallest useful batches, and review checkpoints.
+- **Diagnostics before policy escalation.** Stretch past authored workload caps starts as classified report data, not an automatic red build. Unknown or unclassified stretch fails because the repo cannot reason about it; known stretch becomes a policy decision.
+- **Curated themes over raw multi-select.** `Serve + Receive` and similar future themes should define a slot mix and eligible dual-skill families explicitly.
 
 ---
 
@@ -191,6 +213,8 @@ This document defines the **completion bar** for Tune today catalog trust. Plann
 
 - [Affects R6-R10][Technical] Decide whether the audit should be a docs-only table, a test-backed generated report, or both.
 - [Affects R15-R17][Needs research] For each failing cell, identify the exact FIVB, BAB, Volleyball Canada, or other source material that can safely fill the gap.
+- [Affects R34-R37][Technical/Product] Choose the initial seed corpus size and which over-cap warning categories should remain diagnostic versus become hard failures.
+- [Affects R38][Product] Decide whether `Serve + Receive` is the first curated theme and what its slot contract should require.
 
 ---
 

@@ -19,10 +19,12 @@
 //    (chain-1..5 for pass, chain-6-serving for serve, chain-7-setting for set).
 //    Warmup and wrap blocks are focus-agnostic (they key off skillFocus
 //    'warmup' and 'recovery' respectively, not the session focus).
-//    Technique and movement_proxy blocks MAY support-focus - for example,
-//    a pass-focus session can use a movement_proxy block with
-//    `skillTags: ['pass', 'movement']`. Never author a session template
-//    that mixes two primary main-skill chains.
+//    Technique and movement_proxy blocks MAY support-focus. In default
+//    Recommended sessions the movement_proxy fallback remains pass-scoped
+//    so secondary tags like `['set', 'movement']` do not leak setting
+//    content into a pass/serve session. Never author a session template
+//    that mixes two primary main-skill chains unless a future curated
+//    session-theme surface owns the mixed-skill contract explicitly.
 //
 // 2. Serve-to-attack convertibility (BAB 2024 drill book intro).
 //    "All of the drills under the Serving header can be easily converted
@@ -86,7 +88,10 @@ const movementProxy = (min: number, max: number): BlockSlot => ({
   durationMaxMinutes: max,
   intent: 'Footwork, first-step movement, or reading proxies before harder block.',
   required: false,
-  skillTags: ['pass', 'movement'],
+  // Pass-scoped fallback: named-focus sessions override this via
+  // `effectiveSkillTags()`, while Recommended should not admit every
+  // movement-tagged drill across all skill chains.
+  skillTags: ['pass'],
 })
 
 const mainSkill = (min: number, max: number): BlockSlot => ({

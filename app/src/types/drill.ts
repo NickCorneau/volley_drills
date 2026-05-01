@@ -12,7 +12,12 @@
 export type FeedType = 'self-toss' | 'partner-toss' | 'live-serve' | 'wall-rebound' | 'coach-serve'
 
 /**
- * Technique-axis taxonomy for drills: the GMP a drill primarily trains.
+ * Technique-axis taxonomy for drills: the GMP(s) a drill materially trains.
+ * `skillFocus` may carry multiple values when the drill gives real practice
+ * responsibility to multiple skills (for example pass + serve in scored
+ * serve-receive, or set + movement when footwork is the setting problem).
+ * Do not add a secondary tag just because that action appears as a feed,
+ * scenario, or future progression note.
  *
  * New values land only when partner-walkthrough evidence or at least
  * three founder-ledger rows fire a D135-style trigger. `attack` is a
@@ -26,6 +31,12 @@ export type FeedType = 'self-toss' | 'partner-toss' | 'live-serve' | 'wall-rebou
  * `'recovery'` fallback; see the warmup-slot invariant in
  * `app/src/data/archetypes.ts` and `pickForSlot` in
  * `app/src/domain/sessionAssembly/candidates.ts`.
+ *
+ * `'movement'` is a support tag, not a standalone Tune today focus. In
+ * default Recommended sessions, archetype fallbacks keep movement_proxy
+ * pass-scoped so set/serve drills that also train movement do not leak
+ * across primary focus chains. Named-focus sessions can still use
+ * secondary movement tags for better slot fit.
  */
 export type SkillFocus =
   | 'pass'

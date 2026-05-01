@@ -1,7 +1,10 @@
 ---
+id: focus-coverage-readiness-2026-04-30
 title: "feat: Focus coverage catalog readiness"
-type: feat
-status: active
+status: complete
+stage: validation
+type: plan
+summary: "Completed implementation plan for Tune today focus coverage readiness: generated audit, skill-level-aware focus assembly, strict swap/readiness checks, source-backed gap cards, and all-green current matrix verification."
 date: 2026-04-30
 origin: docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md
 ---
@@ -13,6 +16,10 @@ origin: docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirement
 Implement the readiness control plane behind Tune today focus trust: a test-backed coverage audit, generated-session checks, skill-level-aware generation, current 40-minute long-session readiness, same-focus swap readiness, support-slot focus semantics, and durable source-backed gap-card / activation-batch artifacts.
 
 The plan treats the origin requirements as the source of truth. The outcome is not a hidden "thin focus" fallback. Named-focus Tune today remains v1-ready only when required cells are verified or explicitly not applicable.
+
+**Completion update (2026-04-30):** The readiness engine now verifies all 135 current matrix cells. Passing, Serving, and Setting each stand at 45/45 verified across current configurations, beginner/intermediate/advanced levels, and fixed 15/25/40-minute profiles. Generated-draft coherence now also verifies full requested duration without repeated focus-controlled drill families. Final activation batch: `focus-readiness-batch-3-advanced-pass-set`.
+
+**Follow-up note (2026-05-01):** User dogfood surfaced a 40-minute Serving draft where optional focused slots were skipped and the missing minutes folded into one 24-minute serving block. That behavior is acceptable under the current contract, but it exposes the next quality layer: the audit should distinguish "can generate a full plan" from "can generate a plan without stretching a selected drill past its authored workload envelope." This is also the right staging point for future curated mixed-focus themes such as `Serve + Receive`; do not add arbitrary multi-select focus filtering before the generator can measure theme-specific depth and stretch pressure.
 
 ---
 
@@ -91,6 +98,8 @@ This plan adds the software and documentation surfaces that make that bar measur
 - **Readiness and runtime swap UX are related but not identical.** Keep off-focus swap fallback available for mid-run usability if needed, but the readiness engine must ignore that fallback when measuring same-focus swap depth.
 - **Support-slot focus becomes explicit.** `technique` and `movement_proxy` support slots counted by readiness must be focus-reinforcing. Warmup and wrap remain recommendation-owned.
 - **Gap cards are durable docs.** Store source/gap/manifest artifacts in `docs/reviews/` so readiness failures and cap overrides are reviewable without adding app UI.
+- **Themes are curated contracts, not tag ORs.** A future `Serve + Receive` theme should declare its intended slot mix and acceptable dual-skill drills instead of treating multi-select as "any drill matching either focus." The session theme becomes a new readiness dimension only when it has a product name, a slot contract, and generated-session diagnostics.
+- **Stretch pressure is diagnostic before it is a hard failure.** Current single-focus sessions may redistribute skipped optional minutes into `main_skill`. The next audit layer should report selected-block duration versus `variant.workload.durationMaxMinutes` and `fatigueCap.maxMinutes`, then route over-cap cells into gap cards. Hard-failing every stretch would be premature until product decides which drills can safely run long or be split into rounds.
 
 ---
 
@@ -127,6 +136,18 @@ flowchart TD
   report --> gapCards["Gap cards"]
   gapCards --> activationBatch["Smallest source-backed activation batch"]
 ```
+
+### Future Diagnostic Layer: Stretch Pressure And Themes
+
+The current readiness matrix answers: "Can every visible single focus generate a coherent plan for the supported setup, level, and duration cells?" The next matrix should answer: "Can it do so without hidden duration pressure, and can curated mixed-focus themes meet their own slot contract?"
+
+Recommended architecture:
+
+- Add a pure duration-pressure helper beside `focusReadiness.ts`, fed by a real `SessionDraft`, `DRILLS`, and the selected variants. It should report each block's planned minutes, variant `durationMaxMinutes`, `fatigueCap.maxMinutes`, and whether the overage came from optional-slot redistribution.
+- Keep this diagnostic separate from the existing readiness pass/fail at first. A 24-minute serving block is not automatically wrong, but it should be visible as `over_authored_max` or `over_fatigue_cap` rather than hidden inside a green readiness cell.
+- Add parameterized tests over `focus × configuration × playerLevel × duration × seed`. The assertion should initially be "all stretch pressure is classified and routeable," not "zero stretch exists."
+- Add a second matrix only when a theme ships. For `Serve + Receive`, the dimensions should include the theme id, setup, level, duration, and an explicit slot contract such as "at least one serve-primary family, at least one pass/serve-receive family, and no more than N minutes of unexplained over-cap stretch."
+- Gap cards stay the content-authoring queue. If the theme or stretch diagnostic fails, create a gap card with the failing cell and source-backed candidate direction before authoring or activating drills.
 
 ---
 

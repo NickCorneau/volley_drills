@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  type FocusReadinessCellInput,
   PLAYER_LEVELS,
   READINESS_CONFIGURATIONS,
   READINESS_DURATIONS,
@@ -14,6 +15,8 @@ import {
   type ActivationBatchManifest,
   type FocusReadinessGapCard,
 } from '../focusReadiness'
+import { buildDraft } from '../../sessionBuilder'
+import type { SetupContext } from '../../../model'
 
 const activationReadyGapCard: FocusReadinessGapCard = {
   id: 'gap-serve-pair-open-beginner-40-main',
@@ -39,6 +42,35 @@ const activationManifest: ActivationBatchManifest = {
   capDelta: 0,
   verification: 'focus readiness audit and catalog validation pass',
   checkpointCriteria: 'No additional serving records activate before this batch is verified.',
+}
+
+function contextForCell(cell: FocusReadinessCellInput): SetupContext {
+  const configuration = READINESS_CONFIGURATIONS.find((candidate) => candidate.id === cell.configuration)
+  if (!configuration) throw new Error(`Unknown readiness configuration ${cell.configuration}`)
+  return {
+    ...configuration.context,
+    timeProfile: cell.duration,
+    sessionFocus: cell.focus,
+    playerLevel: cell.level,
+  }
+}
+
+function repeatedFocusControlledDrillIds(cell: FocusReadinessCellInput): string[] {
+  const draft = buildDraft(contextForCell(cell), {
+    assemblySeed: `${cell.focus}-${cell.configuration}-${cell.level}-${cell.duration}-no-repeat`,
+    playerLevel: cell.level,
+  })
+  if (!draft) return ['cannot-build']
+  const totalMinutes = draft.blocks.reduce((sum, block) => sum + block.durationMinutes, 0)
+  if (totalMinutes !== cell.duration) return [`duration-${totalMinutes}`]
+  const focusedDrillIds = draft.blocks
+    .filter((block) =>
+      ['technique', 'movement_proxy', 'main_skill', 'pressure'].includes(block.type),
+    )
+    .map((block) => block.drillId)
+  return focusedDrillIds.filter(
+    (drillId, index) => focusedDrillIds.indexOf(drillId) !== index,
+  )
 }
 
 describe('focus readiness model', () => {
@@ -89,12 +121,20 @@ describe('focus readiness audit engine', () => {
   it('covers every focus, current configuration, level, and fixed duration cell', () => {
     const audit = buildFocusReadinessAudit()
 
-    expect(audit.cells).toHaveLength(
-      VISIBLE_FOCUSES.length *
-        READINESS_CONFIGURATIONS.length *
-        PLAYER_LEVELS.length *
-        READINESS_DURATIONS.length,
-    )
+    expect(VISIBLE_FOCUSES).toEqual(['pass', 'serve', 'set'])
+    expect(PLAYER_LEVELS).toEqual(['beginner', 'intermediate', 'advanced'])
+    expect(READINESS_CONFIGURATIONS.map((configuration) => configuration.id)).toEqual([
+      'solo_net',
+      'solo_wall',
+      'solo_open',
+      'pair_net',
+      'pair_open',
+    ])
+    expect(READINESS_DURATIONS).toEqual([15, 25, 40])
+    expect(audit.cells).toHaveLength(135)
+    for (const focus of VISIBLE_FOCUSES) {
+      expect(audit.cells.filter((cell) => cell.focus === focus)).toHaveLength(45)
+    }
     expect(
       audit.cells.some(
         (cell) =>
@@ -104,6 +144,27 @@ describe('focus readiness audit engine', () => {
           cell.duration === 40,
       ),
     ).toBe(true)
+  })
+
+  it('verifies every visible focus cell against the readiness floor', () => {
+    const audit = buildFocusReadinessAudit()
+
+    expect(audit.cells.filter((cell) => cell.status !== 'verified')).toEqual([])
+    expect(audit.cells.filter((cell) => cell.riskBuckets.length > 0)).toEqual([])
+  })
+
+  it('verified cells can build focus-controlled work without repeated drills', () => {
+    const audit = buildFocusReadinessAudit()
+
+    expect(
+      audit.cells
+        .filter((cell) => cell.status === 'verified')
+        .map((cell) => ({
+          cell,
+          repeatedDrillIds: repeatedFocusControlledDrillIds(cell),
+        }))
+        .filter((result) => result.repeatedDrillIds.length > 0),
+    ).toEqual([])
   })
 
   it('uses the current fixed profiles and treats 40 as the long-session readiness target', () => {
@@ -122,16 +183,28 @@ describe('focus readiness audit engine', () => {
     expect(cell.coverage.pressure.reason).toBe('layout_has_no_pressure_slot')
   })
 
-  it('flags the current pair open serving long-session cell as failing instead of paper-covered', () => {
+  it('verifies advanced pair open serving long-session coverage with source-backed d22 and d33 depth', () => {
     const cell = evaluateFocusReadinessCell({
       focus: 'serve',
       configuration: 'pair_open',
-      level: 'beginner',
+      level: 'advanced',
       duration: 40,
     })
 
-    expect(cell.status).toBe('failing')
-    expect(cell.riskBuckets.length).toBeGreaterThan(0)
+    expect(cell.status).toBe('verified')
+    expect(cell.coverage.main.eligibleDrillFamilies).toEqual(expect.arrayContaining(['d22', 'd33']))
+  })
+
+  it('verifies intermediate solo open serving long-session coverage with no-net scoring depth', () => {
+    const cell = evaluateFocusReadinessCell({
+      focus: 'serve',
+      configuration: 'solo_open',
+      level: 'intermediate',
+      duration: 40,
+    })
+
+    expect(cell.status).toBe('verified')
+    expect(cell.coverage.main.eligibleDrillFamilies).toEqual(expect.arrayContaining(['d22', 'd33']))
   })
 
   it('applies player level when counting eligible drill families', () => {
@@ -150,5 +223,52 @@ describe('focus readiness audit engine', () => {
 
     expect(beginner.coverage.main.eligibleDrillFamilies).toContain('d31')
     expect(advanced.coverage.main.eligibleDrillFamilies).not.toContain('d31')
+  })
+
+  it('applies player level when counting focus-reinforcing support families', () => {
+    const advancedSetting = evaluateFocusReadinessCell({
+      focus: 'set',
+      configuration: 'pair_open',
+      level: 'advanced',
+      duration: 40,
+    })
+
+    expect(advancedSetting.coverage.support.eligibleDrillFamilies).toEqual(
+      expect.arrayContaining(['d47', 'd48']),
+    )
+    for (const beginnerOrIntermediateOnly of ['d38', 'd39', 'd40', 'd42']) {
+      expect(advancedSetting.coverage.support.eligibleDrillFamilies).not.toContain(
+        beginnerOrIntermediateOnly,
+      )
+    }
+  })
+
+  it('verifies beginner setting in pair open long sessions once support slots follow focus', () => {
+    const cell = evaluateFocusReadinessCell({
+      focus: 'set',
+      configuration: 'pair_open',
+      level: 'beginner',
+      duration: 40,
+    })
+
+    expect(cell.status).toBe('verified')
+    expect(cell.coverage.support.eligibleDrillFamilies).toEqual(
+      expect.arrayContaining(['d38', 'd39', 'd40']),
+    )
+  })
+
+  it('verifies beginner serving in pair open long sessions with no-net serving variants', () => {
+    const cell = evaluateFocusReadinessCell({
+      focus: 'serve',
+      configuration: 'pair_open',
+      level: 'beginner',
+      duration: 40,
+    })
+
+    expect(cell.status).toBe('verified')
+    expect(cell.coverage.main.eligibleDrillFamilies).toEqual(expect.arrayContaining(['d31', 'd33']))
+    expect(cell.coverage.support.eligibleDrillFamilies).toEqual(
+      expect.arrayContaining(['d31', 'd33']),
+    )
   })
 })

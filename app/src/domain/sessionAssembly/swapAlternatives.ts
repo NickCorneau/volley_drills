@@ -4,11 +4,13 @@ import type {
   BlockSlot,
   BlockSlotType,
   SessionPlanBlock,
+  PlayerLevel,
   SetupContext,
   SkillFocus,
 } from '../../model'
 import { findPreferredCandidate, findSubstitute } from '../drillSelection'
 import { findCandidates } from './candidates'
+import { isFocusControlledSlotType } from './effectiveFocus'
 import { deriveBlockRationale, deriveSubstitutionRationale } from './rationale'
 
 const SKILL_TAGS_BY_TYPE: Record<BlockSlotType, readonly SkillFocus[]> = {
@@ -22,6 +24,7 @@ const SKILL_TAGS_BY_TYPE: Record<BlockSlotType, readonly SkillFocus[]> = {
 
 export type FindSwapAlternativesOptions = {
   readonly excludeDrillNames?: readonly string[]
+  readonly playerLevel?: PlayerLevel
 }
 
 function findPreferredProgressionTarget(drillId: string): string | undefined {
@@ -53,8 +56,7 @@ export function findSwapAlternatives(
   // accept the small intent-violation (a passing alternate during
   // a "set session") because no-swap is a worse mid-run outcome and
   // the user can still see today's focus on the rest of the plan.
-  const isFocusControlled = block.type === 'main_skill' || block.type === 'pressure'
-  if (isFocusControlled && context.sessionFocus !== undefined) {
+  if (isFocusControlledSlotType(block.type) && context.sessionFocus !== undefined) {
     const widenedContext: SetupContext = { ...context }
     delete widenedContext.sessionFocus
     return computeAlternatives(block, widenedContext, options)
@@ -85,7 +87,9 @@ function computeAlternatives(
     required: block.required,
     skillTags: SKILL_TAGS_BY_TYPE[block.type],
   }
-  const candidates = findCandidates(slot, context).sort((a, b) =>
+  const candidates = findCandidates(slot, context, {
+    playerLevel: options?.playerLevel,
+  }).sort((a, b) =>
     a.drill.id.localeCompare(b.drill.id),
   )
 

@@ -7,7 +7,7 @@ stage: planning
 type: core
 authority: phase sequencing, exit criteria, local-first capability ladder, validation experiments, risk mitigations
 summary: "Phased delivery plan with exit criteria, validation experiments, and local-first capability ladder."
-last_updated: 2026-04-28
+last_updated: 2026-05-01
 depends_on:
 
 - docs/vision.md
@@ -189,6 +189,7 @@ Scope (self-coached, always):
 - Slightly more opinionated week-shape planning and transparent progression/deload suggestions. When activated, use the PoST framework (Coordination -> Skill Adaptability -> Performance) as the periodization macro vocabulary layered on top of the deterministic sRPE-load micro governor defined in `D113` (`baseline3` / `peak30` / rolling-14d bands and history phases in `docs/specs/m001-adaptation-rules.md`). See `docs/research/periodization-post-framework.md` for the macro mapping and `docs/research/srpe-load-adaptation-rules.md` for the micro bands. This resolves `O2` without inventing a new framework.
 - Baseline tests for core skills (design-spec inputs live in `docs/research/baseline-skill-assessments-amateur-beach.md` — asymmetric ship posture: **serve** is the only skill with strong self-administered psychometric support (Costa 2024 graduated 2–22 ring scoring + Zetou 2005 zone overlay + optional 5/5 wind side-switch; optional Ðolo 2023 float-specialist alternate); **pass and set** are partner-mode-primary via three compatible source lineages (Zetou 2005 / VSAT / NCSU-Bartlett 1991); **solo-no-wall pass and set are control drills, not baselines**, per three-vendor 2026-04-22 agreement on the framing; do not activate before Phase 1.5 reaches the roadmap and does not pull forward into M001 or M002 scope). Frame the weekly-receipt skill proxy (`D74`) as retention across non-consecutive days, not last-session hit rate, so the signal tracks skill rather than same-day grooved reps.
 - Constraint-aware substitutions by intent
+- Curated mixed-focus session themes, not arbitrary multi-select focus filtering. First candidate: `Serve + Receive`, with an explicit session contract for serving work, passing/serve-receive work, and any dual-skill drills such as serve-and-pass ladders. Themes should enter only after the current single-focus generator has a stretch-pressure/readiness diagnostic that can show whether a theme has enough distinct eligible work before new drills are authored.
 - Full training-history export in a standard durable format (JSON at minimum)
 - Optional cloud peer for encrypted backup and cross-device relay; the cloud peer is never the source of truth
 

@@ -288,21 +288,26 @@ function risksForCoverage(
 
 function swapCoverageForFocusControlledSlots(
   mainCandidates: readonly CandidateVariant[],
+  supportCandidates: readonly CandidateVariant[],
   pressureCandidates: readonly CandidateVariant[],
   pressure: SlotReadinessCoverage,
 ): SlotReadinessCoverage {
   const mainFamilies = distinctDrillFamilies(mainCandidates)
+  const supportFamilies = distinctDrillFamilies(supportCandidates)
   const pressureFamilies = distinctDrillFamilies(pressureCandidates)
   const mainCovered = mainFamilies.length >= 2
+  const supportCovered = supportFamilies.length >= 2
   const pressureCovered = pressure.status === 'not_applicable' || pressureFamilies.length >= 2
   const combinedCandidates =
-    pressure.status === 'not_applicable' ? mainCandidates : [...mainCandidates, ...pressureCandidates]
+    pressure.status === 'not_applicable'
+      ? [...supportCandidates, ...mainCandidates]
+      : [...supportCandidates, ...mainCandidates, ...pressureCandidates]
 
   return {
-    status: mainCovered && pressureCovered ? 'covered' : 'failing',
+    status: mainCovered && supportCovered && pressureCovered ? 'covered' : 'failing',
     eligibleDrillFamilies: distinctDrillFamilies(combinedCandidates),
     eligibleCatalogIds: toCatalogIds(combinedCandidates),
-    reason: mainCovered && pressureCovered ? undefined : 'same_focus_swap_missing',
+    reason: mainCovered && supportCovered && pressureCovered ? undefined : 'same_focus_swap_missing',
   }
 }
 
@@ -441,9 +446,10 @@ export function evaluateFocusReadinessCell(
   const pressureSlot = layout.find((slot) => slot.type === 'pressure')
   const mainCandidates = slotCandidates(mainSlot, context, input.level)
   const pressureCandidates = slotCandidates(pressureSlot, context, input.level)
+  const supportSlotCandidates = supportCandidates(layout, context, input.focus, input.level)
   const main = coverageFromCandidates(mainCandidates, 2, 'main_floor_missing')
   const support = coverageFromCandidates(
-    supportCandidates(layout, context, input.focus, input.level),
+    supportSlotCandidates,
     1,
     'focus_reinforcing_support_missing',
   )
@@ -452,7 +458,12 @@ export function evaluateFocusReadinessCell(
       ? emptyCoverage('not_applicable', 'layout_has_no_pressure_slot')
       : coverageFromCandidates(pressureCandidates, 1, 'pressure_floor_missing')
 
-  const swap = swapCoverageForFocusControlledSlots(mainCandidates, pressureCandidates, pressure)
+  const swap = swapCoverageForFocusControlledSlots(
+    mainCandidates,
+    supportSlotCandidates,
+    pressureCandidates,
+    pressure,
+  )
   const riskBuckets = risksForCoverage(main, support, pressure, swap)
 
   return {

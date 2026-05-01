@@ -24,7 +24,7 @@ describe('sessionBuilder', () => {
       { assemblySeed: 'batch3-golden-pair-open-25' },
     )
 
-    expect(draft?.assemblyAlgorithmVersion).toBe(1)
+    expect(draft?.assemblyAlgorithmVersion).toBe(3)
     expect(
       draft?.blocks.map((block) => ({
         type: block.type,
@@ -48,14 +48,14 @@ describe('sessionBuilder', () => {
       {
         type: 'movement_proxy',
         durationMinutes: 5,
-        drillId: 'd10',
-        variantId: 'd10-pair',
+        drillId: 'd46',
+        variantId: 'd46-pair-open',
       },
       {
         type: 'main_skill',
         durationMinutes: 7,
-        drillId: 'd11',
-        variantId: 'd11-pair',
+        drillId: 'd33',
+        variantId: 'd33-pair-open',
       },
       {
         type: 'wrap',
@@ -279,7 +279,94 @@ describe('sessionBuilder', () => {
     expect(drill?.skillFocus).toContain('serve')
   })
 
-  it('fails instead of falling back to beginner-only main work for an advanced focus', () => {
+  it('explicit setting focus makes generated support slots setting-reinforcing', () => {
+    const draft = buildDraft(
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+        sessionFocus: 'set',
+      },
+      { assemblySeed: 'setting-support-pair-open-40' },
+    )
+
+    expect(draft).not.toBeNull()
+    for (const block of draft!.blocks.filter(
+      (candidate) => candidate.type === 'technique' || candidate.type === 'movement_proxy',
+    )) {
+      const drill = DRILLS.find((candidate) => candidate.id === block.drillId)
+      expect(drill?.skillFocus).toContain('set')
+    }
+  })
+
+  it('explicit setting focus can use a movement-tagged setting drill in movement_proxy', () => {
+    const drillById = new Map(DRILLS.map((d) => [d.id, d] as const))
+    const draft = buildDraft(
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+        sessionFocus: 'set',
+      },
+      { assemblySeed: 'setting-movement-proxy-pair-open-40' },
+    )
+
+    expect(draft).not.toBeNull()
+    const movementProxy = draft!.blocks.find((block) => block.type === 'movement_proxy')
+    expect(movementProxy).toBeDefined()
+    const drill = drillById.get(movementProxy!.drillId)
+    expect(drill?.skillFocus).toContain('set')
+    expect(drill?.skillFocus).toContain('movement')
+  })
+
+  it('default movement_proxy fallback stays pass-scoped despite movement-tagged setting drills', () => {
+    const drillById = new Map(DRILLS.map((d) => [d.id, d] as const))
+    const draft = buildDraft(
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+      },
+      { assemblySeed: 'recommended-movement-proxy-pair-open-40' },
+    )
+
+    expect(draft).not.toBeNull()
+    const movementProxy = draft!.blocks.find((block) => block.type === 'movement_proxy')
+    expect(movementProxy).toBeDefined()
+    const drill = drillById.get(movementProxy!.drillId)
+    expect(drill?.skillFocus).toContain('pass')
+    expect(drill?.skillFocus).not.toContain('set')
+  })
+
+  it('explicit serving focus can build a pair open 40-minute practice', () => {
+    const draft = buildDraft(
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+        sessionFocus: 'serve',
+      },
+      { assemblySeed: 'serving-pair-open-40' },
+    )
+
+    expect(draft).not.toBeNull()
+    for (const block of draft!.blocks.filter(
+      (candidate) =>
+        candidate.type === 'technique' ||
+        candidate.type === 'movement_proxy' ||
+        candidate.type === 'main_skill' ||
+        candidate.type === 'pressure',
+    )) {
+      const drill = DRILLS.find((candidate) => candidate.id === block.drillId)
+      expect(drill?.skillFocus).toContain('serve')
+    }
+  })
+
+  it('advanced setting focus builds from advanced setting families instead of beginner fallback', () => {
     const playerLevel: PlayerLevel = 'advanced'
     const draft = buildDraft(
       {
@@ -287,12 +374,51 @@ describe('sessionBuilder', () => {
         timeProfile: 40,
         netAvailable: false,
         wallAvailable: false,
-        sessionFocus: 'serve',
+        sessionFocus: 'set',
       },
-      { assemblySeed: 'advanced-serving-solo-open', playerLevel },
+      { assemblySeed: 'advanced-setting-solo-open', playerLevel },
     )
 
-    expect(draft).toBeNull()
+    expect(draft).not.toBeNull()
+    const mainSkill = draft!.blocks.find((block) => block.type === 'main_skill')
+    expect(mainSkill).toBeDefined()
+    expect(['d47', 'd48']).toContain(mainSkill!.drillId)
+  })
+
+  it('advanced passing focus builds from advanced passing families', () => {
+    const draft = buildDraft(
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+        sessionFocus: 'pass',
+      },
+      { assemblySeed: 'advanced-passing-pair-open', playerLevel: 'advanced' },
+    )
+
+    expect(draft).not.toBeNull()
+    const mainSkill = draft!.blocks.find((block) => block.type === 'main_skill')
+    expect(mainSkill).toBeDefined()
+    expect(['d07', 'd46']).toContain(mainSkill!.drillId)
+  })
+
+  it('advanced serving focus can build a pair open 40-minute practice', () => {
+    const draft = buildDraft(
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+        sessionFocus: 'serve',
+      },
+      { assemblySeed: 'advanced-serving-pair-open', playerLevel: 'advanced' },
+    )
+
+    expect(draft).not.toBeNull()
+    const mainSkill = draft!.blocks.find((block) => block.type === 'main_skill')
+    expect(mainSkill).toBeDefined()
+    expect(['d22', 'd33']).toContain(mainSkill!.drillId)
   })
 
   /**
@@ -374,14 +500,16 @@ describe('sessionBuilder', () => {
   /**
    * **Solo content-gap finding (red-team 2026-04-27).** Solo
    * archetypes (`solo_wall` / `solo_net` / `solo_open`) have a
-   * `movement_proxy` slot in their 25-min and 40-min layouts, but
-   * **no `m001Candidate: true` drill carries `'movement'` in
-   * `skillFocus` AND a solo-compatible variant**:
+   * pass-scoped `movement_proxy` fallback in their 25-min and 40-min
+   * layouts, but **no `m001Candidate: true` pass drill carries
+   * `'movement'` in `skillFocus` AND a solo-compatible variant**:
    *
    *   - `d09` (`['pass', 'movement']`, m001=true) — pair-only.
    *   - `d10` (`['pass', 'movement']`, m001=true) — pair-only.
    *   - `d15` (`['pass', 'movement']`, m001=true) — pair-only.
-   *   - All other movement-tagged drills are `m001Candidate: false`.
+   *   - Setting drills such as `d40` / `d47` may carry secondary
+   *     movement tags, but they are intentionally excluded from
+   *     Recommended's pass-scoped movement fallback.
    *
    * As a result, the cca2 dogfeed F6 fix's prefer-`'movement'` branch
    * has no candidate to prefer in solo builds, and the slot falls
@@ -834,7 +962,7 @@ describe('sessionBuilder', () => {
     expect(first).not.toBeNull()
     expect(second).not.toBeNull()
     expect(first?.assemblySeed).toBe('seed-replay')
-    expect(first?.assemblyAlgorithmVersion).toBe(1)
+    expect(first?.assemblyAlgorithmVersion).toBe(3)
     expect(second?.blocks.map((block) => [block.drillId, block.variantId])).toEqual(
       first?.blocks.map((block) => [block.drillId, block.variantId]),
     )

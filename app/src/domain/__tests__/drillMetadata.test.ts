@@ -68,9 +68,11 @@ describe('getBlockSuccessRule', () => {
     // `description`; the V0B-28 surface-move requires a per-attempt
     // rule because the description renders inside the forced-criterion
     // prompt above per-rep Good/Total counts.
-    const block = makeBlock({ drillId: 'd33' })
+    const block = makeBlock({ drillId: 'd33', variantId: 'd33-solo-net' })
     expect(getBlockSuccessRule(block, 1)).toBe('Serve lands in the called zone.')
-    expect(getBlockSuccessRule(block, 2)).toBe('Serve lands in the called zone.')
+    expect(getBlockSuccessRule({ ...block, variantId: 'd33-pair' }, 2)).toBe(
+      'Serve lands in the called zone.',
+    )
   })
 
   it('returns null for an unknown drillId', () => {
@@ -122,7 +124,7 @@ describe('getBlockSuccessRule', () => {
     )
   })
 
-  it('falls back to the participants envelope when variantId is absent (legacy plan)', () => {
+  it('falls back to the pre-open net variant when variantId is absent (legacy plan)', () => {
     // Legacy session plans persisted before variantId was added rely on
     // the participants envelope. Confirm the fallback still works so
     // older ExecutionLogs continue to resolve. Use Object spread so we
@@ -132,6 +134,16 @@ describe('getBlockSuccessRule', () => {
     }
     delete (block as { variantId?: string }).variantId
     expect(getBlockSuccessRule(block, 2)).toMatch(/named by the shagger/)
+  })
+
+  it('does not let no-net variants hijack legacy d33 net fallback', () => {
+    const block: SessionPlanBlock = {
+      ...makeBlock({ drillId: 'd33', drillName: 'Around the World Serving' }),
+    }
+    delete (block as { variantId?: string }).variantId
+
+    expect(getBlockSuccessRule(block, 1)).toBe('Serve lands in the called zone.')
+    expect(getBlockSuccessRule({ ...block }, 2)).toBe('Serve lands in the called zone.')
   })
 
   it('falls back to the first variant when no participant envelope matches', () => {

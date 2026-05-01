@@ -1,5 +1,6 @@
 import { selectArchetype } from '../data/archetypes'
 import type {
+  BlockSlot,
   BlockSlotType,
   DraftBlock,
   ExecutionLog,
@@ -20,7 +21,7 @@ export {
 } from './sessionAssembly/swapAlternatives'
 export { deriveBlockRationale } from './sessionAssembly/rationale'
 
-export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 1
+export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 3
 
 /**
  * Optional inputs that scope build-time drill substitution.
@@ -56,29 +57,56 @@ export interface BuildDraftOptions {
   readonly playerLevel?: PlayerLevel
 }
 
+export interface DraftAssemblyTraceSlot {
+  readonly layoutIndex: number
+  readonly type: BlockSlotType
+  readonly required: boolean
+  readonly allocatedMinutes: number
+  readonly selected: boolean
+  readonly blockId?: string
+  readonly drillId?: string
+  readonly variantId?: string
+}
+
+export interface DraftAssemblyTrace {
+  readonly slots: readonly DraftAssemblyTraceSlot[]
+  readonly skippedOptionalLayoutIndexes: readonly number[]
+  readonly redistributedMinutes: number
+  readonly redistributionLayoutIndex?: number
+}
+
+export interface BuildDraftWithAssemblyTraceResult {
+  readonly draft: SessionDraft
+  readonly assemblyTrace: DraftAssemblyTrace
+}
+
 function stripSessionFocus(context: SetupContext): SetupContext {
   const next: SetupContext = { ...context }
   delete next.sessionFocus
   return next
 }
 
-export function buildDraft(
+function buildDraftResult(
   context: SetupContext,
   options?: BuildDraftOptions,
-): SessionDraft | null {
-  const archetype = selectArchetype(context)
+): BuildDraftWithAssemblyTraceResult | null {
+  const effectiveContext: SetupContext =
+    options?.playerLevel === undefined ? context : { ...context, playerLevel: options.playerLevel }
+  const archetype = selectArchetype(effectiveContext)
   if (!archetype) return null
   const assemblySeed = options?.assemblySeed ?? createAssemblySeed()
   const random = createSeededRandom(assemblySeed)
 
-  const layout = archetype.layouts[context.timeProfile]
+  const layout = archetype.layouts[effectiveContext.timeProfile]
   if (!layout || layout.length === 0) return null
-  const durations = allocateDurations(layout, context.timeProfile)
+  const durations = allocateDurations(layout, effectiveContext.timeProfile)
   if (!durations) return null
 
   const usedDrillIds = new Set<string>()
-  const blocks: DraftBlock[] = []
-  let blockIndex = 0
+  const selectedByLayoutIndex = new Map<
+    number,
+    { readonly pick: CandidateVariant; readonly substitutionRationale?: string }
+  >()
 
   // Decide build-time substitution UP FRONT and reserve the
   // substitute drillId so earlier slots in the layout (e.g.,
@@ -94,7 +122,7 @@ export function buildDraft(
     if (mainSkillSlot) {
       mainSkillSubstitute = pickMainSkillSubstitute(
         mainSkillSlot,
-        context,
+        effectiveContext,
         usedDrillIds,
         lastMainSkillDrillId,
         undefined,
@@ -106,38 +134,75 @@ export function buildDraft(
     }
   }
 
+  function selectSlot(
+    slot: BlockSlot,
+    allowUsedFallback: boolean,
+  ): { readonly pick: CandidateVariant; readonly substitutionRationale?: string } | undefined {
+    if (slot.type === 'main_skill' && mainSkillSubstitute) {
+      return {
+        pick: mainSkillSubstitute.candidate,
+        substitutionRationale: mainSkillSubstitute.rationale,
+      }
+    }
+
+    const pick = pickForSlot(slot, effectiveContext, usedDrillIds, random, {
+      playerLevel: options?.playerLevel,
+      allowUsedFallback,
+    })
+    return pick ? { pick } : undefined
+  }
+
   for (let i = 0; i < layout.length; i++) {
     const slot = layout[i]
+    if (!slot.required) continue
 
-    let pick: CandidateVariant | undefined
-    let substitutionRationale: string | undefined
+    const selected = selectSlot(slot, true)
+    if (!selected) return null
+    selectedByLayoutIndex.set(i, selected)
+    usedDrillIds.add(selected.pick.drill.id)
+  }
 
-    if (slot.type === 'main_skill' && mainSkillSubstitute) {
-      pick = mainSkillSubstitute.candidate
-      substitutionRationale = mainSkillSubstitute.rationale
-    }
+  for (let i = 0; i < layout.length; i++) {
+    const slot = layout[i]
+    if (slot.required) continue
 
-    if (!pick) {
-      pick = pickForSlot(slot, context, usedDrillIds, random, {
-        playerLevel: options?.playerLevel,
-      })
-    }
+    const selected = selectSlot(slot, false)
+    if (!selected) continue
+    selectedByLayoutIndex.set(i, selected)
+    usedDrillIds.add(selected.pick.drill.id)
+  }
 
-    if (!pick) {
-      if (slot.required) return null
-      continue
-    }
+  const blocks: DraftBlock[] = []
+  const blockIdByLayoutIndex = new Map<number, string>()
+  let blockIndex = 0
+  const selectedDurationTotal = [...selectedByLayoutIndex.keys()].reduce(
+    (sum, index) => sum + durations[index],
+    0,
+  )
+  const redistributedMinutes = effectiveContext.timeProfile - selectedDurationTotal
+  const redistributionIndex =
+    redistributedMinutes > 0
+      ? [...selectedByLayoutIndex.keys()].find((index) => layout[index].type === 'main_skill') ??
+        [...selectedByLayoutIndex.keys()].at(-1)
+      : undefined
 
-    usedDrillIds.add(pick.drill.id)
+  for (let i = 0; i < layout.length; i++) {
+    const selected = selectedByLayoutIndex.get(i)
+    if (!selected) continue
 
+    const slot = layout[i]
+    const { pick, substitutionRationale } = selected
+
+    const blockId = `block-${blockIndex++}`
+    blockIdByLayoutIndex.set(i, blockId)
     blocks.push({
-      id: `block-${blockIndex++}`,
+      id: blockId,
       type: slot.type,
       drillId: pick.drill.id,
       variantId: pick.variant.id,
       drillName: pick.drill.name,
       shortName: pick.drill.shortName,
-      durationMinutes: durations[i],
+      durationMinutes: durations[i] + (i === redistributionIndex ? redistributedMinutes : 0),
       coachingCue:
         pick.variant.coachingCues.length > 0
           ? pick.variant.coachingCues.join(' · ')
@@ -145,7 +210,7 @@ export function buildDraft(
       courtsideInstructions: pick.variant.courtsideInstructions,
       courtsideInstructionsBonus: pick.variant.courtsideInstructionsBonus,
       required: slot.required,
-      rationale: substitutionRationale ?? deriveBlockRationale(slot.type, pick.drill, context),
+      rationale: substitutionRationale ?? deriveBlockRationale(slot.type, pick.drill, effectiveContext),
       subBlockIntervalSeconds: pick.variant.subBlockIntervalSeconds,
       segments: pick.variant.segments,
     })
@@ -153,9 +218,9 @@ export function buildDraft(
 
   if (blocks.length === 0) return null
 
-  return {
+  const draft: SessionDraft = {
     id: 'current',
-    context,
+    context: effectiveContext,
     archetypeId: archetype.id,
     archetypeName: archetype.name,
     assemblySeed,
@@ -163,6 +228,45 @@ export function buildDraft(
     blocks,
     updatedAt: Date.now(),
   }
+
+  return {
+    draft,
+    assemblyTrace: {
+      slots: layout.map((slot, index) => {
+        const selected = selectedByLayoutIndex.get(index)
+        return {
+          layoutIndex: index,
+          type: slot.type,
+          required: slot.required,
+          allocatedMinutes: durations[index],
+          selected: selected !== undefined,
+          blockId: blockIdByLayoutIndex.get(index),
+          drillId: selected?.pick.drill.id,
+          variantId: selected?.pick.variant.id,
+        }
+      }),
+      skippedOptionalLayoutIndexes: layout
+        .map((slot, index) => ({ slot, index }))
+        .filter(({ slot, index }) => !slot.required && !selectedByLayoutIndex.has(index))
+        .map(({ index }) => index),
+      redistributedMinutes,
+      redistributionLayoutIndex: redistributionIndex,
+    },
+  }
+}
+
+export function buildDraftWithAssemblyTrace(
+  context: SetupContext,
+  options?: BuildDraftOptions,
+): BuildDraftWithAssemblyTraceResult | null {
+  return buildDraftResult(context, options)
+}
+
+export function buildDraft(
+  context: SetupContext,
+  options?: BuildDraftOptions,
+): SessionDraft | null {
+  return buildDraftResult(context, options)?.draft ?? null
 }
 
 /**

@@ -89,6 +89,28 @@ describe('validateDrillCatalog', () => {
     expect(pairEligibleWallOnly).toEqual([])
   })
 
+  describe('skillFocus authoring semantics', () => {
+    it.each([
+      ['d08', ['pass', 'serve']],
+      ['d18', ['pass', 'serve']],
+      ['d40', ['set', 'movement']],
+      ['d42', ['set', 'movement']],
+      ['d47', ['set', 'movement']],
+    ])('keeps intentional multi-skill tags on %s', (drillId, expectedTags) => {
+      const drillRecord = DRILLS.find((candidate) => candidate.id === drillId)
+      expect(drillRecord?.skillFocus).toEqual(expectedTags)
+    })
+
+    it.each(['d07', 'd15', 'd16', 'd46'])(
+      'does not add serve focus to %s when live serve/feed only trains the receiver',
+      (drillId) => {
+        const drillRecord = DRILLS.find((candidate) => candidate.id === drillId)
+        expect(drillRecord?.skillFocus).toContain('pass')
+        expect(drillRecord?.skillFocus).not.toContain('serve')
+      },
+    )
+  })
+
   it('reports duplicate drill ids and duplicate variant ids', () => {
     const first = drill({ id: 'd-dup' })
     const second = drill({

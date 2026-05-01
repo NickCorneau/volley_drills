@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
   "repo_id": "volley_drills",
-  "last_updated": "2026-04-30",
+  "last_updated": "2026-05-01",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -802,7 +802,7 @@
       "path": "docs/ideation/2026-04-30-focus-picker-drill-depth-ideation.md",
       "type": "ideation",
       "status": "active",
-      "canonical_for": "Ground-up audit plus synthesis of recent focus/skill ideation answering whether Tune today has enough active, source-backed drill depth for pass/serve/set practices and swaps across solo/pair, equipment, and long-session contexts. Finds Passing broadly covered, Setting buildable but thin, and Serving fragile (pair/no-net likely unbuildable; long serve sessions still pass-flavored in support slots; skill level not modeled). Recommends a coverage grid, serving-focus credibility pass, focus-aligned support-block definition, thin-focus honesty contract, long-session simulator, source-backed backlog cards, and variant-level provenance/adaptation checklist."
+      "canonical_for": "Ground-up audit plus synthesis of recent focus/skill ideation answering whether Tune today has enough active, source-backed drill depth for pass/serve/set practices and swaps across solo/pair, equipment, and long-session contexts. Consumed by the 2026-04-30 focus-coverage requirements and continued 2026-05-01 with the next quality layer: generated-plan stretch-pressure diagnostics and curated mixed-focus theme contracts such as Serve + Receive."
     },
     {
       "id": "skill-scope-reservation-requirements-2026-04-29",
@@ -823,7 +823,7 @@
       "path": "docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md",
       "type": "requirements",
       "status": "active",
-      "canonical_for": "Requirements for making Tune today focus choices fully catalog-backed across pass/serve/set, skill levels, setup configurations, long sessions, and swaps. Establishes that Volleycraft should not have thin or unavailable visible focus states; the catalog must meet a practical floor (2 main options, 1 support option, 1 pressure option where applicable, and 1 same-focus swap per focus-controlled slot) before the focus picker is considered complete. Expansion is variant-first, but catalog readiness overrides the earlier D130 authoring cap when required for focus trust."
+      "canonical_for": "Requirements for making Tune today focus choices fully catalog-backed across pass/serve/set, skill levels, setup configurations, long sessions, swaps, and generated-plan stretch-pressure diagnostics. Establishes that Volleycraft should not have thin or unavailable visible focus states; the catalog must meet a practical floor (2 main options, 1 support option, 1 pressure option where applicable, and 1 same-focus swap per focus-controlled slot) before the focus picker is considered complete. Expansion is variant-first, but catalog readiness overrides the earlier D130 authoring cap when required for focus trust. 2026-05-01 adds R33-R38 for generated-plan diagnostics, over-cap classification, and curated mixed-focus theme contracts."
     },
     {
       "id": "pre-run-simplification-2026-04-30",
@@ -836,22 +836,36 @@
       "id": "focus-coverage-readiness-2026-04-30",
       "path": "docs/plans/2026-04-30-002-feat-focus-coverage-readiness-plan.md",
       "type": "plan",
+      "status": "complete",
+      "canonical_for": "Completed implementation plan for the focus coverage catalog readiness requirements: test-backed audit model and coverage engine, existing-onboarding skill-level consumption via skillLevelToDrillBand(), current 40-minute long-session readiness, focus-reinforcing support-slot semantics, strict same-focus swap readiness, durable gap-card / activation-manifest artifacts, and docs/verification sync. Completion state: 135/135 readiness cells verified after batch 3. 2026-05-01 follow-up routes stretch-pressure diagnostics and future curated mixed-focus themes such as Serve + Receive. Origin: docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md."
+    },
+    {
+      "id": "generated-plan-diagnostics-2026-05-01",
+      "path": "docs/plans/2026-05-01-001-feat-generated-plan-diagnostics-plan.md",
+      "type": "plan",
       "status": "active",
-      "canonical_for": "Implementation plan for the focus coverage catalog readiness requirements: test-backed audit model and coverage engine, existing-onboarding skill-level consumption via skillLevelToDrillBand(), current 40-minute long-session readiness, focus-reinforcing support-slot semantics, strict same-focus swap readiness, durable gap-card / activation-manifest artifacts, and docs/verification sync. Origin: docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md."
+      "canonical_for": "Follow-up implementation plan for R33-R38 generated-plan diagnostics: product-supported dimension registry that fails closed when focuses/configurations/levels/durations/themes expand, domain-level deterministic seeded buildDraft() matrix, hard-failure versus routeable-observation classification, selected-block stretch comparison against workload.durationMaxMinutes and fatigueCap.maxMinutes, stable report/gap-card routing, and guardrails that keep future Serve + Receive work out of raw multi-select tag OR filtering. Origin: docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md."
     },
     {
       "id": "focus-coverage-readiness-audit-2026-04-30",
       "path": "docs/reviews/2026-04-30-focus-coverage-readiness-audit.md",
       "type": "review",
       "status": "active",
-      "canonical_for": "Generated-readiness audit snapshot for Tune today named-focus coverage across pass/serve/set, current setup configurations, beginner/intermediate/advanced levels, fixed 15/25/40-minute profiles, focus-reinforcing support, pressure applicability, and strict same-focus swaps. Records 135 cells: pass 30 verified / 15 failing, serve 0 verified / 45 failing, set 0 verified / 45 failing; activation batch intentionally none."
+      "canonical_for": "Generated-readiness audit snapshot for Tune today named-focus coverage across pass/serve/set, current setup configurations, beginner/intermediate/advanced levels, fixed 15/25/40-minute profiles, focus-reinforcing support, pressure applicability, and strict same-focus swaps. Records 135 cells after batch 3: pass 45 verified / 0 failing, serve 45 verified / 0 failing, set 45 verified / 0 failing; batches add focus-controlled support slots, serving depth on d22/d33, and FIVB-backed advanced Passing/Setting depth via d07/d46/d47/d48. 2026-05-01 generated-plan diagnostics now classify 540 seeded buildDraft() cells with 0 hard failures and routeable stretch observations recorded in docs/reviews/2026-05-01-generated-plan-diagnostics-report.json."
+    },
+    {
+      "id": "generated-plan-diagnostics-report-2026-05-01",
+      "path": "docs/reviews/2026-05-01-generated-plan-diagnostics-report.json",
+      "type": "review-data",
+      "status": "active",
+      "canonical_for": "Machine-readable generated-plan diagnostics summary for the current Tune today focus-readiness surface. Source: summarizeGeneratedPlanDiagnostics(buildGeneratedPlanDiagnostics()) and buildGeneratedPlanObservationGroups() in app/src/domain/generatedPlanDiagnostics.ts. Current snapshot: 540 seeded cells, 263 clean, 277 observation-only, 0 hard failures; observations classify optional-slot redistribution, over-authored-max stretch, and fatigue-cap stretch as routeable policy/content signals rather than automatic product failures. Includes 33 drill/variant/block routeable observation groups with example affected cells and likely fix paths."
     },
     {
       "id": "focus-coverage-gap-cards-2026-04-30",
       "path": "docs/reviews/2026-04-30-focus-coverage-gap-cards.md",
       "type": "review",
       "status": "active",
-      "canonical_for": "Grouped source-backed gap cards for the focus coverage readiness audit. Tracks advanced focus main coverage, serving support/swap depth, setting support/swap depth, and 40-minute long-session variety. Does not authorize catalog activation until exact source references, adaptation deltas, cap delta, and batch checkpoint criteria are recorded."
+      "canonical_for": "Grouped source-backed gap cards for the focus coverage readiness audit. All current matrix groups are verified after batch 3. Includes batch 1 activation manifest for focus-controlled support slots plus no-net d31/d33 serving variants, batch 2 manifest for d22/d33 serving level/depth repair, and batch 3 manifest for FIVB-backed advanced Passing/Setting depth via d07/d46/d47/d48. 2026-05-01 stretch-pressure diagnostic card now points to generated-plan observations in docs/reviews/2026-05-01-generated-plan-diagnostics-report.json; future catalog activation still requires exact source references, adaptation deltas, cap delta, and checkpoint criteria."
     },
     {
       "id": "per-move-pacing-indicator-ideation-2026-04-28",

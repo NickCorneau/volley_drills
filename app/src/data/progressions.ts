@@ -156,7 +156,7 @@ const chain4: ProgressionChain = {
   id: 'chain-4-serve-receive',
   name: 'Serve-Receive Variability and Pressure',
   focus: 'Short/deep reads, serve pressure, fatigue-aware caps.',
-  drillIds: ['d15', 'd16', 'd17', 'd18'],
+  drillIds: ['d15', 'd16', 'd46', 'd17', 'd18'],
   defaultGatingThreshold: 0.7,
   links: [
     {
@@ -165,6 +165,13 @@ const chain4: ProgressionChain = {
       direction: 'progression',
       gatingCriteria: '≥ 70% passes graded 2+ on 20 balls in d15',
       description: 'Short/deep read established → add 4-point diamond pattern with fatigue cap.',
+    },
+    {
+      fromDrillId: 'd16',
+      toDrillId: 'd46',
+      direction: 'progression',
+      gatingCriteria: '≥ 3/4 controlled passes per set in d16',
+      description: 'Four-point movement stable → add advanced spin-read receive work.',
     },
     {
       fromDrillId: 'd16',
@@ -258,14 +265,15 @@ const chain6: ProgressionChain = {
 // Tier 1b-A setting wave. Bump Set, Hand Set, and Footwork stay
 // default-unlocked as fundamentals per BAB Beginner's Guide Lesson 2;
 // pair setting progresses from d41 partner rhythm to d42 named corner
-// targets. d43 Triangle Setting and other 3-player BAB drills are
-// deferred to D101 3+ player support; we do not force a two-player
-// adaptation when the source form is genuinely 3+.
+// targets, then branches into FIVB-backed advanced variability and
+// post-set look/call work. d43 Triangle Setting and other 3-player BAB
+// drills remain deferred to D101 3+ player support; we do not force a
+// two-player adaptation when the source form is genuinely 3+.
 const chain7: ProgressionChain = {
   id: 'chain-7-setting',
   name: 'Setting Fundamentals',
-  focus: 'Bump-set shape, hand-set contact, footwork, and pair rhythm.',
-  drillIds: ['d38', 'd39', 'd40', 'd41', 'd42'],
+  focus: 'Bump-set shape, hand-set contact, footwork, pair rhythm, and advanced setting reads.',
+  drillIds: ['d38', 'd39', 'd40', 'd41', 'd42', 'd47', 'd48'],
   defaultGatingThreshold: 0.7,
   links: [
     {
@@ -274,6 +282,20 @@ const chain7: ProgressionChain = {
       direction: 'progression',
       gatingCriteria: '15-set partner rally with clean target shape in d41',
       description: 'Partner rhythm established → set to named corners with the same clean contact.',
+    },
+    {
+      fromDrillId: 'd42',
+      toDrillId: 'd47',
+      direction: 'progression',
+      gatingCriteria: '3 clean sets to each corner in d42',
+      description: 'Named target setting reliable → solve varied pass locations.',
+    },
+    {
+      fromDrillId: 'd47',
+      toDrillId: 'd48',
+      direction: 'progression',
+      gatingCriteria: '3 clean sets from each of the four locations in d47',
+      description: 'Variable set quality reliable → add post-set look and call behavior.',
     },
   ],
 }

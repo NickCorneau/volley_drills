@@ -1,7 +1,7 @@
 import { DRILLS } from '../../data/drills'
 import type { BlockSlot, DrillVariant, PlayerLevel, SetupContext } from '../../model'
 import type { SelectionCandidate } from '../drillSelection'
-import { effectiveSkillTags } from './effectiveFocus'
+import { effectiveSkillTags, isFocusControlledSlotType } from './effectiveFocus'
 import type { RandomSource } from './random'
 import { shuffle } from './random'
 
@@ -9,6 +9,10 @@ export type CandidateVariant = SelectionCandidate
 
 export interface FindCandidatesOptions {
   readonly playerLevel?: PlayerLevel
+}
+
+export interface PickForSlotOptions extends FindCandidatesOptions {
+  readonly allowUsedFallback?: boolean
 }
 
 const PLAYER_LEVEL_ORDER: Record<PlayerLevel, number> = {
@@ -36,10 +40,6 @@ function isLevelEligible(
     PLAYER_LEVEL_ORDER[level] <= PLAYER_LEVEL_ORDER[drill.levelMax]
 }
 
-function appliesLevelFilter(slot: BlockSlot): boolean {
-  return slot.type === 'main_skill' || slot.type === 'pressure'
-}
-
 export function findCandidates(
   slot: BlockSlot,
   context: SetupContext,
@@ -48,7 +48,8 @@ export function findCandidates(
   const playerCount = context.playerMode === 'solo' ? 1 : 2
   const candidates: CandidateVariant[] = []
   const skillTags = effectiveSkillTags(slot.type, context, slot.skillTags)
-  const playerLevel = appliesLevelFilter(slot) ? options?.playerLevel : undefined
+  const effectivePlayerLevel = options?.playerLevel ?? context.playerLevel
+  const playerLevel = isFocusControlledSlotType(slot.type) ? effectivePlayerLevel : undefined
 
   for (const drill of DRILLS) {
     if (!drill.m001Candidate) continue
@@ -77,10 +78,11 @@ export function pickForSlot(
   context: SetupContext,
   usedDrillIds: Set<string>,
   random: RandomSource,
-  options?: FindCandidatesOptions,
+  options?: PickForSlotOptions,
 ): CandidateVariant | undefined {
   const candidates = findCandidates(slot, context, options)
   const unused = candidates.filter((candidate) => !usedDrillIds.has(candidate.drill.id))
+  if (unused.length === 0 && options?.allowUsedFallback === false) return undefined
   const pool = shuffle(unused.length > 0 ? unused : candidates, random)
 
   if (pool.length === 0) return undefined
