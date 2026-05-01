@@ -13,9 +13,8 @@ import { HomeScreen } from '../HomeScreen'
  * yesterday's chosen focus. The user can still override on
  * Tune today before continuing.
  *
- * Partial Repeat ("Repeat what you did") deliberately strips focus;
- * see `buildDraftFromCompletedBlocks` and its dedicated test in
- * `domain/__tests__/buildDraftFromCompletedBlocks.test.ts`.
+ * Partial Repeat ("Repeat what you did") preserves the completed
+ * blocks' plan context, focus included; see `buildDraftFromCompletedBlocks`.
  *
  * If a future change tries to strip focus from full Repeat, this
  * test should fail loudly so the policy decision gets re-litigated
@@ -104,5 +103,26 @@ describe('HomeScreen full Repeat carries prior session focus', () => {
     expect(draft!.context.sessionFocus).toBe('serve')
     expect(draft!.context.playerMode).toBe('pair')
     expect(draft!.context.netAvailable).toBe(true)
+  })
+
+  it('Repeat this session applies the persisted onboarding skill level to legacy plan context', async () => {
+    const user = userEvent.setup()
+    await seedFocusedLastComplete()
+    await db.storageMeta.put({
+      key: 'onboarding.skillLevel',
+      value: 'competitive_pair',
+      updatedAt: Date.now(),
+    })
+    renderHome()
+
+    await user.click(
+      await screen.findByRole('button', { name: /repeat this session/i }),
+    )
+
+    expect(await screen.findByTestId('tune-route')).toBeInTheDocument()
+
+    const draft = await db.sessionDrafts.get('current')
+    expect(draft?.context.playerLevel).toBe('advanced')
+    expect(draft?.blocks.map((block) => block.drillId)).not.toContain('d31')
   })
 })

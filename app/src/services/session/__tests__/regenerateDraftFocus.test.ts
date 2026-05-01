@@ -38,6 +38,7 @@ describe('regenerateDraftFocus', () => {
     await db.sessionDrafts.put(draft)
 
     const result = await regenerateDraftFocus({
+      mode: 'regenerate',
       expectedUpdatedAt: draft.updatedAt,
       sessionFocus: 'serve',
     })
@@ -72,6 +73,7 @@ describe('regenerateDraftFocus', () => {
     })
 
     const result = await regenerateDraftFocus({
+      mode: 'regenerate',
       expectedUpdatedAt: 150,
       sessionFocus: 'serve',
     })
@@ -94,8 +96,8 @@ describe('regenerateDraftFocus', () => {
     await db.sessionDrafts.put(focused)
 
     const result = await regenerateDraftFocus({
+      mode: 'restore_baseline',
       expectedUpdatedAt: focused.updatedAt,
-      useBaseline: true,
       baselineDraft: baseline,
     })
 
@@ -113,6 +115,7 @@ describe('regenerateDraftFocus', () => {
     await db.sessionDrafts.put({ ...draft, updatedAt: 200 })
 
     const result = await regenerateDraftFocus({
+      mode: 'regenerate',
       expectedUpdatedAt: 100,
       sessionFocus: 'serve',
     })
@@ -131,6 +134,7 @@ describe('regenerateDraftFocus', () => {
     await db.sessionDrafts.put(draft)
 
     const result = await regenerateDraftFocus({
+      mode: 'regenerate',
       expectedUpdatedAt: draft.updatedAt,
       sessionFocus: 'serve',
     })

@@ -1,7 +1,7 @@
 ---
 id: generated-plan-diagnostics-2026-05-01
 title: "feat: Generated-plan stretch diagnostics"
-status: active
+status: complete
 stage: validation
 type: plan
 summary: "Follow-up implementation plan for generated-session diagnostics that sweep real seeded drafts, classify hard failures separately from routeable stretch observations, compare selected blocks against authored workload caps, and route findings into gap-card policy before any mixed-focus themes ship."
@@ -13,6 +13,7 @@ depends_on:
   - docs/plans/2026-04-30-002-feat-focus-coverage-readiness-plan.md
   - docs/reviews/2026-04-30-focus-coverage-readiness-audit.md
   - docs/reviews/2026-04-30-focus-coverage-gap-cards.md
+  - docs/reviews/2026-05-01-generated-plan-diagnostics-report.md
   - app/src/domain/sessionAssembly/focusReadiness.ts
   - app/src/domain/sessionBuilder.ts
 ---
@@ -59,6 +60,7 @@ The product decision from the origin requirements is intentionally nuanced: over
 - No user-facing UI changes, focus-chip changes, or runtime warning copy in this slice.
 - No arbitrary multi-select focus picker. Mixed-focus work remains future curated session themes with explicit contracts.
 - No catalog activation, new drills, or variant cap changes as part of the diagnostic implementation. Findings route to gap cards first.
+- Branch-level catalog changes in `app/src/data/drills.ts` are owned by the 2026-04-30 focus-coverage readiness batches, not by this generated-plan diagnostic slice.
 - No manual/custom duration support. The diagnostic covers the current fixed `15 | 25 | 40` `TimeProfile` set.
 - No policy escalation that hard-fails every known over-cap block. Unknown or unclassified stretch fails; classified over-cap stretch starts as report data, even when the selected block was required.
 - No new persisted session schema. Diagnostics should operate from existing `SessionDraft`, archetype, and drill metadata.
@@ -298,7 +300,7 @@ The generated-plan diagnostic should produce one result per seeded cell. Each re
 **Dependencies:** U1, U2, U3
 
 **Files:**
-- Create: `docs/reviews/2026-05-01-generated-plan-diagnostics-report.json`
+- Create: `docs/reviews/2026-05-01-generated-plan-diagnostics-report.md`
 - Modify: `docs/reviews/2026-04-30-focus-coverage-readiness-audit.md`
 - Modify: `docs/reviews/2026-04-30-focus-coverage-gap-cards.md`
 - Modify: `docs/catalog.json`

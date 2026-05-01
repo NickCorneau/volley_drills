@@ -115,6 +115,16 @@ describe('TuneTodayScreen', () => {
     )
   })
 
+  it('does not show transient updating copy when changing focus', async () => {
+    const user = userEvent.setup()
+    await seedDraft()
+    renderScreen()
+
+    await user.click(await screen.findByRole('radio', { name: 'Serving' }))
+
+    expect(screen.queryByText(/updating focus/i)).not.toBeInTheDocument()
+  })
+
   it('continues to safety', async () => {
     const user = userEvent.setup()
     await seedDraft()

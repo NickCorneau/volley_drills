@@ -57,16 +57,30 @@ export interface BuildDraftOptions {
   readonly playerLevel?: PlayerLevel
 }
 
-export interface DraftAssemblyTraceSlot {
+interface DraftAssemblyTraceSlotBase {
   readonly layoutIndex: number
   readonly type: BlockSlotType
   readonly required: boolean
   readonly allocatedMinutes: number
-  readonly selected: boolean
-  readonly blockId?: string
-  readonly drillId?: string
-  readonly variantId?: string
 }
+
+interface SelectedDraftAssemblyTraceSlot extends DraftAssemblyTraceSlotBase {
+  readonly selected: true
+  readonly blockId: string
+  readonly drillId: string
+  readonly variantId: string
+}
+
+interface UnselectedDraftAssemblyTraceSlot extends DraftAssemblyTraceSlotBase {
+  readonly selected: false
+  readonly blockId?: never
+  readonly drillId?: never
+  readonly variantId?: never
+}
+
+export type DraftAssemblyTraceSlot =
+  | SelectedDraftAssemblyTraceSlot
+  | UnselectedDraftAssemblyTraceSlot
 
 export interface DraftAssemblyTrace {
   readonly slots: readonly DraftAssemblyTraceSlot[]
@@ -78,6 +92,38 @@ export interface DraftAssemblyTrace {
 export interface BuildDraftWithAssemblyTraceResult {
   readonly draft: SessionDraft
   readonly assemblyTrace: DraftAssemblyTrace
+}
+
+function buildTraceSlot(
+  slot: BlockSlot,
+  layoutIndex: number,
+  allocatedMinutes: number,
+  selected: { readonly pick: CandidateVariant } | undefined,
+  blockId: string | undefined,
+): DraftAssemblyTraceSlot {
+  if (!selected) {
+    return {
+      layoutIndex,
+      type: slot.type,
+      required: slot.required,
+      allocatedMinutes,
+      selected: false,
+    }
+  }
+  if (!blockId) {
+    throw new Error('Selected draft trace slot is missing block identity.')
+  }
+
+  return {
+    layoutIndex,
+    type: slot.type,
+    required: slot.required,
+    allocatedMinutes,
+    selected: true,
+    blockId,
+    drillId: selected.pick.drill.id,
+    variantId: selected.pick.variant.id,
+  }
 }
 
 function stripSessionFocus(context: SetupContext): SetupContext {
@@ -232,19 +278,15 @@ function buildDraftResult(
   return {
     draft,
     assemblyTrace: {
-      slots: layout.map((slot, index) => {
-        const selected = selectedByLayoutIndex.get(index)
-        return {
-          layoutIndex: index,
-          type: slot.type,
-          required: slot.required,
-          allocatedMinutes: durations[index],
-          selected: selected !== undefined,
-          blockId: blockIdByLayoutIndex.get(index),
-          drillId: selected?.pick.drill.id,
-          variantId: selected?.pick.variant.id,
-        }
-      }),
+      slots: layout.map((slot, index) =>
+        buildTraceSlot(
+          slot,
+          index,
+          durations[index],
+          selectedByLayoutIndex.get(index),
+          blockIdByLayoutIndex.get(index),
+        ),
+      ),
       skippedOptionalLayoutIndexes: layout
         .map((slot, index) => ({ slot, index }))
         .filter(({ slot, index }) => !slot.required && !selectedByLayoutIndex.has(index))

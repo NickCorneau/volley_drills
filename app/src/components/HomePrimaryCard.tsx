@@ -46,6 +46,7 @@ type HomePrimaryCardProps =
       onRepeat: () => void
       onStartDifferent: () => void
       onRepeatWhatYouDid?: () => void
+      actionDisabled?: boolean
     }
   | {
       variant: 'new_user'

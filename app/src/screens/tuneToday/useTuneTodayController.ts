@@ -99,11 +99,12 @@ export function useTuneTodayController() {
       const result =
         nextFocus === 'recommended' && baselineDraft.current
           ? await regenerateDraftFocus({
+              mode: 'restore_baseline',
               expectedUpdatedAt: draft.updatedAt,
-              useBaseline: true,
               baselineDraft: baselineDraft.current,
             })
           : await regenerateDraftFocus({
+              mode: 'regenerate',
               expectedUpdatedAt: draft.updatedAt,
               sessionFocus: nextFocus === 'recommended' ? undefined : nextFocus,
             })

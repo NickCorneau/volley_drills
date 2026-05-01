@@ -5,3 +5,4 @@ ops/agent/runs/*
 .cursor/hooks/state/
 .cursor/plans/
 .cursor/state/
+.compound-engineering/*.local.yaml

@@ -9,12 +9,17 @@ export type RegenerateDraftFocusResult =
   | { ok: true; draft: SessionDraft; changed: boolean }
   | { ok: false; reason: 'load' | 'stale' | 'build' | 'save' | 'schema_blocked' }
 
-export interface RegenerateDraftFocusInput {
-  expectedUpdatedAt: number
-  sessionFocus?: SetupContext['sessionFocus']
-  baselineDraft?: SessionDraft
-  useBaseline?: boolean
-}
+export type RegenerateDraftFocusInput =
+  | {
+      readonly mode: 'regenerate'
+      readonly expectedUpdatedAt: number
+      readonly sessionFocus?: SetupContext['sessionFocus']
+    }
+  | {
+      readonly mode: 'restore_baseline'
+      readonly expectedUpdatedAt: number
+      readonly baselineDraft: SessionDraft
+    }
 
 function contextWithFocus(
   context: SetupContext,
@@ -67,12 +72,12 @@ export async function regenerateDraftFocus(
           return
         }
 
-        if (!input.useBaseline && current.context.sessionFocus === input.sessionFocus) {
+        if (input.mode === 'regenerate' && current.context.sessionFocus === input.sessionFocus) {
           result = { ok: true, draft: current, changed: false }
           return
         }
 
-        const nextDraft = input.useBaseline
+        const nextDraft = input.mode === 'restore_baseline'
           ? input.baselineDraft
           : buildDraft(contextWithFocus(current.context, input.sessionFocus), {
               lastCompletedByType: await findLastCompletedDrillIdsByType(),

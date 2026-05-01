@@ -843,29 +843,57 @@
       "id": "generated-plan-diagnostics-2026-05-01",
       "path": "docs/plans/2026-05-01-001-feat-generated-plan-diagnostics-plan.md",
       "type": "plan",
+      "status": "complete",
+      "canonical_for": "Completed follow-up implementation plan for R33-R38 generated-plan diagnostics: product-supported dimension registry that fails closed when focuses/configurations/levels/durations/themes expand, domain-level deterministic seeded buildDraft() matrix, hard-failure versus routeable-observation classification, selected-block duration-envelope comparison against workload.durationMinMinutes / workload.durationMaxMinutes / fatigueCap.maxMinutes, stable report/gap-card routing, and guardrails that keep future Serve + Receive work out of raw multi-select tag OR filtering. Origin: docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md."
+    },
+    {
+      "id": "generated-plan-diagnostics-next-steps-ideation-2026-05-01",
+      "path": "docs/ideation/2026-05-01-generated-plan-diagnostics-next-steps-ideation.md",
+      "type": "ideation",
       "status": "active",
-      "canonical_for": "Follow-up implementation plan for R33-R38 generated-plan diagnostics: product-supported dimension registry that fails closed when focuses/configurations/levels/durations/themes expand, domain-level deterministic seeded buildDraft() matrix, hard-failure versus routeable-observation classification, selected-block stretch comparison against workload.durationMaxMinutes and fatigueCap.maxMinutes, stable report/gap-card routing, and guardrails that keep future Serve + Receive work out of raw multi-select tag OR filtering. Origin: docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md."
+      "canonical_for": "Ranked ideation for turning the generated-plan diagnostics report into a sequenced next-step program. Six survivors: observation triage workbench, finding graduation ladder, dynamic surface/new focus sentinel, catalog change impact preview, workload envelope authoring guide, and redistribution-free builder comparison. Consumed by docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md."
+    },
+    {
+      "id": "generated-plan-diagnostics-next-steps-requirements-2026-05-01",
+      "path": "docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for taking generated-plan diagnostic findings one by one through routeable observation triage, finding graduation policy, dynamic surface/new-focus gates, catalog impact previews, workload envelope metadata guidance, and diagnostic-only generator redistribution comparisons. First slice recommendation: R1/R2 observation triage workbench plus finding graduation ladder before adding drills or changing generator policy."
+    },
+    {
+      "id": "generated-diagnostics-triage-workflow-plan-2026-05-01",
+      "path": "docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Implementation plan for the generated diagnostics triage workflow. Sequences the full R1-R6 program from docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md, with the first executable slice focused on stable observation group identity, a triage registry/workbench, and finding graduation gates before dynamic surface sentinels, catalog impact previews, workload envelope guidance, or redistribution comparisons."
     },
     {
       "id": "focus-coverage-readiness-audit-2026-04-30",
       "path": "docs/reviews/2026-04-30-focus-coverage-readiness-audit.md",
       "type": "review",
       "status": "active",
-      "canonical_for": "Generated-readiness audit snapshot for Tune today named-focus coverage across pass/serve/set, current setup configurations, beginner/intermediate/advanced levels, fixed 15/25/40-minute profiles, focus-reinforcing support, pressure applicability, and strict same-focus swaps. Records 135 cells after batch 3: pass 45 verified / 0 failing, serve 45 verified / 0 failing, set 45 verified / 0 failing; batches add focus-controlled support slots, serving depth on d22/d33, and FIVB-backed advanced Passing/Setting depth via d07/d46/d47/d48. 2026-05-01 generated-plan diagnostics now classify 540 seeded buildDraft() cells with 0 hard failures and routeable stretch observations recorded in docs/reviews/2026-05-01-generated-plan-diagnostics-report.json."
+      "canonical_for": "Generated-readiness audit snapshot for Tune today named-focus coverage across pass/serve/set, current setup configurations, beginner/intermediate/advanced levels, fixed 15/25/40-minute profiles, focus-reinforcing support, pressure applicability, and strict same-focus swaps. Records 135 cells after batch 3: pass 45 verified / 0 failing, serve 45 verified / 0 failing, set 45 verified / 0 failing; batches add focus-controlled support slots, serving depth on d22/d33, and FIVB-backed advanced Passing/Setting depth via d07/d46/d47/d48. 2026-05-01 generated-plan diagnostics now classify 540 seeded buildDraft() cells with 0 hard failures and routeable duration-envelope observations recorded in docs/reviews/2026-05-01-generated-plan-diagnostics-report.md."
     },
     {
       "id": "generated-plan-diagnostics-report-2026-05-01",
-      "path": "docs/reviews/2026-05-01-generated-plan-diagnostics-report.json",
+      "path": "docs/reviews/2026-05-01-generated-plan-diagnostics-report.md",
       "type": "review-data",
       "status": "active",
-      "canonical_for": "Machine-readable generated-plan diagnostics summary for the current Tune today focus-readiness surface. Source: summarizeGeneratedPlanDiagnostics(buildGeneratedPlanDiagnostics()) and buildGeneratedPlanObservationGroups() in app/src/domain/generatedPlanDiagnostics.ts. Current snapshot: 540 seeded cells, 263 clean, 277 observation-only, 0 hard failures; observations classify optional-slot redistribution, over-authored-max stretch, and fatigue-cap stretch as routeable policy/content signals rather than automatic product failures. Includes 33 drill/variant/block routeable observation groups with example affected cells and likely fix paths."
+      "canonical_for": "Machine-readable generated-plan diagnostics summary for the current Tune today focus-readiness surface. Source: summarizeGeneratedPlanDiagnostics(buildGeneratedPlanDiagnostics()) and buildGeneratedPlanObservationGroups() in app/src/domain/generatedPlanDiagnostics.ts. Current snapshot: 540 seeded cells, 119 clean, 421 observation-only, 0 hard failures; observations classify under-authored-min duration, optional-slot redistribution, over-authored-max stretch, and fatigue-cap stretch as routeable policy/content signals rather than automatic product failures. Records 53 drill/variant/block routeable observation groups with top examples and likely fix paths; full affected cells are generated on demand from the domain helper."
+    },
+    {
+      "id": "generated-plan-diagnostics-triage-2026-05-01",
+      "path": "docs/reviews/2026-05-01-generated-plan-diagnostics-triage.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Docs-first triage workbench for generated-plan routeable observation groups. Generated and validated with the diagnostics report; current snapshot records 53 registry entries, 0 blocking validation issues, 0 warning issues, 32 defer routes, and 21 generator-policy-investigation routes so new/untriaged groups or stale fingerprints become visible before catalog changes."
     },
     {
       "id": "focus-coverage-gap-cards-2026-04-30",
       "path": "docs/reviews/2026-04-30-focus-coverage-gap-cards.md",
       "type": "review",
       "status": "active",
-      "canonical_for": "Grouped source-backed gap cards for the focus coverage readiness audit. All current matrix groups are verified after batch 3. Includes batch 1 activation manifest for focus-controlled support slots plus no-net d31/d33 serving variants, batch 2 manifest for d22/d33 serving level/depth repair, and batch 3 manifest for FIVB-backed advanced Passing/Setting depth via d07/d46/d47/d48. 2026-05-01 stretch-pressure diagnostic card now points to generated-plan observations in docs/reviews/2026-05-01-generated-plan-diagnostics-report.json; future catalog activation still requires exact source references, adaptation deltas, cap delta, and checkpoint criteria."
+      "canonical_for": "Grouped source-backed gap cards for the focus coverage readiness audit. All current matrix groups are verified after batch 3. Includes batch 1 activation manifest for focus-controlled support slots plus no-net d31/d33 serving variants, batch 2 manifest for d22/d33 serving level/depth repair, and batch 3 manifest for FIVB-backed advanced Passing/Setting depth via d07/d46/d47/d48. 2026-05-01 stretch-pressure diagnostic card now points to generated-plan observations in docs/reviews/2026-05-01-generated-plan-diagnostics-report.md; future catalog activation still requires exact source references, adaptation deltas, cap delta, and checkpoint criteria."
     },
     {
       "id": "per-move-pacing-indicator-ideation-2026-04-28",

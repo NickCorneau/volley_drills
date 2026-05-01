@@ -13,10 +13,12 @@ import { selectPrimaryCard, selectSecondaryRows } from '../domain/homePriority'
 import type { PrimaryVariant, SecondaryRow } from '../domain/homePriority'
 import { useAppRegisterSW } from '../lib/pwa-register'
 import { isSchemaBlocked } from '../lib/schema-blocked'
+import { isSkillLevel, skillLevelToDrillBand } from '../lib/skillLevel'
 import { routes } from '../routes'
 import { buildDraft, buildDraftFromCompletedBlocks } from '../domain/sessionBuilder'
 import { discardSession, saveDraft, skipReview, type PendingReview } from '../services/session'
 import { markSoftBlockDismissed, readSoftBlockDismissed } from '../services/softBlock'
+import { getStorageMeta } from '../services/storageMeta'
 import { useHomeScreenState, type HomeFlags } from './home/useHomeScreenState'
 
 /**
@@ -45,6 +47,7 @@ export function HomeScreen() {
   const acting = useRef(false)
   const [confirmingSkip, setConfirmingSkip] = useState(false)
   const [softBlockTarget, setSoftBlockTarget] = useState<SoftBlockTarget>(null)
+  const [nonReviewActionPending, setNonReviewActionPending] = useState(false)
   const { needRefresh, updateApp } = useAppRegisterSW()
 
   // --- action handlers ---
@@ -145,10 +148,15 @@ export function HomeScreen() {
   // `priorContext.sessionFocus` forward — "same conditions" includes
   // yesterday's chosen focus. The user can still override on Tune
   // today before continuing. Partial repeat
-  // (`buildDraftFromCompletedBlocks`) and the pain-recovery rebuild
-  // (`buildRecoveryDraft`) strip focus by design; do NOT add a strip
-  // here without re-checking that decision.
+  // (`buildDraftFromCompletedBlocks`) preserves the completed-block
+  // context, focus included. Pain-recovery rebuilds strip focus by
+  // design; do NOT add a strip here without re-checking that decision.
   const interceptedHandlers = useMemo(() => {
+    const beginNonReviewAction = () => {
+      if (nonReviewActionPending) return false
+      setNonReviewActionPending(true)
+      return true
+    }
     const intercept = (inner: () => void | Promise<void>) => async () => {
       if (state.kind !== 'ready' || !state.flags.reviewPending) {
         await inner()
@@ -177,9 +185,18 @@ export function HomeScreen() {
       // pre-onboarding testers to /onboarding/skill-level first). The
       // Start CTA enters the regular Setup flow, which applies the
       // persisted skill level during plan build.
-      handleNewUserStart: intercept(() => navigate(routes.setup())),
-      handleDraftStart: intercept(() => navigate(routes.tuneToday(), { state: { source: 'home' } })),
-      handleDraftEdit: intercept(() => navigate(routes.setup(), { state: { editDraft: true } })),
+      handleNewUserStart: intercept(() => {
+        if (!beginNonReviewAction()) return
+        navigate(routes.setup())
+      }),
+      handleDraftStart: intercept(() => {
+        if (!beginNonReviewAction()) return
+        navigate(routes.tuneToday(), { state: { source: 'home' } })
+      }),
+      handleDraftEdit: intercept(() => {
+        if (!beginNonReviewAction()) return
+        navigate(routes.setup(), { state: { editDraft: true } })
+      }),
       // One-tap Repeat: rebuild a fresh full-plan draft from the last
       // session's SetupContext and route straight to Tune today. No
       // Setup detour, no stale-context banner, no toggle review. The
@@ -187,13 +204,17 @@ export function HomeScreen() {
       // escape hatch when today's conditions changed.
       handleRepeat: intercept(async () => {
         if (state.kind !== 'ready' || !state.flags.lastComplete) return
+        if (!beginNonReviewAction()) return
         const priorContext = state.flags.lastComplete.plan.context
         if (!priorContext) {
           navigate(routes.setup())
           return
         }
         try {
-          const draft = buildDraft(priorContext)
+          const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
+          const playerLevel =
+            skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
+          const draft = buildDraft(priorContext, { playerLevel })
           if (!draft) {
             navigate(routes.setup())
             return
@@ -201,7 +222,10 @@ export function HomeScreen() {
           await saveDraft(draft)
           navigate(routes.tuneToday(), { state: { source: 'home' } })
         } catch (err) {
-          if (isSchemaBlocked()) return
+          if (isSchemaBlocked()) {
+            setNonReviewActionPending(false)
+            return
+          }
           console.error('Repeat session failed:', err)
           navigate(routes.setup())
         }
@@ -210,13 +234,17 @@ export function HomeScreen() {
       // the tester whose answer to "same as last time?" is *no*. The
       // intercept ensures review_pending still fires the soft-block
       // modal.
-      handleStartDifferentSession: intercept(() => navigate(routes.setup())),
+      handleStartDifferentSession: intercept(() => {
+        if (!beginNonReviewAction()) return
+        navigate(routes.setup())
+      }),
       // C-5 Unit 3: ended-early secondary CTA. Builds a partial draft
       // from only the blocks that actually completed and routes to
       // Tune today. Uses the state-captured `lastComplete` bundle so we
       // don't re-query Dexie for consistency with the render.
       handleRepeatWhatYouDid: intercept(async () => {
         if (state.kind !== 'ready' || !state.flags.lastComplete) return
+        if (!beginNonReviewAction()) return
         try {
           const draft = buildDraftFromCompletedBlocks(
             state.flags.lastComplete.log,
@@ -229,13 +257,16 @@ export function HomeScreen() {
           await saveDraft(draft)
           navigate(routes.tuneToday(), { state: { source: 'home' } })
         } catch (err) {
-          if (isSchemaBlocked()) return
+          if (isSchemaBlocked()) {
+            setNonReviewActionPending(false)
+            return
+          }
           console.error('Repeat-what-you-did failed:', err)
           navigate(routes.setup())
         }
       }),
     }
-  }, [navigate, state])
+  }, [navigate, nonReviewActionPending, state])
 
   const handleSoftBlockFinish = useCallback(() => {
     const t = softBlockTarget
@@ -328,6 +359,7 @@ export function HomeScreen() {
           handleFinishReview,
           handleRequestSkip,
           ...interceptedHandlers,
+          actionDisabled: nonReviewActionPending,
         })}
 
         {/* Phase F1 (2026-04-19): secondary rows used to render as a
@@ -349,6 +381,7 @@ export function HomeScreen() {
                 handleFinishReview,
                 handleDraftOpen: interceptedHandlers.handleDraftStart,
                 handleRepeat: interceptedHandlers.handleRepeat,
+                actionDisabled: nonReviewActionPending,
               }),
             )}
           </ul>
@@ -434,6 +467,7 @@ interface PrimaryHandlers {
    */
   handleStartDifferentSession: () => void
   handleNewUserStart: () => void
+  actionDisabled: boolean
 }
 
 function renderPrimary(primary: PrimaryVariant, flags: HomeFlags, h: PrimaryHandlers) {
@@ -479,6 +513,7 @@ function renderPrimary(primary: PrimaryVariant, flags: HomeFlags, h: PrimaryHand
           onRepeatWhatYouDid={
             flags.lastComplete.log.status === 'ended_early' ? h.handleRepeatWhatYouDid : undefined
           }
+          actionDisabled={h.actionDisabled}
         />
       )
     case 'new_user':
@@ -494,6 +529,7 @@ interface SecondaryHandlers {
   handleFinishReview: () => void
   handleDraftOpen: () => void
   handleRepeat: () => void
+  actionDisabled: boolean
 }
 
 function renderSecondary(row: SecondaryRow, flags: HomeFlags, h: SecondaryHandlers) {
@@ -526,6 +562,7 @@ function renderSecondary(row: SecondaryRow, flags: HomeFlags, h: SecondaryHandle
           variant="last_complete"
           data={flags.lastComplete}
           onRepeat={h.handleRepeat}
+          actionDisabled={h.actionDisabled}
         />
       )
     default: {

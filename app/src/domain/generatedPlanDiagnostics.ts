@@ -28,8 +28,10 @@ export type GeneratedPlanHardFailureCode =
   | 'hard_filter_violation'
   | 'off_focus_controlled_work'
   | 'unclassified_stretch_pressure'
+  | 'assembly_trace_mismatch'
 
 export type GeneratedPlanObservationCode =
+  | 'under_authored_min'
   | 'over_authored_max'
   | 'over_fatigue_cap'
   | 'optional_slot_redistribution'
@@ -116,6 +118,7 @@ export interface GeneratedPlanObservation {
   readonly drillId?: string
   readonly variantId?: string
   readonly plannedMinutes?: number
+  readonly authoredMinMinutes?: number
   readonly authoredMaxMinutes?: number
   readonly fatigueMaxMinutes?: number
   readonly skippedOptionalLayoutIndexes?: readonly number[]
@@ -154,10 +157,13 @@ export interface GeneratedPlanObservationAffectedCell extends GeneratedPlanMatri
 }
 
 export interface GeneratedPlanObservationGroup {
+  readonly groupKey: string
+  readonly diagnosticFingerprint: string
   readonly drillId?: string
   readonly variantId?: string
   readonly blockType?: BlockSlotType
   readonly required?: boolean
+  readonly authoredMinMinutes?: number
   readonly authoredMaxMinutes?: number
   readonly fatigueMaxMinutes?: number
   readonly affectedCellCount: number
@@ -368,6 +374,7 @@ export function analyzeSelectedDraftStretch(
 
     const traceSlot = traceSlotForBlock(block.id, trace)
     const redistribution = redistributionEvidenceForBlock(traceSlot, trace)
+    const underAuthoredMin = block.durationMinutes < variant.workload.durationMinMinutes
     const overAuthoredMax = block.durationMinutes > variant.workload.durationMaxMinutes
     const fatigueMaxMinutes = variant.workload.fatigueCap?.maxMinutes
     const overFatigueMax =
@@ -392,6 +399,18 @@ export function analyzeSelectedDraftStretch(
         drillId: block.drillId,
         variantId: block.variantId,
         message: 'Over-cap block is missing a classified stretch source.',
+      })
+    }
+
+    if (underAuthoredMin && traceSlot) {
+      observations.push({
+        code: 'under_authored_min',
+        ...blockTraceContext(block, traceSlot),
+        drillId: drill.id,
+        variantId: variant.id,
+        plannedMinutes: block.durationMinutes,
+        authoredMinMinutes: variant.workload.durationMinMinutes,
+        classificationSource: 'allocated_duration',
       })
     }
 
@@ -464,6 +483,18 @@ function hasSelectedCandidate(
   )
 }
 
+function traceSlotMatchesBlock(
+  traceSlot: DraftAssemblyTraceSlot,
+  block: { readonly drillId: string; readonly variantId: string; readonly type: BlockSlotType; readonly required: boolean },
+): boolean {
+  return (
+    traceSlot.drillId === block.drillId &&
+    traceSlot.variantId === block.variantId &&
+    traceSlot.type === block.type &&
+    traceSlot.required === block.required
+  )
+}
+
 function generationHardFailures(
   cell: GeneratedPlanMatrixCell,
   configuration: ReadinessConfiguration,
@@ -496,6 +527,7 @@ function generationHardFailures(
 
   const archetype = selectArchetype(draft.context)
   const layout = archetype?.layouts[draft.context.timeProfile] ?? []
+  const selectedTraceBlockIds = new Map<string, number>()
 
   for (const traceSlot of trace.slots) {
     const slot = findSlotForTrace(layout, traceSlot)
@@ -506,11 +538,55 @@ function generationHardFailures(
       })
     }
     if (!traceSlot.selected || !traceSlot.blockId || !traceSlot.drillId || !traceSlot.variantId) {
+      if (traceSlot.selected) {
+        failures.push({
+          code: 'assembly_trace_mismatch',
+          blockId: traceSlot.blockId,
+          blockType: traceSlot.type,
+          required: traceSlot.required,
+          layoutIndex: traceSlot.layoutIndex,
+          allocatedMinutes: traceSlot.allocatedMinutes,
+          drillId: traceSlot.drillId,
+          variantId: traceSlot.variantId,
+          message: 'Selected trace slot is missing selected block identity.',
+        })
+      }
       continue
     }
 
     const block = draft.blocks.find((candidate) => candidate.id === traceSlot.blockId)
-    if (!block || !slot) continue
+    if (!block || !slot) {
+      failures.push({
+        code: 'assembly_trace_mismatch',
+        blockId: traceSlot.blockId,
+        blockType: traceSlot.type,
+        required: traceSlot.required,
+        layoutIndex: traceSlot.layoutIndex,
+        allocatedMinutes: traceSlot.allocatedMinutes,
+        drillId: traceSlot.drillId,
+        variantId: traceSlot.variantId,
+        message: !block
+          ? 'Selected trace slot does not map to a draft block.'
+          : 'Selected trace slot does not map to an archetype layout slot.',
+      })
+      continue
+    }
+
+    if (!traceSlotMatchesBlock(traceSlot, block)) {
+      failures.push({
+        code: 'assembly_trace_mismatch',
+        blockId: traceSlot.blockId,
+        blockType: traceSlot.type,
+        required: traceSlot.required,
+        layoutIndex: traceSlot.layoutIndex,
+        allocatedMinutes: traceSlot.allocatedMinutes,
+        drillId: traceSlot.drillId,
+        variantId: traceSlot.variantId,
+        message: 'Selected trace slot identity does not match its draft block.',
+      })
+    }
+
+    selectedTraceBlockIds.set(block.id, (selectedTraceBlockIds.get(block.id) ?? 0) + 1)
 
     if (!hasSelectedCandidate(slot, draft.context, block)) {
       failures.push({
@@ -533,6 +609,24 @@ function generationHardFailures(
         blockId: block.id,
         drillId: block.drillId,
         variantId: block.variantId,
+      })
+    }
+  }
+
+  for (const block of draft.blocks) {
+    const traceCount = selectedTraceBlockIds.get(block.id) ?? 0
+    if (traceCount !== 1) {
+      failures.push({
+        code: 'assembly_trace_mismatch',
+        blockId: block.id,
+        blockType: block.type,
+        required: block.required,
+        drillId: block.drillId,
+        variantId: block.variantId,
+        message:
+          traceCount === 0
+            ? 'Draft block does not map back to a selected trace slot.'
+            : 'Draft block maps to multiple selected trace slots.',
       })
     }
   }
@@ -574,12 +668,21 @@ export function evaluateGeneratedPlanDiagnosticCell(
     }
   }
 
-  const stretch = analyzeSelectedDraftStretch(generated.draft, generated.assemblyTrace)
+  return analyzeGeneratedPlanDraft(cell, configuration, generated.draft, generated.assemblyTrace)
+}
+
+export function analyzeGeneratedPlanDraft(
+  cell: ApplicableGeneratedPlanMatrixCell,
+  configuration: ReadinessConfiguration,
+  draft: SessionDraft,
+  trace: DraftAssemblyTrace,
+): GeneratedPlanDiagnosticResult {
+  const stretch = analyzeSelectedDraftStretch(draft, trace)
   const hardFailures = [
-    ...generationHardFailures(cell, configuration, generated.draft, generated.assemblyTrace),
+    ...generationHardFailures(cell, configuration, draft, trace),
     ...stretch.hardFailures,
   ]
-  const observations = [...stretch.observations, ...generatedShapeObservations(generated.draft)]
+  const observations = [...stretch.observations, ...generatedShapeObservations(draft)]
 
   return {
     ...cell,
@@ -670,15 +773,104 @@ function observationGroupKey(observations: readonly GeneratedPlanObservation[]):
     firstDefined(observations.map((observation) => observation.variantId)) ?? 'none',
     firstDefined(observations.map((observation) => observation.blockType)) ?? 'none',
     representative?.required === undefined ? 'none' : String(representative.required),
+    firstDefined(observations.map((observation) => observation.authoredMinMinutes)) ?? 'none',
     firstDefined(observations.map((observation) => observation.authoredMaxMinutes)) ?? 'none',
     firstDefined(observations.map((observation) => observation.fatigueMaxMinutes)) ?? 'none',
   ].join('|')
 }
 
+function observationGroupPublicKey(group: Pick<
+  GeneratedPlanObservationGroup,
+  'drillId' | 'variantId' | 'blockType' | 'required' | 'observationCodes'
+>): string {
+  return [
+    'gpdg',
+    'v1',
+    group.drillId ?? 'none',
+    group.variantId ?? 'none',
+    group.blockType ?? 'none',
+    group.required === undefined ? 'none' : String(group.required),
+    [...group.observationCodes].sort().join('+'),
+  ].join(':')
+}
+
+function observationGroupFingerprint(
+  group: Pick<
+    GeneratedPlanObservationGroup,
+    | 'authoredMinMinutes'
+    | 'authoredMaxMinutes'
+    | 'fatigueMaxMinutes'
+    | 'affectedCellCount'
+    | 'likelyFixPaths'
+    | 'affectedCells'
+  >,
+): string {
+  const exampleCells = [...group.affectedCells]
+    .sort((a, b) =>
+      [
+        a.focus.localeCompare(b.focus),
+        a.configuration.localeCompare(b.configuration),
+        a.level.localeCompare(b.level),
+        a.duration - b.duration,
+        a.seed.localeCompare(b.seed),
+        (a.blockId ?? '').localeCompare(b.blockId ?? ''),
+      ].find((comparison) => comparison !== 0) ?? 0,
+    )
+    .slice(0, 3)
+    .map((cell) =>
+      [
+        cell.focus,
+        cell.configuration,
+        cell.level,
+        cell.duration,
+        cell.seed,
+        cell.blockId ?? 'none',
+        cell.plannedMinutes ?? 'none',
+        cell.allocatedMinutes ?? 'none',
+        [...cell.observationCodes].sort().join('+'),
+      ].join('/'),
+    )
+
+  return [
+    'gpdf',
+    'v1',
+    group.authoredMinMinutes ?? 'none',
+    group.authoredMaxMinutes ?? 'none',
+    group.fatigueMaxMinutes ?? 'none',
+    group.affectedCellCount,
+    [...group.likelyFixPaths].sort().join('+'),
+    ...exampleCells,
+  ].join('|')
+}
+
+function withObservationGroupIdentity(
+  group: Omit<GeneratedPlanObservationGroup, 'groupKey' | 'diagnosticFingerprint'>,
+): GeneratedPlanObservationGroup {
+  const keyedGroup = {
+    ...group,
+    groupKey: observationGroupPublicKey(group),
+    diagnosticFingerprint: '',
+  }
+  return {
+    ...keyedGroup,
+    diagnosticFingerprint: observationGroupFingerprint(keyedGroup),
+  }
+}
+
 function likelyFixPathsForObservationCodes(
   codes: readonly GeneratedPlanObservationCode[],
 ): readonly string[] {
+  if (codes.includes('optional_slot_redistribution')) {
+    return [
+      'generator_policy_investigation',
+      'policy_allowance',
+      'block_split',
+      'variant_cap_review',
+      'source_backed_content_depth',
+    ]
+  }
   if (
+    codes.includes('under_authored_min') ||
     codes.includes('over_authored_max') ||
     codes.includes('over_fatigue_cap') ||
     codes.includes('optional_slot_redistribution')
@@ -714,8 +906,10 @@ export function buildGeneratedPlanObservationGroups(
         duration: result.duration,
         seed: result.seed,
         blockId: representative.blockId,
-        plannedMinutes: representative.plannedMinutes,
-        allocatedMinutes: representative.allocatedMinutes,
+        plannedMinutes: firstDefined(observations.map((observation) => observation.plannedMinutes)),
+        allocatedMinutes: firstDefined(
+          observations.map((observation) => observation.allocatedMinutes),
+        ),
         observationCodes,
         redistribution: observations.find((observation) => observation.redistribution)?.redistribution,
       }
@@ -723,20 +917,25 @@ export function buildGeneratedPlanObservationGroups(
       if (existing) {
         const mergedCodes = [...new Set([...existing.observationCodes, ...observationCodes])]
         groups.set(key, {
-          ...existing,
-          affectedCellCount: existing.affectedCellCount + 1,
-          observationCodes: mergedCodes,
-          likelyFixPaths: likelyFixPathsForObservationCodes(mergedCodes),
-          affectedCells: [...existing.affectedCells, affectedCell],
+          ...withObservationGroupIdentity({
+            ...existing,
+            affectedCellCount: existing.affectedCellCount + 1,
+            observationCodes: mergedCodes,
+            likelyFixPaths: likelyFixPathsForObservationCodes(mergedCodes),
+            affectedCells: [...existing.affectedCells, affectedCell],
+          }),
         })
         continue
       }
 
-      groups.set(key, {
+      groups.set(key, withObservationGroupIdentity({
         drillId: firstDefined(observations.map((observation) => observation.drillId)),
         variantId: firstDefined(observations.map((observation) => observation.variantId)),
         blockType: firstDefined(observations.map((observation) => observation.blockType)),
         required: representative.required,
+        authoredMinMinutes: firstDefined(
+          observations.map((observation) => observation.authoredMinMinutes),
+        ),
         authoredMaxMinutes: firstDefined(
           observations.map((observation) => observation.authoredMaxMinutes),
         ),
@@ -747,7 +946,7 @@ export function buildGeneratedPlanObservationGroups(
         observationCodes,
         likelyFixPaths: likelyFixPathsForObservationCodes(observationCodes),
         affectedCells: [affectedCell],
-      })
+      }))
     }
   }
 

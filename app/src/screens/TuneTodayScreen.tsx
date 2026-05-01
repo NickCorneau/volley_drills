@@ -79,11 +79,6 @@ export function TuneTodayScreen() {
               />
             ))}
           </div>
-          {pending && (
-            <p className="text-sm text-text-secondary" aria-live="polite">
-              Updating focus...
-            </p>
-          )}
           {warning && <StatusMessage variant="error" message={warning} />}
         </section>
       </ScreenShell.Body>

@@ -10,7 +10,7 @@ last_updated: 2026-05-01
 depends_on:
   - docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md
   - docs/plans/2026-04-30-002-feat-focus-coverage-readiness-plan.md
-  - docs/reviews/2026-05-01-generated-plan-diagnostics-report.json
+  - docs/reviews/2026-05-01-generated-plan-diagnostics-report.md
   - app/src/domain/generatedPlanDiagnostics.ts
   - app/src/domain/sessionAssembly/focusReadiness.ts
   - app/src/data/drills.ts
@@ -40,7 +40,7 @@ Matrix dimensions:
 
 Coverage uses the same active-catalog and hard-filter path as session generation through `findCandidates()`: M001 candidate status, participants, net/wall, equipment, and unmodeled requirements. It also applies effective player level to all focus-controlled work slots, treats 40 minutes as the current long-session target, requires focus-reinforcing support evidence, measures same-focus swaps without runtime off-focus widening, and verifies generated drafts preserve full requested duration without repeating focus-controlled drill families.
 
-Generated-plan diagnostics now classify duration stretch against selected variant workload caps in `docs/reviews/2026-05-01-generated-plan-diagnostics-report.json`. The current generated-plan matrix covers 540 seeded cells (135 readiness cells x 4 seeds): 263 clean, 277 observation-only, and 0 hard failures. Routeable observations are policy/content signals, not automatic product failures.
+Generated-plan diagnostics now classify selected-block duration envelopes in `docs/reviews/2026-05-01-generated-plan-diagnostics-report.md`. The current generated-plan matrix covers 540 seeded cells (135 readiness cells x 4 seeds): 119 clean, 421 observation-only, and 0 hard failures. Routeable observations are policy/content signals, not automatic product failures.
 
 ## Summary
 
@@ -68,10 +68,10 @@ Generated-plan diagnostics:
 
 - Surface: `pass` / `serve` / `set` x `solo_net` / `solo_wall` / `solo_open` / `pair_net` / `pair_open` x `beginner` / `intermediate` / `advanced` x `15` / `25` / `40` x 4 seeds
 - Total seeded cells: 540
-- Clean cells: 263
-- Observation-only cells: 277
+- Clean cells: 119
+- Observation-only cells: 421
 - Hard-failure cells: 0
-- Observation counts: `optional_slot_redistribution` 236, `over_authored_max` 288, `over_fatigue_cap` 288
+- Observation counts: `under_authored_min` 257, `optional_slot_redistribution` 236, `over_authored_max` 288, `over_fatigue_cap` 288
 
 ## Readiness Interpretation
 
@@ -118,5 +118,7 @@ Batch 3 completed advanced Passing and Setting:
 ## Verification
 
 - `npm test -- src/domain/sessionAssembly/__tests__/focusReadiness.test.ts`
+- `npm test -- src/domain/__tests__/generatedPlanDiagnostics.test.ts`
+- `npm run diagnostics:report:check`
 - `npm test -- src/domain/sessionBuilder.test.ts`
 - `npm test -- src/domain/__tests__/findSwapAlternatives.test.ts`

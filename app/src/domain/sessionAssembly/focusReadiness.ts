@@ -254,16 +254,16 @@ function slotCandidates(
   return findCandidates(slot, context, { playerLevel })
 }
 
-function supportCandidates(
+function supportCandidatesBySlot(
   layout: readonly BlockSlot[],
   context: SetupContext,
   focus: VisibleFocus,
   playerLevel: PlayerLevel,
-): readonly CandidateVariant[] {
+): readonly CandidateVariant[][] {
   const supportSlots = layout.filter(
     (slot) => slot.type === 'technique' || slot.type === 'movement_proxy',
   )
-  return supportSlots.flatMap((slot) =>
+  return supportSlots.map((slot) =>
     slotCandidates(slot, context, playerLevel).filter((candidate) =>
       candidate.drill.skillFocus.includes(focus),
     ),
@@ -286,28 +286,47 @@ function risksForCoverage(
   return [...risks]
 }
 
+export function hasPerSlotSwapCoverage(options: {
+  readonly mainFamilies: readonly string[]
+  readonly supportFamilyGroups: readonly (readonly string[])[]
+  readonly pressureFamilies: readonly string[]
+  readonly pressureApplicable: boolean
+}): boolean {
+  return (
+    options.mainFamilies.length >= 2 &&
+    options.supportFamilyGroups.every((families) => families.length >= 2) &&
+    (!options.pressureApplicable || options.pressureFamilies.length >= 2)
+  )
+}
+
 function swapCoverageForFocusControlledSlots(
   mainCandidates: readonly CandidateVariant[],
-  supportCandidates: readonly CandidateVariant[],
+  supportCandidateGroups: readonly (readonly CandidateVariant[])[],
   pressureCandidates: readonly CandidateVariant[],
   pressure: SlotReadinessCoverage,
 ): SlotReadinessCoverage {
   const mainFamilies = distinctDrillFamilies(mainCandidates)
-  const supportFamilies = distinctDrillFamilies(supportCandidates)
+  const supportFamilyGroups = supportCandidateGroups.map((candidates) =>
+    distinctDrillFamilies(candidates),
+  )
   const pressureFamilies = distinctDrillFamilies(pressureCandidates)
-  const mainCovered = mainFamilies.length >= 2
-  const supportCovered = supportFamilies.length >= 2
-  const pressureCovered = pressure.status === 'not_applicable' || pressureFamilies.length >= 2
+  const covered = hasPerSlotSwapCoverage({
+    mainFamilies,
+    supportFamilyGroups,
+    pressureFamilies,
+    pressureApplicable: pressure.status !== 'not_applicable',
+  })
+  const supportCandidates = supportCandidateGroups.flat()
   const combinedCandidates =
     pressure.status === 'not_applicable'
       ? [...supportCandidates, ...mainCandidates]
       : [...supportCandidates, ...mainCandidates, ...pressureCandidates]
 
   return {
-    status: mainCovered && supportCovered && pressureCovered ? 'covered' : 'failing',
+    status: covered ? 'covered' : 'failing',
     eligibleDrillFamilies: distinctDrillFamilies(combinedCandidates),
     eligibleCatalogIds: toCatalogIds(combinedCandidates),
-    reason: mainCovered && supportCovered && pressureCovered ? undefined : 'same_focus_swap_missing',
+    reason: covered ? undefined : 'same_focus_swap_missing',
   }
 }
 
@@ -446,7 +465,8 @@ export function evaluateFocusReadinessCell(
   const pressureSlot = layout.find((slot) => slot.type === 'pressure')
   const mainCandidates = slotCandidates(mainSlot, context, input.level)
   const pressureCandidates = slotCandidates(pressureSlot, context, input.level)
-  const supportSlotCandidates = supportCandidates(layout, context, input.focus, input.level)
+  const supportCandidateGroups = supportCandidatesBySlot(layout, context, input.focus, input.level)
+  const supportSlotCandidates = supportCandidateGroups.flat()
   const main = coverageFromCandidates(mainCandidates, 2, 'main_floor_missing')
   const support = coverageFromCandidates(
     supportSlotCandidates,
@@ -460,7 +480,7 @@ export function evaluateFocusReadinessCell(
 
   const swap = swapCoverageForFocusControlledSlots(
     mainCandidates,
-    supportSlotCandidates,
+    supportCandidateGroups,
     pressureCandidates,
     pressure,
   )

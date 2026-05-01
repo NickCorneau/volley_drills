@@ -9,7 +9,7 @@ authority: "Durable gap-card backlog for Tune today focus coverage readiness; no
 last_updated: 2026-05-01
 depends_on:
   - docs/reviews/2026-04-30-focus-coverage-readiness-audit.md
-  - docs/reviews/2026-05-01-generated-plan-diagnostics-report.json
+  - docs/reviews/2026-05-01-generated-plan-diagnostics-report.md
   - docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md
   - app/src/domain/generatedPlanDiagnostics.ts
   - app/src/domain/sessionAssembly/focusReadiness.ts
@@ -92,12 +92,12 @@ Activation requires a batch manifest that names exact `drillId` / `variantId` ch
 
 - **Status:** `source_candidate`
 - **Risk buckets:** `thin_long_session`
-- **Affected cells:** generated-plan diagnostics now cover 540 seeded cells. Current status: 0 hard failures; 277 observation-only cells. Observation counts: `optional_slot_redistribution` 236, `over_authored_max` 288, `over_fatigue_cap` 288. The report currently groups routeable observations into 33 drill/variant/block clusters; top affected variants include `d47-solo-open`, `d33-solo-open`, `d33-pair-open`, `d46-solo-open`, and `d01-solo`.
+- **Affected cells:** generated-plan diagnostics now cover 540 seeded cells. Current status: 0 hard failures; 421 observation-only cells. Observation counts: `under_authored_min` 257, `optional_slot_redistribution` 236, `over_authored_max` 288, `over_fatigue_cap` 288. The report currently groups routeable observations into 53 drill/variant/block clusters; top affected variants include `d25-solo`, `d47-solo-open`, `d33-solo-open`, `d33-pair-open`, and `d46-solo-open`.
 - **Missing slots:** none under the current generation contract; the issue is routeable duration pressure against selected drill workload envelopes.
-- **Candidate source material:** existing `variant.workload.durationMaxMinutes`, `variant.workload.fatigueCap.maxMinutes`, and observed session assembly redistribution metadata.
+- **Candidate source material:** existing `variant.workload.durationMinMinutes`, `variant.workload.durationMaxMinutes`, `variant.workload.fatigueCap.maxMinutes`, and observed session assembly redistribution metadata.
 - **Exact source reference:** app metadata, not a drill source. Any content fix still needs BAB/FIVB/Volley Canada source trace.
 - **Likely fix type:** diagnostic layer is now present. Future work should route observation clusters to explicit product allowance for long rounds, block splitting, variant cap review, or source-backed variant/drill activation.
-- **Affected catalog IDs:** observation clusters are summarized in `docs/reviews/2026-05-01-generated-plan-diagnostics-report.json` with selected `drillId` / `variantId`, block type, required flag, cap categories, example affected cells, and likely fix paths.
+- **Affected catalog IDs:** observation clusters are summarized in `docs/reviews/2026-05-01-generated-plan-diagnostics-report.md` with selected `drillId` / `variantId`, block type, required flag, cap categories, example affected cells, and likely fix paths.
 - **Blockers:** product policy must decide which over-cap observations are acceptable, which should split into rounds, and which require additional content depth.
 
 ## Activation Batch Manifest

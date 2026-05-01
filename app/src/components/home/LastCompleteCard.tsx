@@ -16,6 +16,7 @@ export interface LastCompleteCardProps {
    * the normal-case last_complete.
    */
   onRepeatWhatYouDid?: () => void
+  actionDisabled?: boolean
 }
 
 export function LastCompleteCard({
@@ -23,6 +24,7 @@ export function LastCompleteCard({
   onRepeat,
   onStartDifferent,
   onRepeatWhatYouDid,
+  actionDisabled = false,
 }: LastCompleteCardProps) {
   const plannedTotalMinutes = data.plan.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
   const daysAgo = formatDaysAgo(data.log.completedAt ?? data.log.startedAt)
@@ -51,21 +53,26 @@ export function LastCompleteCard({
       </div>
       {isEndedEarly ? (
         <>
-          <Button variant="primary" fullWidth onClick={onRepeat}>
+          <Button variant="primary" fullWidth disabled={actionDisabled} onClick={onRepeat}>
             Repeat full {plannedTotalMinutes}-min plan
           </Button>
           {canRepeatSubset && (
-            <Button variant="outline" fullWidth onClick={onRepeatWhatYouDid}>
+            <Button variant="outline" fullWidth disabled={actionDisabled} onClick={onRepeatWhatYouDid}>
               Repeat what you did ({completedMinutes} min)
             </Button>
           )}
         </>
       ) : (
-        <Button variant="primary" fullWidth onClick={onRepeat}>
+        <Button variant="primary" fullWidth disabled={actionDisabled} onClick={onRepeat}>
           Repeat this session
         </Button>
       )}
-      <Button variant="link" onClick={onStartDifferent} className={LINK_BELOW_PRIMARY_CLASS}>
+      <Button
+        variant="link"
+        disabled={actionDisabled}
+        onClick={onStartDifferent}
+        className={LINK_BELOW_PRIMARY_CLASS}
+      >
         Start a different session
       </Button>
     </section>

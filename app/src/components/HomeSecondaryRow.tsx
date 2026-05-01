@@ -53,6 +53,7 @@ type HomeSecondaryRowProps =
       variant: 'last_complete'
       data: LastCompleteBundle
       onRepeat: () => void
+      actionDisabled?: boolean
     }
 
 export function HomeSecondaryRow(props: HomeSecondaryRowProps) {
@@ -85,7 +86,7 @@ export function HomeSecondaryRow(props: HomeSecondaryRowProps) {
           <span className="text-sm text-text-primary">
             Last &middot; {props.data.plan.presetName}
           </span>
-          <Button variant="ghost" onClick={props.onRepeat}>
+          <Button variant="ghost" disabled={props.actionDisabled} onClick={props.onRepeat}>
             Repeat
           </Button>
         </li>

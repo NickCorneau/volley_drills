@@ -1,12 +1,10 @@
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
-
 import { DRILLS } from '../../data/drills'
-import type { Drill, DrillVariant, SessionDraft, TimeProfile } from '../../model'
+import type { BlockSlotType, Drill, DrillVariant, SessionDraft, TimeProfile } from '../../model'
 import {
   DEFAULT_GENERATED_PLAN_SEEDS,
   DEFAULT_GENERATED_PLAN_SURFACE,
   analyzeSelectedDraftStretch,
+  analyzeGeneratedPlanDraft,
   buildApplicableGeneratedPlanInputs,
   buildGeneratedPlanDiagnostics,
   buildGeneratedPlanMatrix,
@@ -248,6 +246,24 @@ describe('selected draft stretch analyzer', () => {
     )
   })
 
+  it('classifies blocks below authored minimum duration as routeable observations', () => {
+    const result = analyzeSelectedDraftStretch(servingDraft(3), cleanServingTrace)
+
+    expect(result.status).toBe('observation_only')
+    expect(result.observations).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'under_authored_min',
+          blockId: 'block-0',
+          blockType: 'main_skill',
+          required: true,
+          plannedMinutes: 3,
+          authoredMinMinutes: 4,
+        }),
+      ]),
+    )
+  })
+
   it('observes non-persisted assembly trace metadata from real draft generation', () => {
     const context = {
       playerMode: 'pair' as const,
@@ -294,11 +310,12 @@ describe('seeded generated plan diagnostics', () => {
     )
     expect(summary.hardFailureCount).toBe(0)
     expect(summary.statusCounts).toEqual({
-      clean: 263,
-      observation_only: 277,
+      clean: 119,
+      observation_only: 421,
       hard_failure: 0,
     })
     expect(summary.observationCounts).toEqual({
+      under_authored_min: 257,
       optional_slot_redistribution: 236,
       over_authored_max: 288,
       over_fatigue_cap: 288,
@@ -388,6 +405,150 @@ describe('seeded generated plan diagnostics', () => {
     expect(summary.statusCounts.hard_failure).toBe(0)
   })
 
+  function traceMismatchFixture() {
+    const context = {
+      playerMode: 'pair' as const,
+      netAvailable: false,
+      wallAvailable: false,
+      timeProfile: 40 as const,
+      sessionFocus: 'serve' as const,
+      playerLevel: 'beginner' as const,
+    }
+    const traced = buildDraftWithAssemblyTrace(context, {
+      assemblySeed: 'trace-mismatch-serving-beginner-40',
+      playerLevel: 'beginner',
+    })
+    if (!traced) throw new Error('Expected trace mismatch fixture draft to build.')
+    const cell = {
+      focus: 'serve' as const,
+      configuration: 'pair_open' as const,
+      level: 'beginner' as const,
+      duration: 40 as const,
+      seed: 'trace-mismatch-serving-beginner-40',
+      status: 'applicable' as const,
+    }
+    const configuration = requireFixture(
+      READINESS_CONFIGURATIONS.find((candidate) => candidate.id === 'pair_open'),
+      'Missing pair_open readiness configuration',
+    )
+    return { traced, cell, configuration }
+  }
+
+  function analyzeTraceMutation(trace: DraftAssemblyTrace) {
+    const { traced, cell, configuration } = traceMismatchFixture()
+    return analyzeGeneratedPlanDraft(cell, configuration, traced.draft, trace)
+  }
+
+  it('hard-fails selected trace slots that do not map back to draft blocks', () => {
+    const { traced, cell, configuration } = traceMismatchFixture()
+
+    const result = analyzeGeneratedPlanDraft(
+      cell,
+      configuration,
+      traced.draft,
+      {
+        ...traced.assemblyTrace,
+        slots: traced.assemblyTrace.slots.map((slot) =>
+          slot.selected ? { ...slot, blockId: 'missing-block' } : slot,
+        ),
+      },
+    )
+
+    expect(result.status).toBe('hard_failure')
+    expect(result.hardFailures).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'assembly_trace_mismatch',
+          blockId: 'missing-block',
+        }),
+      ]),
+    )
+  })
+
+  it.each([
+    {
+      name: 'selected slot has mismatched drill identity',
+      mutate: (trace: DraftAssemblyTrace) => ({
+        ...trace,
+        slots: trace.slots.map((slot) =>
+          slot.selected ? { ...slot, drillId: 'definitely-wrong-drill' } : slot,
+        ),
+      }),
+      expectedMessage: 'Selected trace slot identity does not match its draft block.',
+    },
+    {
+      name: 'selected slot has mismatched variant identity',
+      mutate: (trace: DraftAssemblyTrace) => ({
+        ...trace,
+        slots: trace.slots.map((slot) =>
+          slot.selected ? { ...slot, variantId: 'definitely-wrong-variant' } : slot,
+        ),
+      }),
+      expectedMessage: 'Selected trace slot identity does not match its draft block.',
+    },
+    {
+      name: 'selected slot has mismatched block type',
+      mutate: (trace: DraftAssemblyTrace) => ({
+        ...trace,
+        slots: trace.slots.map((slot) =>
+          slot.selected ? { ...slot, type: 'wrap' as BlockSlotType } : slot,
+        ),
+      }),
+      expectedMessage: 'Selected trace slot identity does not match its draft block.',
+    },
+    {
+      name: 'selected slot has mismatched required flag',
+      mutate: (trace: DraftAssemblyTrace) => ({
+        ...trace,
+        slots: trace.slots.map((slot) =>
+          slot.selected ? { ...slot, required: !slot.required } : slot,
+        ),
+      }),
+      expectedMessage: 'Selected trace slot identity does not match its draft block.',
+    },
+    {
+      name: 'selected slot points outside the layout',
+      mutate: (trace: DraftAssemblyTrace) => ({
+        ...trace,
+        slots: trace.slots.map((slot) => (slot.selected ? { ...slot, layoutIndex: 999 } : slot)),
+      }),
+      expectedMessage: 'Selected trace slot does not map to an archetype layout slot.',
+    },
+    {
+      name: 'draft block maps to multiple selected trace slots',
+      mutate: (trace: DraftAssemblyTrace) => {
+        const firstSelected = trace.slots.find((slot) => slot.selected)
+        return {
+          ...trace,
+          slots: trace.slots.map((slot) =>
+            slot.selected && firstSelected
+              ? {
+                  ...slot,
+                  blockId: firstSelected.blockId,
+                  drillId: firstSelected.drillId,
+                  variantId: firstSelected.variantId,
+                }
+              : slot,
+          ),
+        }
+      },
+      expectedMessage: 'Draft block maps to multiple selected trace slots.',
+    },
+  ])('hard-fails when $name', ({ mutate, expectedMessage }) => {
+    const { traced } = traceMismatchFixture()
+    const result = analyzeTraceMutation(mutate(traced.assemblyTrace) as DraftAssemblyTrace)
+
+    expect(result.status).toBe('hard_failure')
+    expect(result.hardFailures).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'assembly_trace_mismatch',
+          message: expectedMessage,
+        }),
+      ]),
+    )
+  })
+
   it('groups routeable observations with drill, variant, block, cap, and cell details', () => {
     const groups = buildGeneratedPlanObservationGroups(buildGeneratedPlanDiagnostics())
     const overCapGroups = groups.filter((group) =>
@@ -396,6 +557,10 @@ describe('seeded generated plan diagnostics', () => {
 
     expect(overCapGroups.length).toBeGreaterThan(0)
     expect(overCapGroups.every((group) => group.drillId && group.variantId)).toBe(true)
+    expect(overCapGroups.every((group) => group.groupKey.startsWith('gpdg:v1:'))).toBe(true)
+    expect(overCapGroups.every((group) => group.diagnosticFingerprint.startsWith('gpdf|v1|'))).toBe(
+      true,
+    )
     expect(overCapGroups.every((group) => group.blockType && group.required !== undefined)).toBe(
       true,
     )
@@ -411,65 +576,35 @@ describe('seeded generated plan diagnostics', () => {
         plannedMinutes: expect.any(Number),
       }),
     )
-  })
+    expect(
+      overCapGroups
+        .flatMap((group) => group.affectedCells)
+        .filter((cell) => cell.observationCodes.includes('optional_slot_redistribution'))
+        .every((cell) => cell.plannedMinutes !== undefined),
+    ).toBe(true)
+    expect(
+      overCapGroups
+        .filter((group) => group.observationCodes.includes('optional_slot_redistribution'))
+        .every((group) => group.likelyFixPaths.includes('generator_policy_investigation')),
+    ).toBe(true)
 
-  it('keeps the checked-in report aligned with the generated summary', () => {
-    const report = JSON.parse(
-      readFileSync(
-        resolve(process.cwd(), '../docs/reviews/2026-05-01-generated-plan-diagnostics-report.json'),
-        'utf8',
-      ),
-    ) as {
-      surface: {
-        seed_count: number
-        cell_count: number
-        applicable_count: number
-        not_applicable_count: number
-      }
-      status_counts: Record<string, number>
-      hard_failure_count: number
-      observation_count: number
-      hard_failure_counts: Record<string, number>
-      observation_counts: Record<string, number>
-      routeable_observation_group_count: number
-      top_routeable_observation_groups: Array<{
-        drill_id?: string
-        variant_id?: string
-        block_type?: string
-        required?: boolean
-        affected_cell_count: number
-        example_affected_cells: unknown[]
-      }>
-    }
-    const matrix = buildGeneratedPlanMatrix()
-    const results = buildGeneratedPlanDiagnostics()
-    const summary = summarizeGeneratedPlanDiagnostics(results, matrix)
-    const groups = buildGeneratedPlanObservationGroups(results)
-
-    expect(report.surface).toEqual(
+    const underMinGroup = groups.find((group) =>
+      group.observationCodes.includes('under_authored_min'),
+    )
+    expect(underMinGroup).toEqual(
       expect.objectContaining({
-        seed_count: summary.surface.seedCount,
-        cell_count: summary.surface.cellCount,
-        applicable_count: summary.surface.applicableCount,
-        not_applicable_count: summary.surface.notApplicableCount,
+        authoredMinMinutes: expect.any(Number),
+        affectedCellCount: expect.any(Number),
+        likelyFixPaths: expect.arrayContaining(['variant_cap_review']),
       }),
     )
-    expect(report.status_counts).toEqual(summary.statusCounts)
-    expect(report.hard_failure_count).toBe(summary.hardFailureCount)
-    expect(report.observation_count).toBe(summary.observationCount)
-    expect(report.hard_failure_counts).toEqual(summary.hardFailureCounts)
-    expect(report.observation_counts).toEqual(summary.observationCounts)
-    expect(report.routeable_observation_group_count).toBe(groups.length)
-    expect(report.top_routeable_observation_groups.length).toBeGreaterThan(0)
-    expect(report.top_routeable_observation_groups[0]).toEqual(
+    expect(underMinGroup?.affectedCells[0]).toEqual(
       expect.objectContaining({
-        drill_id: expect.any(String),
-        variant_id: expect.any(String),
-        block_type: expect.any(String),
-        required: expect.any(Boolean),
-        affected_cell_count: expect.any(Number),
-        example_affected_cells: expect.arrayContaining([expect.any(Object)]),
+        plannedMinutes: expect.any(Number),
+        allocatedMinutes: expect.any(Number),
+        observationCodes: expect.arrayContaining(['under_authored_min']),
       }),
     )
   })
+
 })

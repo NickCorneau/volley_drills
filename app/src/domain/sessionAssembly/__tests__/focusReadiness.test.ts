@@ -12,6 +12,7 @@ import {
   isReadinessStatus,
   validateActivationBatchManifest,
   validateFocusReadinessGapCard,
+  hasPerSlotSwapCoverage,
   type ActivationBatchManifest,
   type FocusReadinessGapCard,
 } from '../focusReadiness'
@@ -114,6 +115,55 @@ describe('focus readiness model', () => {
     expect(isReadinessStatus('done')).toBe(false)
     expect(isReadinessRiskBucket('no_same_focus_swap')).toBe(true)
     expect(isReadinessRiskBucket('missing_swap')).toBe(false)
+  })
+
+  it('does not treat pooled support families as per-slot swap coverage', () => {
+    expect(
+      hasPerSlotSwapCoverage({
+        mainFamilies: ['main-a', 'main-b'],
+        supportFamilyGroups: [['support-a'], ['support-b']],
+        pressureFamilies: [],
+        pressureApplicable: false,
+      }),
+    ).toBe(false)
+    expect(
+      hasPerSlotSwapCoverage({
+        mainFamilies: ['main-a', 'main-b'],
+        supportFamilyGroups: [
+          ['support-a', 'support-b'],
+          ['support-c', 'support-d'],
+        ],
+        pressureFamilies: [],
+        pressureApplicable: false,
+      }),
+    ).toBe(true)
+    expect(
+      hasPerSlotSwapCoverage({
+        mainFamilies: ['main-a'],
+        supportFamilyGroups: [
+          ['support-a', 'support-b'],
+          ['support-c', 'support-d'],
+        ],
+        pressureFamilies: ['pressure-a', 'pressure-b'],
+        pressureApplicable: true,
+      }),
+    ).toBe(false)
+    expect(
+      hasPerSlotSwapCoverage({
+        mainFamilies: ['main-a', 'main-b'],
+        supportFamilyGroups: [['support-a', 'support-b']],
+        pressureFamilies: ['pressure-a'],
+        pressureApplicable: true,
+      }),
+    ).toBe(false)
+    expect(
+      hasPerSlotSwapCoverage({
+        mainFamilies: ['main-a', 'main-b'],
+        supportFamilyGroups: [['support-a', 'support-b']],
+        pressureFamilies: ['pressure-a', 'pressure-b'],
+        pressureApplicable: true,
+      }),
+    ).toBe(true)
   })
 })
 
