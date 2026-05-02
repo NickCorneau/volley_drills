@@ -312,6 +312,49 @@ export interface GeneratedPlanD47GapClosureLedger {
   readonly reassessmentBoundary: string
 }
 
+export type GeneratedPlanD01GapFillD47Relationship =
+  | 'd47_held_behind_d01'
+  | 'd47_missing_or_shifted'
+  | 'd47_stale'
+
+export type GeneratedPlanD01GapFillNextArtifactType = 'workload_block_shape_proposal'
+
+export interface GeneratedPlanD01GapFillNextArtifact {
+  readonly artifactType: GeneratedPlanD01GapFillNextArtifactType
+  readonly owner: 'maintainer'
+  readonly evidenceSource: string
+  readonly promotionCriteria: string
+  readonly abandonCriteria: string
+  readonly noChangeCriteria: string
+}
+
+export interface GeneratedPlanD01GapFillProposal {
+  readonly candidateFound: boolean
+  readonly candidate: GeneratedPlanD47ProposalAdmissionCandidate
+  readonly currentnessState: GeneratedPlanD47GapClosureCurrentnessState
+  readonly d47Relationship: GeneratedPlanD01GapFillD47Relationship
+  readonly gapType: Extract<
+    GeneratedPlanD47GapClosureGapType,
+    'programming_shape_gap' | 'workload_metadata_gap'
+  >
+  readonly decisionState: Extract<GeneratedPlanD47GapClosureDecisionState, 'evidence_gathering'>
+  readonly authorizationStatus: Extract<
+    GeneratedPlanD47GapClosureAuthorizationStatus,
+    'not_authorized'
+  >
+  readonly suspectedTrainingGap: string
+  readonly receiptFacts: GeneratedPlanD47ProposalAdmissionReceiptFacts
+  readonly primaryClosurePath: 'combined_workload_block_shape_review'
+  readonly targetSurface: string
+  readonly blockedSourceBackedContentPath: string
+  readonly blockedGeneratorPolicyPath: string
+  readonly nextArtifact: GeneratedPlanD01GapFillNextArtifact
+  readonly expectedDiagnosticMovement: string
+  readonly expectedTrainingQualityMovement: string
+  readonly reassessmentResult: GeneratedPlanD47GapClosureReassessmentResult
+  readonly reassessmentBoundary: string
+}
+
 export interface GeneratedPlanTriageEntry {
   readonly groupKey: string
   readonly diagnosticFingerprint: string
@@ -371,6 +414,8 @@ const REDISTRIBUTION_CAUSALITY_RUNTIME_BOUNDARY =
   'Diagnostic-only receipt; shipped buildDraft() behavior is unchanged.'
 const D47_PROPOSAL_ADMISSION_GROUP_KEY =
   'gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap'
+const D01_GAP_FILL_PROPOSAL_GROUP_KEY =
+  'gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap'
 const D47_PROPOSAL_ADMISSION_MISSING_FACTS: readonly GeneratedPlanProposalAdmissionMissingFact[] = [
   'concrete_delta',
   'evidence_basis',
@@ -394,6 +439,10 @@ const D47_GAP_CLOSURE_SOURCE_DELTA_BOUNDARY =
   'A drill-inventory gap must name content depth beyond the existing FIVB 4.7 activation before catalog work.'
 const D47_GAP_CLOSURE_SUSPECTED_TRAINING_GAP =
   'D47 may be carrying too much advanced setting and movement work inside one main-skill block, but the current evidence must be compared against a simpler candidate before D47 becomes the fill target.'
+const D01_GAP_FILL_SUSPECTED_TRAINING_GAP =
+  'D01 may be a short beginner passing drill being asked to occupy too much main-skill time; the first fill proposal should decide whether to widen workload metadata, split/repeat the block shape, or accept the pressure by policy.'
+const D01_GAP_FILL_TARGET_SURFACE =
+  '`d01-solo` workload envelope (`durationMaxMinutes: 5`, `fatigueCap.maxMinutes: 5`) and generated main-skill block shape.'
 
 const COMPRESSION_LANE_ORDER: readonly GeneratedPlanDecisionDebtCompressionLane[] = [
   'short_session_cooldown_minimum',
@@ -1281,6 +1330,94 @@ export function buildGeneratedPlanD47GapClosureLedger(
   }
 }
 
+function currentnessStateForD01GapFillProposal(
+  group: GeneratedPlanRedistributionCausalityGroupReceipt | undefined,
+  validation: GeneratedPlanTriageValidation,
+): GeneratedPlanD47GapClosureCurrentnessState {
+  if (!group) return 'missing_or_shifted'
+  return validation.issues.some(
+    (issue) =>
+      issue.code === 'stale_fingerprint' &&
+      issue.groupKey === D01_GAP_FILL_PROPOSAL_GROUP_KEY,
+  )
+    ? 'stale'
+    : 'current'
+}
+
+function d47RelationshipForD01GapFillProposal(
+  ledger: GeneratedPlanD47GapClosureLedger,
+): GeneratedPlanD01GapFillD47Relationship {
+  switch (ledger.currentnessState) {
+    case 'current':
+      return 'd47_held_behind_d01'
+    case 'stale':
+      return 'd47_stale'
+    case 'missing_or_shifted':
+      return 'd47_missing_or_shifted'
+    default: {
+      const exhaustive: never = ledger.currentnessState
+      return exhaustive
+    }
+  }
+}
+
+export function buildGeneratedPlanD01GapFillProposal(
+  groups: readonly GeneratedPlanObservationGroup[],
+  registry: readonly GeneratedPlanTriageEntry[],
+): GeneratedPlanD01GapFillProposal {
+  const validation = validateGeneratedPlanTriageCoverage(groups, registry)
+  const receipt = buildGeneratedPlanRedistributionCausalityReceipt(groups, registry)
+  const d01ReceiptGroup = receipt.groups.find(
+    (candidate) => candidate.groupKey === D01_GAP_FILL_PROPOSAL_GROUP_KEY,
+  )
+  const d47GapClosureLedger = buildGeneratedPlanD47GapClosureLedger(groups, registry)
+  const currentnessState = currentnessStateForD01GapFillProposal(d01ReceiptGroup, validation)
+
+  return {
+    candidateFound: d01ReceiptGroup !== undefined,
+    candidate: {
+      groupKey: D01_GAP_FILL_PROPOSAL_GROUP_KEY,
+      diagnosticFingerprint: d01ReceiptGroup?.diagnosticFingerprint,
+      drillId: d01ReceiptGroup?.drillId,
+      variantId: d01ReceiptGroup?.variantId,
+      blockType: d01ReceiptGroup?.blockType,
+      triageRoute: d01ReceiptGroup?.triageRoute,
+      reviewedReportId: d01ReceiptGroup?.reviewedReportId,
+    },
+    currentnessState,
+    d47Relationship: d47RelationshipForD01GapFillProposal(d47GapClosureLedger),
+    gapType: 'programming_shape_gap',
+    decisionState: 'evidence_gathering',
+    authorizationStatus: 'not_authorized',
+    suspectedTrainingGap: D01_GAP_FILL_SUSPECTED_TRAINING_GAP,
+    receiptFacts: buildD47ProposalAdmissionReceiptFacts(d01ReceiptGroup),
+    primaryClosurePath: 'combined_workload_block_shape_review',
+    targetSurface: D01_GAP_FILL_TARGET_SURFACE,
+    blockedSourceBackedContentPath:
+      'Blocked until a content-depth delta beyond existing D01 passing catalog content is named with source evidence.',
+    blockedGeneratorPolicyPath:
+      'Blocked until a generator-policy hypothesis explains why runtime assembly should change instead of workload/block shape.',
+    nextArtifact: {
+      artifactType: 'workload_block_shape_proposal',
+      owner: 'maintainer',
+      evidenceSource: 'Current D01 comparator receipt from the D47 gap closure ledger.',
+      promotionCriteria:
+        'Promote D01 when a proposal chooses widen, split/repeat, or policy-acceptance with expected diagnostic and training-quality movement.',
+      abandonCriteria:
+        'Return to D47 or another candidate if D01 cannot name a concrete workload/block-shape target surface.',
+      noChangeCriteria:
+        'Close without fill only when the remaining pressure is policy-accepted with a no-action threshold and revisit trigger.',
+    },
+    expectedDiagnosticMovement:
+      'Future fill should reduce D01 over-cap/fatigue pressure, route it to an accepted policy allowance, or document why remaining pressure is harmless.',
+    expectedTrainingQualityMovement:
+      'Future fill should improve workload honesty or block-shape coherence for beginner passing without pretending catalog content changed.',
+    reassessmentResult: 'not_started',
+    reassessmentBoundary:
+      'This slice records proposal quality only; actual diagnostic and training-quality reassessment waits for a future authorized D01 fill.',
+  }
+}
+
 function formatD47GapClosureSegmentLabel(segment: GeneratedPlanD47GapClosureSegmentLabel): string {
   switch (segment) {
     case 'pressure_disappears':
@@ -1540,6 +1677,7 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
   )
   const d47ProposalAdmissionTicket = buildGeneratedPlanD47ProposalAdmissionTicket(groups, registry)
   const d47GapClosureLedger = buildGeneratedPlanD47GapClosureLedger(groups, registry)
+  const d01GapFillProposal = buildGeneratedPlanD01GapFillProposal(groups, registry)
   const decisionDebtLines =
     decisionDebtPrompts.length === 0
       ? ['- None.']
@@ -1675,6 +1813,34 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
     `- Reassessment result: \`${d47GapClosureLedger.reassessmentResult}\``,
     `- Reassessment boundary: ${d47GapClosureLedger.reassessmentBoundary}`,
   ]
+  const d01GapFillLines = [
+    '- Proposal source: D47 gap closure comparator receipt for `d01` / `d01-solo`.',
+    `- Candidate: \`${d01GapFillProposal.candidate.groupKey}\``,
+    `- Currentness: \`${d01GapFillProposal.currentnessState}\``,
+    `- D47 relationship: \`${d01GapFillProposal.d47Relationship}\``,
+    `- Gap type: \`${d01GapFillProposal.gapType}\``,
+    `- Decision state: \`${d01GapFillProposal.decisionState}\``,
+    `- Authorization status: \`${d01GapFillProposal.authorizationStatus}\``,
+    `- Suspected training gap: ${d01GapFillProposal.suspectedTrainingGap}`,
+    `- Target surface: ${d01GapFillProposal.targetSurface}`,
+    `- Primary closure path: \`${d01GapFillProposal.primaryClosurePath}\``,
+    `- Receipt facts: total affected cells ${d01GapFillProposal.receiptFacts.totalAffectedCellCount}, pressure disappears ${d01GapFillProposal.receiptFacts.pressureDisappearsCellCount}, pressure remains ${d01GapFillProposal.receiptFacts.pressureRemainsCellCount}, non-redistribution pressure ${d01GapFillProposal.receiptFacts.nonRedistributionPressureCellCount}, inconclusive ${d01GapFillProposal.receiptFacts.comparisonInconclusiveCellCount}`,
+    `- Source-backed content path: ${d01GapFillProposal.blockedSourceBackedContentPath}`,
+    `- Generator-policy path: ${d01GapFillProposal.blockedGeneratorPolicyPath}`,
+    '',
+    '### Next Artifact',
+    '',
+    `- Artifact: \`${d01GapFillProposal.nextArtifact.artifactType}\``,
+    `- Owner: \`${d01GapFillProposal.nextArtifact.owner}\``,
+    `- Evidence source: ${d01GapFillProposal.nextArtifact.evidenceSource}`,
+    `- Promotion criteria: ${d01GapFillProposal.nextArtifact.promotionCriteria}`,
+    `- Abandon criteria: ${d01GapFillProposal.nextArtifact.abandonCriteria}`,
+    `- No-change criteria: ${d01GapFillProposal.nextArtifact.noChangeCriteria}`,
+    `- Expected diagnostic movement: ${d01GapFillProposal.expectedDiagnosticMovement}`,
+    `- Expected training-quality movement: ${d01GapFillProposal.expectedTrainingQualityMovement}`,
+    `- Reassessment result: \`${d01GapFillProposal.reassessmentResult}\``,
+    `- Reassessment boundary: ${d01GapFillProposal.reassessmentBoundary}`,
+  ]
 
   const lines = [
     '## Triage Summary',
@@ -1703,6 +1869,10 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
     '## D47 Gap Closure Ledger',
     '',
     ...d47GapClosureLines,
+    '',
+    '## D01 Gap-Fill Proposal',
+    '',
+    ...d01GapFillLines,
     '',
     '## New / Untriaged Blockers',
     '',

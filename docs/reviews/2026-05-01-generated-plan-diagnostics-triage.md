@@ -14,8 +14,10 @@ depends_on:
   - docs/brainstorms/2026-05-02-generated-diagnostics-redistribution-causality-receipt-requirements.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-d47-u6-proposal-admission-requirements.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-d47-gap-closure-ledger-requirements.md
+  - docs/brainstorms/2026-05-02-generated-diagnostics-d01-comparator-gap-fill-proposal-requirements.md
   - docs/plans/2026-05-02-001-feat-d47-proposal-admission-ticket-plan.md
   - docs/plans/2026-05-02-003-feat-d47-gap-closure-ledger-plan.md
+  - docs/plans/2026-05-02-004-feat-d01-gap-fill-proposal-plan.md
 ---
 
 # Generated Plan Diagnostics Triage
@@ -213,6 +215,35 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 - No-change burden: No-change closure requires dispositions for pressure-disappears, pressure-remains, and non-redistribution pressure segments.
 - Reassessment result: `not_started`
 - Reassessment boundary: This slice records expected movement only; actual diagnostic and training-quality reassessment waits for a future fill.
+
+## D01 Gap-Fill Proposal
+
+- Proposal source: D47 gap closure comparator receipt for `d01` / `d01-solo`.
+- Candidate: `gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`
+- Currentness: `current`
+- D47 relationship: `d47_held_behind_d01`
+- Gap type: `programming_shape_gap`
+- Decision state: `evidence_gathering`
+- Authorization status: `not_authorized`
+- Suspected training gap: D01 may be a short beginner passing drill being asked to occupy too much main-skill time; the first fill proposal should decide whether to widen workload metadata, split/repeat the block shape, or accept the pressure by policy.
+- Target surface: `d01-solo` workload envelope (`durationMaxMinutes: 5`, `fatigueCap.maxMinutes: 5`) and generated main-skill block shape.
+- Primary closure path: `combined_workload_block_shape_review`
+- Receipt facts: total affected cells 18, pressure disappears 0, pressure remains 18, non-redistribution pressure 6, inconclusive 0
+- Source-backed content path: Blocked until a content-depth delta beyond existing D01 passing catalog content is named with source evidence.
+- Generator-policy path: Blocked until a generator-policy hypothesis explains why runtime assembly should change instead of workload/block shape.
+
+### Next Artifact
+
+- Artifact: `workload_block_shape_proposal`
+- Owner: `maintainer`
+- Evidence source: Current D01 comparator receipt from the D47 gap closure ledger.
+- Promotion criteria: Promote D01 when a proposal chooses widen, split/repeat, or policy-acceptance with expected diagnostic and training-quality movement.
+- Abandon criteria: Return to D47 or another candidate if D01 cannot name a concrete workload/block-shape target surface.
+- No-change criteria: Close without fill only when the remaining pressure is policy-accepted with a no-action threshold and revisit trigger.
+- Expected diagnostic movement: Future fill should reduce D01 over-cap/fatigue pressure, route it to an accepted policy allowance, or document why remaining pressure is harmless.
+- Expected training-quality movement: Future fill should improve workload honesty or block-shape coherence for beginner passing without pretending catalog content changed.
+- Reassessment result: `not_started`
+- Reassessment boundary: This slice records proposal quality only; actual diagnostic and training-quality reassessment waits for a future authorized D01 fill.
 
 ## New / Untriaged Blockers
 

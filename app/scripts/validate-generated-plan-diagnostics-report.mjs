@@ -220,8 +220,10 @@ depends_on:
   - docs/brainstorms/2026-05-02-generated-diagnostics-redistribution-causality-receipt-requirements.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-d47-u6-proposal-admission-requirements.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-d47-gap-closure-ledger-requirements.md
+  - docs/brainstorms/2026-05-02-generated-diagnostics-d01-comparator-gap-fill-proposal-requirements.md
   - docs/plans/2026-05-02-001-feat-d47-proposal-admission-ticket-plan.md
   - docs/plans/2026-05-02-003-feat-d47-gap-closure-ledger-plan.md
+  - docs/plans/2026-05-02-004-feat-d01-gap-fill-proposal-plan.md
 ---
 
 # Generated Plan Diagnostics Triage

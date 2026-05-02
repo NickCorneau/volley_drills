@@ -9,6 +9,7 @@ import {
 import {
   authorizationStatusForGeneratedPlanD47GapClosureState,
   buildGeneratedPlanDecisionDebtPrompts,
+  buildGeneratedPlanD01GapFillProposal,
   buildGeneratedPlanD47GapClosureLedger,
   buildGeneratedPlanD47ProposalAdmissionTicket,
   buildGeneratedPlanRedistributionCausalityReceipt,
@@ -887,6 +888,77 @@ describe('generated plan diagnostic triage registry', () => {
     }
   })
 
+  it('builds the D01 comparator gap-fill proposal from current receipt evidence', () => {
+    const groups = currentGroups()
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const proposal = buildGeneratedPlanD01GapFillProposal(groups, registry)
+
+    expect(proposal).toEqual(
+      expect.objectContaining({
+        candidateFound: true,
+        currentnessState: 'current',
+        d47Relationship: 'd47_held_behind_d01',
+        gapType: 'programming_shape_gap',
+        decisionState: 'evidence_gathering',
+        authorizationStatus: 'not_authorized',
+        primaryClosurePath: 'combined_workload_block_shape_review',
+        candidate: expect.objectContaining({
+          groupKey:
+            'gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+          drillId: 'd01',
+          variantId: 'd01-solo',
+          blockType: 'main_skill',
+        }),
+        receiptFacts: expect.objectContaining({
+          totalAffectedCellCount: 18,
+          pressureDisappearsCellCount: 0,
+          pressureRemainsCellCount: 18,
+          nonRedistributionPressureCellCount: 6,
+          comparisonInconclusiveCellCount: 0,
+        }),
+        nextArtifact: expect.objectContaining({
+          artifactType: 'workload_block_shape_proposal',
+          owner: 'maintainer',
+        }),
+        reassessmentResult: 'not_started',
+      }),
+    )
+    expect(proposal.targetSurface).toContain('durationMaxMinutes: 5')
+    expect(proposal.blockedSourceBackedContentPath).toContain('Blocked')
+    expect(proposal.expectedTrainingQualityMovement).toContain('workload honesty')
+  })
+
+  it('blocks D01 gap-fill authorization when the comparator receipt is missing', () => {
+    const groups = currentGroups().filter(
+      (group) =>
+        group.groupKey !==
+        'gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+    )
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const proposal = buildGeneratedPlanD01GapFillProposal(groups, registry)
+
+    expect(proposal.candidateFound).toBe(false)
+    expect(proposal.currentnessState).toBe('missing_or_shifted')
+    expect(proposal.authorizationStatus).toBe('not_authorized')
+    expect(proposal.receiptFacts.totalAffectedCellCount).toBe(0)
+  })
+
+  it('blocks D01 gap-fill authorization when the comparator fingerprint is stale', () => {
+    const d01GroupKey =
+      'gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap'
+    const groups = currentGroups()
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups).map((entry) =>
+      entry.groupKey === d01GroupKey
+        ? { ...entry, diagnosticFingerprint: `${entry.diagnosticFingerprint}:stale` }
+        : entry,
+    )
+    const proposal = buildGeneratedPlanD01GapFillProposal(groups, registry)
+
+    expect(proposal.candidateFound).toBe(true)
+    expect(proposal.currentnessState).toBe('stale')
+    expect(proposal.authorizationStatus).toBe('not_authorized')
+  })
+
   it('fails validation for unexpected unknown compression lanes', () => {
     const groups = currentGroups()
     const firstGroup = groups[0]
@@ -965,6 +1037,16 @@ describe('generated plan diagnostic triage registry', () => {
     expect(markdown).toContain('Non-redistribution pressure: cells 6')
     expect(markdown).toContain('Artifact: `comparator_receipt`')
     expect(markdown).toContain('Reassessment result: `not_started`')
+    expect(markdown).toContain('## D01 Gap-Fill Proposal')
+    expect(markdown).toContain('Proposal source: D47 gap closure comparator receipt')
+    expect(markdown).toContain(
+      'Candidate: `gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`',
+    )
+    expect(markdown).toContain('D47 relationship: `d47_held_behind_d01`')
+    expect(markdown).toContain('Primary closure path: `combined_workload_block_shape_review`')
+    expect(markdown).toContain('Artifact: `workload_block_shape_proposal`')
+    expect(markdown).toContain('Expected diagnostic movement: Future fill should reduce D01')
+    expect(markdown).toContain('Expected training-quality movement: Future fill should improve workload honesty')
     expect(markdown).toContain('docs/ops/workload-envelope-authoring-guide.md#short-session-cooldown-minimum')
     expect(markdown).toContain('Candidate dispositions: `accepted_policy_allowance`')
   })
