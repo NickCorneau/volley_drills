@@ -158,7 +158,7 @@ last_updated: 2026-05-02
 depends_on:
   - app/src/domain/generatedPlanDiagnostics.ts
   - app/src/domain/sessionBuilder.ts
-  - docs/plans/2026-05-01-001-feat-generated-plan-diagnostics-plan.md
+  - docs/archive/plans/2026-05-01-001-feat-generated-plan-diagnostics-plan.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-redistribution-causality-receipt-requirements.md
 ---
@@ -218,6 +218,8 @@ depends_on:
   - app/src/domain/generatedPlanDiagnosticTriage.ts
   - docs/reviews/2026-05-01-generated-plan-diagnostics-report.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-redistribution-causality-receipt-requirements.md
+  - docs/brainstorms/2026-05-02-generated-diagnostics-d47-u6-proposal-admission-requirements.md
+  - docs/plans/2026-05-02-001-feat-d47-proposal-admission-ticket-plan.md
 ---
 
 # Generated Plan Diagnostics Triage
@@ -243,6 +245,13 @@ ${JSON.stringify(registry, null, 2)}
 
 function normalizeMarkdown(markdown) {
   return markdown.replace(/\r\n/g, '\n')
+}
+
+function writeMarkdownIfChanged(path, expectedMarkdown) {
+  const currentMarkdown = readFileSync(path, 'utf8')
+  if (normalizeMarkdown(currentMarkdown) === normalizeMarkdown(expectedMarkdown)) return false
+  writeFileSync(path, expectedMarkdown)
+  return true
 }
 
 const server = await createServer({
@@ -324,10 +333,10 @@ try {
   const expectedMarkdown = reportMarkdown(data)
 
   if (shouldWrite) {
-    writeFileSync(reportPath, expectedMarkdown)
-    writeFileSync(triagePath, expectedTriageMarkdown)
-    console.log(`Wrote ${reportPath}`)
-    console.log(`Wrote ${triagePath}`)
+    const wroteReport = writeMarkdownIfChanged(reportPath, expectedMarkdown)
+    const wroteTriage = writeMarkdownIfChanged(triagePath, expectedTriageMarkdown)
+    console.log(`${wroteReport ? 'Wrote' : 'Already current'} ${reportPath}`)
+    console.log(`${wroteTriage ? 'Wrote' : 'Already current'} ${triagePath}`)
   } else {
     const currentMarkdown = readFileSync(reportPath, 'utf8')
     if (normalizeMarkdown(currentMarkdown) !== normalizeMarkdown(expectedMarkdown)) {

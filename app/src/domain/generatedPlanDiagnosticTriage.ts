@@ -136,6 +136,74 @@ export interface GeneratedPlanRedistributionCausalityReceipt {
   readonly groups: readonly GeneratedPlanRedistributionCausalityGroupReceipt[]
 }
 
+export type GeneratedPlanProposalAdmissionState =
+  | 'evidence_gathering'
+  | 'u6_preview_ready'
+  | 'close_or_hold_without_preview'
+
+export type GeneratedPlanProposalAdmissionMissingFact =
+  | 'concrete_delta'
+  | 'evidence_basis'
+  | 'falsification_condition'
+  | 'expected_diagnostic_movement'
+  | 'product_or_training_quality_hypothesis'
+  | 'no_action_threshold'
+
+export type GeneratedPlanProposalAdmissionSourceEvidenceState =
+  | 'present'
+  | 'missing'
+  | 'not_needed'
+
+export interface GeneratedPlanD47ProposalAdmissionCandidate {
+  readonly groupKey: string
+  readonly diagnosticFingerprint?: string
+  readonly drillId?: string
+  readonly variantId?: string
+  readonly blockType?: GeneratedPlanObservationGroup['blockType']
+  readonly triageRoute?: GeneratedPlanTriageRoute
+  readonly reviewedReportId?: string
+}
+
+export interface GeneratedPlanD47ProposalAdmissionReceiptFacts {
+  readonly totalAffectedCellCount: number
+  readonly pressureDisappearsCellCount: number
+  readonly pressureRemainsCellCount: number
+  readonly nonRedistributionPressureCellCount: number
+  readonly comparisonInconclusiveCellCount: number
+  readonly actionState?: GeneratedPlanRedistributionCausalityState
+  readonly dominantCellState?: GeneratedPlanRedistributionDominantState
+  readonly hasIncompleteEvidence: boolean
+  readonly followUpRoutes: readonly GeneratedPlanRedistributionFollowUpRoute[]
+}
+
+export interface GeneratedPlanD47ProposalAdmissionNoChangePath {
+  readonly admissionState: Extract<
+    GeneratedPlanProposalAdmissionState,
+    'close_or_hold_without_preview'
+  >
+  readonly requiresU6Preview: boolean
+  readonly acceptanceEvidenceRequired: boolean
+  readonly condition: string
+}
+
+export interface GeneratedPlanD47ProposalAdmissionTicket {
+  readonly candidateFound: boolean
+  readonly candidate: GeneratedPlanD47ProposalAdmissionCandidate
+  readonly relatedCandidateGroupKeys: readonly string[]
+  readonly admissionState: GeneratedPlanProposalAdmissionState
+  readonly previewReady: boolean
+  readonly sourceEvidenceState: GeneratedPlanProposalAdmissionSourceEvidenceState
+  readonly sourceEvidenceRationale: string
+  readonly missingProposalFacts: readonly GeneratedPlanProposalAdmissionMissingFact[]
+  readonly receiptFacts: GeneratedPlanD47ProposalAdmissionReceiptFacts
+  readonly workloadProposalTracks: readonly GeneratedPlanRedistributionFollowUpRoute[]
+  readonly generatorPolicyTracks: readonly GeneratedPlanRedistributionFollowUpRoute[]
+  readonly existingSurfaceDecision: string
+  readonly counterfactualPolicyBoundary: string
+  readonly d47AlternativeComparison: string
+  readonly noChangePath: GeneratedPlanD47ProposalAdmissionNoChangePath
+}
+
 export interface GeneratedPlanTriageEntry {
   readonly groupKey: string
   readonly diagnosticFingerprint: string
@@ -193,6 +261,25 @@ const REDISTRIBUTION_CAUSALITY_COMPARISON_MODE: GeneratedPlanRedistributionCausa
   'allocated_duration_counterfactual'
 const REDISTRIBUTION_CAUSALITY_RUNTIME_BOUNDARY =
   'Diagnostic-only receipt; shipped buildDraft() behavior is unchanged.'
+const D47_PROPOSAL_ADMISSION_GROUP_KEY =
+  'gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap'
+const D47_PROPOSAL_ADMISSION_MISSING_FACTS: readonly GeneratedPlanProposalAdmissionMissingFact[] = [
+  'concrete_delta',
+  'evidence_basis',
+  'falsification_condition',
+  'expected_diagnostic_movement',
+  'product_or_training_quality_hypothesis',
+  'no_action_threshold',
+]
+const D47_WORKLOAD_PROPOSAL_TRACKS: readonly GeneratedPlanRedistributionFollowUpRoute[] = [
+  'workload_review',
+  'block_shape_review',
+  'source_backed_proposal_work',
+  'u6_proposal_admission_candidate',
+]
+const D47_GENERATOR_POLICY_TRACKS: readonly GeneratedPlanRedistributionFollowUpRoute[] = [
+  'future_generator_policy_decision',
+]
 
 const COMPRESSION_LANE_ORDER: readonly GeneratedPlanDecisionDebtCompressionLane[] = [
   'short_session_cooldown_minimum',
@@ -739,6 +826,98 @@ export function buildGeneratedPlanRedistributionCausalityReceipt(
   }
 }
 
+function buildD47ProposalAdmissionReceiptFacts(
+  group: GeneratedPlanRedistributionCausalityGroupReceipt | undefined,
+): GeneratedPlanD47ProposalAdmissionReceiptFacts {
+  if (!group) {
+    return {
+      totalAffectedCellCount: 0,
+      pressureDisappearsCellCount: 0,
+      pressureRemainsCellCount: 0,
+      nonRedistributionPressureCellCount: 0,
+      comparisonInconclusiveCellCount: 0,
+      hasIncompleteEvidence: true,
+      followUpRoutes: [],
+    }
+  }
+
+  return {
+    totalAffectedCellCount: group.counts.totalAffectedCellCount,
+    pressureDisappearsCellCount: group.counts.pressureDisappearsCellCount,
+    pressureRemainsCellCount: group.counts.pressureRemainsCellCount,
+    nonRedistributionPressureCellCount:
+      group.counts.nonRedistributionOverCapCellCount +
+      group.counts.nonRedistributionUnderMinCellCount,
+    comparisonInconclusiveCellCount: group.counts.comparisonInconclusiveCellCount,
+    actionState: group.actionState,
+    dominantCellState: group.dominantCellState,
+    hasIncompleteEvidence: group.hasIncompleteEvidence,
+    followUpRoutes: group.followUpRoutes,
+  }
+}
+
+export function buildGeneratedPlanD47ProposalAdmissionTicket(
+  groups: readonly GeneratedPlanObservationGroup[],
+  registry: readonly GeneratedPlanTriageEntry[],
+): GeneratedPlanD47ProposalAdmissionTicket {
+  const receipt = buildGeneratedPlanRedistributionCausalityReceipt(groups, registry)
+  const group = receipt.groups.find((candidate) => candidate.groupKey === D47_PROPOSAL_ADMISSION_GROUP_KEY)
+  const relatedCandidateGroupKeys = receipt.groups
+    .filter(
+      (candidate) =>
+        candidate.groupKey !== D47_PROPOSAL_ADMISSION_GROUP_KEY &&
+        candidate.drillId === 'd47' &&
+        candidate.variantId === 'd47-solo-open',
+    )
+    .map((candidate) => candidate.groupKey)
+
+  return {
+    candidateFound: group !== undefined,
+    candidate: {
+      groupKey: D47_PROPOSAL_ADMISSION_GROUP_KEY,
+      diagnosticFingerprint: group?.diagnosticFingerprint,
+      drillId: group?.drillId,
+      variantId: group?.variantId,
+      blockType: group?.blockType,
+      triageRoute: group?.triageRoute,
+      reviewedReportId: group?.reviewedReportId,
+    },
+    relatedCandidateGroupKeys,
+    admissionState: 'evidence_gathering',
+    previewReady: false,
+    sourceEvidenceState: 'missing',
+    sourceEvidenceRationale:
+      'No proposed delta has named whether source-backed evidence is present, missing, or not needed.',
+    missingProposalFacts: D47_PROPOSAL_ADMISSION_MISSING_FACTS,
+    receiptFacts: buildD47ProposalAdmissionReceiptFacts(group),
+    workloadProposalTracks: group
+      ? group.followUpRoutes.filter((route) => D47_WORKLOAD_PROPOSAL_TRACKS.includes(route))
+      : [],
+    generatorPolicyTracks: group
+      ? group.followUpRoutes.filter((route) => D47_GENERATOR_POLICY_TRACKS.includes(route))
+      : [],
+    existingSurfaceDecision:
+      'Host the first admission ticket in the generated triage workbench before creating any standalone artifact.',
+    counterfactualPolicyBoundary:
+      'Counterfactual-only pressure remains diagnostic evidence until a policy-admissible generator hypothesis is named.',
+    d47AlternativeComparison:
+      'D47 is the first candidate because it stress-tests mixed evidence and non-redistribution pressure; abandon it if causal warrant, product impact, or an admissible proposal path cannot be named.',
+    noChangePath: {
+      admissionState: 'close_or_hold_without_preview',
+      requiresU6Preview: false,
+      acceptanceEvidenceRequired: true,
+      condition:
+        'A no-change disposition can close or hold the ticket when acceptance evidence and a no-action threshold are named.',
+    },
+  }
+}
+
+function formatProposalAdmissionMissingFact(
+  missingFact: GeneratedPlanProposalAdmissionMissingFact,
+): string {
+  return missingFact.replaceAll('_', ' ')
+}
+
 function routeCountsForEntries(
   entries: readonly GeneratedPlanTriageEntry[],
 ): GeneratedPlanDecisionDebtRouteCount[] {
@@ -981,6 +1160,7 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
     groups,
     registry,
   )
+  const d47ProposalAdmissionTicket = buildGeneratedPlanD47ProposalAdmissionTicket(groups, registry)
   const decisionDebtLines =
     decisionDebtPrompts.length === 0
       ? ['- None.']
@@ -1033,6 +1213,40 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
               `- \`${group.groupKey}\`: action \`${group.actionState}\`, dominant \`${group.dominantCellState}\`, incomplete evidence ${group.hasIncompleteEvidence ? 'yes' : 'no'}, pressure disappears ${group.counts.pressureDisappearsCellCount}, pressure remains ${group.counts.pressureRemainsCellCount}, non-redistribution pressure ${group.counts.nonRedistributionOverCapCellCount + group.counts.nonRedistributionUnderMinCellCount}, inconclusive ${group.counts.comparisonInconclusiveCellCount}, follow-up ${group.followUpRoutes.map((route) => `\`${route}\``).join(', ')}`,
           ),
         ]
+  const d47ProposalAdmissionLines = d47ProposalAdmissionTicket.candidateFound
+    ? [
+        '- Ticket source: U8 redistribution causality receipt for `d47` / `d47-solo-open`.',
+        `- Candidate: \`${d47ProposalAdmissionTicket.candidate.groupKey}\``,
+        `- Drill / variant: \`${d47ProposalAdmissionTicket.candidate.drillId}\` / \`${d47ProposalAdmissionTicket.candidate.variantId}\``,
+        `- Block type: \`${d47ProposalAdmissionTicket.candidate.blockType}\``,
+        `- Triage route: \`${d47ProposalAdmissionTicket.candidate.triageRoute}\``,
+        `- Admission state: \`${d47ProposalAdmissionTicket.admissionState}\``,
+        '- Admission gate: U6 preview remains blocked until a concrete proposal names a delta, evidence basis, falsification condition, expected diagnostic movement, impact hypothesis, and no-action threshold.',
+        `- Preview ready: ${d47ProposalAdmissionTicket.previewReady ? 'yes' : 'no'}`,
+        `- Source evidence state: \`${d47ProposalAdmissionTicket.sourceEvidenceState}\` (${d47ProposalAdmissionTicket.sourceEvidenceRationale})`,
+        `- Existing surface decision: ${d47ProposalAdmissionTicket.existingSurfaceDecision}`,
+        `- Receipt facts: total affected cells ${d47ProposalAdmissionTicket.receiptFacts.totalAffectedCellCount}, pressure disappears ${d47ProposalAdmissionTicket.receiptFacts.pressureDisappearsCellCount}, pressure remains ${d47ProposalAdmissionTicket.receiptFacts.pressureRemainsCellCount}, non-redistribution pressure ${d47ProposalAdmissionTicket.receiptFacts.nonRedistributionPressureCellCount}, inconclusive ${d47ProposalAdmissionTicket.receiptFacts.comparisonInconclusiveCellCount}`,
+        `- Receipt classification: action \`${d47ProposalAdmissionTicket.receiptFacts.actionState}\`, dominant \`${d47ProposalAdmissionTicket.receiptFacts.dominantCellState}\`, incomplete evidence ${d47ProposalAdmissionTicket.receiptFacts.hasIncompleteEvidence ? 'yes' : 'no'}`,
+        `- Workload/block/source tracks: ${d47ProposalAdmissionTicket.workloadProposalTracks.map((route) => `\`${route}\``).join(', ')}`,
+        `- Generator-policy tracks: ${d47ProposalAdmissionTicket.generatorPolicyTracks.map((route) => `\`${route}\``).join(', ')}`,
+        `- Counterfactual boundary: ${d47ProposalAdmissionTicket.counterfactualPolicyBoundary}`,
+        `- D47 versus alternatives: ${d47ProposalAdmissionTicket.d47AlternativeComparison}`,
+        `- No-change path: \`${d47ProposalAdmissionTicket.noChangePath.admissionState}\`; requires U6 preview ${d47ProposalAdmissionTicket.noChangePath.requiresU6Preview ? 'yes' : 'no'}; acceptance evidence required ${d47ProposalAdmissionTicket.noChangePath.acceptanceEvidenceRequired ? 'yes' : 'no'}; ${d47ProposalAdmissionTicket.noChangePath.condition}`,
+        '',
+        '### Missing proposal facts',
+        '',
+        ...d47ProposalAdmissionTicket.missingProposalFacts.map(
+          (missingFact) => `- \`${missingFact}\`: ${formatProposalAdmissionMissingFact(missingFact)}`,
+        ),
+      ]
+    : [
+        `- Candidate: \`${d47ProposalAdmissionTicket.candidate.groupKey}\``,
+        '- Admission state: `evidence_gathering`',
+        '- Candidate group is not present in the current redistribution causality receipt.',
+        ...d47ProposalAdmissionTicket.relatedCandidateGroupKeys.map(
+          (groupKey) => `- Related current D47 group: \`${groupKey}\``,
+        ),
+      ]
 
   const lines = [
     '## Triage Summary',
@@ -1053,6 +1267,10 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
     '## Redistribution Causality Receipt',
     '',
     ...redistributionCausalityLines,
+    '',
+    '## D47 Proposal Admission Ticket',
+    '',
+    ...d47ProposalAdmissionLines,
     '',
     '## New / Untriaged Blockers',
     '',

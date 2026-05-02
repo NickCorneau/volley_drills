@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
   "repo_id": "volley_drills",
-  "last_updated": "2026-05-01",
+  "last_updated": "2026-05-02",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -21,7 +21,7 @@
       "notes": "Editing from Windows Cursor is fine; repo automation assumes WSL/bash."
     },
     "active_milestone": "M001",
-    "stack": "Vite + React + TypeScript + PWA + Dexie (schema v5)",
+    "stack": "Vite + React + TypeScript + PWA + Dexie (schema v6)",
     "blocking_gate": "D130 founder-use conditions tracked in docs/research/founder-use-ledger.md; D91 retention gate deferred. See docs/status/current-state.md for current reads.",
     "prototype_feedback": "docs/research/2026-04-12-v0a-runner-probe-feedback.md",
     "v0b_field_look_feedback": "docs/research/2026-04-19-v0b-starter-loop-feedback.md",
@@ -292,6 +292,13 @@
       "status": "active"
     },
     {
+      "id": "docs-archive",
+      "path": "docs/archive/README.md",
+      "type": "index",
+      "status": "active",
+      "canonical_for": "Index for completed or superseded historical docs moved out of active routing while preserving original doc family under docs/archive/<family>/."
+    },
+    {
       "id": "current-state",
       "path": "docs/status/current-state.md",
       "type": "status",
@@ -329,7 +336,7 @@
       "id": "M001",
       "path": "docs/milestones/m001-solo-session-loop.md",
       "type": "milestone",
-      "status": "draft"
+      "status": "active"
     },
     {
       "id": "M002",
@@ -359,7 +366,7 @@
       "id": "M001-review",
       "path": "docs/specs/m001-review-micro-spec.md",
       "type": "spec",
-      "status": "draft"
+      "status": "active"
     },
     {
       "id": "M001-home-sync",
@@ -485,7 +492,7 @@
       "id": "d91-retention-gate-evidence",
       "path": "docs/research/d91-retention-gate-evidence.md",
       "type": "research",
-      "status": "active",
+      "status": "complete",
       "canonical_for": "evidence base and interpretive framing for the D91 M001 go/no-go retention gate"
     },
     {
@@ -679,7 +686,7 @@
     },
     {
       "id": "v0a-runner-probe-plan",
-      "path": "docs/plans/2026-04-12-001-feat-v0a-runner-probe-plan.md",
+      "path": "docs/archive/plans/2026-04-12-001-feat-v0a-runner-probe-plan.md",
       "type": "plan",
       "status": "complete"
     },
@@ -700,17 +707,18 @@
       "path": "docs/plans/2026-04-22-tier1b-serving-setting-expansion.md",
       "type": "plan",
       "status": "complete",
+      "active_registry": true,
       "canonical_for": "Tier 1b Layer A drill-authoring plan: shipped four source-backed drill records (`d31`, `d33`, `d40`, `d42`) plus safe same-chain progression links for `chain-6-serving` and `chain-7-setting`, without schema/filter/UI/Dexie changes. Defers `d36 Jump Float Introduction` to `O7` sports-medicine / PT review and `d43 Triangle Setting` to `D101` 3+ player support; current Layer A cap consumption is 4/10."
     },
     {
       "id": "walkthrough-closeout-polish-2026-04-23",
-      "path": "docs/plans/2026-04-23-walkthrough-closeout-polish.md",
+      "path": "docs/archive/plans/2026-04-23-walkthrough-closeout-polish.md",
       "type": "plan",
       "status": "complete"
     },
     {
       "id": "pre-d91-editorial-polish-2026-04-26",
-      "path": "docs/plans/2026-04-26-pre-d91-editorial-polish.md",
+      "path": "docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md",
       "type": "plan",
       "status": "complete"
     },
@@ -719,11 +727,12 @@
       "path": "docs/plans/2026-04-26-pair-rep-capture-tier1b.md",
       "type": "plan",
       "status": "complete",
+      "active_registry": true,
       "canonical_for": "Tier 1b implementation plan for the post-2026-04-26 pair rep-capture work unlocked by the P2-3 founder-session trigger (`docs/research/founder-use-ledger.md` 2026-04-26 row). Implements `D133` (Framing D from `docs/research/2026-04-26-pair-rep-capture-options.md`): new `/run/check` route after completed blocks with required per-drill **Difficulty tag** plus optional per-drill **Good/Total**, Transition refocused on Up Next, Review-screen session-level count card removed for count drills, Complete drill-grain aggregation, plus a forward-only Dexie migration (`perDrillCaptures: PerDrillCapture[]`). Authors zero new drill records (does not consume the drill-record cap; sibling `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md` consumes 4/10). Defers Framing C (in-session counter on RunScreen) under explicit re-trigger condition. Spec contract in `docs/specs/m001-review-micro-spec.md` §'Per-drill capture at Transition (D133)'."
     },
     {
       "id": "skip-review-modal-and-investment-footer-2026-04-27",
-      "path": "docs/plans/2026-04-27-skip-review-and-investment-footer.md",
+      "path": "docs/archive/plans/2026-04-27-skip-review-and-investment-footer.md",
       "type": "plan",
       "status": "complete",
       "canonical_for": "Fourth successive editorial-class polish pass (after 2026-04-22 / 2026-04-23 / 2026-04-26) targeting the genuinely-open Tier 1b items in `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md`. Two items shipped: `R11` lifted the Home Skip-review confirm from an inline two-step row into a centered `role=dialog` `SkipReviewModal` matching `RunScreen`'s `End session early?` shape (safe-primary `Never mind` first, danger `Yes, skip` below; `Esc` closes; aria-modal + aria-labelledby + autofocus + Tab trap + restore-focus-on-close); `R13` added a quiet `Logged: N session{s} · H:MM total` line above the Settings privacy promise, gated on `count > 0`, sourced from a new `getSessionTallySummary()` query that mirrors `formatDurationLine` per-session minute math and excludes `discarded_resume` stubs via `isTerminalSession`. Two items demoted on close inspection: `R7` (Beach Prep Three truncate-with-expand — underlying blob no longer holds, `d28` reformatted 2026-04-21, and the 2026-04-22 Transition parity pass deliberately removed truncate-with-expand) and `R14` (Accent color demotion — audit-class scope, deferred to a separate pass). Authors zero new drill records; no Dexie migration; no metadata schema changes."
@@ -737,14 +746,14 @@
     },
     {
       "id": "solo-vs-pair-variant-sweep-2026-04-27",
-      "path": "docs/plans/2026-04-27-solo-vs-pair-variant-sweep.md",
+      "path": "docs/archive/plans/2026-04-27-solo-vs-pair-variant-sweep.md",
       "type": "plan",
       "status": "complete",
       "canonical_for": "Catalog-authoring sweep that closes the partner-voice gap on the active M001 drill set. Authors 8 new tuned Pair variants on `m001Candidate: true` Drill families (`d01`, `d05`, `d22`, `d31`, `d38`, `d39`, `d40`, plus a `d33-solo-net` rewrite-and-split into `d33-solo` + `d33-pair`); tightens `participants.max = 1` on the now-redundant Solo voices (`d22-solo`, `d33-solo`, `d38-solo`, `d39-solo`); renames `label: 'Solo'` to `label: 'Any'` on the broad-participation warmup/cooldown variants (`d25-solo`, `d26-solo`, `d28-solo`) so their existing `participants.max=14` doesn't trip the new rule; equipment.balls tightened from `'many'` to `1` on `d31-pair` and `d33-pair` so the pair-rounds reality (one ball, partner cadence) is honest and so `hasUnmodeledRequirements` doesn't filter them out of swap pools. Adds a permanent regression guard via a new `participants_label_mismatch` rule in `app/src/data/catalogValidation.ts`. Lifts the pair-mode menu from 'leaky solo voice' to a first-class pair drill catalog matching `D132`'s pair-first product stance. M001 catalog footprint stays at 19 active Drill records (variant count grows; Drill count unchanged); no schema bump, no Dexie migration, no new archetype rules."
     },
     {
       "id": "layer-2-reliability-and-audit-pass-2026-04-27",
-      "path": "docs/plans/2026-04-27-layer-2-reliability-and-audit-pass.md",
+      "path": "docs/archive/plans/2026-04-27-layer-2-reliability-and-audit-pass.md",
       "type": "plan",
       "status": "complete",
       "canonical_for": "Post-D133 Layer 2 queue closeout pass. Ships two reliability fixes first (`DrillCheckScreen` waits for per-drill capture persistence before navigating; draft edit Setup hydration reads `getCurrentDraft().context` instead of the last completed context), adds Playwright 375 px /review hit-area coverage against current controls, and demotes only decorative accent/readout uses (`PerDrillCapture` Quick tag eyebrow, `PassMetricInput` % good readout, Safety heat-tip bullets). Records `Beach Prep Three` truncate-with-expand as killed, and auto-fill training recency plus Net/Wall persistence as deferred behavior changes requiring a dedicated setup/safety/defaults spec."
@@ -754,11 +763,12 @@
       "path": "docs/plans/2026-04-26-app-architecture-pass.md",
       "type": "plan",
       "status": "complete",
+      "active_registry": true,
       "canonical_for": "Ten-unit architecture systematization pass for the app/ workspace. Lands the in-flight refactor as atomic commits (U0); fixes the field-merging review-draft write so Drill Check captures and Review form fields cannot clobber each other (U1); consolidates capture eligibility / merge / aggregate / meaningful-draft / window classification into one closed `app/src/domain/capture/` module with a `MetricTypeStrategy` registry (U2); decomposes `services/review.ts` along its true reasons-to-change into `services/review/{submit,expire,drafts,cohort,bundle}` behind a barrel (U3); introduces `app/src/model/` as the pure product-type home and demotes `app/src/db/types.ts` to a thin re-export adapter so `domain/` no longer depends on Dexie row shapes (U4); pulls browser-runtime concerns into `app/src/platform/` and hoists post-block routing into `app/src/domain/runFlow/postBlockRoute.ts` (U5); lays forward-compatibility seams `SessionParticipant[]` (`D115`/`D116`/`D117`), `SkillVector` (`D121`), `ExportSession` adapter (Phase 1.5), and `CoachPayload` type (Phase 2 / `D106`) without shipping new UX (U6); encodes the `docs/vision.md` P12 contract structurally in `app/src/contracts/screenContracts.ts` and reframes `runFlowInteractionContract` as a transitional characterization spec with a written sunset rule (U7); refreshes app-facing docs and the testing pyramid map in `app/README.md` and `.cursor/rules/` (U8); consolidates durable building guidance in `docs/ops/app-architecture-guidance.md` (U9); closes with a holistic red-team gate (U10). No Dexie schema bump, no new state-management framework, no UI changes during the architecture pass itself."
     },
     {
       "id": "per-drill-success-criterion-2026-04-27",
-      "path": "docs/plans/2026-04-27-per-drill-success-criterion.md",
+      "path": "docs/archive/plans/2026-04-27-per-drill-success-criterion.md",
       "type": "plan",
       "status": "complete",
       "canonical_for": "Spec-gap fix that re-aligned the per-drill capture surface (`DrillCheckScreen` + `PerDrillCapture`) with `docs/specs/m001-review-micro-spec.md` §Required (V0B-28 forced-criterion prompt, D104 layer-1 self-scoring bias correction). **Shipped 2026-04-28** as part of the architecture pass U2 capture-domain consolidation (`11fed34`). Five items landed: (1) `getBlockSuccessRule` helper in `app/src/domain/drillMetadata.ts` mirrors `getBlockMetricType`'s variant-resolution rule, and the success rule renders as `Success rule: <rule>. If unsure, don't count it as Good.` inside the expanded `Add counts` body inside `PerDrillCapture` so the chip-only fast path stays calm (pinned by `app/src/components/__tests__/PerDrillCapture.test.tsx` `describe('V0B-28 forced-criterion prompt', ...)` and `app/src/domain/__tests__/drillMetadata.test.ts` `describe('getBlockSuccessRule', ...)`); (2) `PassMetricInput`'s rate label changed from the pass-specific `% good pass rate` to the skill-neutral `% good`; (3) `d33 Around the World Serving`'s `successMetric.description` re-worded from a session-level zone enumeration to the per-attempt rule `Serve lands in the called zone.` on both Solo and Pair siblings (`target` retained as the session goal); (4) wire-up — eligibility resolver in `app/src/domain/capture/eligibility.ts` returns `successRule` on both eligible branches, `useDrillCheckController` exposes `captureSuccessRule`, `DrillCheckScreen` passes through; (5) spec sync — `primarySkillMetric` block now reads `the drill check surface (post-D133)` with the source-from-record clause and a 'Surface-move history (2026-04-27)' addendum. Legacy `ReviewScreen` fallback path intentionally out of scope (reached only by non-D133 legacy sessions). Authors zero new drill records; no Dexie migration; no metadata schema changes. Verification: 1065/1065 Vitest, lint clean, build clean."
@@ -782,18 +792,18 @@
       "path": "docs/brainstorms/2026-04-29-session-focus-picker-requirements.md",
       "type": "requirements",
       "status": "active",
-      "canonical_for": "Requirements for the D135-fired Tier 1c session focus picker. Resolves the draft-screen ambiguity by selecting a Tune today review step as the v1 surface and codifies the architectural rigor (shared focus resolver, in-transaction regeneration use case, stale-write guards, repeat / recovery focus strip, accessibility semantics, privacy boundaries). PARTIALLY SUPERSEDED 2026-04-30 by docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md: R4/R5 (four-chip Recommended-as-peer), R7/R32 (mandatory routing on every pre-run path), R8 (Safety read-only focus echo), R12 (all chips always enabled), R34 four-value source-aware Back. The architectural decisions and remaining R-IDs stay authoritative when Tune today is invoked under the new opt-in posture."
+      "canonical_for": "Requirements for the D135-fired Tier 1c session focus picker. Resolves the draft-screen ambiguity by selecting a Tune today review step as the v1 surface and codifies the architectural rigor (shared focus resolver, in-transaction regeneration use case, stale-write guards, repeat / recovery focus strip, accessibility semantics, privacy boundaries). PARTIALLY SUPERSEDED 2026-04-30: the short-lived opt-in fork in docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md was superseded by docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md, which shipped mandatory Tune today with four chips, source-aware Back collapsed to setup/home, and no default Safety focus echo."
     },
     {
       "id": "tier-1c-impl-skill-level-mutability-and-catalog-audit-2026-04-28",
       "path": "docs/plans/2026-04-28-tier-1c-prepay-and-catalog-audit.md",
       "type": "plan",
       "status": "active",
-      "canonical_for": "Post-D135 implementation plan for the triggered bundle: Stream 3 catalog reserve audit (implementation-ready as authored). Stream 1 (Tier 1c focus picker) is owned by docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md; the U1-U5 sketches in this plan are historical and not implementation-ready. Stream 2 skill-level mutability is paused pending Tune today dogfood. Authors zero new drill records and preserves D131 no-telemetry posture."
+      "canonical_for": "Post-D135 implementation plan for the triggered bundle: Stream 3 catalog reserve audit (implementation-ready as authored). Stream 1 (Tier 1c focus picker) is owned by docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md; the U1-U5 sketches in this plan are historical and not implementation-ready. Stream 2 skill-level mutability is paused pending Tune today dogfood. Authors zero new drill records and preserves D131 no-telemetry posture."
     },
     {
       "id": "tune-today-focus-picker-2026-04-29",
-      "path": "docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md",
+      "path": "docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md",
       "type": "plan",
       "status": "superseded",
       "canonical_for": "SUPERSEDED 2026-04-30 by docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md. Originally specced a mandatory pre-safety Tune today route on every pre-run path, optional SetupContext.sessionFocus, a shared focus resolver consumed by initial picks / build-time substitution / swap alternatives, an in-transaction draft regeneration use case, source-aware Back, repeat- and recovery-flow focus stripping, and a calm shibui screen. The architectural pieces (effectiveFocus.ts, services/session/regenerateDraftFocus.ts, stale-write guards, focus strip on buildDraftFromCompletedBlocks and buildRecoveryDraft) are preserved by reference in the 2026-04-30 plan; routing, chip set, and Safety echo are simplified."
@@ -803,7 +813,7 @@
       "path": "docs/ideation/2026-04-29-skill-scope-and-game-layers-ideation.md",
       "type": "ideation",
       "status": "active",
-      "canonical_for": "Ranked ideation answering 'how and when do we integrate attacking, team tactics, out-of-system, and live/adaptive layers?'. Seven survivors: forward-only `attack` SkillFocus reservation + `scenario` axis (S1), two-axis skill × scenario catalog reframe (S2), surfacing existing `MetricType` game-like patterns (S3), team-tactics deferred to M003+ (S4), attack clustered with serve as overhead-striking continuum (S5), out-of-system as scenario not skill (S6), live/adaptive as runner-surfacing not catalog expansion (S7). Recommended sequence: S1+S2 schema/docs reservation now (zero cap), trigger-gated attack exposure under D135-style discipline, team tactics deferred to M003+. S1+S2 consumed by docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md."
+      "canonical_for": "Ranked ideation answering 'how and when do we integrate attacking, team tactics, out-of-system, and live/adaptive layers?'. Seven survivors: forward-only `attack` SkillFocus reservation + `scenario` axis (S1), two-axis skill × scenario catalog reframe (S2), surfacing existing `MetricType` game-like patterns (S3), team-tactics deferred to M003+ (S4), attack clustered with serve as overhead-striking continuum (S5), out-of-system as scenario not skill (S6), live/adaptive as runner-surfacing not catalog expansion (S7). Recommended sequence: S1+S2 schema/docs reservation now (zero cap), trigger-gated attack exposure under D135-style discipline, team tactics deferred to M003+. S1+S2 consumed by docs/archive/brainstorms/2026-04-29-skill-scope-reservation-requirements.md."
     },
     {
       "id": "focus-picker-drill-depth-2026-04-30",
@@ -814,7 +824,7 @@
     },
     {
       "id": "skill-scope-reservation-requirements-2026-04-29",
-      "path": "docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md",
+      "path": "docs/archive/brainstorms/2026-04-29-skill-scope-reservation-requirements.md",
       "type": "requirements",
       "status": "superseded",
       "canonical_for": "SUPERSEDED 2026-04-30 by docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md (Track 4: docs-only) on the grounds that types reservation + research note + catalog cross-links spend attention before D135-style trigger evidence has fired. The replacement records the policy ('out-of-system is scenario, not skill; attack is a future skill axis member when trigger fires; no schema changes until then') in a single decision row instead of a types PR. The skill-correlation insight and the cluster-pairing thesis remain valid as a future-state design check; only the implementation cost is deferred."
@@ -837,19 +847,20 @@
       "id": "pre-run-simplification-2026-04-30",
       "path": "docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md",
       "type": "plan",
-      "status": "active",
-      "canonical_for": "Canonical implementation plan (revised 2026-04-30 after agent red-team and user feedback). Ships Tune today MANDATORY between Setup and Safety with four chips (Recommended/Passing/Serving/Setting), all-enabled with fail-on-tap inline copy, source-aware Back ('setup' | 'home'), and the full 2026-04-29-001 architecture: effectiveFocus.ts shared resolver, services/session/regenerateDraftFocus.ts in-transaction use case, stale-write guard, repeat / recovery focus strip. Bundled with three orthogonal pre-run cuts: (1) full Wind delete (field, UI, fixtures, windFriendly catalog cleanup; no Dexie migration); (2) conditional Wall row (only when Solo + No Net) plus Wall-required catalog invariant test; (3) no default Safety focus echo, recovery-override line only when painFlag === true && draft.context.sessionFocus !== undefined. Track 4 ships skill-scope policy as JSDoc on SkillFocus (no D136 decision row). Includes explicit K-ID inheritance matrix from 2026-04-29-001 (K1-K13 with K7 collapsed to two values). Supersedes docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md (its design rationale is inherited; ~6 net-new files ship under this plan)."
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Canonical implementation plan (revised 2026-04-30 after agent red-team and user feedback). Ships Tune today MANDATORY between Setup and Safety with four chips (Recommended/Passing/Serving/Setting), all-enabled with fail-on-tap inline copy, source-aware Back ('setup' | 'home'), and the full 2026-04-29-001 architecture: effectiveFocus.ts shared resolver, services/session/regenerateDraftFocus.ts in-transaction use case, stale-write guard, repeat / recovery focus strip. Bundled with three orthogonal pre-run cuts: (1) full Wind delete (field, UI, fixtures, windFriendly catalog cleanup; no Dexie migration); (2) conditional Wall row (only when Solo + No Net) plus Wall-required catalog invariant test; (3) no default Safety focus echo, recovery-override line only when painFlag === true && draft.context.sessionFocus !== undefined. Track 4 ships skill-scope policy as JSDoc on SkillFocus (no D136 decision row). Includes explicit K-ID inheritance matrix from 2026-04-29-001 (K1-K13 with K7 collapsed to two values). Supersedes docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md (its design rationale is inherited; ~6 net-new files ship under this plan)."
     },
     {
       "id": "focus-coverage-readiness-2026-04-30",
-      "path": "docs/plans/2026-04-30-002-feat-focus-coverage-readiness-plan.md",
+      "path": "docs/archive/plans/2026-04-30-002-feat-focus-coverage-readiness-plan.md",
       "type": "plan",
       "status": "complete",
       "canonical_for": "Completed implementation plan for the focus coverage catalog readiness requirements: test-backed audit model and coverage engine, existing-onboarding skill-level consumption via skillLevelToDrillBand(), current 40-minute long-session readiness, focus-reinforcing support-slot semantics, strict same-focus swap readiness, durable gap-card / activation-manifest artifacts, and docs/verification sync. Completion state: 135/135 readiness cells verified after batch 3. 2026-05-01 follow-up routes stretch-pressure diagnostics and future curated mixed-focus themes such as Serve + Receive. Origin: docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md."
     },
     {
       "id": "generated-plan-diagnostics-2026-05-01",
-      "path": "docs/plans/2026-05-01-001-feat-generated-plan-diagnostics-plan.md",
+      "path": "docs/archive/plans/2026-05-01-001-feat-generated-plan-diagnostics-plan.md",
       "type": "plan",
       "status": "complete",
       "canonical_for": "Completed follow-up implementation plan for R33-R38 generated-plan diagnostics: product-supported dimension registry that fails closed when focuses/configurations/levels/durations/themes expand, domain-level deterministic seeded buildDraft() matrix, hard-failure versus routeable-observation classification, selected-block duration-envelope comparison against workload.durationMinMinutes / workload.durationMaxMinutes / fatigueCap.maxMinutes, stable report/gap-card routing, and guardrails that keep future Serve + Receive work out of raw multi-select tag OR filtering. Origin: docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md."
@@ -860,6 +871,13 @@
       "type": "ideation",
       "status": "active",
       "canonical_for": "Ranked ideation for turning the generated-plan diagnostics report into a sequenced next-step program. Original six survivors: observation triage workbench, finding graduation ladder, dynamic surface/new focus sentinel, catalog change impact preview, workload envelope authoring guide, and redistribution-free builder comparison. 2026-05-01 continuation selects decision-debt compression review after U1-U3 completion; post-U7 continuation selects U5 dynamic surface/new focus sentinel; post-U5 continuation selected U8 redistribution causality receipt, now implemented. Consumed by the generated diagnostics requirements addenda."
+    },
+    {
+      "id": "docs-process-lifecycle-ideation-2026-05-02",
+      "path": "docs/ideation/2026-05-02-docs-process-lifecycle-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked ideation for the next docs/process lifecycle improvements after the docs validity and archive pass. Selects archive policy notes, active-registry catalog markers, and archive drift validation as the first three implementation moves; leaves replacement-chain metadata, audit verdict vocabulary, and a lifecycle triage queue as future follow-up."
     },
     {
       "id": "generated-plan-diagnostics-next-steps-requirements-2026-05-01",
@@ -897,11 +915,25 @@
       "canonical_for": "Focused U8 requirements addendum for a repeatable diagnostic-only redistribution causality receipt. Separates optional-slot redistribution pressure from catalog, workload, and block-shape pressure without authorizing runtime generator changes, catalog edits, workload metadata edits, or U6 preview tooling."
     },
     {
+      "id": "generated-diagnostics-d47-u6-proposal-admission-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d47-u6-proposal-admission-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for turning the U8 d47-solo-open receipt-backed candidate into a concrete U6 proposal-admission package. Defines the admission ticket before preview tooling, catalog edits, workload metadata edits, source-backed activation, or runtime generator changes."
+    },
+    {
       "id": "generated-diagnostics-triage-workflow-plan-2026-05-01",
       "path": "docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md",
       "type": "plan",
       "status": "active",
-      "canonical_for": "Implementation plan for the generated diagnostics triage workflow. Sequences the R1-R8 program from docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md plus the decision-debt, workload-envelope, dynamic-surface, and redistribution-causality addenda, with completed slices focused on stable observation group identity, triage registry/workbench, finding graduation gates, decision-debt compression, workload envelope guidance, dynamic surface sentinels, and redistribution causality receipts before concrete-proposal catalog impact previews."
+      "canonical_for": "Implementation plan for the generated diagnostics triage workflow. Sequences the R1-R8 program from docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md plus the decision-debt, workload-envelope, dynamic-surface, redistribution-causality, and d47 proposal-admission addenda, with completed slices focused on stable observation group identity, triage registry/workbench, finding graduation gates, decision-debt compression, workload envelope guidance, dynamic surface sentinels, and redistribution causality receipts before concrete-proposal catalog impact previews."
+    },
+    {
+      "id": "generated-diagnostics-d47-proposal-admission-ticket-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-001-feat-d47-proposal-admission-ticket-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Implementation plan for generating the first D47 proposal-admission ticket from the U8 redistribution causality receipt. Keeps U6 preview tooling, catalog edits, workload metadata edits, source-backed activation, and runtime generator changes deferred until a concrete proposal passes the admission gate."
     },
     {
       "id": "focus-coverage-readiness-audit-2026-04-30",
@@ -949,14 +981,15 @@
       "id": "per-move-pacing-indicator-2026-04-28",
       "path": "docs/plans/2026-04-28-per-move-pacing-indicator.md",
       "type": "plan",
-      "status": "active",
-      "canonical_for": "Implementation plan and shipped ledger for the per-move pacing indicator. Adds `DrillSegment` type + `DrillVariant.segments?` + `courtsideInstructionsBonus?`; authors segments on `d28-solo` (4×45s), `d26-solo` (3×60s), `d25-solo` (5 segments / 60+30+30+30+30; durationMinMinutes bumped 2→3); pure helper at `app/src/domain/runFlow/segmentTiming.ts`; `<SegmentList>` at `app/src/components/run/SegmentList.tsx`; controller wiring in `useRunController` + extension of `useBlockPacingTicks` for per-segment end beep; catalog validation rule `segment_duration_mismatch`. Visible-channel half of S1 from `docs/ideation/2026-04-28-what-to-add-next-ideation.md`."
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan and shipped ledger for the per-move pacing indicator. Adds `DrillSegment` type + `DrillVariant.segments?` + `courtsideInstructionsBonus?`; authors segments on `d28-solo` (4×45s), `d26-solo` (3×60s), `d25-solo` (5 segments / 60+30+30+30+30; durationMinMinutes bumped 2→3); pure helper at `app/src/domain/runFlow/segmentTiming.ts`; `<SegmentList>` at `app/src/components/run/SegmentList.tsx`; controller wiring in `useRunController` + extension of `useBlockPacingTicks` for per-segment end beep; catalog validation rule `segment_duration_mismatch`. Shipped UI uses the V2 aligned accent-dot/checkmark marker system rather than the earlier `Now` pill, and later V3/V4 iterations made the list Shorten-aware and `eachSide`-aware. Visible-channel half of S1 from `docs/ideation/2026-04-28-what-to-add-next-ideation.md`."
     },
     {
       "id": "per-drill-capture-coverage-phase-2a-streak-2026-04-28",
-      "path": "docs/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md",
+      "path": "docs/archive/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md",
       "type": "plan",
-      "status": "active",
+      "status": "complete",
       "canonical_for": "Phase 2A of `docs/plans/2026-04-27-per-drill-capture-coverage.md`. Ships an optional `Add longest streak (optional)` drawer on `/run/check` for `streak`-typed `main_skill` / `pressure` drills (`d01-solo`, `d01-pair`, `d38-pair`, `d41-pair`). Architecture seam: `captureShape` discriminator added to the metric-strategy registry (semantic only, no UI copy); additive Dexie v6 `metricCapture?: { kind: 'streak'; longest: number }` field on `PerDrillCapture`; new pure-domain builders (`buildPerDrillCaptureRecord`, `validateStreakLongest`) that forbid impossible rows by construction; eligibility resolver extends `eligible_difficulty_only` with `optionalCaptureShape: CaptureShape`. UI: streak drawer is collapsed by default, `inputMode=numeric` whole numbers `0..99`, V0B-28 success rule renders above the input without the anti-generosity nudge (does not apply to streak). CompleteScreen renders `Longest streak: N` quietly under the drill name and suppresses the `Counts not logged` line for streak-logged drills. Pulled forward as a bounded D130 founder-use exception authorized by the new `D134` row, with a pre-registered falsification gate that freezes Phase 2B (`points-to-target`, `pass-grade-avg`) if streak capture is skipped or feels like bookkeeping in the next eligible sessions. `D131` posture preserved: telemetry stays off, export omits `metricCapture` in Phase 2A. Authors zero new drill records; consumes one Tier 1b authoring-attention slot; defers `points-to-target`, `pass-grade-avg`, `composite`, `completion` to Phase 2B."
     },
     {
@@ -1204,7 +1237,9 @@
       "flat lists for contracts and defaults",
       "cross-references instead of duplicated canon",
       "thin compatibility surfaces",
-      "explicit WSL/bash notes where automation is described"
+      "explicit WSL/bash notes where automation is described",
+      "archive completed/superseded historical docs under docs/archive/<family>/",
+      "mark complete plan registries kept in active folders with active_registry: true"
     ]
   }
 }

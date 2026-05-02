@@ -10,7 +10,7 @@ last_updated: 2026-05-02
 depends_on:
   - app/src/domain/generatedPlanDiagnostics.ts
   - app/src/domain/sessionBuilder.ts
-  - docs/plans/2026-05-01-001-feat-generated-plan-diagnostics-plan.md
+  - docs/archive/plans/2026-05-01-001-feat-generated-plan-diagnostics-plan.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-redistribution-causality-receipt-requirements.md
 ---

@@ -8,6 +8,7 @@ import {
 } from '../generatedPlanDiagnostics'
 import {
   buildGeneratedPlanDecisionDebtPrompts,
+  buildGeneratedPlanD47ProposalAdmissionTicket,
   buildGeneratedPlanRedistributionCausalityReceipt,
   buildGeneratedPlanTriageWorkbenchMarkdown,
   buildInitialGeneratedPlanTriageRegistry,
@@ -563,6 +564,78 @@ describe('generated plan diagnostic triage registry', () => {
     )
   })
 
+  it('builds the D47 proposal admission ticket from the current redistribution receipt', () => {
+    const groups = currentGroups()
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const ticket = buildGeneratedPlanD47ProposalAdmissionTicket(groups, registry)
+
+    expect(ticket).toEqual(
+      expect.objectContaining({
+        admissionState: 'evidence_gathering',
+        previewReady: false,
+        sourceEvidenceState: 'missing',
+        candidate: expect.objectContaining({
+          groupKey:
+            'gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+          drillId: 'd47',
+          variantId: 'd47-solo-open',
+          blockType: 'main_skill',
+          triageRoute: 'generator_policy_investigation',
+        }),
+        receiptFacts: expect.objectContaining({
+          totalAffectedCellCount: 30,
+          pressureDisappearsCellCount: 12,
+          pressureRemainsCellCount: 18,
+          nonRedistributionPressureCellCount: 6,
+          comparisonInconclusiveCellCount: 0,
+        }),
+        missingProposalFacts: [
+          'concrete_delta',
+          'evidence_basis',
+          'falsification_condition',
+          'expected_diagnostic_movement',
+          'product_or_training_quality_hypothesis',
+          'no_action_threshold',
+        ],
+      }),
+    )
+    expect(ticket.workloadProposalTracks).toEqual([
+      'workload_review',
+      'block_shape_review',
+      'source_backed_proposal_work',
+      'u6_proposal_admission_candidate',
+    ])
+    expect(ticket.generatorPolicyTracks).toEqual(['future_generator_policy_decision'])
+    expect(ticket.sourceEvidenceRationale).toContain('No proposed delta')
+    expect(ticket.counterfactualPolicyBoundary).toContain('diagnostic evidence')
+    expect(ticket.noChangePath).toEqual(
+      expect.objectContaining({
+        admissionState: 'close_or_hold_without_preview',
+        requiresU6Preview: false,
+        acceptanceEvidenceRequired: true,
+        condition: expect.stringContaining('no-action threshold'),
+      }),
+    )
+  })
+
+  it('keeps shifted D47 receipt candidates visible when the stable admission key is absent', () => {
+    const shiftedD47GroupKey =
+      'gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+review_fixture'
+    const groups = currentGroups().map((group) =>
+      group.groupKey ===
+      'gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap'
+        ? { ...group, groupKey: shiftedD47GroupKey }
+        : group,
+    )
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const ticket = buildGeneratedPlanD47ProposalAdmissionTicket(groups, registry)
+
+    expect(ticket.candidateFound).toBe(false)
+    expect(ticket.relatedCandidateGroupKeys).toEqual([shiftedD47GroupKey])
+    expect(ticket.admissionState).toBe('evidence_gathering')
+    expect(ticket.previewReady).toBe(false)
+  })
+
   it('fails validation for unexpected unknown compression lanes', () => {
     const groups = currentGroups()
     const firstGroup = groups[0]
@@ -609,6 +682,25 @@ describe('generated plan diagnostic triage registry', () => {
     expect(markdown).toContain('allocated_duration_counterfactual')
     expect(markdown).toContain('Pressure disappears under allocated-duration counterfactual')
     expect(markdown).toContain('Non-redistribution pressure cells')
+    expect(markdown).toContain('## D47 Proposal Admission Ticket')
+    expect(markdown).toContain('Ticket source: U8 redistribution causality receipt')
+    expect(markdown).toContain(
+      'Candidate: `gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`',
+    )
+    expect(markdown).toContain('Admission state: `evidence_gathering`')
+    expect(markdown).toContain('Admission gate: U6 preview remains blocked')
+    expect(markdown).toContain(
+      'Receipt facts: total affected cells 30, pressure disappears 12, pressure remains 18, non-redistribution pressure 6, inconclusive 0',
+    )
+    expect(markdown).toContain(
+      'Workload/block/source tracks: `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`',
+    )
+    expect(markdown).toContain('Generator-policy tracks: `future_generator_policy_decision`')
+    expect(markdown).toContain('No-change path: `close_or_hold_without_preview`')
+    expect(markdown).toContain('Missing proposal facts')
+    expect(markdown).toContain('`product_or_training_quality_hypothesis`: product or training quality hypothesis')
+    expect(markdown).toContain('`no_action_threshold`: no action threshold')
+    expect(markdown).toContain('Counterfactual-only pressure remains diagnostic evidence')
     expect(markdown).toContain('docs/ops/workload-envelope-authoring-guide.md#short-session-cooldown-minimum')
     expect(markdown).toContain('Candidate dispositions: `accepted_policy_allowance`')
   })

@@ -12,6 +12,8 @@ depends_on:
   - app/src/domain/generatedPlanDiagnosticTriage.ts
   - docs/reviews/2026-05-01-generated-plan-diagnostics-report.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-redistribution-causality-receipt-requirements.md
+  - docs/brainstorms/2026-05-02-generated-diagnostics-d47-u6-proposal-admission-requirements.md
+  - docs/plans/2026-05-02-001-feat-d47-proposal-admission-ticket-plan.md
 ---
 
 # Generated Plan Diagnostics Triage
@@ -140,6 +142,35 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 - `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
 - `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 2, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
 - `gpdg:v1:d31:d31-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `mixed_cell_states`, incomplete evidence no, pressure disappears 1, pressure remains 1, non-redistribution pressure 0, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`, `future_generator_policy_decision`
+
+## D47 Proposal Admission Ticket
+
+- Ticket source: U8 redistribution causality receipt for `d47` / `d47-solo-open`.
+- Candidate: `gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`
+- Drill / variant: `d47` / `d47-solo-open`
+- Block type: `main_skill`
+- Triage route: `generator_policy_investigation`
+- Admission state: `evidence_gathering`
+- Admission gate: U6 preview remains blocked until a concrete proposal names a delta, evidence basis, falsification condition, expected diagnostic movement, impact hypothesis, and no-action threshold.
+- Preview ready: no
+- Source evidence state: `missing` (No proposed delta has named whether source-backed evidence is present, missing, or not needed.)
+- Existing surface decision: Host the first admission ticket in the generated triage workbench before creating any standalone artifact.
+- Receipt facts: total affected cells 30, pressure disappears 12, pressure remains 18, non-redistribution pressure 6, inconclusive 0
+- Receipt classification: action `pressure_remains_without_redistribution`, dominant `pressure_remains_without_redistribution`, incomplete evidence no
+- Workload/block/source tracks: `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`
+- Generator-policy tracks: `future_generator_policy_decision`
+- Counterfactual boundary: Counterfactual-only pressure remains diagnostic evidence until a policy-admissible generator hypothesis is named.
+- D47 versus alternatives: D47 is the first candidate because it stress-tests mixed evidence and non-redistribution pressure; abandon it if causal warrant, product impact, or an admissible proposal path cannot be named.
+- No-change path: `close_or_hold_without_preview`; requires U6 preview no; acceptance evidence required yes; A no-change disposition can close or hold the ticket when acceptance evidence and a no-action threshold are named.
+
+### Missing proposal facts
+
+- `concrete_delta`: concrete delta
+- `evidence_basis`: evidence basis
+- `falsification_condition`: falsification condition
+- `expected_diagnostic_movement`: expected diagnostic movement
+- `product_or_training_quality_hypothesis`: product or training quality hypothesis
+- `no_action_threshold`: no action threshold
 
 ## New / Untriaged Blockers
 

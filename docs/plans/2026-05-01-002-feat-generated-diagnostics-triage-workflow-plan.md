@@ -4,7 +4,7 @@ title: "feat: Add generated diagnostics triage workflow"
 status: active
 stage: validation
 type: plan
-summary: "Implementation plan for turning generated-plan diagnostics into a docs-first triage workflow, including stable observation identity, triage workbench, freshness gates, decision-debt compression, workload guidance, dynamic surface sentinels, and redistribution causality receipts."
+summary: "Implementation plan for turning generated-plan diagnostics into a docs-first triage workflow. Implemented slices now cover stable observation identity, triage workbench, freshness gates, decision-debt compression, workload guidance, dynamic surface sentinels, and redistribution causality receipts; U6 catalog impact preview remains deferred until a concrete catalog/cap proposal exists."
 date: 2026-05-01
 origin: docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md
 deepened: 2026-05-01
@@ -15,6 +15,8 @@ deepened: 2026-05-01
 ## Overview
 
 Add the workflow layer that turns generated-plan diagnostics from a report into a sequenced decision system. The first implementation slices created stable observation-group identity, a compact triage workbench, freshness and graduation gates, decision-debt compression, workload metadata guidance, and dynamic surface sentinels. The latest slice adds a diagnostic-only redistribution causality receipt so generator-policy groups can be reviewed as repeatable evidence before any runtime generator or catalog changes.
+
+Status note (2026-05-02): U1-U5, U7, and U8 are implemented and represented in the committed report/triage artifacts. U6 catalog impact preview remains intentionally active/deferred until there is a concrete source-backed catalog, workload-cap, or candidate activation proposal to preview.
 
 ---
 
@@ -47,6 +49,8 @@ The post-U1-U3 continuation follows `docs/brainstorms/2026-05-01-generated-diagn
 **Dynamic-surface addendum:** Plan R3 is sharpened by `docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md`; U5 covers addendum R1-R16, F1-F3, and AE1-AE6.
 
 **Redistribution-causality addendum:** Plan R6 is sharpened by `docs/brainstorms/2026-05-02-generated-diagnostics-redistribution-causality-receipt-requirements.md`; U8 covers addendum R1-R17, F1-F3, and AE1-AE6.
+
+**D47 proposal-admission addendum:** U6 is sharpened by `docs/brainstorms/2026-05-02-generated-diagnostics-d47-u6-proposal-admission-requirements.md` and planned in `docs/plans/2026-05-02-001-feat-d47-proposal-admission-ticket-plan.md`; it defines the first receipt-backed admission ticket required before concrete U6 preview planning.
 
 ---
 
@@ -469,9 +473,9 @@ The first generated-plan diagnostics plan already created a dynamic matrix that 
 
 **Goal:** Let maintainers preview how a concrete catalog or workload metadata proposal would change readiness and generated-plan diagnostics before activation.
 
-**Requirements:** R4; covers AE10, AE11.
+**Requirements:** R4 plus `docs/brainstorms/2026-05-02-generated-diagnostics-d47-u6-proposal-admission-requirements.md`; covers AE10, AE11 plus the d47 proposal-admission addendum R1-R21, F1-F3, and AE1-AE7.
 
-**Dependencies:** U1, U3, U4, plus a concrete gap card, cap edit, or candidate catalog change to preview.
+**Dependencies:** U1, U3, U4, U8, plus a concrete gap card, cap edit, or candidate catalog change to preview. The d47 proposal-admission ticket is a prerequisite admission slice before generic preview tooling, and current d47 remains evidence-gathering until it names a concrete delta, evidence basis, falsification condition, expected diagnostic movement, product/training-quality hypothesis, and no-action threshold.
 
 **Files:**
 
