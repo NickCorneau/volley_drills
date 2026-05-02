@@ -13,9 +13,9 @@ import { HomeScreen } from '../HomeScreen'
  * The shape of the test: seed an ExecutionLog with
  * `status: 'ended_early'` where only 2 of 3 plan blocks completed.
  * Assert the card renders two buttons, assert each button's behavior:
- * - "Repeat full N-min plan" -> /tune-today with a rebuilt full-plan draft
+ * - "Repeat full plan" -> /tune-today with a rebuilt full-plan draft
  *   (2026-04-22 one-tap Repeat; previously went to /setup?from=repeat)
- * - "Repeat what you did (M min)" -> /tune-today with partial draft
+ * - "Repeat shorter version (M min)" -> /tune-today with partial draft
  */
 
 async function clearDb() {
@@ -131,26 +131,26 @@ describe('HomeScreen: Repeat on ended-early (C-5 Unit 3)', () => {
     // Primary: Repeat full plan (25 min: 3 + 11 + 11).
     expect(
       await screen.findByRole('button', {
-        name: /repeat full 25-min plan/i,
+        name: /repeat full plan/i,
       }),
     ).toBeInTheDocument()
 
-    // Secondary: Repeat what you did (14 min: 3 + 11).
+    // Secondary: Repeat shorter version (14 min: 3 + 11).
     expect(
       screen.getByRole('button', {
-        name: /repeat what you did \(14 min\)/i,
+        name: /repeat shorter version \(14 min\)/i,
       }),
     ).toBeInTheDocument()
   })
 
-  it('Repeat what you did -> /tune-today with a partial draft (2 blocks, not 3)', async () => {
+  it('Repeat shorter version -> /tune-today with a partial draft (2 blocks, not 3)', async () => {
     const user = userEvent.setup()
     await seedEndedEarly()
     renderHome()
 
     await user.click(
       await screen.findByRole('button', {
-        name: /repeat what you did \(14 min\)/i,
+        name: /repeat shorter version \(14 min\)/i,
       }),
     )
 
@@ -173,7 +173,7 @@ describe('HomeScreen: Repeat on ended-early (C-5 Unit 3)', () => {
 
     await user.click(
       await screen.findByRole('button', {
-        name: /repeat full 25-min plan/i,
+        name: /repeat full plan/i,
       }),
     )
     // 2026-04-22 one-tap Repeat: handleRepeat rebuilds a fresh

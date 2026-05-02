@@ -142,7 +142,7 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     await seedDraft({ playerMode: 'pair', netAvailable: true, wallAvailable: false, sessionFocus: 'serve' })
     renderScreen()
 
-    await user.click(await screen.findByRole('button', { name: /^yes$/i }))
+    await user.click(await screen.findByRole('radio', { name: /^yes$/i }))
 
     expect(await screen.findByText(/recovery overrides today's focus/i)).toBeInTheDocument()
   })
@@ -151,7 +151,7 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     const user = userEvent.setup()
     renderScreen()
 
-    await user.click(await screen.findByRole('button', { name: /^yes$/i }))
+    await user.click(await screen.findByRole('radio', { name: /^yes$/i }))
 
     expect(screen.queryByText(/recovery overrides today's focus/i)).not.toBeInTheDocument()
   })
@@ -242,7 +242,7 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     )
 
     await user.click(await screen.findByRole('radio', { name: /^today$/i }))
-    await user.click(screen.getByRole('button', { name: /^no$/i }))
+    await user.click(screen.getByRole('radio', { name: /^no$/i }))
     await user.click(screen.getByRole('button', { name: /^start session$/i }))
 
     expect(audioContextCtor).toHaveBeenCalledTimes(1)
@@ -278,7 +278,7 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     )
 
     await user.click(await screen.findByRole('radio', { name: /^today$/i }))
-    await user.click(screen.getByRole('button', { name: /^no$/i }))
+    await user.click(screen.getByRole('radio', { name: /^no$/i }))
     await user.click(screen.getByRole('button', { name: /^start session$/i }))
 
     expect(request).toHaveBeenCalledWith('screen')

@@ -107,7 +107,7 @@ describe('HomeScreen recent sessions trailer (Tier 1a Unit 5)', () => {
   it('renders nothing on a fresh install', async () => {
     renderHome()
     // Wait for Home to leave its loading state.
-    await screen.findByRole('button', { name: /start first workout/i })
+    await screen.findByRole('button', { name: /start first session/i })
     expect(screen.queryByRole('region', { name: /recent sessions/i })).not.toBeInTheDocument()
   })
 

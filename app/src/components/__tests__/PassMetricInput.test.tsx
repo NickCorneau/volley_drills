@@ -67,7 +67,7 @@ describe('PassMetricInput (V0B-02 / H13 tap-to-type)', () => {
   // state as empty + `placeholder="0"` so the field looks unfilled
   // until the user actually commits a value. The internal domain
   // values (`good` / `total`) are unchanged. See
-  // `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 3.
+  // `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 3.
   it('renders untouched zero values as empty + placeholder="0" (not literal "0")', () => {
     render(<Harness initialGood={0} initialTotal={0} />)
 

@@ -13,7 +13,7 @@ depends_on:
   - docs/research/outdoor-courtside-ui-brief.md
   - docs/research/partner-walkthrough-results/2026-04-22-manual-ui-design-review.md
   - docs/plans/2026-04-22-partner-walkthrough-polish.md
-  - docs/plans/2026-04-23-walkthrough-closeout-polish.md
+  - docs/archive/plans/2026-04-23-walkthrough-closeout-polish.md
   - .cursor/rules/courtside-copy.mdc
 related:
   - docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md

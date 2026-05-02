@@ -75,7 +75,7 @@ Dated design / UX review passes. Each is a point-in-time capture, not a source o
 
 - `docs/research/partner-walkthrough-results/` — raw partner-walkthrough transcripts and synthesis (field-test data, not design guidelines)
 - `docs/decisions.md` — design-touching decisions (`D86`, `D125`, `D129`, `D130`, `D132`)
-- `docs/plans/2026-04-22-partner-walkthrough-polish.md`, `docs/plans/2026-04-23-walkthrough-closeout-polish.md` — design-polish plans driven by reviews
+- `docs/plans/2026-04-22-partner-walkthrough-polish.md`, `docs/archive/plans/2026-04-23-walkthrough-closeout-polish.md` — design-polish plans driven by reviews
 
 ## Working Principles
 

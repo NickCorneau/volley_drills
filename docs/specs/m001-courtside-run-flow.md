@@ -6,7 +6,7 @@ stage: validation
 type: spec
 authority: courtside run screen states, interaction contract, interruption handling
 summary: "Screen states, interaction contract, and interruption handling for the courtside run flow."
-last_updated: 2026-04-19
+last_updated: 2026-05-02
 depends_on:
   - docs/milestones/m001-solo-session-loop.md
   - docs/prd-foundation.md
@@ -38,7 +38,7 @@ Define the user-visible run flow for the first implementation-ready slice:
 - minimal taps
 - believable under beach conditions
 
-The v0a validation prototype in `app/` currently implements a partial version of this flow. M001 full build remains gated by field testing. See `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for as-built deviations.
+The v0b Starter Loop in `app/` implements the current courtside flow. Older v0a deviations are preserved in `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for retrospective context.
 
 ## Core principle
 

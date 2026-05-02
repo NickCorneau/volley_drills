@@ -11,7 +11,7 @@ depends_on:
 
 - docs/plans/2026-04-16-003-rest-of-v0b-plan.md
 - docs/plans/2026-04-12-v0a-to-v0b-transition.md
-- docs/plans/2026-04-16-005-feat-phase-c0-schema-plan.md
+- docs/archive/plans/2026-04-16-005-feat-phase-c0-schema-plan.md
 - docs/specs/m001-phase-c-ux-decisions.md
 - docs/specs/m001-review-micro-spec.md
 - docs/specs/m001-home-and-sync-notes.md

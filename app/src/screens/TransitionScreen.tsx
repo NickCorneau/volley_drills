@@ -59,7 +59,7 @@ export function TransitionScreen() {
         footer. The capture state, draft persistence effects, and
         capture-target derivation now live in `useDrillCheckController`;
         this surface only previews the upcoming block. See
-        `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 9.
+        `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 9.
 
         2026-04-27 cca2 dogfeed F1 follow-up
         (`docs/research/2026-04-27-cca2-dogfeed-findings.md`): the
@@ -117,7 +117,7 @@ export function TransitionScreen() {
             tracking-wider`. Dropped the dashboard-eyebrow voice to
             `text-sm font-medium` sentence case; the "Transition"
             label is a calm status marker, not a hero. See
-            `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
+            `docs/archive/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
         <span className="justify-self-center text-sm font-medium text-text-secondary">
           Transition
         </span>
@@ -222,11 +222,11 @@ export function TransitionScreen() {
           >
             <span
               id="transition-coaching-cue-title"
-              className="text-xs font-semibold uppercase tracking-wide text-accent"
+              className="text-xs font-medium text-accent"
             >
               Cue
             </span>
-            <p className="mt-1 whitespace-pre-line text-base font-medium leading-relaxed text-text-primary">
+            <p className="mt-1 whitespace-pre-line text-base leading-relaxed text-text-primary">
               {nextBlock.coachingCue}
             </p>
           </section>

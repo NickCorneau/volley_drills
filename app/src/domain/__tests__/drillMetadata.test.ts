@@ -8,7 +8,7 @@ import { getBlockMetricType, getBlockSuccessRule } from '../drillMetadata'
  * the same variant for any given (block, playerCount) pair so the
  * count-eligibility decision and the rule rendered above the inputs can
  * never disagree. See
- * `docs/plans/2026-04-27-per-drill-success-criterion.md` and
+ * `docs/archive/plans/2026-04-27-per-drill-success-criterion.md` and
  * `docs/specs/m001-review-micro-spec.md` §Required line 78.
  */
 

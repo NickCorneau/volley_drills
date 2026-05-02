@@ -12,7 +12,7 @@ import { SettingsScreen } from '../SettingsScreen'
  * this?` link carries the tester to the Settings explainer.
  *
  * Sources:
- *   docs/plans/2026-04-23-walkthrough-closeout-polish.md
+ *   docs/archive/plans/2026-04-23-walkthrough-closeout-polish.md
  *   docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md
  *
  * D118 three-state durability posture is unchanged; this is a

@@ -5,7 +5,7 @@ status: active
 stage: validation
 type: agent-contract
 authority: Claude-specific pointer surface only
-last_updated: 2026-04-15
+last_updated: 2026-05-02
 depends_on:
   - AGENTS.md
   - docs/catalog.json

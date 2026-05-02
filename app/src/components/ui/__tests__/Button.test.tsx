@@ -60,18 +60,16 @@ describe('Button', () => {
 
   // Partner-walkthrough polish 2026-04-22 (design review A1): a disabled
   // primary CTA must read as neutral gray, not as a peach-tinted accent.
-  // The prior `disabled:opacity-50` kept the orange hue and made disabled
-  // visually ambiguous with the selected-chip peach used across Setup /
-  // Safety. Keep this invariant so a regression re-introduces the
-  // ambiguity-with-selected-chips problem. See
-  // `docs/plans/2026-04-22-partner-walkthrough-polish.md` item 2.
+  // Keep the disabled treatment conditional in the component instead of
+  // Tailwind `disabled:` variants so enabled buttons never inherit the
+  // neutral disabled color in browser stacks that preserve nested CSS.
   it('disabled primary renders as neutral gray, not peach-tinted accent', () => {
     render(<Button disabled>Disabled primary</Button>)
     const btn = screen.getByRole('button')
-    expect(btn.className).toContain('disabled:bg-text-secondary/10')
-    expect(btn.className).toContain('disabled:text-text-secondary/70')
-    expect(btn.className).toContain('disabled:cursor-not-allowed')
+    expect(btn.className).toContain('bg-text-secondary/10')
+    expect(btn.className).toContain('text-text-secondary/70')
+    expect(btn.className).toContain('cursor-not-allowed')
     // The prior opacity-only disabled treatment is explicitly replaced.
-    expect(btn.className).not.toContain('disabled:opacity-50')
+    expect(btn.className).not.toContain('disabled:')
   })
 })

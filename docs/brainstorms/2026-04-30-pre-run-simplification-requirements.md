@@ -4,13 +4,13 @@ title: "Pre-run choice-load simplification requirements"
 status: active
 stage: validation
 type: requirements
-summary: "Cut pre-run choice tax to the bone in four parallel tracks: Setup-stage cuts (drop Wind, conditional Wall), Tune today goes opt-in (Setup → Safety stays default; Tune today reachable only via 'Change focus' on Home draft card), Safety simplification (no default focus echo), and skill-scope docs-only (single decision row instead of types reservation + research note). Preserves the 2026-04-29 architectural work on focus resolution, regeneration, and repeat/recovery focus strip; only changes who is routed through Tune today by default (no one)."
-authority: "Supersedes the Tune-today-mandatory routing requirements, the four-chip Recommended-as-peer pattern, and the Safety focus echo from docs/brainstorms/2026-04-29-session-focus-picker-requirements.md. Supersedes the types reservation + research note shape from docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md, replacing it with a single docs/decisions.md row. Triggers a re-issue of docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md."
-last_updated: 2026-04-30
+summary: "Historical simplification brainstorm with a post-review iteration log. Final shipped outcome: full Wind delete, Wall conditional on Solo + No Net, Tune today mandatory between Setup/Home draft paths and Safety with four chips (Recommended / Passing / Serving / Setting), no default Safety focus echo, and skill-scope policy as JSDoc. The opt-in Tune today body below is superseded by the iteration log and docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md."
+authority: "Historical requirements and supersession record for the 2026-04-30 pre-run simplification. The body's opt-in Tune today proposal is superseded; docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md owns the shipped mandatory Tune today routing. The full Wind delete, conditional Wall, Safety focus-echo cut, and skill-scope JSDoc policy carry forward."
+last_updated: 2026-05-02
 depends_on:
   - docs/brainstorms/2026-04-29-session-focus-picker-requirements.md
-  - docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md
-  - docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md
+  - docs/archive/brainstorms/2026-04-29-skill-scope-reservation-requirements.md
+  - docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md
   - docs/vision.md
   - docs/decisions.md
   - docs/research/skill-correlation-amateur-beach.md
@@ -56,7 +56,7 @@ Four parallel tracks, each cut-shaped:
 - **Track 1 — Setup-stage cuts.** Drop the Wind row entirely. Hide the Wall row unless `playerMode === 'solo' && netAvailable === false`. Players, Net, and Time stay; Time keeps its `15` default.
 - **Track 2 — Tune today goes opt-in.** Default routes (`Setup → Safety`, `Repeat → Safety`, Home `Start session → Safety`, onboarding `Today's setup → Safety`) skip Tune today. The route is reachable only via a small secondary `Change focus` action on the Home draft card. When entered, Tune today shows the recommendation and three focus chips (`Passing / Serving / Setting`); `Recommended` becomes ambient default state, not a peer chip. Infeasible chips are pre-checked and disabled.
 - **Track 3 — Safety simplification.** Remove the default focus echo from the Safety summary line. Render focus-related copy only when the user switches to recovery and that recovery overrode a prior chosen focus. Recency, pain, and heat-tip behavior are unchanged.
-- **Track 4 — Skill-scope docs-only.** No types changes. No research note. A single decision row in `docs/decisions.md` records the policy: "out-of-system is scenario, not skill; attack is a future skill axis member that waits for D135-style trigger evidence; no schema or content changes until that trigger fires." `docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md` is marked superseded.
+- **Track 4 — Skill-scope docs-only.** No types changes. No research note. A single decision row in `docs/decisions.md` records the policy: "out-of-system is scenario, not skill; attack is a future skill axis member that waits for D135-style trigger evidence; no schema or content changes until that trigger fires." `docs/archive/brainstorms/2026-04-29-skill-scope-reservation-requirements.md` is marked superseded.
 
 The four tracks are independent enough to ship in any order, but Track 2's controller / route / regeneration code is the largest piece and naturally lands together with Track 3's Safety echo cut.
 
@@ -183,13 +183,13 @@ The minority who want to steer focus pays one detour: build → Safety → tap B
 ### Track 4 — Skill-scope docs-only
 
 - **R28. Author one decision row in `docs/decisions.md`.** Next available `D` ID (expected `D136` at write time). Content: (a) "out-of-system is scenario, not skill" as a stable design principle; (b) "`attack` is a future skill axis member; expose a fifth `Tune today` chip and author attack drills only when D135-style trigger evidence fires"; (c) "no types changes (`SkillFocus` union stays as-is), no `scenario?` field on `DrillVariant`, no research note, no catalog reservation entry until that trigger"; (d) "the 2026-04-29 reservation requirements are superseded by the 2026-04-30 simplification brainstorm."
-- **R29. Mark `docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md` as superseded.** Frontmatter `status: superseded`. A short superseded-by note pointing at this brainstorm and the new decision row. Catalog `canonical_for` summary updated to reflect the supersession.
+- **R29. Mark `docs/archive/brainstorms/2026-04-29-skill-scope-reservation-requirements.md` as superseded.** Frontmatter `status: superseded`. A short superseded-by note pointing at this brainstorm and the new decision row. Catalog `canonical_for` summary updated to reflect the supersession.
 - **R30. Update the 2026-04-29 skill-scope ideation `related:` block.** The `related:` field of `docs/ideation/2026-04-29-skill-scope-and-game-layers-ideation.md` adds a forward link to the new decision row and to this brainstorm.
 - **R31. No types changes.** `app/src/types/drill.ts` is not edited under this brainstorm. No `'attack'` reservation. No `Scenario` union. No `scenario?` on `DrillVariant`. CI catalog validation rules are unchanged.
 
 ### Cross-track
 
-- **R32. Re-issue `docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md`.** Mark as superseded; the new implementation plan (handoff to `/ce-plan` from this brainstorm) covers Tracks 1–4.
+- **R32. Re-issue `docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md`.** Mark as superseded; the new implementation plan (handoff to `/ce-plan` from this brainstorm) covers Tracks 1–4.
 - **R33. Mark `docs/brainstorms/2026-04-29-session-focus-picker-requirements.md` as partially superseded.** Frontmatter remains `status: active` (most R-IDs are preserved by reference); add a section near the top listing the specific R-IDs and KDs that are superseded by this brainstorm (Tune-today-mandatory routing R32; Recommended-as-peer-chip R4 / R5; Safety focus echo R8; source-aware Back four-value model implicit in R34; all-enabled chips R12).
 - **R34. Validation must pass.** `bash scripts/validate-agent-docs.sh` passes after this brainstorm and its plan land.
 
@@ -208,7 +208,7 @@ The minority who want to steer focus pays one detour: build → Safety → tap B
 - **AE9. Covers R26.** Given a user with `sessionFocus = 'serve'` answers `pain = yes` and taps `Continue with recovery`, the recovery card shows "Recovery overrides today's focus." A user whose `sessionFocus` was already undefined sees no focus copy.
 - **AE10. Covers R10, R23.** Given a prior completed plan was Serving-focused, when the user taps `Repeat this session`, the rebuilt draft has `sessionFocus: undefined` and the route goes directly to `/safety`.
 - **AE11. Covers R16.** Given a user opens Tune today from Home and taps Back, they return to Home with the saved draft intact. (No `setup` source path exists in v1.)
-- **AE12. Covers R28, R29, R30, R31.** Given the docs-only Track 4 lands, `docs/decisions.md` has a new `D136` row stating the policy. `app/src/types/drill.ts` is unchanged (no `'attack'` value, no `Scenario` union). `docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md` has `status: superseded` in frontmatter.
+- **AE12. Covers R28, R29, R30, R31.** Given the docs-only Track 4 lands, `docs/decisions.md` has a new `D136` row stating the policy. `app/src/types/drill.ts` is unchanged (no `'attack'` value, no `Scenario` union). `docs/archive/brainstorms/2026-04-29-skill-scope-reservation-requirements.md` has `status: superseded` in frontmatter.
 - **AE13. Covers R34.** Given the brainstorm and plan PR land, `bash scripts/validate-agent-docs.sh` passes without errors.
 
 ---
@@ -298,8 +298,8 @@ The minority who want to steer focus pays one detour: build → Safety → tap B
 | Source doc | What this brainstorm supersedes | What stays authoritative there |
 |---|---|---|
 | `docs/brainstorms/2026-04-29-session-focus-picker-requirements.md` | R4 / R5 (four-chip Recommended-as-peer pattern), R7 / R32 (mandatory routing through Tune today on every pre-run path), R8 (Safety read-only focus echo as default), R12 (all-four-chips-always-enabled under mandatory exposure), R34's four-value source-aware Back model. | Most R-IDs (R1–R3, R9–R11, R13–R18, R19–R30, R33, R35–R44). All KDs except KD2 (Home as entry point — now also the *only* entry point) and KD3 (Safety stays pure — now stricter; no echo at all). |
-| `docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md` | All R-IDs (R1–R18). The entire types reservation + research note + catalog cross-link shape. | The problem framing in `docs/ideation/2026-04-29-skill-scope-and-game-layers-ideation.md` is unchanged; that ideation's S1 + S2 + S5 are still the right *direction*, but the implementation cost is deferred to evidence. |
-| `docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md` | Status changes to `superseded`. The new plan covers Tracks 1–4 of this brainstorm and inherits 2026-04-29's K3–K13 by reference where applicable. | None — superseded in full by the new plan. |
+| `docs/archive/brainstorms/2026-04-29-skill-scope-reservation-requirements.md` | All R-IDs (R1–R18). The entire types reservation + research note + catalog cross-link shape. | The problem framing in `docs/ideation/2026-04-29-skill-scope-and-game-layers-ideation.md` is unchanged; that ideation's S1 + S2 + S5 are still the right *direction*, but the implementation cost is deferred to evidence. |
+| `docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md` | Status changes to `superseded`. The new plan covers Tracks 1–4 of this brainstorm and inherits 2026-04-29's K3–K13 by reference where applicable. | None — superseded in full by the new plan. |
 
 ---
 

@@ -12,7 +12,7 @@ export const routePaths = {
    * the previous block isn't a count-eligible main_skill / pressure
    * block (warmup, technique, wrap, or skipped) so the user never sees
    * an empty reflective beat. See
-   * `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 9.
+   * `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 9.
    */
   drillCheck: '/run/check',
   transition: '/run/transition',

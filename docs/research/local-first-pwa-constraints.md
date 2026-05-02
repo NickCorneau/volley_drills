@@ -6,7 +6,7 @@ stage: validation
 type: research
 authority: iPhone/PWA platform constraints, storage durability, update safety, and degraded-capability defaults
 summary: "iPhone/PWA platform constraints, the 2026 three-layer storage-durability model, three-state save copy, update safety, and the real-device test protocol for M001."
-last_updated: 2026-04-16
+last_updated: 2026-05-02
 depends_on:
   - docs/vision.md
   - docs/decisions.md
@@ -160,10 +160,10 @@ Do not silently drop Safari-tab data at install time; that will read as data los
 
 ### 8. Apply the research to the current codebase
 
-- `app/` contains a runnable v0a validation PWA with `vite-plugin-pwa`, Dexie persistence, and a service worker.
-- `requestPersistentStorage()` is called at startup in `main.tsx`; it returns a boolean from `navigator.storage.persist()`.
-- The service worker currently uses `registerType: 'autoUpdate'` with `immediate: true` — a v0a exception to D41 safe-boundary updates that should be revisited before broader field testing.
-- The `Saved on device` line on `CompleteScreen.tsx` is currently posture-insensitive; wiring the three-state copy pattern is tracked as a pre-field-test follow-up (see Open questions below).
+- `app/` contains the runnable v0b Starter Loop PWA with `vite-plugin-pwa`, Dexie persistence, and a generated service worker.
+- Persistent-storage prompting is tied to a session-start user gesture, not startup, so the browser can honor `navigator.storage.persist()` where supported.
+- The service worker uses prompt-style update registration (`registerType: 'prompt'`) rather than forced immediate updates.
+- `CompleteScreen.tsx` uses posture-sensitive three-state save copy through `hooks/useInstallPosture.ts` and `lib/storageCopy.ts`.
 - A production-only storage diagnostics page does not exist yet. It should be built before any strong durability claim is made in release copy.
 
 ## IndexedDB and Dexie failure modes on mobile

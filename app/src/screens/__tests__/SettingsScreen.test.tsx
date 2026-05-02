@@ -105,7 +105,7 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
   // Vite `define` injection in `vite.config.ts`; the test runtime
   // pins them to `'test'` / `'test'` via `src/test-setup.ts` so this
   // assertion is stable across machines and git states. See
-  // `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 6.
+  // `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 6.
   it('renders the build-id row in the footer', () => {
     render(
       <MemoryRouter initialEntries={['/settings']}>

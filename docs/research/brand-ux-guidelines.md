@@ -12,10 +12,10 @@ depends_on:
   - docs/research/outdoor-courtside-ui-brief.md
   - docs/research/japanese-inspired-visual-direction.md
   - docs/research/product-naming.md
-  - docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md
-  - docs/plans/2026-04-19-feat-phase-f9-inter-self-host-plan.md
-  - docs/plans/2026-04-19-feat-phase-f10-timer-display-face-plan.md
-  - docs/plans/2026-04-19-feat-phase-f11-brand-hero-typography-plan.md
+  - docs/archive/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md
+  - docs/archive/plans/2026-04-19-feat-phase-f9-inter-self-host-plan.md
+  - docs/archive/plans/2026-04-19-feat-phase-f10-timer-display-face-plan.md
+  - docs/archive/plans/2026-04-19-feat-phase-f11-brand-hero-typography-plan.md
 related:
   - canvases/typography-review.canvas.tsx
 ---

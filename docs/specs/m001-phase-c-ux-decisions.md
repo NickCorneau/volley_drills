@@ -7,7 +7,7 @@ stage: planning
 type: spec
 authority: Phase C surface behavior, state precedence, copy calls, cut/defer scope, schema additions required by Phase C surfaces
 summary: "Opinionated resolutions for the product + UX gaps surfaced by the pre-build review of v0b Phase C. Consolidates decisions that the existing specs leave ambiguous."
-last_updated: 2026-04-19-b
+last_updated: 2026-05-02
 depends_on:
   - docs/plans/2026-04-12-v0a-to-v0b-transition.md
   - docs/specs/m001-home-and-sync-notes.md
@@ -53,7 +53,7 @@ All eight decisions below were signed off 2026-04-16 after walk-through with the
 
 **Amendment 2026-04-16 (D121):** D-C4's Skill Level answer was revised from the `Beginner / Intermediate / Advanced` identity labels to four pair-first **functional** bands (`Foundations` / `Rally builders` / `Side-out builders` / `Competitive pair`) plus a `Not sure yet` escape. Rationale and external-evidence backing live in `D121` (`docs/decisions.md`); this doc carries the surface-level shape. Phase C-3 (Onboarding, per the consolidated plan's re-sequenced order) builds the new taxonomy.
 
-**Amendment 2026-04-19 (Phase F Home CTA cleanup):** D-C3 and D-C5 are amended to drop the `Same as last time` text link and the `Edit` text link from the LastComplete card; the LastComplete card's secondary becomes a single `Start a different session` tertiary text link (normal case) or tertiary text link below the two Repeat buttons (ended-early case). The Draft card's `Edit` text link is renamed `Change setup`. Rationale: the shipped impl routed both `Repeat this session` and `Edit` to the same URL (`/setup?from=repeat`), and `Same as last time` was a narrow-value one-tap shortcut that bypassed the StaleContextBanner's "Adjust if today's different" nudge. The simplification preserves the Hybrid Repeat behavior of D-C3 (primary CTA → pre-filled Setup with banner → Safety → Run) while eliminating the same-URL duplication D-C5 inadvertently produced. See `docs/plans/2026-04-19-feat-phase-f-d91-validity-hardening-plan.md` Unit 1 and `D122` for the supporting D91-validity rationale.
+**Amendment 2026-04-19 (Phase F Home CTA cleanup):** D-C3 and D-C5 are amended to drop the `Same as last time` text link and the `Edit` text link from the LastComplete card; the LastComplete card's secondary becomes a single `Start a different session` tertiary text link (normal case) or tertiary text link below the two Repeat buttons (ended-early case). The Draft card's `Edit` text link is renamed `Change setup`. Rationale: the shipped impl routed both `Repeat this session` and `Edit` to the same URL (`/setup?from=repeat`), and `Same as last time` was a narrow-value one-tap shortcut that bypassed the StaleContextBanner's "Adjust if today's different" nudge. The simplification preserves the Hybrid Repeat behavior of D-C3 (primary CTA → pre-filled Setup with banner → Safety → Run) while eliminating the same-URL duplication D-C5 inadvertently produced. See `docs/archive/plans/2026-04-19-feat-phase-f-d91-validity-hardening-plan.md` Unit 1 and `D122` for the supporting D91-validity rationale.
 
 
 | # | Decision | Signed-off answer |
@@ -268,7 +268,7 @@ Each option is a full-width button ≥60px tall with a short label + one-sentenc
 - **Cut copy variants** (age tiers + multi-pending count): aged-draft subtext, `>28d Welcome back`, "N reviews pending." Cut per v3 H11 / C5 / C6.
 - **Cut by Phase F (2026-04-19):** LastComplete `Edit` text link (folded into Repeat's pre-filled Setup), LastComplete `Same as last time` text link (bypassed StaleContextBanner; one-tap saving not worth the data-quality regression). Draft `Edit` text link renamed to `Change setup`.
 
-**Rationale for Phase F simplification.** The pre-Phase-F impl shipped `Repeat this session` (primary) and `Edit` (text link) both routing to `/setup?from=repeat` — two affordances with identical behavior. `Same as last time` was a third text link that bypassed Setup entirely (one tap saved, but at the cost of bypassing the StaleContextBanner's "Adjust if today's different" nudge). The post-Phase-F card simplifies to a single user-visible choice — *same as last time, or different?* — with no same-URL duplication and no shortcut that dodges the "what changed today?" check. See `docs/plans/2026-04-19-feat-phase-f-d91-validity-hardening-plan.md` Unit 1.
+**Rationale for Phase F simplification.** The pre-Phase-F impl shipped `Repeat this session` (primary) and `Edit` (text link) both routing to `/setup?from=repeat` — two affordances with identical behavior. `Same as last time` was a third text link that bypassed Setup entirely (one tap saved, but at the cost of bypassing the StaleContextBanner's "Adjust if today's different" nudge). The post-Phase-F card simplifies to a single user-visible choice — *same as last time, or different?* — with no same-URL duplication and no shortcut that dodges the "what changed today?" check. See `docs/archive/plans/2026-04-19-feat-phase-f-d91-validity-hardening-plan.md` Unit 1.
 
 **State transitions.** Dismissing a secondary row triggers a fade-and-collapse (150ms) rather than instant disappearance. Primary card swaps after a dismissal use a crossfade; avoid hard cuts.
 
@@ -278,13 +278,13 @@ Each option is a full-width button ≥60px tall with a short label + one-sentenc
 
 **Decisions.**
 
-- There is **no Session Prep screen**. `Setup` builds the `SessionDraft`, writes it to Dexie, and routes straight to `Safety`. Same as v0a.
+- There is **no Session Prep screen**. In the current v0b flow, `Setup` builds the `SessionDraft`, writes it to Dexie, and routes through the lightweight Tune today focus step before `Safety`.
 - **Swap / Shorten / Switch affordances** live on the Home/Draft card's `Change setup` flow (renamed from `Edit` per Phase F 2026-04-19), which re-enters `Setup` with pre-filled values and offers per-block swap affordances once the draft exists. Not a new screen. LastComplete no longer carries a separate `Edit` secondary — the single `Start a different session` secondary routes to fresh Setup instead; modifying last-session context happens through the Repeat path's pre-filled Setup.
 - `buildDraft()` emits a `rationale: string` on the `SessionDraft` — **v0b: schema-only** (`H7`). The "See why" affordance on Home/Draft and the Repeat card's "What changes next time" line are cut; the field stays for M001-build to light up without a schema migration.
 - **Per-block swap** in Setup (not a new screen): after building a draft, the Home/Draft card shows the block list with a single `Swap` affordance per block. Tapping cycles to the next ranked alternative. This is `2-3 swap alternatives` from the session-assembly spec, rendered compactly.
 - **Fallback / broaden constraints:** if `buildDraft` returns an empty or near-empty draft, the Setup screen shows an inline "Can't build for these constraints — broaden?" affordance that relaxes one filter at a time (net required → optional, wall required → optional). No new screen.
 
-**Handoff.** `Setup` → `Safety` → `Run`. The `Start` button on `Safety` is the lock boundary (D37: the plan snapshot locks at session start, not at draft build). This matches current v0a behavior.
+**Handoff.** `Setup` → `Tune today` → `Safety` → `Run`. The `Start` button on `Safety` remains the lock boundary (D37: the plan snapshot locks at session start, not at draft build).
 
 **Copy.**
 

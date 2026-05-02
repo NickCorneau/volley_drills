@@ -29,7 +29,7 @@ vi.mock('../../services/review', async () => {
  * host route moved.
  *
  * Sources:
- *   docs/plans/2026-04-26-pre-d91-editorial-polish.md Item 9
+ *   docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md Item 9
  *   docs/specs/m001-review-micro-spec.md §"Per-drill capture at Drill Check (D133)"
  *   docs/research/2026-04-26-pair-rep-capture-options.md (Framing D)
  *

@@ -6,7 +6,7 @@ stage: validation
 type: research
 authority: "evidence base for safety-gate placement, first-run screen count, and progressive profiling in M001"
 summary: "What public data says about whether a dedicated pre-session safety screen hurts activation, and what to test instead."
-last_updated: 2026-04-16
+last_updated: 2026-05-02
 depends_on:
   - docs/research/beach-training-resources.md
   - docs/specs/m001-courtside-run-flow.md
@@ -157,7 +157,7 @@ Audited against the repo as of 2026-04-16. Nothing in the research overturns an 
 
 ### What the evidence challenges (test, do not flip)
 
-The current v0a flow is `Home → Setup → Safety → Run`, with `SafetyCheckScreen.tsx` as a standalone screen. The research argues this is the weaker evidence-backed default *when the safety check is genuinely short* — the default case for us, since the check is a binary pain flag plus a 4-option recency chip row plus an optional heat CTA. The public record points toward folding short red-flag questions into the adjacent decision point and using adaptive branching only for "yes" answers. Fitbod and Runna are the two closest-category live-app analogues and both put safety inside plan adaptation rather than at the front door.
+The current v0b flow is `Home / Setup → Tune today → Safety → Run`, with `SafetyCheckScreen.tsx` still as a standalone readiness screen. The research argues this remains the weaker evidence-backed default *when the safety check is genuinely short* — the default case for us, since the check is a binary pain flag plus a recency chip row plus an optional heat CTA. The public record points toward folding short red-flag questions into the adjacent decision point and using adaptive branching only for "yes" answers. Fitbod and Runna are the two closest-category live-app analogues and both put safety inside plan adaptation rather than at the front door.
 
 The research does not prove our standalone screen is worse — no named consumer fitness app has published the exact A/B. It does, however, give us strong evidence-based reasons to run that test inside the `D91` cohort.
 

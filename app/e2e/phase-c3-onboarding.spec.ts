@@ -4,8 +4,8 @@ import { test, expect, type BrowserContext, type Page } from '@playwright/test'
  * Phase C-3 onboarding smoke (D-C4 / D121 / V0B-16 / H15).
  *
  * Real-browser proof that:
- * - A fresh install routes through Skill Level -> Today's Setup -> Safety
- *   -> Run (no Home bounce until onboarding completes).
+ * - A fresh install routes through Skill Level -> Today's Setup -> Tune Today
+ *   -> Safety -> Run (no Home bounce until onboarding completes).
  * - An existing tester (seeded `ExecutionLog` + `onboarding.completedAt`
  *   sentinel, simulating a post-C-0-backfill device) skips onboarding
  *   and lands on Home directly.

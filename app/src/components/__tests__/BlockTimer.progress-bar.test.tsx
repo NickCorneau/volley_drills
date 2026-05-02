@@ -34,7 +34,7 @@ import { BlockTimer } from '../BlockTimer'
  * `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`
  * §A4 (original framing),
  * `2026-04-22-all-passes-reconciled.md` item #8 (original framing),
- * `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Post-ship
+ * `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Post-ship
  * amendment §"Item 7" (reversal rationale).
  */
 describe('BlockTimer progress bar (visual half of #8 / A4, chip reverted)', () => {

@@ -2,6 +2,7 @@ import { useId, useState } from 'react'
 import type { DifficultyTag } from '../db'
 import { validateStreakLongest } from '../domain/capture'
 import { PassMetricInput } from './PassMetricInput'
+import { ToggleChip } from './ui'
 
 /**
  * Tier 1b D133 (2026-04-26): per-drill capture surface that lives on
@@ -50,7 +51,7 @@ import { PassMetricInput } from './PassMetricInput'
  * so the prompt generalizes across pass / serve / set drills.
  * Implements the first layer of the `D104` three-layer self-scoring
  * bias correction on the post-`D133` capture surface. See
- * `docs/plans/2026-04-27-per-drill-success-criterion.md` and
+ * `docs/archive/plans/2026-04-27-per-drill-success-criterion.md` and
  * `docs/specs/m001-review-micro-spec.md` §Required line 78.
  */
 
@@ -128,7 +129,7 @@ export function PerDrillCapture(props: PerDrillCaptureProps) {
       data-testid="per-drill-capture"
     >
       <div className="flex flex-col gap-1">
-        <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">Quick tag</p>
+        <p className="text-xs font-medium text-text-secondary">Drill check</p>
         <h2 id="per-drill-heading" className="text-sm font-semibold text-text-primary">
           How was {drillName}?
         </h2>
@@ -138,23 +139,12 @@ export function PerDrillCapture(props: PerDrillCaptureProps) {
         {DIFFICULTY_CHIPS.map((chip) => {
           const selected = difficulty === chip.value
           return (
-            <button
+            <ToggleChip
               key={chip.value}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              data-difficulty={chip.value}
-              onClick={() => onDifficultyChange(chip.value)}
-              className={[
-                'flex min-h-[54px] items-center justify-center rounded-[12px] px-2 py-2 text-center transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
-                selected
-                  ? 'bg-accent text-white hover:bg-accent-pressed active:bg-accent-pressed'
-                  : 'border border-text-secondary/25 bg-bg-primary text-text-primary hover:brightness-95 active:brightness-90',
-              ].join(' ')}
-            >
-              <span className="text-sm font-semibold leading-tight">{chip.label}</span>
-            </button>
+              label={chip.label}
+              selected={selected}
+              onTap={() => onDifficultyChange(chip.value)}
+            />
           )
         })}
       </div>
@@ -265,7 +255,7 @@ function CountDrawer({
         nudge ("If unsure, don't count it as Good.") is the count-only
         layer-1 correction; the streak branch below intentionally
         drops it because streak counting is intrinsically conservative.
-        See `docs/plans/2026-04-27-per-drill-success-criterion.md`
+        See `docs/archive/plans/2026-04-27-per-drill-success-criterion.md`
         and the `D134` row in `docs/decisions.md`.
       */}
       {successRuleDescription && (

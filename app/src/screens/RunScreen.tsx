@@ -221,7 +221,7 @@ export function RunScreen() {
           (`rounded-2xl border border-accent/30 bg-info-surface p-4`
           with an h2 "Coaching note" in accent + accent-colored body
           copy) to a sidebar-voiced aside: a 2-px accent left-rule,
-          a small uppercase "Cue" label, and neutral body copy.
+          a small "Cue" label, and neutral body copy.
           2026-04-22 round 2: dropped the preview + "Show full
           coaching note" toggle. The ScreenShell body is a first-class
           scroll container with top/bottom fade affordances; hiding
@@ -245,11 +245,11 @@ export function RunScreen() {
           >
             <span
               id="coaching-cue-title"
-              className="text-xs font-semibold uppercase tracking-wide text-accent"
+              className="text-xs font-medium text-accent"
             >
               Cue
             </span>
-            <p className="mt-1 whitespace-pre-line text-base font-medium leading-relaxed text-text-primary">
+            <p className="mt-1 whitespace-pre-line text-base leading-relaxed text-text-primary">
               {currentBlock.coachingCue}
             </p>
           </section>

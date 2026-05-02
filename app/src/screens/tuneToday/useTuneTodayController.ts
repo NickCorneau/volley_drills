@@ -139,7 +139,7 @@ export function useTuneTodayController() {
   // Deterministic recovery from the load-error state: setup is
   // always a valid place to start over, regardless of where the
   // user came from. Source-aware `goBack` would route a Home-source
-  // user back to Home and trap them in a Home -> Review session ->
+  // user back to Home and trap them in a Home -> Continue ->
   // load error -> Home loop if reads keep failing.
   const goBackToSetup = useCallback(() => {
     navigate(routes.setup())

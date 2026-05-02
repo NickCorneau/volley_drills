@@ -5,7 +5,7 @@ status: active
 stage: validation
 type: workspace-readme
 authority: current web app prototype state and implementation guardrails
-last_updated: 2026-04-28
+last_updated: 2026-05-02
 depends_on:
   - docs/prd-foundation.md
   - docs/decisions.md
@@ -46,9 +46,10 @@ Layers (dependencies point inward; see `docs/ops/app-architecture-guidance.md` f
 
 > **Before making changes**, read `docs/plans/2026-04-16-003-rest-of-v0b-plan.md` for the v0b status registry (what landed, what was cut, what was deferred post-D91). The older v0a feedback log at `docs/research/2026-04-12-v0a-runner-probe-feedback.md` is retrospective only.
 
-- The app is the **v0b Starter Loop PWA**, feature-complete as of 2026-04-19 and deployed at https://volleydrills.nicholascorneau.workers.dev. It runs the full Home → Onboarding → Setup → Safety → Run → Check → Transition → Review → Complete loop with deterministic session assembly, a 0–10 RPE chip grid, drill-grain difficulty/count capture, a three-case honest session summary, the full Finish-Later review contract (2h cap), a flat 4-row Home priority model with a soft-block review modal, a Repeat path from LastComplete, a JSON data export, block-end audio cues, and a Swap action on RunScreen.
-- **Routes**: `/` (Home), `/onboarding/skill-level`, `/onboarding/todays-setup`, `/setup`, `/safety`, `/run`, `/run/check`, `/run/transition`, `/review`, `/complete?id=…`, `/settings`.
-- **Dexie schema (v5)**: `sessionPlans`, `sessionDrafts` (singleton), `executionLogs`, `sessionReviews` (with `status: 'submitted' | 'skipped' | 'draft'`, capture-window fields per `V0B-30`, and optional `perDrillCaptures` per `D133`), `timerState`, `storageMeta` (key-value: onboarding progress, UX flags, last player mode). Schema in `src/db/schema.ts`. Migrations backfill `status` and `onboarding.completedAt`; v5 is a forward-only boundary for drill-grain capture reads. The Dexie database name stays `volley-drills` to preserve any pre-rename tester data (see `D125`).
+- The app is the **v0b Starter Loop PWA**, feature-complete as of 2026-04-19 and deployed at https://volleydrills.nicholascorneau.workers.dev. It runs the full Home → Onboarding → Setup → Tune today → Safety → Run → Check → Transition → Review → Complete loop with deterministic session assembly, today-only focus steering, a 0–10 RPE chip grid, drill-grain difficulty/count capture, optional streak metric capture, a three-case honest session summary, the full Finish-Later review contract (2h cap), a flat 4-row Home priority model with a soft-block review modal, Repeat paths from completed sessions, a JSON data export, block-end audio cues, and a Swap action on RunScreen.
+- **Routes**: `/` (Home), `/onboarding/skill-level`, `/onboarding/todays-setup`, `/setup`, `/tune-today`, `/safety`, `/run`, `/run/check`, `/run/transition`, `/review`, `/complete?id=…`, `/settings`.
+- **Pre-run flow**: all fresh setup, draft, and repeat paths create or open the singleton `SessionDraft`, route through `/tune-today` for Recommended / Passing / Serving / Setting, then continue to Safety. Tune today regenerates the saved draft through `services/session/regenerateDraftFocus.ts`; Safety remains readiness-only.
+- **Dexie schema (v6)**: `sessionPlans`, `sessionDrafts` (singleton), `executionLogs`, `sessionReviews` (with `status: 'submitted' | 'skipped' | 'draft'`, capture-window fields per `V0B-30`, optional `perDrillCaptures` per `D133`, and optional streak `metricCapture` per `D134`), `timerState`, `storageMeta` (key-value: onboarding progress, UX flags, last player mode). Schema in `src/db/schema.ts`. Migrations backfill `status`, `onboarding.completedAt`, and preserve the v5 drill-grain boundary while v6 adds optional streak capture. The Dexie database name stays `volley-drills` to preserve any pre-rename tester data (see `D125`).
 - **PWA**: `vite-plugin-pwa` with `registerType: 'prompt'` (safe-boundary updates via `useRegisterSW`, per `D41` / `V0B-20`). `navigator.storage.persist()` fires on the session-start user gesture (`V0B-25`). Three-state posture-sensitive save copy on `CompleteScreen.tsx` via `hooks/useInstallPosture.ts` + `lib/storageCopy.ts` (`V0B-24`). See `docs/research/local-first-pwa-constraints.md`.
 - **Timer**: timestamp-based with 5s flush to `timerState`, wake-lock during active blocks, 3-2-1 pre-roll with audio tick, block-end beep via `platform/` (re-exports `lib/audio.ts`; foreground `AudioContext`; narrow slice of `V0B-08`).
 - **Safety**: binary pain gate + training recency + heat CTA, answer-first consequence copy (`V0B-16`), lighter-session override with confirmation, regulatory-posture copy audit landed (`V0B-18`, `D86`).
@@ -80,6 +81,14 @@ For build and style verification:
 cd app
 npm run build
 npm run lint
+```
+
+Generated-plan diagnostics are checked from this workspace:
+
+```bash
+cd app
+npm run diagnostics:report:check
+npm run diagnostics:triage:check
 ```
 
 ## Tests

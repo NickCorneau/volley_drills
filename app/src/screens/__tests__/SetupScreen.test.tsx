@@ -139,7 +139,7 @@ describe('SetupScreen (C-3)', () => {
     // chip rows. The one-tap Repeat change retires that entry point
     // entirely — Setup should never render a `role="status"` banner
     // regardless of what's seeded, because the only non-onboarding
-    // entries now are `Start a different session` and `New workout`.
+    // entries now are `Start a different session` and `Start new session`.
     // Pre-fill via `getLastContext()` still happens silently.
     await db.storageMeta.put({
       key: 'onboarding.completedAt',

@@ -40,7 +40,7 @@
  * both globals so unit tests run without touching the real Vite
  * pipeline.
  *
- * See `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 6.
+ * See `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 6.
  */
 
 declare const __VOLLEYCRAFT_BUILD_VERSION__: string | undefined

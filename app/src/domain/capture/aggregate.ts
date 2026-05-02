@@ -25,7 +25,7 @@ export interface AggregateCapturesResult {
    * decides which keys to omit / collapse to "All <bucket>". `notCaptured`
    * rows still receive their tag counted here — the chip was tapped, the
    * counts were the optional bit. See
-   * `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 8.
+   * `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 8.
    */
   tagBreakdown: {
     too_hard: number

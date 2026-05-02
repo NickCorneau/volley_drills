@@ -26,21 +26,20 @@ export function TuneTodayScreen() {
   } = useTuneTodayController()
 
   if (loading) {
-    return (
-      <div className="mx-auto flex min-h-[60dvh] w-full max-w-[390px] flex-col items-center justify-center gap-4">
-        <p className="text-text-secondary">Loading...</p>
-      </div>
-    )
+    return <StatusMessage variant="loading" />
   }
 
   if (loadError || !draft) {
     return (
-      <div className="mx-auto flex min-h-[60dvh] w-full max-w-[390px] flex-col items-center justify-center gap-4 text-center">
-        <p className="text-text-secondary">Could not load your saved session.</p>
-        <Button variant="ghost" onClick={goBackToSetup}>
-          Back to setup
-        </Button>
-      </div>
+      <StatusMessage
+        variant="empty"
+        message="Could not load your saved session."
+        action={
+          <Button variant="ghost" onClick={goBackToSetup}>
+            Back to setup
+          </Button>
+        }
+      />
     )
   }
 

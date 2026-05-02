@@ -29,7 +29,7 @@ export function LastCompleteCard({
   const plannedTotalMinutes = data.plan.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
   const daysAgo = formatDaysAgo(data.log.completedAt ?? data.log.startedAt)
   const isEndedEarly = data.log.status === 'ended_early'
-  // "Repeat what you did" label shows actually-completed minutes so
+  // The shorter-repeat label shows actually-completed minutes so
   // the label and the rebuilt draft always agree (C-5 Unit 3 risk row).
   const completedMinutes = isEndedEarly
     ? data.plan.blocks.reduce((sum, block, idx) => {
@@ -40,31 +40,29 @@ export function LastCompleteCard({
   const canRepeatSubset = isEndedEarly && completedMinutes > 0 && onRepeatWhatYouDid !== undefined
 
   return (
-    <section role="region" aria-label="Your last session" className={PRIMARY_CARD_CLASS}>
+    <section role="region" aria-label="Train again" className={PRIMARY_CARD_CLASS}>
       <div>
-        <p className="text-sm font-medium text-text-secondary">Your last session</p>
-        <p className="mt-1 text-sm font-medium text-text-primary">{data.plan.presetName}</p>
-        <p className="mt-0.5 text-sm text-text-secondary">
-          {plannedTotalMinutes > 0 ? `${plannedTotalMinutes} min` : ''}
-          {plannedTotalMinutes > 0 && daysAgo ? ' \u00b7 ' : ''}
-          {daysAgo}
-          {isEndedEarly && ' \u00b7 ended early'}
+        <p className="text-sm font-semibold text-text-primary">Ready to train again.</p>
+        <p className="mt-2 text-sm text-text-secondary">
+          {data.plan.presetName}
+          {plannedTotalMinutes > 0 && ` · ${plannedTotalMinutes} min`}
+          {isEndedEarly && daysAgo && ` · ended early ${daysAgo}`}
         </p>
       </div>
       {isEndedEarly ? (
         <>
           <Button variant="primary" fullWidth disabled={actionDisabled} onClick={onRepeat}>
-            Repeat full {plannedTotalMinutes}-min plan
+            Repeat full plan
           </Button>
           {canRepeatSubset && (
             <Button variant="outline" fullWidth disabled={actionDisabled} onClick={onRepeatWhatYouDid}>
-              Repeat what you did ({completedMinutes} min)
+              Repeat shorter version ({completedMinutes} min)
             </Button>
           )}
         </>
       ) : (
         <Button variant="primary" fullWidth disabled={actionDisabled} onClick={onRepeat}>
-          Repeat this session
+          Repeat last session
         </Button>
       )}
       <Button

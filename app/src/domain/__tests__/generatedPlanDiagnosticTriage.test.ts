@@ -7,7 +7,9 @@ import {
   type GeneratedPlanObservationGroup,
 } from '../generatedPlanDiagnostics'
 import {
+  authorizationStatusForGeneratedPlanD47GapClosureState,
   buildGeneratedPlanDecisionDebtPrompts,
+  buildGeneratedPlanD47GapClosureLedger,
   buildGeneratedPlanD47ProposalAdmissionTicket,
   buildGeneratedPlanRedistributionCausalityReceipt,
   buildGeneratedPlanTriageWorkbenchMarkdown,
@@ -636,6 +638,255 @@ describe('generated plan diagnostic triage registry', () => {
     expect(ticket.previewReady).toBe(false)
   })
 
+  it('builds the comparator-first D47 gap closure ledger from current receipt evidence', () => {
+    const groups = currentGroups()
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const ledger = buildGeneratedPlanD47GapClosureLedger(groups, registry)
+
+    expect(ledger).toEqual(
+      expect.objectContaining({
+        candidateFound: true,
+        currentnessState: 'current',
+        gapType: 'undetermined',
+        decisionState: 'evidence_gathering',
+        authorizationStatus: 'not_authorized',
+        candidate: expect.objectContaining({
+          groupKey:
+            'gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+        }),
+        receiptFacts: expect.objectContaining({
+          totalAffectedCellCount: 30,
+          pressureDisappearsCellCount: 12,
+          pressureRemainsCellCount: 18,
+          nonRedistributionPressureCellCount: 6,
+        }),
+        comparatorReceipt: expect.objectContaining({
+          comparatorKind: 'receipt_candidate',
+          groupKey:
+            'gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+          simplerThanD47: true,
+          higherConfidenceThanD47: true,
+          receiptFacts: expect.objectContaining({
+            pressureDisappearsCellCount: 0,
+            pressureRemainsCellCount: 18,
+            nonRedistributionPressureCellCount: 6,
+          }),
+        }),
+      }),
+    )
+    expect(ledger.segmentDispositions.map((segment) => segment.segment)).toEqual([
+      'pressure_disappears',
+      'pressure_remains',
+      'non_redistribution_pressure',
+    ])
+    expect(ledger.segmentDispositions.every((segment) => segment.authorizationStatus === 'not_authorized')).toBe(
+      true,
+    )
+    expect(ledger.nextArtifact).toEqual(
+      expect.objectContaining({
+        artifactType: 'comparator_receipt',
+        owner: 'maintainer',
+        abandonCriteria: expect.stringContaining('comparator presents'),
+      }),
+    )
+    expect(ledger.sourceDeltaBoundary).toContain('beyond the existing FIVB 4.7 activation')
+    expect(ledger.reassessmentResult).toBe('not_started')
+  })
+
+  it('blocks D47 gap closure authorization when the stable receipt key is absent', () => {
+    const shiftedD47GroupKey =
+      'gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+review_fixture'
+    const groups = currentGroups().map((group) =>
+      group.groupKey ===
+      'gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap'
+        ? { ...group, groupKey: shiftedD47GroupKey }
+        : group,
+    )
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const ledger = buildGeneratedPlanD47GapClosureLedger(groups, registry)
+
+    expect(ledger.currentnessState).toBe('missing_or_shifted')
+    expect(ledger.authorizationStatus).toBe('not_authorized')
+    expect(ledger.relatedCandidateGroupKeys).toEqual([shiftedD47GroupKey])
+    if (ledger.comparatorReceipt.comparatorKind === 'receipt_candidate') {
+      expect(ledger.comparatorReceipt.groupKey).not.toBe(shiftedD47GroupKey)
+    }
+  })
+
+  it('falls back to baseline when only shifted D47 evidence is present', () => {
+    const d47Group = currentGroups().find(
+      (group) =>
+        group.groupKey ===
+        'gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+    )
+    if (!d47Group) throw new Error('Expected current D47 group.')
+    const shiftedD47Group = {
+      ...d47Group,
+      groupKey:
+        'gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+review_fixture',
+    } satisfies GeneratedPlanObservationGroup
+    const registry = buildInitialGeneratedPlanTriageRegistry([shiftedD47Group])
+    const ledger = buildGeneratedPlanD47GapClosureLedger([shiftedD47Group], registry)
+
+    expect(ledger.candidateFound).toBe(false)
+    expect(ledger.currentnessState).toBe('missing_or_shifted')
+    expect(ledger.comparatorReceipt.comparatorKind).toBe('no_change_baseline')
+    expect(ledger.authorizationStatus).toBe('not_authorized')
+  })
+
+  it('marks D47 gap closure ledger stale when the stable D47 fingerprint is stale', () => {
+    const groups = currentGroups()
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups).map((entry) =>
+      entry.groupKey ===
+      'gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap'
+        ? { ...entry, diagnosticFingerprint: `${entry.diagnosticFingerprint}:stale` }
+        : entry,
+    )
+    const ledger = buildGeneratedPlanD47GapClosureLedger(groups, registry)
+
+    expect(ledger.currentnessState).toBe('stale')
+    expect(ledger.authorizationStatus).toBe('not_authorized')
+  })
+
+  it('does not select a stale comparator receipt candidate', () => {
+    const staleComparatorKey =
+      'gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap'
+    const groups = currentGroups()
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups).map((entry) =>
+      entry.groupKey === staleComparatorKey
+        ? { ...entry, diagnosticFingerprint: `${entry.diagnosticFingerprint}:stale` }
+        : entry,
+    )
+    const ledger = buildGeneratedPlanD47GapClosureLedger(groups, registry)
+
+    if (ledger.comparatorReceipt.comparatorKind === 'receipt_candidate') {
+      expect(ledger.comparatorReceipt.groupKey).not.toBe(staleComparatorKey)
+    }
+    expect(ledger.authorizationStatus).toBe('not_authorized')
+  })
+
+  it('falls back to a no-change baseline when no comparator candidate exists', () => {
+    const d47Group = currentGroups().find(
+      (group) =>
+        group.groupKey ===
+        'gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+    )
+    if (!d47Group) throw new Error('Expected current D47 group.')
+
+    const registry = buildInitialGeneratedPlanTriageRegistry([d47Group])
+    const ledger = buildGeneratedPlanD47GapClosureLedger([d47Group], registry)
+
+    expect(ledger.comparatorReceipt).toEqual(
+      expect.objectContaining({
+        comparatorKind: 'no_change_baseline',
+        simplerThanD47: false,
+        higherConfidenceThanD47: false,
+      }),
+    )
+    expect('groupKey' in ledger.comparatorReceipt).toBe(false)
+    expect(ledger.authorizationStatus).toBe('not_authorized')
+  })
+
+  it('derives legal D47 gap closure authorization states from state and currentness', () => {
+    const cases = [
+      {
+        gapType: 'programming_shape_gap',
+        decisionState: 'evidence_gathering',
+        currentnessState: 'current',
+        allSegmentsHaveDisposition: true,
+        expected: 'not_authorized',
+      },
+      {
+        gapType: 'programming_shape_gap',
+        decisionState: 'primary_fill_path_selected',
+        currentnessState: 'current',
+        allSegmentsHaveDisposition: true,
+        expected: 'ready_for_planning',
+      },
+      {
+        gapType: 'undetermined',
+        decisionState: 'primary_fill_path_selected',
+        currentnessState: 'current',
+        allSegmentsHaveDisposition: true,
+        expected: 'not_authorized',
+      },
+      {
+        gapType: 'programming_shape_gap',
+        decisionState: 'primary_fill_path_selected',
+        currentnessState: 'stale',
+        allSegmentsHaveDisposition: true,
+        expected: 'not_authorized',
+      },
+      {
+        gapType: 'programming_shape_gap',
+        decisionState: 'primary_fill_path_selected',
+        currentnessState: 'current',
+        allSegmentsHaveDisposition: false,
+        expected: 'not_authorized',
+      },
+      {
+        gapType: 'no_real_gap',
+        decisionState: 'no_change_closed',
+        currentnessState: 'current',
+        allSegmentsHaveDisposition: false,
+        expected: 'not_authorized',
+      },
+      {
+        gapType: 'no_real_gap',
+        decisionState: 'no_change_closed',
+        currentnessState: 'current',
+        allSegmentsHaveDisposition: true,
+        expected: 'closed_without_fill',
+      },
+      {
+        gapType: 'programming_shape_gap',
+        decisionState: 'abandoned_for_better_candidate',
+        currentnessState: 'current',
+        allSegmentsHaveDisposition: true,
+        expected: 'closed_without_fill',
+      },
+      {
+        gapType: 'programming_shape_gap',
+        decisionState: 'fill_planned',
+        currentnessState: 'current',
+        allSegmentsHaveDisposition: true,
+        expected: 'authorized_for_fill_plan',
+      },
+      {
+        gapType: 'undetermined',
+        decisionState: 'fill_planned',
+        currentnessState: 'current',
+        allSegmentsHaveDisposition: true,
+        expected: 'not_authorized',
+      },
+      {
+        gapType: 'programming_shape_gap',
+        decisionState: 'fill_applied_reassessment_pending',
+        currentnessState: 'current',
+        allSegmentsHaveDisposition: false,
+        expected: 'not_authorized',
+      },
+      {
+        gapType: 'programming_shape_gap',
+        decisionState: 'closed_validated',
+        currentnessState: 'current',
+        allSegmentsHaveDisposition: true,
+        expected: 'authorized_for_fill_plan',
+      },
+    ] as const
+
+    for (const testCase of cases) {
+      expect(
+        authorizationStatusForGeneratedPlanD47GapClosureState(
+          testCase.gapType,
+          testCase.decisionState,
+          testCase.currentnessState,
+          testCase.allSegmentsHaveDisposition,
+        ),
+      ).toBe(testCase.expected)
+    }
+  })
+
   it('fails validation for unexpected unknown compression lanes', () => {
     const groups = currentGroups()
     const firstGroup = groups[0]
@@ -701,6 +952,19 @@ describe('generated plan diagnostic triage registry', () => {
     expect(markdown).toContain('`product_or_training_quality_hypothesis`: product or training quality hypothesis')
     expect(markdown).toContain('`no_action_threshold`: no action threshold')
     expect(markdown).toContain('Counterfactual-only pressure remains diagnostic evidence')
+    expect(markdown).toContain('## D47 Gap Closure Ledger')
+    expect(markdown).toContain('Ledger source: D47 proposal-admission ticket plus U8 redistribution causality receipt')
+    expect(markdown).toContain('Currentness: `current`')
+    expect(markdown).toContain('Decision state: `evidence_gathering`')
+    expect(markdown).toContain('Authorization status: `not_authorized`')
+    expect(markdown).toContain('Comparator kind: `receipt_candidate`')
+    expect(markdown).toContain(
+      'Comparator candidate: `gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`',
+    )
+    expect(markdown).toContain('Pressure disappears under counterfactual: cells 12')
+    expect(markdown).toContain('Non-redistribution pressure: cells 6')
+    expect(markdown).toContain('Artifact: `comparator_receipt`')
+    expect(markdown).toContain('Reassessment result: `not_started`')
     expect(markdown).toContain('docs/ops/workload-envelope-authoring-guide.md#short-session-cooldown-minimum')
     expect(markdown).toContain('Candidate dispositions: `accepted_policy_allowance`')
   })

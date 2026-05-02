@@ -24,7 +24,7 @@
  *   amendment + 2026-04-19 follow-on)
  * - `docs/decisions.md` D122 (pre-D91 validity carve-outs), D128
  *   (cold-state default flipped to solo voice)
- * - `docs/plans/2026-04-19-feat-phase-f-d91-validity-hardening-plan.md`
+ * - `docs/archive/plans/2026-04-19-feat-phase-f-d91-validity-hardening-plan.md`
  *   Unit 2 (open question resolution)
  */
 

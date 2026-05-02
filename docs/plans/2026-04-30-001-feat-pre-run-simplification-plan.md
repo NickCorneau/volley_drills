@@ -2,18 +2,19 @@
 id: pre-run-simplification-2026-04-30
 title: "feat: Pre-run flow (Tune today mandatory + Setup-stage cuts + Safety polish + skill-scope JSDoc)"
 type: feat
-status: active
+status: complete
 stage: validation
 date: 2026-04-30
 revised: 2026-04-30
+shipped: 2026-04-30
 origin: docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md
 authority: "Canonical implementation plan for the post-iteration 2026-04-30 simplification: ships Tune today mandatory pre-safety (the 2026-04-29-001 design verbatim) bundled with three orthogonal cuts (full Wind delete + conditional Wall + no default Safety focus echo + JSDoc skill-scope policy)."
 summary: "Mandatory Tune today route between Setup and Safety with four chips (Recommended / Passing / Serving / Setting), all-enabled with fail-on-tap inline copy, source-aware Back ('setup' | 'home'), and the full 2026-04-29 architecture (effectiveFocus.ts shared resolver, services/session/regenerateDraftFocus.ts in-transaction use case, stale-write guard, repeat / recovery focus strip). Plus three orthogonal pre-run cuts: full Wind delete (field, UI, fixtures, windFriendly catalog cleanup); conditional Wall row (only when Solo + No Net); no default Safety focus echo (recovery-override line only when painFlag and a chosen focus exist together). Track 4 ships skill-scope policy as a JSDoc comment on the SkillFocus type union, not a D136 decision row. The 2026-04-30 simplification iteration that proposed an opt-in Tune today is superseded by this plan after agent red-team and user feedback."
-last_updated: 2026-04-30
+last_updated: 2026-05-02
 related:
   - docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md
   - docs/brainstorms/2026-04-29-session-focus-picker-requirements.md
-  - docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md
+  - docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md
   - docs/research/outdoor-courtside-ui-brief.md
   - docs/research/japanese-inspired-visual-direction.md
 decision_refs:
@@ -36,7 +37,7 @@ Bundles four tracks into one PR (or two natural splits — see Phased Delivery):
 - **Track 3.** Safety simplification: no default focus echo on the session summary line; the only Safety surface that mentions focus is a single line on the `PainOverrideCard` when `painFlag === true && draft.context.sessionFocus !== undefined`.
 - **Track 4.** Skill-scope policy as a JSDoc comment on the `SkillFocus` type union in `app/src/types/drill.ts`. No D136 decision row. No types reservation.
 
-This plan supersedes `docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md` — that plan's design rationale (K3–K13) is preserved; its file scope is reauthored here. **Honest framing:** "preserved by reference" means *design rationale and decisions* are inherited, not that the code already exists. ~6 units of net-new code ship under this plan: `domain/sessionAssembly/effectiveFocus.ts`, `services/session/regenerateDraftFocus.ts`, `screens/TuneTodayScreen.tsx`, `screens/tuneToday/useTuneTodayController.ts`, plus edits to ~10 existing files across screens, components, domain, and tests.
+This plan supersedes `docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md` — that plan's design rationale (K3–K13) is preserved; its file scope is reauthored here. **Honest framing:** "preserved by reference" means *design rationale and decisions* are inherited, not that the code already exists. ~6 units of net-new code ship under this plan: `domain/sessionAssembly/effectiveFocus.ts`, `services/session/regenerateDraftFocus.ts`, `screens/TuneTodayScreen.tsx`, `screens/tuneToday/useTuneTodayController.ts`, plus edits to ~10 existing files across screens, components, domain, and tests.
 
 The 2026-04-30 simplification iteration (opt-in Tune today) was rejected after agent red-team and user feedback. The opt-in shape charged 11 taps for A2's first focus session with no discoverable entry path; the user judged "less friction, fewer taps to first usage" the dominant constraint and reverted Track 2 to mandatory.
 
@@ -91,9 +92,9 @@ Track 1 + 3 + 4 are independent simplification cuts that travel well alongside T
 ### Track 4 — Skill-scope JSDoc
 
 - **R28.** Add a JSDoc comment on the `SkillFocus` type union in `app/src/types/drill.ts` recording the policy. Default candidate text:
-  > `SkillFocus` is the technique-axis taxonomy for drills (the GMP a drill primarily trains). New values land only when partner-walkthrough evidence or ≥3 founder-ledger rows fire a `D135`-style trigger. `attack` is a planned future member of this union (it will pair with `serve` as the overhead-striking cluster) and is **not** in the union today; do not add it preemptively. `out_of_system`, `side_out`, `transition`, and `game_like` are **scenarios**, not skills, and belong on a future `DrillVariant.scenario?: Scenario` field, not in this union — do not add them here. See `docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md` (superseded; historical analysis) and `docs/ideation/2026-04-29-skill-scope-and-game-layers-ideation.md`.
+  > `SkillFocus` is the technique-axis taxonomy for drills (the GMP a drill primarily trains). New values land only when partner-walkthrough evidence or ≥3 founder-ledger rows fire a `D135`-style trigger. `attack` is a planned future member of this union (it will pair with `serve` as the overhead-striking cluster) and is **not** in the union today; do not add it preemptively. `out_of_system`, `side_out`, `transition`, and `game_like` are **scenarios**, not skills, and belong on a future `DrillVariant.scenario?: Scenario` field, not in this union — do not add them here. See `docs/archive/brainstorms/2026-04-29-skill-scope-reservation-requirements.md` (superseded; historical analysis) and `docs/ideation/2026-04-29-skill-scope-and-game-layers-ideation.md`.
 - **R29.** No D136 decision row. No `app/src/types/drill.ts` type changes beyond the JSDoc. No `Scenario` union. No `scenario?` field. No research note authored.
-- **R30.** `docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md` keeps `status: superseded` (already landed during the brainstorm phase). The supersession chain now points at the JSDoc rather than the deleted D136 plan.
+- **R30.** `docs/archive/brainstorms/2026-04-29-skill-scope-reservation-requirements.md` keeps `status: superseded` (already landed during the brainstorm phase). The supersession chain now points at the JSDoc rather than the deleted D136 plan.
 
 ### Cross-track
 
@@ -135,7 +136,7 @@ Track 1 + 3 + 4 are independent simplification cuts that travel well alongside T
 
 ## Context & Research
 
-### K-ID inheritance matrix (from `docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md`)
+### K-ID inheritance matrix (from `docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md`)
 
 Honest accounting of which 2026-04-29 K-IDs survive, which are replaced, and which are obsolete:
 
@@ -688,6 +689,6 @@ If the PR feels manageable as a single review, ship all units together. Phase sp
 ## Sources & References
 
 - **Origin document:** [docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md](../brainstorms/2026-04-30-pre-run-simplification-requirements.md) — see iteration log for the mandatory revert + Wind delete + JSDoc decisions.
-- **Predecessor (superseded):** [docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md](2026-04-29-001-feat-tune-today-focus-picker-plan.md) — design rationale for K1–K13 inherited per the matrix above.
+- **Predecessor (superseded):** [docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md](../archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md) — design rationale for K1–K13 inherited per the matrix above.
 - **Cap & trigger discipline:** [docs/plans/2026-04-20-m001-adversarial-memo.md](2026-04-20-m001-adversarial-memo.md).
 - **Decision references:** D83, D91, D125, D130, D131, D135.

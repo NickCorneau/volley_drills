@@ -9,7 +9,7 @@ authority: "Current machine-readable readiness snapshot for focus-picker catalog
 last_updated: 2026-05-01
 depends_on:
   - docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md
-  - docs/plans/2026-04-30-002-feat-focus-coverage-readiness-plan.md
+  - docs/archive/plans/2026-04-30-002-feat-focus-coverage-readiness-plan.md
   - docs/reviews/2026-05-01-generated-plan-diagnostics-report.md
   - app/src/domain/generatedPlanDiagnostics.ts
   - app/src/domain/sessionAssembly/focusReadiness.ts

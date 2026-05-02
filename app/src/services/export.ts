@@ -11,7 +11,7 @@ import { db } from '../db'
  * flow. The tester taps Export on SettingsScreen; founder collects the
  * JSON during weekly check-ins out-of-band.
  *
- * Shape decisions (see `docs/plans/2026-04-17-feat-phase-e-content-tooling-plan.md`
+ * Shape decisions (see `docs/archive/plans/2026-04-17-feat-phase-e-content-tooling-plan.md`
  * Unit 2, Key Decisions):
  * - `sessionDrafts` excluded - transient pre-session state, deleted
  *   after session creation. Not historically interesting.

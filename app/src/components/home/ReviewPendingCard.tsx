@@ -20,9 +20,9 @@ export function ReviewPendingCard({ data, onFinish, onSkip }: ReviewPendingCardP
         {/* 2026-04-26 pre-D91 editorial polish (F11): eyebrow voice
             aligned with the card's `aria-label="Review pending"` and
             the SoftBlockModal "review pending for {planName}" copy.
-            See `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 1. */}
-        <p className="text-sm font-medium text-text-secondary">Review pending</p>
-        <p className="mt-1 text-sm font-medium text-text-primary">{data.planName}</p>
+            See `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 1. */}
+        <p className="text-sm font-semibold text-text-primary">Finish the quick review.</p>
+        <p className="mt-2 text-sm text-text-secondary">{data.planName}</p>
       </div>
       <Button variant="primary" fullWidth onClick={onFinish}>
         Finish review

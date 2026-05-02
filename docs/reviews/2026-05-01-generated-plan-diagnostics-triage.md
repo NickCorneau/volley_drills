@@ -13,7 +13,9 @@ depends_on:
   - docs/reviews/2026-05-01-generated-plan-diagnostics-report.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-redistribution-causality-receipt-requirements.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-d47-u6-proposal-admission-requirements.md
+  - docs/brainstorms/2026-05-02-generated-diagnostics-d47-gap-closure-ledger-requirements.md
   - docs/plans/2026-05-02-001-feat-d47-proposal-admission-ticket-plan.md
+  - docs/plans/2026-05-02-003-feat-d47-gap-closure-ledger-plan.md
 ---
 
 # Generated Plan Diagnostics Triage
@@ -171,6 +173,46 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 - `expected_diagnostic_movement`: expected diagnostic movement
 - `product_or_training_quality_hypothesis`: product or training quality hypothesis
 - `no_action_threshold`: no action threshold
+
+## D47 Gap Closure Ledger
+
+- Ledger source: D47 proposal-admission ticket plus U8 redistribution causality receipt.
+- Candidate: `gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`
+- Currentness: `current`
+- Gap type: `undetermined`
+- Decision state: `evidence_gathering`
+- Authorization status: `not_authorized`
+- Suspected training gap: D47 may be carrying too much advanced setting and movement work inside one main-skill block, but the current evidence must be compared against a simpler candidate before D47 becomes the fill target.
+- Source provenance: Existing D47 provenance: FIVB Drill-book 4.7 Four Great Sets, activated in focus-readiness batch 3.
+- Source delta boundary: A drill-inventory gap must name content depth beyond the existing FIVB 4.7 activation before catalog work.
+- Receipt facts: total affected cells 30, pressure disappears 12, pressure remains 18, non-redistribution pressure 6, inconclusive 0
+
+### Comparator Receipt
+
+- Comparator kind: `receipt_candidate`
+- Comparator candidate: `gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`
+- Comparator rationale: Comparator-first pilot selected this receipt candidate because it shows non-redistribution pressure with fewer mixed-causality obligations than D47.
+- Simpler than D47: yes
+- Higher-confidence than D47: yes
+- Comparator facts: total affected cells 18, pressure disappears 0, pressure remains 18, non-redistribution pressure 6, inconclusive 0
+
+### Segment Dispositions
+
+- Pressure disappears under counterfactual: cells 12, gap `generator_policy_artifact`, decision `evidence_gathering`, authorization `not_authorized`; Counterfactual-only pressure needs a generator-policy hypothesis before it can drive fill work.
+- Pressure remains without redistribution: cells 18, gap `undetermined`, decision `evidence_gathering`, authorization `not_authorized`; Remaining pressure may be workload metadata, block shape, or content-depth pressure; compare before selecting D47.
+- Non-redistribution pressure: cells 6, gap `undetermined`, decision `evidence_gathering`, authorization `not_authorized`; Non-redistribution pressure is the strongest reason to compare D47 against a simpler candidate first.
+
+### Next Artifact
+
+- Artifact: `comparator_receipt`
+- Owner: `maintainer`
+- Evidence source: Current U8 redistribution causality receipt and D47 admission ticket.
+- Promotion criteria: Promote D47 only if it names stronger causal warrant, product impact, and a smaller fill artifact than the comparator.
+- Abandon criteria: Abandon D47 if the comparator presents a simpler or higher-confidence path to a concrete gap fill.
+- No-change criteria: Close without fill only when every segment has evidence, a no-action threshold, and a revisit trigger.
+- No-change burden: No-change closure requires dispositions for pressure-disappears, pressure-remains, and non-redistribution pressure segments.
+- Reassessment result: `not_started`
+- Reassessment boundary: This slice records expected movement only; actual diagnostic and training-quality reassessment waits for a future fill.
 
 ## New / Untriaged Blockers
 

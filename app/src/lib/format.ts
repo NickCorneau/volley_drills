@@ -204,7 +204,7 @@ export function phaseLabel(type: BlockSlotType): string {
   // voice the typography audit flagged as off-thesis for the calm,
   // shibui-leaning direction. Case is the source of truth now; the
   // pill drops its `uppercase` utility in the same pass. See
-  // `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`.
+  // `docs/archive/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`.
   //
   // 2026-04-27 cca2 dogfeed F1 (`docs/research/2026-04-27-cca2-dogfeed-
   // findings.md`): the F8 collapse of `technique | movement_proxy |

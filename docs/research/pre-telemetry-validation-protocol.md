@@ -6,7 +6,7 @@ stage: validation
 type: research
 authority: operational protocol for the 14-day M001 validation cohort — recruitment, consent, per-use logging, non-returner probes, pre-registered verdict memo, and the 5-page evidence packet artifact
 summary: "Thin longitudinal protocol for a 5-20 person no-telemetry cohort: one narrow segment, one observed baseline, per-use micro-log, three signal-based pulses, aggressive non-returner follow-up, pre-registered decision memo, and a 5-page evidence packet. Pairs with D91 thresholds; does not replace them."
-last_updated: 2026-04-16
+last_updated: 2026-05-02
 depends_on:
   - docs/research/d91-retention-gate-evidence.md
   - docs/discovery/phase-0-wedge-validation.md
@@ -73,7 +73,7 @@ This note fills that gap. It is deliberately compatible with `D91`:
 ## The Three Things The Protocol Optimizes For
 
 1. **Behavioral evidence of return.** Did qualified testers come back on their own, across time, for real reasons? Self-initiated vs nudged is a first-class field, not a narration.
-2. **Completion of the core job.** Did the user actually finish the `Setup -> Safety -> Run -> Review` loop, or did they drop out mid-flow? Partial completions and abandonment points are as informative as completions.
+2. **Completion of the core job.** Did the user actually finish the `Setup -> Tune today -> Safety -> Run -> Review` loop, or did they drop out mid-flow? Partial completions and abandonment points are as informative as completions.
 3. **Structured reasons for non-return.** Silent non-return is the cleanest signal of weak pull; the protocol turns it into explicit, comparable data rather than hoping the final debrief will surface it.
 
 The protocol deliberately separates **confirmatory evidence** (matches the preregistered verdict rules) from **interesting anecdotes** (colorful but non-binding). Both go in the packet; only the first category can move the verdict.
@@ -237,7 +237,7 @@ For compatibility with `D91`'s banded reading, also maintain a per-tester adhere
 - Elapsed hours between session 1 and session 2.
 - Whether any third session occurred in the 14-day window.
 - Total active minutes per session; fully completed vs abandoned mid-flow.
-- Whether the full intended flow (`Setup -> Safety -> Run -> Review`) was engaged or only a narrow slice.
+- Whether the full intended flow (`Setup -> Tune today -> Safety -> Run -> Review`) was engaged or only a narrow slice.
 - Context log per **completed and missed** session (weather, location, alone vs with others, exact blocker when missed).
 - Post-qualification conviction check (only for testers who crossed the 2+ sessions in 14 days line).
 
@@ -251,7 +251,7 @@ The memo must include:
 
 - **Target segment.** Exactly who qualifies (see `Cohort design`).
 - **Core user job.** The thin-slice loop the cohort is testing: assemble a believable passing session -> run it courtside -> capture the one-minute review -> return next week.
-- **Definitions.** What counts as "meaningful use" (completed at least through a non-trivial portion of the run flow), "repeat use" (full `Setup -> Safety -> Run -> Review` completed on a separate day), "completion" (all four steps finished in one session within the time budget).
+- **Definitions.** What counts as "meaningful use" (completed at least through a non-trivial portion of the run flow), "repeat use" (full `Setup -> Tune today -> Safety -> Run -> Review` completed on a separate day), "completion" (the full thin-slice loop finished in one session within the time budget).
 - **Valid-session rules.** Minimum active minutes, what friction caused abandonment still counts, what logistical blocks do not (e.g. beach closed, tester traveling).
 - **Disqualification rules.** Misrecruit vs negative reaction — negative reactions do not disqualify.
 - **Contact cadence.** Frozen founder-to-tester contact plan; extra nudging to drifting testers invalidates the self-initiated-return count (see `D91` contamination controls).
@@ -264,7 +264,7 @@ These are stricter than a bare `D91` pass and sit inside its banded frame. They 
 
 **Go.**
 
-- At least **4 of 5** qualified testers complete the core loop end-to-end (`Setup -> Safety -> Run -> Review`) at least once without live researcher rescue after kickoff.
+- At least **4 of 5** qualified testers complete the core loop end-to-end (`Setup -> Tune today -> Safety -> Run -> Review`) at least once without live researcher rescue after kickoff.
 - At least **3 of 5** return on **three or more separate days or use events** within the 14-day window, with **at least one `D91` enrichment signal** present (unprompted return, >48h-gap second session, or third-session / concrete scheduling commitment).
 - At least **2 of 5** testers independently describe concrete superiority over their current workaround (named, not generic).
 - **No unresolved fatal issue** around trust, safety (pain-gate / stop-triggers), or basic courtside usability.

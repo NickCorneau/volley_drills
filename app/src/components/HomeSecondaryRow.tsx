@@ -11,7 +11,7 @@ import { Button } from './ui'
  * Variants mirror `SecondaryRow['kind']` from domain/homePriority.ts:
  * - `review_pending_advisory`: Finish review CTA (tester still has time
  *   on the 2 h cap)
- * - `draft`: Review CTA on the saved session draft
+ * - `draft`: Continue CTA on the saved session draft
  * - `last_complete`: Repeat CTA on the last finalized session
  *
  * Phase F1 (2026-04-19) - Home calm pass:
@@ -21,7 +21,7 @@ import { Button } from './ui'
  *   grouped by a hairline divider. Per-row padding bumps slightly so
  *   tap targets stay comfortable. Keeps the same variant API; pure
  *   visual-hierarchy pass. See
- *   `docs/plans/2026-04-19-feat-phase-f1-home-calm-pass-plan.md`.
+ *   `docs/archive/plans/2026-04-19-feat-phase-f1-home-calm-pass-plan.md`.
  */
 
 // Phase F1 / F6 / F9 (2026-04-19): shared flat-row class. No border,
@@ -62,7 +62,7 @@ export function HomeSecondaryRow(props: HomeSecondaryRowProps) {
       return (
         <li className={SECONDARY_ROW_CLASS}>
           <span className="text-sm text-text-primary">
-            Review pending &middot; {props.data.planName}
+            Review &middot; {props.data.planName}
           </span>
           <Button variant="ghost" onClick={props.onFinish}>
             Finish review
@@ -73,10 +73,10 @@ export function HomeSecondaryRow(props: HomeSecondaryRowProps) {
       return (
         <li className={SECONDARY_ROW_CLASS}>
           <span className="text-sm text-text-primary">
-            Draft &middot; {props.data.archetypeName}
+            Ready &middot; {props.data.archetypeName}
           </span>
           <Button variant="ghost" onClick={props.onOpen}>
-            Review
+            Continue
           </Button>
         </li>
       )
@@ -84,7 +84,7 @@ export function HomeSecondaryRow(props: HomeSecondaryRowProps) {
       return (
         <li className={SECONDARY_ROW_CLASS}>
           <span className="text-sm text-text-primary">
-            Last &middot; {props.data.plan.presetName}
+            Last session &middot; {props.data.plan.presetName}
           </span>
           <Button variant="ghost" disabled={props.actionDisabled} onClick={props.onRepeat}>
             Repeat

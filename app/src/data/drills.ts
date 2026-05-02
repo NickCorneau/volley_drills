@@ -1846,7 +1846,7 @@ const d33: Drill = {
       // The 6-zone order and the "all 6 zones once" goal stay in
       // `target` and `courtsideInstructions` where they belong as the
       // session goal, not as the per-rep criterion. See
-      // `docs/plans/2026-04-27-per-drill-success-criterion.md`.
+      // `docs/archive/plans/2026-04-27-per-drill-success-criterion.md`.
       successMetric: {
         type: 'reps-successful',
         description: 'Serve lands in the called zone.',

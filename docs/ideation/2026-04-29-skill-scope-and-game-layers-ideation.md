@@ -10,8 +10,8 @@ last_updated: 2026-04-29
 related:
   - docs/ideation/2026-04-28-what-to-add-next-ideation.md
   - docs/brainstorms/2026-04-29-session-focus-picker-requirements.md
-  - docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md
-  - docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md
+  - docs/archive/brainstorms/2026-04-29-skill-scope-reservation-requirements.md
+  - docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md
   - docs/vision.md
   - docs/decisions.md
   - docs/milestones/m001-solo-session-loop.md
@@ -68,7 +68,7 @@ This artifact ranks directions worth exploring under current evidence. It does n
 - `docs/research/product-naming.md` (D125 volleyball-inclusive long-run rationale)
 - `app/src/types/drill.ts` (current `SkillFocus` enum: `pass | serve | set | movement | conditioning | recovery | warmup`; no `attack` yet)
 - `docs/ideation/2026-04-28-what-to-add-next-ideation.md` (existing rejection lines around new content authoring without trigger)
-- `docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md` (just-shipped Tier 1c picker, four states pass/serve/set/Recommended)
+- `docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md` (just-shipped Tier 1c picker, four states pass/serve/set/Recommended)
 
 ## Anchor problem (one paragraph)
 
@@ -102,7 +102,7 @@ Ranked by leverage × evidence-honesty × cap discipline.
 
 - **Shape**: do not author a new "game day" mode. Instead, surface the already-existing `MetricType = 'streak' | 'points-to-target' | 'completion' | 'composite'` patterns more honestly in the runner and review surfaces. A drill with `points-to-target` *is* a wash drill; a drill with `composite` *is* a queen-of-court analog. The "game-like" gap is presentation, not catalog scope.
 - **Why a survivor**: the `MetricType` enum already encodes most game-modes amateur beach players want. The 2026-04-28 per-drill capture phase 2A streak shipping reinforces this — game-like capture lives at the metric layer. The product gap is that users do not perceive the existing drills as "game-like" because the runner copy is technique-grind voice.
-- **Evidence**: `app/src/types/drill.ts` (`MetricType` already 7 variants); `docs/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md` (streak capture proves the metric path).
+- **Evidence**: `app/src/types/drill.ts` (`MetricType` already 7 variants); `docs/archive/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md` (streak capture proves the metric path).
 - **Cap impact**: zero (runner copy + review surface polish).
 - **Trigger**: a founder/partner session note naming "this didn't feel like volleyball, it felt like drills" — current trigger pre-fired by 2026-04-21 partner-walkthrough commentary on session shape feeling rigid.
 - **Risk**: low — copy-tier change. Risk is over-claiming game-like vibe on drills that are still technique-grind underneath.
@@ -190,7 +190,7 @@ The cap discipline asks: did the ideation surface a clever way to ship drill-sha
 
 Recommended sequence (lowest cost first):
 
-1. **S1 + S2 combined** — *consumed 2026-04-29* by `docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md`. Authors a single docs+types PR: reserve `'attack'` in `SkillFocus`, reserve `scenario?` on `DrillVariant`, add a decision row, author `docs/research/skill-vs-scenario-axes.md`, and cross-link. Explicitly does not author drills, expose UI, consume the cap, or fire `D135`.
+1. **S1 + S2 combined** — *consumed 2026-04-29* by `docs/archive/brainstorms/2026-04-29-skill-scope-reservation-requirements.md`. Authors a single docs+types PR: reserve `'attack'` in `SkillFocus`, reserve `scenario?` on `DrillVariant`, add a decision row, author `docs/research/skill-vs-scenario-axes.md`, and cross-link. Explicitly does not author drills, expose UI, consume the cap, or fire `D135`.
 2. **S4 deferral note** — second target. Document team-tactics deferral as a sequencing decision in `docs/decisions.md` so future agents do not re-litigate the question every milestone.
 3. **S3 game-like surfacing** — third, when copy/runner work surfaces as the next chunk.
 4. **Trigger fire** — when partner-walkthrough or founder-ledger evidence flags an attack gap, brainstorm S5 (attack as overhead-striking cluster with serve) and ship under D135-style discipline.

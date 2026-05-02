@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { BackButton, Button, ScreenShell, ToggleChip } from '../components/ui'
+import { BackButton, Button, ScreenShell, StatusMessage, ToggleChip } from '../components/ui'
 import type { PlayerMode, TimeProfile } from '../types/session'
 import type { SetupContext } from '../db/types'
 import { buildDraft } from '../domain/sessionBuilder'
@@ -45,8 +45,8 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     location.state.editDraft === true
   // 2026-04-22 one-tap Repeat simplification: the `?from=repeat`
   // branch + `StaleContextBanner` were retired here because `Repeat
-  // this session` on Home now rebuilds the draft and jumps straight
-  // to `/safety`. Setup only renders for fresh / "Start a different
+  // this session` on Home now rebuilds the draft and routes through
+  // `/tune-today`. Setup only renders for fresh / "Start a different
   // session" entries, where `getLastContext()` silently pre-fills the
   // toggles from the last session as a convenience (no banner — the
   // user explicitly asked to start something different, so naming the
@@ -174,11 +174,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   ])
 
   if (!prefilled) {
-    return (
-      <div className="mx-auto flex min-h-[60dvh] w-full max-w-[390px] flex-col items-center justify-center gap-4">
-        <p className="text-text-secondary">Loading setup...</p>
-      </div>
-    )
+    return <StatusMessage variant="loading" message="Loading setup…" />
   }
 
   return (
@@ -197,7 +193,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
             "Today's Setup" Title Case). Matches "Before we start",
             "Settings", and the rest of the app per brand-ux
             guidelines §1.4. See
-            `docs/plans/2026-04-19-feat-phase-f12-ux-consistency-plan.md`. */}
+            `docs/archive/plans/2026-04-19-feat-phase-f12-ux-consistency-plan.md`. */}
         <h1 className="flex-1 text-center text-xl font-semibold tracking-tight text-text-primary">
           Today&apos;s setup
         </h1>
@@ -205,10 +201,8 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       </ScreenShell.Header>
 
       <ScreenShell.Body className="gap-6 pb-4">
-        {/* Phase F8 (2026-04-19): section h2s lifted from `text-sm` to
-          `text-base` to match Safety / Review / Settings (same
-          semantic role across the app). See
-          `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
+        {/* Section labels stay compact on phones; hierarchy comes from
+          grouping and chip state rather than larger text. */}
         <section className="flex flex-col gap-3">
           <h2 className="text-sm font-semibold text-text-primary">Players</h2>
           <div className="flex gap-2" role="radiogroup" aria-label="Player mode">
@@ -280,11 +274,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           <p className="text-xs text-text-secondary">Includes warm-up and cool-down.</p>
         </section>
 
-        {error && (
-          <p className="rounded-[12px] bg-warning-surface px-4 py-3 text-sm text-warning">
-            {error}
-          </p>
-        )}
+        {error && <StatusMessage variant="error" message={error} />}
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="flex flex-col gap-4 pt-4">

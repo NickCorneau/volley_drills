@@ -95,7 +95,7 @@ describe('HomeScreen Repeat race guard', () => {
     await seedLastComplete()
     renderHome()
 
-    await user.click(await screen.findByRole('button', { name: /repeat this session/i }))
+    await user.click(await screen.findByRole('button', { name: /repeat last session/i }))
     expect(await screen.findByRole('button', { name: /start a different session/i })).toBeDisabled()
 
     await act(async () => {

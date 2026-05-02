@@ -6,7 +6,7 @@ stage: planning
 type: research
 authority: M001 trust invariants, verification stack guidance, and testing-layer recommendations
 summary: "Testing stack, trust invariants, and verification strategy for M001."
-last_updated: 2026-04-12
+last_updated: 2026-05-02
 depends_on:
   - docs/decisions.md
   - docs/specs/m001-courtside-run-flow.md
@@ -58,9 +58,9 @@ The right split for this stack is:
 
 Why this fits the current repo:
 
-- `app/` is a runnable v0a prototype with 6 screens, Dexie persistence, and vite-plugin-pwa service worker
-- Vitest and Playwright are not yet configured; the browser-test harness is still needed
-- the best use of this research right now is to shape the verification stack for the existing v0a code before M001 build
+- `app/` is the runnable v0b Starter Loop with Dexie persistence and a `vite-plugin-pwa` service worker
+- Vitest, React Testing Library, fake-indexeddb, and Playwright are configured; the ongoing job is keeping each behavior at the lowest test tier that proves it
+- the best use of this research right now is to shape verification depth for M001 changes without over-testing UI wiring that pure domain tests already cover
 
 ### 2. Treat browser-only PWA behavior as a real-browser concern
 

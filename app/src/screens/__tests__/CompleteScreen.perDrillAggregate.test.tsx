@@ -276,7 +276,7 @@ describe('CompleteScreen Difficulty recap row (Item 8)', () => {
  * D134 (2026-04-28) Phase 2A: CompleteScreen streak receipt.
  *
  * Sources:
- *   docs/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md
+ *   docs/archive/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md
  *     §"Receipt-only Complete display"
  *   docs/decisions.md D134
  *

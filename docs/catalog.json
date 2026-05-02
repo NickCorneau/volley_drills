@@ -1,5 +1,5 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "repo_id": "volley_drills",
   "last_updated": "2026-05-02",
   "_meta": {
@@ -390,7 +390,9 @@
       "id": "phase-0-readiness-assessment",
       "path": "docs/discovery/phase-0-readiness-assessment.md",
       "type": "discovery",
-      "status": "superseded"
+      "status": "superseded",
+      "successor_disposition": "no_single_successor",
+      "successor_reason": "Current state split between app/README.md and v0a research feedback."
     },
     {
       "id": "phase-0-wedge-validation",
@@ -664,13 +666,15 @@
       "id": "agent-runtime",
       "path": "docs/ops/agent-runtime.md",
       "type": "ops",
-      "status": "superseded"
+      "status": "superseded",
+      "canonical_successor": "docs/ops/agent-operations.md"
     },
     {
       "id": "autonomous-milestone-system",
       "path": "docs/ops/autonomous-milestone-system.md",
       "type": "ops",
-      "status": "superseded"
+      "status": "superseded",
+      "canonical_successor": "docs/ops/agent-operations.md"
     },
     {
       "id": "deploy-cloudflare-worker",
@@ -682,7 +686,8 @@
       "id": "deploy-cloudflare-pages",
       "path": "docs/ops/deploy-cloudflare-pages.md",
       "type": "ops",
-      "status": "superseded"
+      "status": "superseded",
+      "canonical_successor": "docs/ops/deploy-cloudflare-worker.md"
     },
     {
       "id": "v0a-runner-probe-plan",
@@ -806,6 +811,7 @@
       "path": "docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md",
       "type": "plan",
       "status": "superseded",
+      "canonical_successor": "docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md",
       "canonical_for": "SUPERSEDED 2026-04-30 by docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md. Originally specced a mandatory pre-safety Tune today route on every pre-run path, optional SetupContext.sessionFocus, a shared focus resolver consumed by initial picks / build-time substitution / swap alternatives, an in-transaction draft regeneration use case, source-aware Back, repeat- and recovery-flow focus stripping, and a calm shibui screen. The architectural pieces (effectiveFocus.ts, services/session/regenerateDraftFocus.ts, stale-write guards, focus strip on buildDraftFromCompletedBlocks and buildRecoveryDraft) are preserved by reference in the 2026-04-30 plan; routing, chip set, and Safety echo are simplified."
     },
     {
@@ -827,7 +833,8 @@
       "path": "docs/archive/brainstorms/2026-04-29-skill-scope-reservation-requirements.md",
       "type": "requirements",
       "status": "superseded",
-      "canonical_for": "SUPERSEDED 2026-04-30 by docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md (Track 4: docs-only) on the grounds that types reservation + research note + catalog cross-links spend attention before D135-style trigger evidence has fired. The replacement records the policy ('out-of-system is scenario, not skill; attack is a future skill axis member when trigger fires; no schema changes until then') in a single decision row instead of a types PR. The skill-correlation insight and the cluster-pairing thesis remain valid as a future-state design check; only the implementation cost is deferred."
+      "canonical_successor": "docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md",
+      "canonical_for": "SUPERSEDED 2026-04-30 by docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md (Track 4: docs-only), then compressed to terminal successor docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md because the complete plan owns the shipped Track 4 JSDoc policy and no-schema-change outcome. The skill-correlation insight and the cluster-pairing thesis remain valid as a future-state design check; only the implementation cost is deferred."
     },
     {
       "id": "pre-run-simplification-requirements-2026-04-30",
@@ -877,7 +884,35 @@
       "path": "docs/ideation/2026-05-02-docs-process-lifecycle-ideation.md",
       "type": "ideation",
       "status": "active",
-      "canonical_for": "Ranked ideation for the next docs/process lifecycle improvements after the docs validity and archive pass. Selects archive policy notes, active-registry catalog markers, and archive drift validation as the first three implementation moves; leaves replacement-chain metadata, audit verdict vocabulary, and a lifecycle triage queue as future follow-up."
+      "canonical_for": "Ranked ideation for the next docs/process lifecycle improvements after the docs validity and archive pass. Selects archive policy notes, active-registry catalog markers, and archive drift validation as the first three implementation moves; continuation selects canonical successor metadata as the next requirements target while leaving instruction-role metadata, audit verdict vocabulary, routing receipts, successor warnings, and lifecycle triage thresholds as future follow-up."
+    },
+    {
+      "id": "diagnostics-to-gap-fill-ideation-2026-05-02",
+      "path": "docs/ideation/2026-05-02-diagnostics-to-gap-fill-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked ideation for turning generated diagnostics into concrete drill and programming gap fills. Selects the D47-piloted Diagnostic Gap Closure Ledger as the first brainstorm target, with evidence shopping lists, reassessment receipts, outcome coverage maps, source-backed gap-card drafts, counterfactual-first drill surgery, and one-gap-per-cycle queue as follow-up survivors."
+    },
+    {
+      "id": "calm-courtside-ux-style-ideation-2026-05-02",
+      "path": "docs/ideation/2026-05-02-calm-courtside-ux-style-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked ideation for UX/design/style changes adjacent to the 2026-05-02 calm recurring-user Home pass. Six survivors: Active Session Glance System, Capture By Exception, Consequence-First Safety, Post-Session Receipt Layer, Local-First Trust Cues, and Tune Today Intent Dial. Selects Active Session Glance System as the ce-brainstorm target."
+    },
+    {
+      "id": "active-session-glance-system-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-active-session-glance-system-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for Run Face v1, the selected Active Session Glance System survivor from the calm courtside UX/style ideation. Bounds the next Run design pass to answering 'what now?' in a five-second glance with one dominant live reading, one current cue, quiet session-position context, and preserved full-instruction access, without authorizing new routes, timer behavior, data model, or a whole-app visual system."
+    },
+    {
+      "id": "docs-canonical-successor-metadata-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-docs-canonical-successor-metadata-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for adding narrow `canonical_successor` metadata so archived or superseded docs can route agents to current truth. Includes an explicit no-single-successor escape hatch, compatibility treatment for existing `superseded_by`, and warning/report-first validation boundaries without authorizing a full lifecycle schema, audit verdict vocabulary, docs triage queue, or broad archived-doc backfill."
     },
     {
       "id": "generated-plan-diagnostics-next-steps-requirements-2026-05-01",
@@ -922,6 +957,13 @@
       "canonical_for": "Focused requirements addendum for turning the U8 d47-solo-open receipt-backed candidate into a concrete U6 proposal-admission package. Defines the admission ticket before preview tooling, catalog edits, workload metadata edits, source-backed activation, or runtime generator changes."
     },
     {
+      "id": "generated-diagnostics-d47-gap-closure-ledger-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d47-gap-closure-ledger-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for using d47-solo-open as the first concrete gap-closure ledger pilot. Turns diagnostic evidence into a named drill/programming gap, closure path, evidence checklist, fill-readiness state, and reassessment receipt before catalog edits, workload metadata edits, source-backed activation, U6 preview tooling, or runtime generator changes."
+    },
+    {
       "id": "generated-diagnostics-triage-workflow-plan-2026-05-01",
       "path": "docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md",
       "type": "plan",
@@ -934,6 +976,22 @@
       "type": "plan",
       "status": "active",
       "canonical_for": "Implementation plan for generating the first D47 proposal-admission ticket from the U8 redistribution causality receipt. Keeps U6 preview tooling, catalog edits, workload metadata edits, source-backed activation, and runtime generator changes deferred until a concrete proposal passes the admission gate."
+    },
+    {
+      "id": "generated-diagnostics-d47-gap-closure-ledger-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-003-feat-d47-gap-closure-ledger-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for adding a comparator-first D47 gap closure ledger to the generated diagnostics triage workbench. Keeps D47 not authorized until comparator evidence chooses abandonment, no-change closure, or a primary fill path, without catalog edits, workload metadata edits, source-backed activation, U6 preview tooling, or runtime generator changes."
+    },
+    {
+      "id": "docs-canonical-successor-metadata-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-002-feat-docs-canonical-successor-metadata-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for adding catalog-first `canonical_successor`, `successor_disposition`, and `successor_reason` metadata plus validator coverage. Keeps missing-successor reports non-blocking while hard-failing malformed opted-in successor metadata, without introducing a broad lifecycle schema, audit verdict vocabulary, or docs triage queue."
     },
     {
       "id": "focus-coverage-readiness-audit-2026-04-30",
@@ -954,7 +1012,7 @@
       "path": "docs/reviews/2026-05-01-generated-plan-diagnostics-triage.md",
       "type": "review",
       "status": "active",
-      "canonical_for": "Docs-first triage workbench for generated-plan routeable observation groups. Generated and validated with the diagnostics report; current snapshot records 53 registry entries, 0 blocking validation issues, 0 warning issues, 32 defer routes, 21 generator-policy-investigation routes, decision-debt compression, and a redistribution causality receipt so new/untriaged groups, stale fingerprints, or stale receipt evidence become visible before catalog or generator changes."
+      "canonical_for": "Docs-first triage workbench for generated-plan routeable observation groups. Generated and validated with the diagnostics report; current snapshot records 53 registry entries, 0 blocking validation issues, 0 warning issues, 32 defer routes, 21 generator-policy-investigation routes, decision-debt compression, a redistribution causality receipt, the D47 proposal-admission ticket, and the comparator-first D47 gap closure ledger so new/untriaged groups, stale fingerprints, stale receipt evidence, or premature D47 fill authorization become visible before catalog or generator changes."
     },
     {
       "id": "focus-coverage-gap-cards-2026-04-30",
@@ -1239,7 +1297,8 @@
       "thin compatibility surfaces",
       "explicit WSL/bash notes where automation is described",
       "archive completed/superseded historical docs under docs/archive/<family>/",
-      "mark complete plan registries kept in active folders with active_registry: true"
+      "mark complete plan registries kept in active folders with active_registry: true",
+      "route archived/superseded cataloged docs with canonical_successor or successor_disposition: no_single_successor plus successor_reason"
     ]
   }
 }

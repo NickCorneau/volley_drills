@@ -204,6 +204,114 @@ export interface GeneratedPlanD47ProposalAdmissionTicket {
   readonly noChangePath: GeneratedPlanD47ProposalAdmissionNoChangePath
 }
 
+export type GeneratedPlanD47GapClosureGapType =
+  | 'drill_inventory_gap'
+  | 'programming_shape_gap'
+  | 'workload_metadata_gap'
+  | 'generator_policy_artifact'
+  | 'no_real_gap'
+  | 'undetermined'
+
+export type GeneratedPlanD47GapClosureDecisionState =
+  | 'evidence_gathering'
+  | 'primary_fill_path_selected'
+  | 'no_change_closed'
+  | 'abandoned_for_better_candidate'
+  | 'fill_planned'
+  | 'fill_applied_reassessment_pending'
+  | 'closed_validated'
+
+export type GeneratedPlanD47GapClosureAuthorizationStatus =
+  | 'not_authorized'
+  | 'ready_for_planning'
+  | 'authorized_for_fill_plan'
+  | 'closed_without_fill'
+
+export type GeneratedPlanD47GapClosureCurrentnessState =
+  | 'current'
+  | 'stale'
+  | 'missing_or_shifted'
+
+export type GeneratedPlanD47GapClosureSegmentLabel =
+  | 'pressure_disappears'
+  | 'pressure_remains'
+  | 'non_redistribution_pressure'
+
+export type GeneratedPlanD47GapClosureComparatorKind =
+  | 'receipt_candidate'
+  | 'no_change_baseline'
+
+export type GeneratedPlanD47GapClosureReassessmentResult =
+  | 'not_started'
+  | 'validated'
+  | 'partially_validated'
+  | 'regressed'
+  | 'inconclusive'
+
+export interface GeneratedPlanD47GapClosureSegmentDisposition {
+  readonly segment: GeneratedPlanD47GapClosureSegmentLabel
+  readonly cellCount: number
+  readonly gapType: GeneratedPlanD47GapClosureGapType
+  readonly decisionState: GeneratedPlanD47GapClosureDecisionState
+  readonly authorizationStatus: GeneratedPlanD47GapClosureAuthorizationStatus
+  readonly disposition: string
+  readonly expectedDiagnosticMovement: string
+  readonly expectedTrainingQualityMovement: string
+}
+
+export interface GeneratedPlanD47GapClosureNextArtifact {
+  readonly artifactType: 'comparator_receipt'
+  readonly owner: 'maintainer'
+  readonly evidenceSource: string
+  readonly promotionCriteria: string
+  readonly abandonCriteria: string
+  readonly noChangeCriteria: string
+}
+
+export type GeneratedPlanD47GapClosureComparatorReceipt =
+  | {
+      readonly comparatorKind: Extract<
+        GeneratedPlanD47GapClosureComparatorKind,
+        'receipt_candidate'
+      >
+      readonly groupKey: string
+      readonly drillId?: string
+      readonly variantId?: string
+      readonly rationale: string
+      readonly simplerThanD47: boolean
+      readonly higherConfidenceThanD47: boolean
+      readonly receiptFacts: GeneratedPlanD47ProposalAdmissionReceiptFacts
+    }
+  | {
+      readonly comparatorKind: Extract<
+        GeneratedPlanD47GapClosureComparatorKind,
+        'no_change_baseline'
+      >
+      readonly rationale: string
+      readonly simplerThanD47: false
+      readonly higherConfidenceThanD47: false
+    }
+
+export interface GeneratedPlanD47GapClosureLedger {
+  readonly candidateFound: boolean
+  readonly candidate: GeneratedPlanD47ProposalAdmissionCandidate
+  readonly relatedCandidateGroupKeys: readonly string[]
+  readonly currentnessState: GeneratedPlanD47GapClosureCurrentnessState
+  readonly gapType: GeneratedPlanD47GapClosureGapType
+  readonly decisionState: GeneratedPlanD47GapClosureDecisionState
+  readonly authorizationStatus: GeneratedPlanD47GapClosureAuthorizationStatus
+  readonly suspectedTrainingGap: string
+  readonly receiptFacts: GeneratedPlanD47ProposalAdmissionReceiptFacts
+  readonly segmentDispositions: readonly GeneratedPlanD47GapClosureSegmentDisposition[]
+  readonly comparatorReceipt: GeneratedPlanD47GapClosureComparatorReceipt
+  readonly nextArtifact: GeneratedPlanD47GapClosureNextArtifact
+  readonly sourceProvenance: string
+  readonly sourceDeltaBoundary: string
+  readonly noChangeClosureBurden: string
+  readonly reassessmentResult: GeneratedPlanD47GapClosureReassessmentResult
+  readonly reassessmentBoundary: string
+}
+
 export interface GeneratedPlanTriageEntry {
   readonly groupKey: string
   readonly diagnosticFingerprint: string
@@ -280,6 +388,12 @@ const D47_WORKLOAD_PROPOSAL_TRACKS: readonly GeneratedPlanRedistributionFollowUp
 const D47_GENERATOR_POLICY_TRACKS: readonly GeneratedPlanRedistributionFollowUpRoute[] = [
   'future_generator_policy_decision',
 ]
+const D47_GAP_CLOSURE_SOURCE_PROVENANCE =
+  'Existing D47 provenance: FIVB Drill-book 4.7 Four Great Sets, activated in focus-readiness batch 3.'
+const D47_GAP_CLOSURE_SOURCE_DELTA_BOUNDARY =
+  'A drill-inventory gap must name content depth beyond the existing FIVB 4.7 activation before catalog work.'
+const D47_GAP_CLOSURE_SUSPECTED_TRAINING_GAP =
+  'D47 may be carrying too much advanced setting and movement work inside one main-skill block, but the current evidence must be compared against a simpler candidate before D47 becomes the fill target.'
 
 const COMPRESSION_LANE_ORDER: readonly GeneratedPlanDecisionDebtCompressionLane[] = [
   'short_session_cooldown_minimum',
@@ -918,6 +1032,270 @@ function formatProposalAdmissionMissingFact(
   return missingFact.replaceAll('_', ' ')
 }
 
+function nonRedistributionPressureCellCount(
+  group: GeneratedPlanRedistributionCausalityGroupReceipt,
+): number {
+  return (
+    group.counts.nonRedistributionOverCapCellCount +
+    group.counts.nonRedistributionUnderMinCellCount
+  )
+}
+
+export function authorizationStatusForGeneratedPlanD47GapClosureState(
+  gapType: GeneratedPlanD47GapClosureGapType,
+  decisionState: GeneratedPlanD47GapClosureDecisionState,
+  currentnessState: GeneratedPlanD47GapClosureCurrentnessState,
+  allSegmentsHaveDisposition: boolean,
+): GeneratedPlanD47GapClosureAuthorizationStatus {
+  if (currentnessState !== 'current') return 'not_authorized'
+
+  switch (decisionState) {
+    case 'evidence_gathering':
+      return 'not_authorized'
+    case 'primary_fill_path_selected':
+      if (!allSegmentsHaveDisposition) return 'not_authorized'
+      return gapType === 'undetermined' || gapType === 'no_real_gap'
+        ? 'not_authorized'
+        : 'ready_for_planning'
+    case 'no_change_closed':
+      return allSegmentsHaveDisposition ? 'closed_without_fill' : 'not_authorized'
+    case 'abandoned_for_better_candidate':
+      if (!allSegmentsHaveDisposition) return 'not_authorized'
+      return 'closed_without_fill'
+    case 'fill_planned':
+    case 'fill_applied_reassessment_pending':
+    case 'closed_validated':
+      if (!allSegmentsHaveDisposition) return 'not_authorized'
+      return gapType === 'no_real_gap' || gapType === 'undetermined'
+        ? 'not_authorized'
+        : 'authorized_for_fill_plan'
+    default: {
+      const exhaustive: never = decisionState
+      return exhaustive
+    }
+  }
+}
+
+function currentnessStateForD47GapClosureLedger(
+  ticket: GeneratedPlanD47ProposalAdmissionTicket,
+  validation: GeneratedPlanTriageValidation,
+): GeneratedPlanD47GapClosureCurrentnessState {
+  if (!ticket.candidateFound) return 'missing_or_shifted'
+  return validation.issues.some(
+    (issue) =>
+      issue.code === 'stale_fingerprint' &&
+      issue.groupKey === D47_PROPOSAL_ADMISSION_GROUP_KEY,
+  )
+    ? 'stale'
+    : 'current'
+}
+
+function buildD47GapClosureSegmentDispositions(
+  receiptFacts: GeneratedPlanD47ProposalAdmissionReceiptFacts,
+): GeneratedPlanD47GapClosureSegmentDisposition[] {
+  return [
+    {
+      segment: 'pressure_disappears',
+      cellCount: receiptFacts.pressureDisappearsCellCount,
+      gapType: 'generator_policy_artifact',
+      decisionState: 'evidence_gathering',
+      authorizationStatus: 'not_authorized',
+      disposition:
+        'Counterfactual-only pressure needs a generator-policy hypothesis before it can drive fill work.',
+      expectedDiagnosticMovement:
+        'A valid generator-policy hypothesis should reduce pressure-disappears cells without hiding remaining pressure.',
+      expectedTrainingQualityMovement:
+        'Not assessed until a policy hypothesis explains why shorter generated allocation improves the session.',
+    },
+    {
+      segment: 'pressure_remains',
+      cellCount: receiptFacts.pressureRemainsCellCount,
+      gapType: 'undetermined',
+      decisionState: 'evidence_gathering',
+      authorizationStatus: 'not_authorized',
+      disposition:
+        'Remaining pressure may be workload metadata, block shape, or content-depth pressure; compare before selecting D47.',
+      expectedDiagnosticMovement:
+        'A selected fill path should reduce pressure-remains cells or prove they are policy-acceptable.',
+      expectedTrainingQualityMovement:
+        'Use block-shape coherence or workload honesty if this becomes the primary fill path.',
+    },
+    {
+      segment: 'non_redistribution_pressure',
+      cellCount: receiptFacts.nonRedistributionPressureCellCount,
+      gapType: 'undetermined',
+      decisionState: 'evidence_gathering',
+      authorizationStatus: 'not_authorized',
+      disposition:
+        'Non-redistribution pressure is the strongest reason to compare D47 against a simpler candidate first.',
+      expectedDiagnosticMovement:
+        'A better pilot should expose the same pressure with fewer mixed-causality obligations.',
+      expectedTrainingQualityMovement:
+        'Use workload honesty or block-shape coherence before source-backed drill inventory work.',
+    },
+  ]
+}
+
+function isD47GapClosureTarget(
+  group: GeneratedPlanRedistributionCausalityGroupReceipt,
+): boolean {
+  return group.drillId === 'd47' && group.variantId === 'd47-solo-open'
+}
+
+function comparatorIsSimplerThanD47(
+  comparator: GeneratedPlanRedistributionCausalityGroupReceipt,
+  d47: GeneratedPlanRedistributionCausalityGroupReceipt,
+): boolean {
+  return (
+    comparator.counts.totalAffectedCellCount < d47.counts.totalAffectedCellCount ||
+    (comparator.counts.pressureDisappearsCellCount < d47.counts.pressureDisappearsCellCount &&
+      comparator.counts.pressureRemainsCellCount <= d47.counts.pressureRemainsCellCount)
+  )
+}
+
+function comparatorIsHigherConfidenceThanD47(
+  comparator: GeneratedPlanRedistributionCausalityGroupReceipt,
+  d47: GeneratedPlanRedistributionCausalityGroupReceipt,
+): boolean {
+  return (
+    !comparator.hasIncompleteEvidence &&
+    comparator.counts.pressureDisappearsCellCount < d47.counts.pressureDisappearsCellCount &&
+    nonRedistributionPressureCellCount(comparator) > 0
+  )
+}
+
+function chooseD47GapClosureComparator(
+  receiptGroups: readonly GeneratedPlanRedistributionCausalityGroupReceipt[],
+  d47: GeneratedPlanRedistributionCausalityGroupReceipt | undefined,
+  blockedGroupKeys: ReadonlySet<string>,
+): GeneratedPlanRedistributionCausalityGroupReceipt | undefined {
+  if (!d47) return undefined
+
+  return receiptGroups
+    .filter(
+      (group) => {
+        if (isD47GapClosureTarget(group)) return false
+        if (blockedGroupKeys.has(group.groupKey)) return false
+        if (nonRedistributionPressureCellCount(group) <= 0) return false
+        return comparatorIsSimplerThanD47(group, d47) || comparatorIsHigherConfidenceThanD47(group, d47)
+      },
+    )
+    .sort((left, right) => {
+      const pressureDisappearsDelta =
+        left.counts.pressureDisappearsCellCount - right.counts.pressureDisappearsCellCount
+      if (pressureDisappearsDelta !== 0) return pressureDisappearsDelta
+      const nonRedistributionDelta =
+        nonRedistributionPressureCellCount(right) - nonRedistributionPressureCellCount(left)
+      if (nonRedistributionDelta !== 0) return nonRedistributionDelta
+      return left.counts.totalAffectedCellCount - right.counts.totalAffectedCellCount
+    })[0]
+}
+
+function buildD47GapClosureComparatorReceipt(
+  comparator: GeneratedPlanRedistributionCausalityGroupReceipt | undefined,
+  d47: GeneratedPlanRedistributionCausalityGroupReceipt | undefined,
+): GeneratedPlanD47GapClosureComparatorReceipt {
+  if (!comparator) {
+    return {
+      comparatorKind: 'no_change_baseline',
+      rationale:
+        'No simpler current receipt candidate with non-redistribution pressure is available; compare D47 against a no-change baseline before selecting it.',
+      simplerThanD47: false,
+      higherConfidenceThanD47: false,
+    }
+  }
+
+  const receiptFacts = buildD47ProposalAdmissionReceiptFacts(comparator)
+  const simplerThanD47 = d47 ? comparatorIsSimplerThanD47(comparator, d47) : false
+  const higherConfidenceThanD47 = d47
+    ? comparatorIsHigherConfidenceThanD47(comparator, d47)
+    : false
+  return {
+    comparatorKind: 'receipt_candidate',
+    groupKey: comparator.groupKey,
+    drillId: comparator.drillId,
+    variantId: comparator.variantId,
+    rationale:
+      'Comparator-first pilot selected this receipt candidate because it shows non-redistribution pressure with fewer mixed-causality obligations than D47.',
+    simplerThanD47,
+    higherConfidenceThanD47,
+    receiptFacts,
+  }
+}
+
+export function buildGeneratedPlanD47GapClosureLedger(
+  groups: readonly GeneratedPlanObservationGroup[],
+  registry: readonly GeneratedPlanTriageEntry[],
+): GeneratedPlanD47GapClosureLedger {
+  const validation = validateGeneratedPlanTriageCoverage(groups, registry)
+  const ticket = buildGeneratedPlanD47ProposalAdmissionTicket(groups, registry)
+  const receipt = buildGeneratedPlanRedistributionCausalityReceipt(groups, registry)
+  const d47ReceiptGroup = receipt.groups.find(
+    (candidate) => candidate.groupKey === D47_PROPOSAL_ADMISSION_GROUP_KEY,
+  )
+  const blockedGroupKeys = new Set(validation.blockingIssues.map((issue) => issue.groupKey))
+  const comparatorReceipt = buildD47GapClosureComparatorReceipt(
+    chooseD47GapClosureComparator(receipt.groups, d47ReceiptGroup, blockedGroupKeys),
+    d47ReceiptGroup,
+  )
+  const currentnessState = currentnessStateForD47GapClosureLedger(ticket, validation)
+  const gapType: GeneratedPlanD47GapClosureGapType = 'undetermined'
+  const decisionState: GeneratedPlanD47GapClosureDecisionState = 'evidence_gathering'
+  const segmentDispositions = buildD47GapClosureSegmentDispositions(ticket.receiptFacts)
+
+  return {
+    candidateFound: ticket.candidateFound,
+    candidate: ticket.candidate,
+    relatedCandidateGroupKeys: ticket.relatedCandidateGroupKeys,
+    currentnessState,
+    gapType,
+    decisionState,
+    authorizationStatus: authorizationStatusForGeneratedPlanD47GapClosureState(
+      gapType,
+      decisionState,
+      currentnessState,
+      segmentDispositions.every((segment) => segment.cellCount >= 0 && hasText(segment.disposition)),
+    ),
+    suspectedTrainingGap: D47_GAP_CLOSURE_SUSPECTED_TRAINING_GAP,
+    receiptFacts: ticket.receiptFacts,
+    segmentDispositions,
+    comparatorReceipt,
+    nextArtifact: {
+      artifactType: 'comparator_receipt',
+      owner: 'maintainer',
+      evidenceSource: 'Current U8 redistribution causality receipt and D47 admission ticket.',
+      promotionCriteria:
+        'Promote D47 only if it names stronger causal warrant, product impact, and a smaller fill artifact than the comparator.',
+      abandonCriteria:
+        'Abandon D47 if the comparator presents a simpler or higher-confidence path to a concrete gap fill.',
+      noChangeCriteria:
+        'Close without fill only when every segment has evidence, a no-action threshold, and a revisit trigger.',
+    },
+    sourceProvenance: D47_GAP_CLOSURE_SOURCE_PROVENANCE,
+    sourceDeltaBoundary: D47_GAP_CLOSURE_SOURCE_DELTA_BOUNDARY,
+    noChangeClosureBurden:
+      'No-change closure requires dispositions for pressure-disappears, pressure-remains, and non-redistribution pressure segments.',
+    reassessmentResult: 'not_started',
+    reassessmentBoundary:
+      'This slice records expected movement only; actual diagnostic and training-quality reassessment waits for a future fill.',
+  }
+}
+
+function formatD47GapClosureSegmentLabel(segment: GeneratedPlanD47GapClosureSegmentLabel): string {
+  switch (segment) {
+    case 'pressure_disappears':
+      return 'Pressure disappears under counterfactual'
+    case 'pressure_remains':
+      return 'Pressure remains without redistribution'
+    case 'non_redistribution_pressure':
+      return 'Non-redistribution pressure'
+    default: {
+      const exhaustive: never = segment
+      return exhaustive
+    }
+  }
+}
+
 function routeCountsForEntries(
   entries: readonly GeneratedPlanTriageEntry[],
 ): GeneratedPlanDecisionDebtRouteCount[] {
@@ -1161,6 +1539,7 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
     registry,
   )
   const d47ProposalAdmissionTicket = buildGeneratedPlanD47ProposalAdmissionTicket(groups, registry)
+  const d47GapClosureLedger = buildGeneratedPlanD47GapClosureLedger(groups, registry)
   const decisionDebtLines =
     decisionDebtPrompts.length === 0
       ? ['- None.']
@@ -1247,6 +1626,55 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
           (groupKey) => `- Related current D47 group: \`${groupKey}\``,
         ),
       ]
+  const comparatorReceipt = d47GapClosureLedger.comparatorReceipt
+  const comparatorFacts =
+    comparatorReceipt.comparatorKind === 'receipt_candidate'
+      ? comparatorReceipt.receiptFacts
+      : undefined
+  const d47GapClosureLines = [
+    '- Ledger source: D47 proposal-admission ticket plus U8 redistribution causality receipt.',
+    `- Candidate: \`${d47GapClosureLedger.candidate.groupKey}\``,
+    `- Currentness: \`${d47GapClosureLedger.currentnessState}\``,
+    `- Gap type: \`${d47GapClosureLedger.gapType}\``,
+    `- Decision state: \`${d47GapClosureLedger.decisionState}\``,
+    `- Authorization status: \`${d47GapClosureLedger.authorizationStatus}\``,
+    `- Suspected training gap: ${d47GapClosureLedger.suspectedTrainingGap}`,
+    `- Source provenance: ${d47GapClosureLedger.sourceProvenance}`,
+    `- Source delta boundary: ${d47GapClosureLedger.sourceDeltaBoundary}`,
+    `- Receipt facts: total affected cells ${d47GapClosureLedger.receiptFacts.totalAffectedCellCount}, pressure disappears ${d47GapClosureLedger.receiptFacts.pressureDisappearsCellCount}, pressure remains ${d47GapClosureLedger.receiptFacts.pressureRemainsCellCount}, non-redistribution pressure ${d47GapClosureLedger.receiptFacts.nonRedistributionPressureCellCount}, inconclusive ${d47GapClosureLedger.receiptFacts.comparisonInconclusiveCellCount}`,
+    '',
+    '### Comparator Receipt',
+    '',
+    `- Comparator kind: \`${comparatorReceipt.comparatorKind}\``,
+    comparatorReceipt.comparatorKind === 'receipt_candidate'
+      ? `- Comparator candidate: \`${comparatorReceipt.groupKey}\``
+      : '- Comparator candidate: no-change baseline',
+    `- Comparator rationale: ${comparatorReceipt.rationale}`,
+    `- Simpler than D47: ${comparatorReceipt.simplerThanD47 ? 'yes' : 'no'}`,
+    `- Higher-confidence than D47: ${comparatorReceipt.higherConfidenceThanD47 ? 'yes' : 'no'}`,
+    comparatorFacts
+      ? `- Comparator facts: total affected cells ${comparatorFacts.totalAffectedCellCount}, pressure disappears ${comparatorFacts.pressureDisappearsCellCount}, pressure remains ${comparatorFacts.pressureRemainsCellCount}, non-redistribution pressure ${comparatorFacts.nonRedistributionPressureCellCount}, inconclusive ${comparatorFacts.comparisonInconclusiveCellCount}`
+      : '- Comparator facts: baseline only, no receipt candidate selected.',
+    '',
+    '### Segment Dispositions',
+    '',
+    ...d47GapClosureLedger.segmentDispositions.map(
+      (segment) =>
+        `- ${formatD47GapClosureSegmentLabel(segment.segment)}: cells ${segment.cellCount}, gap \`${segment.gapType}\`, decision \`${segment.decisionState}\`, authorization \`${segment.authorizationStatus}\`; ${segment.disposition}`,
+    ),
+    '',
+    '### Next Artifact',
+    '',
+    `- Artifact: \`${d47GapClosureLedger.nextArtifact.artifactType}\``,
+    `- Owner: \`${d47GapClosureLedger.nextArtifact.owner}\``,
+    `- Evidence source: ${d47GapClosureLedger.nextArtifact.evidenceSource}`,
+    `- Promotion criteria: ${d47GapClosureLedger.nextArtifact.promotionCriteria}`,
+    `- Abandon criteria: ${d47GapClosureLedger.nextArtifact.abandonCriteria}`,
+    `- No-change criteria: ${d47GapClosureLedger.nextArtifact.noChangeCriteria}`,
+    `- No-change burden: ${d47GapClosureLedger.noChangeClosureBurden}`,
+    `- Reassessment result: \`${d47GapClosureLedger.reassessmentResult}\``,
+    `- Reassessment boundary: ${d47GapClosureLedger.reassessmentBoundary}`,
+  ]
 
   const lines = [
     '## Triage Summary',
@@ -1271,6 +1699,10 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
     '## D47 Proposal Admission Ticket',
     '',
     ...d47ProposalAdmissionLines,
+    '',
+    '## D47 Gap Closure Ledger',
+    '',
+    ...d47GapClosureLines,
     '',
     '## New / Untriaged Blockers',
     '',

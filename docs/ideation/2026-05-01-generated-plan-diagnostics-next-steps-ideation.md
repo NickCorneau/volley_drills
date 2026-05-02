@@ -10,7 +10,7 @@ last_updated: 2026-05-02
 depends_on:
   - docs/reviews/2026-05-01-generated-plan-diagnostics-report.md
   - docs/reviews/2026-04-30-focus-coverage-gap-cards.md
-  - docs/plans/2026-05-01-001-feat-generated-plan-diagnostics-plan.md
+  - docs/archive/plans/2026-05-01-001-feat-generated-plan-diagnostics-plan.md
   - docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md
   - docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md
 ---
@@ -418,3 +418,131 @@ Grounding from the continuation pass:
 ### Updated Recommendation
 
 U8 has now been brainstormed, planned, and implemented as a redistribution causality receipt in the generated diagnostics report and triage workbench. Use the generated receipt to decide whether specific groups route toward future generator-policy decisions, workload/block-shape review, source-backed proposal work, U6 proposal admission, or no implementation action. Keep the changed-diagnostics delta gate as the best remaining alternate if the next bottleneck shifts from generator-policy evidence to report-review ergonomics.
+
+---
+
+## Continuation: Post-U8 Proposal Admission Selection
+
+### Grounding
+
+- U8 produced a generated redistribution causality receipt with 21 groups and 251 total affected cells.
+- The strongest concrete proposal candidate is `gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`.
+- That group maps to `d47` / `d47-solo-open` (Four Great Sets / Solo open) and carries mixed evidence: 30 affected cells, 12 pressure-disappears cells, 18 pressure-remains cells, and 6 non-redistribution pressure cells.
+- U6 remains intentionally gated on a concrete gap card, cap edit, workload metadata edit, or catalog proposal; the next move should define admission criteria before preview tooling.
+- External analogues favored RFC/KEP-style admission, API diff gates, catalog validation, merge queues, and experiment guardrails.
+
+### Fresh Ranked Survivors After U8
+
+#### 1. U6 Proposal Admission Ticket For D47
+
+**Description:** Define the minimum proposal package for `d47-solo-open`: group key, changed IDs, proposed workload/block/content delta, evidence path, expected diagnostic movement, and verification hooks.
+
+**Rationale:** This is the strongest bridge from U8 evidence to proposal planning without prematurely building full U6 preview tooling.
+
+**Downsides:** It is workflow scaffolding and proposal framing, not the actual preview implementation.
+
+**Confidence:** 91%
+
+**Complexity:** Low / Medium
+
+**Status:** Explored
+
+#### 2. Mixed-Evidence Split For Pressure-Remains Groups
+
+**Description:** Split a mixed receipt into generator-policy evidence, remaining workload/block pressure, and non-redistribution pressure.
+
+**Rationale:** `d47-solo-open` has multiple true signals; one fix path would overclaim.
+
+**Downsides:** Can duplicate U8 receipt output unless scoped as proposal input.
+
+**Confidence:** 88%
+
+**Complexity:** Low
+
+**Status:** Unexplored
+
+#### 3. D47 Source-Backed Block/Workload Proposal Stub
+
+**Description:** Create a proposal stub for Four Great Sets / Solo open that evaluates workload envelope, block shape, and source-backed content depth without prescribing a fix.
+
+**Rationale:** It turns the receipt-backed candidate into a concrete brainstorm target while preserving the no-direct-catalog-edit boundary.
+
+**Downsides:** Needs care not to jump straight to catalog edits.
+
+**Confidence:** 84%
+
+**Complexity:** Low / Medium
+
+**Status:** Unexplored
+
+#### 4. Changed-Diagnostics Delta Gate
+
+**Description:** Add a compact report-adjacent diff for new, disappeared, worsened, changed-fingerprint, changed-route, changed-receipt, and changed-surface diagnostics.
+
+**Rationale:** Strong next leverage if the bottleneck is reviewing future report changes, not this specific d47 proposal.
+
+**Downsides:** Less directly tied to the immediate proposal plan.
+
+**Confidence:** 82%
+
+**Complexity:** Medium
+
+**Status:** Unexplored
+
+#### 5. Maintainer Decision Queue
+
+**Description:** Compile triage compression plus U8 routes into a short queue of decisions: accept policy, prepare U6 proposal, request source evidence, defer generator policy, or no action.
+
+**Rationale:** The workflow now has evidence, but the human next action remains partly implicit.
+
+**Downsides:** Could become ceremony if it tries to decide automatically.
+
+**Confidence:** 78%
+
+**Complexity:** Low / Medium
+
+**Status:** Unexplored
+
+#### 6. Diagnostics Compatibility Policy Matrix
+
+**Description:** Define which generated diagnostic changes are silent, baseline-update-only, proposal-gated, policy-gated, or fail-closed.
+
+**Rationale:** Helps keep diagnostics trusted as the matrix and receipt outputs evolve.
+
+**Downsides:** Better after one or two proposal workflows expose real change categories.
+
+**Confidence:** 73%
+
+**Complexity:** Low / Medium
+
+**Status:** Unexplored
+
+#### 7. Diagnostics Workflow Pattern Capture
+
+**Description:** Capture the generated diagnostics workflow as the first reusable `docs/solutions` learning.
+
+**Rationale:** There are no prior learnings, and this branch has created a reusable pattern.
+
+**Downsides:** Closeout/compounding work, not the highest-leverage next product step.
+
+**Confidence:** 70%
+
+**Complexity:** Low
+
+**Status:** Unexplored
+
+### Fresh Rejection Summary
+
+| #   | Idea                              | Reason Rejected                                                                      |
+| --- | --------------------------------- | ------------------------------------------------------------------------------------ |
+| 1   | Full U6 preview now               | Still too abstract before a concrete proposal exists.                                |
+| 2   | Generic automated admission linter | Better after the first admission ticket proves the shape.                            |
+| 3   | Shadow proposal object            | Useful implementation variant of the d47 admission ticket, not a standalone idea.    |
+| 4   | Generator-policy experiment guardrail | Important later, but less immediate than pressure that remains without redistribution. |
+| 5   | Negative theme coverage contract  | Mostly covered by U5.                                                                |
+| 6   | 10x diagnostics volume budget     | Useful later, not the next bottleneck.                                               |
+| 7   | Stable proposal identity          | Good convention inside the admission ticket, not a standalone idea.                  |
+
+### Fresh Recommendation
+
+Proceed to `/ce-brainstorm` on **U6 Proposal Admission Ticket For D47**. The brainstorm should produce a focused requirements addendum that defines what a receipt-backed candidate must contain before U6 preview planning begins.

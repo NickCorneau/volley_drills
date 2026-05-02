@@ -11,9 +11,9 @@ shipped: 2026-04-28
 
 ## Overview
 
-Adds a `segments?: DrillSegment[]` composition field to `DrillVariant` so the three M001-active timed drills (`d28-solo` warmup, `d25-solo` and `d26-solo` cooldown) declare their internal moves as named, individually-timed segments. The pacing pipeline reuses today's `subBlockIntervalSeconds` snapshot rails (catalog → variant → pick → DraftBlock → SessionPlanBlock → swap → runner). RunScreen renders segments as a structured list with a shibui highlight (left rule + "Now" pill + checkmarks for completed segments) when present, and falls back to today's prose+uniform-tick path when absent. A per-segment end beep replaces the uniform sub-block tick on segmented drills.
+Adds a `segments?: DrillSegment[]` composition field to `DrillVariant` so the three M001-active timed drills (`d28-solo` warmup, `d25-solo` and `d26-solo` cooldown) declare their internal moves as named, individually-timed segments. The pacing pipeline reuses today's `subBlockIntervalSeconds` snapshot rails (catalog → variant → pick → DraftBlock → SessionPlanBlock → swap → runner). RunScreen renders segments as a structured list with the shipped V2 shibui marker treatment (aligned accent dot for the active row, checkmarks for completed segments, hollow markers for future segments) when present, and falls back to today's prose+uniform-tick path when absent. A per-segment end beep replaces the uniform sub-block tick on segmented drills.
 
-This is the visible-channel half of S1 from `docs/ideation/2026-04-28-what-to-add-next-ideation.md`. The audio-reliability boundary (silent switch / lock state / Wake Lock denial) is unchanged; the visible channel is what survives that boundary.
+This is the visible-channel half of S1 from `docs/ideation/2026-04-28-what-to-add-next-ideation.md`. The audio-reliability boundary (silent switch / lock state / Wake Lock denial) is unchanged; the visible channel is what survives that boundary. Some detailed U7 examples below preserve the original V1 `NOW`-pill plan for implementation history; the shipped V2 adjustment replaces that pill with the accent-dot marker described in the overview and in the post-manual-test iteration notes.
 
 ---
 
@@ -88,7 +88,7 @@ Other learnings folded into the plan:
 - The `subBlockIntervalSeconds` snapshot pipeline survived the U2 capture-domain consolidation untouched, suggesting it's a stable shape to extend.
 - The 2026-04-22 partner-walkthrough density polish round 2 dropped Run body copy from `text-lg` (18 px) to `text-base` (16 px) to match TransitionScreen and avoid font-size jumps. The segment list inherits `text-base` exactly — see §"Design decisions" token table.
 - `Card.tsx` lines 22–27: `FOCAL_SURFACE_CLASS` is **explicitly off-limits on RunScreen / TransitionScreen** because outdoor readability requires hard contrast and large unambiguous controls; subtle shadows + hairline rings are correct for calm review/settings/onboarding surfaces but wrong for glare-readable run mode. The segment list uses no card chrome.
-- `docs/research/japanese-inspired-visual-direction.md` §"Run": *"keep the current outdoor-first legibility contract; do not use this note to justify softer contrast or smaller type; if this direction is applied here, it should show up as calmer spacing, clearer grouping, and less chrome, not aesthetic styling."* The shibui treatment is therefore expressed as **gap-2, sidebar-voice + tiny pill, hard text contrast** — never as a softer surface.
+- `docs/research/japanese-inspired-visual-direction.md` §"Run": *"keep the current outdoor-first legibility contract; do not use this note to justify softer contrast or smaller type; if this direction is applied here, it should show up as calmer spacing, clearer grouping, and less chrome, not aesthetic styling."* The shibui treatment is therefore expressed as **gap-2, sidebar-voice + tiny marker, hard text contrast** — never as a softer surface.
 
 ### External references
 
@@ -131,7 +131,7 @@ This section is the `ce-frontend-design` Layer 1 output for U7. Module C applies
 
   Segment list:
     ✓  Jog or A-skip around your sand box.            45s
-    ▎  Ankle hops and lateral shuffles.    [ NOW ]    45s
+    •  Ankle hops and lateral shuffles.               45s
     ○  Arm circles and trunk rotations.                45s
     ○  Quick side shuffles and pivot-back starts.      45s
 
@@ -146,7 +146,7 @@ This section is the `ce-frontend-design` Layer 1 output for U7. Module C applies
 
 ### Interaction plan (motion)
 
-**Zero motion.** State transitions between rows are instantaneous. The cockpit footer's `BlockTimer` remains the only animated element on the screen (per the partner-walkthrough density polish 2026-04-22 round 2, the japanese-inspired-direction §3 "limited motion," and the outdoor-courtside-ui-brief Run-mode active-state list). The "Now" pill does not pulse. The check appears instantly at segment end. The hollow circle does not animate to filled.
+**Zero motion.** State transitions between rows are instantaneous. The cockpit footer's `BlockTimer` remains the only animated element on the screen (per the partner-walkthrough density polish 2026-04-22 round 2, the japanese-inspired-direction §3 "limited motion," and the outdoor-courtside-ui-brief Run-mode active-state list). The active dot does not pulse. The check appears instantly at segment end. The hollow circle does not animate to filled.
 
 ARIA: `<ul aria-label="Segments">`; the active `<li>` carries `aria-current="step"`; an off-screen `aria-live="polite"` element announces segment changes for screen readers. This is the accessibility half of R7 (visible state independent of audio state).
 
@@ -164,13 +164,13 @@ The pattern below mirrors the **existing coaching-cue treatment** in `RunScreen.
 | Future row label | `text-base leading-relaxed text-text-secondary` | Same `text-secondary` (#4b5563, AAA) as the eyebrow counter |
 | Duration suffix | `ml-auto text-sm tabular-nums text-text-secondary` | Tabular-nums mirrors `BlockTimer`; right-anchored via `ml-auto` |
 | Past row marker | `<CheckIcon className="size-4 shrink-0 text-success" />` | `text-success` = `#047857` emerald-700, AAA on every surface |
-| Active row marker | `<span className="rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-bg-primary">Now</span>` | Filled pill (not just an accent text label) so it's glanceable in glare; `bg-bg-primary` text on `bg-accent` clears WCAG AA easily |
+| Active row marker | `<span className="size-2 rounded-full bg-accent" aria-hidden="true" />` | Shipped V2 accent dot: equal-width marker column keeps labels aligned across states without adding a competing text pill |
 | Future row marker | `<span className="size-3 shrink-0 rounded-full border border-text-secondary/40" aria-hidden="true" />` | Hollow circle, neutral; no `border-2` or shadow — flat |
 | Bonus paragraph | `<p className="mt-3 text-sm leading-relaxed text-text-secondary">{bonus}</p>` | Mirrors the preroll-hint voice at RunScreen.tsx line 261 |
 
 **`size-4` / `size-3`** = Tailwind v4 shorthand for `h-4 w-4` / `h-3 w-3`. Confirmed Tailwind v4 in repo via `@import 'tailwindcss'` in `app/src/index.css`.
 
-The `Now` pill uses `text-bg-primary` (white text, `#ffffff`) on `bg-accent` (`#b45309`, amber-700). Contrast ratio ≈ 4.99 — clears WCAG AA for normal text and clears AA for the 10 px size at 600 weight per the 14 px-bold equivalence rule. If a future contrast pass shows the pill is borderline at outdoor RPE-5 viewing angles, swap the pill text to `text-white` (functionally identical, semantically clearer) and revisit.
+The shipped active marker is purely decorative (`aria-hidden`) and exists only to align the active row with the past/future marker column. The row itself carries `aria-current="step"` for assistive technology.
 
 ### Litmus checks (Module C — components in existing apps)
 

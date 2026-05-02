@@ -185,21 +185,20 @@ export function SafetyCheckScreen() {
   }
 
   if (!draftLoaded) {
-    return (
-      <div className="mx-auto flex min-h-[60dvh] w-full max-w-[390px] flex-col items-center justify-center gap-4">
-        <p className="text-text-secondary">Loading...</p>
-      </div>
-    )
+    return <StatusMessage variant="loading" />
   }
 
   if (!draft) {
     return (
-      <div className="mx-auto flex min-h-[60dvh] w-full max-w-[390px] flex-col items-center justify-center gap-4">
-        <p className="text-text-secondary">{createError ?? 'Session not found'}</p>
-        <Button variant="ghost" onClick={() => navigate(routes.setup())}>
-          Back to setup
-        </Button>
-      </div>
+      <StatusMessage
+        variant="empty"
+        message={createError ?? 'Session not found'}
+        action={
+          <Button variant="ghost" onClick={() => navigate(routes.setup())}>
+            Back to setup
+          </Button>
+        }
+      />
     )
   }
 
@@ -310,45 +309,20 @@ export function SafetyCheckScreen() {
           <p className="text-sm text-text-secondary">
             Regular muscle soreness is fine. We&apos;ll switch to a lighter session if yes.
           </p>
-          {/* Field-test feedback 2026-04-21: the No / Yes buttons read
-            visually heavier than the recency chips above (text-base
-            font-semibold + px-4/py-3 vs the recency row's text-sm
-            font-medium + px-2/py-2), so the two mutex rows looked like
-            different families of controls. Harmonize: same weight, same
-            radius, same padding, same font-size as the recency chips so
-            "Before we start" reads as one consistent form. The
-            unselected-Yes still swaps to a single hairline border to
-            match the selected-state stroke width of the recency warning
-            chip and keep the two rows visually equivalent. Unselected
-            fills use `bg-bg-primary` like `ToggleChip` so chips read
-            white on `bg-surface-calm`, not washed into the page. */}
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setPainFlag(false)}
-              className={[
-                'min-h-[54px] flex-1 rounded-[16px] px-2 py-2 text-sm font-medium transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
-                painFlag === false
-                  ? 'border border-success bg-success text-white focus-visible:ring-success'
-                  : 'border border-gray-200 bg-bg-primary text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-success',
-              ].join(' ')}
-            >
-              No
-            </button>
-            <button
-              type="button"
-              onClick={() => setPainFlag(true)}
-              className={[
-                'min-h-[54px] flex-1 rounded-[16px] px-2 py-2 text-sm font-medium transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
-                painFlag === true
-                  ? 'border border-warning bg-warning-surface text-warning focus-visible:ring-warning'
-                  : 'border border-gray-200 bg-bg-primary text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-warning',
-              ].join(' ')}
-            >
-              Yes
-            </button>
+          {/* Use the shared chip language here too: "No" is reassuring
+            but not a primary CTA, and "Yes" keeps the warning tone. */}
+          <div className="flex gap-2" role="radiogroup" aria-label="Sharp pain or guarding">
+            <ToggleChip
+              label="No"
+              selected={painFlag === false}
+              onTap={() => setPainFlag(false)}
+            />
+            <ToggleChip
+              label="Yes"
+              selected={painFlag === true}
+              onTap={() => setPainFlag(true)}
+              tone="warning"
+            />
           </div>
         </section>
 

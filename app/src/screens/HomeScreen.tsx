@@ -8,7 +8,6 @@ import { SkipReviewModal } from '../components/SkipReviewModal'
 import { SoftBlockModal } from '../components/SoftBlockModal'
 import { UpdatePrompt } from '../components/UpdatePrompt'
 import { Button, ScreenShell } from '../components/ui'
-import { FOCAL_SURFACE_CLASS } from '../components/ui/Card'
 import { selectPrimaryCard, selectSecondaryRows } from '../domain/homePriority'
 import type { PrimaryVariant, SecondaryRow } from '../domain/homePriority'
 import { useAppRegisterSW } from '../lib/pwa-register'
@@ -110,7 +109,7 @@ export function HomeScreen() {
     navigate(routes.review(state.flags.reviewPending.executionId))
   }, [navigate, state])
 
-  const handleStartWorkout = useCallback(() => navigate(routes.setup()), [navigate])
+  const handleStartSession = useCallback(() => navigate(routes.setup()), [navigate])
 
   // --- soft-block interception + non-review CTA handlers ---
   //
@@ -299,7 +298,7 @@ export function HomeScreen() {
     return (
       <div className="mx-auto flex w-full max-w-[390px] flex-col items-center gap-6 pt-16">
         <Brandmark size={56} />
-        <p className="text-text-secondary">Loading...</p>
+        <p className="text-text-secondary">Loading…</p>
       </div>
     )
   }
@@ -365,16 +364,18 @@ export function HomeScreen() {
         {/* Phase F1 (2026-04-19): secondary rows used to render as a
           flex-col of independent bordered cards, which competed with
           the primary card for visual weight. They now sit inside a
-          single calmer container grouped by a hairline divider, so
+          single quiet container grouped by a hairline divider, so
           the Home screen reads as "one focal card, one supporting
           cluster" instead of a flat stack of competing mini-cards.
           Variant API unchanged; HomeSecondaryRow flattens its own
-          surface to match. */}
+          surface to match. 2026-05-02 recurrence pass: the rail keeps
+          the border/radius but drops the focal-card shadow so a saved
+          draft or last session does not ask for equal attention. */}
         {secondary.length > 0 && (
           <ul
             role="list"
             aria-label="Other active actions"
-            className={`divide-y divide-text-primary/5 overflow-hidden ${FOCAL_SURFACE_CLASS}`}
+            className="divide-y divide-text-primary/5 overflow-hidden rounded-[16px] border border-text-primary/10 bg-bg-primary"
           >
             {secondary.map((row) =>
               renderSecondary(row, flags, {
@@ -389,8 +390,8 @@ export function HomeScreen() {
 
         {flags.resume && (
           <section className="mt-4 flex flex-col gap-4">
-            <Button variant="outline" fullWidth onClick={handleStartWorkout}>
-              Start New Workout
+            <Button variant="outline" fullWidth onClick={handleStartSession}>
+              Start new session
             </Button>
           </section>
         )}

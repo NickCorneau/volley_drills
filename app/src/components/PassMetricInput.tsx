@@ -76,7 +76,7 @@ export function PassMetricInput({
         rate line stays correct in that path because "% good" reads as
         "% good passes" once the rule above it has named the pass
         criterion. See
-        `docs/plans/2026-04-27-per-drill-success-criterion.md`.
+        `docs/archive/plans/2026-04-27-per-drill-success-criterion.md`.
       */}
       {rate != null && !notCaptured && (
         <p className="text-center text-sm font-semibold text-text-primary">{rate}% good</p>
@@ -144,7 +144,7 @@ function NumberCell({
   // placeholder text is itself "0", so a courtside reader still
   // sees a "0" sign in the field; only the visual weight changes
   // (greyed placeholder vs. bold typed text). See
-  // `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 3.
+  // `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 3.
   const [text, setText] = useState(() => valueToDisplayText(value))
 
   // Keep local text in sync when the parent's value changes (e.g.

@@ -40,7 +40,7 @@ This plan was **rewritten on 2026-04-28 after `D135` fired** the Tier 1c partner
 
 **2026-04-29 Stream 1 design/architecture refinement:** `docs/brainstorms/2026-04-29-session-focus-picker-requirements.md` supersedes this plan's earlier Stream 1 UI detail that described a draft-screen "Swap-Focus" cycle button. The domain intent survives, but v1 now routes fresh and existing drafts through a minimal pre-safety **Tune today** review step with a four-option focus chip/radiogroup. The next planning pass should rewrite U4/U5 against that requirements doc before implementation.
 
-**Red-team clarification (2026-04-29):** Treat this plan's Stream 1 requirements and implementation units as **historical / not implementation-ready**. The Stream 1 implementation is owned by `docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md` — follow that plan for Tune today, the focus resolver, the regeneration use case, and the routing changes. The old cycle helper, Swap-Focus button, and "existing draft-screen" placement here do not ship. Stream 3 (catalog reserve audit) remains implementation-ready as written.
+**Red-team clarification (2026-04-29):** Treat this plan's Stream 1 requirements and implementation units as **historical / not implementation-ready**. The Stream 1 implementation is owned by `docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md` — follow that plan for Tune today, the focus resolver, the regeneration use case, and the routing changes. The old cycle helper, Swap-Focus button, and "existing draft-screen" placement here do not ship. Stream 3 (catalog reserve audit) remains implementation-ready as written.
 
 ---
 

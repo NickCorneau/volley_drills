@@ -91,7 +91,7 @@ describe('focusLabel (Tier 1a Unit 5)', () => {
   /**
    * 2026-04-22 — the three volleyball-skill focuses render as gerunds
    * ("Passing" / "Serving" / "Setting") so that the Home recent-
-   * workouts row's `focus` column cannot be misread as a status value
+   * recent-sessions row's `focus` column cannot be misread as a status value
    * when it sits next to the `Done` / `Partial` status column. Field
    * evidence: `N3` in the Post-close partner mentions section of the
    * 2026-04-21 Tier 1a walkthrough ledger; traced to courtside-copy
@@ -105,7 +105,7 @@ describe('focusLabel (Tier 1a Unit 5)', () => {
    * visually-jarring `Yesterday Partial Partial` on the Home recent
    * row. Internal enum key `'partial'` is unchanged; only the
    * rendered label diverges. See
-   * `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 2.
+   * `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 2.
    */
   it('renders skill focuses as gerunds and fallbacks in sentence case', () => {
     expect(focusLabel('pass')).toBe('Passing')

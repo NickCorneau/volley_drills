@@ -5,7 +5,7 @@
 // 11-chip 0-10 grid per the merged Review proposal in
 // `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`
 // and the closeout polish plan
-// `docs/plans/2026-04-23-walkthrough-closeout-polish.md`.
+// `docs/archive/plans/2026-04-23-walkthrough-closeout-polish.md`.
 //
 // Why three and not eleven: the four 2026-04-22 synthesis passes
 // (workflow, shibui, design review, trifold) and Seb P1-12 converged on
@@ -42,6 +42,7 @@
 // until the user taps a different chip.
 
 import { EFFORT_CHIPS, pickChipForRpe } from './rpeSelectorUtils'
+import { ToggleChip } from './ui'
 
 type RpeSelectorProps = {
   value: number | null
@@ -62,29 +63,13 @@ export function RpeSelector({ value, onChange, ariaLabelledBy = 'rpe-heading' }:
       {EFFORT_CHIPS.map((chip) => {
         const selected = selectedValue === chip.value
         return (
-          <button
+          <ToggleChip
             key={chip.label}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            onClick={() => onChange(chip.value)}
-            className={[
-              'flex min-h-[54px] items-center justify-center rounded-[12px] px-2 py-2 text-center transition-colors',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
-              // Design review A2 (neutral outline default on
-              // unselected chips) so tappable things look tappable on
-              // the reduced 3-chip row. Selected chips darken via
-              // `accent-pressed`; unselected chips keep a hairline
-              // border on a neutral surface and use `brightness-*` to
-              // give a hover/press cue without swapping the surface
-              // tone on touch.
-              selected
-                ? 'bg-accent text-white hover:bg-accent-pressed active:bg-accent-pressed'
-                : 'border border-text-secondary/25 bg-bg-primary text-text-primary hover:brightness-95 active:brightness-90',
-            ].join(' ')}
-          >
-            <span className="text-base font-semibold leading-none">{chip.label}</span>
-          </button>
+            label={chip.label}
+            selected={selected}
+            onTap={() => onChange(chip.value)}
+            shape="rounded"
+          />
         )
       })}
     </div>

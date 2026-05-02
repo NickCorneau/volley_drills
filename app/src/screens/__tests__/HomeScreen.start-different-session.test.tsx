@@ -133,7 +133,7 @@ describe('HomeScreen: Start a different session (Phase F Unit 1)', () => {
 
     // LastComplete primary renders and the tertiary "Start a different
     // session" link is present.
-    await screen.findByRole('button', { name: /repeat this session/i })
+    await screen.findByRole('button', { name: /repeat last session/i })
     const startDifferent = screen.getByRole('button', {
       name: /start a different session/i,
     })
@@ -157,7 +157,7 @@ describe('HomeScreen: Start a different session (Phase F Unit 1)', () => {
     await seedLastComplete()
     renderHome()
 
-    await screen.findByRole('button', { name: /repeat this session/i })
+    await screen.findByRole('button', { name: /repeat last session/i })
 
     expect(screen.queryByRole('button', { name: /^edit$/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /same as last time/i })).not.toBeInTheDocument()

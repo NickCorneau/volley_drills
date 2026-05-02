@@ -152,7 +152,7 @@ describe('PerDrillCapture captureShape: count', () => {
   // inputs. Sourced from the drill record's
   // `variant.successMetric.description` via `getBlockSuccessRule` on
   // the `DrillCheckScreen` wire-up. See
-  // `docs/plans/2026-04-27-per-drill-success-criterion.md` and
+  // `docs/archive/plans/2026-04-27-per-drill-success-criterion.md` and
   // `docs/specs/m001-review-micro-spec.md` §Required line 78.
   describe('V0B-28 forced-criterion prompt', () => {
     it('renders the per-drill success rule and the anti-generosity nudge above the inputs after expanding counts', () => {

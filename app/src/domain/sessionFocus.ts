@@ -71,7 +71,7 @@ export function inferSessionFocus(blocks: readonly SessionPlanBlock[]): SkillFoc
  * the session represents multiple skills") and cannot collide with
  * the `Done` / `Partial` status column. The internal enum key
  * `'partial'` is unchanged so this is a render-only edit. See
- * `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 2.
+ * `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 2.
  */
 export function focusLabel(focus: SkillFocus | 'partial'): string {
   switch (focus) {

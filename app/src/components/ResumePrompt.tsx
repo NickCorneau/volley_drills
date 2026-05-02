@@ -42,7 +42,7 @@ export function ResumePrompt({
               tracking-wider`. Dropped the dashboard-eyebrow voice to
               sentence-case `font-medium` supporting copy so the block
               name beneath it (drill title) carries the visual weight.
-              See `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
+              See `docs/archive/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
           <p className="text-xs font-medium text-text-secondary">Paused at</p>
           <p className="mt-1 font-semibold text-text-primary">{blockDrillName}</p>
           <p className="mt-0.5 text-sm text-text-secondary">{blockPositionLabel}</p>
