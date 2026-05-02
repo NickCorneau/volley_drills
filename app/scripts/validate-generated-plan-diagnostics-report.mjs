@@ -26,8 +26,61 @@ function snakeCaseCell(cell) {
     block_id: cell.blockId,
     planned_minutes: cell.plannedMinutes,
     allocated_minutes: cell.allocatedMinutes,
+    authored_min_minutes: cell.authoredMinMinutes,
+    authored_max_minutes: cell.authoredMaxMinutes,
+    fatigue_max_minutes: cell.fatigueMaxMinutes,
     observation_codes: cell.observationCodes,
-    redistribution: cell.redistribution,
+    redistribution: snakeCaseRedistribution(cell.redistribution),
+  }
+}
+
+function snakeCaseRedistribution(redistribution) {
+  if (!redistribution) return undefined
+  return {
+    source: redistribution.source,
+    redistributed_minutes: redistribution.redistributedMinutes,
+    skipped_optional_layout_indexes: redistribution.skippedOptionalLayoutIndexes,
+    redistribution_layout_index: redistribution.redistributionLayoutIndex,
+    redistributedMinutes: redistribution.redistributedMinutes,
+    skippedOptionalLayoutIndexes: redistribution.skippedOptionalLayoutIndexes,
+    redistributionLayoutIndex: redistribution.redistributionLayoutIndex,
+  }
+}
+
+function snakeCaseNotApplicableCell(cell) {
+  return {
+    focus: cell.focus,
+    configuration: cell.configuration,
+    level: cell.level,
+    duration: cell.duration,
+    seed: cell.seed,
+    reason: cell.reason,
+  }
+}
+
+function snakeCaseSurfaceContract(report) {
+  return {
+    included: {
+      focuses: report.included.focuses,
+      configurations: report.included.configurations,
+      levels: report.included.levels,
+      durations: report.included.durations,
+      seed_ids: report.included.seedIds,
+    },
+    excluded: report.excluded.map((entry) => ({
+      state: entry.state,
+      dimension: entry.dimension,
+      value: entry.value,
+      reason: entry.reason,
+      authority: entry.authority,
+      revisit_trigger: entry.revisitTrigger,
+    })),
+    validation_issues: report.validationIssues.map((issue) => ({
+      code: issue.code,
+      dimension: issue.dimension,
+      value: issue.value,
+      message: issue.message,
+    })),
   }
 }
 
@@ -47,6 +100,51 @@ function snakeCaseGroup(group) {
   }
 }
 
+function snakeCaseRedistributionCausalityCounts(counts) {
+  return {
+    total_affected_cell_count: counts.totalAffectedCellCount,
+    redistribution_affected_cell_count: counts.redistributionAffectedCellCount,
+    current_over_authored_max_cell_count: counts.currentOverAuthoredMaxCellCount,
+    current_over_fatigue_cap_cell_count: counts.currentOverFatigueCapCellCount,
+    current_under_authored_min_cell_count: counts.currentUnderAuthoredMinCellCount,
+    allocated_over_authored_max_cell_count: counts.allocatedOverAuthoredMaxCellCount,
+    allocated_over_fatigue_cap_cell_count: counts.allocatedOverFatigueCapCellCount,
+    allocated_under_authored_min_cell_count: counts.allocatedUnderAuthoredMinCellCount,
+    non_redistribution_over_cap_cell_count: counts.nonRedistributionOverCapCellCount,
+    non_redistribution_under_min_cell_count: counts.nonRedistributionUnderMinCellCount,
+    pressure_disappears_cell_count: counts.pressureDisappearsCellCount,
+    pressure_remains_cell_count: counts.pressureRemainsCellCount,
+    comparison_inconclusive_cell_count: counts.comparisonInconclusiveCellCount,
+    redistribution_without_pressure_cell_count: counts.redistributionWithoutPressureCellCount,
+    counterfactual_unfilled_minutes: counts.counterfactualUnfilledMinutes,
+  }
+}
+
+function snakeCaseRedistributionCausalityReceipt(receipt) {
+  return {
+    comparison_mode: receipt.comparisonMode,
+    runtime_boundary: receipt.runtimeBoundary,
+    group_count: receipt.groupCount,
+    counts: snakeCaseRedistributionCausalityCounts(receipt.counts),
+    groups: receipt.groups.map((group) => ({
+      group_key: group.groupKey,
+      diagnostic_fingerprint: group.diagnosticFingerprint,
+      triage_status: group.triageStatus,
+      triage_route: group.triageRoute,
+      reviewed_report_id: group.reviewedReportId,
+      drill_id: group.drillId,
+      variant_id: group.variantId,
+      block_type: group.blockType,
+      observation_codes: group.observationCodes,
+      action_state: group.actionState,
+      dominant_cell_state: group.dominantCellState,
+      has_incomplete_evidence: group.hasIncompleteEvidence,
+      follow_up_routes: group.followUpRoutes,
+      counts: snakeCaseRedistributionCausalityCounts(group.counts),
+    })),
+  }
+}
+
 function reportMarkdown(data) {
   return `---
 id: generated-plan-diagnostics-report-2026-05-01
@@ -56,11 +154,13 @@ stage: validation
 type: review-data
 summary: "Machine-readable generated-plan diagnostics summary for the current Tune today focus-readiness surface."
 authority: "Current generated-plan diagnostic snapshot for seeded buildDraft() stretch-pressure and duration-envelope classification."
-last_updated: 2026-05-01
+last_updated: 2026-05-02
 depends_on:
   - app/src/domain/generatedPlanDiagnostics.ts
   - app/src/domain/sessionBuilder.ts
   - docs/plans/2026-05-01-001-feat-generated-plan-diagnostics-plan.md
+  - docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md
+  - docs/brainstorms/2026-05-02-generated-diagnostics-redistribution-causality-receipt-requirements.md
 ---
 
 # Generated Plan Diagnostics Report
@@ -112,11 +212,12 @@ stage: validation
 type: review
 summary: "Docs-first triage workbench and decision-debt compression review for generated-plan routeable observation groups."
 authority: "Current triage snapshot for generated-plan diagnostic observation groups; validates stable group identity, conservative routes, stale fingerprint review, and derived decision-debt compression lanes."
-last_updated: 2026-05-01
+last_updated: 2026-05-02
 depends_on:
   - app/src/domain/generatedPlanDiagnostics.ts
   - app/src/domain/generatedPlanDiagnosticTriage.ts
   - docs/reviews/2026-05-01-generated-plan-diagnostics-report.md
+  - docs/brainstorms/2026-05-02-generated-diagnostics-redistribution-causality-receipt-requirements.md
 ---
 
 # Generated Plan Diagnostics Triage
@@ -156,12 +257,21 @@ try {
   const matrix = diagnostics.buildGeneratedPlanMatrix()
   const results = diagnostics.buildGeneratedPlanDiagnostics()
   const summary = diagnostics.summarizeGeneratedPlanDiagnostics(results, matrix)
+  const surfaceContract = diagnostics.DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT
+  const surfaceContractValidation = diagnostics.validateGeneratedPlanSurfaceContract(surfaceContract)
+  if (surfaceContractValidation.blockingIssues.length > 0) {
+    throw new Error(
+      `Generated plan diagnostics surface contract has ${surfaceContractValidation.blockingIssues.length} blocking validation issue(s).`,
+    )
+  }
   const groups = diagnostics.buildGeneratedPlanObservationGroups(results)
   const currentTriageMarkdown = shouldWrite ? undefined : readFileSync(triagePath, 'utf8')
   const triageRegistry = shouldWrite
     ? triage.buildInitialGeneratedPlanTriageRegistry(groups)
     : extractTriageRegistry(currentTriageMarkdown)
   const triageValidation = triage.validateGeneratedPlanTriageCoverage(groups, triageRegistry)
+  const redistributionCausalityReceipt =
+    triage.buildGeneratedPlanRedistributionCausalityReceipt(groups, triageRegistry)
   const expectedTriageMarkdown = triageMarkdown(
     triage.buildGeneratedPlanTriageWorkbenchMarkdown(groups, triageRegistry),
     triageRegistry,
@@ -184,11 +294,16 @@ try {
       configurations: summary.surface.configurations,
       levels: summary.surface.levels,
       durations: summary.surface.durations,
+      seed_ids: summary.surface.seedIds,
       seed_count: summary.surface.seedCount,
       cell_count: summary.surface.cellCount,
       applicable_count: summary.surface.applicableCount,
       not_applicable_count: summary.surface.notApplicableCount,
+      not_applicable_cells: summary.notApplicable.map(snakeCaseNotApplicableCell),
     },
+    surface_contract: snakeCaseSurfaceContract(
+      diagnostics.buildGeneratedPlanSurfaceContractReport(surfaceContract),
+    ),
     status_counts: summary.statusCounts,
     hard_failure_count: summary.hardFailureCount,
     observation_count: summary.observationCount,
@@ -196,6 +311,9 @@ try {
     observation_counts: summary.observationCounts,
     routeable_observation_group_count: groups.length,
     top_routeable_observation_groups: groups.slice(0, 5).map(snakeCaseGroup),
+    redistribution_causality_receipt: snakeCaseRedistributionCausalityReceipt(
+      redistributionCausalityReceipt,
+    ),
     policy: {
       hard_failures_block_readiness: true,
       routeable_observations_are_not_product_failures: true,

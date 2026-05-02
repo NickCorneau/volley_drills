@@ -6,12 +6,13 @@ stage: validation
 type: ideation
 summary: "Ranked ideation for turning generated-plan diagnostic observations into a sequenced catalog, generator, and test-gating workflow."
 authority: "Ideation only; identifies promising next-step directions after the generated-plan diagnostics report without authorizing catalog changes."
-last_updated: 2026-05-01
+last_updated: 2026-05-02
 depends_on:
   - docs/reviews/2026-05-01-generated-plan-diagnostics-report.md
   - docs/reviews/2026-04-30-focus-coverage-gap-cards.md
   - docs/plans/2026-05-01-001-feat-generated-plan-diagnostics-plan.md
   - docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md
+  - docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md
 ---
 
 # Ideation: Generated-Plan Diagnostics Next Steps
@@ -73,7 +74,7 @@ External grounding:
 
 **Complexity:** Low / Medium
 
-**Status:** Unexplored
+**Status:** Explored
 
 ### 3. Dynamic Surface / New Focus Sentinel
 
@@ -87,7 +88,7 @@ External grounding:
 
 **Complexity:** Medium
 
-**Status:** Unexplored
+**Status:** Explored
 
 ### 4. Catalog Change Impact Preview
 
@@ -115,7 +116,7 @@ External grounding:
 
 **Complexity:** Low
 
-**Status:** Unexplored
+**Status:** Explored
 
 ### 6. Redistribution-Free Builder Comparison
 
@@ -133,13 +134,15 @@ External grounding:
 
 ## Rejection Summary
 
-| # | Idea | Reason Rejected |
-|---|------|-----------------|
-| 1 | Add drills directly from top groups | Too blunt; observations need route decisions and source-backed gap cards first. |
-| 2 | Thousand-drill synthetic catalog | Interesting but too expensive and artificial for the current stage. |
-| 3 | Fully manual coaching editor | Useful later, but too much UI/product surface before the triage workflow exists. |
-| 4 | Standalone heatmap | Folded into the stronger Observation Triage Workbench idea. |
-| 5 | Everything fails until classified | Too disruptive for 421 current observations; better as a graduation ladder. |
+
+| #   | Idea                                | Reason Rejected                                                                  |
+| --- | ----------------------------------- | -------------------------------------------------------------------------------- |
+| 1   | Add drills directly from top groups | Too blunt; observations need route decisions and source-backed gap cards first.  |
+| 2   | Thousand-drill synthetic catalog    | Interesting but too expensive and artificial for the current stage.              |
+| 3   | Fully manual coaching editor        | Useful later, but too much UI/product surface before the triage workflow exists. |
+| 4   | Standalone heatmap                  | Folded into the stronger Observation Triage Workbench idea.                      |
+| 5   | Everything fails until classified   | Too disruptive for 421 current observations; better as a graduation ladder.      |
+
 
 ## Recommended Sequence
 
@@ -184,3 +187,234 @@ Updated snapshot:
 3. Use that pass to decide whether the next implementation unit should be U5 dynamic surface sentinel, U8 redistribution comparison, or U7 workload envelope guidance.
 4. Defer U6 catalog impact preview until a concrete gap card, cap edit, or candidate catalog change exists.
 
+## Continuation: Post-U7 Next Work Selection
+
+Later on 2026-05-01, U4 decision-debt compression and U7 workload envelope guidance were implemented and committed. The current next-step choice is no longer "write the guide"; it is which remaining diagnostic workflow guard should come next.
+
+Grounding from the continuation pass:
+
+- Codebase scan favored a small, high-signal workflow guard over another broad documentation pass.
+- Prior learnings search found no `docs/solutions/` base, so this diagnostics workflow is new institutional territory.
+- External analogues favored changed-surface gates, actionable review diagnostics, affected-set impact analysis, lineage previews, and sentinel-event learning loops.
+- U6 impact preview is useful, but the strongest U6 shape is a proposal gate or receipt until a concrete catalog/cap proposal exists.
+
+### Updated Ranked Survivors
+
+#### 1. Dynamic Surface / New Focus Sentinel
+
+**Description:** Add a diagnostic preflight that compares product-supported focuses, setup configurations, durations, levels, and future theme contracts against generated diagnostics coverage. New surfaces must be included, explicitly `not_applicable`, or deferred with a reason.
+
+**Rationale:** This protects future branch work from silently adding supported surfaces that diagnostics do not cover. It is the closest repo analogue to "clean as you code": keep known debt routed, but fail closed on newly changed scope.
+
+**Downsides:** Needs careful scope so synthetic surfaces do not become artificial tests disconnected from shipped product support.
+
+**Confidence:** 91%
+
+**Complexity:** Medium
+
+**Status:** Explored
+
+#### 2. Redistribution Causality Snapshot
+
+**Description:** Add a diagnostic-only counterfactual that summarizes current redistribution-affected groups against a no-redistribution or isolated-redistribution run, without changing shipped `buildDraft()` behavior.
+
+**Rationale:** The current generator-policy lane still contains 21 groups and 236 redistribution-affected cells. This would separate catalog-envelope pressure from optional-slot redistribution effects before any generator-policy change.
+
+**Downsides:** More analytical than protective; it may be better immediately after the dynamic-surface sentinel unless redistribution is blocking a concrete decision.
+
+**Confidence:** 86%
+
+**Complexity:** Medium
+
+**Status:** Unexplored
+
+#### 3. Diagnostics Freshness Diff / Changed-Surface Baseline
+
+**Description:** Add a compact regenerated-report diff that shows new, disappeared, worsened, or reclassified groups since the last generated report.
+
+**Rationale:** Maintainers should review diagnostic deltas instead of rereading the whole matrix after every regeneration. This could pair well with U5 if the sentinel needs a changed-surface baseline.
+
+**Downsides:** It needs a stable comparison source and could overlap with existing stale-fingerprint checks if scoped too broadly.
+
+**Confidence:** 82%
+
+**Complexity:** Low / Medium
+
+**Status:** Unexplored
+
+#### 4. U6 Proposal Gate / Catalog Blast-Radius Receipt
+
+**Description:** Define the smallest concrete proposal shape needed before U6 preview tooling is worth building: affected group keys, changed catalog IDs, proposed metadata/content deltas, evidence path, expected diagnostics movement, and verification commands.
+
+**Rationale:** This keeps U6 from becoming abstract tooling. It turns impact preview into something driven by a real gap card, cap edit, or activation manifest.
+
+**Downsides:** It may feel like planning infrastructure rather than product diagnostics until a real catalog proposal appears.
+
+**Confidence:** 78%
+
+**Complexity:** Low / Medium
+
+**Status:** Unexplored
+
+#### 5. Maintainer Action Queue
+
+**Description:** Produce a short next-action queue from compressed prompts: decide, gather evidence, route to U8, prepare U6 proposal, or no action.
+
+**Rationale:** The hard part has shifted from seeing observations to choosing the next human move.
+
+**Downsides:** Risks hiding judgment too early if the queue pretends to auto-pick policy outcomes.
+
+**Confidence:** 74%
+
+**Complexity:** Low
+
+**Status:** Unexplored
+
+#### 6. Sentinel Learning Loop / Workflow Pattern Capture
+
+**Description:** After the next unit lands, capture the diagnostics workflow as a reusable pattern or learning: generated report -> stable identity -> triage registry -> compression -> policy guide -> sentinel/impact gate.
+
+**Rationale:** No prior `docs/solutions/` learning base exists, and this branch is creating a reusable diagnostics workflow.
+
+**Downsides:** It is better as a close-out action after U5 or U8 than as the main next implementation unit.
+
+**Confidence:** 70%
+
+**Complexity:** Low
+
+**Status:** Unexplored
+
+### Rejection Summary
+
+
+| #   | Idea                                  | Reason Rejected                                                      |
+| --- | ------------------------------------- | -------------------------------------------------------------------- |
+| 1   | Direct catalog edits from diagnostics | Still violates source-backed gap-card and U7 boundaries.             |
+| 2   | Full U6 preview tool now              | Too abstract until a concrete catalog/cap proposal exists.           |
+| 3   | Prompt disposition buttons as data    | Useful later, but premature without a stable human review loop.      |
+| 4   | Threshold ownership map               | Valuable as a detail inside U5/U8, too thin as standalone next work. |
+| 5   | Workload-envelope executable fixtures | U7 just landed; better after actual metadata proposal pressure.      |
+| 6   | Runtime-catalog boundary guard        | Mostly covered by U7 guide and route fields.                         |
+| 7   | Auto-pick next unit                   | Duplicates action queue and risks hiding human judgment too early.   |
+| 8   | U5/U8 bridge                          | Good future integration, too broad for the immediate next unit.      |
+
+
+### Updated Recommendation
+
+Proceed to `/ce-plan` on **Dynamic Surface / New Focus Sentinel** using `docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md`. Keep U8 redistribution causality snapshot as the strongest alternate if generator-policy evidence becomes the immediate blocker.
+
+## Continuation: Post-U5 Next Work Selection
+
+On 2026-05-02, U5 dynamic surface/new focus sentinel was implemented and verified. The next-step question shifted from protecting future supported-surface drift to choosing the strongest remaining evidence gate before catalog or generator policy changes.
+
+Grounding from the continuation pass:
+
+- U1-U5 and U7 are now complete in `docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md`.
+- The generated triage workbench still has 53 routeable groups: 32 `defer` groups and 21 `generator_policy_investigation` groups.
+- The generator redistribution compression lane has 21 groups, 251 total affected cells, 236 redistribution-affected cells, and recommends U8.
+- U6 remains valuable, but the plan intentionally waits for a concrete gap card, cap edit, metadata edit, or catalog proposal.
+- External analogues favored changed-scope/delta gates, schema compatibility checks, blast-radius reports, and owner-routed action queues.
+- No `docs/solutions/` learning base exists for this workflow yet.
+
+### Updated Ranked Survivors After U5
+
+#### 1. U8 Redistribution Causality Receipt
+
+**Description:** Add a diagnostic-only redistribution comparison receipt for the 21 generator-policy groups. It should separate cells that only look bad because optional slots redistributed minutes from cells that remain over cap or under minimum without redistribution.
+
+**Rationale:** This is the most concrete remaining decision blocker. It directly follows the current compression lane and can produce evidence without changing shipped `buildDraft()` behavior.
+
+**Downsides:** Counterfactual diagnostics can overclaim. The output must be framed as evidence, not generator policy.
+
+**Confidence:** 91%
+
+**Complexity:** Medium
+
+**Status:** Explored
+
+#### 2. Changed-Diagnostics Delta Gate
+
+**Description:** Add a compact report-adjacent diff for new, disappeared, worsened, changed-route, changed-fingerprint, or changed-surface diagnostics since the prior generated report.
+
+**Rationale:** U5 made surface drift fail-closed; the next leverage layer is reviewing diagnostic deltas instead of rereading the whole matrix.
+
+**Downsides:** Needs a stable baseline and may overlap with existing stale-fingerprint checks if scoped too broadly.
+
+**Confidence:** 84%
+
+**Complexity:** Low / Medium
+
+**Status:** Unexplored
+
+#### 3. U6 Proposal Admission Ticket
+
+**Description:** Define the minimum concrete proposal shape required before U6 preview tooling should run: changed IDs, expected metadata/content deltas, affected groups, evidence path, expected diagnostic movement, and verification hooks.
+
+**Rationale:** Keeps U6 from becoming abstract comparison tooling before there is a real catalog/cap proposal.
+
+**Downsides:** It is enabling workflow, not the full impact preview.
+
+**Confidence:** 81%
+
+**Complexity:** Low / Medium
+
+**Status:** Unexplored
+
+#### 4. Maintainer Decision Queue
+
+**Description:** Convert compressed prompts into a short queue of human decisions: accept policy allowance, gather evidence, route to U8, prepare U6 proposal, or no action.
+
+**Rationale:** The workflow now has durable diagnostics, triage, compression, guidance, and sentinel gates; the human next action is still partly implicit.
+
+**Downsides:** Can hide judgment if it pretends to decide outcomes automatically.
+
+**Confidence:** 78%
+
+**Complexity:** Low
+
+**Status:** Unexplored
+
+#### 5. Diagnostics Compatibility Policy Matrix
+
+**Description:** Define which generated diagnostics changes are allowed silently, which require a baseline update, which require proposal preview, and which fail closed.
+
+**Rationale:** External schema/new-code analogies point to explicit compatibility modes as the way to keep gates trusted and low-noise.
+
+**Downsides:** Could become policy paperwork unless tied to U8/U6/delta outputs.
+
+**Confidence:** 74%
+
+**Complexity:** Low / Medium
+
+**Status:** Unexplored
+
+#### 6. Diagnostics Workflow Pattern Capture
+
+**Description:** Capture the reusable generated diagnostics workflow as the first `docs/solutions` learning: report -> identity -> triage -> graduation -> compression -> guidance/sentinel -> causality/impact gates.
+
+**Rationale:** This branch has created an institutional pattern and no `docs/solutions` baseline exists yet.
+
+**Downsides:** Better as closeout or companion work than the main next implementation unit.
+
+**Confidence:** 70%
+
+**Complexity:** Low
+
+**Status:** Unexplored
+
+### Rejection Summary
+
+| #   | Idea                          | Reason Rejected                                                                |
+| --- | ----------------------------- | ------------------------------------------------------------------------------ |
+| 1   | Direct catalog edits          | Still violates source-backed gap-card and U7 boundaries.                       |
+| 2   | Full U6 preview tool now      | Too abstract without a concrete proposal.                                      |
+| 3   | Broad owner-routed queue      | Useful later, but premature before the remaining evidence gates are clearer.   |
+| 4   | Deferred workload heat strip  | Mostly duplicates U7 plus existing compression lanes.                          |
+| 5   | Workflow fixture pack         | Good implementation detail inside U8/U6/delta work, not the main next idea.    |
+| 6   | Surface change ledger         | Mostly absorbed by U5 and the stronger changed-diagnostics delta gate.         |
+| 7   | Machine-only routing receipt  | Useful as part of action queue/delta output, too thin standalone.              |
+| 8   | Generator policy pain ledger  | Duplicates U8 without the counterfactual evidence that makes U8 valuable.      |
+
+### Updated Recommendation
+
+U8 has now been brainstormed, planned, and implemented as a redistribution causality receipt in the generated diagnostics report and triage workbench. Use the generated receipt to decide whether specific groups route toward future generator-policy decisions, workload/block-shape review, source-backed proposal work, U6 proposal admission, or no implementation action. Keep the changed-diagnostics delta gate as the best remaining alternate if the next bottleneck shifts from generator-policy evidence to report-review ergonomics.

@@ -55,6 +55,74 @@ export interface GeneratedPlanSupportedSurface {
   readonly notApplicable?: readonly GeneratedPlanNotApplicableCell[]
 }
 
+export type GeneratedPlanSurfaceContractDimension =
+  | 'focus'
+  | 'configuration'
+  | 'level'
+  | 'duration'
+  | 'seed'
+  | 'theme'
+
+export type GeneratedPlanSurfaceContractState =
+  | 'pre_activation_deferred'
+  | 'reserved_future'
+  | 'unsupported_user_visible'
+
+export interface GeneratedPlanSurfaceContractEntry {
+  readonly state: GeneratedPlanSurfaceContractState
+  readonly dimension: GeneratedPlanSurfaceContractDimension
+  readonly value: string
+  readonly reason: string
+  readonly authority: string
+  readonly revisitTrigger: string
+}
+
+export interface GeneratedPlanSurfaceContract {
+  readonly included: GeneratedPlanSupportedSurface
+  readonly excluded: readonly GeneratedPlanSurfaceContractEntry[]
+}
+
+export type GeneratedPlanSurfaceContractIssueCode =
+  | 'empty_included_surface_dimension'
+  | 'duplicate_included_surface_value'
+  | 'missing_required_surface_value'
+  | 'unknown_included_surface_value'
+  | 'unknown_included_configuration'
+  | 'configuration_context_mismatch'
+  | 'placeholder_surface_reason'
+  | 'unknown_excluded_surface_value'
+  | 'conflicting_surface_contract_state'
+  | 'duplicate_excluded_surface_value'
+  | 'unsupported_user_visible_surface'
+  | 'theme_coverage_requires_contract'
+  | 'duplicate_not_applicable_cell'
+  | 'invalid_not_applicable_cell'
+  | 'placeholder_not_applicable_reason'
+
+export interface GeneratedPlanSurfaceContractIssue {
+  readonly code: GeneratedPlanSurfaceContractIssueCode
+  readonly dimension: GeneratedPlanSurfaceContractDimension
+  readonly value?: string
+  readonly message: string
+}
+
+export interface GeneratedPlanSurfaceContractValidation {
+  readonly issues: readonly GeneratedPlanSurfaceContractIssue[]
+  readonly blockingIssues: readonly GeneratedPlanSurfaceContractIssue[]
+}
+
+export interface GeneratedPlanSurfaceContractReport {
+  readonly included: {
+    readonly focuses: readonly VisibleFocus[]
+    readonly configurations: readonly ReadinessConfigurationId[]
+    readonly levels: readonly PlayerLevel[]
+    readonly durations: readonly TimeProfile[]
+    readonly seedIds: readonly string[]
+  }
+  readonly excluded: readonly GeneratedPlanSurfaceContractEntry[]
+  readonly validationIssues: readonly GeneratedPlanSurfaceContractIssue[]
+}
+
 export interface GeneratedPlanMatrixCell {
   readonly focus: VisibleFocus
   readonly configuration: ReadinessConfigurationId
@@ -81,6 +149,7 @@ export interface GeneratedPlanSurfaceSummary {
   readonly configurations: readonly ReadinessConfigurationId[]
   readonly levels: readonly PlayerLevel[]
   readonly durations: readonly TimeProfile[]
+  readonly seedIds?: readonly string[]
   readonly seedCount: number
   readonly cellCount: number
   readonly applicableCount: number
@@ -152,6 +221,9 @@ export interface GeneratedPlanObservationAffectedCell extends GeneratedPlanMatri
   readonly blockId?: string
   readonly plannedMinutes?: number
   readonly allocatedMinutes?: number
+  readonly authoredMinMinutes?: number
+  readonly authoredMaxMinutes?: number
+  readonly fatigueMaxMinutes?: number
   readonly observationCodes: readonly GeneratedPlanObservationCode[]
   readonly redistribution?: GeneratedPlanRedistributionEvidence
 }
@@ -185,12 +257,333 @@ export const DEFAULT_GENERATED_PLAN_SEEDS: readonly string[] = [
   'matrix-d',
 ] as const
 
-export const DEFAULT_GENERATED_PLAN_SURFACE: GeneratedPlanSupportedSurface = {
-  focuses: VISIBLE_FOCUSES,
-  configurations: READINESS_CONFIGURATIONS,
-  levels: PLAYER_LEVELS,
-  durations: READINESS_DURATIONS,
-  seeds: DEFAULT_GENERATED_PLAN_SEEDS,
+export const DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT: GeneratedPlanSurfaceContract = {
+  included: {
+    focuses: VISIBLE_FOCUSES,
+    configurations: READINESS_CONFIGURATIONS,
+    levels: PLAYER_LEVELS,
+    durations: READINESS_DURATIONS,
+    seeds: DEFAULT_GENERATED_PLAN_SEEDS,
+  },
+  excluded: [
+    {
+      state: 'reserved_future',
+      dimension: 'theme',
+      value: 'future_curated_themes',
+      reason:
+        'Curated themes require a concrete theme contract before generated diagnostics can claim coverage.',
+      authority:
+        'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
+      revisitTrigger:
+        'Revisit when a theme contract defines identity, supported cells, and focused-slot behavior.',
+    },
+  ],
+}
+
+export const DEFAULT_GENERATED_PLAN_SURFACE: GeneratedPlanSupportedSurface =
+  DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT.included
+
+const PLACEHOLDER_SURFACE_REASONS = new Set(['unsupported', 'n/a', 'na', 'todo', 'tbd'])
+
+const REQUIRED_GENERATED_PLAN_SURFACE_BASELINE: Record<
+  Exclude<GeneratedPlanSurfaceContractDimension, 'theme'>,
+  readonly string[]
+> = {
+  focus: ['pass', 'serve', 'set'],
+  configuration: ['solo_net', 'solo_wall', 'solo_open', 'pair_net', 'pair_open'],
+  level: ['beginner', 'intermediate', 'advanced'],
+  duration: ['15', '25', '40'],
+  seed: ['matrix-a', 'matrix-b', 'matrix-c', 'matrix-d'],
+} as const
+
+function surfaceValues(surface: GeneratedPlanSupportedSurface): Record<
+  Exclude<GeneratedPlanSurfaceContractDimension, 'theme'>,
+  readonly string[]
+> {
+  return {
+    focus: surface.focuses,
+    configuration: surface.configurations.map((configuration) => configuration.id),
+    level: surface.levels,
+    duration: surface.durations.map(String),
+    seed: surface.seeds,
+  }
+}
+
+function canonicalSurfaceValues(): Record<
+  Exclude<GeneratedPlanSurfaceContractDimension, 'theme'>,
+  readonly string[]
+> {
+  return {
+    focus: VISIBLE_FOCUSES,
+    configuration: READINESS_CONFIGURATIONS.map((configuration) => configuration.id),
+    level: PLAYER_LEVELS,
+    duration: READINESS_DURATIONS.map(String),
+    seed: DEFAULT_GENERATED_PLAN_SEEDS,
+  }
+}
+
+function sameReadinessConfigurationContext(
+  left: ReadinessConfiguration,
+  right: ReadinessConfiguration,
+): boolean {
+  return (
+    left.context.playerMode === right.context.playerMode &&
+    left.context.netAvailable === right.context.netAvailable &&
+    left.context.wallAvailable === right.context.wallAvailable
+  )
+}
+
+function isSpecificSurfaceText(value: string): boolean {
+  const normalized = value.trim().toLowerCase()
+  return normalized.length > 0 && !PLACEHOLDER_SURFACE_REASONS.has(normalized)
+}
+
+function surfaceIssue(
+  code: GeneratedPlanSurfaceContractIssueCode,
+  dimension: GeneratedPlanSurfaceContractDimension,
+  value: string | undefined,
+  message: string,
+): GeneratedPlanSurfaceContractIssue {
+  return { code, dimension, value, message }
+}
+
+export function validateGeneratedPlanSurfaceContract(
+  contract: GeneratedPlanSurfaceContract = DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT,
+): GeneratedPlanSurfaceContractValidation {
+  const issues: GeneratedPlanSurfaceContractIssue[] = []
+  const includedValues = surfaceValues(contract.included)
+  const canonicalValues = canonicalSurfaceValues()
+  const baselineValues = REQUIRED_GENERATED_PLAN_SURFACE_BASELINE
+
+  for (const [dimension, values] of Object.entries(includedValues) as Array<
+    [Exclude<GeneratedPlanSurfaceContractDimension, 'theme'>, readonly string[]]
+  >) {
+    if (values.length === 0) {
+      issues.push(
+        surfaceIssue(
+          'empty_included_surface_dimension',
+          dimension,
+          undefined,
+          `Included ${dimension} values must not be empty.`,
+        ),
+      )
+    }
+    const seenValues = new Set<string>()
+    for (const value of values) {
+      if (seenValues.has(value)) {
+        issues.push(
+          surfaceIssue(
+            'duplicate_included_surface_value',
+            dimension,
+            value,
+            `Included ${dimension} value ${value} is duplicated.`,
+          ),
+        )
+      }
+      seenValues.add(value)
+    }
+    const canonicalValueSet = new Set(canonicalValues[dimension])
+    for (const value of values) {
+      if (!canonicalValueSet.has(value)) {
+        issues.push(
+          surfaceIssue(
+            'unknown_included_surface_value',
+            dimension,
+            value,
+            `Included ${dimension} value ${value} is not part of the current generated diagnostics surface.`,
+          ),
+        )
+      }
+    }
+    for (const requiredValue of baselineValues[dimension]) {
+      if (!seenValues.has(requiredValue)) {
+        issues.push(
+          surfaceIssue(
+            'missing_required_surface_value',
+            dimension,
+            requiredValue,
+            `Required ${dimension} value ${requiredValue} is neither included nor explicitly deferred.`,
+          ),
+        )
+      }
+    }
+  }
+
+  const canonicalConfigurationIds = new Set(canonicalValues.configuration)
+  const canonicalConfigurationsById = new Map(
+    READINESS_CONFIGURATIONS.map((configuration) => [configuration.id, configuration] as const),
+  )
+  for (const configuration of contract.included.configurations) {
+    const canonicalConfiguration = canonicalConfigurationsById.get(configuration.id)
+    if (!canonicalConfigurationIds.has(configuration.id) || !canonicalConfiguration) {
+      issues.push(
+        surfaceIssue(
+          'unknown_included_configuration',
+          'configuration',
+          configuration.id,
+          `Included configuration ${configuration.id} is not a canonical readiness configuration.`,
+        ),
+      )
+    } else if (!sameReadinessConfigurationContext(configuration, canonicalConfiguration)) {
+      issues.push(
+        surfaceIssue(
+          'configuration_context_mismatch',
+          'configuration',
+          configuration.id,
+          `Included configuration ${configuration.id} does not match its canonical readiness context.`,
+        ),
+      )
+    }
+  }
+
+  const excludedKeys = new Set<string>()
+  for (const entry of contract.excluded) {
+    const key = `${entry.dimension}:${entry.value}`
+    if (excludedKeys.has(key)) {
+      issues.push(
+        surfaceIssue(
+          'duplicate_excluded_surface_value',
+          entry.dimension,
+          entry.value,
+          `Excluded ${entry.dimension} value ${entry.value} is duplicated.`,
+        ),
+      )
+    }
+    excludedKeys.add(key)
+
+    if (entry.dimension !== 'theme') {
+      const dimension = entry.dimension
+      const includedValueSet = new Set(includedValues[dimension])
+      const canonicalValueSet = new Set(canonicalValues[dimension])
+      const baselineValueSet = new Set(baselineValues[dimension])
+      if (includedValueSet.has(entry.value)) {
+        issues.push(
+          surfaceIssue(
+            'conflicting_surface_contract_state',
+            entry.dimension,
+            entry.value,
+            `Excluded ${entry.dimension} value ${entry.value} is still included in the generated diagnostics surface.`,
+          ),
+        )
+      }
+      if (!canonicalValueSet.has(entry.value)) {
+        issues.push(
+          surfaceIssue(
+            'unknown_excluded_surface_value',
+            entry.dimension,
+            entry.value,
+            `Excluded ${entry.dimension} value ${entry.value} is not part of the current generated diagnostics surface.`,
+          ),
+        )
+      }
+      if (baselineValueSet.has(entry.value)) {
+        issues.push(
+          surfaceIssue(
+            'unsupported_user_visible_surface',
+            entry.dimension,
+            entry.value,
+            `Current supported ${entry.dimension} value ${entry.value} cannot be excluded by reason alone.`,
+          ),
+        )
+      }
+    }
+
+    if (
+      !isSpecificSurfaceText(entry.reason) ||
+      !isSpecificSurfaceText(entry.authority) ||
+      !isSpecificSurfaceText(entry.revisitTrigger)
+    ) {
+      issues.push(
+        surfaceIssue(
+          'placeholder_surface_reason',
+          entry.dimension,
+          entry.value,
+          `Excluded ${entry.dimension} value ${entry.value} needs a specific reason, authority, and revisit trigger.`,
+        ),
+      )
+    }
+    if (entry.state === 'unsupported_user_visible') {
+      issues.push(
+        surfaceIssue(
+          'unsupported_user_visible_surface',
+          entry.dimension,
+          entry.value,
+          `User-visible ${entry.dimension} value ${entry.value} cannot be excluded by reason alone.`,
+        ),
+      )
+    }
+    if (entry.dimension === 'theme' && entry.state !== 'reserved_future') {
+      issues.push(
+        surfaceIssue(
+          'theme_coverage_requires_contract',
+          entry.dimension,
+          entry.value,
+          `Theme value ${entry.value} cannot be marked covered without a concrete theme contract.`,
+        ),
+      )
+    }
+  }
+
+  const notApplicableKeys = new Set<string>()
+  for (const cell of contract.included.notApplicable ?? []) {
+    const key = `${cell.focus}:${cell.configuration}:${cell.level}:${cell.duration}:${cell.seed}`
+    if (notApplicableKeys.has(key)) {
+      issues.push(
+        surfaceIssue(
+          'duplicate_not_applicable_cell',
+          'seed',
+          key,
+          `Not-applicable cell ${key} is duplicated.`,
+        ),
+      )
+    }
+    notApplicableKeys.add(key)
+
+    const invalidDimensions: GeneratedPlanSurfaceContractDimension[] = []
+    if (!includedValues.focus.includes(cell.focus)) invalidDimensions.push('focus')
+    if (!includedValues.configuration.includes(cell.configuration)) invalidDimensions.push('configuration')
+    if (!includedValues.level.includes(cell.level)) invalidDimensions.push('level')
+    if (!includedValues.duration.includes(String(cell.duration))) invalidDimensions.push('duration')
+    if (!includedValues.seed.includes(cell.seed)) invalidDimensions.push('seed')
+    for (const dimension of invalidDimensions) {
+      issues.push(
+        surfaceIssue(
+          'invalid_not_applicable_cell',
+          dimension,
+          key,
+          `Not-applicable cell ${key} references a value outside the included surface.`,
+        ),
+      )
+    }
+    if (!isSpecificSurfaceText(cell.reason)) {
+      issues.push(
+        surfaceIssue(
+          'placeholder_not_applicable_reason',
+          'seed',
+          key,
+          `Not-applicable cell ${key} needs a specific reason.`,
+        ),
+      )
+    }
+  }
+
+  return { issues, blockingIssues: issues }
+}
+
+export function buildGeneratedPlanSurfaceContractReport(
+  contract: GeneratedPlanSurfaceContract = DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT,
+): GeneratedPlanSurfaceContractReport {
+  return {
+    included: {
+      focuses: contract.included.focuses,
+      configurations: contract.included.configurations.map((configuration) => configuration.id),
+      levels: contract.included.levels,
+      durations: contract.included.durations,
+      seedIds: contract.included.seeds,
+    },
+    excluded: contract.excluded,
+    validationIssues: validateGeneratedPlanSurfaceContract(contract).issues,
+  }
 }
 
 function matchesNotApplicableCell(
@@ -266,6 +659,7 @@ export function buildGeneratedPlanSurfaceSummary(
     configurations: [...new Set(matrix.map((cell) => cell.configuration))],
     levels: [...new Set(matrix.map((cell) => cell.level))],
     durations: [...new Set(matrix.map((cell) => cell.duration))],
+    seedIds: [...new Set(matrix.map((cell) => cell.seed))],
     seedCount: new Set(matrix.map((cell) => cell.seed)).size,
     cellCount: matrix.length,
     applicableCount: matrix.filter((cell) => cell.status === 'applicable').length,
@@ -341,6 +735,9 @@ export function analyzeSelectedDraftStretch(
     const targetSlot = trace.slots.find(
       (slot) => slot.layoutIndex === trace.redistributionLayoutIndex,
     )
+    const targetBlock = targetSlot?.blockId
+      ? draft.blocks.find((block) => block.id === targetSlot.blockId)
+      : undefined
     observations.push({
       code: 'optional_slot_redistribution',
       blockId: targetSlot?.blockId,
@@ -350,6 +747,7 @@ export function analyzeSelectedDraftStretch(
       allocatedMinutes: targetSlot?.allocatedMinutes,
       drillId: targetSlot?.drillId,
       variantId: targetSlot?.variantId,
+      plannedMinutes: targetBlock?.durationMinutes,
       skippedOptionalLayoutIndexes: trace.skippedOptionalLayoutIndexes,
       redistribution: {
         source: 'observed',
@@ -692,15 +1090,30 @@ export function analyzeGeneratedPlanDraft(
   }
 }
 
+function readinessConfigurationContextsMatch(
+  left: ReadinessConfiguration,
+  right: ReadinessConfiguration,
+): boolean {
+  return (
+    left.context.playerMode === right.context.playerMode &&
+    left.context.netAvailable === right.context.netAvailable &&
+    left.context.wallAvailable === right.context.wallAvailable
+  )
+}
+
 export function buildGeneratedPlanDiagnostics(
   surface: GeneratedPlanSupportedSurface = DEFAULT_GENERATED_PLAN_SURFACE,
 ): GeneratedPlanDiagnosticResult[] {
-  const configurationsById = new Map(
+  const canonicalConfigurationsById = new Map(
+    READINESS_CONFIGURATIONS.map((configuration) => [configuration.id, configuration] as const),
+  )
+  const suppliedConfigurationsById = new Map(
     surface.configurations.map((configuration) => [configuration.id, configuration] as const),
   )
 
   return buildApplicableGeneratedPlanInputs(surface).map((cell) => {
-    const configuration = configurationsById.get(cell.configuration)
+    const configuration = canonicalConfigurationsById.get(cell.configuration)
+    const suppliedConfiguration = suppliedConfigurationsById.get(cell.configuration)
     if (!configuration) {
       return {
         ...cell,
@@ -708,7 +1121,23 @@ export function buildGeneratedPlanDiagnostics(
         hardFailures: [
           {
             code: 'no_draft',
-            message: `No registered configuration for ${cell.configuration}.`,
+            message: `No canonical readiness configuration for ${cell.configuration}.`,
+          },
+        ],
+        observations: [],
+      }
+    }
+    if (
+      suppliedConfiguration &&
+      !readinessConfigurationContextsMatch(suppliedConfiguration, configuration)
+    ) {
+      return {
+        ...cell,
+        status: 'hard_failure',
+        hardFailures: [
+          {
+            code: 'no_draft',
+            message: `Diagnostic surface configuration context does not match canonical readiness configuration for ${cell.configuration}.`,
           },
         ],
         observations: [],
@@ -899,6 +1328,12 @@ export function buildGeneratedPlanObservationGroups(
       const key = observationGroupKey(observations)
       const existing = groups.get(key)
       const observationCodes = [...new Set(observations.map((observation) => observation.code))]
+      const drillId = firstDefined(observations.map((observation) => observation.drillId))
+      const variantId = firstDefined(observations.map((observation) => observation.variantId))
+      const { variant: selectedVariant } =
+        drillId !== undefined && variantId !== undefined
+          ? findVariant(drillId, variantId)
+          : { variant: undefined }
       const affectedCell: GeneratedPlanObservationAffectedCell = {
         focus: result.focus,
         configuration: result.configuration,
@@ -910,6 +1345,15 @@ export function buildGeneratedPlanObservationGroups(
         allocatedMinutes: firstDefined(
           observations.map((observation) => observation.allocatedMinutes),
         ),
+        authoredMinMinutes: firstDefined(
+          observations.map((observation) => observation.authoredMinMinutes),
+        ) ?? selectedVariant?.workload.durationMinMinutes,
+        authoredMaxMinutes: firstDefined(
+          observations.map((observation) => observation.authoredMaxMinutes),
+        ) ?? selectedVariant?.workload.durationMaxMinutes,
+        fatigueMaxMinutes: firstDefined(
+          observations.map((observation) => observation.fatigueMaxMinutes),
+        ) ?? selectedVariant?.workload.fatigueCap?.maxMinutes,
         observationCodes,
         redistribution: observations.find((observation) => observation.redistribution)?.redistribution,
       }

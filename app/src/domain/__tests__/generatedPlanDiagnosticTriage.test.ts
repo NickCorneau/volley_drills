@@ -3,10 +3,12 @@ import {
   buildGeneratedPlanDiagnostics,
   buildGeneratedPlanObservationGroups,
   type GeneratedPlanDiagnosticResult,
+  type GeneratedPlanObservationAffectedCell,
   type GeneratedPlanObservationGroup,
 } from '../generatedPlanDiagnostics'
 import {
   buildGeneratedPlanDecisionDebtPrompts,
+  buildGeneratedPlanRedistributionCausalityReceipt,
   buildGeneratedPlanTriageWorkbenchMarkdown,
   buildInitialGeneratedPlanTriageRegistry,
   conservativeRouteForGeneratedPlanGroup,
@@ -19,6 +21,54 @@ import {
 
 function currentGroups(): GeneratedPlanObservationGroup[] {
   return buildGeneratedPlanObservationGroups(buildGeneratedPlanDiagnostics())
+}
+
+function redistributionCell(
+  overrides: Partial<GeneratedPlanObservationAffectedCell> = {},
+): GeneratedPlanObservationAffectedCell {
+  return {
+    focus: 'serve',
+    configuration: 'pair_open',
+    level: 'beginner',
+    duration: 40,
+    seed: 'receipt-fixture',
+    blockId: 'block-0',
+    plannedMinutes: 9,
+    allocatedMinutes: 8,
+    authoredMinMinutes: 4,
+    authoredMaxMinutes: 8,
+    fatigueMaxMinutes: 8,
+    observationCodes: ['optional_slot_redistribution', 'over_authored_max', 'over_fatigue_cap'],
+    redistribution: {
+      source: 'observed',
+      redistributedMinutes: 1,
+      skippedOptionalLayoutIndexes: [1],
+      redistributionLayoutIndex: 0,
+    },
+    ...overrides,
+  }
+}
+
+function redistributionGroup(
+  overrides: Partial<GeneratedPlanObservationGroup> = {},
+): GeneratedPlanObservationGroup {
+  const affectedCells = overrides.affectedCells ?? [redistributionCell()]
+  return {
+    groupKey: 'gpdg:v1:d31:d31-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+    diagnosticFingerprint: 'gpdf|fixture',
+    drillId: 'd31',
+    variantId: 'd31-pair-open',
+    blockType: 'main_skill',
+    required: true,
+    authoredMinMinutes: 4,
+    authoredMaxMinutes: 8,
+    fatigueMaxMinutes: 8,
+    affectedCellCount: affectedCells.length,
+    observationCodes: ['optional_slot_redistribution', 'over_authored_max', 'over_fatigue_cap'],
+    likelyFixPaths: ['generator_policy_investigation'],
+    affectedCells,
+    ...overrides,
+  }
 }
 
 describe('generated plan diagnostic triage identity', () => {
@@ -342,6 +392,177 @@ describe('generated plan diagnostic triage registry', () => {
     )
   })
 
+  it('builds a repeatable redistribution causality receipt for current generator-policy groups', () => {
+    const groups = currentGroups()
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const receipt = buildGeneratedPlanRedistributionCausalityReceipt(groups, registry)
+
+    expect(receipt.comparisonMode).toBe('allocated_duration_counterfactual')
+    expect(receipt.runtimeBoundary).toContain('buildDraft() behavior is unchanged')
+    expect(receipt.groupCount).toBe(21)
+    expect(receipt.counts.totalAffectedCellCount).toBe(251)
+    expect(receipt.counts.redistributionAffectedCellCount).toBe(236)
+    expect(receipt.counts.nonRedistributionOverCapCellCount).toBe(15)
+    expect(receipt.counts.nonRedistributionUnderMinCellCount).toBe(0)
+    expect(receipt.counts.pressureDisappearsCellCount).toBeGreaterThan(0)
+    expect(receipt.counts.pressureRemainsCellCount).toBeGreaterThan(0)
+    expect(receipt.counts.counterfactualUnfilledMinutes).toBeGreaterThan(0)
+    expect(receipt.groups.every((group) => group.groupKey.startsWith('gpdg:v1:'))).toBe(true)
+  })
+
+  it('classifies redistribution causality states and preserves mixed-group evidence', () => {
+    const pressureDisappears = redistributionGroup({
+      groupKey: 'gpdg:v1:d31:disappears:main_skill:true:optional_slot_redistribution+over_authored_max',
+      affectedCells: [redistributionCell()],
+    })
+    const pressureRemains = redistributionGroup({
+      groupKey: 'gpdg:v1:d31:remains:main_skill:true:optional_slot_redistribution+over_authored_max',
+      affectedCells: [redistributionCell({ allocatedMinutes: 9 })],
+    })
+    const inconclusive = redistributionGroup({
+      groupKey: 'gpdg:v1:d31:inconclusive:main_skill:true:optional_slot_redistribution+over_authored_max',
+      affectedCells: [redistributionCell({ allocatedMinutes: undefined })],
+    })
+    const redistributionOnly = redistributionGroup({
+      groupKey: 'gpdg:v1:d31:only:main_skill:true:optional_slot_redistribution',
+      observationCodes: ['optional_slot_redistribution'],
+      affectedCells: [
+        redistributionCell({
+          plannedMinutes: 8,
+          allocatedMinutes: 8,
+          observationCodes: ['optional_slot_redistribution'],
+        }),
+      ],
+    })
+    const redistributionPreventsUnderMin = redistributionGroup({
+      groupKey: 'gpdg:v1:d31:prevents-under-min:main_skill:true:optional_slot_redistribution',
+      observationCodes: ['optional_slot_redistribution'],
+      affectedCells: [
+        redistributionCell({
+          plannedMinutes: 8,
+          allocatedMinutes: 3,
+          observationCodes: ['optional_slot_redistribution'],
+        }),
+      ],
+    })
+    const mixed = redistributionGroup({
+      groupKey: 'gpdg:v1:d31:mixed:main_skill:true:optional_slot_redistribution+over_authored_max',
+      affectedCells: [redistributionCell(), redistributionCell({ seed: 'receipt-fixture-b', allocatedMinutes: 9 })],
+    })
+    const groups = [
+      pressureDisappears,
+      pressureRemains,
+      inconclusive,
+      redistributionOnly,
+      redistributionPreventsUnderMin,
+      mixed,
+    ]
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const receipt = buildGeneratedPlanRedistributionCausalityReceipt(groups, registry)
+    const byKey = new Map(receipt.groups.map((group) => [group.groupKey, group] as const))
+
+    expect(byKey.get(pressureDisappears.groupKey)).toEqual(
+      expect.objectContaining({
+        actionState: 'likely_redistribution_caused',
+        followUpRoutes: ['future_generator_policy_decision'],
+      }),
+    )
+    expect(byKey.get(pressureRemains.groupKey)).toEqual(
+      expect.objectContaining({
+        actionState: 'pressure_remains_without_redistribution',
+        followUpRoutes: [
+          'workload_review',
+          'block_shape_review',
+          'source_backed_proposal_work',
+          'u6_proposal_admission_candidate',
+        ],
+      }),
+    )
+    expect(byKey.get(inconclusive.groupKey)).toEqual(
+      expect.objectContaining({
+        actionState: 'comparison_inconclusive',
+        hasIncompleteEvidence: true,
+      }),
+    )
+    expect(byKey.get(redistributionOnly.groupKey)).toEqual(
+      expect.objectContaining({
+        actionState: 'redistribution_without_pressure',
+        followUpRoutes: ['no_implementation_action_yet'],
+      }),
+    )
+    expect(byKey.get(redistributionPreventsUnderMin.groupKey)).toEqual(
+      expect.objectContaining({
+        actionState: 'redistribution_without_pressure',
+      }),
+    )
+    expect(byKey.get(redistributionPreventsUnderMin.groupKey)?.counts.allocatedUnderAuthoredMinCellCount).toBe(
+      1,
+    )
+    expect(byKey.get(redistributionPreventsUnderMin.groupKey)?.counts.pressureRemainsCellCount).toBe(0)
+    expect(byKey.get(mixed.groupKey)).toEqual(
+      expect.objectContaining({
+        actionState: 'pressure_remains_without_redistribution',
+        dominantCellState: 'mixed_cell_states',
+        followUpRoutes: [
+          'workload_review',
+          'block_shape_review',
+          'source_backed_proposal_work',
+          'u6_proposal_admission_candidate',
+          'future_generator_policy_decision',
+        ],
+      }),
+    )
+    expect(byKey.get(mixed.groupKey)?.counts.pressureDisappearsCellCount).toBe(1)
+    expect(byKey.get(mixed.groupKey)?.counts.pressureRemainsCellCount).toBe(1)
+  })
+
+  it('marks missing workload limits as inconclusive instead of claiming causality', () => {
+    const group = redistributionGroup({
+      groupKey: 'gpdg:v1:d31:missing-variant:main_skill:true:optional_slot_redistribution+over_authored_max',
+      variantId: 'missing-variant',
+      authoredMinMinutes: undefined,
+      authoredMaxMinutes: undefined,
+      fatigueMaxMinutes: undefined,
+      affectedCells: [
+        redistributionCell({
+          authoredMinMinutes: undefined,
+          authoredMaxMinutes: undefined,
+          fatigueMaxMinutes: undefined,
+        }),
+      ],
+    })
+    const receipt = buildGeneratedPlanRedistributionCausalityReceipt(
+      [group],
+      buildInitialGeneratedPlanTriageRegistry([group]),
+    )
+
+    expect(receipt.groups[0]).toEqual(
+      expect.objectContaining({
+        actionState: 'comparison_inconclusive',
+        hasIncompleteEvidence: true,
+      }),
+    )
+    expect(receipt.counts.comparisonInconclusiveCellCount).toBe(1)
+  })
+
+  it('keeps rerouted redistribution groups in the causality receipt while unresolved', () => {
+    const group = redistributionGroup()
+    const [entry] = buildInitialGeneratedPlanTriageRegistry([group])
+    if (!entry) throw new Error('Expected synthetic triage entry.')
+    const receipt = buildGeneratedPlanRedistributionCausalityReceipt(
+      [group],
+      [{ ...entry, route: 'block_split' }],
+    )
+
+    expect(receipt.groups).toHaveLength(1)
+    expect(receipt.groups[0]).toEqual(
+      expect.objectContaining({
+        groupKey: group.groupKey,
+        triageRoute: 'block_split',
+      }),
+    )
+  })
+
   it('fails validation for unexpected unknown compression lanes', () => {
     const groups = currentGroups()
     const firstGroup = groups[0]
@@ -384,6 +605,10 @@ describe('generated plan diagnostic triage registry', () => {
     expect(markdown).toContain('Short-session cooldown minimum')
     expect(markdown).toContain('Generator redistribution investigation')
     expect(markdown).toContain('redistribution-affected cells')
+    expect(markdown).toContain('## Redistribution Causality Receipt')
+    expect(markdown).toContain('allocated_duration_counterfactual')
+    expect(markdown).toContain('Pressure disappears under allocated-duration counterfactual')
+    expect(markdown).toContain('Non-redistribution pressure cells')
     expect(markdown).toContain('docs/ops/workload-envelope-authoring-guide.md#short-session-cooldown-minimum')
     expect(markdown).toContain('Candidate dispositions: `accepted_policy_allowance`')
   })

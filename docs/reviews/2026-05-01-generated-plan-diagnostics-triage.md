@@ -6,11 +6,12 @@ stage: validation
 type: review
 summary: "Docs-first triage workbench and decision-debt compression review for generated-plan routeable observation groups."
 authority: "Current triage snapshot for generated-plan diagnostic observation groups; validates stable group identity, conservative routes, stale fingerprint review, and derived decision-debt compression lanes."
-last_updated: 2026-05-01
+last_updated: 2026-05-02
 depends_on:
   - app/src/domain/generatedPlanDiagnostics.ts
   - app/src/domain/generatedPlanDiagnosticTriage.ts
   - docs/reviews/2026-05-01-generated-plan-diagnostics-report.md
+  - docs/brainstorms/2026-05-02-generated-diagnostics-redistribution-causality-receipt-requirements.md
 ---
 
 # Generated Plan Diagnostics Triage
@@ -100,6 +101,45 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 - Next evidence needed: Compare redistribution-affected cells against non-redistribution over-cap cells.
 - Group keys: `gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d46:d46-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d46:d46-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d47:d47-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d05:d05-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d31:d31-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d40:d40-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d31:d31-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-solo-net:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d31:d31-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`
 
+
+## Redistribution Causality Receipt
+
+- Comparison mode: `allocated_duration_counterfactual`
+- Runtime boundary: Diagnostic-only receipt; shipped buildDraft() behavior is unchanged.
+- Groups: 21; total affected cells: 251
+- Redistribution-affected cells: 236
+- Current pressure cells: over authored max 231, over fatigue cap 231, under authored min 0
+- Allocated-duration pressure cells: over authored max 80, over fatigue cap 80, under authored min 0
+- Non-redistribution pressure cells: over cap 15, under authored min 0
+- Pressure disappears under allocated-duration counterfactual: 151
+- Pressure remains without redistribution: 80
+- Comparison inconclusive cells: 0
+- Redistribution without cap/min pressure cells: 20
+- Counterfactual unfilled minutes across affected cells: 2092
+
+### Redistribution Causality Groups
+
+- `gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `pressure_remains_without_redistribution`, incomplete evidence no, pressure disappears 12, pressure remains 18, non-redistribution pressure 6, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`, `future_generator_policy_decision`
+- `gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 28, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d33:d33-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 24, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d46:d46-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `mixed_cell_states`, incomplete evidence no, pressure disappears 12, pressure remains 12, non-redistribution pressure 0, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`, `future_generator_policy_decision`
+- `gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `pressure_remains_without_redistribution`, incomplete evidence no, pressure disappears 0, pressure remains 18, non-redistribution pressure 6, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`
+- `gpdg:v1:d46:d46-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `mixed_cell_states`, incomplete evidence no, pressure disappears 8, pressure remains 8, non-redistribution pressure 0, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`, `future_generator_policy_decision`
+- `gpdg:v1:d47:d47-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 12, pressure remains 4, non-redistribution pressure 0, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`, `future_generator_policy_decision`
+- `gpdg:v1:d05:d05-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `pressure_remains_without_redistribution`, incomplete evidence no, pressure disappears 6, pressure remains 9, non-redistribution pressure 3, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`, `future_generator_policy_decision`
+- `gpdg:v1:d31:d31-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `mixed_cell_states`, incomplete evidence no, pressure disappears 7, pressure remains 7, non-redistribution pressure 0, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`, `future_generator_policy_decision`
+- `gpdg:v1:d40:d40-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 12, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
+- `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 10, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
+- `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 6, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d31:d31-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `mixed_cell_states`, incomplete evidence no, pressure disappears 3, pressure remains 3, non-redistribution pressure 0, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`, `future_generator_policy_decision`
+- `gpdg:v1:d33:d33-solo-net:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 6, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
+- `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 2, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
+- `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 2, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d31:d31-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `mixed_cell_states`, incomplete evidence no, pressure disappears 1, pressure remains 1, non-redistribution pressure 0, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`, `future_generator_policy_decision`
 
 ## New / Untriaged Blockers
 
@@ -651,7 +691,7 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
   },
   {
     "groupKey": "gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution",
-    "diagnosticFingerprint": "gpdf|v1|none|none|none|10|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/25/matrix-c/block-2/none/7/optional_slot_redistribution|serve/solo_net/intermediate/25/matrix-c/block-2/none/7/optional_slot_redistribution|serve/solo_open/advanced/25/matrix-a/block-2/none/7/optional_slot_redistribution",
+    "diagnosticFingerprint": "gpdf|v1|none|none|none|10|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/25/matrix-c/block-2/12/7/optional_slot_redistribution|serve/solo_net/intermediate/25/matrix-c/block-2/12/7/optional_slot_redistribution|serve/solo_open/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution",
     "triageStatus": "routed",
     "route": "generator_policy_investigation",
     "enforcementStatus": "observation_only",
@@ -833,7 +873,7 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
   },
   {
     "groupKey": "gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution",
-    "diagnosticFingerprint": "gpdf|v1|none|none|none|6|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/advanced/25/matrix-a/block-2/none/7/optional_slot_redistribution|serve/pair_net/intermediate/25/matrix-a/block-2/none/7/optional_slot_redistribution|serve/pair_open/advanced/25/matrix-b/block-2/none/7/optional_slot_redistribution",
+    "diagnosticFingerprint": "gpdf|v1|none|none|none|6|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution|serve/pair_net/intermediate/25/matrix-a/block-2/12/7/optional_slot_redistribution|serve/pair_open/advanced/25/matrix-b/block-2/12/7/optional_slot_redistribution",
     "triageStatus": "routed",
     "route": "generator_policy_investigation",
     "enforcementStatus": "observation_only",
@@ -1053,7 +1093,7 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
   },
   {
     "groupKey": "gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution",
-    "diagnosticFingerprint": "gpdf|v1|none|none|none|2|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/advanced/25/matrix-c/block-2/none/7/optional_slot_redistribution|serve/pair_net/intermediate/25/matrix-c/block-2/none/7/optional_slot_redistribution",
+    "diagnosticFingerprint": "gpdf|v1|none|none|none|2|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/advanced/25/matrix-c/block-2/12/7/optional_slot_redistribution|serve/pair_net/intermediate/25/matrix-c/block-2/12/7/optional_slot_redistribution",
     "triageStatus": "routed",
     "route": "generator_policy_investigation",
     "enforcementStatus": "observation_only",
@@ -1109,7 +1149,7 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
   },
   {
     "groupKey": "gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution",
-    "diagnosticFingerprint": "gpdf|v1|none|none|none|2|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/25/matrix-a/block-2/none/7/optional_slot_redistribution|serve/solo_net/intermediate/25/matrix-a/block-2/none/7/optional_slot_redistribution",
+    "diagnosticFingerprint": "gpdf|v1|none|none|none|2|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution|serve/solo_net/intermediate/25/matrix-a/block-2/12/7/optional_slot_redistribution",
     "triageStatus": "routed",
     "route": "generator_policy_investigation",
     "enforcementStatus": "observation_only",

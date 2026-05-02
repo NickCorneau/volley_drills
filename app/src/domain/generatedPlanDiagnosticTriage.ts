@@ -1,5 +1,6 @@
 import type {
   GeneratedPlanObservationCode,
+  GeneratedPlanObservationAffectedCell,
   GeneratedPlanObservationGroup,
 } from './generatedPlanDiagnostics'
 
@@ -65,6 +66,76 @@ export interface GeneratedPlanDecisionDebtPrompt {
   readonly candidateDispositions: readonly string[]
 }
 
+export type GeneratedPlanRedistributionCausalityComparisonMode =
+  'allocated_duration_counterfactual'
+
+export type GeneratedPlanRedistributionCausalityState =
+  | 'likely_redistribution_caused'
+  | 'pressure_remains_without_redistribution'
+  | 'comparison_inconclusive'
+  | 'redistribution_without_pressure'
+
+export type GeneratedPlanRedistributionDominantState =
+  | GeneratedPlanRedistributionCausalityState
+  | 'mixed_cell_states'
+
+export type GeneratedPlanRedistributionFollowUpRoute =
+  | 'future_generator_policy_decision'
+  | 'workload_review'
+  | 'block_shape_review'
+  | 'source_backed_proposal_work'
+  | 'u6_proposal_admission_candidate'
+  | 'no_implementation_action_yet'
+  | 'comparison_support_needed'
+
+export interface GeneratedPlanRedistributionCausalityCounts {
+  readonly totalAffectedCellCount: number
+  readonly redistributionAffectedCellCount: number
+  readonly currentOverAuthoredMaxCellCount: number
+  readonly currentOverFatigueCapCellCount: number
+  readonly currentUnderAuthoredMinCellCount: number
+  readonly allocatedOverAuthoredMaxCellCount: number
+  readonly allocatedOverFatigueCapCellCount: number
+  readonly allocatedUnderAuthoredMinCellCount: number
+  readonly nonRedistributionOverCapCellCount: number
+  readonly nonRedistributionUnderMinCellCount: number
+  readonly pressureDisappearsCellCount: number
+  readonly pressureRemainsCellCount: number
+  readonly comparisonInconclusiveCellCount: number
+  readonly redistributionWithoutPressureCellCount: number
+  readonly counterfactualUnfilledMinutes: number
+}
+
+export interface GeneratedPlanRedistributionCausalityCellReceipt
+  extends GeneratedPlanRedistributionCausalityCounts {
+  readonly state: GeneratedPlanRedistributionCausalityState
+}
+
+export interface GeneratedPlanRedistributionCausalityGroupReceipt {
+  readonly groupKey: string
+  readonly diagnosticFingerprint: string
+  readonly triageStatus: GeneratedPlanTriageStatus
+  readonly triageRoute: GeneratedPlanTriageRoute
+  readonly reviewedReportId: string
+  readonly drillId?: string
+  readonly variantId?: string
+  readonly blockType?: GeneratedPlanObservationGroup['blockType']
+  readonly observationCodes: readonly GeneratedPlanObservationCode[]
+  readonly actionState: GeneratedPlanRedistributionCausalityState
+  readonly dominantCellState: GeneratedPlanRedistributionDominantState
+  readonly hasIncompleteEvidence: boolean
+  readonly followUpRoutes: readonly GeneratedPlanRedistributionFollowUpRoute[]
+  readonly counts: GeneratedPlanRedistributionCausalityCounts
+}
+
+export interface GeneratedPlanRedistributionCausalityReceipt {
+  readonly comparisonMode: GeneratedPlanRedistributionCausalityComparisonMode
+  readonly runtimeBoundary: string
+  readonly groupCount: number
+  readonly counts: GeneratedPlanRedistributionCausalityCounts
+  readonly groups: readonly GeneratedPlanRedistributionCausalityGroupReceipt[]
+}
+
 export interface GeneratedPlanTriageEntry {
   readonly groupKey: string
   readonly diagnosticFingerprint: string
@@ -118,6 +189,10 @@ const ENFORCEMENT_STATUSES: readonly GeneratedPlanEnforcementStatus[] = [
 
 const LOW_VOLUME_WATCHLIST_MAX_AFFECTED_CELLS = 3
 const WORKLOAD_ENVELOPE_GUIDE_PATH = 'docs/ops/workload-envelope-authoring-guide.md'
+const REDISTRIBUTION_CAUSALITY_COMPARISON_MODE: GeneratedPlanRedistributionCausalityComparisonMode =
+  'allocated_duration_counterfactual'
+const REDISTRIBUTION_CAUSALITY_RUNTIME_BOUNDARY =
+  'Diagnostic-only receipt; shipped buildDraft() behavior is unchanged.'
 
 const COMPRESSION_LANE_ORDER: readonly GeneratedPlanDecisionDebtCompressionLane[] = [
   'short_session_cooldown_minimum',
@@ -354,6 +429,314 @@ function nonRedistributionOverCapCellCount(group: GeneratedPlanObservationGroup)
       (affectedCellHasObservationCode(cell, 'over_authored_max') ||
         affectedCellHasObservationCode(cell, 'over_fatigue_cap')),
   ).length
+}
+
+function emptyRedistributionCausalityCounts(): GeneratedPlanRedistributionCausalityCounts {
+  return {
+    totalAffectedCellCount: 0,
+    redistributionAffectedCellCount: 0,
+    currentOverAuthoredMaxCellCount: 0,
+    currentOverFatigueCapCellCount: 0,
+    currentUnderAuthoredMinCellCount: 0,
+    allocatedOverAuthoredMaxCellCount: 0,
+    allocatedOverFatigueCapCellCount: 0,
+    allocatedUnderAuthoredMinCellCount: 0,
+    nonRedistributionOverCapCellCount: 0,
+    nonRedistributionUnderMinCellCount: 0,
+    pressureDisappearsCellCount: 0,
+    pressureRemainsCellCount: 0,
+    comparisonInconclusiveCellCount: 0,
+    redistributionWithoutPressureCellCount: 0,
+    counterfactualUnfilledMinutes: 0,
+  }
+}
+
+function addRedistributionCausalityCounts(
+  left: GeneratedPlanRedistributionCausalityCounts,
+  right: GeneratedPlanRedistributionCausalityCounts,
+): GeneratedPlanRedistributionCausalityCounts {
+  return {
+    totalAffectedCellCount: left.totalAffectedCellCount + right.totalAffectedCellCount,
+    redistributionAffectedCellCount:
+      left.redistributionAffectedCellCount + right.redistributionAffectedCellCount,
+    currentOverAuthoredMaxCellCount:
+      left.currentOverAuthoredMaxCellCount + right.currentOverAuthoredMaxCellCount,
+    currentOverFatigueCapCellCount:
+      left.currentOverFatigueCapCellCount + right.currentOverFatigueCapCellCount,
+    currentUnderAuthoredMinCellCount:
+      left.currentUnderAuthoredMinCellCount + right.currentUnderAuthoredMinCellCount,
+    allocatedOverAuthoredMaxCellCount:
+      left.allocatedOverAuthoredMaxCellCount + right.allocatedOverAuthoredMaxCellCount,
+    allocatedOverFatigueCapCellCount:
+      left.allocatedOverFatigueCapCellCount + right.allocatedOverFatigueCapCellCount,
+    allocatedUnderAuthoredMinCellCount:
+      left.allocatedUnderAuthoredMinCellCount + right.allocatedUnderAuthoredMinCellCount,
+    nonRedistributionOverCapCellCount:
+      left.nonRedistributionOverCapCellCount + right.nonRedistributionOverCapCellCount,
+    nonRedistributionUnderMinCellCount:
+      left.nonRedistributionUnderMinCellCount + right.nonRedistributionUnderMinCellCount,
+    pressureDisappearsCellCount:
+      left.pressureDisappearsCellCount + right.pressureDisappearsCellCount,
+    pressureRemainsCellCount: left.pressureRemainsCellCount + right.pressureRemainsCellCount,
+    comparisonInconclusiveCellCount:
+      left.comparisonInconclusiveCellCount + right.comparisonInconclusiveCellCount,
+    redistributionWithoutPressureCellCount:
+      left.redistributionWithoutPressureCellCount + right.redistributionWithoutPressureCellCount,
+    counterfactualUnfilledMinutes:
+      left.counterfactualUnfilledMinutes + right.counterfactualUnfilledMinutes,
+  }
+}
+
+function redistributionCausalityStateCount(
+  counts: GeneratedPlanRedistributionCausalityCounts,
+  state: GeneratedPlanRedistributionCausalityState,
+): number {
+  switch (state) {
+    case 'likely_redistribution_caused':
+      return counts.pressureDisappearsCellCount
+    case 'pressure_remains_without_redistribution':
+      return counts.pressureRemainsCellCount
+    case 'comparison_inconclusive':
+      return counts.comparisonInconclusiveCellCount
+    case 'redistribution_without_pressure':
+      return counts.redistributionWithoutPressureCellCount
+    default: {
+      const exhaustive: never = state
+      return exhaustive
+    }
+  }
+}
+
+function dominantRedistributionCausalityState(
+  counts: GeneratedPlanRedistributionCausalityCounts,
+): GeneratedPlanRedistributionDominantState {
+  const states: readonly GeneratedPlanRedistributionCausalityState[] = [
+    'likely_redistribution_caused',
+    'pressure_remains_without_redistribution',
+    'redistribution_without_pressure',
+    'comparison_inconclusive',
+  ]
+  const rankedStates = states
+    .map((state) => ({ state, count: redistributionCausalityStateCount(counts, state) }))
+    .sort((a, b) => b.count - a.count)
+  const [first, second] = rankedStates
+  if (!first || first.count === 0) return 'comparison_inconclusive'
+  if (second && first.count === second.count) return 'mixed_cell_states'
+  return first.state
+}
+
+function groupRedistributionCausalityActionState(
+  counts: GeneratedPlanRedistributionCausalityCounts,
+): GeneratedPlanRedistributionCausalityState {
+  const interpretableCellCount =
+    counts.totalAffectedCellCount - counts.comparisonInconclusiveCellCount
+  if (interpretableCellCount <= 0) return 'comparison_inconclusive'
+  if (counts.pressureRemainsCellCount > 0) return 'pressure_remains_without_redistribution'
+  if (counts.pressureDisappearsCellCount > 0) return 'likely_redistribution_caused'
+  if (counts.redistributionWithoutPressureCellCount > 0) return 'redistribution_without_pressure'
+  return 'comparison_inconclusive'
+}
+
+function followUpRoutesForRedistributionCausalityState(
+  state: GeneratedPlanRedistributionCausalityState,
+): readonly GeneratedPlanRedistributionFollowUpRoute[] {
+  switch (state) {
+    case 'likely_redistribution_caused':
+      return ['future_generator_policy_decision']
+    case 'pressure_remains_without_redistribution':
+      return [
+        'workload_review',
+        'block_shape_review',
+        'source_backed_proposal_work',
+        'u6_proposal_admission_candidate',
+      ]
+    case 'comparison_inconclusive':
+      return ['comparison_support_needed']
+    case 'redistribution_without_pressure':
+      return ['no_implementation_action_yet']
+    default: {
+      const exhaustive: never = state
+      return exhaustive
+    }
+  }
+}
+
+function followUpRoutesForRedistributionCausalityCounts(
+  counts: GeneratedPlanRedistributionCausalityCounts,
+  actionState: GeneratedPlanRedistributionCausalityState,
+): readonly GeneratedPlanRedistributionFollowUpRoute[] {
+  const routes = new Set(followUpRoutesForRedistributionCausalityState(actionState))
+  if (counts.pressureDisappearsCellCount > 0) routes.add('future_generator_policy_decision')
+  if (counts.comparisonInconclusiveCellCount > 0) routes.add('comparison_support_needed')
+  return [...routes]
+}
+
+function classifyRedistributionCausalityCell(
+  group: GeneratedPlanObservationGroup,
+  cell: GeneratedPlanObservationAffectedCell,
+): GeneratedPlanRedistributionCausalityCellReceipt {
+  const hasRedistributionEvidence =
+    cell.redistribution !== undefined ||
+    affectedCellHasObservationCode(cell, 'optional_slot_redistribution')
+  const baseCounts: GeneratedPlanRedistributionCausalityCounts = {
+    ...emptyRedistributionCausalityCounts(),
+    totalAffectedCellCount: 1,
+    redistributionAffectedCellCount: hasRedistributionEvidence ? 1 : 0,
+    counterfactualUnfilledMinutes: cell.redistribution?.redistributedMinutes ?? 0,
+  }
+
+  if (!group.drillId || !group.variantId) {
+    return {
+      ...baseCounts,
+      comparisonInconclusiveCellCount: 1,
+      state: 'comparison_inconclusive',
+    }
+  }
+
+  if (cell.plannedMinutes === undefined || cell.allocatedMinutes === undefined) {
+    return {
+      ...baseCounts,
+      comparisonInconclusiveCellCount: 1,
+      state: 'comparison_inconclusive',
+    }
+  }
+
+  const authoredMinMinutes = cell.authoredMinMinutes ?? group.authoredMinMinutes
+  const authoredMaxMinutes = cell.authoredMaxMinutes ?? group.authoredMaxMinutes
+  const fatigueMaxMinutes = cell.fatigueMaxMinutes ?? group.fatigueMaxMinutes
+
+  if (authoredMinMinutes === undefined || authoredMaxMinutes === undefined) {
+    return {
+      ...baseCounts,
+      comparisonInconclusiveCellCount: 1,
+      state: 'comparison_inconclusive',
+    }
+  }
+
+  if (affectedCellHasObservationCode(cell, 'over_fatigue_cap') && fatigueMaxMinutes === undefined) {
+    return {
+      ...baseCounts,
+      comparisonInconclusiveCellCount: 1,
+      state: 'comparison_inconclusive',
+    }
+  }
+
+  const currentOverAuthoredMax = cell.plannedMinutes > authoredMaxMinutes
+  const currentOverFatigueCap =
+    fatigueMaxMinutes !== undefined && cell.plannedMinutes > fatigueMaxMinutes
+  const currentUnderAuthoredMin = cell.plannedMinutes < authoredMinMinutes
+  const allocatedOverAuthoredMax = cell.allocatedMinutes > authoredMaxMinutes
+  const allocatedOverFatigueCap =
+    fatigueMaxMinutes !== undefined && cell.allocatedMinutes > fatigueMaxMinutes
+  const allocatedUnderAuthoredMin = cell.allocatedMinutes < authoredMinMinutes
+
+  const pressureCounts: GeneratedPlanRedistributionCausalityCounts = {
+    ...baseCounts,
+    currentOverAuthoredMaxCellCount: currentOverAuthoredMax ? 1 : 0,
+    currentOverFatigueCapCellCount: currentOverFatigueCap ? 1 : 0,
+    currentUnderAuthoredMinCellCount: currentUnderAuthoredMin ? 1 : 0,
+    allocatedOverAuthoredMaxCellCount: allocatedOverAuthoredMax ? 1 : 0,
+    allocatedOverFatigueCapCellCount: allocatedOverFatigueCap ? 1 : 0,
+    allocatedUnderAuthoredMinCellCount: allocatedUnderAuthoredMin ? 1 : 0,
+    nonRedistributionOverCapCellCount:
+      !hasRedistributionEvidence && (currentOverAuthoredMax || currentOverFatigueCap) ? 1 : 0,
+    nonRedistributionUnderMinCellCount:
+      !hasRedistributionEvidence && currentUnderAuthoredMin ? 1 : 0,
+  }
+
+  const hasCurrentPressure =
+    currentOverAuthoredMax || currentOverFatigueCap || currentUnderAuthoredMin
+  const hasAllocatedPressure =
+    allocatedOverAuthoredMax || allocatedOverFatigueCap || allocatedUnderAuthoredMin
+
+  if (hasCurrentPressure && hasAllocatedPressure) {
+    return {
+      ...pressureCounts,
+      pressureRemainsCellCount: 1,
+      state: 'pressure_remains_without_redistribution',
+    }
+  }
+
+  if (hasCurrentPressure) {
+    return {
+      ...pressureCounts,
+      pressureDisappearsCellCount: 1,
+      state: 'likely_redistribution_caused',
+    }
+  }
+
+  if (hasRedistributionEvidence) {
+    return {
+      ...pressureCounts,
+      redistributionWithoutPressureCellCount: 1,
+      state: 'redistribution_without_pressure',
+    }
+  }
+
+  return {
+    ...pressureCounts,
+    comparisonInconclusiveCellCount: 1,
+    state: 'comparison_inconclusive',
+  }
+}
+
+function buildRedistributionCausalityGroupReceipt(
+  group: GeneratedPlanObservationGroup,
+  entry: GeneratedPlanTriageEntry,
+): GeneratedPlanRedistributionCausalityGroupReceipt {
+  const counts = group.affectedCells
+    .map((cell) => classifyRedistributionCausalityCell(group, cell))
+    .reduce(addRedistributionCausalityCounts, emptyRedistributionCausalityCounts())
+  const actionState = groupRedistributionCausalityActionState(counts)
+
+  return {
+    groupKey: group.groupKey,
+    diagnosticFingerprint: group.diagnosticFingerprint,
+    triageStatus: entry.triageStatus,
+    triageRoute: entry.route,
+    reviewedReportId: entry.reviewedReportId,
+    drillId: group.drillId,
+    variantId: group.variantId,
+    blockType: group.blockType,
+    observationCodes: group.observationCodes,
+    actionState,
+    dominantCellState: dominantRedistributionCausalityState(counts),
+    hasIncompleteEvidence: counts.comparisonInconclusiveCellCount > 0,
+    followUpRoutes: followUpRoutesForRedistributionCausalityCounts(counts, actionState),
+    counts,
+  }
+}
+
+export function buildGeneratedPlanRedistributionCausalityReceipt(
+  groups: readonly GeneratedPlanObservationGroup[],
+  registry: readonly GeneratedPlanTriageEntry[],
+): GeneratedPlanRedistributionCausalityReceipt {
+  const entriesByKey = new Map(registry.map((entry) => [entry.groupKey, entry] as const))
+  const receiptGroups = groups
+    .map((group) => ({ group, entry: entriesByKey.get(group.groupKey) }))
+    .filter(
+      (item): item is { group: GeneratedPlanObservationGroup; entry: GeneratedPlanTriageEntry } => {
+        const { entry } = item
+        return (
+          entry !== undefined &&
+          compressionLaneForGeneratedPlanTriageItem(item.group, entry) ===
+            'generator_redistribution_investigation' &&
+          entry.triageStatus !== 'resolved' &&
+          entry.triageStatus !== 'superseded'
+        )
+      },
+    )
+    .map(({ group, entry }) => buildRedistributionCausalityGroupReceipt(group, entry))
+
+  return {
+    comparisonMode: REDISTRIBUTION_CAUSALITY_COMPARISON_MODE,
+    runtimeBoundary: REDISTRIBUTION_CAUSALITY_RUNTIME_BOUNDARY,
+    groupCount: receiptGroups.length,
+    counts: receiptGroups
+      .map((group) => group.counts)
+      .reduce(addRedistributionCausalityCounts, emptyRedistributionCausalityCounts()),
+    groups: receiptGroups,
+  }
 }
 
 function routeCountsForEntries(
@@ -594,6 +977,10 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
     routeCounts.set(entry.route, (routeCounts.get(entry.route) ?? 0) + 1)
   }
   const decisionDebtPrompts = buildGeneratedPlanDecisionDebtPrompts(groups, registry)
+  const redistributionCausalityReceipt = buildGeneratedPlanRedistributionCausalityReceipt(
+    groups,
+    registry,
+  )
   const decisionDebtLines =
     decisionDebtPrompts.length === 0
       ? ['- None.']
@@ -622,6 +1009,30 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
             '',
           ]
         })
+  const redistributionCausalityLines =
+    redistributionCausalityReceipt.groups.length === 0
+      ? ['- None.']
+      : [
+          `- Comparison mode: \`${redistributionCausalityReceipt.comparisonMode}\``,
+          `- Runtime boundary: ${redistributionCausalityReceipt.runtimeBoundary}`,
+          `- Groups: ${redistributionCausalityReceipt.groupCount}; total affected cells: ${redistributionCausalityReceipt.counts.totalAffectedCellCount}`,
+          `- Redistribution-affected cells: ${redistributionCausalityReceipt.counts.redistributionAffectedCellCount}`,
+          `- Current pressure cells: over authored max ${redistributionCausalityReceipt.counts.currentOverAuthoredMaxCellCount}, over fatigue cap ${redistributionCausalityReceipt.counts.currentOverFatigueCapCellCount}, under authored min ${redistributionCausalityReceipt.counts.currentUnderAuthoredMinCellCount}`,
+          `- Allocated-duration pressure cells: over authored max ${redistributionCausalityReceipt.counts.allocatedOverAuthoredMaxCellCount}, over fatigue cap ${redistributionCausalityReceipt.counts.allocatedOverFatigueCapCellCount}, under authored min ${redistributionCausalityReceipt.counts.allocatedUnderAuthoredMinCellCount}`,
+          `- Non-redistribution pressure cells: over cap ${redistributionCausalityReceipt.counts.nonRedistributionOverCapCellCount}, under authored min ${redistributionCausalityReceipt.counts.nonRedistributionUnderMinCellCount}`,
+          `- Pressure disappears under allocated-duration counterfactual: ${redistributionCausalityReceipt.counts.pressureDisappearsCellCount}`,
+          `- Pressure remains without redistribution: ${redistributionCausalityReceipt.counts.pressureRemainsCellCount}`,
+          `- Comparison inconclusive cells: ${redistributionCausalityReceipt.counts.comparisonInconclusiveCellCount}`,
+          `- Redistribution without cap/min pressure cells: ${redistributionCausalityReceipt.counts.redistributionWithoutPressureCellCount}`,
+          `- Counterfactual unfilled minutes across affected cells: ${redistributionCausalityReceipt.counts.counterfactualUnfilledMinutes}`,
+          '',
+          '### Redistribution Causality Groups',
+          '',
+          ...redistributionCausalityReceipt.groups.map(
+            (group) =>
+              `- \`${group.groupKey}\`: action \`${group.actionState}\`, dominant \`${group.dominantCellState}\`, incomplete evidence ${group.hasIncompleteEvidence ? 'yes' : 'no'}, pressure disappears ${group.counts.pressureDisappearsCellCount}, pressure remains ${group.counts.pressureRemainsCellCount}, non-redistribution pressure ${group.counts.nonRedistributionOverCapCellCount + group.counts.nonRedistributionUnderMinCellCount}, inconclusive ${group.counts.comparisonInconclusiveCellCount}, follow-up ${group.followUpRoutes.map((route) => `\`${route}\``).join(', ')}`,
+          ),
+        ]
 
   const lines = [
     '## Triage Summary',
@@ -638,6 +1049,10 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
     '## Decision-Debt Compression',
     '',
     ...decisionDebtLines,
+    '',
+    '## Redistribution Causality Receipt',
+    '',
+    ...redistributionCausalityLines,
     '',
     '## New / Untriaged Blockers',
     '',

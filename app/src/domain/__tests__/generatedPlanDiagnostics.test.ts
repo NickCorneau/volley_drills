@@ -3,21 +3,25 @@ import type { BlockSlotType, Drill, DrillVariant, SessionDraft, TimeProfile } fr
 import {
   DEFAULT_GENERATED_PLAN_SEEDS,
   DEFAULT_GENERATED_PLAN_SURFACE,
+  DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT,
   analyzeSelectedDraftStretch,
   analyzeGeneratedPlanDraft,
   buildApplicableGeneratedPlanInputs,
   buildGeneratedPlanDiagnostics,
   buildGeneratedPlanMatrix,
   buildGeneratedPlanObservationGroups,
+  buildGeneratedPlanSurfaceContractReport,
   buildGeneratedPlanSurfaceSummary,
   isGeneratedPlanDiagnosticStatus,
   summarizeGeneratedPlanDiagnostics,
+  validateGeneratedPlanSurfaceContract,
 } from '../generatedPlanDiagnostics'
 import {
   PLAYER_LEVELS,
   READINESS_CONFIGURATIONS,
   READINESS_DURATIONS,
   VISIBLE_FOCUSES,
+  type ReadinessConfiguration,
 } from '../sessionAssembly/focusReadiness'
 import { buildDraft, buildDraftWithAssemblyTrace, type DraftAssemblyTrace } from '../sessionBuilder'
 
@@ -156,6 +160,316 @@ describe('generated plan diagnostic matrix', () => {
     ])
     expect(summary.notApplicableCount).toBe(1)
     expect(summary.applicableCount).toBe(0)
+  })
+
+  it('validates the default supported surface contract', () => {
+    const validation = validateGeneratedPlanSurfaceContract(DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT)
+
+    expect(validation.blockingIssues).toEqual([])
+    expect(DEFAULT_GENERATED_PLAN_SURFACE).toEqual(DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT.included)
+  })
+
+  it('fails validation for silent supported-surface omissions and shrinkage', () => {
+    const validation = validateGeneratedPlanSurfaceContract({
+      ...DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT,
+      included: {
+        ...DEFAULT_GENERATED_PLAN_SURFACE,
+        durations: [15, 25],
+      },
+      excluded: [],
+    })
+
+    expect(validation.blockingIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'missing_required_surface_value',
+          dimension: 'duration',
+          value: '40',
+        }),
+      ]),
+    )
+  })
+
+  it('rejects deferring current supported surface values by reason alone', () => {
+    const validation = validateGeneratedPlanSurfaceContract({
+      ...DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT,
+      included: {
+        ...DEFAULT_GENERATED_PLAN_SURFACE,
+        durations: [15, 25],
+      },
+      excluded: [
+        ...DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT.excluded,
+        {
+          state: 'pre_activation_deferred',
+          dimension: 'duration',
+          value: '40',
+          reason: '40-minute generated diagnostics are deferred while the surface contract fixture proves shrinkage review.',
+          authority: 'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
+          revisitTrigger: 'Restore before any product-supported 40-minute diagnostic surface ships.',
+        },
+      ],
+    })
+
+    expect(validation.blockingIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'missing_required_surface_value',
+          dimension: 'duration',
+          value: '40',
+        }),
+        expect.objectContaining({
+          code: 'unsupported_user_visible_surface',
+          dimension: 'duration',
+          value: '40',
+        }),
+      ]),
+    )
+  })
+
+  it('rejects placeholder deferral reasons', () => {
+    const validation = validateGeneratedPlanSurfaceContract({
+      ...DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT,
+      excluded: [
+        ...DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT.excluded,
+        {
+          state: 'pre_activation_deferred',
+          dimension: 'duration',
+          value: '40',
+          reason: 'unsupported',
+          authority: 'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
+          revisitTrigger: 'Replace with a specific product boundary.',
+        },
+      ],
+    })
+
+    expect(validation.blockingIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'placeholder_surface_reason',
+          dimension: 'duration',
+          value: '40',
+        }),
+      ]),
+    )
+  })
+
+  it('rejects unknown included configurations even when their setup context can generate', () => {
+    const pairOpenConfiguration = requireFixture(
+      READINESS_CONFIGURATIONS.find((configuration) => configuration.id === 'pair_open'),
+      'Missing pair_open readiness configuration',
+    )
+    const duplicatePairOpenConfiguration: ReadinessConfiguration = {
+      id: 'pair_open_shadow' as ReadinessConfiguration['id'],
+      context: pairOpenConfiguration.context,
+    }
+    const validation = validateGeneratedPlanSurfaceContract({
+      ...DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT,
+      included: {
+        ...DEFAULT_GENERATED_PLAN_SURFACE,
+        configurations: [...DEFAULT_GENERATED_PLAN_SURFACE.configurations, duplicatePairOpenConfiguration],
+      },
+    })
+
+    expect(validation.blockingIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'unknown_included_configuration',
+          dimension: 'configuration',
+          value: 'pair_open_shadow',
+        }),
+        expect.objectContaining({
+          code: 'unknown_included_surface_value',
+          dimension: 'configuration',
+          value: 'pair_open_shadow',
+        }),
+      ]),
+    )
+  })
+
+  it('rejects canonical configuration ids paired with non-canonical contexts', () => {
+    const pairOpenConfiguration = requireFixture(
+      READINESS_CONFIGURATIONS.find((configuration) => configuration.id === 'pair_open'),
+      'Missing pair_open readiness configuration',
+    )
+    const validation = validateGeneratedPlanSurfaceContract({
+      ...DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT,
+      included: {
+        ...DEFAULT_GENERATED_PLAN_SURFACE,
+        configurations: [
+          {
+            id: 'solo_net',
+            context: pairOpenConfiguration.context,
+          },
+        ],
+      },
+    })
+
+    expect(validation.blockingIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'configuration_context_mismatch',
+          dimension: 'configuration',
+          value: 'solo_net',
+        }),
+      ]),
+    )
+  })
+
+  it('rejects unknown included values across generated surface dimensions', () => {
+    const validation = validateGeneratedPlanSurfaceContract({
+      ...DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT,
+      included: {
+        ...DEFAULT_GENERATED_PLAN_SURFACE,
+        durations: [...DEFAULT_GENERATED_PLAN_SURFACE.durations, 99 as TimeProfile],
+        seeds: [...DEFAULT_GENERATED_PLAN_SURFACE.seeds, 'matrix-e'],
+      },
+    })
+
+    expect(validation.blockingIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'unknown_included_surface_value', dimension: 'duration', value: '99' }),
+        expect.objectContaining({ code: 'unknown_included_surface_value', dimension: 'seed', value: 'matrix-e' }),
+      ]),
+    )
+  })
+
+  it('rejects unknown and conflicting excluded surface values', () => {
+    const validation = validateGeneratedPlanSurfaceContract({
+      ...DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT,
+      excluded: [
+        ...DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT.excluded,
+        {
+          state: 'pre_activation_deferred',
+          dimension: 'duration',
+          value: '999',
+          reason: 'Fixture value proves typoed deferred values cannot enter report evidence.',
+          authority: 'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
+          revisitTrigger: 'Replace with a real supported duration before use.',
+        },
+        {
+          state: 'pre_activation_deferred',
+          dimension: 'seed',
+          value: 'matrix-a',
+          reason: 'Fixture proves included values cannot also be deferred.',
+          authority: 'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
+          revisitTrigger: 'Remove the conflict before report generation.',
+        },
+      ],
+    })
+
+    expect(validation.blockingIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'unknown_excluded_surface_value', dimension: 'duration', value: '999' }),
+        expect.objectContaining({ code: 'conflicting_surface_contract_state', dimension: 'seed', value: 'matrix-a' }),
+        expect.objectContaining({ code: 'unsupported_user_visible_surface', dimension: 'seed', value: 'matrix-a' }),
+      ]),
+    )
+  })
+
+  it('rejects empty and duplicate included surface dimensions', () => {
+    const validation = validateGeneratedPlanSurfaceContract({
+      ...DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT,
+      included: {
+        ...DEFAULT_GENERATED_PLAN_SURFACE,
+        focuses: [],
+        seeds: ['matrix-a', 'matrix-a'],
+      },
+    })
+
+    expect(validation.blockingIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'empty_included_surface_dimension', dimension: 'focus' }),
+        expect.objectContaining({ code: 'duplicate_included_surface_value', dimension: 'seed', value: 'matrix-a' }),
+      ]),
+    )
+  })
+
+  it('keeps future theme coverage reserved outside the generated matrix', () => {
+    expect(DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT.excluded).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          state: 'reserved_future',
+          dimension: 'theme',
+          value: 'future_curated_themes',
+        }),
+      ]),
+    )
+  })
+
+  it('rejects non-reserved theme entries before a theme contract exists', () => {
+    const validation = validateGeneratedPlanSurfaceContract({
+      ...DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT,
+      excluded: [
+        {
+          state: 'pre_activation_deferred',
+          dimension: 'theme',
+          value: 'future_curated_themes',
+          reason: 'Fixture proves themes cannot be partially deferred as coverage.',
+          authority: 'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
+          revisitTrigger: 'Replace only when a concrete theme contract exists.',
+        },
+      ],
+    })
+
+    expect(validation.blockingIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'theme_coverage_requires_contract',
+          dimension: 'theme',
+          value: 'future_curated_themes',
+        }),
+      ]),
+    )
+  })
+
+  it('validates cell-level not-applicable reasons and coordinates', () => {
+    const validNotApplicableCell = {
+      focus: 'serve' as const,
+      configuration: READINESS_CONFIGURATIONS[0].id,
+      level: 'beginner' as const,
+      duration: 15 as const,
+      seed: 'matrix-a',
+      reason: 'Fixture proves not-applicable cell-level reasons are validated.',
+    }
+    const validation = validateGeneratedPlanSurfaceContract({
+      ...DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT,
+      included: {
+        ...DEFAULT_GENERATED_PLAN_SURFACE,
+        notApplicable: [
+          validNotApplicableCell,
+          validNotApplicableCell,
+          {
+            ...validNotApplicableCell,
+            seed: 'unknown-seed',
+            reason: 'unsupported',
+          },
+        ],
+      },
+    })
+
+    expect(validation.blockingIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'duplicate_not_applicable_cell' }),
+        expect.objectContaining({ code: 'invalid_not_applicable_cell', dimension: 'seed' }),
+        expect.objectContaining({ code: 'placeholder_not_applicable_reason' }),
+      ]),
+    )
+  })
+
+  it('reports exact seed IDs and reserved surface reasons for generated artifacts', () => {
+    const report = buildGeneratedPlanSurfaceContractReport()
+
+    expect(report.included.seedIds).toEqual(['matrix-a', 'matrix-b', 'matrix-c', 'matrix-d'])
+    expect(report.excluded).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          dimension: 'theme',
+          state: 'reserved_future',
+          reason: expect.stringContaining('concrete theme contract'),
+        }),
+      ]),
+    )
+    expect(report.validationIssues).toEqual([])
   })
 
   it('guards diagnostic terminal statuses', () => {
@@ -347,6 +661,74 @@ describe('seeded generated plan diagnostics', () => {
     ])
   })
 
+  it('fails closed when a raw diagnostic surface uses an unknown configuration id', () => {
+    const pairOpenConfiguration = requireFixture(
+      READINESS_CONFIGURATIONS.find((configuration) => configuration.id === 'pair_open'),
+      'Missing pair_open readiness configuration',
+    )
+    const results = buildGeneratedPlanDiagnostics({
+      ...DEFAULT_GENERATED_PLAN_SURFACE,
+      focuses: ['serve'],
+      configurations: [
+        {
+          id: 'pair_open_shadow' as ReadinessConfiguration['id'],
+          context: pairOpenConfiguration.context,
+        },
+      ],
+      levels: ['beginner'],
+      durations: [15],
+      seeds: ['unknown-config'],
+    })
+
+    expect(results).toEqual([
+      expect.objectContaining({
+        configuration: 'pair_open_shadow',
+        status: 'hard_failure',
+        hardFailures: expect.arrayContaining([
+          expect.objectContaining({
+            code: 'no_draft',
+            message: expect.stringContaining('No canonical readiness configuration'),
+          }),
+        ]),
+      }),
+    ])
+  })
+
+  it('fails closed when a raw diagnostic surface reuses a canonical id with a different context', () => {
+    const pairOpenConfiguration = requireFixture(
+      READINESS_CONFIGURATIONS.find((configuration) => configuration.id === 'pair_open'),
+      'Missing pair_open readiness configuration',
+    )
+    const results = buildGeneratedPlanDiagnostics({
+      ...DEFAULT_GENERATED_PLAN_SURFACE,
+      focuses: ['serve'],
+      configurations: [
+        {
+          id: 'solo_net',
+          context: pairOpenConfiguration.context,
+        },
+      ],
+      levels: ['beginner'],
+      durations: [15],
+      seeds: ['canonical-config'],
+    })
+
+    expect(results[0]).toEqual(
+      expect.objectContaining({
+        configuration: 'solo_net',
+        status: 'hard_failure',
+        hardFailures: expect.arrayContaining([
+          expect.objectContaining({
+            code: 'no_draft',
+            message: expect.stringContaining(
+              'Diagnostic surface configuration context does not match canonical readiness configuration',
+            ),
+          }),
+        ]),
+      }),
+    )
+  })
+
   it('preserves not-applicable cells through the diagnostic summary path', () => {
     const surface = {
       ...DEFAULT_GENERATED_PLAN_SURFACE,
@@ -397,6 +779,7 @@ describe('seeded generated plan diagnostics', () => {
         configurations: [READINESS_CONFIGURATIONS[0].id],
         levels: ['beginner'],
         durations: [40],
+        seedIds: ['summary-seed'],
         seedCount: 1,
         cellCount: 1,
       }),
