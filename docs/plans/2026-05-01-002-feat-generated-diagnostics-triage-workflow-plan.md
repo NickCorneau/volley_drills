@@ -4,7 +4,7 @@ title: "feat: Add generated diagnostics triage workflow"
 status: active
 stage: validation
 type: plan
-summary: "Implementation plan for turning generated-plan diagnostics into a docs-first triage workflow. Implemented slices now cover stable observation identity, triage workbench, freshness gates, decision-debt compression, workload guidance, dynamic surface sentinels, redistribution causality receipts, the D47 proposal-admission ticket, the comparator-first D47 gap closure ledger, and the D01 comparator gap-fill proposal; U6 catalog impact preview remains deferred until a concrete catalog/cap proposal exists."
+summary: "Implementation plan for turning generated-plan diagnostics into a docs-first triage workflow. Implemented slices now cover stable observation identity, triage workbench, freshness gates, decision-debt compression, workload guidance, dynamic surface sentinels, redistribution causality receipts, the D47 proposal-admission ticket, the comparator-first D47 gap closure ledger, the D01 comparator gap-fill proposal, and the D01 workload/block-shape proposal; U6 catalog impact preview remains deferred until a concrete catalog/cap proposal exists."
 date: 2026-05-01
 origin: docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md
 deepened: 2026-05-01
@@ -16,7 +16,7 @@ deepened: 2026-05-01
 
 Add the workflow layer that turns generated-plan diagnostics from a report into a sequenced decision system. The first implementation slices created stable observation-group identity, a compact triage workbench, freshness and graduation gates, decision-debt compression, workload metadata guidance, and dynamic surface sentinels. The latest slice adds a diagnostic-only redistribution causality receipt so generator-policy groups can be reviewed as repeatable evidence before any runtime generator or catalog changes.
 
-Status note (2026-05-02): U1-U5, U7, U8, the D47 proposal-admission ticket, the comparator-first D47 gap closure ledger, and the D01 comparator gap-fill proposal are implemented and represented in the committed report/triage artifacts. U6 catalog impact preview remains intentionally active/deferred until there is a concrete source-backed catalog, workload-cap, or candidate activation proposal to preview.
+Status note (2026-05-02): U1-U5, U7, U8, the D47 proposal-admission ticket, the comparator-first D47 gap closure ledger, the D01 comparator gap-fill proposal, and the D01 workload/block-shape proposal are implemented and represented in the committed report/triage artifacts. U6 catalog impact preview remains intentionally active/deferred until there is a concrete source-backed catalog, workload-cap, or candidate activation proposal to preview.
 
 ---
 
@@ -55,6 +55,8 @@ The post-U1-U3 continuation follows `docs/brainstorms/2026-05-01-generated-diagn
 **D47 gap-closure addendum:** The D47 admission slice is extended by `docs/brainstorms/2026-05-02-generated-diagnostics-d47-gap-closure-ledger-requirements.md` and planned in `docs/plans/2026-05-02-003-feat-d47-gap-closure-ledger-plan.md`; it keeps D47 comparator-first and not authorized until a simpler candidate or no-change baseline is compared.
 
 **D01 comparator gap-fill addendum:** The D47 ledger's selected comparator is extended by `docs/brainstorms/2026-05-02-generated-diagnostics-d01-comparator-gap-fill-proposal-requirements.md` and planned in `docs/plans/2026-05-02-004-feat-d01-gap-fill-proposal-plan.md`; it keeps D01 as a workload/block-shape proposal candidate before any catalog, workload metadata, source-backed, U6 preview, or generator edits.
+
+**D01 workload/block-shape addendum:** The D01 comparator proposal is extended by `docs/brainstorms/2026-05-02-generated-diagnostics-d01-workload-block-shape-proposal-requirements.md` and planned in `docs/plans/2026-05-02-006-feat-d01-workload-block-shape-proposal-plan.md`; it selects block-shape review as the primary candidate disposition, keeps metadata review secondary, and leaves all fill actions unauthorized.
 
 ---
 

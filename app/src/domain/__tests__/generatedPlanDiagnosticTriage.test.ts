@@ -10,6 +10,7 @@ import {
   authorizationStatusForGeneratedPlanD47GapClosureState,
   buildGeneratedPlanDecisionDebtPrompts,
   buildGeneratedPlanD01GapFillProposal,
+  buildGeneratedPlanD01WorkloadBlockShapeProposal,
   buildGeneratedPlanD47GapClosureLedger,
   buildGeneratedPlanD47ProposalAdmissionTicket,
   buildGeneratedPlanRedistributionCausalityReceipt,
@@ -959,6 +960,68 @@ describe('generated plan diagnostic triage registry', () => {
     expect(proposal.authorizationStatus).toBe('not_authorized')
   })
 
+  it('builds the D01 workload block-shape proposal with block shape as the selected disposition', () => {
+    const groups = currentGroups()
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const proposal = buildGeneratedPlanD01WorkloadBlockShapeProposal(groups, registry)
+
+    expect(proposal).toEqual(
+      expect.objectContaining({
+        candidateFound: true,
+        currentnessState: 'current',
+        authorizationStatus: 'not_authorized',
+        selectedDisposition: 'block_shape_review_needed',
+        secondaryDisposition: 'metadata_review_needed',
+        metadataAction: 'unchanged',
+        sourceBackedContentDisposition: 'source_depth_blocked',
+        generatorPolicyDisposition: 'generator_policy_blocked',
+        u6Eligibility: 'blocked_until_concrete_block_or_cap_proposal',
+        reassessmentResult: 'not_started',
+        candidate: expect.objectContaining({
+          groupKey:
+            'gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+        }),
+      }),
+    )
+    expect(proposal.recommendedFutureFillShape).toContain('split, repeat, or reroute')
+    expect(proposal.blockShapeRationale).toContain('short repeated-contact work')
+    expect(proposal.noActionThreshold).toContain('policy-accepted')
+    expect(proposal.revisitTrigger).toContain('regenerated D01 pressure')
+  })
+
+  it('keeps the D01 workload block-shape proposal not authorized when D01 evidence is stale', () => {
+    const d01GroupKey =
+      'gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap'
+    const groups = currentGroups()
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups).map((entry) =>
+      entry.groupKey === d01GroupKey
+        ? { ...entry, diagnosticFingerprint: `${entry.diagnosticFingerprint}:stale` }
+        : entry,
+    )
+    const proposal = buildGeneratedPlanD01WorkloadBlockShapeProposal(groups, registry)
+
+    expect(proposal.currentnessState).toBe('stale')
+    expect(proposal.authorizationStatus).toBe('not_authorized')
+    expect(proposal.metadataAction).toBe('unchanged')
+    expect(proposal.reassessmentResult).toBe('not_started')
+  })
+
+  it('keeps the D01 workload block-shape proposal not authorized when D01 evidence is missing', () => {
+    const groups = currentGroups().filter(
+      (group) =>
+        group.groupKey !==
+        'gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+    )
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const proposal = buildGeneratedPlanD01WorkloadBlockShapeProposal(groups, registry)
+
+    expect(proposal.candidateFound).toBe(false)
+    expect(proposal.currentnessState).toBe('missing_or_shifted')
+    expect(proposal.authorizationStatus).toBe('not_authorized')
+    expect(proposal.selectedDisposition).toBe('block_shape_review_needed')
+    expect(proposal.metadataAction).toBe('unchanged')
+  })
+
   it('fails validation for unexpected unknown compression lanes', () => {
     const groups = currentGroups()
     const firstGroup = groups[0]
@@ -1047,6 +1110,13 @@ describe('generated plan diagnostic triage registry', () => {
     expect(markdown).toContain('Artifact: `workload_block_shape_proposal`')
     expect(markdown).toContain('Expected diagnostic movement: Future fill should reduce D01')
     expect(markdown).toContain('Expected training-quality movement: Future fill should improve workload honesty')
+    expect(markdown).toContain('## D01 Workload Block-Shape Proposal')
+    expect(markdown).toContain('Selected disposition: `block_shape_review_needed`')
+    expect(markdown).toContain('Secondary disposition: `metadata_review_needed`')
+    expect(markdown).toContain('Metadata action: `unchanged`')
+    expect(markdown).toContain('Recommended future fill shape: Future fill should split, repeat, or reroute')
+    expect(markdown).toContain('Source-backed content disposition: `source_depth_blocked`')
+    expect(markdown).toContain('U6 eligibility: `blocked_until_concrete_block_or_cap_proposal`')
     expect(markdown).toContain('docs/ops/workload-envelope-authoring-guide.md#short-session-cooldown-minimum')
     expect(markdown).toContain('Candidate dispositions: `accepted_policy_allowance`')
   })

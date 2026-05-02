@@ -971,11 +971,18 @@
       "canonical_for": "Focused requirements addendum for turning the D47 ledger's d01-solo comparator receipt into the first concrete gap-fill proposal candidate. Frames D01 as a simpler workload/block-shape pilot before catalog edits, workload metadata edits, source-backed activation, U6 preview tooling, or runtime generator changes."
     },
     {
+      "id": "generated-diagnostics-d01-workload-block-shape-proposal-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d01-workload-block-shape-proposal-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for turning the D01 gap-fill proposal into a concrete workload/block-shape proposal. Selects block-shape review before cap widening, keeps metadata review secondary, and blocks catalog, source-backed, U6 preview, or generator edits until a later authorized fill."
+    },
+    {
       "id": "generated-diagnostics-triage-workflow-plan-2026-05-01",
       "path": "docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md",
       "type": "plan",
       "status": "active",
-      "canonical_for": "Implementation plan for the generated diagnostics triage workflow. Sequences the R1-R8 program from docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md plus the decision-debt, workload-envelope, dynamic-surface, redistribution-causality, D47 proposal-admission, D47 gap-closure, and D01 comparator gap-fill addenda, with completed slices focused on stable observation group identity, triage registry/workbench, finding graduation gates, decision-debt compression, workload envelope guidance, dynamic surface sentinels, redistribution causality receipts, and concrete proposal handoff before U6 catalog impact preview."
+      "canonical_for": "Implementation plan for the generated diagnostics triage workflow. Sequences the R1-R8 program from docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md plus the decision-debt, workload-envelope, dynamic-surface, redistribution-causality, D47 proposal-admission, D47 gap-closure, D01 comparator gap-fill, and D01 workload/block-shape addenda, with completed slices focused on stable observation group identity, triage registry/workbench, finding graduation gates, decision-debt compression, workload envelope guidance, dynamic surface sentinels, redistribution causality receipts, and concrete proposal handoff before U6 catalog impact preview."
     },
     {
       "id": "generated-diagnostics-d47-proposal-admission-ticket-plan-2026-05-02",
@@ -999,6 +1006,14 @@
       "status": "complete",
       "active_registry": true,
       "canonical_for": "Implementation plan for adding a D01 comparator gap-fill proposal to the generated diagnostics triage workbench. Keeps D01 as a derived workload/block-shape proposal candidate before catalog edits, workload metadata edits, source-backed activation, U6 preview tooling, or runtime generator changes."
+    },
+    {
+      "id": "generated-diagnostics-d01-workload-block-shape-proposal-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-006-feat-d01-workload-block-shape-proposal-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for adding a generated D01 workload/block-shape proposal. Selects block-shape review as the primary disposition, keeps workload metadata review secondary, and blocks catalog, source-backed, U6 preview, workload metadata, or generator edits until a later authorized fill."
     },
     {
       "id": "docs-canonical-successor-metadata-plan-2026-05-02",
@@ -1034,7 +1049,7 @@
       "path": "docs/reviews/2026-05-01-generated-plan-diagnostics-triage.md",
       "type": "review",
       "status": "active",
-      "canonical_for": "Docs-first triage workbench for generated-plan routeable observation groups. Generated and validated with the diagnostics report; current snapshot records 53 registry entries, 0 blocking validation issues, 0 warning issues, 32 defer routes, 21 generator-policy-investigation routes, decision-debt compression, a redistribution causality receipt, the D47 proposal-admission ticket, the comparator-first D47 gap closure ledger, and the D01 comparator gap-fill proposal so new/untriaged groups, stale fingerprints, stale receipt evidence, or premature fill authorization become visible before catalog or generator changes."
+      "canonical_for": "Docs-first triage workbench for generated-plan routeable observation groups. Generated and validated with the diagnostics report; current snapshot records 53 registry entries, 0 blocking validation issues, 0 warning issues, 32 defer routes, 21 generator-policy-investigation routes, decision-debt compression, a redistribution causality receipt, the D47 proposal-admission ticket, the comparator-first D47 gap closure ledger, the D01 comparator gap-fill proposal, and the D01 workload/block-shape proposal so new/untriaged groups, stale fingerprints, stale receipt evidence, or premature fill authorization become visible before catalog or generator changes."
     },
     {
       "id": "focus-coverage-gap-cards-2026-04-30",

@@ -355,6 +355,55 @@ export interface GeneratedPlanD01GapFillProposal {
   readonly reassessmentBoundary: string
 }
 
+export type GeneratedPlanD01WorkloadBlockShapeDisposition =
+  | 'block_shape_review_needed'
+  | 'metadata_review_needed'
+  | 'source_depth_blocked'
+  | 'generator_policy_blocked'
+
+export type GeneratedPlanD01WorkloadBlockShapeMetadataAction = 'unchanged'
+
+export type GeneratedPlanD01WorkloadBlockShapeU6Eligibility =
+  'blocked_until_concrete_block_or_cap_proposal'
+
+export interface GeneratedPlanD01WorkloadBlockShapeProposal {
+  readonly candidateFound: boolean
+  readonly candidate: GeneratedPlanD47ProposalAdmissionCandidate
+  readonly currentnessState: GeneratedPlanD47GapClosureCurrentnessState
+  readonly authorizationStatus: Extract<
+    GeneratedPlanD47GapClosureAuthorizationStatus,
+    'not_authorized'
+  >
+  readonly selectedDisposition: Extract<
+    GeneratedPlanD01WorkloadBlockShapeDisposition,
+    'block_shape_review_needed'
+  >
+  readonly secondaryDisposition: Extract<
+    GeneratedPlanD01WorkloadBlockShapeDisposition,
+    'metadata_review_needed'
+  >
+  readonly metadataAction: GeneratedPlanD01WorkloadBlockShapeMetadataAction
+  readonly targetSurface: string
+  readonly evidenceLayer: string
+  readonly recommendedFutureFillShape: string
+  readonly blockShapeRationale: string
+  readonly expectedDiagnosticMovement: string
+  readonly expectedTrainingQualityMovement: string
+  readonly noActionThreshold: string
+  readonly revisitTrigger: string
+  readonly sourceBackedContentDisposition: Extract<
+    GeneratedPlanD01WorkloadBlockShapeDisposition,
+    'source_depth_blocked'
+  >
+  readonly generatorPolicyDisposition: Extract<
+    GeneratedPlanD01WorkloadBlockShapeDisposition,
+    'generator_policy_blocked'
+  >
+  readonly u6Eligibility: GeneratedPlanD01WorkloadBlockShapeU6Eligibility
+  readonly reassessmentResult: GeneratedPlanD47GapClosureReassessmentResult
+  readonly reassessmentBoundary: string
+}
+
 export interface GeneratedPlanTriageEntry {
   readonly groupKey: string
   readonly diagnosticFingerprint: string
@@ -1418,6 +1467,44 @@ export function buildGeneratedPlanD01GapFillProposal(
   }
 }
 
+export function buildGeneratedPlanD01WorkloadBlockShapeProposal(
+  groups: readonly GeneratedPlanObservationGroup[],
+  registry: readonly GeneratedPlanTriageEntry[],
+): GeneratedPlanD01WorkloadBlockShapeProposal {
+  const gapFillProposal = buildGeneratedPlanD01GapFillProposal(groups, registry)
+
+  return {
+    candidateFound: gapFillProposal.candidateFound,
+    candidate: gapFillProposal.candidate,
+    currentnessState: gapFillProposal.currentnessState,
+    authorizationStatus: 'not_authorized',
+    selectedDisposition: 'block_shape_review_needed',
+    secondaryDisposition: 'metadata_review_needed',
+    metadataAction: 'unchanged',
+    targetSurface: gapFillProposal.targetSurface,
+    evidenceLayer:
+      'Generated trace and block allocation are primary; D01 variant workload metadata is secondary.',
+    recommendedFutureFillShape:
+      'Future fill should split, repeat, or reroute the main-skill shape instead of stretching one short beginner passing drill.',
+    blockShapeRationale:
+      'D01 copy and streak scoring describe short repeated-contact work, not a long continuous main-skill workload.',
+    expectedDiagnosticMovement:
+      'A future block-shape fill should reduce D01 over-cap/fatigue pressure or route remaining pressure to an accepted policy allowance.',
+    expectedTrainingQualityMovement:
+      'A future fill should make beginner passing sessions feel more honest by reducing fatigue drift and clarifying when D01 repeats versus when another drill should carry the block.',
+    noActionThreshold:
+      'No change is acceptable only if remaining D01 pressure is explicitly policy-accepted with no cap widening and no hidden generator change.',
+    revisitTrigger:
+      'Revisit if regenerated D01 pressure increases, D01 becomes a top affected group again after a block-shape fill, or a concrete cap proposal is authored.',
+    sourceBackedContentDisposition: 'source_depth_blocked',
+    generatorPolicyDisposition: 'generator_policy_blocked',
+    u6Eligibility: 'blocked_until_concrete_block_or_cap_proposal',
+    reassessmentResult: 'not_started',
+    reassessmentBoundary:
+      'This proposal chooses the future fill direction only; actual diagnostic and training-quality reassessment waits for an authorized block-shape or cap proposal.',
+  }
+}
+
 function formatD47GapClosureSegmentLabel(segment: GeneratedPlanD47GapClosureSegmentLabel): string {
   switch (segment) {
     case 'pressure_disappears':
@@ -1678,6 +1765,10 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
   const d47ProposalAdmissionTicket = buildGeneratedPlanD47ProposalAdmissionTicket(groups, registry)
   const d47GapClosureLedger = buildGeneratedPlanD47GapClosureLedger(groups, registry)
   const d01GapFillProposal = buildGeneratedPlanD01GapFillProposal(groups, registry)
+  const d01WorkloadBlockShapeProposal = buildGeneratedPlanD01WorkloadBlockShapeProposal(
+    groups,
+    registry,
+  )
   const decisionDebtLines =
     decisionDebtPrompts.length === 0
       ? ['- None.']
@@ -1841,6 +1932,28 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
     `- Reassessment result: \`${d01GapFillProposal.reassessmentResult}\``,
     `- Reassessment boundary: ${d01GapFillProposal.reassessmentBoundary}`,
   ]
+  const d01WorkloadBlockShapeLines = [
+    '- Proposal source: D01 gap-fill proposal plus workload envelope authoring guide.',
+    `- Candidate: \`${d01WorkloadBlockShapeProposal.candidate.groupKey}\``,
+    `- Currentness: \`${d01WorkloadBlockShapeProposal.currentnessState}\``,
+    `- Authorization status: \`${d01WorkloadBlockShapeProposal.authorizationStatus}\``,
+    `- Selected disposition: \`${d01WorkloadBlockShapeProposal.selectedDisposition}\``,
+    `- Secondary disposition: \`${d01WorkloadBlockShapeProposal.secondaryDisposition}\``,
+    `- Metadata action: \`${d01WorkloadBlockShapeProposal.metadataAction}\``,
+    `- Target surface: ${d01WorkloadBlockShapeProposal.targetSurface}`,
+    `- Evidence layer: ${d01WorkloadBlockShapeProposal.evidenceLayer}`,
+    `- Recommended future fill shape: ${d01WorkloadBlockShapeProposal.recommendedFutureFillShape}`,
+    `- Block-shape rationale: ${d01WorkloadBlockShapeProposal.blockShapeRationale}`,
+    `- Expected diagnostic movement: ${d01WorkloadBlockShapeProposal.expectedDiagnosticMovement}`,
+    `- Expected training-quality movement: ${d01WorkloadBlockShapeProposal.expectedTrainingQualityMovement}`,
+    `- No-action threshold: ${d01WorkloadBlockShapeProposal.noActionThreshold}`,
+    `- Revisit trigger: ${d01WorkloadBlockShapeProposal.revisitTrigger}`,
+    `- Source-backed content disposition: \`${d01WorkloadBlockShapeProposal.sourceBackedContentDisposition}\``,
+    `- Generator-policy disposition: \`${d01WorkloadBlockShapeProposal.generatorPolicyDisposition}\``,
+    `- U6 eligibility: \`${d01WorkloadBlockShapeProposal.u6Eligibility}\``,
+    `- Reassessment result: \`${d01WorkloadBlockShapeProposal.reassessmentResult}\``,
+    `- Reassessment boundary: ${d01WorkloadBlockShapeProposal.reassessmentBoundary}`,
+  ]
 
   const lines = [
     '## Triage Summary',
@@ -1873,6 +1986,10 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
     '## D01 Gap-Fill Proposal',
     '',
     ...d01GapFillLines,
+    '',
+    '## D01 Workload Block-Shape Proposal',
+    '',
+    ...d01WorkloadBlockShapeLines,
     '',
     '## New / Untriaged Blockers',
     '',

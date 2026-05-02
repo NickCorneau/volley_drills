@@ -15,9 +15,11 @@ depends_on:
   - docs/brainstorms/2026-05-02-generated-diagnostics-d47-u6-proposal-admission-requirements.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-d47-gap-closure-ledger-requirements.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-d01-comparator-gap-fill-proposal-requirements.md
+  - docs/brainstorms/2026-05-02-generated-diagnostics-d01-workload-block-shape-proposal-requirements.md
   - docs/plans/2026-05-02-001-feat-d47-proposal-admission-ticket-plan.md
   - docs/plans/2026-05-02-003-feat-d47-gap-closure-ledger-plan.md
   - docs/plans/2026-05-02-004-feat-d01-gap-fill-proposal-plan.md
+  - docs/plans/2026-05-02-006-feat-d01-workload-block-shape-proposal-plan.md
 ---
 
 # Generated Plan Diagnostics Triage
@@ -244,6 +246,29 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 - Expected training-quality movement: Future fill should improve workload honesty or block-shape coherence for beginner passing without pretending catalog content changed.
 - Reassessment result: `not_started`
 - Reassessment boundary: This slice records proposal quality only; actual diagnostic and training-quality reassessment waits for a future authorized D01 fill.
+
+## D01 Workload Block-Shape Proposal
+
+- Proposal source: D01 gap-fill proposal plus workload envelope authoring guide.
+- Candidate: `gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`
+- Currentness: `current`
+- Authorization status: `not_authorized`
+- Selected disposition: `block_shape_review_needed`
+- Secondary disposition: `metadata_review_needed`
+- Metadata action: `unchanged`
+- Target surface: `d01-solo` workload envelope (`durationMaxMinutes: 5`, `fatigueCap.maxMinutes: 5`) and generated main-skill block shape.
+- Evidence layer: Generated trace and block allocation are primary; D01 variant workload metadata is secondary.
+- Recommended future fill shape: Future fill should split, repeat, or reroute the main-skill shape instead of stretching one short beginner passing drill.
+- Block-shape rationale: D01 copy and streak scoring describe short repeated-contact work, not a long continuous main-skill workload.
+- Expected diagnostic movement: A future block-shape fill should reduce D01 over-cap/fatigue pressure or route remaining pressure to an accepted policy allowance.
+- Expected training-quality movement: A future fill should make beginner passing sessions feel more honest by reducing fatigue drift and clarifying when D01 repeats versus when another drill should carry the block.
+- No-action threshold: No change is acceptable only if remaining D01 pressure is explicitly policy-accepted with no cap widening and no hidden generator change.
+- Revisit trigger: Revisit if regenerated D01 pressure increases, D01 becomes a top affected group again after a block-shape fill, or a concrete cap proposal is authored.
+- Source-backed content disposition: `source_depth_blocked`
+- Generator-policy disposition: `generator_policy_blocked`
+- U6 eligibility: `blocked_until_concrete_block_or_cap_proposal`
+- Reassessment result: `not_started`
+- Reassessment boundary: This proposal chooses the future fill direction only; actual diagnostic and training-quality reassessment waits for an authorized block-shape or cap proposal.
 
 ## New / Untriaged Blockers
 
