@@ -1,4 +1,4 @@
-import type { IncompleteReason } from '../db'
+import type { IncompleteReason } from '../model'
 import { ToggleChip } from './ui'
 
 const OPTIONS: { value: IncompleteReason; label: string }[] = [

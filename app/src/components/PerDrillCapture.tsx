@@ -1,5 +1,5 @@
 import { useId, useState } from 'react'
-import type { DifficultyTag } from '../db'
+import type { DifficultyTag } from '../model'
 import { validateStreakLongest } from '../domain/capture'
 import { PassMetricInput } from './PassMetricInput'
 import { ToggleChip } from './ui'
@@ -232,7 +232,7 @@ function CountDrawer({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="self-start text-sm font-medium text-accent underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        className="inline-flex min-h-[44px] self-start items-center text-sm font-medium text-accent underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         data-testid="per-drill-add-counts"
       >
         Add counts (optional)
@@ -304,7 +304,7 @@ function StreakDrawer({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="self-start text-sm font-medium text-accent underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        className="inline-flex min-h-[44px] self-start items-center text-sm font-medium text-accent underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         data-testid="per-drill-add-streak"
       >
         Add longest streak (optional)
@@ -331,10 +331,7 @@ function StreakDrawer({
           {successRuleDescription}
         </p>
       )}
-      <StreakInput
-        streakLongest={streakLongest}
-        onStreakLongestChange={onStreakLongestChange}
-      />
+      <StreakInput streakLongest={streakLongest} onStreakLongestChange={onStreakLongestChange} />
     </div>
   )
 }
@@ -360,9 +357,7 @@ function StreakInput({
   const helperId = useId()
   const errorId = useId()
 
-  const [text, setText] = useState(() =>
-    streakLongest === null ? '' : String(streakLongest),
-  )
+  const [text, setText] = useState(() => (streakLongest === null ? '' : String(streakLongest)))
   const [showInvalid, setShowInvalid] = useState(false)
 
   // React "adjust state during render" pattern for syncing local text

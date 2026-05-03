@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
 import { RunControls } from '../RunControls'
 
 /**
@@ -55,6 +54,10 @@ describe('RunControls Swap button (Phase F Unit 4)', () => {
     expect(screen.getByRole('button', { name: /shorten/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /skip block/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /end session/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^swap$/i }).parentElement).toHaveClass(
+      'grid',
+      'grid-cols-2',
+    )
   })
 
   it('paused state + required block + onSwap undefined: Swap and Skip both hidden', () => {

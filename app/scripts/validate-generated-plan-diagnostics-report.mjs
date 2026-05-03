@@ -222,10 +222,25 @@ depends_on:
   - docs/brainstorms/2026-05-02-generated-diagnostics-d47-gap-closure-ledger-requirements.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-d01-comparator-gap-fill-proposal-requirements.md
   - docs/brainstorms/2026-05-02-generated-diagnostics-d01-workload-block-shape-proposal-requirements.md
+  - docs/brainstorms/2026-05-02-generated-diagnostics-d01-block-shape-fill-requirements.md
+  - docs/brainstorms/2026-05-02-generated-diagnostics-d01-redistribution-handoff-requirements.md
+  - docs/brainstorms/2026-05-02-generated-diagnostics-d01-cap-catalog-fork-requirements.md
+  - docs/brainstorms/2026-05-02-gap-closure-selection-workbench-requirements.md
+  - docs/brainstorms/2026-05-02-generated-diagnostics-d47-reentry-selection-requirements.md
+  - docs/brainstorms/2026-05-02-generated-diagnostics-d47-concrete-delta-proposal-requirements.md
+  - docs/reviews/2026-05-02-d47-source-backed-gap-card.md
+  - docs/reviews/2026-05-02-d47-d05-comparator-evaluation-payload.md
   - docs/plans/2026-05-02-001-feat-d47-proposal-admission-ticket-plan.md
   - docs/plans/2026-05-02-003-feat-d47-gap-closure-ledger-plan.md
   - docs/plans/2026-05-02-004-feat-d01-gap-fill-proposal-plan.md
   - docs/plans/2026-05-02-006-feat-d01-workload-block-shape-proposal-plan.md
+  - docs/plans/2026-05-02-007-feat-d01-block-shape-fill-plan.md
+  - docs/plans/2026-05-02-008-feat-d01-redistribution-handoff-plan.md
+  - docs/plans/2026-05-02-010-feat-d01-cap-catalog-fork-plan.md
+  - docs/plans/2026-05-02-011-feat-gap-closure-selection-workbench-plan.md
+  - docs/plans/2026-05-02-012-feat-d47-d05-comparator-decision-packet-plan.md
+  - docs/plans/2026-05-02-013-feat-d47-d05-comparator-evaluation-payload-plan.md
+  - docs/plans/2026-05-02-018-feat-d49-residual-follow-up-plan.md
 ---
 
 # Generated Plan Diagnostics Triage
@@ -273,7 +288,8 @@ try {
   const results = diagnostics.buildGeneratedPlanDiagnostics()
   const summary = diagnostics.summarizeGeneratedPlanDiagnostics(results, matrix)
   const surfaceContract = diagnostics.DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT
-  const surfaceContractValidation = diagnostics.validateGeneratedPlanSurfaceContract(surfaceContract)
+  const surfaceContractValidation =
+    diagnostics.validateGeneratedPlanSurfaceContract(surfaceContract)
   if (surfaceContractValidation.blockingIssues.length > 0) {
     throw new Error(
       `Generated plan diagnostics surface contract has ${surfaceContractValidation.blockingIssues.length} blocking validation issue(s).`,
@@ -285,8 +301,10 @@ try {
     ? triage.buildInitialGeneratedPlanTriageRegistry(groups)
     : extractTriageRegistry(currentTriageMarkdown)
   const triageValidation = triage.validateGeneratedPlanTriageCoverage(groups, triageRegistry)
-  const redistributionCausalityReceipt =
-    triage.buildGeneratedPlanRedistributionCausalityReceipt(groups, triageRegistry)
+  const redistributionCausalityReceipt = triage.buildGeneratedPlanRedistributionCausalityReceipt(
+    groups,
+    triageRegistry,
+  )
   const expectedTriageMarkdown = triageMarkdown(
     triage.buildGeneratedPlanTriageWorkbenchMarkdown(groups, triageRegistry),
     triageRegistry,
@@ -346,7 +364,9 @@ try {
   } else {
     const currentMarkdown = readFileSync(reportPath, 'utf8')
     if (normalizeMarkdown(currentMarkdown) !== normalizeMarkdown(expectedMarkdown)) {
-      throw new Error('Generated plan diagnostics report is stale. Run npm run diagnostics:report:update.')
+      throw new Error(
+        'Generated plan diagnostics report is stale. Run npm run diagnostics:report:update.',
+      )
     }
     if (triageValidation.blockingIssues.length > 0) {
       throw new Error(

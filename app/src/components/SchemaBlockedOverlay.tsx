@@ -1,7 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import { isSchemaBlocked, subscribeSchemaBlocked } from '../lib/schema-blocked'
-import { ELEVATED_PANEL_SURFACE } from './ui/Card'
-import { Button } from './ui'
+import { ActionOverlay, Button } from './ui'
 
 export interface SchemaBlockedOverlayProps {
   onReload?: () => void
@@ -20,26 +19,22 @@ export function SchemaBlockedOverlay({ onReload }: SchemaBlockedOverlayProps = {
   const handleReload = onReload ?? (() => window.location.reload())
 
   return (
-    <div
+    <ActionOverlay
       role="alertdialog"
-      aria-modal="true"
-      aria-labelledby="schema-blocked-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+      title="Reload to continue"
+      description="A different version of this app is open in another tab. Close other tabs and reload to continue."
+      className="bg-black/50 px-4"
+      panelClassName="max-w-[390px]"
     >
-      <div
-        className={`mx-auto flex w-full max-w-[390px] flex-col gap-4 rounded-[12px] p-6 ${ELEVATED_PANEL_SURFACE}`}
+      <Button
+        variant="primary"
+        fullWidth
+        onClick={handleReload}
+        className="mt-4"
+        data-action-overlay-initial-focus="true"
       >
-        <h2 id="schema-blocked-title" className="text-lg font-bold text-text-primary">
-          Reload to continue
-        </h2>
-        <p className="text-sm text-text-secondary">
-          A different version of this app is open in another tab. Close other tabs and reload to
-          continue.
-        </p>
-        <Button variant="primary" fullWidth onClick={handleReload}>
-          Reload
-        </Button>
-      </div>
-    </div>
+        Reload
+      </Button>
+    </ActionOverlay>
   )
 }

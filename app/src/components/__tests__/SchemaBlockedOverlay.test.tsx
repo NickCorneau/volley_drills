@@ -1,10 +1,13 @@
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
-import { emitSchemaBlocked } from '../../lib/schema-blocked'
+import { emitSchemaBlocked, resetSchemaBlockedForTesting } from '../../lib/schema-blocked'
 import { SchemaBlockedOverlay } from '../SchemaBlockedOverlay'
 
 describe('SchemaBlockedOverlay', () => {
+  beforeEach(() => {
+    resetSchemaBlockedForTesting()
+  })
+
   it('is hidden by default', () => {
     render(<SchemaBlockedOverlay />)
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
@@ -16,18 +19,42 @@ describe('SchemaBlockedOverlay', () => {
     act(() => {
       emitSchemaBlocked()
     })
-    expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+    expect(screen.getByRole('alertdialog', { name: /reload to continue/i })).toBeInTheDocument()
     expect(screen.getByText(/close other tabs and reload/i)).toBeInTheDocument()
   })
 
   it('clicking Reload invokes onReload prop', async () => {
+    const user = userEvent.setup()
     const onReload = vi.fn()
     render(<SchemaBlockedOverlay onReload={onReload} />)
     act(() => {
       emitSchemaBlocked()
     })
-    await userEvent.click(screen.getByRole('button', { name: 'Reload' }))
+    await user.click(screen.getByRole('button', { name: 'Reload' }))
     expect(onReload).toHaveBeenCalledOnce()
+  })
+
+  it('autofocuses Reload as the only recovery action', () => {
+    render(<SchemaBlockedOverlay onReload={() => {}} />)
+    act(() => {
+      emitSchemaBlocked()
+    })
+
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Reload' }))
+  })
+
+  it('does not dismiss or reload on Escape', async () => {
+    const user = userEvent.setup()
+    const onReload = vi.fn()
+    render(<SchemaBlockedOverlay onReload={onReload} />)
+    act(() => {
+      emitSchemaBlocked()
+    })
+
+    await user.keyboard('{Escape}')
+
+    expect(screen.getByRole('alertdialog', { name: /reload to continue/i })).toBeInTheDocument()
+    expect(onReload).not.toHaveBeenCalled()
   })
 
   it('shows overlay when emitSchemaBlocked fires BEFORE mount (sticky flag)', () => {

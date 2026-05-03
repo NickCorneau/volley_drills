@@ -80,9 +80,9 @@ This document does not silently override the `D127` deferral of broad body-scale
 **Live hierarchy**
 
 - R1. Run Face v1 must have one dominant live reading: timer/progress for the timed Run blocks currently supported by the app. Do not add non-timed block support in v1.
-- R2. Run Face v1 must surface exactly one primary "current cue" zone by default. Cue source precedence is: active segment when present, then authored coaching cue, then the first actionable line of courtside instructions, then drill name as the fixed fallback. Any short label must be local presentation copy from existing block fields; v1 must not add generated labels, stored cue fields, a new taxonomy, or a new coaching/rationale pipeline.
-- R3. The screen must make the primary next action visible without hunting. Existing actions can remain in the cockpit/footer pattern, but the visual hierarchy should keep the next action legible during movement.
-- R4. The screen must show session position in a quiet way: current block number, current/next/done state, or equivalent context. This must support orientation without adding a full session dashboard.
+- R2. Run Face v1 must surface exactly one primary "current cue" zone by default. Cue source precedence is: active segment label/current row when present; otherwise existing `currentBlock.coachingCue` verbatim or its first ` · `-separated clause; otherwise a bounded verbatim instruction excerpt only when the first non-empty instruction sentence is short and obviously action-shaped; otherwise drill name as the fixed fallback. Any short label must be local presentation copy from existing block fields; v1 must not add generated labels, stored cue fields, a new taxonomy, NLP, an actionability classifier, or a new coaching/rationale pipeline.
+- R3. The screen must make the primary UI control visible without hunting. Existing actions can remain in the cockpit/footer pattern, but the visual hierarchy should keep the primary control legible during movement. The athlete's physical "what now?" action is owned by the current cue, not by control styling.
+- R4. The screen must show session position quietly through the existing block count, with an optional current/next label only if screenshot review proves it helps. This must support orientation without adding done/current/next rail chrome or a full session dashboard.
 
 **Instruction access and restraint**
 
@@ -101,20 +101,21 @@ This document does not silently override the `D127` deferral of broad body-scale
 
 ## Acceptance Examples
 
-- AE1. **Covers R1, R2, R3.** Given a returning user starts a normal timed drill, when the Run screen appears after preroll, then the user can identify the current drill/action, remaining time/progress, and primary control without reading the full instruction paragraph first.
+- AE1. **Covers R1, R2, R3.** Given a returning user starts a normal timed drill, when the Run screen appears after preroll, then the user can identify the current training cue, remaining time/progress, and primary UI control without reading the full instruction paragraph first.
 - AE2. **Covers R5, R10.** Given a drill has a long instruction paragraph, when the block is running, then the current cue remains the visual priority and the full instruction is still reachable without leaving Run.
 - AE3. **Covers R4, R6.** Given the user runs a structured warmup/cooldown segment block, when a segment changes, then the current segment remains the visible "now" signal and the broader Run face does not duplicate or obscure it.
 - AE4. **Covers R7, R8.** Given the timer is paused or wake-lock guidance appears, when the user glances at the phone, then the state reads as actionable recovery guidance rather than a broken timer or error state.
 - AE5. **Covers R9, R11.** Given a planner scopes Run Face v1, when writing the implementation plan, then the plan stays within Run presentation/hierarchy and does not add a full session dashboard, new route, or new training model.
-- AE6. **Covers R3, R4.** Given a pair leader sets the phone down on a bench or bag at normal courtside distance, when a partner asks what is next, then the leader can identify the current cue, timer/progress, and primary control without rereading the full instruction body.
-- AE7. **Covers R6, R10, R11.** Given the Run face is reviewed at 360px and 390px widths, when running, paused, segmented, long-instruction, and warning states are shown, then footer controls remain visible without overlap, touch targets remain at least 44px, focus order follows the visible control order, timer announcements do not spam assistive technology, and paused/warning/error states have accessible labels.
+- AE6. **Covers R2, R3, R4.** Given a pair session with the phone set down on a bench or bag roughly 1-3 m away in outdoor-light conditions, when either player glances for what is happening now, then the visible cue preserves who does what from existing authored fields and the timer/progress plus primary UI control are legible without rereading the full instruction body.
+- AE7. **Covers R3, R6, R7, R10.** Given the Run face is reviewed at 360px and 390px widths, when running, paused, segmented, long-instruction, and warning states are shown, then footer controls remain visible without overlap, touch targets remain at least 44px, focus order follows the visible control order, timer announcements do not spam assistive technology, and paused/warning/error states have accessible labels.
+- AE8. **Covers R3, R5, R8.** Given a short-phone viewport with a dense state such as paused plus warning guidance, swap/shorten controls, or long instructions, when the user scrolls the Run body, then the footer cockpit remains pinned, controls do not overlap the body, and the current cue plus recovery message remain reachable without hiding the primary UI control.
 
 ---
 
 ## Success Criteria
 
 - Phone screenshots of Run at 360px and 390px wide read as one clear live face, not a stack of similarly important text blocks.
-- A pair set-down review confirms the current cue, timer/progress, and primary control are legible from normal courtside distance.
+- A pair set-down review confirms both players can read the current cue's role/action meaning, timer/progress, and primary UI control from roughly 1-3 m in outdoor-light conditions.
 - A returning user can understand what to do now in about five seconds without reading multiple paragraphs.
 - The Run face preserves 44px minimum touch targets, logical focus order, non-spamming timer semantics, and accessible labels for paused, warning, and error states.
 - Existing timer, controls, segment list, pause, shorten, swap, skip, and end-session behavior remains intact.
@@ -139,9 +140,9 @@ This document does not silently override the `D127` deferral of broad body-scale
 
 - **Selected direction:** Run Face v1, not a full session status system. This keeps the work bounded to the highest-friction active surface.
 - **Primary user outcome:** "What should I do right now?" in a five-second glance.
-- **Instruction posture:** Full instruction remains available inline within the Run route, but the default active face prioritizes one current cue. V1 should start with secondary below-the-cue detail or inline disclosure, not a bottom sheet or separate detail route.
-- **Current-cue precedence:** Active segment wins when present. Otherwise use authored coaching cue, then the first actionable line of courtside instructions, then drill name. Do not invent generated cue labels.
-- **Session-position posture:** Start with the existing block count plus, only if screenshots prove it helps, a quiet current/next label. Do not add a full done/current/next rail in v1.
+- **Instruction posture:** Full instruction remains available inline within the Run route, but the default active face prioritizes one current cue. V1 should start with inline disclosure for long instructions; secondary text below the cue is the fallback if disclosure adds friction. Do not use a bottom sheet or separate detail route.
+- **Current-cue precedence:** Active segment label/current row wins when present. Otherwise use `currentBlock.coachingCue` verbatim or its first ` · `-separated clause, then a bounded verbatim instruction excerpt only when the first non-empty instruction sentence is short and obviously action-shaped, then drill name. Do not invent generated cue labels.
+- **Session-position posture:** Start with the existing block count plus, only if screenshots prove it helps, a quiet current/next label. Do not add a done/current/next rail in v1.
 - **Timer posture:** The pinned cockpit footer remains the timer source of truth. Do not duplicate a second timer above the fold unless screenshot review proves the cockpit can be visually lost in a required state.
 - **Typography posture:** Larger type is allowed only where it earns glanceability; compact body text remains the default elsewhere.
 - **Segment posture:** Existing per-move segment indicators are a first-class part of the Run face, not a competing second feature.
@@ -149,6 +150,8 @@ This document does not silently override the `D127` deferral of broad body-scale
 ---
 
 ## State Priority Matrix
+
+This table is a visual-priority reference for Run Face v1. It is not a new state enum, state machine, or component system.
 
 | State | Dominant reading | Current cue | Primary action | Supporting message |
 |---|---|---|---|---|
@@ -179,7 +182,7 @@ This document does not silently override the `D127` deferral of broad body-scale
 
 ### Deferred to Planning
 
-- [Affects R2, R5][Design] Which inline detail treatment best preserves full instruction access without competing with the current cue?
+- [Affects R2, R5][Design] Does the inline disclosure default preserve full instruction access without competing with the current cue, or should planning fall back to secondary below-the-cue text?
 - [Affects R4][Design] Does the existing block count need a quiet current/next label after screenshot review, or is the count enough?
 - [Affects R1][Design] Does screenshot review show any required state where the cockpit timer is visually lost?
 

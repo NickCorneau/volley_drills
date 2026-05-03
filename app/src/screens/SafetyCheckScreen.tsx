@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PainOverrideCard } from '../components/PainOverrideCard'
 import { BackButton, Button, ScreenShell, StatusMessage, ToggleChip } from '../components/ui'
-import type { SessionDraft } from '../db/types'
+import type { SessionDraft } from '../model'
 import { buildRecoveryDraft, estimateRecoverySessionMinutes } from '../domain/sessionBuilder'
 import {
   primeAudioForGesture,
@@ -312,11 +312,7 @@ export function SafetyCheckScreen() {
           {/* Use the shared chip language here too: "No" is reassuring
             but not a primary CTA, and "Yes" keeps the warning tone. */}
           <div className="flex gap-2" role="radiogroup" aria-label="Sharp pain or guarding">
-            <ToggleChip
-              label="No"
-              selected={painFlag === false}
-              onTap={() => setPainFlag(false)}
-            />
+            <ToggleChip label="No" selected={painFlag === false} onTap={() => setPainFlag(false)} />
             <ToggleChip
               label="Yes"
               selected={painFlag === true}

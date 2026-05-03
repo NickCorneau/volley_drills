@@ -96,6 +96,7 @@ describe('validateDrillCatalog', () => {
       ['d40', ['set', 'movement']],
       ['d42', ['set', 'movement']],
       ['d47', ['set', 'movement']],
+      ['d49', ['set', 'movement']],
     ])('keeps intentional multi-skill tags on %s', (drillId, expectedTags) => {
       const drillRecord = DRILLS.find((candidate) => candidate.id === drillId)
       expect(drillRecord?.skillFocus).toEqual(expectedTags)
@@ -109,6 +110,47 @@ describe('validateDrillCatalog', () => {
         expect(drillRecord?.skillFocus).not.toContain('serve')
       },
     )
+  })
+
+  describe('D49 source-backed activation', () => {
+    it('adds only solo and pair open variants without unmodeled equipment requirements', () => {
+      const d49 = DRILLS.find((candidate) => candidate.id === 'd49')
+
+      expect(d49).toBeDefined()
+      expect(d49?.m001Candidate).toBe(true)
+      expect(d49?.levelMin).toBe('advanced')
+      expect(d49?.levelMax).toBe('advanced')
+      expect(d49?.variants.map((variant) => variant.id)).toEqual([
+        'd49-solo-open',
+        'd49-pair-open',
+      ])
+      for (const variant of d49?.variants ?? []) {
+        expect(variant.equipment.balls).toBe(1)
+        expect(variant.environmentFlags.needsWall).toBe(false)
+        expect(variant.environmentFlags.needsLines).toBe(false)
+        expect(variant.environmentFlags.needsCones).toBe(false)
+        expect(variant.workload.durationMaxMinutes).toBeGreaterThan(9)
+        expect(variant.courtsideInstructions).toContain('rounds')
+      }
+    })
+
+    it('keeps D47 workload caps unchanged while D49 carries longer setting blocks', () => {
+      const d47 = DRILLS.find((candidate) => candidate.id === 'd47')
+      const d49 = DRILLS.find((candidate) => candidate.id === 'd49')
+
+      expect(d47?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([9, 9])
+      expect(
+        d47?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes),
+      ).toEqual([9, 9])
+      expect(d49?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([
+        14,
+        14,
+      ])
+      expect(d49?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes)).toEqual([
+        14,
+        14,
+      ])
+    })
   })
 
   it('reports duplicate drill ids and duplicate variant ids', () => {

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { BackButton, Button, ScreenShell, StatusMessage, ToggleChip } from '../components/ui'
 import type { PlayerMode, TimeProfile } from '../types/session'
-import type { SetupContext } from '../db/types'
+import type { SetupContext } from '../model'
 import { buildDraft } from '../domain/sessionBuilder'
 import { isOnboardingStep } from '../lib/onboarding'
 import { isSchemaBlocked } from '../lib/schema-blocked'
@@ -40,9 +40,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const shouldHydrateDraft =
-    !isOnboarding &&
-    isSetupLocationState(location.state) &&
-    location.state.editDraft === true
+    !isOnboarding && isSetupLocationState(location.state) && location.state.editDraft === true
   // 2026-04-22 one-tap Repeat simplification: the `?from=repeat`
   // branch + `StaleContextBanner` were retired here because `Repeat
   // this session` on Home now rebuilds the draft and routes through
@@ -108,7 +106,8 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   }, [isOnboarding, navigate, shouldHydrateDraft])
 
   const showWall = playerMode === 'solo' && netAvailable === false
-  const isComplete = playerMode !== null && netAvailable !== null && (!showWall || wallAvailable !== null)
+  const isComplete =
+    playerMode !== null && netAvailable !== null && (!showWall || wallAvailable !== null)
 
   const submitting = useRef(false)
 

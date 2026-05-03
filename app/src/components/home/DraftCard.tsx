@@ -1,4 +1,4 @@
-import type { SessionDraft } from '../../db'
+import type { SessionDraft } from '../../model'
 import { Button } from '../ui'
 import { LINK_BELOW_PRIMARY_CLASS, PRIMARY_CARD_CLASS } from './cardStyles'
 

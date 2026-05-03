@@ -2,6 +2,104 @@ import { describe, expect, it } from 'vitest'
 
 import { DRILLS } from '../drills'
 
+type ActiveCopySurface = {
+  drillId: string
+  variantId: string
+  field: string
+  text: string
+}
+
+function activeCopySurfaces(): ActiveCopySurface[] {
+  return DRILLS.flatMap((drill) =>
+    drill.m001Candidate
+      ? [
+          {
+            drillId: drill.id,
+            variantId: 'drill',
+            field: 'name',
+            text: drill.name,
+          },
+          {
+            drillId: drill.id,
+            variantId: 'drill',
+            field: 'shortName',
+            text: drill.shortName,
+          },
+          {
+            drillId: drill.id,
+            variantId: 'drill',
+            field: 'objective',
+            text: drill.objective,
+          },
+          ...drill.teachingPoints.map((point, index) => ({
+            drillId: drill.id,
+            variantId: 'drill',
+            field: `teachingPoints[${index}]`,
+            text: point,
+          })),
+          {
+            drillId: drill.id,
+            variantId: 'drill',
+            field: 'progressionDescription',
+            text: drill.progressionDescription,
+          },
+          {
+            drillId: drill.id,
+            variantId: 'drill',
+            field: 'regressionDescription',
+            text: drill.regressionDescription,
+          },
+          ...drill.variants.flatMap((variant) => {
+            const surfaces: ActiveCopySurface[] = [
+              {
+                drillId: drill.id,
+                variantId: variant.id,
+                field: 'successMetric.description',
+                text: variant.successMetric.description,
+              },
+              {
+                drillId: drill.id,
+                variantId: variant.id,
+                field: 'successMetric.target',
+                text: variant.successMetric.target ?? '',
+              },
+              {
+                drillId: drill.id,
+                variantId: variant.id,
+                field: 'courtsideInstructions',
+                text: variant.courtsideInstructions,
+              },
+              ...(variant.courtsideInstructionsBonus
+                ? [
+                    {
+                      drillId: drill.id,
+                      variantId: variant.id,
+                      field: 'courtsideInstructionsBonus',
+                      text: variant.courtsideInstructionsBonus,
+                    },
+                  ]
+                : []),
+              ...variant.coachingCues.map((cue, index) => ({
+                drillId: drill.id,
+                variantId: variant.id,
+                field: `coachingCues[${index}]`,
+                text: cue,
+              })),
+              ...(variant.segments ?? []).map((segment, index) => ({
+                drillId: drill.id,
+                variantId: variant.id,
+                field: `segments[${index}].label`,
+                text: segment.label,
+              })),
+            ]
+
+            return surfaces
+          }),
+        ]
+      : [],
+  )
+}
+
 /**
  * Focused regression pins for drill catalog copy that the red-team
  * review caught after a sweep landed. Each test names the finding and
@@ -19,6 +117,46 @@ import { DRILLS } from '../drills'
  */
 
 describe('drill copy regressions', () => {
+  describe('active drill copy contract', () => {
+    it.each(activeCopySurfaces())(
+      '$drillId:$variantId $field uses no em-dashes in user-visible copy',
+      ({ text, drillId, variantId, field }) => {
+        expect(
+          text,
+          `${drillId}:${variantId} ${field} contains an em-dash. Use punctuation or rewrite per courtside-copy.mdc.`,
+        ).not.toContain('\u2014')
+      },
+    )
+
+    it('every active variant has a concrete success metric description and target', () => {
+      const issues = DRILLS.flatMap((drill) =>
+        drill.m001Candidate
+          ? drill.variants.flatMap((variant) => {
+              const description = variant.successMetric.description.trim()
+              const target = variant.successMetric.target?.trim() ?? ''
+              const unresolved = /level-dependent|\bX\b/i
+              return [
+                description.length === 0
+                  ? `${drill.id}:${variant.id} has an empty successMetric.description`
+                  : undefined,
+                target.length === 0
+                  ? `${drill.id}:${variant.id} has an empty successMetric.target`
+                  : undefined,
+                unresolved.test(target)
+                  ? `${drill.id}:${variant.id} has an unresolved successMetric.target: ${target}`
+                  : undefined,
+                unresolved.test(description)
+                  ? `${drill.id}:${variant.id} has an unresolved successMetric.description: ${description}`
+                  : undefined,
+              ].filter((issue): issue is string => issue !== undefined)
+            })
+          : [],
+      )
+
+      expect(issues).toEqual([])
+    })
+  })
+
   describe('lead-with-skill invariant (cca2 dogfeed F8 sweep, 2026-04-27)', () => {
     /**
      * 2026-04-27 cca2 dogfeed F8 (`docs/research/2026-04-27-cca2-

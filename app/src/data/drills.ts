@@ -70,7 +70,7 @@ const d01: Drill = {
   chainId: 'chain-1-platform',
   m001Candidate: true,
   teachingPoints: [
-    'Athletic posture throughout.',
+    'Start in ready posture.',
     'Contact between wrists and elbows.',
     'Keep space between body and platform.',
     'Bend knees to keep platform stable.',
@@ -101,7 +101,7 @@ const d01: Drill = {
       courtsideInstructions:
         'Pass up to yourself off your own toss. Between each contact, clap behind your back, then rebuild your platform. Mix low, medium, and high arcs.',
       coachingCues: [
-        'Athletic posture.',
+        'Ready posture.',
         'Contact between wrists and elbows.',
         'Keep space between body and platform.',
         'Bend knees to keep platform stable.',
@@ -135,7 +135,7 @@ const d01: Drill = {
       courtsideInstructions:
         'Forearm-pass back to your partner with a clap reset. Stand 3 m apart; tosser sends an easy arc to the passer; passer forearm-passes back at catchable height, then claps behind the back while the tosser catches. Reset and repeat. Switch roles after every 10 reps or every miss.',
       coachingCues: [
-        'Athletic posture.',
+        'Ready posture.',
         'Contact between wrists and elbows.',
         'Pass back to your partner, not past them.',
         'Bend knees to keep platform stable.',
@@ -205,9 +205,9 @@ const d03: Drill = {
   m001Candidate: true,
   teachingPoints: [
     'Arms straight throughout.',
-    'Shoulder shrug assist.',
+    'Lift from your shoulders without swinging.',
     'Pass high enough to be settable.',
-    'Abs tucked.',
+    'Keep ribs stacked over hips.',
   ],
   progressionDescription: 'Increase toss speed; add 1-step movement every rep.',
   regressionDescription: 'Shorter distance; allow receiver to "freeze" before contact.',
@@ -236,9 +236,9 @@ const d03: Drill = {
         'Pass back to your partner from a kneel, then stand. Start kneeling; partner tosses; receiver passes back 10 reps. Then stand in serve-receive stance and repeat.',
       coachingCues: [
         'Arms straight.',
-        'Shoulder shrug assist.',
+        'Lift without swinging.',
         'Pass high enough to be settable.',
-        'Abs tucked.',
+        'Ribs over hips.',
       ],
     },
   ],
@@ -338,8 +338,8 @@ const d05: Drill = {
   m001Candidate: true,
   teachingPoints: [
     'Get behind ball horizontally.',
-    'Brake-step before contact.',
-    'Platform angle drives direction.',
+    'Plant to stop before contact.',
+    'Aim your arm angle toward the target.',
     'Transfer weight to front foot.',
   ],
   progressionDescription: 'Toss to left/right so you must move behind the ball.',
@@ -369,8 +369,8 @@ const d05: Drill = {
         'Pass into your set window off a self-toss. Place a marker at the set window (where the setter would stand, ~3 m off the net). Self-toss slightly in front; pass to land within that zone; retrieve quickly and repeat. Use 20 total reps.',
       coachingCues: [
         'Get behind ball horizontally.',
-        'Brake-step.',
-        'Platform angle drives direction.',
+        'Plant before contact.',
+        'Aim your arm angle.',
         'Transfer weight to front foot.',
       ],
     },
@@ -405,7 +405,7 @@ const d05: Drill = {
         'Pass back to your partner at the set window. Partner stands at the set window (where the setter would stand, ~3 m off the net) and tosses an arc 2–3 m in front of the passer. Passer passes back so partner catches without moving more than one step. Switch roles after 20 tosses.',
       coachingCues: [
         'Get behind ball horizontally.',
-        'Brake-step.',
+        'Plant before contact.',
         'Pass to your partner, not past them.',
         'Transfer weight to front foot.',
       ],
@@ -568,7 +568,7 @@ const d07: Drill = {
         target: '16 of 24 passes 2+ and 20 of 24 correct calls',
       },
       courtsideInstructions:
-        'Pass a partner toss or serve from 4-6 m away to the set window. Partner flashes 1-5 after contact; call the number before the next feed. Switch after 12 reps.',
+        'Pass a partner toss from 4-6 m away to the set window. Partner flashes 1-5 after contact; call the number before the next feed. Switch after 12 reps.',
       coachingCues: [
         'Be still through contact.',
         'Eyes up after the ball leaves your platform.',
@@ -998,7 +998,7 @@ const d15: Drill = {
   m001Candidate: true,
   teachingPoints: [
     'Centered ready position enables quick forward/back.',
-    "Read ball early - off the server's hand.",
+    "Read the ball early from the server's hand.",
     'Hands apart while moving.',
   ],
   progressionDescription: 'More random (mix all); faster serves.',
@@ -1033,7 +1033,7 @@ const d15: Drill = {
         'Pass to the set window after reading short vs deep balls. Server/coach delivers short or deep balls; passer reads early, moves, and passes to the set window (where the setter would stand, ~3 m off the net).',
       coachingCues: [
         'Centered ready position enables quick forward/back.',
-        "Read ball early - off the server's hand.",
+        "Read the ball early from the server's hand.",
         'Hands apart while moving.',
       ],
     },
@@ -1478,7 +1478,7 @@ const d22: Drill = {
       successMetric: {
         type: 'points-to-target',
         description: 'Assign point values to zones; serve out loses a point.',
-        target: 'Reach 10 points with ≤ X errors (level-dependent)',
+        target: 'Reach 10 points with no more than 3 missed serves',
       },
       courtsideInstructions:
         'Serve to earn 10 points across self-assigned zones. Assign point values to zones; each serve in scores those points; a serve out loses a point. Adjust zone values for your level or objective.',
@@ -2004,7 +2004,7 @@ const d25: Drill = {
   shortName: 'Downshift',
   skillFocus: ['recovery'],
   objective:
-    'Transition out of the session: slow the heart rate, unload the feet and hips, do a quick symptom/hydration check. Not an injury-prevention or recovery claim.',
+    'Transition out of the session: settle breathing, unload the feet and hips, do a quick symptom/hydration check. Not an injury-prevention or recovery claim.',
   levelMin: 'beginner',
   levelMax: 'advanced',
   chainId: 'chain-cooldown',
@@ -2097,7 +2097,7 @@ const d25: Drill = {
       // bumped to 4 (see workload comment above).
       courtsideInstructions:
         'Walk first, then four short stretch holds. Gentle tension only; skip any move that hurts today.',
-      courtsideInstructionsBonus: 'Hydrate and note any pain.',
+      courtsideInstructionsBonus: 'Drink water and note any pain.',
       segments: [
         { id: 'd25-solo-s1', label: 'Walk with long exhales.', durationSec: 60 },
         {
@@ -2126,7 +2126,7 @@ const d25: Drill = {
       coachingCues: [
         'Long exhale, let heart rate come down.',
         'Gentle tension only.',
-        'Hot session? Rehydrate before you leave.',
+        'Hot session? Drink water before you leave.',
       ],
     },
   ],
@@ -2290,7 +2290,7 @@ const d38: Drill = {
   teachingPoints: [
     'Platform stays square to the target.',
     'Contact on the forearms, not the wrists.',
-    'Legs drive the set - the arms aim, the legs lift.',
+    'Legs lift the ball; arms aim it.',
   ],
   progressionDescription: 'Add a moving bump-set (one step in, one step back) between reps.',
   regressionDescription:
@@ -2323,8 +2323,8 @@ const d38: Drill = {
       courtsideInstructions:
         'Bump-set off your own toss into a 1 m landing circle around you. Self-toss to yourself ~1.5 m up; bump-set the ball back up with platform angled at the sky; aim for a settable arc landing within the circle. Reset and repeat.',
       coachingCues: [
-        'Platform square, not tilted.',
-        'Contact on the forearms.',
+        'Platform square to target.',
+        'Contact on forearms.',
         'Legs lift; arms aim.',
       ],
     },
@@ -2357,7 +2357,7 @@ const d38: Drill = {
       courtsideInstructions:
         'Bump-set back to your partner at catchable height. Stand 3 m apart; partner tosses an arc to the setter; setter bump-sets it back. Goal: unbroken rally. If it breaks, restart and count the new streak. Switch tosser and setter every 10 reps.',
       coachingCues: [
-        'Platform square, not tilted.',
+        'Platform square to partner.',
         'Set to your partner, not past them.',
         'Legs lift; arms aim.',
       ],
@@ -2552,7 +2552,7 @@ const d41: Drill = {
   chainId: 'chain-7-setting',
   m001Candidate: true,
   teachingPoints: [
-    'Set to a spot your partner does not have to move to - the ball is the message, the target is the apology.',
+    'Set to a spot your partner can hold without moving.',
     'Reset feet between sets; plant before you set.',
     'Arc the ball ~1.5 m above reach height so your partner has time to square up.',
   ],
@@ -2805,12 +2805,94 @@ const d48: Drill = {
   ],
 }
 
+// D47 source-backed activation (2026-05-02). Better at Beach solo setting
+// footwork, JVA out-of-system/up-and-back setting, and TAOCV set-and-go
+// conditioning all point at a distinct advanced setting problem: repeated
+// movement, recovery, and target quality under fatigue. M001 keeps only the
+// one/two-player adaptation and rejects 3+ player source forms.
+const d49: Drill = {
+  id: 'd49',
+  name: 'Set and Recover',
+  shortName: 'Set Recover',
+  skillFocus: ['set', 'movement'],
+  objective: 'Deliver controlled out-of-system sets while recovering to a home marker under fatigue.',
+  levelMin: 'advanced',
+  levelMax: 'advanced',
+  chainId: 'chain-7-setting',
+  m001Candidate: true,
+  teachingPoints: [
+    'Recover before the next feed.',
+    'Use legs for the high ball.',
+    'Protect set quality when breathing hard.',
+  ],
+  progressionDescription: 'Shorten recovery time or shrink the target window after quality stays stable.',
+  regressionDescription: 'Use fewer locations, longer rest, or a larger target window.',
+  variants: [
+    {
+      id: 'd49-solo-open',
+      drillId: 'd49',
+      label: 'Solo open',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 8,
+        durationMaxMinutes: 14,
+        rpeMin: 6,
+        rpeMax: 8,
+        fatigueCap: { maxReps: 36, maxMinutes: 14, restBetweenSetsSeconds: 30 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Out-of-system self-toss sets landing in the target window after recovery.',
+        target: '24 of 36 sets in-window across three rounds',
+      },
+      courtsideInstructions:
+        'Set from three recovery rounds. Start at a home marker, self-toss off-net or deep, move to set into a marked target window, then recover home before the next toss. Rest 30 seconds between rounds; stop early if set shape collapses.',
+      coachingCues: [
+        'Recover first, toss second.',
+        'Arrive low before you set.',
+        'Quality beats speed.',
+      ],
+    },
+    {
+      id: 'd49-pair-open',
+      drillId: 'd49',
+      label: 'Pair open',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['tosser', 'setter'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 8,
+        durationMaxMinutes: 14,
+        rpeMin: 6,
+        rpeMax: 8,
+        fatigueCap: { maxReps: 36, maxMinutes: 14, restBetweenSetsSeconds: 30 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Partner-reachable high sets after end-line, off-net, and side-line movement.',
+        target: '24 of 36 sets reachable within one step across three rounds',
+      },
+      courtsideInstructions:
+        'Set from three recovery rounds, then switch. Setter starts at a home marker. Partner tosses from end-line, off-net, or side-line markers; setter moves, sends a high controlled set to a reachable window, then recovers home. Rest 30 seconds between rounds.',
+      coachingCues: [
+        'Beat the toss with your feet.',
+        'Set high enough to attack.',
+        'Recover before calling ready.',
+      ],
+    },
+  ],
+}
+
 // `d43 Triangle Setting` (BAB Drill Book Plans 5-7, 10, 11) is intentionally
 // not authored here. The source drill is a 3-player triangle route; the
 // honest M001 stance is that drills whose source form needs three or more
 // players wait for D101 3+ player support rather than getting forced into a
-// two-player adaptation. d47/d48 above use FIVB one/two-player-compatible
-// setting read concepts, not the deferred BAB triangle queue.
+// two-player adaptation. d47/d48/d49 above use one/two-player-compatible
+// setting concepts, not the deferred BAB triangle queue.
 
 // ---------------------------------------------------------------------------
 // Chain warmup: Beach Prep (default warmup, D105 + BAB 2024)
@@ -2831,14 +2913,14 @@ const d28: Drill = {
   shortName: 'Beach Prep',
   skillFocus: ['warmup'],
   objective:
-    'Whole-body ramp, ankle proprioception, shoulder + trunk activation, and sand movement rehearsal in 3 minutes.',
+    'Whole-body ramp, ankle balance, shoulder and trunk activation, and sand movement rehearsal in 3 minutes.',
   levelMin: 'beginner',
   levelMax: 'advanced',
   chainId: 'chain-warmup',
   m001Candidate: true,
   teachingPoints: [
     'Move through full range before loading.',
-    'Ankles first - short hops and lateral shuffles wake proprioception faster than jogging on sand.',
+    'Ankles first: short hops and lateral shuffles wake up sand balance faster than jogging.',
     'End warmer than you started; cold shoulders do not pass well.',
   ],
   progressionDescription:
@@ -2911,7 +2993,7 @@ const d28: Drill = {
       coachingCues: [
         'Short hops, loud feet.',
         'Full range on arm swings.',
-        'Move your feet - ankles first, then legs.',
+        'Move ankles first, then legs.',
       ],
     },
   ],
@@ -2959,6 +3041,7 @@ export const DRILLS: readonly Drill[] = [
   d42,
   d47,
   d48,
+  d49,
 ] as const
 
 export const M001_DRILL_IDS: readonly string[] = DRILLS.filter((d) => d.m001Candidate).map(

@@ -148,3 +148,21 @@ Past learnings:
 ## Handoff
 
 `Active Session Glance System` is selected for `ce-brainstorm`.
+
+## Follow-Up Ideation: Run Face Review Hardening
+
+After Run Face v1 implementation and review, a narrow follow-up survivor was selected for immediate `ce-brainstorm` -> `ce-plan` -> `ce-work`.
+
+### Selected Survivor: Run Face Review Hardening Bundle
+
+**Description:** Land one narrow follow-up bundle that makes Run Face v1 review-clean: disclosure labels and tests prove full detail access; cue fallback refuses multiline/long instruction parsing; sparse live/status/alert semantics cover paused/preroll/error without timer chatter; docs/test standards are cleaned up.
+
+**Rationale:** These fixes are independently high-confidence and mutually reinforcing. They directly address review findings, strengthen the original R2/R5/R7/AE7 contracts, and avoid reopening broader Run design or generated-diagnostics work.
+
+**Downsides:** Slightly more test churn and a bit more ARIA markup in `RunScreen` / `BlockTimer`. The main risk is overbuilding a live-region abstraction; keep it local and state-specific.
+
+**Confidence:** 96%
+
+**Complexity:** Low-Medium
+
+**Status:** Selected for `ce-brainstorm`

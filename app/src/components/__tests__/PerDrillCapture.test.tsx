@@ -125,6 +125,25 @@ describe('PerDrillCapture captureShape: count', () => {
     expect(screen.queryByTestId('per-drill-add-streak')).not.toBeInTheDocument()
   })
 
+  it('keeps the collapsed counts affordance at a comfortable tap height', () => {
+    render(
+      <PerDrillCapture
+        drillName="One-arm Passing"
+        difficulty="still_learning"
+        onDifficultyChange={noop}
+        captureShape={{ kind: 'count' }}
+        goodPasses={0}
+        attemptCount={0}
+        notCaptured={false}
+        onGoodChange={noop}
+        onAttemptChange={noop}
+        onToggleNotCaptured={noop}
+      />,
+    )
+
+    expect(screen.getByTestId('per-drill-add-counts').className).toContain('min-h-[44px]')
+  })
+
   it('reveals the Good/Total inputs after tapping "Add counts"', () => {
     render(
       <PerDrillCapture
@@ -262,6 +281,21 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
     expect(screen.queryByTestId('per-drill-streak')).not.toBeInTheDocument()
     expect(screen.queryByTestId('per-drill-add-counts')).not.toBeInTheDocument()
     expect(screen.queryByTestId('per-drill-counts')).not.toBeInTheDocument()
+  })
+
+  it('keeps the collapsed streak affordance at a comfortable tap height', () => {
+    render(
+      <PerDrillCapture
+        drillName="Bump Set Fundamentals"
+        difficulty="still_learning"
+        onDifficultyChange={noop}
+        captureShape={{ kind: 'streak' }}
+        streakLongest={null}
+        onStreakLongestChange={noop}
+      />,
+    )
+
+    expect(screen.getByTestId('per-drill-add-streak').className).toContain('min-h-[44px]')
   })
 
   it('reveals the streak input after tapping the affordance', () => {

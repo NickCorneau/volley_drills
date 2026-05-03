@@ -169,7 +169,7 @@ describe('chain-7-setting (Tier 1b-A setting progression)', () => {
   })
 
   it('has the authored setting drills with d43 deferred to 3+ player support', () => {
-    expect(chain?.drillIds).toEqual(['d38', 'd39', 'd40', 'd41', 'd42', 'd47', 'd48'])
+    expect(chain?.drillIds).toEqual(['d38', 'd39', 'd40', 'd41', 'd42', 'd47', 'd48', 'd49'])
     expect(chain?.drillIds).not.toContain('d43')
   })
 
@@ -191,6 +191,14 @@ describe('chain-7-setting (Tier 1b-A setting progression)', () => {
       ['d42', 'd47'],
       ['d47', 'd48'],
     ])
+  })
+
+  it('keeps D49 as a source-backed advanced setting/movement lateral from D47', () => {
+    const laterals = chain?.links
+      .filter((l) => l.direction === 'lateral')
+      .map((l) => [l.fromDrillId, l.toDrillId])
+
+    expect(laterals).toContainEqual(['d47', 'd49'])
   })
 
   it('every drill in the chain declares skillFocus set', () => {
@@ -220,5 +228,9 @@ describe('chain-7-setting (Tier 1b-A setting progression)', () => {
     expect(drillById.get('d48')?.m001Candidate).toBe(true)
     expect(drillById.get('d48')?.levelMin).toBe('advanced')
     expect(drillById.get('d48')?.levelMax).toBe('advanced')
+
+    expect(drillById.get('d49')?.m001Candidate).toBe(true)
+    expect(drillById.get('d49')?.levelMin).toBe('advanced')
+    expect(drillById.get('d49')?.levelMax).toBe('advanced')
   })
 })

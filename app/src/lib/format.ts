@@ -1,4 +1,4 @@
-import type { ExecutionLog, ExecutionStatus } from '../db'
+import type { ExecutionLog, ExecutionStatus } from '../model'
 import type { EyebrowSkillFocus } from '../domain/drillMetadata'
 import type { BlockSlotType } from '../types/session'
 

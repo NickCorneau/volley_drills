@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
 import type { BlockSlotType } from '../../types/session'
 import { RunScreen } from '../RunScreen'
@@ -24,10 +23,9 @@ import { RunScreen } from '../RunScreen'
  *   (`Technique` / `Movement` / `Main drill` / `Pressure`). The two
  *   rationale-specific cases in this file were removed — they
  *   pinned a rendering that no longer happens. The remaining cases
- *   continue to pin the `text-base` outdoor-floor rule on
- *   `courtsideInstructions` and `coachingCue` (the partner-walkthrough
- *   round-2 invariant from `docs/research/outdoor-courtside-ui-brief.md`
- *   §Freeze Now).
+ *   continue to pin the run-card type hierarchy: the focal current
+ *   cue owns `text-base`, while full instructions sit behind inline
+ *   disclosure as compact secondary detail.
  *
  * The seeded plan still carries `rationale` on the block so the
  * data field stays exercised in tests; the block render simply
@@ -280,18 +278,17 @@ describe('RunScreen: body-typography invariants (P1-11 / cca2 dogfeed F1)', () =
     expect(screen.getByText('Main drill')).toBeInTheDocument()
   })
 
-  it('courtsideInstructions renders at text-base (16 px outdoor floor); Transition uses text-sm preview + collapse', async () => {
+  it('full courtsideInstructions render as compact secondary detail behind inline disclosure', async () => {
     await seedPausedSession('exec-instr', 'plan-instr')
     renderAt('exec-instr')
 
     const instructions = await screen.findByText(/Self-toss; forearm pass up and down\./i)
 
-    // Run keeps 16 px for courtsideInstructions during the block.
-    // TransitionScreen (2026-04-22) uses a smaller preview + optional
-    // "Show full prep" so long wrap lists do not bury the CTA stack.
-    expect(instructions.className).toContain('text-base')
+    // Run Face v1 keeps one larger current cue, then parks fuller
+    // instructions as secondary text behind disclosure to reduce
+    // phone-screen load during live play.
+    expect(instructions.className).toContain('text-sm')
     expect(instructions.className).not.toContain('text-lg')
-    expect(instructions.className).not.toContain('text-sm')
     expect(instructions.className).not.toContain('text-xs')
   })
 

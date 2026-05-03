@@ -215,7 +215,7 @@ export function SettingsScreen() {
             `-dirty`. See `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md`
             Item 6. */}
         <p
-          className="pb-3 text-center font-mono text-[11px] text-text-secondary/80"
+          className="pb-3 text-center font-mono text-xs text-text-secondary/80"
           data-testid="settings-build-id"
         >
           Build {BUILD_VERSION} · {BUILD_DATE}

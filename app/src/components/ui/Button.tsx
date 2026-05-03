@@ -16,6 +16,11 @@ type ButtonProps = {
 } & ButtonHTMLAttributes<HTMLButtonElement>
 
 const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2'
+const primaryBase = cx(
+  'min-h-[56px] rounded-[16px] px-4 py-3 text-sm font-semibold',
+  focusRing,
+  'focus-visible:ring-accent',
+)
 
 // Phase F11 (2026-04-19): hover states added to every clickable
 // variant. The Phase F9 rollback correctly removed hover darkening
@@ -30,10 +35,8 @@ const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible
 // and provides the tactile cue.
 const variantStyles: Record<ButtonVariant, string> = {
   primary: cx(
-    'min-h-[56px] rounded-[16px] px-4 py-3 text-sm font-semibold',
+    primaryBase,
     'bg-accent text-white hover:bg-accent-pressed active:bg-accent-pressed',
-    focusRing,
-    'focus-visible:ring-accent',
   ),
   outline: cx(
     'min-h-[54px] rounded-[16px] px-4 py-3 text-sm font-semibold',
@@ -112,7 +115,7 @@ const variantStyles: Record<ButtonVariant, string> = {
 const disabledStyles: Record<ButtonVariant, string> = {
   primary: cx(
     // Disabled primary CTAs read as neutral "not yet", not lightly active.
-    'cursor-not-allowed bg-text-secondary/10 text-text-secondary/70',
+    'cursor-not-allowed bg-text-secondary/10 text-text-primary opacity-100',
     'hover:bg-text-secondary/10 active:bg-text-secondary/10',
   ),
   outline: 'cursor-not-allowed opacity-50',
@@ -138,7 +141,7 @@ export function Button({
       disabled={disabled}
       className={cx(
         'transition-colors',
-        variantStyles[variant],
+        variant === 'primary' && disabled ? primaryBase : variantStyles[variant],
         disabled && disabledStyles[variant],
         fullWidth && 'w-full',
         className,

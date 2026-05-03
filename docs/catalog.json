@@ -110,32 +110,23 @@
       "path": "CLAUDE.md",
       "kind": "compatibility_surface",
       "always_read": false,
-      "use_when": [
-        "tool expects a Claude-specific root file"
-      ]
+      "use_when": ["tool expects a Claude-specific root file"]
     },
     {
       "path": "llms.txt",
       "kind": "compatibility_surface",
       "always_read": false,
-      "use_when": [
-        "tool expects a lightweight root summary"
-      ]
+      "use_when": ["tool expects a lightweight root summary"]
     },
     {
       "path": "agent-manifest.json",
       "kind": "compatibility_surface",
       "always_read": false,
-      "use_when": [
-        "tool expects a small JSON manifest"
-      ]
+      "use_when": ["tool expects a small JSON manifest"]
     }
   ],
   "read_packs": {
-    "cold_start_minimal": [
-      "AGENTS.md",
-      "docs/catalog.json"
-    ],
+    "cold_start_minimal": ["AGENTS.md", "docs/catalog.json"],
     "product_direction": [
       "docs/vision.md",
       "docs/decisions.md",
@@ -150,10 +141,7 @@
       "docs/research/2026-04-19-v0b-starter-loop-feedback.md",
       "app/README.md"
     ],
-    "research_question": [
-      "docs/research/README.md",
-      "docs/research/"
-    ],
+    "research_question": ["docs/research/README.md", "docs/research/"],
     "docs_editing": [
       "AGENTS.md",
       "docs/catalog.json",
@@ -178,58 +166,37 @@
     {
       "rank": 1,
       "path": "docs/vision.md",
-      "owns": [
-        "product principles",
-        "strategic stance"
-      ]
+      "owns": ["product principles", "strategic stance"]
     },
     {
       "rank": 2,
       "path": "docs/decisions.md",
-      "owns": [
-        "decided items (D*)",
-        "open questions (O*)",
-        "ruled-out items"
-      ]
+      "owns": ["decided items (D*)", "open questions (O*)", "ruled-out items"]
     },
     {
       "rank": 3,
       "path": "docs/prd-foundation.md",
-      "owns": [
-        "scope",
-        "workflow",
-        "object model",
-        "MVP requirements"
-      ]
+      "owns": ["scope", "workflow", "object model", "MVP requirements"]
     },
     {
       "rank": 4,
       "path": "docs/roadmap.md",
-      "owns": [
-        "phase sequencing",
-        "exit criteria"
-      ]
+      "owns": ["phase sequencing", "exit criteria"]
     },
     {
       "rank": 5,
       "path": "docs/milestones/",
-      "owns": [
-        "thin-slice charter scope"
-      ]
+      "owns": ["thin-slice charter scope"]
     },
     {
       "rank": 6,
       "path": "docs/specs/",
-      "owns": [
-        "milestone behavior details"
-      ]
+      "owns": ["milestone behavior details"]
     },
     {
       "rank": 7,
       "path": "docs/research/",
-      "owns": [
-        "curated research inputs"
-      ]
+      "owns": ["curated research inputs"]
     },
     {
       "rank": 8,
@@ -243,17 +210,12 @@
     {
       "rank": 9,
       "path": "AGENTS.md",
-      "owns": [
-        "repo-wide routing",
-        "working constraints"
-      ]
+      "owns": ["repo-wide routing", "working constraints"]
     },
     {
       "rank": 10,
       "path": "CLAUDE.md",
-      "owns": [
-        "tool-specific compatibility hints"
-      ]
+      "owns": ["tool-specific compatibility hints"]
     }
   ],
   "docs": [
@@ -901,11 +863,46 @@
       "canonical_for": "Ranked ideation for UX/design/style changes adjacent to the 2026-05-02 calm recurring-user Home pass. Six survivors: Active Session Glance System, Capture By Exception, Consequence-First Safety, Post-Session Receipt Layer, Local-First Trust Cues, and Tune Today Intent Dial. Selects Active Session Glance System as the ce-brainstorm target."
     },
     {
+      "id": "shadcn-courtside-overlay-ideation-2026-05-02",
+      "path": "docs/ideation/2026-05-02-shadcn-courtside-overlay-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked shadcn-informed frontend design ideation for Volleycraft overlays. Selects a local ActionOverlay primitive inspired by shadcn Dialog/AlertDialog interaction discipline while rejecting broad shadcn installation or theme replacement."
+    },
+    {
+      "id": "catalog-gap-closure-ideation-2026-05-02",
+      "path": "docs/ideation/2026-05-02-catalog-gap-closure-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked ideation for selecting the next minimal, high-quality catalog/config gap closure target from current generated-plan diagnostics. Selects the Gap Closure Selection Workbench with D47 reentry as the first concrete target-selection case, and includes the follow-up exercise explainer/instruction quality continuation that selected the Drill Copy Contract direction."
+    },
+    {
+      "id": "volleycraft-typography-ideation-2026-05-02",
+      "path": "docs/ideation/2026-05-02-volleycraft-typography-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked typography and brand-fit ideation for Volleycraft. Selects keeping Inter Variable plus JetBrains Mono Variable while defining semantic type roles, selectively retuning courtside-critical scale, adding distance-aware Run typography scaffolding, and protecting the calm brand rhythm with lightweight guardrails."
+    },
+    {
+      "id": "volleycraft-typography-system-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-volleycraft-typography-system-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for a Volleycraft typography-system pass selected from the typography ideation. Bounds the work to preserving the current font families, defining semantic type roles, selectively retuning active-use and trust-critical copy, recording Run distance-ladder expectations, and adding typography drift guardrails without authorizing a font swap, broad theme replacement, global body-scale migration, or runtime behavior changes."
+    },
+    {
       "id": "active-session-glance-system-requirements-2026-05-02",
       "path": "docs/brainstorms/2026-05-02-active-session-glance-system-requirements.md",
       "type": "requirements",
       "status": "active",
       "canonical_for": "Requirements for Run Face v1, the selected Active Session Glance System survivor from the calm courtside UX/style ideation. Bounds the next Run design pass to answering 'what now?' in a five-second glance with one dominant live reading, one current cue, quiet session-position context, and preserved full-instruction access, without authorizing new routes, timer behavior, data model, or a whole-app visual system."
+    },
+    {
+      "id": "run-face-review-hardening-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-run-face-review-hardening-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Follow-up requirements for review-cleaning Run Face v1 after implementation. Narrows the selected follow-up ideation survivor to proofable inline disclosure, conservative cue fallback, sparse accessible state announcements, and doc/test standards cleanup without changing routes, timer mechanics, data, or drill assembly."
     },
     {
       "id": "docs-canonical-successor-metadata-requirements-2026-05-02",
@@ -950,6 +947,27 @@
       "canonical_for": "Focused U8 requirements addendum for a repeatable diagnostic-only redistribution causality receipt. Separates optional-slot redistribution pressure from catalog, workload, and block-shape pressure without authorizing runtime generator changes, catalog edits, workload metadata edits, or U6 preview tooling."
     },
     {
+      "id": "catalog-gap-closure-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-catalog-gap-closure-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Fresh requirements for choosing the next minimal, high-quality catalog/config gap closure move from current generated-plan diagnostics. Frames target selection as evidence-gated product work before any catalog, workload, source-backed, U6, or runtime generator edits."
+    },
+    {
+      "id": "exercise-copy-contract-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-exercise-copy-contract-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for turning the catalog-gap copy-quality continuation into an exercise-copy contract. Bounds the pass to active drill explainers, instructions, success rules, cues, scaling, warmup/cooldown, bonus, and segment copy without authorizing new drills, metadata/workload changes, generated behavior changes, or a new drill-card UI."
+    },
+    {
+      "id": "gap-closure-selection-workbench-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-gap-closure-selection-workbench-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for a generated Gap Closure Selection section in the diagnostics triage workbench. Selects exactly one next artifact from current evidence, handles D47 reentry after D01 is held, compares top alternatives, and blocks catalog/config edits until later evidence payloads are complete."
+    },
+    {
       "id": "generated-diagnostics-d47-u6-proposal-admission-requirements-2026-05-02",
       "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d47-u6-proposal-admission-requirements.md",
       "type": "requirements",
@@ -962,6 +980,20 @@
       "type": "requirements",
       "status": "active",
       "canonical_for": "Focused requirements addendum for using d47-solo-open as the first concrete gap-closure ledger pilot. Turns diagnostic evidence into a named drill/programming gap, closure path, evidence checklist, fill-readiness state, and reassessment receipt before catalog edits, workload metadata edits, source-backed activation, U6 preview tooling, or runtime generator changes."
+    },
+    {
+      "id": "generated-diagnostics-d47-reentry-selection-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d47-reentry-selection-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for the post-D01 catalog re-diagnosis step. Resumes D47 with D01 held, compares D47 against current top alternatives, and requires one evidence-ready next artifact before catalog, workload, block-shape, U6, or generator edits."
+    },
+    {
+      "id": "generated-diagnostics-d47-concrete-delta-proposal-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d47-concrete-delta-proposal-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for the D47 concrete-delta gate. Defines how D47 can proceed to source-backed gap-card planning only when changed or missing catalog surfaces, source needs, adaptation deltas, expected movement, verification, checkpoint criteria, and why D47 beats the current D05 comparator and no-change are named. Current comparator state is owned by the generated triage and D47-vs-D05 comparator evaluation payload."
     },
     {
       "id": "generated-diagnostics-d01-comparator-gap-fill-proposal-requirements-2026-05-02",
@@ -978,11 +1010,32 @@
       "canonical_for": "Focused requirements addendum for turning the D01 gap-fill proposal into a concrete workload/block-shape proposal. Selects block-shape review before cap widening, keeps metadata review secondary, and blocks catalog, source-backed, U6 preview, or generator edits until a later authorized fill."
     },
     {
+      "id": "generated-diagnostics-d01-block-shape-fill-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d01-block-shape-fill-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for applying the first concrete D01 block-shape fill. Authorizes narrow duration-aware main-skill rerouting plus generated diagnostics reassessment, while blocking D01 metadata edits, source-backed content, U6 preview tooling, broad theme work, and unrelated generator policy changes."
+    },
+    {
+      "id": "generated-diagnostics-d01-redistribution-handoff-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d01-redistribution-handoff-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for the D01 redistribution-specific block-shape follow-up. Authorizes a handoff admission check and, only when admissible, a narrow capacity-aware handoff of skipped optional minutes away from over-stretched d01-solo to another already-selected block that can honestly carry them without weakening training intent, while blocking D01 metadata edits, broad redistribution scoring, source-backed content, U6 preview tooling, and unrelated generator policy changes."
+    },
+    {
+      "id": "generated-diagnostics-d01-cap-catalog-fork-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d01-cap-catalog-fork-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for turning the D01 insufficient allocated-pressure receipt into a decision-forcing cap/catalog/no-change/D47-resume packet, with source-backed catalog-fill planning gated on gap-card-ready evidence rather than presumed from allocated pressure alone."
+    },
+    {
       "id": "generated-diagnostics-triage-workflow-plan-2026-05-01",
       "path": "docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md",
       "type": "plan",
       "status": "active",
-      "canonical_for": "Implementation plan for the generated diagnostics triage workflow. Sequences the R1-R8 program from docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md plus the decision-debt, workload-envelope, dynamic-surface, redistribution-causality, D47 proposal-admission, D47 gap-closure, D01 comparator gap-fill, and D01 workload/block-shape addenda, with completed slices focused on stable observation group identity, triage registry/workbench, finding graduation gates, decision-debt compression, workload envelope guidance, dynamic surface sentinels, redistribution causality receipts, and concrete proposal handoff before U6 catalog impact preview."
+      "canonical_for": "Implementation plan for the generated diagnostics triage workflow. Sequences the R1-R8 program from docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md plus the decision-debt, workload-envelope, dynamic-surface, redistribution-causality, D47 proposal-admission, D47 gap-closure, D01 comparator gap-fill, D01 workload/block-shape, D01 block-shape fill, D01 redistribution handoff, D01 cap/catalog fork, gap-closure selection, and D47-vs-D05 comparator decision addenda, with completed slices focused on stable observation group identity, triage registry/workbench, finding graduation gates, decision-debt compression, workload envelope guidance, dynamic surface sentinels, redistribution causality receipts, proposal handoffs, partial D01 fill reassessment, D01 insufficient-handoff admission, the current `resume_d47_with_d01_held` / `d47_resumed_d01_held` fork, and the comparator packet that currently holds D47 and D05 for a proof payload before U6 catalog impact preview."
     },
     {
       "id": "generated-diagnostics-d47-proposal-admission-ticket-plan-2026-05-02",
@@ -1016,6 +1069,102 @@
       "canonical_for": "Implementation plan for adding a generated D01 workload/block-shape proposal. Selects block-shape review as the primary disposition, keeps workload metadata review secondary, and blocks catalog, source-backed, U6 preview, workload metadata, or generator edits until a later authorized fill."
     },
     {
+      "id": "generated-diagnostics-d01-block-shape-fill-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-007-feat-d01-block-shape-fill-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for applying the first concrete D01 block-shape fill through D01-scoped duration-aware main-skill candidate selection and a generated diagnostics reassessment receipt."
+    },
+    {
+      "id": "generated-diagnostics-d01-redistribution-handoff-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-008-feat-d01-redistribution-handoff-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for the D01 redistribution-specific follow-up. Adds an admission-first handoff check to the generated D01 fill receipt, records the current target as insufficient allocated-duration pressure, and states whether D01 still blocks the D47 gap-closure path."
+    },
+    {
+      "id": "generated-diagnostics-d01-cap-catalog-fork-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-010-feat-d01-cap-catalog-fork-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for adding a generated D01 cap/catalog fork packet. Turns the insufficient allocated-pressure receipt into an explicit cap, catalog/source-backed, no-change, or D47-resume decision, while requiring gap-card-ready evidence before catalog-fill planning blocks D47."
+    },
+    {
+      "id": "gap-closure-selection-workbench-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-011-feat-gap-closure-selection-workbench-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for adding a generated Gap Closure Selection section to the diagnostics triage workbench. Selects a D47-vs-D05 comparator proposal as the next not-authorized artifact after D01 is held, compares top alternatives, and preserves non-authorization for catalog/config edits."
+    },
+    {
+      "id": "d47-d05-comparator-decision-packet-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-012-feat-d47-d05-comparator-decision-packet-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for adding a generated D47-vs-D05 comparator decision packet. Introduced the hold/win/no-change packet contract and required a comparator evaluation payload before D47, D05, or accepted no-change could become the next not-authorized artifact; the current generated outcome is now owned by the D47-vs-D05 comparator evaluation payload."
+    },
+    {
+      "id": "d47-d05-comparator-evaluation-payload-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-013-feat-d47-d05-comparator-evaluation-payload-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for adding the D47-vs-D05 comparator evaluation payload. Moves the generated comparator packet from hold to a D47-winning, not-authorized outcome and names a D47 source-backed catalog implementation plan as the follow-up artifact."
+    },
+    {
+      "id": "d47-source-backed-catalog-implementation-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-014-feat-d47-source-backed-catalog-implementation-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for the D47-winning source-backed catalog gap. Added a bounded D49 advanced setting/movement family plus a narrow advanced-setting selection path; regenerated diagnostics now mark the original D47 comparator key `closed_by_d49` and route residual long-session setting pressure to D49 workload/redistribution follow-up."
+    },
+    {
+      "id": "action-overlay-primitive-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-015-feat-action-overlay-primitive-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for adding a local ActionOverlay primitive inspired by shadcn Dialog/AlertDialog accessibility discipline. Refactors SkipReviewModal and SoftBlockModal onto shared role, focus-trap, focus-restore, Escape, and safe-default focus behavior without installing shadcn or changing app routes/data/domain behavior."
+    },
+    {
+      "id": "action-overlay-consistency-pass-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-016-feat-action-overlay-consistency-pass-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed second ActionOverlay pass that migrates ResumePrompt, SchemaBlockedOverlay, and the Run end-session confirm onto the local overlay primitive while preserving behavior, copy, routes, reload semantics, and bottom-aligned Run placement."
+    },
+    {
+      "id": "exercise-copy-contract-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-017-feat-exercise-copy-contract-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for the exercise-copy contract pass. Extends the courtside-copy rule, adds focused mechanical copy tests, audits active drill explainers/instructions/success rules/cues/scaling copy, and preserves copy-only boundaries around workload, participants, equipment, source-backed catalog changes, and generated diagnostics."
+    },
+    {
+      "id": "d49-residual-follow-up-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-018-feat-d49-residual-follow-up-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for adding a generated D49 residual follow-up packet after D47 closed by D49. Splits D49 under-min workload evidence from optional-slot redistribution pressure while preserving not-authorized status for caps, catalog content, runtime redistribution, and D47 reopening."
+    },
+    {
+      "id": "agent-architecture-cleanup-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-019-refactor-agent-architecture-cleanup-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Bounded implementation plan for making app architecture debt visible to future agents. Adds a report-mode layer-boundary check, safe product-type import cleanup, a canonical cleanup queue in app architecture guidance, and explicit deferrals for generated diagnostics, e2e fixture helpers, session selection policy, and broad controller extraction."
+    },
+    {
       "id": "docs-canonical-successor-metadata-plan-2026-05-02",
       "path": "docs/plans/2026-05-02-002-feat-docs-canonical-successor-metadata-plan.md",
       "type": "plan",
@@ -1031,25 +1180,54 @@
       "canonical_for": "Implementation plan for Run Face v1, a bounded active Run-screen presentation pass from docs/brainstorms/2026-05-02-active-session-glance-system-requirements.md. Sequences deterministic current-cue selection, one-cue Run body hierarchy, cockpit/state refinement, focused Run accessibility tests, and phone-width visual verification without adding new routes, timer behavior, data model, drill assembly behavior, or generated coaching labels."
     },
     {
+      "id": "run-face-review-hardening-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-009-feat-run-face-review-hardening-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for hardening Run Face v1 review findings through proofable disclosure labels, conservative cue fallback, sparse accessible state announcements, and doc/test standards cleanup while preserving existing route, timer, data, controller, and drill assembly behavior."
+    },
+    {
       "id": "focus-coverage-readiness-audit-2026-04-30",
       "path": "docs/reviews/2026-04-30-focus-coverage-readiness-audit.md",
       "type": "review",
       "status": "active",
-      "canonical_for": "Generated-readiness audit snapshot for Tune today named-focus coverage across pass/serve/set, current setup configurations, beginner/intermediate/advanced levels, fixed 15/25/40-minute profiles, focus-reinforcing support, pressure applicability, and strict same-focus swaps. Records 135 cells after batch 3: pass 45 verified / 0 failing, serve 45 verified / 0 failing, set 45 verified / 0 failing; batches add focus-controlled support slots, serving depth on d22/d33, and FIVB-backed advanced Passing/Setting depth via d07/d46/d47/d48. 2026-05-01 generated-plan diagnostics now classify 540 seeded buildDraft() cells with 0 hard failures and routeable duration-envelope observations recorded in docs/reviews/2026-05-01-generated-plan-diagnostics-report.md."
+      "canonical_for": "Generated-readiness audit snapshot for Tune today named-focus coverage across pass/serve/set, current setup configurations, beginner/intermediate/advanced levels, fixed 15/25/40-minute profiles, focus-reinforcing support, pressure applicability, and strict same-focus swaps. Records 135 cells after batch 3: pass 45 verified / 0 failing, serve 45 verified / 0 failing, set 45 verified / 0 failing; batches add focus-controlled support slots, serving depth on d22/d33, and FIVB-backed advanced Passing/Setting depth via d07/d46/d47/d48. 2026-05-01 generated-plan diagnostics classify generated buildDraft() cells with 0 hard failures and routeable duration-envelope observations recorded in docs/reviews/2026-05-01-generated-plan-diagnostics-report.md."
     },
     {
       "id": "generated-plan-diagnostics-report-2026-05-01",
       "path": "docs/reviews/2026-05-01-generated-plan-diagnostics-report.md",
       "type": "review-data",
       "status": "active",
-      "canonical_for": "Machine-readable generated-plan diagnostics summary for the current Tune today focus-readiness surface. Source: summarizeGeneratedPlanDiagnostics(buildGeneratedPlanDiagnostics()) and buildGeneratedPlanObservationGroups() in app/src/domain/generatedPlanDiagnostics.ts. Current snapshot: 540 seeded cells, 119 clean, 421 observation-only, 0 hard failures; observations classify under-authored-min duration, optional-slot redistribution, over-authored-max stretch, and fatigue-cap stretch as routeable policy/content signals rather than automatic product failures. Records 53 drill/variant/block routeable observation groups, top examples, surface-contract evidence, and the generated redistribution causality receipt."
+      "canonical_for": "Machine-readable generated-plan diagnostics summary for the current Tune today focus-readiness surface. Source: summarizeGeneratedPlanDiagnostics(buildGeneratedPlanDiagnostics()) and buildGeneratedPlanObservationGroups() in app/src/domain/generatedPlanDiagnostics.ts. Current snapshot: 540 seeded cells, 124 clean, 416 observation-only, 0 hard failures; observations classify under-authored-min duration, optional-slot redistribution, over-authored-max stretch, and fatigue-cap stretch as routeable policy/content signals rather than automatic product failures. Records 58 drill/variant/block routeable observation groups, top examples, surface-contract evidence, and the generated redistribution causality receipt."
     },
     {
       "id": "generated-plan-diagnostics-triage-2026-05-01",
       "path": "docs/reviews/2026-05-01-generated-plan-diagnostics-triage.md",
       "type": "review",
       "status": "active",
-      "canonical_for": "Docs-first triage workbench for generated-plan routeable observation groups. Generated and validated with the diagnostics report; current snapshot records 53 registry entries, 0 blocking validation issues, 0 warning issues, 32 defer routes, 21 generator-policy-investigation routes, decision-debt compression, a redistribution causality receipt, the D47 proposal-admission ticket, the comparator-first D47 gap closure ledger, the D01 comparator gap-fill proposal, and the D01 workload/block-shape proposal so new/untriaged groups, stale fingerprints, stale receipt evidence, or premature fill authorization become visible before catalog or generator changes."
+      "canonical_for": "Docs-first triage workbench for generated-plan routeable observation groups. Generated and validated with the diagnostics report; current snapshot records 58 registry entries, 0 blocking validation issues, 0 warning issues, 35 defer routes, 23 generator-policy-investigation routes, decision-debt compression, a redistribution causality receipt, the D47 proposal-admission ticket, the D47 gap closure ledger, D01 follow-up packets, gap-closure selection, the D49 residual follow-up packet, the D47-vs-D05 comparator evaluation payload, and the D47-vs-D05 comparator decision packet. Current D47 state is `closed_by_d49`: the original D47 comparator key is gone, D49 carries residual workload and redistribution pressure, and catalog/runtime activation remains bounded by follow-up review."
+    },
+    {
+      "id": "d47-source-backed-gap-card-2026-05-02",
+      "path": "docs/reviews/2026-05-02-d47-source-backed-gap-card.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Source-backed gap-card candidate for the D47 advanced setting/movement pressure cluster. Names a possible D49-style setting conditioning sibling using Better at Beach, JVA, TAOCV, and existing FIVB 4.7 boundary evidence, but keeps activation not authorized; after the D47-winning comparator payload, it is follow-up catalog-planning input, not implementation approval."
+    },
+    {
+      "id": "d47-d05-comparator-evaluation-payload-2026-05-02",
+      "path": "docs/reviews/2026-05-02-d47-d05-comparator-evaluation-payload.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "D47-vs-D05 comparator evaluation payload. Selects `d47_wins`, keeps authorization `not_authorized`, records D47 source/adaptation and selection-path proof, preserves D05 re-entry triggers, and names the D47 source-backed catalog implementation plan as the follow-up artifact."
+    },
+    {
+      "id": "d49-source-backed-activation-manifest-2026-05-02",
+      "path": "docs/reviews/2026-05-02-d49-source-backed-activation-manifest.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Activation manifest for the D47-winning source-backed catalog gap. Authorizes only the bounded D49 advanced setting/movement implementation and selection-path proof while preserving D05 re-entry and rejecting D47 cap widening or 3+ player source forms."
     },
     {
       "id": "focus-coverage-gap-cards-2026-04-30",
@@ -1300,22 +1478,10 @@
   ],
   "status_vocabularies": {
     "doc_status": {
-      "values": [
-        "draft",
-        "active",
-        "complete",
-        "superseded"
-      ]
+      "values": ["draft", "active", "complete", "superseded"]
     },
     "milestone_status": {
-      "values": [
-        "draft",
-        "ready",
-        "active",
-        "blocked",
-        "complete",
-        "deferred"
-      ]
+      "values": ["draft", "ready", "active", "blocked", "complete", "deferred"]
     }
   },
   "doc_conventions": {

@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
 import { BlockTimer } from '../BlockTimer'
 
 /**
@@ -72,5 +71,23 @@ describe('BlockTimer progress bar (visual half of #8 / A4, chip reverted)', () =
     render(<BlockTimer remainingSeconds={47} totalSeconds={120} isPaused={false} />)
     expect(screen.queryByTestId('block-timer-chip')).toBeNull()
     expect(screen.queryByText(/left$/i)).toBeNull()
+  })
+
+  it('does not announce every running timer tick as a live-region update', () => {
+    render(<BlockTimer remainingSeconds={47} totalSeconds={120} isPaused={false} />)
+    const timer = screen.getByRole('timer')
+    expect(timer).toHaveAttribute('aria-live', 'off')
+    expect(timer).toHaveAccessibleName('0:47 remaining')
+  })
+
+  it('announces paused state politely', () => {
+    render(<BlockTimer remainingSeconds={47} totalSeconds={120} isPaused />)
+    const timer = screen.getByRole('timer')
+    expect(timer).toHaveAttribute('aria-live', 'off')
+    expect(timer).toHaveAccessibleName('0:47 remaining, paused')
+    expect(screen.getByText(/Timer paused\. Tap Resume to continue\./i)).toHaveAttribute(
+      'aria-live',
+      'polite',
+    )
   })
 })

@@ -54,7 +54,15 @@ export function BlockTimer({ remainingSeconds, totalSeconds, isPaused }: BlockTi
   const isCountingDown = !isPaused && remainingSeconds > 0 && remainingSeconds <= 3.5
 
   return (
-    <div className="flex flex-col items-center gap-3" role="timer" aria-live="polite">
+    <div
+      className="flex flex-col items-center gap-3"
+      role="timer"
+      aria-label={`${formatTime(remainingSeconds)} remaining${isPaused ? ', paused' : ''}`}
+      aria-live="off"
+    >
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {isPaused ? 'Timer paused. Tap Resume to continue.' : ''}
+      </span>
       <div
         className={`font-mono text-[56px] font-bold leading-none tabular-nums transition-colors ${
           isCountingDown ? 'text-accent' : 'text-text-primary'

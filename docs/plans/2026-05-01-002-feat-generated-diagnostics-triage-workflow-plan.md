@@ -4,7 +4,7 @@ title: "feat: Add generated diagnostics triage workflow"
 status: active
 stage: validation
 type: plan
-summary: "Implementation plan for turning generated-plan diagnostics into a docs-first triage workflow. Implemented slices now cover stable observation identity, triage workbench, freshness gates, decision-debt compression, workload guidance, dynamic surface sentinels, redistribution causality receipts, the D47 proposal-admission ticket, the comparator-first D47 gap closure ledger, the D01 comparator gap-fill proposal, and the D01 workload/block-shape proposal; U6 catalog impact preview remains deferred until a concrete catalog/cap proposal exists."
+summary: "Implementation plan for turning generated-plan diagnostics into a docs-first triage workflow. Implemented slices now cover stable observation identity, triage workbench, freshness gates, decision-debt compression, workload guidance, dynamic surface sentinels, redistribution causality receipts, the D47 proposal-admission ticket, the comparator-first D47 gap closure ledger, the D01 comparator gap-fill proposal, the D01 workload/block-shape proposal, a partially validated D01 block-shape fill receipt, D01 redistribution handoff admission, the D01 cap/catalog fork packet, the gap-closure selection workbench, and the generated D47-vs-D05 comparator decision packet; U6 catalog impact preview remains deferred until a concrete catalog/cap proposal exists."
 date: 2026-05-01
 origin: docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md
 deepened: 2026-05-01
@@ -16,7 +16,7 @@ deepened: 2026-05-01
 
 Add the workflow layer that turns generated-plan diagnostics from a report into a sequenced decision system. The first implementation slices created stable observation-group identity, a compact triage workbench, freshness and graduation gates, decision-debt compression, workload metadata guidance, and dynamic surface sentinels. The latest slice adds a diagnostic-only redistribution causality receipt so generator-policy groups can be reviewed as repeatable evidence before any runtime generator or catalog changes.
 
-Status note (2026-05-02): U1-U5, U7, U8, the D47 proposal-admission ticket, the comparator-first D47 gap closure ledger, the D01 comparator gap-fill proposal, and the D01 workload/block-shape proposal are implemented and represented in the committed report/triage artifacts. U6 catalog impact preview remains intentionally active/deferred until there is a concrete source-backed catalog, workload-cap, or candidate activation proposal to preview.
+Status note (2026-05-02): U1-U5, U7, U8, the D47 proposal-admission ticket, the comparator-first D47 gap closure ledger, the D01 comparator gap-fill proposal, the D01 workload/block-shape proposal, the D01 block-shape fill receipt, D01 redistribution handoff admission, the D01 cap/catalog fork packet, the gap-closure selection workbench, and the D47-vs-D05 comparator decision packet are implemented and represented in the committed report/triage artifacts. The D01 fill is partially validated: target cells moved from 18 to 12 and non-redistribution pressure moved from 6 to 0; handoff admission classifies the remaining target as `insufficient_allocated_pressure`, and the cap/catalog fork packet now resumes D47 with D01 held because no cap, catalog, or no-change payload is planning-ready. The current comparator packet selects `hold_both_for_evidence` with next artifact `D47-vs-D05 comparator evaluation payload`; D47 catalog work remains held behind that proof payload and the source-backed gap-card gate. U6 catalog impact preview remains intentionally active/deferred until there is a concrete source-backed catalog, workload-cap, or candidate activation proposal to preview.
 
 ---
 
@@ -57,6 +57,14 @@ The post-U1-U3 continuation follows `docs/brainstorms/2026-05-01-generated-diagn
 **D01 comparator gap-fill addendum:** The D47 ledger's selected comparator is extended by `docs/brainstorms/2026-05-02-generated-diagnostics-d01-comparator-gap-fill-proposal-requirements.md` and planned in `docs/plans/2026-05-02-004-feat-d01-gap-fill-proposal-plan.md`; it keeps D01 as a workload/block-shape proposal candidate before any catalog, workload metadata, source-backed, U6 preview, or generator edits.
 
 **D01 workload/block-shape addendum:** The D01 comparator proposal is extended by `docs/brainstorms/2026-05-02-generated-diagnostics-d01-workload-block-shape-proposal-requirements.md` and planned in `docs/plans/2026-05-02-006-feat-d01-workload-block-shape-proposal-plan.md`; it selects block-shape review as the primary candidate disposition, keeps metadata review secondary, and leaves all fill actions unauthorized.
+
+**D01 block-shape fill addendum:** The D01 workload/block-shape proposal is extended by `docs/brainstorms/2026-05-02-generated-diagnostics-d01-block-shape-fill-requirements.md` and planned in `docs/plans/2026-05-02-007-feat-d01-block-shape-fill-plan.md`; it applies a D01-scoped duration-aware main-skill reroute and records a generated reassessment receipt showing partial diagnostic validation while leaving field training-quality validation and redistribution-specific follow-up open.
+
+**D01 redistribution handoff addendum:** The D01 block-shape fill receipt is extended by `docs/brainstorms/2026-05-02-generated-diagnostics-d01-redistribution-handoff-requirements.md` and planned in `docs/plans/2026-05-02-008-feat-d01-redistribution-handoff-plan.md`; it adds an admission-first handoff read and records that current D01 residual pressure is `insufficient_allocated_pressure`, which points away from another runtime redistribution tweak and toward a cap/catalog decision or resuming D47 with D01 still explicitly open.
+
+**D01 cap/catalog fork addendum:** The D01 redistribution handoff result is extended by `docs/brainstorms/2026-05-02-generated-diagnostics-d01-cap-catalog-fork-requirements.md` and planned in `docs/plans/2026-05-02-010-feat-d01-cap-catalog-fork-plan.md`; it adds a decision-forcing packet that selects cap, catalog/source-backed, accepted no-change, or D47 resume only from planning-ready evidence. The current packet resumes D47 with D01 held because no cap, catalog, or no-change payload is ready enough to block D47 or authorize catalog-fill planning.
+
+**Gap-closure selection addendum:** The post-D01 reentry work is represented by `docs/brainstorms/2026-05-02-gap-closure-selection-workbench-requirements.md`, `docs/brainstorms/2026-05-02-generated-diagnostics-d47-reentry-selection-requirements.md`, `docs/plans/2026-05-02-011-feat-gap-closure-selection-workbench-plan.md`, `docs/brainstorms/2026-05-02-generated-diagnostics-d47-concrete-delta-proposal-requirements.md`, `docs/reviews/2026-05-02-d47-source-backed-gap-card.md`, and `docs/plans/2026-05-02-012-feat-d47-d05-comparator-decision-packet-plan.md`; it now renders a D47-vs-D05 comparator decision packet. Current generated evidence holds both candidates for one comparator evaluation payload, and D47 can use the held source-backed gap card only if that payload proves D47 beats D05 and no-change.
 
 ---
 
@@ -166,7 +174,7 @@ The post-U1-U3 continuation follows `docs/brainstorms/2026-05-01-generated-diagn
 
 ## High-Level Technical Design
 
-> *This illustrates the intended approach and is directional guidance for review, not implementation specification. The implementing agent should treat it as context, not code to reproduce.*
+> _This illustrates the intended approach and is directional guidance for review, not implementation specification. The implementing agent should treat it as context, not code to reproduce._
 
 ```mermaid
 flowchart TD
@@ -184,10 +192,7 @@ flowchart TD
   K --> M[unknown compression category validation]
 ```
 
-
-
 Recommended triage state model:
-
 
 | Field               | Purpose                               | Example values                                                                                                                    |
 | ------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -195,16 +200,13 @@ Recommended triage state model:
 | `route`             | Product/content/generator disposition | `policy_allowance`, `variant_cap_review`, `block_split`, `source_backed_content_depth`, `generator_policy_investigation`, `defer` |
 | `enforcementStatus` | Test strictness                       | `observation_only`, `hard_fail_candidate`, `hard_fail_enforced`                                                                   |
 
-
 Recommended derived compression contract:
-
 
 | Concept              | Purpose                        | Notes                                                                                                |
 | -------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------- |
 | Compression lane     | Human decision prompt grouping | Derived from current group + registry fields; not manually persisted per row in U4.                  |
 | Lane explanation     | Maintainer trust               | Each prompt should state why rows were grouped there.                                                |
 | Unknown/unclassified | Safety fallback                | Unexpected patterns are surfaced separately and validated so they do not disappear into a watchlist. |
-
 
 ---
 
@@ -639,23 +641,21 @@ The first generated-plan diagnostics plan already created a dynamic matrix that 
 
 ## Risks & Dependencies
 
-
-| Risk                                                    | Mitigation                                                                                                                                               |
-| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Triage registry becomes stale                           | Validate against live `buildGeneratedPlanObservationGroups(buildGeneratedPlanDiagnostics())`.                                                            |
-| All current observations accidentally become blocking   | Keep default `enforcementStatus` as observation-only and only fail missing triage entries, unknown compression lanes, or explicit enforced group checks. |
-| Same-key facts drift while the gate passes              | Store a diagnostic fingerprint per group and surface stale fingerprints for review.                                                                      |
-| Stable keys become brittle after cap edits              | Keep mutable cap facts in the fingerprint rather than the key; use resolved/superseded cleanup for disappeared groups.                                   |
-| Agents add drills before policy decisions               | Keep content-depth routes unresolved without source-backed gap cards or activation manifests.                                                            |
-| Decision-debt compression becomes another stale surface | Generate or validate it from the triage registry, and keep row-level triage as the source of truth.                                                      |
-| R3-R6 follow-ups bloat the first slice                  | Sequence R1/R2/R7 first and treat dynamic surfaces, impact previews, workload guidance, and redistribution comparisons as follow-on work.                |
-| Compression lane matching hides novel patterns          | Require an unknown/unclassified lane and validate unexpected unknowns rather than sending them to low-volume watchlist.                                  |
-| Redistribution prompt overstates causality              | Split total affected cells from redistribution-affected and non-redistribution over-cap cells.                                                           |
-| Allocated-duration counterfactual implies valid runtime policy | Label U8 comparison mode explicitly, include skipped optional / unfilled-minute evidence, and route policy decisions outside U8.                 |
-| Redistribution comparison changes runtime behavior      | Make comparison diagnostic-only and test directly that `buildDraft()` output and public options stay unchanged.                                           |
-| Missing workload limits produce false causality labels  | Require an explicit workload-limit source before classification and mark missing variant/limit evidence as inconclusive.                                  |
-| U8 receipt becomes stale but still authoritative        | Make U8 receipt freshness blocking under `diagnostics:report:check`, including group membership, counts, route labels, and Markdown.                      |
-
+| Risk                                                           | Mitigation                                                                                                                                               |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Triage registry becomes stale                                  | Validate against live `buildGeneratedPlanObservationGroups(buildGeneratedPlanDiagnostics())`.                                                            |
+| All current observations accidentally become blocking          | Keep default `enforcementStatus` as observation-only and only fail missing triage entries, unknown compression lanes, or explicit enforced group checks. |
+| Same-key facts drift while the gate passes                     | Store a diagnostic fingerprint per group and surface stale fingerprints for review.                                                                      |
+| Stable keys become brittle after cap edits                     | Keep mutable cap facts in the fingerprint rather than the key; use resolved/superseded cleanup for disappeared groups.                                   |
+| Agents add drills before policy decisions                      | Keep content-depth routes unresolved without source-backed gap cards or activation manifests.                                                            |
+| Decision-debt compression becomes another stale surface        | Generate or validate it from the triage registry, and keep row-level triage as the source of truth.                                                      |
+| R3-R6 follow-ups bloat the first slice                         | Sequence R1/R2/R7 first and treat dynamic surfaces, impact previews, workload guidance, and redistribution comparisons as follow-on work.                |
+| Compression lane matching hides novel patterns                 | Require an unknown/unclassified lane and validate unexpected unknowns rather than sending them to low-volume watchlist.                                  |
+| Redistribution prompt overstates causality                     | Split total affected cells from redistribution-affected and non-redistribution over-cap cells.                                                           |
+| Allocated-duration counterfactual implies valid runtime policy | Label U8 comparison mode explicitly, include skipped optional / unfilled-minute evidence, and route policy decisions outside U8.                         |
+| Redistribution comparison changes runtime behavior             | Make comparison diagnostic-only and test directly that `buildDraft()` output and public options stay unchanged.                                          |
+| Missing workload limits produce false causality labels         | Require an explicit workload-limit source before classification and mark missing variant/limit evidence as inconclusive.                                 |
+| U8 receipt becomes stale but still authoritative               | Make U8 receipt freshness blocking under `diagnostics:report:check`, including group membership, counts, route labels, and Markdown.                     |
 
 ---
 
@@ -681,4 +681,3 @@ The first generated-plan diagnostics plan already created a dynamic matrix that 
 - **Triage domain:** `app/src/domain/generatedPlanDiagnosticTriage.ts`
 - **Readiness domain:** `app/src/domain/sessionAssembly/focusReadiness.ts`
 - **Report validation script:** `app/scripts/validate-generated-plan-diagnostics-report.mjs`
-

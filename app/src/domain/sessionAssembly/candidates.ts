@@ -13,6 +13,8 @@ export interface FindCandidatesOptions {
 
 export interface PickForSlotOptions extends FindCandidatesOptions {
   readonly allowUsedFallback?: boolean
+  readonly targetDurationMinutes?: number
+  readonly preferTargetDurationFit?: boolean
 }
 
 const PLAYER_LEVEL_ORDER: Record<PlayerLevel, number> = {
@@ -36,8 +38,10 @@ function isLevelEligible(
   level: PlayerLevel | undefined,
 ): boolean {
   if (level === undefined) return true
-  return PLAYER_LEVEL_ORDER[drill.levelMin] <= PLAYER_LEVEL_ORDER[level] &&
+  return (
+    PLAYER_LEVEL_ORDER[drill.levelMin] <= PLAYER_LEVEL_ORDER[level] &&
     PLAYER_LEVEL_ORDER[level] <= PLAYER_LEVEL_ORDER[drill.levelMax]
+  )
 }
 
 export function findCandidates(
@@ -53,10 +57,16 @@ export function findCandidates(
 
   for (const drill of DRILLS) {
     if (!drill.m001Candidate) continue
+    // D49 is high-load setting conditioning. Keep it out of support slots so
+    // it remains available for the main-skill duration-pressure path it was
+    // authored to solve.
+    if (drill.id === 'd49' && slot.type !== 'main_skill') continue
     if (!isLevelEligible(drill, playerLevel)) continue
 
     const hasMatchingFocus =
-      !skillTags || skillTags.length === 0 || skillTags.some((tag) => drill.skillFocus.includes(tag))
+      !skillTags ||
+      skillTags.length === 0 ||
+      skillTags.some((tag) => drill.skillFocus.includes(tag))
     if (!hasMatchingFocus) continue
 
     for (const variant of drill.variants) {
@@ -73,6 +83,34 @@ export function findCandidates(
   return candidates
 }
 
+export function candidateCanCarryTargetDuration(
+  candidate: CandidateVariant,
+  targetDurationMinutes: number,
+): boolean {
+  const fatigueMaxMinutes = candidate.variant.workload.fatigueCap?.maxMinutes
+  return (
+    candidate.variant.workload.durationMaxMinutes >= targetDurationMinutes &&
+    (fatigueMaxMinutes === undefined || fatigueMaxMinutes >= targetDurationMinutes)
+  )
+}
+
+export function candidateDurationCapacity(candidate: CandidateVariant): number {
+  const fatigueMaxMinutes = candidate.variant.workload.fatigueCap?.maxMinutes
+  return Math.min(
+    candidate.variant.workload.durationMaxMinutes,
+    fatigueMaxMinutes ?? Number.MAX_SAFE_INTEGER,
+  )
+}
+
+function strongestDurationCapacityCandidate(
+  candidates: readonly CandidateVariant[],
+): CandidateVariant | undefined {
+  return candidates.reduce<CandidateVariant | undefined>((best, candidate) => {
+    if (!best) return candidate
+    return candidateDurationCapacity(candidate) > candidateDurationCapacity(best) ? candidate : best
+  }, undefined)
+}
+
 export function pickForSlot(
   slot: BlockSlot,
   context: SetupContext,
@@ -86,6 +124,27 @@ export function pickForSlot(
   const pool = shuffle(unused.length > 0 ? unused : candidates, random)
 
   if (pool.length === 0) return undefined
+
+  const targetDurationMinutes = options?.targetDurationMinutes
+  if (slot.type === 'main_skill' && targetDurationMinutes !== undefined) {
+    const defaultPick = pool[0]
+    const shouldPreferTargetDuration =
+      options?.preferTargetDurationFit === true ||
+      (defaultPick?.drill.id === 'd01' &&
+        !candidateCanCarryTargetDuration(defaultPick, targetDurationMinutes))
+    if (shouldPreferTargetDuration) {
+      const durationFit = pool.find((candidate) =>
+        candidateCanCarryTargetDuration(candidate, targetDurationMinutes),
+      )
+      if (durationFit) return durationFit
+      const strongestCandidate = strongestDurationCapacityCandidate(
+        defaultPick?.drill.id === 'd01'
+          ? pool.filter((candidate) => candidate.drill.id !== 'd01')
+          : pool,
+      )
+      if (strongestCandidate) return strongestCandidate
+    }
+  }
 
   if (slot.type === 'warmup') {
     const warmup =

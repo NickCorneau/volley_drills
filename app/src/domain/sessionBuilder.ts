@@ -9,7 +9,11 @@ import type {
   SessionPlan,
   SetupContext,
 } from '../model'
-import { pickForSlot, type CandidateVariant } from './sessionAssembly/candidates'
+import {
+  candidateCanCarryTargetDuration,
+  pickForSlot,
+  type CandidateVariant,
+} from './sessionAssembly/candidates'
 import { allocateDurations, allocateRecoveryDurations } from './sessionAssembly/durations'
 import { createAssemblySeed, createSeededRandom } from './sessionAssembly/random'
 import { deriveBlockRationale } from './sessionAssembly/rationale'
@@ -21,7 +25,9 @@ export {
 } from './sessionAssembly/swapAlternatives'
 export { deriveBlockRationale } from './sessionAssembly/rationale'
 
-export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 3
+export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 4
+
+const ADVANCED_SETTING_DURATION_FIT_DRILL_IDS = new Set(['d47', 'd48'])
 
 /**
  * Optional inputs that scope build-time drill substitution.
@@ -132,6 +138,21 @@ function stripSessionFocus(context: SetupContext): SetupContext {
   return next
 }
 
+function shouldPreferAdvancedSettingDurationFit(
+  slot: BlockSlot,
+  context: SetupContext,
+  selected: CandidateVariant,
+  plannedDurationMinutes: number,
+): boolean {
+  return (
+    slot.type === 'main_skill' &&
+    context.sessionFocus === 'set' &&
+    context.playerLevel === 'advanced' &&
+    ADVANCED_SETTING_DURATION_FIT_DRILL_IDS.has(selected.drill.id) &&
+    !candidateCanCarryTargetDuration(selected, plannedDurationMinutes)
+  )
+}
+
 function buildDraftResult(
   context: SetupContext,
   options?: BuildDraftOptions,
@@ -183,6 +204,7 @@ function buildDraftResult(
   function selectSlot(
     slot: BlockSlot,
     allowUsedFallback: boolean,
+    targetDurationMinutes: number,
   ): { readonly pick: CandidateVariant; readonly substitutionRationale?: string } | undefined {
     if (slot.type === 'main_skill' && mainSkillSubstitute) {
       return {
@@ -194,6 +216,7 @@ function buildDraftResult(
     const pick = pickForSlot(slot, effectiveContext, usedDrillIds, random, {
       playerLevel: options?.playerLevel,
       allowUsedFallback,
+      targetDurationMinutes,
     })
     return pick ? { pick } : undefined
   }
@@ -202,7 +225,7 @@ function buildDraftResult(
     const slot = layout[i]
     if (!slot.required) continue
 
-    const selected = selectSlot(slot, true)
+    const selected = selectSlot(slot, true, durations[i])
     if (!selected) return null
     selectedByLayoutIndex.set(i, selected)
     usedDrillIds.add(selected.pick.drill.id)
@@ -212,7 +235,7 @@ function buildDraftResult(
     const slot = layout[i]
     if (slot.required) continue
 
-    const selected = selectSlot(slot, false)
+    const selected = selectSlot(slot, false, durations[i])
     if (!selected) continue
     selectedByLayoutIndex.set(i, selected)
     usedDrillIds.add(selected.pick.drill.id)
@@ -228,9 +251,37 @@ function buildDraftResult(
   const redistributedMinutes = effectiveContext.timeProfile - selectedDurationTotal
   const redistributionIndex =
     redistributedMinutes > 0
-      ? [...selectedByLayoutIndex.keys()].find((index) => layout[index].type === 'main_skill') ??
-        [...selectedByLayoutIndex.keys()].at(-1)
+      ? ([...selectedByLayoutIndex.keys()].find((index) => layout[index].type === 'main_skill') ??
+        [...selectedByLayoutIndex.keys()].at(-1))
       : undefined
+
+  if (redistributionIndex !== undefined) {
+    const slot = layout[redistributionIndex]
+    const selected = selectedByLayoutIndex.get(redistributionIndex)
+    if (slot.type === 'main_skill' && selected) {
+      const plannedDurationMinutes = durations[redistributionIndex] + redistributedMinutes
+      const shouldRerouteD01 =
+        selected.pick.drill.id === 'd01' &&
+        !candidateCanCarryTargetDuration(selected.pick, plannedDurationMinutes)
+      const shouldRerouteAdvancedSetting = shouldPreferAdvancedSettingDurationFit(
+        slot,
+        effectiveContext,
+        selected.pick,
+        plannedDurationMinutes,
+      )
+      if (shouldRerouteD01 || shouldRerouteAdvancedSetting) {
+        const rerouted = pickForSlot(slot, effectiveContext, usedDrillIds, random, {
+          playerLevel: options?.playerLevel,
+          allowUsedFallback: false,
+          targetDurationMinutes: plannedDurationMinutes,
+          preferTargetDurationFit: true,
+        })
+        if (rerouted) {
+          selectedByLayoutIndex.set(redistributionIndex, { pick: rerouted })
+        }
+      }
+    }
+  }
 
   for (let i = 0; i < layout.length; i++) {
     const selected = selectedByLayoutIndex.get(i)
@@ -256,7 +307,8 @@ function buildDraftResult(
       courtsideInstructions: pick.variant.courtsideInstructions,
       courtsideInstructionsBonus: pick.variant.courtsideInstructionsBonus,
       required: slot.required,
-      rationale: substitutionRationale ?? deriveBlockRationale(slot.type, pick.drill, effectiveContext),
+      rationale:
+        substitutionRationale ?? deriveBlockRationale(slot.type, pick.drill, effectiveContext),
       subBlockIntervalSeconds: pick.variant.subBlockIntervalSeconds,
       segments: pick.variant.segments,
     })
@@ -506,4 +558,3 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
 // Swap alternate derivation lives in `sessionAssembly/swapAlternatives.ts`;
 // this module re-exports it above to keep the historical `sessionBuilder`
 // import path stable during the Batch 3 split.
-

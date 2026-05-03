@@ -1,7 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
-
-import { ELEVATED_PANEL_SURFACE } from './ui/Card'
-import { Button } from './ui'
+import { ActionOverlay, Button } from './ui'
 
 /**
  * 2026-04-27 reconciled-list `R11`: Skip-review confirm modal.
@@ -50,103 +47,33 @@ interface Props {
   onCancel: () => void
 }
 
-const FOCUSABLE_SELECTOR =
-  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-
 export function SkipReviewModal({ planName, onConfirm, onCancel }: Props) {
-  const panelRef = useRef<HTMLDivElement | null>(null)
-  const previouslyFocusedRef = useRef<HTMLElement | null>(null)
-
-  const getFocusable = useCallback((): HTMLElement[] => {
-    const panel = panelRef.current
-    if (!panel) return []
-    return Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
-  }, [])
-
-  useEffect(() => {
-    previouslyFocusedRef.current = (document.activeElement as HTMLElement | null) ?? null
-    // The safe-primary `Never mind` button is the first focusable
-    // element inside the panel; focus it on mount so a keyboard or
-    // screen-reader user lands on the non-destructive default.
-    const focusable = getFocusable()
-    focusable[0]?.focus()
-    return () => {
-      // Restore focus on close so a keyboard user lands back on the
-      // Home `Skip review` link they came from.
-      const prev = previouslyFocusedRef.current
-      if (prev && typeof prev.focus === 'function') {
-        prev.focus()
-      }
-    }
-  }, [getFocusable])
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onCancel()
-        return
-      }
-      if (e.key !== 'Tab') return
-      const focusable = getFocusable()
-      if (focusable.length === 0) {
-        e.preventDefault()
-        return
-      }
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      const active = document.activeElement as HTMLElement | null
-      // If focus drifted outside the dialog (background interaction
-      // before the trap engaged), pull it back inside.
-      if (!active || !panelRef.current?.contains(active)) {
-        e.preventDefault()
-        first.focus()
-        return
-      }
-      if (e.shiftKey && active === first) {
-        e.preventDefault()
-        last.focus()
-      } else if (!e.shiftKey && active === last) {
-        e.preventDefault()
-        first.focus()
-      }
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [onCancel, getFocusable])
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="skip-review-title"
-    >
-      <div
-        ref={panelRef}
-        className={`w-full max-w-[340px] rounded-[12px] p-6 ${ELEVATED_PANEL_SURFACE}`}
-      >
-        <h2 id="skip-review-title" className="text-lg font-bold text-text-primary">
-          Skip review?
-        </h2>
-        <p className="mt-2 text-sm text-text-secondary">
+    <ActionOverlay
+      title="Skip review?"
+      description={
+        <>
           Skipping leaves <span className="font-medium text-text-primary">{planName}</span> out of
           what comes next. The session is still saved to your history.
-        </p>
-        {/* Safe-primary first, destructive below: keeps `Never mind` as
-            the default thumb-target after the modal opens, mirrors the
-            `End session early?` modal's `Go back` / `End session`
-            arrangement, and prevents an accidental skip-review tap from
-            taking the destructive action without a second deliberate
-            confirm. */}
-        <div className="mt-6 flex flex-col gap-3">
-          <Button variant="primary" fullWidth onClick={onCancel}>
-            Never mind
-          </Button>
-          <Button variant="danger" fullWidth onClick={onConfirm}>
-            Yes, skip
-          </Button>
-        </div>
+        </>
+      }
+      onDismiss={onCancel}
+    >
+      {/* Safe-primary first: keeps `Never mind` as the default keyboard
+          and thumb target after the modal opens. */}
+      <div className="mt-6 flex flex-col gap-3">
+        <Button
+          variant="primary"
+          fullWidth
+          onClick={onCancel}
+          data-action-overlay-initial-focus="true"
+        >
+          Never mind
+        </Button>
+        <Button variant="danger" fullWidth onClick={onConfirm}>
+          Yes, skip
+        </Button>
       </div>
-    </div>
+    </ActionOverlay>
   )
 }

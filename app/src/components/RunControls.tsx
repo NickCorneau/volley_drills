@@ -50,23 +50,23 @@ export function RunControls({
         <Button variant="primary" fullWidth onClick={onResume}>
           Resume
         </Button>
-        <div className="flex gap-3">
+        <div className="grid grid-cols-2 gap-3">
           {onSwap && (
-            <Button variant="secondary" className="flex-1" onClick={onSwap}>
+            <Button variant="secondary" onClick={onSwap}>
               Swap
             </Button>
           )}
-          <Button variant="secondary" className="flex-1" onClick={onShorten}>
+          <Button variant="secondary" onClick={onShorten}>
             Shorten
           </Button>
           {!isRequired && (
-            <Button variant="secondary" className="flex-1" onClick={onSkip}>
+            <Button variant="secondary" onClick={onSkip}>
               Skip block
             </Button>
           )}
           <Button
             variant="secondary"
-            className="flex-1 border-warning/20 text-warning"
+            className="border-warning/20 text-warning"
             onClick={onEndSession}
           >
             End session

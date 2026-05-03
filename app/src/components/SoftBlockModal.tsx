@@ -1,7 +1,5 @@
-import { useEffect } from 'react'
 import type { PendingReview } from '../services/session'
-import { ELEVATED_PANEL_SURFACE } from './ui/Card'
-import { Button } from './ui'
+import { ActionOverlay, Button } from './ui'
 
 /**
  * D-C1 soft-block modal (C-4 Unit 4).
@@ -34,48 +32,32 @@ interface Props {
 }
 
 export function SoftBlockModal({ pendingReview, onFinish, onSkipAndContinue, onClose }: Props) {
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [onClose])
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="softblock-title"
-    >
-      <div className={`relative w-full max-w-[340px] rounded-[12px] p-6 ${ELEVATED_PANEL_SURFACE}`}>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-text-primary/5 hover:text-text-primary active:bg-text-primary/10 active:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-        >
-          &times;
-        </button>
-        <h2 id="softblock-title" className="text-lg font-bold text-text-primary">
-          Finish your review first?
-        </h2>
-        <p className="mt-3 text-sm text-text-secondary">
+    <ActionOverlay
+      title="Finish your review first?"
+      description={
+        <>
           You have a review pending for{' '}
           <span className="font-medium text-text-primary">{pendingReview.planName}</span>. Finish it
           first, or skip and continue?
-        </p>
-
-        <div className="mt-6 flex flex-col gap-3">
-          <Button variant="primary" fullWidth onClick={onFinish}>
-            Finish review
-          </Button>
-          <Button variant="outline" fullWidth onClick={onSkipAndContinue}>
-            Skip review and continue
-          </Button>
-        </div>
+        </>
+      }
+      onDismiss={onClose}
+      showCloseButton
+    >
+      <div className="mt-6 flex flex-col gap-3">
+        <Button
+          variant="primary"
+          fullWidth
+          onClick={onFinish}
+          data-action-overlay-initial-focus="true"
+        >
+          Finish review
+        </Button>
+        <Button variant="outline" fullWidth onClick={onSkipAndContinue}>
+          Skip review and continue
+        </Button>
       </div>
-    </div>
+    </ActionOverlay>
   )
 }

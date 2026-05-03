@@ -67,8 +67,10 @@ describe('Button', () => {
     render(<Button disabled>Disabled primary</Button>)
     const btn = screen.getByRole('button')
     expect(btn.className).toContain('bg-text-secondary/10')
-    expect(btn.className).toContain('text-text-secondary/70')
+    expect(btn.className).toContain('text-text-primary')
+    expect(btn.className).toContain('opacity-100')
     expect(btn.className).toContain('cursor-not-allowed')
+    expect(btn.className).not.toContain('text-white')
     // The prior opacity-only disabled treatment is explicitly replaced.
     expect(btn.className).not.toContain('disabled:')
   })

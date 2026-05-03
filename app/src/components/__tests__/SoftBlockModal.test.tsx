@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
 import type { PendingReview } from '../../services/session'
 import { SoftBlockModal } from '../SoftBlockModal'
 
@@ -116,5 +115,43 @@ describe('SoftBlockModal (C-4 Unit 4 / D-C1)', () => {
 
     await user.keyboard('{Escape}')
     expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('autofocuses Finish review even though the close button is present first in DOM order', () => {
+    render(
+      <SoftBlockModal
+        pendingReview={pr}
+        onFinish={() => {}}
+        onSkipAndContinue={() => {}}
+        onClose={() => {}}
+      />,
+    )
+
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: /finish review/i }))
+  })
+
+  it('keeps keyboard focus trapped inside the modal', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <SoftBlockModal
+        pendingReview={pr}
+        onFinish={() => {}}
+        onSkipAndContinue={() => {}}
+        onClose={() => {}}
+      />,
+    )
+
+    const close = screen.getByRole('button', { name: /close/i })
+    const finishReview = screen.getByRole('button', { name: /finish review/i })
+    const skipReview = screen.getByRole('button', { name: /skip review and continue/i })
+
+    expect(document.activeElement).toBe(finishReview)
+    await user.tab()
+    expect(document.activeElement).toBe(skipReview)
+    await user.tab()
+    expect(document.activeElement).toBe(close)
+    await user.tab({ shift: true })
+    expect(document.activeElement).toBe(skipReview)
   })
 })

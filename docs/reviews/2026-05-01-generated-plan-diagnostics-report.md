@@ -24,10 +24,10 @@ Record the current generated-plan diagnostic snapshot for the Tune today support
 ## Summary
 
 - Total seeded cells: 540
-- Clean cells: 119
-- Observation-only cells: 421
+- Clean cells: 124
+- Observation-only cells: 416
 - Hard-failure cells: 0
-- Routeable observation groups: 53
+- Routeable observation groups: 58
 
 ## Interpretation
 
@@ -130,20 +130,20 @@ The committed report intentionally keeps top routeable groups plus examples only
     "validation_issues": []
   },
   "status_counts": {
-    "clean": 119,
-    "observation_only": 421,
+    "clean": 124,
+    "observation_only": 416,
     "hard_failure": 0
   },
   "hard_failure_count": 0,
-  "observation_count": 1069,
+  "observation_count": 1025,
   "hard_failure_counts": {},
   "observation_counts": {
-    "under_authored_min": 257,
-    "optional_slot_redistribution": 236,
-    "over_authored_max": 288,
-    "over_fatigue_cap": 288
+    "under_authored_min": 265,
+    "optional_slot_redistribution": 228,
+    "over_authored_max": 266,
+    "over_fatigue_cap": 266
   },
-  "routeable_observation_group_count": 53,
+  "routeable_observation_group_count": 58,
   "top_routeable_observation_groups": [
     {
       "drill_id": "d25",
@@ -151,7 +151,7 @@ The committed report intentionally keeps top routeable groups plus examples only
       "block_type": "wrap",
       "required": true,
       "authored_min_minutes": 4,
-      "affected_cell_count": 87,
+      "affected_cell_count": 79,
       "observation_codes": [
         "under_authored_min"
       ],
@@ -206,94 +206,6 @@ The committed report intentionally keeps top routeable groups plus examples only
           "observation_codes": [
             "under_authored_min"
           ]
-        }
-      ]
-    },
-    {
-      "drill_id": "d47",
-      "variant_id": "d47-solo-open",
-      "block_type": "main_skill",
-      "required": true,
-      "authored_max_minutes": 9,
-      "fatigue_max_minutes": 9,
-      "affected_cell_count": 30,
-      "observation_codes": [
-        "over_authored_max",
-        "over_fatigue_cap",
-        "optional_slot_redistribution"
-      ],
-      "likely_fix_paths": [
-        "generator_policy_investigation",
-        "policy_allowance",
-        "block_split",
-        "variant_cap_review",
-        "source_backed_content_depth"
-      ],
-      "example_affected_cells": [
-        {
-          "focus": "set",
-          "configuration": "solo_net",
-          "level": "intermediate",
-          "duration": 40,
-          "seed": "matrix-b",
-          "block_id": "block-3",
-          "planned_minutes": 10,
-          "allocated_minutes": 10,
-          "authored_min_minutes": 5,
-          "authored_max_minutes": 9,
-          "fatigue_max_minutes": 9,
-          "observation_codes": [
-            "over_authored_max",
-            "over_fatigue_cap"
-          ]
-        },
-        {
-          "focus": "set",
-          "configuration": "solo_net",
-          "level": "intermediate",
-          "duration": 40,
-          "seed": "matrix-c",
-          "block_id": "block-3",
-          "planned_minutes": 10,
-          "allocated_minutes": 10,
-          "authored_min_minutes": 5,
-          "authored_max_minutes": 9,
-          "fatigue_max_minutes": 9,
-          "observation_codes": [
-            "over_authored_max",
-            "over_fatigue_cap"
-          ]
-        },
-        {
-          "focus": "set",
-          "configuration": "solo_net",
-          "level": "advanced",
-          "duration": 25,
-          "seed": "matrix-a",
-          "block_id": "block-2",
-          "planned_minutes": 12,
-          "allocated_minutes": 7,
-          "authored_min_minutes": 5,
-          "authored_max_minutes": 9,
-          "fatigue_max_minutes": 9,
-          "observation_codes": [
-            "optional_slot_redistribution",
-            "over_authored_max",
-            "over_fatigue_cap"
-          ],
-          "redistribution": {
-            "source": "observed",
-            "redistributed_minutes": 5,
-            "skipped_optional_layout_indexes": [
-              2
-            ],
-            "redistribution_layout_index": 3,
-            "redistributedMinutes": 5,
-            "skippedOptionalLayoutIndexes": [
-              2
-            ],
-            "redistributionLayoutIndex": 3
-          }
         }
       ]
     },
@@ -648,72 +560,97 @@ The committed report intentionally keeps top routeable groups plus examples only
           }
         }
       ]
+    },
+    {
+      "drill_id": "d07",
+      "variant_id": "d07-solo-open",
+      "block_type": "technique",
+      "required": true,
+      "authored_min_minutes": 5,
+      "affected_cell_count": 18,
+      "observation_codes": [
+        "under_authored_min"
+      ],
+      "likely_fix_paths": [
+        "policy_allowance",
+        "block_split",
+        "variant_cap_review",
+        "source_backed_content_depth"
+      ],
+      "example_affected_cells": [
+        {
+          "focus": "pass",
+          "configuration": "solo_net",
+          "level": "intermediate",
+          "duration": 15,
+          "seed": "matrix-a",
+          "block_id": "block-1",
+          "planned_minutes": 4,
+          "allocated_minutes": 4,
+          "authored_min_minutes": 5,
+          "authored_max_minutes": 8,
+          "fatigue_max_minutes": 8,
+          "observation_codes": [
+            "under_authored_min"
+          ]
+        },
+        {
+          "focus": "pass",
+          "configuration": "solo_net",
+          "level": "intermediate",
+          "duration": 15,
+          "seed": "matrix-c",
+          "block_id": "block-1",
+          "planned_minutes": 4,
+          "allocated_minutes": 4,
+          "authored_min_minutes": 5,
+          "authored_max_minutes": 8,
+          "fatigue_max_minutes": 8,
+          "observation_codes": [
+            "under_authored_min"
+          ]
+        },
+        {
+          "focus": "pass",
+          "configuration": "solo_net",
+          "level": "advanced",
+          "duration": 15,
+          "seed": "matrix-a",
+          "block_id": "block-1",
+          "planned_minutes": 4,
+          "allocated_minutes": 4,
+          "authored_min_minutes": 5,
+          "authored_max_minutes": 8,
+          "fatigue_max_minutes": 8,
+          "observation_codes": [
+            "under_authored_min"
+          ]
+        }
+      ]
     }
   ],
   "redistribution_causality_receipt": {
     "comparison_mode": "allocated_duration_counterfactual",
-    "runtime_boundary": "Diagnostic-only receipt; shipped buildDraft() behavior is unchanged.",
-    "group_count": 21,
+    "runtime_boundary": "Diagnostic-only counterfactual receipt; shipped buildDraft() behavior may include separately authorized fills such as the D01 block-shape fill.",
+    "group_count": 23,
     "counts": {
-      "total_affected_cell_count": 251,
-      "redistribution_affected_cell_count": 236,
-      "current_over_authored_max_cell_count": 231,
-      "current_over_fatigue_cap_cell_count": 231,
+      "total_affected_cell_count": 231,
+      "redistribution_affected_cell_count": 228,
+      "current_over_authored_max_cell_count": 199,
+      "current_over_fatigue_cap_cell_count": 199,
       "current_under_authored_min_cell_count": 0,
-      "allocated_over_authored_max_cell_count": 80,
-      "allocated_over_fatigue_cap_cell_count": 80,
-      "allocated_under_authored_min_cell_count": 0,
-      "non_redistribution_over_cap_cell_count": 15,
+      "allocated_over_authored_max_cell_count": 52,
+      "allocated_over_fatigue_cap_cell_count": 52,
+      "allocated_under_authored_min_cell_count": 12,
+      "non_redistribution_over_cap_cell_count": 3,
       "non_redistribution_under_min_cell_count": 0,
-      "pressure_disappears_cell_count": 151,
-      "pressure_remains_cell_count": 80,
+      "pressure_disappears_cell_count": 147,
+      "pressure_remains_cell_count": 52,
       "comparison_inconclusive_cell_count": 0,
-      "redistribution_without_pressure_cell_count": 20,
-      "counterfactual_unfilled_minutes": 2092
+      "redistribution_without_pressure_cell_count": 32,
+      "counterfactual_unfilled_minutes": 2004
     },
     "groups": [
-      {
-        "group_key": "gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-        "diagnostic_fingerprint": "gpdf|v1|none|9|9|30|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|set/solo_net/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|set/solo_net/advanced/25/matrix-b/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|set/solo_net/advanced/25/matrix-c/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-        "triage_status": "routed",
-        "triage_route": "generator_policy_investigation",
-        "reviewed_report_id": "generated-plan-diagnostics-report-2026-05-01",
-        "drill_id": "d47",
-        "variant_id": "d47-solo-open",
-        "block_type": "main_skill",
-        "observation_codes": [
-          "over_authored_max",
-          "over_fatigue_cap",
-          "optional_slot_redistribution"
-        ],
-        "action_state": "pressure_remains_without_redistribution",
-        "dominant_cell_state": "pressure_remains_without_redistribution",
-        "has_incomplete_evidence": false,
-        "follow_up_routes": [
-          "workload_review",
-          "block_shape_review",
-          "source_backed_proposal_work",
-          "u6_proposal_admission_candidate",
-          "future_generator_policy_decision"
-        ],
-        "counts": {
-          "total_affected_cell_count": 30,
-          "redistribution_affected_cell_count": 24,
-          "current_over_authored_max_cell_count": 30,
-          "current_over_fatigue_cap_cell_count": 30,
-          "current_under_authored_min_cell_count": 0,
-          "allocated_over_authored_max_cell_count": 18,
-          "allocated_over_fatigue_cap_cell_count": 18,
-          "allocated_under_authored_min_cell_count": 0,
-          "non_redistribution_over_cap_cell_count": 6,
-          "non_redistribution_under_min_cell_count": 0,
-          "pressure_disappears_cell_count": 12,
-          "pressure_remains_cell_count": 18,
-          "comparison_inconclusive_cell_count": 0,
-          "redistribution_without_pressure_cell_count": 0,
-          "counterfactual_unfilled_minutes": 212
-        }
-      },
       {
         "group_key": "gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
         "diagnostic_fingerprint": "gpdf|v1|none|10|10|28|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/25/matrix-d/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/advanced/40/matrix-d/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/intermediate/25/matrix-d/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
@@ -833,47 +770,6 @@ The committed report intentionally keeps top routeable groups plus examples only
         }
       },
       {
-        "group_key": "gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-        "diagnostic_fingerprint": "gpdf|v1|none|5|5|18|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|pass/solo_net/beginner/25/matrix-a/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|pass/solo_net/beginner/25/matrix-c/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|pass/solo_net/beginner/40/matrix-a/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-        "triage_status": "routed",
-        "triage_route": "generator_policy_investigation",
-        "reviewed_report_id": "generated-plan-diagnostics-report-2026-05-01",
-        "drill_id": "d01",
-        "variant_id": "d01-solo",
-        "block_type": "main_skill",
-        "observation_codes": [
-          "optional_slot_redistribution",
-          "over_authored_max",
-          "over_fatigue_cap"
-        ],
-        "action_state": "pressure_remains_without_redistribution",
-        "dominant_cell_state": "pressure_remains_without_redistribution",
-        "has_incomplete_evidence": false,
-        "follow_up_routes": [
-          "workload_review",
-          "block_shape_review",
-          "source_backed_proposal_work",
-          "u6_proposal_admission_candidate"
-        ],
-        "counts": {
-          "total_affected_cell_count": 18,
-          "redistribution_affected_cell_count": 12,
-          "current_over_authored_max_cell_count": 18,
-          "current_over_fatigue_cap_cell_count": 18,
-          "current_under_authored_min_cell_count": 0,
-          "allocated_over_authored_max_cell_count": 18,
-          "allocated_over_fatigue_cap_cell_count": 18,
-          "allocated_under_authored_min_cell_count": 0,
-          "non_redistribution_over_cap_cell_count": 6,
-          "non_redistribution_under_min_cell_count": 0,
-          "pressure_disappears_cell_count": 0,
-          "pressure_remains_cell_count": 18,
-          "comparison_inconclusive_cell_count": 0,
-          "redistribution_without_pressure_cell_count": 0,
-          "counterfactual_unfilled_minutes": 106
-        }
-      },
-      {
         "group_key": "gpdg:v1:d46:d46-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
         "diagnostic_fingerprint": "gpdf|v1|none|8|8|16|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|pass/pair_net/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|pass/pair_net/advanced/25/matrix-b/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|pass/pair_net/advanced/25/matrix-c/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
         "triage_status": "routed",
@@ -910,48 +806,6 @@ The committed report intentionally keeps top routeable groups plus examples only
           "non_redistribution_under_min_cell_count": 0,
           "pressure_disappears_cell_count": 8,
           "pressure_remains_cell_count": 8,
-          "comparison_inconclusive_cell_count": 0,
-          "redistribution_without_pressure_cell_count": 0,
-          "counterfactual_unfilled_minutes": 148
-        }
-      },
-      {
-        "group_key": "gpdg:v1:d47:d47-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-        "diagnostic_fingerprint": "gpdf|v1|none|9|9|16|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|set/pair_net/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|set/pair_net/advanced/25/matrix-b/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|set/pair_net/advanced/25/matrix-c/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-        "triage_status": "routed",
-        "triage_route": "generator_policy_investigation",
-        "reviewed_report_id": "generated-plan-diagnostics-report-2026-05-01",
-        "drill_id": "d47",
-        "variant_id": "d47-pair-open",
-        "block_type": "main_skill",
-        "observation_codes": [
-          "optional_slot_redistribution",
-          "over_authored_max",
-          "over_fatigue_cap"
-        ],
-        "action_state": "pressure_remains_without_redistribution",
-        "dominant_cell_state": "likely_redistribution_caused",
-        "has_incomplete_evidence": false,
-        "follow_up_routes": [
-          "workload_review",
-          "block_shape_review",
-          "source_backed_proposal_work",
-          "u6_proposal_admission_candidate",
-          "future_generator_policy_decision"
-        ],
-        "counts": {
-          "total_affected_cell_count": 16,
-          "redistribution_affected_cell_count": 16,
-          "current_over_authored_max_cell_count": 16,
-          "current_over_fatigue_cap_cell_count": 16,
-          "current_under_authored_min_cell_count": 0,
-          "allocated_over_authored_max_cell_count": 4,
-          "allocated_over_fatigue_cap_cell_count": 4,
-          "allocated_under_authored_min_cell_count": 0,
-          "non_redistribution_over_cap_cell_count": 0,
-          "non_redistribution_under_min_cell_count": 0,
-          "pressure_disappears_cell_count": 12,
-          "pressure_remains_cell_count": 4,
           "comparison_inconclusive_cell_count": 0,
           "redistribution_without_pressure_cell_count": 0,
           "counterfactual_unfilled_minutes": 148
@@ -1042,6 +896,47 @@ The committed report intentionally keeps top routeable groups plus examples only
         }
       },
       {
+        "group_key": "gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+        "diagnostic_fingerprint": "gpdf|v1|none|5|5|12|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|pass/solo_net/beginner/25/matrix-a/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|pass/solo_net/beginner/25/matrix-c/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|pass/solo_net/beginner/40/matrix-a/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+        "triage_status": "routed",
+        "triage_route": "generator_policy_investigation",
+        "reviewed_report_id": "generated-plan-diagnostics-report-2026-05-01",
+        "drill_id": "d01",
+        "variant_id": "d01-solo",
+        "block_type": "main_skill",
+        "observation_codes": [
+          "optional_slot_redistribution",
+          "over_authored_max",
+          "over_fatigue_cap"
+        ],
+        "action_state": "pressure_remains_without_redistribution",
+        "dominant_cell_state": "pressure_remains_without_redistribution",
+        "has_incomplete_evidence": false,
+        "follow_up_routes": [
+          "workload_review",
+          "block_shape_review",
+          "source_backed_proposal_work",
+          "u6_proposal_admission_candidate"
+        ],
+        "counts": {
+          "total_affected_cell_count": 12,
+          "redistribution_affected_cell_count": 12,
+          "current_over_authored_max_cell_count": 12,
+          "current_over_fatigue_cap_cell_count": 12,
+          "current_under_authored_min_cell_count": 0,
+          "allocated_over_authored_max_cell_count": 12,
+          "allocated_over_fatigue_cap_cell_count": 12,
+          "allocated_under_authored_min_cell_count": 0,
+          "non_redistribution_over_cap_cell_count": 0,
+          "non_redistribution_under_min_cell_count": 0,
+          "pressure_disappears_cell_count": 0,
+          "pressure_remains_cell_count": 12,
+          "comparison_inconclusive_cell_count": 0,
+          "redistribution_without_pressure_cell_count": 0,
+          "counterfactual_unfilled_minutes": 106
+        }
+      },
+      {
         "group_key": "gpdg:v1:d40:d40-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
         "diagnostic_fingerprint": "gpdf|v1|none|10|10|12|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|set/solo_net/beginner/40/matrix-a/block-3/17/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|set/solo_net/beginner/40/matrix-b/block-3/17/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|set/solo_net/beginner/40/matrix-c/block-3/17/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
         "triage_status": "routed",
@@ -1077,6 +972,44 @@ The committed report intentionally keeps top routeable groups plus examples only
           "comparison_inconclusive_cell_count": 0,
           "redistribution_without_pressure_cell_count": 0,
           "counterfactual_unfilled_minutes": 80
+        }
+      },
+      {
+        "group_key": "gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+        "diagnostic_fingerprint": "gpdf|v1|none|14|14|12|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|set/solo_net/advanced/40/matrix-a/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|set/solo_net/advanced/40/matrix-b/block-3/17/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|set/solo_net/advanced/40/matrix-c/block-3/17/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+        "triage_status": "routed",
+        "triage_route": "generator_policy_investigation",
+        "reviewed_report_id": "generated-plan-diagnostics-report-2026-05-01",
+        "drill_id": "d49",
+        "variant_id": "d49-solo-open",
+        "block_type": "main_skill",
+        "observation_codes": [
+          "optional_slot_redistribution",
+          "over_authored_max",
+          "over_fatigue_cap"
+        ],
+        "action_state": "likely_redistribution_caused",
+        "dominant_cell_state": "likely_redistribution_caused",
+        "has_incomplete_evidence": false,
+        "follow_up_routes": [
+          "future_generator_policy_decision"
+        ],
+        "counts": {
+          "total_affected_cell_count": 12,
+          "redistribution_affected_cell_count": 12,
+          "current_over_authored_max_cell_count": 12,
+          "current_over_fatigue_cap_cell_count": 12,
+          "current_under_authored_min_cell_count": 0,
+          "allocated_over_authored_max_cell_count": 0,
+          "allocated_over_fatigue_cap_cell_count": 0,
+          "allocated_under_authored_min_cell_count": 0,
+          "non_redistribution_over_cap_cell_count": 0,
+          "non_redistribution_under_min_cell_count": 0,
+          "pressure_disappears_cell_count": 12,
+          "pressure_remains_cell_count": 0,
+          "comparison_inconclusive_cell_count": 0,
+          "redistribution_without_pressure_cell_count": 0,
+          "counterfactual_unfilled_minutes": 116
         }
       },
       {
@@ -1151,6 +1084,44 @@ The committed report intentionally keeps top routeable groups plus examples only
           "comparison_inconclusive_cell_count": 0,
           "redistribution_without_pressure_cell_count": 0,
           "counterfactual_unfilled_minutes": 126
+        }
+      },
+      {
+        "group_key": "gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+        "diagnostic_fingerprint": "gpdf|v1|none|14|14|8|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|set/pair_net/advanced/40/matrix-a/block-3/18/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|set/pair_net/advanced/40/matrix-b/block-2/24/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|set/pair_net/advanced/40/matrix-c/block-2/24/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+        "triage_status": "routed",
+        "triage_route": "generator_policy_investigation",
+        "reviewed_report_id": "generated-plan-diagnostics-report-2026-05-01",
+        "drill_id": "d49",
+        "variant_id": "d49-pair-open",
+        "block_type": "main_skill",
+        "observation_codes": [
+          "optional_slot_redistribution",
+          "over_authored_max",
+          "over_fatigue_cap"
+        ],
+        "action_state": "likely_redistribution_caused",
+        "dominant_cell_state": "likely_redistribution_caused",
+        "has_incomplete_evidence": false,
+        "follow_up_routes": [
+          "future_generator_policy_decision"
+        ],
+        "counts": {
+          "total_affected_cell_count": 8,
+          "redistribution_affected_cell_count": 8,
+          "current_over_authored_max_cell_count": 8,
+          "current_over_fatigue_cap_cell_count": 8,
+          "current_under_authored_min_cell_count": 0,
+          "allocated_over_authored_max_cell_count": 0,
+          "allocated_over_fatigue_cap_cell_count": 0,
+          "allocated_under_authored_min_cell_count": 0,
+          "non_redistribution_over_cap_cell_count": 0,
+          "non_redistribution_under_min_cell_count": 0,
+          "pressure_disappears_cell_count": 8,
+          "pressure_remains_cell_count": 0,
+          "comparison_inconclusive_cell_count": 0,
+          "redistribution_without_pressure_cell_count": 0,
+          "counterfactual_unfilled_minutes": 96
         }
       },
       {
@@ -1305,6 +1276,78 @@ The committed report intentionally keeps top routeable groups plus examples only
           "comparison_inconclusive_cell_count": 0,
           "redistribution_without_pressure_cell_count": 0,
           "counterfactual_unfilled_minutes": 54
+        }
+      },
+      {
+        "group_key": "gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution",
+        "diagnostic_fingerprint": "gpdf|v1|none|none|none|6|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|set/pair_net/advanced/25/matrix-b/block-2/12/7/optional_slot_redistribution|set/pair_net/advanced/25/matrix-c/block-2/12/7/optional_slot_redistribution|set/pair_net/advanced/25/matrix-d/block-2/12/7/optional_slot_redistribution",
+        "triage_status": "routed",
+        "triage_route": "generator_policy_investigation",
+        "reviewed_report_id": "generated-plan-diagnostics-report-2026-05-01",
+        "drill_id": "d49",
+        "variant_id": "d49-pair-open",
+        "block_type": "main_skill",
+        "observation_codes": [
+          "optional_slot_redistribution"
+        ],
+        "action_state": "redistribution_without_pressure",
+        "dominant_cell_state": "redistribution_without_pressure",
+        "has_incomplete_evidence": false,
+        "follow_up_routes": [
+          "no_implementation_action_yet"
+        ],
+        "counts": {
+          "total_affected_cell_count": 6,
+          "redistribution_affected_cell_count": 6,
+          "current_over_authored_max_cell_count": 0,
+          "current_over_fatigue_cap_cell_count": 0,
+          "current_under_authored_min_cell_count": 0,
+          "allocated_over_authored_max_cell_count": 0,
+          "allocated_over_fatigue_cap_cell_count": 0,
+          "allocated_under_authored_min_cell_count": 6,
+          "non_redistribution_over_cap_cell_count": 0,
+          "non_redistribution_under_min_cell_count": 0,
+          "pressure_disappears_cell_count": 0,
+          "pressure_remains_cell_count": 0,
+          "comparison_inconclusive_cell_count": 0,
+          "redistribution_without_pressure_cell_count": 6,
+          "counterfactual_unfilled_minutes": 30
+        }
+      },
+      {
+        "group_key": "gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution",
+        "diagnostic_fingerprint": "gpdf|v1|none|none|none|6|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|set/solo_net/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution|set/solo_net/advanced/25/matrix-d/block-2/12/7/optional_slot_redistribution|set/solo_open/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution",
+        "triage_status": "routed",
+        "triage_route": "generator_policy_investigation",
+        "reviewed_report_id": "generated-plan-diagnostics-report-2026-05-01",
+        "drill_id": "d49",
+        "variant_id": "d49-solo-open",
+        "block_type": "main_skill",
+        "observation_codes": [
+          "optional_slot_redistribution"
+        ],
+        "action_state": "redistribution_without_pressure",
+        "dominant_cell_state": "redistribution_without_pressure",
+        "has_incomplete_evidence": false,
+        "follow_up_routes": [
+          "no_implementation_action_yet"
+        ],
+        "counts": {
+          "total_affected_cell_count": 6,
+          "redistribution_affected_cell_count": 6,
+          "current_over_authored_max_cell_count": 0,
+          "current_over_fatigue_cap_cell_count": 0,
+          "current_under_authored_min_cell_count": 0,
+          "allocated_over_authored_max_cell_count": 0,
+          "allocated_over_fatigue_cap_cell_count": 0,
+          "allocated_under_authored_min_cell_count": 6,
+          "non_redistribution_over_cap_cell_count": 0,
+          "non_redistribution_under_min_cell_count": 0,
+          "pressure_disappears_cell_count": 0,
+          "pressure_remains_cell_count": 0,
+          "comparison_inconclusive_cell_count": 0,
+          "redistribution_without_pressure_cell_count": 6,
+          "counterfactual_unfilled_minutes": 30
         }
       },
       {

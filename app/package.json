@@ -12,6 +12,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "architecture:check": "node scripts/check-architecture-boundaries.mjs",
+    "architecture:check:strict": "node scripts/check-architecture-boundaries.mjs --strict",
     "diagnostics:report:check": "node scripts/validate-generated-plan-diagnostics-report.mjs",
     "diagnostics:triage:check": "node scripts/validate-generated-plan-diagnostics-report.mjs",
     "diagnostics:report:update": "node scripts/validate-generated-plan-diagnostics-report.mjs --write",

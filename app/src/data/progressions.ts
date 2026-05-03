@@ -265,15 +265,16 @@ const chain6: ProgressionChain = {
 // Tier 1b-A setting wave. Bump Set, Hand Set, and Footwork stay
 // default-unlocked as fundamentals per BAB Beginner's Guide Lesson 2;
 // pair setting progresses from d41 partner rhythm to d42 named corner
-// targets, then branches into FIVB-backed advanced variability and
+// targets, then branches into FIVB-backed advanced variability,
 // post-set look/call work. d43 Triangle Setting and other 3-player BAB
-// drills remain deferred to D101 3+ player support; we do not force a
-// two-player adaptation when the source form is genuinely 3+.
+// drills remain deferred to D101 3+ player support; d49 is the source-backed
+// 1-2 player conditioning sibling for longer advanced setting blocks, not a
+// forced adaptation of the 3-player triangle source.
 const chain7: ProgressionChain = {
   id: 'chain-7-setting',
   name: 'Setting Fundamentals',
   focus: 'Bump-set shape, hand-set contact, footwork, pair rhythm, and advanced setting reads.',
-  drillIds: ['d38', 'd39', 'd40', 'd41', 'd42', 'd47', 'd48'],
+  drillIds: ['d38', 'd39', 'd40', 'd41', 'd42', 'd47', 'd48', 'd49'],
   defaultGatingThreshold: 0.7,
   links: [
     {
@@ -296,6 +297,13 @@ const chain7: ProgressionChain = {
       direction: 'progression',
       gatingCriteria: '3 clean sets from each of the four locations in d47',
       description: 'Variable set quality reliable → add post-set look and call behavior.',
+    },
+    {
+      fromDrillId: 'd47',
+      toDrillId: 'd49',
+      direction: 'lateral',
+      description:
+        'Alternative advanced setting branch for longer out-of-system recovery and set-quality conditioning blocks.',
     },
   ],
 }
