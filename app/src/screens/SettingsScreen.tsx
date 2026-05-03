@@ -200,8 +200,8 @@ export function SettingsScreen() {
         {/* 2026-04-26 pre-D91 editorial polish (`F14`): build-id row
             for D91 field-test debugging hygiene. When a tester reports
             a bug, the founder's first triage question is "what build
-            are you on?" — this row is the answer. Monospace so the
-            identifier reads as copyable rather than human prose.
+            are you on?" — this row is the answer. Keep it in the human
+            UI face; `font-mono` is reserved for timer/instrument text.
             Values come from Vite `define` injection in
             `vite.config.ts` via the typed `lib/buildInfo.ts` accessor.
 
@@ -215,7 +215,7 @@ export function SettingsScreen() {
             `-dirty`. See `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md`
             Item 6. */}
         <p
-          className="pb-3 text-center font-mono text-xs text-text-secondary/80"
+          className="pb-3 text-center text-xs font-medium text-text-secondary/80"
           data-testid="settings-build-id"
         >
           Build {BUILD_VERSION} · {BUILD_DATE}

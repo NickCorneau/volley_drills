@@ -241,6 +241,7 @@ depends_on:
   - docs/plans/2026-05-02-012-feat-d47-d05-comparator-decision-packet-plan.md
   - docs/plans/2026-05-02-013-feat-d47-d05-comparator-evaluation-payload-plan.md
   - docs/plans/2026-05-02-018-feat-d49-residual-follow-up-plan.md
+  - docs/plans/2026-05-03-001-feat-d49-next-work-selection-plan.md
 ---
 
 # Generated Plan Diagnostics Triage

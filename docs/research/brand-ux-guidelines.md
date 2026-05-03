@@ -122,6 +122,77 @@ Exceptions:
 
 Upper-case letter-tracked "dashboard eyebrow" labels (`UPPERCASE tracking-wider`) are **not allowed** as a design pattern. The one legitimate uppercase-tracked surface is the `BlockTimer` `PAUSED` state indicator, which is a transient state marker attached to the live timer, not a content eyebrow.
 
+### 1.5 Typography pass lanes
+
+Added 2026-05-03 from `docs/brainstorms/2026-05-02-volleycraft-typography-system-requirements.md`.
+
+The current font families are not under review in the typography-system pass:
+
+- `Inter Variable` remains the human UI/body family.
+- `JetBrains Mono Variable` remains the timer/instrument family.
+- No new display face, remote font request, broad brand-font replacement, or component-library theme replacement is authorized.
+
+Use two evidence lanes when touching typography:
+
+| Lane | May ship now | Must stay evidence-gated |
+| --- | --- | --- |
+| Role and documentation | Role naming, route/state inventory, checklist updates, browser screenshot review | New typography authority outside this note |
+| Source classes | Hard violations such as below-floor body/support text, active-run or safety-critical readability fixes with a named athlete outcome | Broad `text-sm` migration, default body-token retune, distance-mode behavior |
+| Validation | Narrow drift guardrail and browser verification | Claims about glare, sunglasses, sweat, or 1-3 m set-down readability without real-device evidence |
+
+### 1.6 First-pass type role checklist
+
+This checklist is a decision aid, not a new abstraction layer. Start from the scale in §1.2 and the tokens in `app/src/index.css`; add code-level roles only when implementation proves the role repeats enough to justify it.
+
+| Role bucket | Current examples | Active-run eligible | Default evidence lane |
+| --- | --- | --- | --- |
+| Active-run glance | Run phase/state, current cue, timer, primary controls | Yes | Ship-now for hard violations; field-validation-needed for distance claims |
+| Trust / safety support | Safety consequence copy, Review blockers, storage/save trust lines | No, except active-run expectation setting | Ship-now when consequence or recovery clarity is at stake |
+| Ordinary support / metadata | meta lines, chip helpers, secondary labels, footer explanations | No | Inspect-only unless below floor or trust-critical |
+| Action labels | primary CTAs, secondary buttons, ghost links, confirm rows | Sometimes | Ship-now when tap target and label readability are affected |
+| Timer / instrument text | `BlockTimer`, preroll countdown, exact time/count displays | Yes | Ship-now at current arm-length scale; larger states require evidence |
+| Receipt / carry-forward | Complete verdict, saved state, next-step/carry-forward copy | No | Inspect-only unless trust or investment copy is unclear |
+
+### 1.7 Route and state inventory
+
+Use this inventory before changing classes. It prevents a typography pass from becoming a whole-app retune while still covering active and trust-critical surfaces.
+
+| Surface / route family | Screen job | First-pass posture |
+| --- | --- | --- |
+| `/run` | active timer, cue, phase/state, primary controls | Apply-now for active-run glance roles and screenshot verification |
+| `/safety` | consequence and safe-to-train confirmation | Apply-now for trust/safety support touched by the pass |
+| `/review`, `/run/check` | end-session and drill-grain capture without lying | Apply-now for blocker/helper copy touched by the pass; inspect capture states |
+| `/` | resume, review-pending, repeat, local trust cues | Inspect trust/resume roles; apply only documented hard violations |
+| `/complete` | receipt, saved state, carry-forward | Inspect receipt/carry-forward roles; apply only documented hard violations |
+| `/setup`, `/tune-today`, onboarding | prep choices and recommendation controls | Inspect-only unless touched copy is active-use or trust-critical |
+| `/run/transition` | between-block handoff | Inspect active-run-adjacent state; defer behavior changes |
+| Modals / overlays / prompts | recovery, blocked, confirm, resume, update | Inspect state-role consistency; apply only hard violations |
+| `/settings` | export and local-storage explanation | Inspect trust/support roles; defer broad scale changes |
+
+For touched surfaces, check these states when they exist: normal/default, loading or missing data, error/recovery, blocked or schema-blocked, interrupted/resume, skipped/partial/incomplete, and success/saved/receipt.
+
+### 1.8 Verification and guardrail checklist
+
+Browser verification at 390 × 844 can prove hierarchy and obvious layout regressions. It does not prove direct-sun, sunglasses, sweat, or 1-3 m set-down readability. Mark those as `field-validation-needed` unless real-device evidence was collected.
+
+Minimum screenshot matrix for a typography pass that changes UI classes:
+
+- Run active
+- Safety consequence
+- Review blocked/helper or `/run/check`
+- Home trust or resume
+- Complete receipt
+- one error, recovery, blocked, or interrupted state
+
+Guardrails should stay narrow. Approved first-pass checks:
+
+- no body-like arbitrary text below `12px`
+- no new uppercase tracked eyebrow outside the `BlockTimer` `PAUSED` state
+- no arbitrary text sizes outside an explicit timer/display allowlist
+- no decorative `font-mono`; mono belongs to timer/instrument text
+
+Each exception must name the role bucket, surface, active-run eligibility, and rationale.
+
 ---
 
 ## 2 · Color

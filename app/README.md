@@ -91,6 +91,13 @@ npm run diagnostics:report:check
 npm run diagnostics:triage:check
 ```
 
+Typography drift guardrails are opt-in and intentionally narrow:
+
+```bash
+cd app
+npm run typography:guardrails:check
+```
+
 ## Tests
 
 Unit and component tests (Vitest + Testing Library + fake-indexeddb):
@@ -107,7 +114,7 @@ npm run test:e2e
 npm run test:e2e:headed
 ```
 
-The E2E suite includes functional flow tests (`e2e/session-flow.spec.ts`, `e2e/edge-cases.spec.ts`) and WCAG 2.1 AA accessibility checks via `@axe-core/playwright` (`e2e/accessibility.spec.ts`).
+The E2E suite includes functional flow tests (`e2e/session-flow.spec.ts`, `e2e/edge-cases.spec.ts`), typography screenshot evidence (`e2e/typography-visual-evidence.spec.ts`), and WCAG 2.1 AA accessibility checks via `@axe-core/playwright` (`e2e/accessibility.spec.ts`).
 
 ## Deploy
 

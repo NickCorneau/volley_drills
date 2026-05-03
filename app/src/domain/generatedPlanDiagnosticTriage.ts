@@ -646,7 +646,15 @@ export type GeneratedPlanD49ResidualFollowUpAuthorizationStatus = 'not_authorize
 export type GeneratedPlanD49ResidualFollowUpLaneDisposition =
   | 'workload_review_needed'
   | 'route_to_u8'
+  | 'accepted_residual_debt'
   | 'no_implementation_action_yet'
+
+export type GeneratedPlanD49ResidualSelectedNextWork =
+  | 'accept_residual_debt'
+  | 'workload_metadata_review'
+  | 'block_shape_review'
+  | 'route_to_u8'
+  | 'no_action'
 
 export interface GeneratedPlanD49ResidualFollowUpLane {
   readonly label: string
@@ -657,12 +665,26 @@ export interface GeneratedPlanD49ResidualFollowUpLane {
   readonly nextArtifact: string
 }
 
+export interface GeneratedPlanD49ChangeAuthorization {
+  readonly cap: GeneratedPlanD49ResidualFollowUpAuthorizationStatus
+  readonly catalog: GeneratedPlanD49ResidualFollowUpAuthorizationStatus
+  readonly runtimeRedistribution: GeneratedPlanD49ResidualFollowUpAuthorizationStatus
+  readonly d47Reopen: GeneratedPlanD49ResidualFollowUpAuthorizationStatus
+}
+
 export interface GeneratedPlanD49ResidualFollowUpPacket {
   readonly packetSource: string
-  readonly d47ClosureState: GeneratedPlanD47GapClosureCurrentnessState
+  readonly d47ResolutionState: GeneratedPlanD47GapClosureCurrentnessState
   readonly authorizationStatus: GeneratedPlanD49ResidualFollowUpAuthorizationStatus
+  readonly changeAuthorization: GeneratedPlanD49ChangeAuthorization
+  readonly selectedNextWork: GeneratedPlanD49ResidualSelectedNextWork
+  readonly selectedNextWorkRationale: string
+  readonly selectedNextWorkOwner: 'maintainer'
+  readonly selectedNextWorkRevisitTrigger: string
+  readonly sessionQualityVerdict: string
   readonly workloadLane: GeneratedPlanD49ResidualFollowUpLane
   readonly redistributionLane: GeneratedPlanD49ResidualFollowUpLane
+  readonly redistributionNoActionLane: GeneratedPlanD49ResidualFollowUpLane
   readonly activationBoundary: string
   readonly trainingQualityBoundary: string
   readonly nextArtifact: string
@@ -3196,6 +3218,23 @@ function d49RedistributionResidualGroups(
   )
 }
 
+function d49RedistributionPressureGroups(
+  groups: readonly GeneratedPlanRedistributionCausalityGroupReceipt[],
+): GeneratedPlanRedistributionCausalityGroupReceipt[] {
+  return groups.filter(
+    (group) =>
+      group.actionState === 'likely_redistribution_caused' &&
+      (group.counts.currentOverAuthoredMaxCellCount > 0 ||
+        group.counts.currentOverFatigueCapCellCount > 0),
+  )
+}
+
+function d49RedistributionNoActionGroups(
+  groups: readonly GeneratedPlanRedistributionCausalityGroupReceipt[],
+): GeneratedPlanRedistributionCausalityGroupReceipt[] {
+  return groups.filter((group) => group.actionState === 'redistribution_without_pressure')
+}
+
 function d49WorkloadLane(
   groups: readonly GeneratedPlanObservationGroup[],
 ): GeneratedPlanD49ResidualFollowUpLane {
@@ -3254,8 +3293,8 @@ function d49RedistributionLane(
       groupKeys: [],
       totalAffectedCellCount: 0,
       evidenceSummary:
-        'No current D49 optional-slot redistribution groups are present in the redistribution causality receipt.',
-      nextArtifact: 'No D49 redistribution action until regenerated diagnostics show U8 evidence.',
+        'No pressure-bearing D49 optional-slot redistribution groups are present in the redistribution causality receipt.',
+      nextArtifact: 'No D49 U8 action until regenerated diagnostics show pressure-bearing redistribution evidence.',
     }
   }
 
@@ -3265,7 +3304,118 @@ function d49RedistributionLane(
     groupKeys: groups.map((group) => group.groupKey),
     totalAffectedCellCount,
     evidenceSummary: `D49 redistribution receipt groups include ${pressureDisappearsCellCount} cells where pressure disappears under allocated-duration comparison, ${pressureRemainsCellCount} cells where pressure remains, and ${redistributionWithoutPressureCellCount} redistribution-only cells.`,
-    nextArtifact: 'U8 generator-policy follow-up; do not change runtime redistribution here.',
+    nextArtifact:
+      'Existing redistribution causality receipt evidence routes to a future generator-policy follow-up; do not change runtime redistribution here.',
+  }
+}
+
+function d49RedistributionNoActionLane(
+  groups: readonly GeneratedPlanRedistributionCausalityGroupReceipt[],
+): GeneratedPlanD49ResidualFollowUpLane {
+  const totalAffectedCellCount = groups.reduce(
+    (sum, group) => sum + group.counts.totalAffectedCellCount,
+    0,
+  )
+
+  if (groups.length === 0) {
+    return {
+      label: 'D49 optional-slot-only redistribution',
+      disposition: 'no_implementation_action_yet',
+      groupKeys: [],
+      totalAffectedCellCount: 0,
+      evidenceSummary:
+        'No D49 optional-slot-only redistribution groups are present in the redistribution causality receipt.',
+      nextArtifact: 'No optional-slot-only D49 action.',
+    }
+  }
+
+  return {
+    label: 'D49 optional-slot-only redistribution',
+    disposition: 'accepted_residual_debt',
+    groupKeys: groups.map((group) => group.groupKey),
+    totalAffectedCellCount,
+    evidenceSummary:
+      'D49 optional-slot redistribution exists without cap, fatigue, or minimum pressure; keep it visible but do not promote it to U8 work.',
+    nextArtifact: 'No implementation action; revisit only if regenerated diagnostics add cap or fatigue pressure.',
+  }
+}
+
+function selectedNextWorkForD49ResidualPacket(
+  d47ResolutionState: GeneratedPlanD47GapClosureCurrentnessState,
+  workloadLane: GeneratedPlanD49ResidualFollowUpLane,
+  redistributionLane: GeneratedPlanD49ResidualFollowUpLane,
+  noActionLane: GeneratedPlanD49ResidualFollowUpLane,
+): GeneratedPlanD49ResidualSelectedNextWork {
+  if (d47ResolutionState !== 'closed_by_d49') return 'no_action'
+  if (redistributionLane.disposition === 'route_to_u8') return 'route_to_u8'
+  if (workloadLane.disposition === 'workload_review_needed') return 'workload_metadata_review'
+  if (noActionLane.disposition === 'accepted_residual_debt') return 'accept_residual_debt'
+  return 'no_action'
+}
+
+function selectedNextWorkRationaleForD49ResidualPacket(
+  selectedNextWork: GeneratedPlanD49ResidualSelectedNextWork,
+): string {
+  switch (selectedNextWork) {
+    case 'route_to_u8':
+      return 'Pressure-bearing D49 optional-slot redistribution disappears under allocated-duration comparison, so future generator-policy follow-up is the first useful decision.'
+    case 'workload_metadata_review':
+      return 'D49 has workload-envelope evidence but no pressure-bearing redistribution evidence, so workload metadata and block allocation should be reviewed before cap changes.'
+    case 'accept_residual_debt':
+      return 'Only optional-slot redistribution without cap/fatigue/minimum pressure remains, so the residual is visible but not implementation-worthy.'
+    case 'block_shape_review':
+      return 'D49 evidence indicates a future block-shape review, but this branch is not selected by current generated diagnostics.'
+    case 'no_action':
+      return 'No D49 implementation action is selected; either D47 must re-enter first or regenerated diagnostics no longer show D49 residual pressure.'
+    default: {
+      const exhaustive: never = selectedNextWork
+      return exhaustive
+    }
+  }
+}
+
+function selectedNextWorkRevisitTriggerForD49ResidualPacket(
+  selectedNextWork: GeneratedPlanD49ResidualSelectedNextWork,
+): string {
+  switch (selectedNextWork) {
+    case 'route_to_u8':
+      return 'Revisit after a D49-scoped generator-policy proposal proves allocated-duration counterfactual movement without broad runtime redistribution changes.'
+    case 'workload_metadata_review':
+      return 'Revisit when a concrete D49 workload proposal names the metadata or block-shape delta and expected diagnostic movement.'
+    case 'accept_residual_debt':
+      return 'Revisit only if optional-slot-only D49 groups gain cap, fatigue, or under-min pressure.'
+    case 'block_shape_review':
+      return 'Revisit when a D49 block-shape proposal exists.'
+    case 'no_action':
+      return 'Revisit if the original D47 comparator key returns or regenerated diagnostics show new D49 pressure.'
+    default: {
+      const exhaustive: never = selectedNextWork
+      return exhaustive
+    }
+  }
+}
+
+function nextArtifactForD49ResidualPacket(
+  selectedNextWork: GeneratedPlanD49ResidualSelectedNextWork,
+  workloadLane: GeneratedPlanD49ResidualFollowUpLane,
+): string {
+  switch (selectedNextWork) {
+    case 'route_to_u8':
+      return workloadLane.disposition === 'workload_review_needed'
+        ? 'D49 workload envelope review plus future U8 generator-policy follow-up'
+        : 'Future U8 generator-policy follow-up'
+    case 'workload_metadata_review':
+      return 'D49 workload envelope review; no metadata change without a concrete proposal.'
+    case 'accept_residual_debt':
+      return 'No D49 implementation action; optional-slot-only redistribution remains visible residual debt.'
+    case 'block_shape_review':
+      return 'D49 block-shape review; no runtime or catalog change without a concrete proposal.'
+    case 'no_action':
+      return 'No D49 residual follow-up until regenerated diagnostics show D49 pressure.'
+    default: {
+      const exhaustive: never = selectedNextWork
+      return exhaustive
+    }
   }
 }
 
@@ -3278,38 +3428,61 @@ export function buildGeneratedPlanD49ResidualFollowUpPacket(
   const redistributionReceipt = buildGeneratedPlanRedistributionCausalityReceipt(groups, registry)
   const currentEvidenceGroupKeys = currentD49EvidenceGroupKeys(validation)
   const workloadLane = d49WorkloadLane(d49WorkloadResidualGroups(groups, currentEvidenceGroupKeys))
+  const d49RedistributionGroups = d49RedistributionResidualGroups(
+    redistributionReceipt,
+    currentEvidenceGroupKeys,
+  )
   const redistributionLane = d49RedistributionLane(
-    d49RedistributionResidualGroups(redistributionReceipt, currentEvidenceGroupKeys),
+    d49RedistributionPressureGroups(d49RedistributionGroups),
+  )
+  const redistributionNoActionLane = d49RedistributionNoActionLane(
+    d49RedistributionNoActionGroups(d49RedistributionGroups),
   )
   const originalD47ComparatorKeyPresent = groups.some(
     (group) => group.groupKey === D47_PROPOSAL_ADMISSION_GROUP_KEY,
   )
-  const d47ClosureState = originalD47ComparatorKeyPresent
+  const d47ResolutionState = originalD47ComparatorKeyPresent
     ? d47Ledger.currentnessState
     : 'closed_by_d49'
-  const hasResidualEvidence =
-    workloadLane.totalAffectedCellCount > 0 || redistributionLane.totalAffectedCellCount > 0
-  const canRouteToD49ResidualFollowUp = d47ClosureState === 'closed_by_d49'
+  const canRouteToD49ResidualFollowUp = d47ResolutionState === 'closed_by_d49'
+  const selectedNextWork = selectedNextWorkForD49ResidualPacket(
+    d47ResolutionState,
+    workloadLane,
+    redistributionLane,
+    redistributionNoActionLane,
+  )
 
   return {
     packetSource: D49_RESIDUAL_FOLLOW_UP_PACKET_SOURCE,
-    d47ClosureState,
+    d47ResolutionState,
     authorizationStatus: 'not_authorized',
+    changeAuthorization: {
+      cap: 'not_authorized',
+      catalog: 'not_authorized',
+      runtimeRedistribution: 'not_authorized',
+      d47Reopen: 'not_authorized',
+    },
+    selectedNextWork,
+    selectedNextWorkRationale: selectedNextWorkRationaleForD49ResidualPacket(selectedNextWork),
+    selectedNextWorkOwner: 'maintainer',
+    selectedNextWorkRevisitTrigger:
+      selectedNextWorkRevisitTriggerForD49ResidualPacket(selectedNextWork),
+    sessionQualityVerdict:
+      'generated_review_needed: before accepting residual debt or promoting D49 metadata/block-shape work, inspect generated D49-affected sessions for interval/rest honesty, set-quality protection, and capture-surface fit.',
     workloadLane,
     redistributionLane,
+    redistributionNoActionLane,
     activationBoundary:
       'D49 remains bounded to the authorized solo/pair open advanced setting/movement family: one ball, markers, no 3+ player source forms, and no generic conditioning expansion. This packet does not widen D49 caps, add content, or change D47/D05.',
     trainingQualityBoundary:
       'Generated diagnostics can route workload and redistribution questions, but D49 training quality still needs manual courtside validation before broader claims.',
     nextArtifact: !canRouteToD49ResidualFollowUp
       ? 'D47 gap closure re-entry before D49 residual follow-up.'
-      : hasResidualEvidence
-      ? 'D49 workload envelope review plus U8 redistribution follow-up'
-      : 'No D49 residual follow-up until regenerated diagnostics show D49 pressure.',
+      : nextArtifactForD49ResidualPacket(selectedNextWork, workloadLane),
     stopCondition:
       'Do not edit catalog metadata, add catalog content, change runtime redistribution, or reopen D47 from this packet alone.',
     d47ReentryCondition:
-      d47ClosureState === 'closed_by_d49'
+      d47ResolutionState === 'closed_by_d49'
         ? 'Re-enter D47 only if regenerated diagnostics recreate the original D47 comparator key.'
         : 'Re-enter D47 gap closure before treating D49 as the residual owner.',
   }
@@ -3320,8 +3493,17 @@ export function formatGeneratedPlanD49ResidualFollowUpPacketMarkdown(
 ): string[] {
   return [
     `- Packet source: ${packet.packetSource}`,
-    `- D47 closure state: \`${packet.d47ClosureState}\``,
-    `- Authorization status: \`${packet.authorizationStatus}\``,
+    `- D47 resolution state: \`${packet.d47ResolutionState}\``,
+    `- Packet authorization status: \`${packet.authorizationStatus}\``,
+    `- D49 cap authorization: \`${packet.changeAuthorization.cap}\``,
+    `- D49 catalog authorization: \`${packet.changeAuthorization.catalog}\``,
+    `- D49 runtime redistribution authorization: \`${packet.changeAuthorization.runtimeRedistribution}\``,
+    `- D47 reopen authorization: \`${packet.changeAuthorization.d47Reopen}\``,
+    `- Selected next work: \`${packet.selectedNextWork}\``,
+    `- Selected next-work rationale: ${packet.selectedNextWorkRationale}`,
+    `- Selected next-work owner: \`${packet.selectedNextWorkOwner}\``,
+    `- Selected next-work revisit trigger: ${packet.selectedNextWorkRevisitTrigger}`,
+    `- Product/session-quality verdict: ${packet.sessionQualityVerdict}`,
     `- Activation boundary: ${packet.activationBoundary}`,
     `- Training-quality boundary: ${packet.trainingQualityBoundary}`,
     `- Next artifact: ${packet.nextArtifact}`,
@@ -3346,6 +3528,16 @@ export function formatGeneratedPlanD49ResidualFollowUpPacketMarkdown(
     `- Next artifact: ${packet.redistributionLane.nextArtifact}`,
     packet.redistributionLane.groupKeys.length > 0
       ? `- Group keys: ${packet.redistributionLane.groupKeys.map((key) => `\`${key}\``).join(', ')}`
+      : '- Group keys: none',
+    '',
+    `### ${packet.redistributionNoActionLane.label}`,
+    '',
+    `- Disposition: \`${packet.redistributionNoActionLane.disposition}\``,
+    `- Total affected cells: ${packet.redistributionNoActionLane.totalAffectedCellCount}`,
+    `- Evidence summary: ${packet.redistributionNoActionLane.evidenceSummary}`,
+    `- Next artifact: ${packet.redistributionNoActionLane.nextArtifact}`,
+    packet.redistributionNoActionLane.groupKeys.length > 0
+      ? `- Group keys: ${packet.redistributionNoActionLane.groupKeys.map((key) => `\`${key}\``).join(', ')}`
       : '- Group keys: none',
   ]
 }

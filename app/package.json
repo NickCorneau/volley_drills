@@ -14,6 +14,7 @@
     "test:watch": "vitest",
     "architecture:check": "node scripts/check-architecture-boundaries.mjs",
     "architecture:check:strict": "node scripts/check-architecture-boundaries.mjs --strict",
+    "typography:guardrails:check": "node scripts/validate-typography-guardrails.mjs",
     "diagnostics:report:check": "node scripts/validate-generated-plan-diagnostics-report.mjs",
     "diagnostics:triage:check": "node scripts/validate-generated-plan-diagnostics-report.mjs",
     "diagnostics:report:update": "node scripts/validate-generated-plan-diagnostics-report.mjs --write",

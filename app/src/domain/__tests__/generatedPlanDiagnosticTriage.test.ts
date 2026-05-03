@@ -1555,11 +1555,19 @@ describe('generated plan diagnostic triage registry', () => {
 
     expect(packet).toEqual(
       expect.objectContaining({
-        d47ClosureState: 'closed_by_d49',
+        d47ResolutionState: 'closed_by_d49',
         authorizationStatus: 'not_authorized',
-        nextArtifact: 'D49 workload envelope review plus U8 redistribution follow-up',
+        selectedNextWork: 'route_to_u8',
+        nextArtifact: 'D49 workload envelope review plus future U8 generator-policy follow-up',
       }),
     )
+    expect(packet.changeAuthorization).toEqual({
+      cap: 'not_authorized',
+      catalog: 'not_authorized',
+      runtimeRedistribution: 'not_authorized',
+      d47Reopen: 'not_authorized',
+    })
+    expect(packet.sessionQualityVerdict).toContain('generated_review_needed')
     expect(packet.workloadLane).toEqual(
       expect.objectContaining({
         disposition: 'workload_review_needed',
@@ -1575,19 +1583,71 @@ describe('generated plan diagnostic triage registry', () => {
     expect(packet.redistributionLane).toEqual(
       expect.objectContaining({
         disposition: 'route_to_u8',
-        totalAffectedCellCount: 32,
+        totalAffectedCellCount: 20,
       }),
     )
     expect(packet.redistributionLane.groupKeys).toEqual(
       expect.arrayContaining([
         'gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
         'gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+      ]),
+    )
+    expect(packet.redistributionLane.groupKeys).not.toEqual(
+      expect.arrayContaining([
+        'gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution',
+        'gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution',
+      ]),
+    )
+    expect(packet.redistributionNoActionLane).toEqual(
+      expect.objectContaining({
+        disposition: 'accepted_residual_debt',
+        totalAffectedCellCount: 12,
+      }),
+    )
+    expect(packet.redistributionNoActionLane.groupKeys).toEqual(
+      expect.arrayContaining([
         'gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution',
         'gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution',
       ]),
     )
     expect(packet.stopCondition).toContain('Do not edit catalog metadata')
     expect(packet.d47ReentryCondition).toContain('original D47 comparator key')
+  })
+
+  it('accepts optional-slot-only D49 redistribution as residual debt without routing to U8', () => {
+    const groups = currentGroups().filter((group) => {
+      if (group.drillId !== 'd49') return false
+      const hasOptionalRedistribution = group.observationCodes.includes(
+        'optional_slot_redistribution',
+      )
+      const hasPressure =
+        group.observationCodes.includes('over_authored_max') ||
+        group.observationCodes.includes('over_fatigue_cap') ||
+        group.observationCodes.includes('under_authored_min')
+
+      return hasOptionalRedistribution && !hasPressure
+    })
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const packet = buildGeneratedPlanD49ResidualFollowUpPacket(groups, registry)
+
+    expect(packet.workloadLane.disposition).toBe('no_implementation_action_yet')
+    expect(packet.redistributionLane).toEqual(
+      expect.objectContaining({
+        disposition: 'no_implementation_action_yet',
+        totalAffectedCellCount: 0,
+        groupKeys: [],
+      }),
+    )
+    expect(packet.redistributionNoActionLane).toEqual(
+      expect.objectContaining({
+        disposition: 'accepted_residual_debt',
+        totalAffectedCellCount: 12,
+      }),
+    )
+    expect(packet.selectedNextWork).toBe('accept_residual_debt')
+    expect(packet.nextArtifact).toContain('No D49 implementation action')
+    expect(packet.nextArtifact).not.toContain('U8')
+    expect(packet.selectedNextWorkRationale).toContain('not implementation-worthy')
   })
 
   it('keeps D49 residual follow-up non-actionable when D49 evidence is absent', () => {
@@ -1613,7 +1673,8 @@ describe('generated plan diagnostic triage registry', () => {
     expect(packet.nextArtifact).toBe(
       'No D49 residual follow-up until regenerated diagnostics show D49 pressure.',
     )
-    expect(packet.d47ClosureState).toBe('closed_by_d49')
+    expect(packet.selectedNextWork).toBe('no_action')
+    expect(packet.d47ResolutionState).toBe('closed_by_d49')
     expect(packet.d47ReentryCondition).toContain('original D47 comparator key')
   })
 
@@ -1634,6 +1695,13 @@ describe('generated plan diagnostic triage registry', () => {
       }),
     )
     expect(packet.redistributionLane).toEqual(
+      expect.objectContaining({
+        disposition: 'no_implementation_action_yet',
+        totalAffectedCellCount: 0,
+        groupKeys: [],
+      }),
+    )
+    expect(packet.redistributionNoActionLane).toEqual(
       expect.objectContaining({
         disposition: 'no_implementation_action_yet',
         totalAffectedCellCount: 0,
@@ -1681,7 +1749,8 @@ describe('generated plan diagnostic triage registry', () => {
     const registry = buildInitialGeneratedPlanTriageRegistry(groups)
     const packet = buildGeneratedPlanD49ResidualFollowUpPacket(groups, registry)
 
-    expect(packet.d47ClosureState).toBe('current')
+    expect(packet.d47ResolutionState).toBe('current')
+    expect(packet.selectedNextWork).toBe('no_action')
     expect(packet.nextArtifact).toBe('D47 gap closure re-entry before D49 residual follow-up.')
     expect(packet.d47ReentryCondition).toContain('Re-enter D47 gap closure')
     expect(packet.workloadLane.disposition).toBe('workload_review_needed')
@@ -2279,12 +2348,20 @@ describe('generated plan diagnostic triage registry', () => {
     expect(markdown).toContain('D25 cooldown policy receipt')
     expect(markdown).toContain('D05 comparator proposal')
     expect(markdown).toContain('## D49 Residual Follow-Up')
-    expect(markdown).toContain('D47 closure state: `closed_by_d49`')
+    expect(markdown).toContain('D47 resolution state: `closed_by_d49`')
+    expect(markdown).toContain('D49 cap authorization: `not_authorized`')
+    expect(markdown).toContain('D49 catalog authorization: `not_authorized`')
+    expect(markdown).toContain('D49 runtime redistribution authorization: `not_authorized`')
+    expect(markdown).toContain('D47 reopen authorization: `not_authorized`')
+    expect(markdown).toContain('Selected next work: `route_to_u8`')
+    expect(markdown).toContain('Product/session-quality verdict: generated_review_needed')
     expect(markdown).toContain('one ball, markers, no 3+ player source forms')
     expect(markdown).toContain('### D49 workload envelope review')
     expect(markdown).toContain('Disposition: `workload_review_needed`')
     expect(markdown).toContain('### D49 redistribution investigation')
     expect(markdown).toContain('Disposition: `route_to_u8`')
+    expect(markdown).toContain('### D49 optional-slot-only redistribution')
+    expect(markdown).toContain('Disposition: `accepted_residual_debt`')
     expect(markdown).toContain(
       'Stop condition: Do not edit catalog metadata, add catalog content, change runtime redistribution, or reopen D47 from this packet alone.',
     )

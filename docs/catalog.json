@@ -381,6 +381,13 @@
       "status": "active"
     },
     {
+      "id": "brand-ux-guidelines",
+      "path": "docs/research/brand-ux-guidelines.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "Canonical Volleycraft UX behavior reference for typography, color, copy voice, layout, iconography, states, and per-screen posture. Includes the 2026-05-03 first-pass typography role checklist, evidence lanes, route/state inventory, screenshot matrix, and narrow drift guardrail contract."
+    },
+    {
       "id": "outdoor-courtside-ui-brief",
       "path": "docs/research/outdoor-courtside-ui-brief.md",
       "type": "research",
@@ -1157,6 +1164,14 @@
       "canonical_for": "Completed implementation plan for adding a generated D49 residual follow-up packet after D47 closed by D49. Splits D49 under-min workload evidence from optional-slot redistribution pressure while preserving not-authorized status for caps, catalog content, runtime redistribution, and D47 reopening."
     },
     {
+      "id": "d49-next-work-selection-plan-2026-05-03",
+      "path": "docs/plans/2026-05-03-001-feat-d49-next-work-selection-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for refining the generated D49 residual follow-up packet so it selects the next useful work, routes only pressure-bearing D49 redistribution evidence to future U8/generator-policy follow-up, treats optional-slot-only redistribution as no action, and separates D47 resolution from D49 cap/catalog/runtime authorization."
+    },
+    {
       "id": "agent-architecture-cleanup-plan-2026-05-02",
       "path": "docs/plans/2026-05-02-019-refactor-agent-architecture-cleanup-plan.md",
       "type": "plan",
@@ -1206,7 +1221,7 @@
       "path": "docs/reviews/2026-05-01-generated-plan-diagnostics-triage.md",
       "type": "review",
       "status": "active",
-      "canonical_for": "Docs-first triage workbench for generated-plan routeable observation groups. Generated and validated with the diagnostics report; current snapshot records 58 registry entries, 0 blocking validation issues, 0 warning issues, 35 defer routes, 23 generator-policy-investigation routes, decision-debt compression, a redistribution causality receipt, the D47 proposal-admission ticket, the D47 gap closure ledger, D01 follow-up packets, gap-closure selection, the D49 residual follow-up packet, the D47-vs-D05 comparator evaluation payload, and the D47-vs-D05 comparator decision packet. Current D47 state is `closed_by_d49`: the original D47 comparator key is gone, D49 carries residual workload and redistribution pressure, and catalog/runtime activation remains bounded by follow-up review."
+      "canonical_for": "Docs-first triage workbench for generated-plan routeable observation groups. Generated and validated with the diagnostics report; current snapshot records 58 registry entries, 0 blocking validation issues, 0 warning issues, 35 defer routes, 23 generator-policy-investigation routes, decision-debt compression, a redistribution causality receipt, the D47 proposal-admission ticket, the D47 gap closure ledger, D01 follow-up packets, gap-closure selection, the D49 residual follow-up packet, the D47-vs-D05 comparator evaluation payload, and the D47-vs-D05 comparator decision packet. Current D47 state is `closed_by_d49`: the original D47 comparator key is gone; D49 residual follow-up selects `route_to_u8` for pressure-bearing redistribution evidence, keeps workload review visible, treats optional-slot-only redistribution as no action, and leaves D49 cap/catalog/runtime activation not authorized."
     },
     {
       "id": "d47-source-backed-gap-card-2026-05-02",

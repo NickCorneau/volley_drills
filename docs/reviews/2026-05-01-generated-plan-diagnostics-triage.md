@@ -35,6 +35,7 @@ depends_on:
   - docs/plans/2026-05-02-012-feat-d47-d05-comparator-decision-packet-plan.md
   - docs/plans/2026-05-02-013-feat-d47-d05-comparator-evaluation-payload-plan.md
   - docs/plans/2026-05-02-018-feat-d49-residual-follow-up-plan.md
+  - docs/plans/2026-05-03-001-feat-d49-next-work-selection-plan.md
 ---
 
 # Generated Plan Diagnostics Triage
@@ -323,11 +324,20 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 ## D49 Residual Follow-Up
 
 - Packet source: D47 closed-by-D49 gap closure ledger plus current D49 generated diagnostics.
-- D47 closure state: `closed_by_d49`
-- Authorization status: `not_authorized`
+- D47 resolution state: `closed_by_d49`
+- Packet authorization status: `not_authorized`
+- D49 cap authorization: `not_authorized`
+- D49 catalog authorization: `not_authorized`
+- D49 runtime redistribution authorization: `not_authorized`
+- D47 reopen authorization: `not_authorized`
+- Selected next work: `route_to_u8`
+- Selected next-work rationale: Pressure-bearing D49 optional-slot redistribution disappears under allocated-duration comparison, so future generator-policy follow-up is the first useful decision.
+- Selected next-work owner: `maintainer`
+- Selected next-work revisit trigger: Revisit after a D49-scoped generator-policy proposal proves allocated-duration counterfactual movement without broad runtime redistribution changes.
+- Product/session-quality verdict: generated_review_needed: before accepting residual debt or promoting D49 metadata/block-shape work, inspect generated D49-affected sessions for interval/rest honesty, set-quality protection, and capture-surface fit.
 - Activation boundary: D49 remains bounded to the authorized solo/pair open advanced setting/movement family: one ball, markers, no 3+ player source forms, and no generic conditioning expansion. This packet does not widen D49 caps, add content, or change D47/D05.
 - Training-quality boundary: Generated diagnostics can route workload and redistribution questions, but D49 training quality still needs manual courtside validation before broader claims.
-- Next artifact: D49 workload envelope review plus U8 redistribution follow-up
+- Next artifact: D49 workload envelope review plus future U8 generator-policy follow-up
 - Stop condition: Do not edit catalog metadata, add catalog content, change runtime redistribution, or reopen D47 from this packet alone.
 - D47 re-entry condition: Re-enter D47 only if regenerated diagnostics recreate the original D47 comparator key.
 
@@ -342,10 +352,18 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 ### D49 redistribution investigation
 
 - Disposition: `route_to_u8`
-- Total affected cells: 32
-- Evidence summary: D49 redistribution receipt groups include 20 cells where pressure disappears under allocated-duration comparison, 0 cells where pressure remains, and 12 redistribution-only cells.
-- Next artifact: U8 generator-policy follow-up; do not change runtime redistribution here.
-- Group keys: `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution`
+- Total affected cells: 20
+- Evidence summary: D49 redistribution receipt groups include 20 cells where pressure disappears under allocated-duration comparison, 0 cells where pressure remains, and 0 redistribution-only cells.
+- Next artifact: Existing redistribution causality receipt evidence routes to a future generator-policy follow-up; do not change runtime redistribution here.
+- Group keys: `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`
+
+### D49 optional-slot-only redistribution
+
+- Disposition: `accepted_residual_debt`
+- Total affected cells: 12
+- Evidence summary: D49 optional-slot redistribution exists without cap, fatigue, or minimum pressure; keep it visible but do not promote it to U8 work.
+- Next artifact: No implementation action; revisit only if regenerated diagnostics add cap or fatigue pressure.
+- Group keys: `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution`
 
 ## D47 vs D05 Comparator Evaluation Payload
 
