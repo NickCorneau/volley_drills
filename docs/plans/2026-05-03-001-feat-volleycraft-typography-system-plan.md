@@ -1,8 +1,11 @@
 ---
+id: volleycraft-typography-system-plan-2026-05-03
 title: "feat: Add Volleycraft typography system guardrails"
 type: feat
 status: active
+stage: validation
 date: 2026-05-03
+summary: "Implementation plan for the Volleycraft typography-system pass: canonical role checklist, route/state inventory, narrow drift guardrail, hard-violation fix, and browser screenshot evidence without a font swap or broad body-scale migration."
 origin: docs/brainstorms/2026-05-02-volleycraft-typography-system-requirements.md
 ---
 

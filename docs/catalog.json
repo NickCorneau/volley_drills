@@ -898,6 +898,13 @@
       "canonical_for": "Requirements for a Volleycraft typography-system pass selected from the typography ideation. Bounds the work to preserving the current font families, defining semantic type roles, selectively retuning active-use and trust-critical copy, recording Run distance-ladder expectations, and adding typography drift guardrails without authorizing a font swap, broad theme replacement, global body-scale migration, or runtime behavior changes."
     },
     {
+      "id": "volleycraft-typography-system-plan-2026-05-03",
+      "path": "docs/plans/2026-05-03-001-feat-volleycraft-typography-system-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Implementation plan for the Volleycraft typography-system pass. Tracks the completed docs, guardrail, hard-violation fix, browser evidence, and verification work selected from the typography-system requirements."
+    },
+    {
       "id": "active-session-glance-system-requirements-2026-05-02",
       "path": "docs/brainstorms/2026-05-02-active-session-glance-system-requirements.md",
       "type": "requirements",
