@@ -1,4 +1,12 @@
-import { BackButton, Button, Card, ScreenShell, StatusMessage, ToggleChip } from '../components/ui'
+import {
+  BackButton,
+  Button,
+  Card,
+  ChoiceSection,
+  ScreenShell,
+  StatusMessage,
+  ToggleChip,
+} from '../components/ui'
 import type { TuneTodayFocus } from './tuneToday/useTuneTodayController'
 import { useTuneTodayController } from './tuneToday/useTuneTodayController'
 
@@ -66,8 +74,7 @@ export function TuneTodayScreen() {
           </div>
         </Card>
 
-        <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-text-primary">Focus</h2>
+        <ChoiceSection title="Focus">
           <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Focus">
             {FOCUS_OPTIONS.map((option) => (
               <ToggleChip
@@ -79,7 +86,7 @@ export function TuneTodayScreen() {
             ))}
           </div>
           {warning && <StatusMessage variant="error" message={warning} />}
-        </section>
+        </ChoiceSection>
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="flex flex-col gap-4 pt-4">

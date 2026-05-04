@@ -3,9 +3,9 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import {
   BackButton,
   Button,
+  ChoiceSection,
+  ChoiceSubsection,
   ScreenShell,
-  SetupChoiceSection,
-  SetupNestedChoiceBlock,
   StatusMessage,
   ToggleChip,
 } from '../components/ui'
@@ -231,7 +231,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       </ScreenShell.Header>
 
       <ScreenShell.Body className="gap-6 pb-4">
-        <SetupChoiceSection title="Players">
+        <ChoiceSection title="Players">
           <div className="flex gap-2" role="radiogroup" aria-label="Player mode">
             <ToggleChip
               label="Solo"
@@ -244,9 +244,9 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
               onTap={() => setPlayerMode('pair')}
             />
           </div>
-        </SetupChoiceSection>
+        </ChoiceSection>
 
-        <SetupChoiceSection title="Net">
+        <ChoiceSection title="Net">
           <div className="flex gap-2" role="radiogroup" aria-label="Net available">
             <ToggleChip
               label="Yes"
@@ -260,7 +260,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
             />
           </div>
           {showWall && (
-            <SetupNestedChoiceBlock titleId="wall-available-label" title="Wall or fence nearby?">
+            <ChoiceSubsection titleId="wall-available-label" title="Wall or fence nearby?">
               <div className="flex gap-2" role="radiogroup" aria-labelledby="wall-available-label">
                 <ToggleChip
                   label="Yes"
@@ -273,18 +273,15 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
                   onTap={() => setWallAvailable(false)}
                 />
               </div>
-            </SetupNestedChoiceBlock>
+            </ChoiceSubsection>
           )}
-        </SetupChoiceSection>
+        </ChoiceSection>
 
-        <SetupChoiceSection
-          title="Time"
-          footerNote="Includes warm-up and cool-down."
-        >
+        <ChoiceSection title="Time" footerNote="Includes warm-up and cool-down.">
           {/* 2026-04-21 partner-walkthrough P1-10: Seb expected 15 min to
             mean 15 min of main/technique work, not "total session
-            including warm-up and cool-down." Clarifier lives in
-            `SetupChoiceSection` footerNote. See
+            including warm-up and cool-down." Clarifier lives in the
+            shared `ChoiceSection` footerNote. See
             docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md. */}
           <div className="flex gap-2" role="radiogroup" aria-label="Time profile">
             {TIME_OPTIONS.map((t) => (
@@ -296,15 +293,9 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
               />
             ))}
           </div>
-        </SetupChoiceSection>
+        </ChoiceSection>
 
-        <SetupChoiceSection
-          title={
-            <>
-              Focus <span className="font-normal text-text-secondary">(optional)</span>
-            </>
-          }
-        >
+        <ChoiceSection title="Focus" optional>
           <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Focus">
             {FOCUS_OPTIONS.map((option) => (
               <ToggleChip
@@ -317,7 +308,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
               />
             ))}
           </div>
-        </SetupChoiceSection>
+        </ChoiceSection>
 
         {error && <StatusMessage variant="error" message={error} />}
       </ScreenShell.Body>

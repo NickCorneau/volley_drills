@@ -1,7 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PainOverrideCard } from '../components/PainOverrideCard'
-import { BackButton, Button, ScreenShell, StatusMessage, ToggleChip } from '../components/ui'
+import {
+  BackButton,
+  Button,
+  ChoiceSection,
+  ChoiceSubsection,
+  ScreenShell,
+  StatusMessage,
+  ToggleChip,
+} from '../components/ui'
 import type { SessionDraft } from '../model'
 import { buildRecoveryDraft, estimateRecoverySessionMinutes } from '../domain/sessionBuilder'
 import {
@@ -243,18 +251,19 @@ export function SafetyCheckScreen() {
           the bottom directly beneath its triggering question, which
           matches the "tapping Yes reveals options below" mental model
           users already expect from Setup / Safety form patterns. */}
-        <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-text-primary">When did you last train?</h2>
+        <ChoiceSection
+          title="When did you last train?"
+          description={
+            hasSessionHistory
+              ? 'Today means a shorter, lower-intensity start.'
+              : 'Today or First time means a shorter, lower-intensity start.'
+          }
+        >
           {/* Description collapses the "or First time" clause for
             returning users so it matches the rendered chip set.
             Partner-walkthrough polish 2026-04-22: wording follows the
             chip labels - "Today" reads as a valid answer, not an
             alarm. */}
-          <p className="text-sm text-text-secondary">
-            {hasSessionHistory
-              ? 'Today means a shorter, lower-intensity start.'
-              : 'Today or First time means a shorter, lower-intensity start.'}
-          </p>
           <div className="flex gap-2">
             {visibleRecencyOptions.map((opt) => (
               <ToggleChip
@@ -272,16 +281,18 @@ export function SafetyCheckScreen() {
             primary `2+` chip stays selected while a sub-bucket is active
             so the two rows read as one nested question. */}
           {showLayoffBuckets && (
-            <div className="flex flex-col gap-2 rounded-[12px] bg-bg-warm/60 p-3">
-              <p className="text-xs text-text-secondary">Roughly how long off?</p>
-              <div className="flex gap-2">
+            <ChoiceSubsection titleId="layoff-bucket-label" title="Roughly how long off?">
+              <div
+                className="flex gap-2"
+                role="radiogroup"
+                aria-labelledby="layoff-bucket-label"
+              >
                 {LAYOFF_BUCKETS.map((bucket) => (
                   <ToggleChip
                     key={bucket}
                     label={LAYOFF_BUCKET_LABEL[bucket]}
                     selected={recency === bucket}
                     onTap={() => setRecency(bucket)}
-                    size="sm"
                   />
                 ))}
               </div>
@@ -291,14 +302,14 @@ export function SafetyCheckScreen() {
                   before ramping up.
                 </p>
               )}
-            </div>
+            </ChoiceSubsection>
           )}
-        </section>
+        </ChoiceSection>
 
-        <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-text-primary">
-            Any pain that&apos;s sharp, or makes you guard a movement?
-          </h2>
+        <ChoiceSection
+          title="Any pain that's sharp, or makes you guard a movement?"
+          description="Regular muscle soreness is fine. We'll switch to a lighter session if yes."
+        >
           {/* 2026-04-20 physio-review: the original "pain that changes how
             you move" read to most users as "am I visibly limping," but
             the early warning sign is usually subtle guarding or
@@ -306,11 +317,6 @@ export function SafetyCheckScreen() {
             DOMS from something that actually warrants a lighter
             session, which most recreational athletes find hard to
             self-sort. */}
-          <p className="text-sm text-text-secondary">
-            Regular muscle soreness is fine. We&apos;ll switch to a lighter session if yes.
-          </p>
-          {/* Use the shared chip language here too: "No" is reassuring
-            but not a primary CTA, and "Yes" keeps the warning tone. */}
           <div className="flex gap-2" role="radiogroup" aria-label="Sharp pain or guarding">
             <ToggleChip label="No" selected={painFlag === false} onTap={() => setPainFlag(false)} />
             <ToggleChip
@@ -320,7 +326,7 @@ export function SafetyCheckScreen() {
               tone="warning"
             />
           </div>
-        </section>
+        </ChoiceSection>
 
         {painFlag === true && (
           <div className="flex flex-col gap-2">
