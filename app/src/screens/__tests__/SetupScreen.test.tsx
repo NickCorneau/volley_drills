@@ -59,7 +59,7 @@ describe('SetupScreen (C-3)', () => {
         checked: true,
       }),
     ).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /focus \(optional\)/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: /^focus$/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /build session/i })).toBeEnabled()
     expect(screen.queryByText(/choose .* to build/i)).not.toBeInTheDocument()
   })

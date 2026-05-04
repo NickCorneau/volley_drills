@@ -295,7 +295,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           </div>
         </ChoiceSection>
 
-        <ChoiceSection title="Focus" optional>
+        <ChoiceSection title="Focus">
           <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Focus">
             {FOCUS_OPTIONS.map((option) => (
               <ToggleChip
