@@ -1,5 +1,5 @@
 import type { PendingReview } from '../services/session'
-import { ActionOverlay, Button } from './ui'
+import { ConfirmModal } from './ui'
 
 /**
  * D-C1 soft-block modal (C-4 Unit 4).
@@ -22,6 +22,12 @@ import { ActionOverlay, Button } from './ui'
  *
  * The wrapper HomeScreen (Unit 5) owns the state that controls the
  * modal's mount; this component only renders when visible.
+ *
+ * Plan U8 (2026-05-04): the title + description + safe-primary +
+ * outline-secondary shape now lives on `ConfirmModal`. The
+ * `data-action-overlay-initial-focus` string-attribute contract is
+ * gone; ConfirmModal threads its own ref through ActionOverlay's typed
+ * focus seam.
  */
 
 interface Props {
@@ -33,31 +39,23 @@ interface Props {
 
 export function SoftBlockModal({ pendingReview, onFinish, onSkipAndContinue, onClose }: Props) {
   return (
-    <ActionOverlay
+    <ConfirmModal
       title="Finish your review first?"
       description={
         <>
           You have a review pending for{' '}
-          <span className="font-medium text-text-primary">{pendingReview.planName}</span>. Finish it
-          first, or skip and continue?
+          <span className="font-medium text-text-primary">{pendingReview.planName}</span>. Finish
+          it first, or skip and continue?
         </>
       }
+      safeAction={{ label: 'Finish review', onClick: onFinish }}
+      destructiveAction={{
+        label: 'Skip review and continue',
+        onClick: onSkipAndContinue,
+        variant: 'outline',
+      }}
       onDismiss={onClose}
       showCloseButton
-    >
-      <div className="mt-6 flex flex-col gap-3">
-        <Button
-          variant="primary"
-          fullWidth
-          onClick={onFinish}
-          data-action-overlay-initial-focus="true"
-        >
-          Finish review
-        </Button>
-        <Button variant="outline" fullWidth onClick={onSkipAndContinue}>
-          Skip review and continue
-        </Button>
-      </div>
-    </ActionOverlay>
+    />
   )
 }

@@ -418,9 +418,12 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
     fireEvent.blur(input)
 
     expect(onStreakLongestChange).toHaveBeenLastCalledWith(null)
-    expect(screen.getByTestId('per-drill-streak-invalid')).toHaveTextContent(
-      /Use a whole number\. This result will be skipped unless fixed\./,
-    )
+    // Plan U10 (2026-05-04): the invalid message lives on `NumberCell`'s
+    // `invalidMessage` prop instead of a per-caller test id; query by
+    // text content directly.
+    expect(
+      screen.getByText(/Use a whole number\. This result will be skipped unless fixed\./),
+    ).toBeInTheDocument()
     expect(input).toHaveAttribute('aria-invalid', 'true')
   })
 
@@ -443,7 +446,9 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
     fireEvent.blur(input)
 
     expect(onStreakLongestChange).toHaveBeenLastCalledWith(null)
-    expect(screen.getByTestId('per-drill-streak-invalid')).toBeInTheDocument()
+    expect(
+      screen.getByText(/Use a whole number\. This result will be skipped unless fixed\./),
+    ).toBeInTheDocument()
   })
 
   it('clears the inline correction text once the value becomes valid', () => {
@@ -461,7 +466,9 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
     const input = screen.getByTestId('per-drill-streak-input')
     fireEvent.change(input, { target: { value: '1.5' } })
     fireEvent.blur(input)
-    expect(screen.getByTestId('per-drill-streak-invalid')).toBeInTheDocument()
+    expect(
+      screen.getByText(/Use a whole number\. This result will be skipped unless fixed\./),
+    ).toBeInTheDocument()
 
     rerender(
       <PerDrillCapture
@@ -473,7 +480,9 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
         onStreakLongestChange={noop}
       />,
     )
-    expect(screen.queryByTestId('per-drill-streak-invalid')).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(/Use a whole number\. This result will be skipped unless fixed\./),
+    ).not.toBeInTheDocument()
   })
 
   it('rehydrates the input text from streakLongest on mount', () => {

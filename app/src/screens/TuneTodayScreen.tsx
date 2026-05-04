@@ -1,16 +1,17 @@
 import {
-  BackButton,
   Button,
   Card,
+  ChoiceRow,
+  type ChoiceRowOption,
   ChoiceSection,
+  ScreenHeader,
   ScreenShell,
   StatusMessage,
-  ToggleChip,
 } from '../components/ui'
 import type { TuneTodayFocus } from './tuneToday/useTuneTodayController'
 import { useTuneTodayController } from './tuneToday/useTuneTodayController'
 
-const FOCUS_OPTIONS: readonly { value: TuneTodayFocus; label: string }[] = [
+const FOCUS_OPTIONS: readonly ChoiceRowOption<TuneTodayFocus>[] = [
   { value: 'recommended', label: 'Recommended' },
   { value: 'pass', label: 'Passing' },
   { value: 'serve', label: 'Serving' },
@@ -53,13 +54,7 @@ export function TuneTodayScreen() {
 
   return (
     <ScreenShell>
-      <ScreenShell.Header className="flex items-center gap-2 pt-2 pb-3">
-        <BackButton label="Back" onClick={goBack} />
-        <h1 className="flex-1 text-center text-xl font-semibold tracking-tight text-text-primary">
-          {heading}
-        </h1>
-        <div className="w-12" />
-      </ScreenShell.Header>
+      <ScreenHeader backLabel="Back" onBack={goBack} title={heading} />
 
       <ScreenShell.Body className="gap-6 pb-4">
         <Card variant="focal" aria-label="Your setup">
@@ -75,16 +70,13 @@ export function TuneTodayScreen() {
         </Card>
 
         <ChoiceSection title="Focus">
-          <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Focus">
-            {FOCUS_OPTIONS.map((option) => (
-              <ToggleChip
-                key={option.value}
-                label={option.label}
-                selected={focus === option.value}
-                onTap={() => void selectFocus(option.value)}
-              />
-            ))}
-          </div>
+          <ChoiceRow<TuneTodayFocus>
+            value={focus}
+            onChange={(next) => void selectFocus(next)}
+            options={FOCUS_OPTIONS}
+            layout="grid-2"
+            ariaLabel="Focus"
+          />
           {warning && <StatusMessage variant="error" message={warning} />}
         </ChoiceSection>
       </ScreenShell.Body>

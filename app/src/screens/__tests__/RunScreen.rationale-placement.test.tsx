@@ -23,9 +23,9 @@ import { RunScreen } from '../RunScreen'
  *   (`Technique` / `Movement` / `Main drill` / `Pressure`). The two
  *   rationale-specific cases in this file were removed — they
  *   pinned a rendering that no longer happens. The remaining cases
- *   continue to pin the run-card type hierarchy: the focal current
- *   cue owns `text-base`, while full instructions sit behind inline
- *   disclosure as compact secondary detail.
+ *   continue to pin the run-card type hierarchy: instruction and cue
+ *   prose use the shared run-flow `text-base` role, while fuller
+ *   context can sit behind inline disclosure to reduce live-screen load.
  *
  * The seeded plan still carries `rationale` on the block so the
  * data field stays exercised in tests; the block render simply
@@ -49,6 +49,7 @@ type SeedOptions = {
   drillId?: string
   variantId?: string
   drillName?: string
+  coachingCue?: string
   playerCount?: 1 | 2
 }
 
@@ -56,6 +57,7 @@ async function seedPausedSession(execId: string, planId: string, options: SeedOp
   const now = Date.now()
   const blockType = options.blockType ?? 'main_skill'
   const drillName = options.drillName ?? 'Passing'
+  const coachingCue = options.coachingCue ?? 'Athletic posture.'
   const playerCount = options.playerCount ?? 1
   // `rationale` defaults to a populated string; pass `undefined`
   // explicitly to seed a legacy plan that pre-dates Tier 1a Unit 4.
@@ -85,7 +87,7 @@ async function seedPausedSession(execId: string, planId: string, options: SeedOp
         drillName,
         shortName: 'Pass',
         durationMinutes: 5,
-        coachingCue: 'Athletic posture.',
+        coachingCue,
         courtsideInstructions: 'Self-toss; forearm pass up and down.',
         ...rationaleField,
         required: true,
@@ -254,9 +256,14 @@ describe('RunScreen: body-typography invariants (P1-11 / cca2 dogfeed F1)', () =
     expect(headerEl!.className).not.toContain('justify-between')
 
     // The eyebrow's parent cell should be `justify-self-center` so
-    // the role label sits at the center of its 1/3 column.
+    // the role label sits at the center of its 1/3 column. After
+    // plan U5 (2026-05-04), the alignment class lives on the wrapping
+    // span that `RunFlowHeader` renders around the caller's eyebrow
+    // node, so the assertion targets the parent — not the eyebrow
+    // text node itself, which now only carries the caller's
+    // typography classes.
     const eyebrow = screen.getByText('Main drill')
-    expect(eyebrow.className).toContain('justify-self-center')
+    expect(eyebrow.parentElement?.className).toContain('justify-self-center')
   })
 
   it('renders cleanly for legacy plans without a `rationale` field on the block', async () => {
@@ -278,18 +285,34 @@ describe('RunScreen: body-typography invariants (P1-11 / cca2 dogfeed F1)', () =
     expect(screen.getByText('Main drill')).toBeInTheDocument()
   })
 
-  it('full courtsideInstructions render as compact secondary detail behind inline disclosure', async () => {
+  it('full courtsideInstructions render at shared run-flow body size behind inline disclosure', async () => {
     await seedPausedSession('exec-instr', 'plan-instr')
     renderAt('exec-instr')
 
     const instructions = await screen.findByText(/Self-toss; forearm pass up and down\./i)
 
-    // Run Face v1 keeps one larger current cue, then parks fuller
-    // instructions as secondary text behind disclosure to reduce
-    // phone-screen load during live play.
-    expect(instructions.className).toContain('text-sm')
+    // TransitionScreen already renders this instruction role at
+    // `text-base`; RunScreen matches it so interim and live play do
+    // not change prose size for the same content role.
+    expect(instructions.className).toContain('text-base')
     expect(instructions.className).not.toContain('text-lg')
+    expect(instructions.className).not.toContain('text-sm')
     expect(instructions.className).not.toContain('text-xs')
+  })
+
+  it('full coachingCue detail renders at shared run-flow body size', async () => {
+    await seedPausedSession('exec-full-cue-size', 'plan-full-cue-size', {
+      coachingCue:
+        'Athletic posture. · Keep your platform steady through contact and reset your feet before the next touch.',
+    })
+    renderAt('exec-full-cue-size')
+
+    const fullCue = await screen.findByText(/Keep your platform steady through contact/i)
+
+    expect(fullCue.className).toContain('text-base')
+    expect(fullCue.className).not.toContain('text-lg')
+    expect(fullCue.className).not.toContain('text-sm')
+    expect(fullCue.className).not.toContain('text-xs')
   })
 
   it('coachingCue renders at text-base (16 px outdoor floor)', async () => {

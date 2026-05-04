@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { ActionOverlay, Button } from './ui'
 
 type ResumePromptProps = {
@@ -22,12 +22,20 @@ export function ResumePrompt({
   // directly below the primary Reopen session button) can't destroy an
   // in-progress session. Red-team bug #4.
   const [confirmingDiscard, setConfirmingDiscard] = useState(false)
+  // Plan U2 (2026-05-04): two refs for the two-state focus targets;
+  // pair with `refocusKey={confirmingDiscard}` so the overlay re-runs
+  // its focus effect on the state flip and lands on the right ref.
+  // Non-confirming → "Reopen session" (primary). Confirming → "Keep
+  // session" (the cancel-the-confirm escape; safe-primary in this state).
+  const reopenRef = useRef<HTMLButtonElement>(null)
+  const keepRef = useRef<HTMLButtonElement>(null)
 
   return (
     <ActionOverlay
       title="Session in progress"
       description={sessionName}
       refocusKey={confirmingDiscard}
+      initialFocusRef={confirmingDiscard ? keepRef : reopenRef}
     >
       <div className="mt-5 rounded-[12px] bg-bg-warm p-4">
         {/* Phase F8 (2026-04-19): was `text-xs font-semibold uppercase
@@ -45,12 +53,7 @@ export function ResumePrompt({
 
       {!confirmingDiscard ? (
         <div className="mt-6 flex flex-col gap-3">
-          <Button
-            variant="primary"
-            fullWidth
-            onClick={onResume}
-            data-action-overlay-initial-focus="true"
-          >
+          <Button variant="primary" fullWidth onClick={onResume} ref={reopenRef}>
             Reopen session
           </Button>
           <Button variant="outline" fullWidth onClick={() => setConfirmingDiscard(true)}>
@@ -69,7 +72,7 @@ export function ResumePrompt({
             variant="ghost"
             fullWidth
             onClick={() => setConfirmingDiscard(false)}
-            data-action-overlay-initial-focus="true"
+            ref={keepRef}
           >
             Keep session
           </Button>

@@ -2,13 +2,16 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PainOverrideCard } from '../components/PainOverrideCard'
 import {
-  BackButton,
   Button,
+  Callout,
+  ChoiceRow,
+  type ChoiceRowOption,
   ChoiceSection,
   ChoiceSubsection,
+  Expander,
+  ScreenHeader,
   ScreenShell,
   StatusMessage,
-  ToggleChip,
 } from '../components/ui'
 import type { SessionDraft } from '../model'
 import { buildRecoveryDraft, estimateRecoverySessionMinutes } from '../domain/sessionBuilder'
@@ -223,24 +226,20 @@ export function SafetyCheckScreen() {
         because the `PainOverrideCard` in the body owns the CTAs in
         that state.
       */}
-      <ScreenShell.Header className="pt-2 pb-3">
-        {/**
-         * Three-column header (Back | centered title | spacer) mirrors
-         * SetupScreen so the "tap to escape" affordance lives in the same
-         * thumb zone across the pre-run flow. Leaving SafetyCheck does
-         * NOT mutate the persisted draft - SafetyCheckScreen only reads
-         * the draft and writes safety answers inline on Start session - so a
-         * Back tap returns the user to Home with their draft intact
-         * (surfaces there as the Draft primary card per C-4 Surface 2).
-         */}
-        <div className="flex items-center gap-2">
-          <BackButton label="Back" onClick={() => navigate(routes.home())} />
-          <h1 className="flex-1 text-center text-xl font-semibold tracking-tight text-text-primary">
-            Before we start
-          </h1>
-          <div className="w-12" />
-        </div>
-      </ScreenShell.Header>
+      {/**
+       * Three-column header (Back | centered title | spacer) mirrors
+       * SetupScreen so the "tap to escape" affordance lives in the same
+       * thumb zone across the pre-run flow. Leaving SafetyCheck does
+       * NOT mutate the persisted draft - SafetyCheckScreen only reads
+       * the draft and writes safety answers inline on Start session - so a
+       * Back tap returns the user to Home with their draft intact
+       * (surfaces there as the Draft primary card per C-4 Surface 2).
+       */}
+      <ScreenHeader
+        backLabel="Back"
+        onBack={() => navigate(routes.home())}
+        title="Before we start"
+      />
 
       <ScreenShell.Body className="gap-6 pb-4">
         {/* 2026-04-19 dogfeed reorder: Recency first, then Pain. The
@@ -263,18 +262,22 @@ export function SafetyCheckScreen() {
             returning users so it matches the rendered chip set.
             Partner-walkthrough polish 2026-04-22: wording follows the
             chip labels - "Today" reads as a valid answer, not an
-            alarm. */}
-          <div className="flex gap-2">
-            {visibleRecencyOptions.map((opt) => (
-              <ToggleChip
-                key={opt}
-                label={PRIMARY_RECENCY_LABEL[opt]}
-                selected={primaryRowSelection === opt}
-                onTap={() => setRecency(opt)}
-                tone={opt === '0 days' ? 'warning' : 'accent'}
-              />
-            ))}
-          </div>
+            alarm. Mixed-tone case: `0 days` renders as `warning` to
+            cue the reader that today + today's training is the
+            high-fatigue path; siblings render with the default
+            `accent` tone. */}
+          <ChoiceRow<PrimaryRecency>
+            value={primaryRowSelection}
+            onChange={(next) => setRecency(next)}
+            options={visibleRecencyOptions.map(
+              (opt): ChoiceRowOption<PrimaryRecency> => ({
+                value: opt,
+                label: PRIMARY_RECENCY_LABEL[opt],
+                tone: opt === '0 days' ? 'warning' : undefined,
+              }),
+            )}
+            ariaLabel="When did you last train?"
+          />
           {/* 2026-04-20 physio-review: detraining is not linear - bucketing
             "2+" by weeks/months lets a 3+ month returner see a clinician
             nudge without making short-gap users read extra copy. The
@@ -282,20 +285,17 @@ export function SafetyCheckScreen() {
             so the two rows read as one nested question. */}
           {showLayoffBuckets && (
             <ChoiceSubsection titleId="layoff-bucket-label" title="Roughly how long off?">
-              <div
-                className="flex gap-2"
-                role="radiogroup"
-                aria-labelledby="layoff-bucket-label"
-              >
-                {LAYOFF_BUCKETS.map((bucket) => (
-                  <ToggleChip
-                    key={bucket}
-                    label={LAYOFF_BUCKET_LABEL[bucket]}
-                    selected={recency === bucket}
-                    onTap={() => setRecency(bucket)}
-                  />
-                ))}
-              </div>
+              <ChoiceRow<LayoffBucket>
+                value={isLayoffBucket(recency) ? recency : null}
+                onChange={(next) => setRecency(next)}
+                options={LAYOFF_BUCKETS.map(
+                  (bucket): ChoiceRowOption<LayoffBucket> => ({
+                    value: bucket,
+                    label: LAYOFF_BUCKET_LABEL[bucket],
+                  }),
+                )}
+                ariaLabelledBy="layoff-bucket-label"
+              />
               {recency === '3+ months' && (
                 <p className="text-xs leading-relaxed text-text-secondary">
                   Coming back from injury or illness? Consider a quick check-in with a clinician
@@ -317,15 +317,15 @@ export function SafetyCheckScreen() {
             DOMS from something that actually warrants a lighter
             session, which most recreational athletes find hard to
             self-sort. */}
-          <div className="flex gap-2" role="radiogroup" aria-label="Sharp pain or guarding">
-            <ToggleChip label="No" selected={painFlag === false} onTap={() => setPainFlag(false)} />
-            <ToggleChip
-              label="Yes"
-              selected={painFlag === true}
-              onTap={() => setPainFlag(true)}
-              tone="warning"
-            />
-          </div>
+          <ChoiceRow<'no' | 'yes'>
+            value={painFlag === null ? null : painFlag ? 'yes' : 'no'}
+            onChange={(next) => setPainFlag(next === 'yes')}
+            options={[
+              { value: 'no', label: 'No' },
+              { value: 'yes', label: 'Yes', tone: 'warning' },
+            ]}
+            ariaLabel="Sharp pain or guarding"
+          />
         </ChoiceSection>
 
         {painFlag === true && (
@@ -346,69 +346,64 @@ export function SafetyCheckScreen() {
         )}
 
         <section>
-          <button
-            type="button"
-            onClick={() => setHeatExpanded((prev) => !prev)}
-            className="flex min-h-[54px] items-center gap-2 text-sm font-medium text-accent transition-colors hover:text-accent-pressed active:text-accent-pressed"
+          <Expander
+            onOpenChange={(open) => setHeatExpanded(open)}
+            trigger={
+              <>
+                {/* Phase F12 (2026-04-19): the old `🔥` emoji was replaced
+                  with an inline stroke SVG so the flame inherits the
+                  accent text color and renders the same on every OS.
+                  Emoji in UI chrome ties the brand to the host-OS glyph
+                  (see `app/src/components/Brandmark.tsx` for the same
+                  rationale applied to the volleyball logo). */}
+                <svg
+                  aria-hidden="true"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 3c0 4-4 5-4 9a4 4 0 0 0 8 0c0-1.5-1-2.5-2-3 0 2-1 3-2 3 1-3 3-5 3-8-1 1-2 1-3-1z" />
+                </svg>
+                Heat &amp; safety tips
+              </>
+            }
+            contentClassName="flex flex-col gap-3"
           >
-            {/* Phase F12 (2026-04-19): the old `🔥` emoji was replaced
-              with an inline stroke SVG so the flame inherits the
-              accent text color and renders the same on every OS.
-              Emoji in UI chrome ties the brand to the host-OS glyph
-              (see `app/src/components/Brandmark.tsx` for the same
-              rationale applied to the volleyball logo). */}
-            <svg
-              aria-hidden="true"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 3c0 4-4 5-4 9a4 4 0 0 0 8 0c0-1.5-1-2.5-2-3 0 2-1 3-2 3 1-3 3-5 3-8-1 1-2 1-3-1z" />
-            </svg>
-            Heat &amp; safety tips
-            <span
-              className={`transition-transform ${heatExpanded ? 'rotate-180' : ''}`}
-              aria-hidden
-            >
-              ▾
-            </span>
-          </button>
-          {heatExpanded && (
-            <div className="mt-3 flex flex-col gap-3">
-              {/* 2026-04-20 physio-review: warning signs first, not mixed
-                into prevention bullets. Heat stroke is a
-                minutes-matter escalation - "stopped sweating" and
-                "confusion" belong above the list of things to do to
-                prevent it, not tucked at the bottom of a single bag
-                of tips. */}
-              <div className="rounded-[12px] border border-warning/30 bg-warning-surface p-4">
-                <h3 className="text-sm font-semibold text-warning">
-                  Stop immediately if you notice:
-                </h3>
-                <ul className="mt-2 flex flex-col gap-1.5">
-                  {HEAT_WARNING_SIGNS.map((sign) => (
-                    <li
-                      key={sign}
-                      className="flex items-start gap-2 text-sm leading-relaxed text-text-primary"
-                    >
-                      <span className="shrink-0 text-warning" aria-hidden>
-                        •
-                      </span>
-                      {sign}
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-2 text-xs leading-relaxed text-text-secondary">
-                  Move to shade, cool down with water, and call your local emergency number (911 /
-                  999 / 112) if severe.
-                </p>
-              </div>
-              <ul className="flex flex-col gap-2 rounded-[12px] bg-info-surface p-4">
+            {/* 2026-04-20 physio-review: warning signs first, not mixed
+              into prevention bullets. Heat stroke is a
+              minutes-matter escalation - "stopped sweating" and
+              "confusion" belong above the list of things to do to
+              prevent it, not tucked at the bottom of a single bag
+              of tips. */}
+            <Callout tone="warning" emphasis="hairline">
+              <h3 className="text-sm font-semibold text-warning">
+                Stop immediately if you notice:
+              </h3>
+              <ul className="mt-2 flex flex-col gap-1.5">
+                {HEAT_WARNING_SIGNS.map((sign) => (
+                  <li
+                    key={sign}
+                    className="flex items-start gap-2 text-sm leading-relaxed text-text-primary"
+                  >
+                    <span className="shrink-0 text-warning" aria-hidden>
+                      •
+                    </span>
+                    {sign}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-xs leading-relaxed text-text-secondary">
+                Move to shade, cool down with water, and call your local emergency number (911 /
+                999 / 112) if severe.
+              </p>
+            </Callout>
+            <Callout tone="info">
+              <ul className="flex flex-col gap-2">
                 {HEAT_PREVENTION_TIPS.map((tip) => (
                   <li
                     key={tip}
@@ -421,8 +416,8 @@ export function SafetyCheckScreen() {
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
+            </Callout>
+          </Expander>
         </section>
 
         {createError && <StatusMessage variant="error" message={createError} />}

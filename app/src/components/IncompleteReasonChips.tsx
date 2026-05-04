@@ -1,7 +1,7 @@
 import type { IncompleteReason } from '../model'
-import { ToggleChip } from './ui'
+import { ChoiceRow, type ChoiceRowOption } from './ui'
 
-const OPTIONS: { value: IncompleteReason; label: string }[] = [
+const OPTIONS: readonly ChoiceRowOption<IncompleteReason>[] = [
   { value: 'time', label: 'Time' },
   { value: 'fatigue', label: 'Fatigue' },
   { value: 'pain', label: 'Pain' },
@@ -14,23 +14,17 @@ type IncompleteReasonChipsProps = {
 }
 
 export function IncompleteReasonChips({ value, onChange }: IncompleteReasonChipsProps) {
+  // Plan U3 (2026-05-04): deselect-on-retap stays caller-owned. ChoiceRow's
+  // onChange always receives a value; the wrapping lambda decides to forward
+  // null when the tapped option is already selected.
   return (
-    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Why did you end early?">
-      {OPTIONS.map((opt) => {
-        const selected = value === opt.value
-        return (
-          <ToggleChip
-            key={opt.value}
-            label={opt.label}
-            selected={selected}
-            onTap={() => onChange(selected ? null : opt.value)}
-            tone="warning"
-            shape="pill"
-            fill={false}
-            className="px-4"
-          />
-        )
-      })}
-    </div>
+    <ChoiceRow<IncompleteReason>
+      value={value}
+      onChange={(next) => onChange(value === next ? null : next)}
+      options={OPTIONS}
+      layout="grid-2"
+      defaultTone="warning"
+      ariaLabel="Why did you end early?"
+    />
   )
 }

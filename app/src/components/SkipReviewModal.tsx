@@ -1,4 +1,4 @@
-import { ActionOverlay, Button } from './ui'
+import { ConfirmModal } from './ui'
 
 /**
  * 2026-04-27 reconciled-list `R11`: Skip-review confirm modal.
@@ -26,18 +26,12 @@ import { ActionOverlay, Button } from './ui'
  * `confirmingSkip` state); the modal mounts at the screen root next to
  * the existing `SoftBlockModal`.
  *
- * Focus management (red-team adversarial finding, 2026-04-27): the
- * modal autofocuses the safe-primary `Never mind` button on mount,
- * traps keyboard focus inside the dialog while open (Tab + Shift+Tab
- * cycle through the dialog's focusable elements), and restores focus
- * to whatever element opened it (typically the Home `Skip review`
- * link) on close. Without focus management, a keyboard or screen-
- * reader user who tabs past the destructive `Yes, skip` button lands
- * on the underlying Home page elements while the dialog is still
- * up - structurally undermining the `aria-modal` contract and making
- * the destructive confirm easier to mis-tap. The implementation
- * mirrors WAI-ARIA Authoring Practices for dialogs (focus trap +
- * restore-on-close); ESC dismissal stays as before.
+ * Plan U8 (2026-05-04): the safe-primary + danger-secondary shape now
+ * lives on `ConfirmModal`. Focus management (autofocus the safe-primary
+ * "Never mind", focus trap, focus restore on close) is owned by
+ * ActionOverlay (the underlying primitive) via the typed
+ * `initialFocusRef` seam; the `data-action-overlay-initial-focus`
+ * string-attribute contract is gone.
  */
 
 interface Props {
@@ -49,7 +43,7 @@ interface Props {
 
 export function SkipReviewModal({ planName, onConfirm, onCancel }: Props) {
   return (
-    <ActionOverlay
+    <ConfirmModal
       title="Skip review?"
       description={
         <>
@@ -57,23 +51,9 @@ export function SkipReviewModal({ planName, onConfirm, onCancel }: Props) {
           what comes next. The session is still saved to your history.
         </>
       }
+      safeAction={{ label: 'Never mind', onClick: onCancel }}
+      destructiveAction={{ label: 'Yes, skip', onClick: onConfirm }}
       onDismiss={onCancel}
-    >
-      {/* Safe-primary first: keeps `Never mind` as the default keyboard
-          and thumb target after the modal opens. */}
-      <div className="mt-6 flex flex-col gap-3">
-        <Button
-          variant="primary"
-          fullWidth
-          onClick={onCancel}
-          data-action-overlay-initial-focus="true"
-        >
-          Never mind
-        </Button>
-        <Button variant="danger" fullWidth onClick={onConfirm}>
-          Yes, skip
-        </Button>
-      </div>
-    </ActionOverlay>
+    />
   )
 }

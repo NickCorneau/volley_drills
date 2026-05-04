@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from 'react'
+import type { ButtonHTMLAttributes, Ref } from 'react'
 import { cx } from '../../lib/cn'
 
 export type ButtonVariant =
@@ -13,6 +13,13 @@ export type ButtonVariant =
 type ButtonProps = {
   variant?: ButtonVariant
   fullWidth?: boolean
+  /**
+   * Plan U2 (2026-05-04): React 19 ref-as-prop. Threaded through to the
+   * underlying `<button>` so callers can target focus management
+   * (e.g., `ActionOverlay` `initialFocusRef`) without dropping down to
+   * a raw `<button>`. No `forwardRef` needed under React 19.
+   */
+  ref?: Ref<HTMLButtonElement>
 } & ButtonHTMLAttributes<HTMLButtonElement>
 
 const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2'
@@ -132,11 +139,13 @@ export function Button({
   className,
   type = 'button',
   disabled,
+  ref,
   children,
   ...props
 }: ButtonProps) {
   return (
     <button
+      ref={ref}
       type={type}
       disabled={disabled}
       className={cx(

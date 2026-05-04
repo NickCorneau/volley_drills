@@ -212,7 +212,11 @@ describe('TransitionScreen: role-label eyebrow + rationale absent (cca2 dogfeed 
     expect(headerEl!.className).toContain('grid-cols-3')
     expect(headerEl!.className).not.toContain('justify-between')
 
+    // After plan U5 (2026-05-04), the alignment class lives on the
+    // wrapping span that `RunFlowHeader` renders around the caller's
+    // eyebrow node, so target the parent — the eyebrow text node only
+    // carries the caller's typography classes.
     const eyebrow = screen.getByText('Transition')
-    expect(eyebrow.className).toContain('justify-self-center')
+    expect(eyebrow.parentElement?.className).toContain('justify-self-center')
   })
 })

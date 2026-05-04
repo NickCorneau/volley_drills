@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react'
+import { useRef, useSyncExternalStore } from 'react'
 import { isSchemaBlocked, subscribeSchemaBlocked } from '../lib/schema-blocked'
 import { ActionOverlay, Button } from './ui'
 
@@ -13,6 +13,10 @@ export interface SchemaBlockedOverlayProps {
 // a StrictMode remount window.
 export function SchemaBlockedOverlay({ onReload }: SchemaBlockedOverlayProps = {}) {
   const blocked = useSyncExternalStore(subscribeSchemaBlocked, isSchemaBlocked, isSchemaBlocked)
+  // Plan U2 (2026-05-04): typed initial-focus seam. Hook order matters,
+  // so the ref is created unconditionally even though the overlay only
+  // renders when `blocked` is true.
+  const reloadRef = useRef<HTMLButtonElement>(null)
 
   if (!blocked) return null
 
@@ -25,13 +29,14 @@ export function SchemaBlockedOverlay({ onReload }: SchemaBlockedOverlayProps = {
       description="A different version of this app is open in another tab. Close other tabs and reload to continue."
       className="bg-black/50 px-4"
       panelClassName="max-w-[390px]"
+      initialFocusRef={reloadRef}
     >
       <Button
         variant="primary"
         fullWidth
         onClick={handleReload}
         className="mt-4"
-        data-action-overlay-initial-focus="true"
+        ref={reloadRef}
       >
         Reload
       </Button>

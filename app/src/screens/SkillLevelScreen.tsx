@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ScreenShell } from '../components/ui'
-import { FOCAL_SURFACE_CLASS } from '../components/ui/Card'
+import { FOCAL_SURFACE_CLASS } from '../components/ui/surfaces'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { SKILL_LEVEL_LABEL, SKILL_LEVELS, type SkillLevel } from '../lib/skillLevel'
 import { loadVoiceFromStorage, type Voice } from '../lib/voiceFromContext'

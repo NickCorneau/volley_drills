@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BackButton, Button, Card, ScreenShell, StatusMessage } from '../components/ui'
+import { Button, Callout, Card, ScreenHeader, ScreenShell, StatusMessage } from '../components/ui'
 import { useInstallPosture } from '../hooks/useInstallPosture'
 import { BUILD_DATE, BUILD_VERSION } from '../lib/buildInfo'
 import { formatTotalDurationLine } from '../lib/format'
@@ -106,18 +106,12 @@ export function SettingsScreen() {
         rhythm, and footer ("Your data stays on this device.") on the
         same grid as SetupScreen / SafetyCheckScreen / ReviewScreen.
       */}
-      <ScreenShell.Header className="flex items-center gap-2 pt-2 pb-3">
-        <BackButton label="Back" onClick={() => navigate(routes.home())} />
-        <h1 className="flex-1 text-center text-xl font-semibold tracking-tight text-text-primary">
-          Settings
-        </h1>
-        <div className="w-12" />
-      </ScreenShell.Header>
+      <ScreenHeader backLabel="Back" onBack={() => navigate(routes.home())} title="Settings" />
 
       <ScreenShell.Body className="gap-8 pb-4">
         <Card variant="focal">
           <div>
-            <h2 className="text-sm font-semibold text-text-primary">Export training records</h2>
+            <h2 className="text-base font-semibold text-text-primary">Export training records</h2>
             <p className="mt-1 text-sm text-text-secondary">
               Downloads your session history as a JSON file you can share.
             </p>
@@ -131,13 +125,9 @@ export function SettingsScreen() {
             {state.kind === 'exporting' ? 'Exporting\u2026' : 'Export training records'}
           </Button>
           {state.kind === 'success' && (
-            <p
-              role="status"
-              aria-live="polite"
-              className="rounded-[12px] bg-success/10 px-4 py-3 text-center text-sm font-medium text-success"
-            >
+            <Callout tone="success" size="sm" role="status">
               Export saved. Check your downloads.
-            </p>
+            </Callout>
           )}
           {state.kind === 'error' && <StatusMessage variant="error" message={state.message} />}
         </Card>
@@ -162,7 +152,7 @@ export function SettingsScreen() {
           data-posture={posture}
           className="flex flex-col gap-2 rounded-[12px] border border-text-secondary/15 bg-bg-warm/40 p-4"
         >
-          <h2 id="settings-storage-heading" className="text-sm font-semibold text-text-primary">
+          <h2 id="settings-storage-heading" className="text-base font-semibold text-text-primary">
             About local storage
           </h2>
           <p className="text-sm font-medium text-text-primary">{storageCopy.primary}</p>

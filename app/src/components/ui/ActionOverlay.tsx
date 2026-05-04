@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useId, useRef } from 'react'
-import type { ReactNode } from 'react'
+import type { ReactNode, RefObject } from 'react'
 import { createPortal } from 'react-dom'
 
 import { cx } from '../../lib/cn'
-import { ELEVATED_PANEL_SURFACE } from './Card'
+import { ELEVATED_PANEL_SURFACE } from './surfaces'
 
 type ActionOverlayProps = {
   title: string
@@ -14,14 +14,28 @@ type ActionOverlayProps = {
   closeLabel?: string
   showCloseButton?: boolean
   refocusKey?: string | number | boolean
+  /**
+   * Plan U2 (2026-05-04): typed initial-focus seam. When provided and
+   * `.current` resolves to a focusable element, it wins over the
+   * first-focusable fallback. Pairing with `refocusKey` re-runs the
+   * focus effect (e.g. ResumePrompt's confirming-state flip swaps which
+   * ref is passed; the key bump is no longer strictly required because
+   * the ref identity change re-runs the effect, but it stays in the
+   * API as an escape hatch for callers that point a single ref at a
+   * different element across re-renders).
+   *
+   * Replaces the legacy `data-action-overlay-initial-focus="true"`
+   * string attribute, which was removed at the end of U2 (no callers
+   * left). New callers MUST use this seam; the ESLint guardrail in U12
+   * will fail at edit time if the attribute is re-introduced.
+   */
+  initialFocusRef?: RefObject<HTMLElement | null>
   className?: string
   panelClassName?: string
 }
 
 const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-
-const ACTION_OVERLAY_INITIAL_FOCUS_ATTR = 'data-action-overlay-initial-focus'
 
 export function ActionOverlay({
   title,
@@ -32,6 +46,7 @@ export function ActionOverlay({
   closeLabel = 'Close',
   showCloseButton = false,
   refocusKey,
+  initialFocusRef,
   className,
   panelClassName,
 }: ActionOverlayProps) {
@@ -94,13 +109,14 @@ export function ActionOverlay({
 
   useEffect(() => {
     const panel = panelRef.current
-    const markedTarget = panel?.querySelector<HTMLElement>(
-      `[${ACTION_OVERLAY_INITIAL_FOCUS_ATTR}="true"]`,
-    )
+    // Precedence: typed `initialFocusRef` > first focusable element > panel itself.
+    // The legacy `[data-action-overlay-initial-focus="true"]` attribute path
+    // was removed at the end of U2 (2026-05-04) once all callers migrated.
+    const refTarget = initialFocusRef?.current ?? null
     const focusable = getFocusable()
-    const initialTarget = markedTarget ?? focusable[0] ?? panel
+    const initialTarget = refTarget ?? focusable[0] ?? panel
     initialTarget?.focus()
-  }, [getFocusable, refocusKey])
+  }, [getFocusable, refocusKey, initialFocusRef])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

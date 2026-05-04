@@ -1,8 +1,7 @@
-import { useId, useState } from 'react'
 import type { DifficultyTag } from '../model'
 import { validateStreakLongest } from '../domain/capture'
 import { PassMetricInput } from './PassMetricInput'
-import { ToggleChip } from './ui'
+import { ChoiceRow, type ChoiceRowOption, Disclosure, NumberCell } from './ui'
 
 /**
  * Tier 1b D133 (2026-04-26): per-drill capture surface that lives on
@@ -55,7 +54,7 @@ import { ToggleChip } from './ui'
  * `docs/specs/m001-review-micro-spec.md` §Required line 78.
  */
 
-const DIFFICULTY_CHIPS: { value: DifficultyTag; label: string }[] = [
+const DIFFICULTY_CHIPS: readonly ChoiceRowOption<DifficultyTag>[] = [
   { value: 'too_hard', label: 'Too hard' },
   { value: 'still_learning', label: 'Still learning' },
   { value: 'too_easy', label: 'Too easy' },
@@ -130,24 +129,18 @@ export function PerDrillCapture(props: PerDrillCaptureProps) {
     >
       <div className="flex flex-col gap-1">
         <p className="text-xs font-medium text-text-secondary">Drill check</p>
-        <h2 id="per-drill-heading" className="text-sm font-semibold text-text-primary">
+        <h2 id="per-drill-heading" className="text-base font-semibold text-text-primary">
           How was {drillName}?
         </h2>
       </div>
 
-      <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-labelledby="per-drill-heading">
-        {DIFFICULTY_CHIPS.map((chip) => {
-          const selected = difficulty === chip.value
-          return (
-            <ToggleChip
-              key={chip.value}
-              label={chip.label}
-              selected={selected}
-              onTap={() => onDifficultyChange(chip.value)}
-            />
-          )
-        })}
-      </div>
+      <ChoiceRow<DifficultyTag>
+        value={difficulty}
+        onChange={onDifficultyChange}
+        options={DIFFICULTY_CHIPS}
+        layout="grid-3"
+        ariaLabelledBy="per-drill-heading"
+      />
 
       {renderDrawer(props, successRuleDescription)}
     </section>
@@ -225,27 +218,13 @@ function CountDrawer({
   onAttemptChange: (next: number) => void
   onToggleNotCaptured: () => void
 }) {
-  const [open, setOpen] = useState(false)
-
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex min-h-[44px] self-start items-center text-sm font-medium text-accent underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-        data-testid="per-drill-add-counts"
-      >
-        Add counts (optional)
-      </button>
-    )
-  }
-
   return (
-    <div className="flex flex-col gap-3" data-testid="per-drill-counts">
-      <p className="text-sm text-text-secondary">
-        <span className="font-medium text-text-primary">Counts</span>{' '}
-        <span className="font-normal">(optional)</span>
-      </p>
+    <Disclosure label="Add counts (optional)" testId="per-drill-add-counts">
+      <div className="flex flex-col gap-3" data-testid="per-drill-counts">
+        <p className="text-sm text-text-secondary">
+          <span className="font-medium text-text-primary">Counts</span>{' '}
+          <span className="font-normal">(optional)</span>
+        </p>
       {/*
         V0B-28 forced-criterion prompt (D104 layer-1). Voice mirrors
         the legacy `ReviewScreen` fallback path so the rule reads as
@@ -267,15 +246,16 @@ function CountDrawer({
           </span>
         </p>
       )}
-      <PassMetricInput
-        good={goodPasses}
-        total={attemptCount}
-        onGoodChange={onGoodChange}
-        onTotalChange={onAttemptChange}
-        notCaptured={notCaptured}
-        onToggleNotCaptured={onToggleNotCaptured}
-      />
-    </div>
+        <PassMetricInput
+          good={goodPasses}
+          total={attemptCount}
+          onGoodChange={onGoodChange}
+          onTotalChange={onAttemptChange}
+          notCaptured={notCaptured}
+          onToggleNotCaptured={onToggleNotCaptured}
+        />
+      </div>
+    </Disclosure>
   )
 }
 
@@ -297,42 +277,29 @@ function StreakDrawer({
   streakLongest: number | null
   onStreakLongestChange: (next: number | null) => void
 }) {
-  const [open, setOpen] = useState(false)
-
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex min-h-[44px] self-start items-center text-sm font-medium text-accent underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-        data-testid="per-drill-add-streak"
-      >
-        Add longest streak (optional)
-      </button>
-    )
-  }
-
   return (
-    <div className="flex flex-col gap-3" data-testid="per-drill-streak">
-      <p className="text-sm text-text-secondary">
-        <span className="font-medium text-text-primary">Streak</span>{' '}
-        <span className="font-normal">(optional)</span>
-      </p>
-      {/*
-        V0B-28 forced-criterion prompt on the streak branch, with the
-        anti-generosity clause dropped per `D134` rationale: streak
-        counting is intrinsically conservative (a missed contact ends
-        the streak) so applying the count-drill anxiety here would
-        import nuance the input does not actually need.
-      */}
-      {successRuleDescription && (
-        <p className="text-sm text-text-secondary" data-testid="per-drill-success-rule">
-          <span className="font-medium text-text-primary">Success rule:</span>{' '}
-          {successRuleDescription}
+    <Disclosure label="Add longest streak (optional)" testId="per-drill-add-streak">
+      <div className="flex flex-col gap-3" data-testid="per-drill-streak">
+        <p className="text-sm text-text-secondary">
+          <span className="font-medium text-text-primary">Streak</span>{' '}
+          <span className="font-normal">(optional)</span>
         </p>
-      )}
-      <StreakInput streakLongest={streakLongest} onStreakLongestChange={onStreakLongestChange} />
-    </div>
+        {/*
+          V0B-28 forced-criterion prompt on the streak branch, with the
+          anti-generosity clause dropped per `D134` rationale: streak
+          counting is intrinsically conservative (a missed contact ends
+          the streak) so applying the count-drill anxiety here would
+          import nuance the input does not actually need.
+        */}
+        {successRuleDescription && (
+          <p className="text-sm text-text-secondary" data-testid="per-drill-success-rule">
+            <span className="font-medium text-text-primary">Success rule:</span>{' '}
+            {successRuleDescription}
+          </p>
+        )}
+        <StreakInput streakLongest={streakLongest} onStreakLongestChange={onStreakLongestChange} />
+      </div>
+    </Disclosure>
   )
 }
 
@@ -346,6 +313,19 @@ function StreakDrawer({
  * so the user can fix it. The 0..99 range comes from
  * `validateStreakLongest`.
  */
+/**
+ * Plan U10 (2026-05-04): the streak cell is a thin caller of `NumberCell`
+ * with `validate={validateStreakLongest}` for the 0..99 integer range
+ * check and `invalidMessage` carrying the existing correction copy.
+ * The empty-zero rule, blur/Enter commit, and `aria-invalid` /
+ * `aria-describedby` wiring all live on `NumberCell` now.
+ *
+ * NumberCell's onCommit returns `number | null`; the streak parent's
+ * `onStreakLongestChange` already accepts that signature, so the call
+ * passes through directly. NumberCell's internal `value` prop is `number`
+ * (not nullable), so we map `null → 0` for the rendered display state —
+ * `valueToDisplayText(0) === ''` keeps the empty placeholder showing.
+ */
 function StreakInput({
   streakLongest,
   onStreakLongestChange,
@@ -353,99 +333,20 @@ function StreakInput({
   streakLongest: number | null
   onStreakLongestChange: (next: number | null) => void
 }) {
-  const id = useId()
-  const helperId = useId()
-  const errorId = useId()
-
-  const [text, setText] = useState(() => (streakLongest === null ? '' : String(streakLongest)))
-  const [showInvalid, setShowInvalid] = useState(false)
-
-  // React "adjust state during render" pattern for syncing local text
-  // when the parent's controlled value changes (rehydration, swap, etc).
-  // Tracking a snapshot of the prop and reacting to changes during
-  // render — instead of inside `useEffect` — avoids the cascading-render
-  // warning while preserving the rule that a user typing locally is not
-  // wiped by a parent re-render that still reports `null`. The reset
-  // only fires when the parent's value materially changed AND landed on
-  // a meaningful integer; a parent clear (`null`) leaves the local
-  // text untouched so a partially-typed draft survives.
-  // See https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
-  const [streakLongestSnapshot, setStreakLongestSnapshot] = useState(streakLongest)
-  if (streakLongest !== streakLongestSnapshot) {
-    setStreakLongestSnapshot(streakLongest)
-    if (streakLongest !== null) {
-      setText(String(streakLongest))
-      setShowInvalid(false)
-    }
-  }
-
-  const commit = () => {
-    const trimmed = text.trim()
-    if (trimmed === '') {
-      onStreakLongestChange(null)
-      setShowInvalid(false)
-      return
-    }
-    // Reject non-integer-shaped strings up front (e.g. `1.5`, `-3`,
-    // `5e2`, `5px`). `parseInt` would silently truncate `1.5` to `1`,
-    // hiding the input mistake — the streak surface promises whole
-    // numbers, so we surface the correction text instead. The numeric
-    // range / integer-domain check still goes through the pure
-    // `validateStreakLongest` helper for parity with the controller's
-    // hydration path.
-    if (!/^\d+$/.test(trimmed)) {
-      onStreakLongestChange(null)
-      setShowInvalid(true)
-      return
-    }
-    const parsed = Number.parseInt(trimmed, 10)
-    const validated = validateStreakLongest(parsed)
-    if (validated === null) {
-      onStreakLongestChange(null)
-      setShowInvalid(true)
-      return
-    }
-    setShowInvalid(false)
-    onStreakLongestChange(validated)
-  }
-
   return (
-    <div className="flex flex-col items-start gap-2">
-      <label htmlFor={id} className="text-sm font-medium text-text-primary">
-        Longest streak
-      </label>
-      <input
-        id={id}
-        type="text"
-        inputMode="numeric"
-        pattern="[0-9]*"
-        value={text}
-        placeholder="0"
-        aria-describedby={`${helperId} ${showInvalid ? errorId : ''}`.trim()}
-        aria-invalid={showInvalid}
-        onChange={(e) => setText(e.target.value)}
-        onBlur={commit}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault()
-            ;(e.target as HTMLInputElement).blur()
-          }
-        }}
-        className="h-16 w-28 rounded-[12px] border-2 border-text-primary/20 bg-bg-primary text-center text-3xl font-bold tabular-nums text-text-primary placeholder:text-text-primary/30 focus-visible:border-accent focus-visible:outline-none"
-        data-testid="per-drill-streak-input"
-      />
-      {showInvalid && (
-        <p
-          id={errorId}
-          className="text-sm text-text-secondary"
-          data-testid="per-drill-streak-invalid"
-        >
-          Use a whole number. This result will be skipped unless fixed.
-        </p>
-      )}
-      <p id={helperId} className="text-sm text-text-secondary">
-        If you counted, enter your best unbroken streak. Leave blank if unsure.
-      </p>
-    </div>
+    <NumberCell
+      label="Longest streak"
+      value={streakLongest ?? 0}
+      onCommit={onStreakLongestChange}
+      validate={validateStreakLongest}
+      invalidMessage="Use a whole number. This result will be skipped unless fixed."
+      helperText="If you counted, enter your best unbroken streak. Leave blank if unsure."
+      testId="per-drill-streak-input"
+      // The streak input historically left-aligned its label / helper text
+      // (`items-start`) while PassMetricInput's cells centered theirs
+      // (`items-center`). NumberCell's default is `items-center`; the
+      // helper text below the input renders centered which reads fine
+      // courtside. Drop the items-start divergence on extraction.
+    />
   )
 }

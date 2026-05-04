@@ -1,10 +1,18 @@
 import type { ReactNode } from 'react'
+import { Callout } from './Callout'
 
 type StatusMessageProps =
   | { variant: 'loading'; message?: string }
   | { variant: 'error'; message: string }
   | { variant: 'empty'; message: string; action?: ReactNode }
 
+/**
+ * Page-state primitive: loading / error / empty. Distinct from `Callout`,
+ * which is a tone-driven information surface. Plan U9 (2026-05-04): the
+ * `error` variant's body markup now uses `Callout tone="warning" size="sm"
+ * role="alert"` so the warning-surface styling lives once on `Callout`;
+ * `StatusMessage` keeps the page-state semantic role.
+ */
 export function StatusMessage(props: StatusMessageProps) {
   switch (props.variant) {
     case 'loading':
@@ -15,9 +23,9 @@ export function StatusMessage(props: StatusMessageProps) {
       )
     case 'error':
       return (
-        <p className="rounded-[12px] bg-warning-surface px-4 py-3 text-center text-sm font-medium text-warning">
+        <Callout tone="warning" size="sm" role="alert">
           {props.message}
-        </p>
+        </Callout>
       )
     case 'empty':
       return (

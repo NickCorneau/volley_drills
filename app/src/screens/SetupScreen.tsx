@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
-  BackButton,
   Button,
+  ChoiceRow,
+  type ChoiceRowOption,
   ChoiceSection,
   ChoiceSubsection,
+  ScreenHeader,
   ScreenShell,
   StatusMessage,
-  ToggleChip,
 } from '../components/ui'
 import type { PlayerMode, TimeProfile } from '../types/session'
 import type { SetupContext } from '../model'
@@ -214,65 +215,51 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         the footer. The setup rows can slip below the fold on a 390 x 844
         iPhone when any section expands or a tester re-reads the options.
       */}
-      <ScreenShell.Header className="flex items-center gap-2 pt-2 pb-3">
-        <BackButton
-          label={isOnboarding ? 'Skill level' : 'Home'}
-          onClick={() => navigate(isOnboarding ? routes.onboardingSkillLevel() : routes.home())}
-        />
-        {/* Phase F12 (2026-04-19): screen title sentence case (was
-            "Today's Setup" Title Case). Matches "Before we start",
-            "Settings", and the rest of the app per brand-ux
-            guidelines §1.4. See
-            `docs/archive/plans/2026-04-19-feat-phase-f12-ux-consistency-plan.md`. */}
-        <h1 className="flex-1 text-center text-xl font-semibold tracking-tight text-text-primary">
-          Today&apos;s setup
-        </h1>
-        <div className="w-12" />
-      </ScreenShell.Header>
+      {/* Phase F12 (2026-04-19): screen title sentence case (was
+          "Today's Setup" Title Case). Matches "Before we start",
+          "Settings", and the rest of the app per brand-ux
+          guidelines §1.4. See
+          `docs/archive/plans/2026-04-19-feat-phase-f12-ux-consistency-plan.md`. */}
+      <ScreenHeader
+        backLabel={isOnboarding ? 'Skill level' : 'Home'}
+        onBack={() => navigate(isOnboarding ? routes.onboardingSkillLevel() : routes.home())}
+        title={<>Today&apos;s setup</>}
+      />
 
       <ScreenShell.Body className="gap-6 pb-4">
         <ChoiceSection title="Players">
-          <div className="flex gap-2" role="radiogroup" aria-label="Player mode">
-            <ToggleChip
-              label="Solo"
-              selected={playerMode === 'solo'}
-              onTap={() => setPlayerMode('solo')}
-            />
-            <ToggleChip
-              label="Pair"
-              selected={playerMode === 'pair'}
-              onTap={() => setPlayerMode('pair')}
-            />
-          </div>
+          <ChoiceRow<PlayerMode>
+            value={playerMode}
+            onChange={setPlayerMode}
+            options={[
+              { value: 'solo', label: 'Solo' },
+              { value: 'pair', label: 'Pair' },
+            ]}
+            ariaLabel="Player mode"
+          />
         </ChoiceSection>
 
         <ChoiceSection title="Net">
-          <div className="flex gap-2" role="radiogroup" aria-label="Net available">
-            <ToggleChip
-              label="Yes"
-              selected={netAvailable === true}
-              onTap={() => setNetAvailable(true)}
-            />
-            <ToggleChip
-              label="No"
-              selected={netAvailable === false}
-              onTap={() => setNetAvailable(false)}
-            />
-          </div>
+          <ChoiceRow<'yes' | 'no'>
+            value={netAvailable === null ? null : netAvailable ? 'yes' : 'no'}
+            onChange={(next) => setNetAvailable(next === 'yes')}
+            options={[
+              { value: 'yes', label: 'Yes' },
+              { value: 'no', label: 'No' },
+            ]}
+            ariaLabel="Net available"
+          />
           {showWall && (
             <ChoiceSubsection titleId="wall-available-label" title="Wall or fence nearby?">
-              <div className="flex gap-2" role="radiogroup" aria-labelledby="wall-available-label">
-                <ToggleChip
-                  label="Yes"
-                  selected={wallAvailable === true}
-                  onTap={() => setWallAvailable(true)}
-                />
-                <ToggleChip
-                  label="No"
-                  selected={wallAvailable === false}
-                  onTap={() => setWallAvailable(false)}
-                />
-              </div>
+              <ChoiceRow<'yes' | 'no'>
+                value={wallAvailable === null ? null : wallAvailable ? 'yes' : 'no'}
+                onChange={(next) => setWallAvailable(next === 'yes')}
+                options={[
+                  { value: 'yes', label: 'Yes' },
+                  { value: 'no', label: 'No' },
+                ]}
+                ariaLabelledBy="wall-available-label"
+              />
             </ChoiceSubsection>
           )}
         </ChoiceSection>
@@ -283,31 +270,29 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
             including warm-up and cool-down." Clarifier lives in the
             shared `ChoiceSection` footerNote. See
             docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md. */}
-          <div className="flex gap-2" role="radiogroup" aria-label="Time profile">
-            {TIME_OPTIONS.map((t) => (
-              <ToggleChip
-                key={t}
-                label={`${t} min`}
-                selected={timeProfile === t}
-                onTap={() => setTimeProfile(t)}
-              />
-            ))}
-          </div>
+          <ChoiceRow<string>
+            value={String(timeProfile)}
+            onChange={(next) => setTimeProfile(Number.parseInt(next, 10) as TimeProfile)}
+            options={TIME_OPTIONS.map(
+              (t): ChoiceRowOption<string> => ({ value: String(t), label: `${t} min` }),
+            )}
+            ariaLabel="Time profile"
+          />
         </ChoiceSection>
 
         <ChoiceSection title="Focus">
-          <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Focus">
-            {FOCUS_OPTIONS.map((option) => (
-              <ToggleChip
-                key={option.value}
-                label={option.label}
-                selected={sessionFocus === option.value}
-                onTap={() => setSessionFocus(option.value)}
-                fill={false}
-                className="min-w-0 w-full"
-              />
-            ))}
-          </div>
+          <ChoiceRow<SetupFocus>
+            value={sessionFocus}
+            onChange={setSessionFocus}
+            options={FOCUS_OPTIONS.map(
+              (option): ChoiceRowOption<SetupFocus> => ({
+                value: option.value,
+                label: option.label,
+              }),
+            )}
+            layout="grid-2"
+            ariaLabel="Focus"
+          />
         </ChoiceSection>
 
         {error && <StatusMessage variant="error" message={error} />}

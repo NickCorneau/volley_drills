@@ -2,9 +2,8 @@ import { useRef, useState } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { BlockTimer } from '../components/BlockTimer'
 import { RunControls } from '../components/RunControls'
-import { SafetyIcon } from '../components/SafetyIcon'
 import { SegmentList } from '../components/run/SegmentList'
-import { ActionOverlay, Button, ScreenShell, StatusMessage } from '../components/ui'
+import { ConfirmModal, RunFlowHeader, ScreenShell, StatusMessage } from '../components/ui'
 import { getBlockSkillFocus } from '../domain/drillMetadata'
 import { blockEyebrowLabel } from '../lib/format'
 import { routes } from '../routes'
@@ -147,52 +146,34 @@ export function RunScreen() {
         rendering it.
       */}
       {/*
-        Header layout: 3-column grid, NOT flex justify-between.
-        2026-04-27 cca2 dogfeed visual catch: the prior `flex
-        justify-between` pattern keeps the gap-left of the middle
-        item equal to the gap-right, but does NOT center the middle
-        item relative to the container — so the eyebrow drifts
-        right of true center by `(left_child_width -
-        right_child_width) / 2`. With `SafetyIcon` at `h-14 w-14`
-        (56 px touch target) and a short counter `N/M` (~22 px),
-        the math is `+17 px` right of center on RunScreen — visible
-        as misalignment when comparing to TransitionScreen (which
-        has the wider `Next: N/M` counter and reads visually
-        centered by accident).
+        2026-04-27 cca2 dogfeed F8 follow-up: eyebrow composes
+        slot role + drill skill (`Main drill · Serve`) via
+        `blockEyebrowLabel` so the courtside reader sees the skill
+        on first glance, not buried in the body. Skill omitted for
+        warmup / wrap by design (no per-skill identity). Falls back
+        to bare `phaseLabel` when the drill is unknown (synthetic
+        test, legacy plan, or non-pass/serve/set drill). Centralised
+        composition keeps Run + Transition in sync on separator and
+        vocabulary.
 
-        `grid-cols-3` + per-cell `justify-self-{start,center,end}`
-        forces the middle column to center on the container regardless
-        of side-cell widths. Symmetric column widths also let the
-        eyebrow auto-truncate cleanly if a future label (e.g. Tier
-        1c `Main drill · serve` composition) ever exceeds the
-        column width — the `truncate` class is reserved for that
-        eventuality without changing this layout.
+        The 3-column grid layout (and the "why grid not flex"
+        rationale) lives once on `RunFlowHeader` (plan U5).
       */}
-      <ScreenShell.Header className="grid grid-cols-3 items-center pt-2 pb-3">
-        <div className="justify-self-start">
-          <SafetyIcon />
-        </div>
-        {/*
-          2026-04-27 cca2 dogfeed F8 follow-up: eyebrow now composes
-          slot role + drill skill (`Main drill · Serve`) via
-          `blockEyebrowLabel` so the courtside reader sees the skill
-          on first glance, not buried in the body. Skill omitted for
-          warmup / wrap by design (no per-skill identity). Falls back
-          to bare `phaseLabel` when the drill is unknown (synthetic
-          test, legacy plan, or non-pass/serve/set drill). Centralised
-          composition keeps Run + Transition in sync on separator and
-          vocabulary.
-        */}
-        <span className="justify-self-center text-sm font-semibold text-accent">
-          {blockEyebrowLabel(
-            currentBlock.type,
-            getBlockSkillFocus(currentBlock, plan?.playerCount ?? 1),
-          )}
-        </span>
-        <span className="justify-self-end text-sm font-medium text-text-secondary">
-          {currentBlockIndex + 1}/{totalBlocks}
-        </span>
-      </ScreenShell.Header>
+      <RunFlowHeader
+        eyebrow={
+          <span className="text-sm font-semibold text-accent">
+            {blockEyebrowLabel(
+              currentBlock.type,
+              getBlockSkillFocus(currentBlock, plan?.playerCount ?? 1),
+            )}
+          </span>
+        }
+        counter={
+          <span className="text-sm font-medium text-text-secondary">
+            {currentBlockIndex + 1}/{totalBlocks}
+          </span>
+        }
+      />
 
       <ScreenShell.Body className="gap-4 pb-4">
         <div>
@@ -213,7 +194,7 @@ export function RunScreen() {
         )}
 
         {hasVisibleSegmentInstructions && (
-          <p className="whitespace-pre-line text-sm leading-relaxed text-text-secondary">
+          <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
             {currentBlock.courtsideInstructions}
           </p>
         )}
@@ -242,14 +223,14 @@ export function RunScreen() {
             <div className="mt-3 flex flex-col gap-3">
               {hasInstructionDetail && (
                 <section aria-label="Full drill instructions">
-                  <p className="whitespace-pre-line text-sm leading-relaxed text-text-primary">
+                  <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
                     {currentBlock.courtsideInstructions}
                   </p>
                 </section>
               )}
               {hasCueDetail && (
                 <section aria-label="Full coaching cue">
-                  <p className="whitespace-pre-line text-sm leading-relaxed text-text-secondary">
+                  <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
                     {currentBlock.coachingCue}
                   </p>
                 </section>
@@ -336,41 +317,33 @@ export function RunScreen() {
       </ScreenShell.Footer>
 
       {showEndConfirm && (
-        <ActionOverlay
+        // Safe-primary first, destructive below: keeps "Go back" as the
+        // default thumb-target after the pause, mirrors the iOS/Android
+        // action-sheet convention, and prevents an accidental end of
+        // session from the paused-timer state. Red-team UX #6. Plan U8
+        // (2026-05-04): the title + description + safe + danger
+        // bottom-sheet shape lives on `ConfirmModal` with
+        // `placement="bottom-sheet"`.
+        <ConfirmModal
           title="End session early?"
           description={
             currentBlock.type === 'wrap'
               ? 'You\u2019re in your downshift. Two or three minutes of easy walking before you leave is an honest finish. Your progress will be saved.'
               : 'You still have blocks remaining. Your progress will be saved and you can review what you completed.'
           }
+          placement="bottom-sheet"
+          safeAction={{
+            label: 'Go back',
+            onClick: handleEndSessionCancelOnce,
+            disabled: isEndingSession,
+          }}
+          destructiveAction={{
+            label: 'End session',
+            onClick: () => void handleEndSessionConfirmOnce(),
+            disabled: isEndingSession,
+          }}
           onDismiss={handleEndSessionCancelOnce}
-          className="items-end bg-black/40 px-4 pb-8 pt-4"
-          panelClassName="max-w-[390px] rounded-[16px]"
-        >
-          {/* Safe-primary first, destructive below: keeps "Go back" as the
-                default thumb-target after the pause, mirrors the iOS/Android
-                action-sheet convention, and prevents an accidental end of
-                session from the paused-timer state. Red-team UX #6. */}
-          <div className="mt-6 flex flex-col gap-3">
-            <Button
-              variant="primary"
-              fullWidth
-              onClick={handleEndSessionCancelOnce}
-              disabled={isEndingSession}
-              data-action-overlay-initial-focus="true"
-            >
-              Go back
-            </Button>
-            <Button
-              variant="danger"
-              fullWidth
-              onClick={() => void handleEndSessionConfirmOnce()}
-              disabled={isEndingSession}
-            >
-              End session
-            </Button>
-          </div>
-        </ActionOverlay>
+        />
       )}
     </ScreenShell>
   )

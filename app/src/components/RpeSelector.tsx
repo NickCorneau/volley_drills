@@ -42,7 +42,7 @@
 // until the user taps a different chip.
 
 import { EFFORT_CHIPS, pickChipForRpe } from './rpeSelectorUtils'
-import { ToggleChip } from './ui'
+import { ChoiceRow, type ChoiceRowOption } from './ui'
 
 type RpeSelectorProps = {
   value: number | null
@@ -56,22 +56,26 @@ type RpeSelectorProps = {
   ariaLabelledBy?: string
 }
 
+// ChoiceRow needs string-typed values; the persisted RPE is numeric. Map
+// the chip values to stringified Borg anchors here so the value space the
+// primitive sees ("3" / "5" / "7") is stable and unambiguous; the
+// rehydration helper still pivots on the numeric anchor.
+const CHIP_OPTIONS: readonly ChoiceRowOption<string>[] = EFFORT_CHIPS.map((chip) => ({
+  value: String(chip.value),
+  label: chip.label,
+}))
+
 export function RpeSelector({ value, onChange, ariaLabelledBy = 'rpe-heading' }: RpeSelectorProps) {
-  const selectedValue = pickChipForRpe(value)
+  const selectedNumeric = pickChipForRpe(value)
+  // `pickChipForRpe(null)` returns null; otherwise it snaps to a canonical anchor.
+  const selectedKey = selectedNumeric === null ? null : String(selectedNumeric)
   return (
-    <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-labelledby={ariaLabelledBy}>
-      {EFFORT_CHIPS.map((chip) => {
-        const selected = selectedValue === chip.value
-        return (
-          <ToggleChip
-            key={chip.label}
-            label={chip.label}
-            selected={selected}
-            onTap={() => onChange(chip.value)}
-            shape="rounded"
-          />
-        )
-      })}
-    </div>
+    <ChoiceRow<string>
+      value={selectedKey}
+      onChange={(next) => onChange(Number.parseInt(next, 10))}
+      options={CHIP_OPTIONS}
+      layout="grid-3"
+      ariaLabelledBy={ariaLabelledBy}
+    />
   )
 }

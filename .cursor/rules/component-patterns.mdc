@@ -8,14 +8,36 @@ alwaysApply: false
 
 # Component Patterns
 
-## UI Primitives
+## Folder split
 
-Use shared primitives from `components/ui/` for standard interactive elements:
+- `components/ui/` — atomic primitives. Generic, reusable, no Volleycraft-specific semantics.
+- `components/patterns/` — Volleycraft-shaped composites. They wrap `ui/` primitives into app-specific patterns (courtside-flow headers, the run-flow finished pill, the confirm-modal shell over `ActionOverlay`, the back-button affordance the pre-run/settings flow always wraps).
 
-- `<Button variant="primary|outline|secondary|danger|ghost|soft|link">` for action buttons
-- `<Card>` for rounded content sections with warm background
-- `<ScreenShell>` (with `.Header` / `.Body` / `.Footer` subcomponents) for the outer screen layout
-- `<StatusMessage variant="loading|error|empty">` for loading, error, and not-found states
+`components/ui/index.ts` re-exports the patterns for back-compat; new code should import from `components/patterns` directly when the symbol lives there.
+
+## UI Primitives (atomic — `components/ui/`)
+
+- `<Button variant="primary|outline|secondary|danger|ghost|soft|link">` for action buttons. Forwards a `ref` for callers that need to target focus management (e.g., `ActionOverlay` `initialFocusRef`).
+- `<Card variant="soft|focal">` for rounded content sections (warm or focal-surface background).
+- `<Callout tone="info|warning|success" emphasis="flat|hairline" size="md|sm">` for tone-driven information panels (heat warnings, PainOverrideCard outer panel, Settings export-success message). `StatusMessage variant="error"` uses Callout internally.
+- `<ChoiceRow value onChange options layout ariaLabel|ariaLabelledBy>` for radiogroup chip rows. Layout is `'flex' | 'grid-2' | 'grid-3'`. Per-option `tone` overrides `defaultTone` (mixed-tone case: SafetyCheckScreen Recency `0 days` is warning while siblings are accent).
+- `<ChoiceSection title description? footerNote? optional?>` for headed choice sections. Closed slot set; new slot needs use opaque `children`.
+- `<ChoiceSubsection titleId title description?>` for nested follow-up panels inside a `ChoiceSection`.
+- `<Disclosure label children testId?>` for collapsed-by-default reveal that REPLACES its trigger when expanded (PerDrillCapture drawers).
+- `<Expander trigger children onOpenChange?>` for collapse/expand where the trigger STAYS VISIBLE with a chevron (SafetyCheckScreen heat tips).
+- `<NumberCell label value onCommit validate? invalidMessage? helperText? testId?>` for large numeric tap-to-type input. Empty input commits `null`; the empty-zero rule renders `value === 0` as a placeholder.
+- `<ScreenShell>` (with `.Header` / `.Body` / `.Footer` subcomponents) for the outer screen layout.
+- `<StatusMessage variant="loading|error|empty">` for page-load states (loading / error / empty). Distinct from `Callout`.
+- `<ToggleChip label selected onTap tone? size? shape? fill? ariaLabel?>` for individual chips (used inside `ChoiceRow`).
+- `<ActionOverlay title description? children initialFocusRef? refocusKey?>` for low-level modal / sheet shells. Most callers should use `ConfirmModal` (in `patterns/`) instead; reach for `ActionOverlay` only when the content shape is heavier than a confirm (e.g., ResumePrompt's paused-info display).
+
+## Volleycraft-shaped patterns (`components/patterns/`)
+
+- `<ScreenHeader backLabel onBack title backAriaLabel? right?>` for the canonical pre-run/settings header (BackButton + centered title + spacer).
+- `<RunFlowHeader eyebrow counter>` for the run-flow header (SafetyIcon + 3-cell-grid eyebrow + counter). Caller owns eyebrow/counter typography (focal-vs-status distinction is intentional).
+- `<ConfirmModal title description? safeAction destructiveAction? onDismiss placement?>` for "title + description + safe-primary + optional destructive-secondary" composition over `ActionOverlay`. `placement="bottom-sheet"` for action-sheet positioning (RunScreen end-session). Internally threads `initialFocusRef` to the safe-primary so accidental destructive taps stay one extra deliberate motion away.
+- `<JustFinishedPill drillName status>` for the warm-panel + success-circle drill-completion pill (DrillCheckScreen, TransitionScreen).
+- `<BackButton label onClick aria-label?>` for the courtside back affordance (used inside `ScreenHeader`; also available standalone).
 
 Never build inline Tailwind class-string arrays with `.join(' ')` for buttons. Use the Button component and pass layout-specific classes via the `className` prop (e.g., `className="flex-1"`).
 
@@ -40,9 +62,18 @@ Controllers MUST NOT branch on `navigator.vibrate` or call Dexie directly. If a 
 
 ## Tailwind elevation and focus (pitfalls)
 
-- **Do not stack `ring-*` and `shadow-*` on the same always-on surface** (e.g. a white card with `rounded-[16px]`). In Tailwind, `ring` is implemented with `box-shadow`; combining it with `shadow-sm` / `shadow-lg` applies **two box-shadow layers** and often produces **grey corner wedges** in WebKit / Chrome. Prefer **`border` + a single `shadow-*`** for card edges (see `FOCAL_SURFACE_CLASS` in `components/ui/Card.tsx`).
+- **Do not stack `ring-*` and `shadow-*` on the same always-on surface** (e.g. a white card with `rounded-[16px]`). In Tailwind, `ring` is implemented with `box-shadow`; combining it with `shadow-sm` / `shadow-lg` applies **two box-shadow layers** and often produces **grey corner wedges** in WebKit / Chrome. Prefer **`border` + a single `shadow-*`** for card edges (see `FOCAL_SURFACE_CLASS` in `components/ui/surfaces.ts`).
 - **Focal cards that already use `FOCAL_SURFACE_CLASS` (`border` + `shadow-sm`)** should not add **`focus-visible:ring-*`** on the same element — focus would reintroduce a second shadow stack. Use **`focus-visible:outline-*`** (+ `outline-offset`) for keyboard focus on those surfaces instead (`SkillLevelScreen` option rows are the reference).
-- **Centered modals and blocking overlays** (`SkipReviewModal`, `SoftBlockModal`, `ResumePrompt`, `SchemaBlockedOverlay`, RunScreen end-session sheet) use **`ELEVATED_PANEL_SURFACE`** from `components/ui/Card.tsx` — same hairline border as focal cards, **`shadow-lg`** instead of `shadow-sm`. Add layout (`max-w`, `rounded-*`, `p-6`, etc.) beside the token; do not one-off `bg-bg-primary shadow-lg` without the border.
+- **Centered modals and blocking overlays** (`SkipReviewModal`, `SoftBlockModal`, `ResumePrompt`, `SchemaBlockedOverlay`, RunScreen end-session sheet) use **`ELEVATED_PANEL_SURFACE`** from `components/ui/surfaces.ts` — same hairline border as focal cards, **`shadow-lg`** instead of `shadow-sm`. Add layout (`max-w`, `rounded-*`, `p-6`, etc.) beside the token; do not one-off `bg-bg-primary shadow-lg` without the border.
+
+## Drift Guardrail
+
+The custom ESLint rule `volleycraft/no-inline-primitive-drift` (in `app/eslint-rules/`) fails at edit time when patterns the consolidation centralised get hand-rolled inline again. Currently enforced:
+
+- **`role="radiogroup"`** outside `app/src/components/ui/ChoiceRow.tsx`. Use `<ChoiceRow>` instead.
+- **`data-action-overlay-initial-focus`** anywhere. The string-attribute contract was removed in plan U2 (2026-05-04); pass `initialFocusRef` to `ActionOverlay` (or use `<ConfirmModal>` which threads the ref internally).
+
+The escape hatch is `// eslint-disable-next-line volleycraft/no-inline-primitive-drift -- <reason>`. Use it only when there's a documented reason the primitive can't fit; PR review catches disables without a reason.
 
 ## P12 contract
 

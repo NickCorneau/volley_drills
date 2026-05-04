@@ -1,6 +1,11 @@
 import { Link, useSearchParams } from 'react-router-dom'
-import { SafetyIcon } from '../components/SafetyIcon'
-import { Button, ScreenShell, StatusMessage } from '../components/ui'
+import {
+  Button,
+  JustFinishedPill,
+  RunFlowHeader,
+  ScreenShell,
+  StatusMessage,
+} from '../components/ui'
 import { getBlockSkillFocus } from '../domain/drillMetadata'
 import { blockEyebrowLabel, formatDuration } from '../lib/format'
 import { routes } from '../routes'
@@ -100,71 +105,28 @@ export function TransitionScreen() {
         only thing that differs between the two surfaces: decide
         here, execute there.
       */}
-      {/*
-        Header layout: 3-column grid for true center-alignment of
-        the middle eyebrow. See `RunScreen.tsx`'s header block
-        comment for the math on why `flex justify-between` drifts
-        the middle item off-center when SafetyIcon (56 px) and the
-        counter have asymmetric widths. Same fix applied here for
-        run-flow visual consistency across Run / Transition /
-        DrillCheck.
-      */}
-      <ScreenShell.Header className="grid grid-cols-3 items-center pt-2 pb-3">
-        <div className="justify-self-start">
-          <SafetyIcon />
-        </div>
-        {/* Phase F8 (2026-04-19): was `text-sm font-bold uppercase
-            tracking-wider`. Dropped the dashboard-eyebrow voice to
-            `text-sm font-medium` sentence case; the "Transition"
-            label is a calm status marker, not a hero. See
-            `docs/archive/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
-        <span className="justify-self-center text-sm font-medium text-text-secondary">
-          Transition
-        </span>
-        <span className="justify-self-end text-sm font-medium text-text-secondary">
-          Next: {currentBlockIndex + 1}/{totalBlocks}
-        </span>
-      </ScreenShell.Header>
+      {/* Phase F8 (2026-04-19): was `text-sm font-bold uppercase
+          tracking-wider`. Dropped the dashboard-eyebrow voice to
+          `text-sm font-medium` sentence case; the "Transition"
+          label is a calm status marker, not a hero. The 3-column
+          grid layout lives once on `RunFlowHeader` (plan U5). */}
+      <RunFlowHeader
+        eyebrow={
+          <span className="text-sm font-medium text-text-secondary">Transition</span>
+        }
+        counter={
+          <span className="text-sm font-medium text-text-secondary">
+            Next: {currentBlockIndex + 1}/{totalBlocks}
+          </span>
+        }
+      />
 
       <ScreenShell.Body className="gap-4 pb-4">
         {prevBlock && (
-          <div className="flex items-start gap-2.5 rounded-[12px] bg-bg-warm p-3">
-            <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success text-white">
-              {prevBlockStatus?.status === 'completed' ? (
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              ) : (
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-              )}
-            </div>
-            <div>
-              <p className="font-semibold text-text-primary">{prevBlock.drillName}</p>
-              <p className="text-sm text-success">
-                {prevBlockStatus?.status === 'completed' ? 'Complete' : 'Skipped'}
-              </p>
-            </div>
-          </div>
+          <JustFinishedPill
+            drillName={prevBlock.drillName}
+            status={prevBlockStatus?.status === 'completed' ? 'completed' : 'skipped'}
+          />
         )}
 
         <div className="border-t border-text-secondary/10" />
