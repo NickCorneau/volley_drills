@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { BackButton, Button, ScreenShell, StatusMessage, ToggleChip } from '../components/ui'
+import {
+  BackButton,
+  Button,
+  ScreenShell,
+  SetupChoiceSection,
+  SetupNestedChoiceBlock,
+  StatusMessage,
+  ToggleChip,
+} from '../components/ui'
 import type { PlayerMode, TimeProfile } from '../types/session'
 import type { SetupContext } from '../model'
 import { buildDraft } from '../domain/sessionBuilder'
@@ -19,6 +27,14 @@ import { routes } from '../routes'
 import type { PlayerLevel } from '../types/drill'
 
 const TIME_OPTIONS: TimeProfile[] = [15, 25, 40]
+const FOCUS_OPTIONS = [
+  { value: 'recommended', label: 'Recommended' },
+  { value: 'pass', label: 'Passing' },
+  { value: 'serve', label: 'Serving' },
+  { value: 'set', label: 'Setting' },
+] as const
+
+type SetupFocus = (typeof FOCUS_OPTIONS)[number]['value']
 
 const isTimestamp = (v: unknown): v is number =>
   typeof v === 'number' && Number.isFinite(v) && v > 0
@@ -42,18 +58,20 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   const shouldHydrateDraft =
     !isOnboarding && isSetupLocationState(location.state) && location.state.editDraft === true
   // 2026-04-22 one-tap Repeat simplification: the `?from=repeat`
-  // branch + `StaleContextBanner` were retired here because `Repeat
-  // this session` on Home now rebuilds the draft and routes through
-  // `/tune-today`. Setup only renders for fresh / "Start a different
-  // session" entries, where `getLastContext()` silently pre-fills the
-  // toggles from the last session as a convenience (no banner — the
-  // user explicitly asked to start something different, so naming the
-  // prior day is noise).
+  // branch + `StaleContextBanner` were retired here. Setup renders for
+  // fresh / "Start a different session" entries, where
+  // `getLastContext()` silently pre-fills the physical setup toggles
+  // from the last session as a convenience (no banner — the user
+  // explicitly asked to start something different, so naming the prior
+  // day is noise). Fresh setup defaults to the fastest common path
+  // (Solo + net available + Recommended focus); edit mode restores the
+  // current draft focus.
 
-  const [playerMode, setPlayerMode] = useState<PlayerMode | null>(null)
-  const [netAvailable, setNetAvailable] = useState<boolean | null>(null)
+  const [playerMode, setPlayerMode] = useState<PlayerMode | null>('solo')
+  const [netAvailable, setNetAvailable] = useState<boolean | null>(true)
   const [wallAvailable, setWallAvailable] = useState<boolean | null>(null)
   const [timeProfile, setTimeProfile] = useState<TimeProfile>(15)
+  const [sessionFocus, setSessionFocus] = useState<SetupFocus>('recommended')
   const [prefilled, setPrefilled] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -93,6 +111,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           setNetAvailable(ctx.netAvailable)
           setWallAvailable(ctx.wallAvailable)
           setTimeProfile(ctx.timeProfile)
+          setSessionFocus(shouldHydrateDraft ? (ctx.sessionFocus ?? 'recommended') : 'recommended')
         }
       } catch {
         // Prefill is best-effort; a failed read falls through to defaults.
@@ -108,6 +127,14 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   const showWall = playerMode === 'solo' && netAvailable === false
   const isComplete =
     playerMode !== null && netAvailable !== null && (!showWall || wallAvailable !== null)
+  const incompleteHint =
+    playerMode === null
+      ? 'Choose players to build.'
+      : netAvailable === null
+        ? 'Choose net availability to build.'
+        : showWall && wallAvailable === null
+          ? 'Choose wall or fence availability to build.'
+          : null
 
   const submitting = useRef(false)
 
@@ -123,6 +150,9 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         timeProfile,
         netAvailable: netAvailable!,
         wallAvailable: showWall ? wallAvailable! : false,
+      }
+      if (sessionFocus !== 'recommended') {
+        context.sessionFocus = sessionFocus
       }
 
       // Phase 2.2 / 3.2 build-time substitution input. A fresh Setup
@@ -154,7 +184,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       if (isOnboarding) {
         await setStorageMeta('onboarding.completedAt', Date.now())
       }
-      navigate(routes.tuneToday(), { state: { source: 'setup' } })
+      navigate(routes.safety())
     } catch {
       setError('Failed to save session. Please try again.')
     } finally {
@@ -165,6 +195,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     isComplete,
     playerMode,
     timeProfile,
+    sessionFocus,
     netAvailable,
     wallAvailable,
     showWall,
@@ -200,10 +231,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       </ScreenShell.Header>
 
       <ScreenShell.Body className="gap-6 pb-4">
-        {/* Section labels stay compact on phones; hierarchy comes from
-          grouping and chip state rather than larger text. */}
-        <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-text-primary">Players</h2>
+        <SetupChoiceSection title="Players">
           <div className="flex gap-2" role="radiogroup" aria-label="Player mode">
             <ToggleChip
               label="Solo"
@@ -216,10 +244,9 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
               onTap={() => setPlayerMode('pair')}
             />
           </div>
-        </section>
+        </SetupChoiceSection>
 
-        <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-text-primary">Net</h2>
+        <SetupChoiceSection title="Net">
           <div className="flex gap-2" role="radiogroup" aria-label="Net available">
             <ToggleChip
               label="Yes"
@@ -232,28 +259,33 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
               onTap={() => setNetAvailable(false)}
             />
           </div>
-        </section>
+          {showWall && (
+            <SetupNestedChoiceBlock titleId="wall-available-label" title="Wall or fence nearby?">
+              <div className="flex gap-2" role="radiogroup" aria-labelledby="wall-available-label">
+                <ToggleChip
+                  label="Yes"
+                  selected={wallAvailable === true}
+                  onTap={() => setWallAvailable(true)}
+                />
+                <ToggleChip
+                  label="No"
+                  selected={wallAvailable === false}
+                  onTap={() => setWallAvailable(false)}
+                />
+              </div>
+            </SetupNestedChoiceBlock>
+          )}
+        </SetupChoiceSection>
 
-        {showWall && (
-          <section className="flex flex-col gap-3">
-            <h2 className="text-sm font-semibold text-text-primary">Wall or fence</h2>
-            <div className="flex gap-2" role="radiogroup" aria-label="Wall available">
-              <ToggleChip
-                label="Yes"
-                selected={wallAvailable === true}
-                onTap={() => setWallAvailable(true)}
-              />
-              <ToggleChip
-                label="No"
-                selected={wallAvailable === false}
-                onTap={() => setWallAvailable(false)}
-              />
-            </div>
-          </section>
-        )}
-
-        <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-text-primary">Time</h2>
+        <SetupChoiceSection
+          title="Time"
+          footerNote="Includes warm-up and cool-down."
+        >
+          {/* 2026-04-21 partner-walkthrough P1-10: Seb expected 15 min to
+            mean 15 min of main/technique work, not "total session
+            including warm-up and cool-down." Clarifier lives in
+            `SetupChoiceSection` footerNote. See
+            docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md. */}
           <div className="flex gap-2" role="radiogroup" aria-label="Time profile">
             {TIME_OPTIONS.map((t) => (
               <ToggleChip
@@ -264,19 +296,36 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
               />
             ))}
           </div>
-          {/* 2026-04-21 partner-walkthrough P1-10: Seb expected 15 min to
-            mean 15 min of main/technique work, not "total session
-            including warm-up and cool-down." One-line clarifier below
-            the picker surfaces the framing without inflating the setup
-            funnel. See
-            docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md. */}
-          <p className="text-xs text-text-secondary">Includes warm-up and cool-down.</p>
-        </section>
+        </SetupChoiceSection>
+
+        <SetupChoiceSection
+          title={
+            <>
+              Focus <span className="font-normal text-text-secondary">(optional)</span>
+            </>
+          }
+        >
+          <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Focus">
+            {FOCUS_OPTIONS.map((option) => (
+              <ToggleChip
+                key={option.value}
+                label={option.label}
+                selected={sessionFocus === option.value}
+                onTap={() => setSessionFocus(option.value)}
+                fill={false}
+                className="min-w-0 w-full"
+              />
+            ))}
+          </div>
+        </SetupChoiceSection>
 
         {error && <StatusMessage variant="error" message={error} />}
       </ScreenShell.Body>
 
-      <ScreenShell.Footer className="flex flex-col gap-4 pt-4">
+      <ScreenShell.Footer className="flex flex-col gap-2 pt-3">
+        {incompleteHint && !isSaving && (
+          <p className="text-center text-xs text-text-secondary">{incompleteHint}</p>
+        )}
         <Button
           variant="primary"
           fullWidth

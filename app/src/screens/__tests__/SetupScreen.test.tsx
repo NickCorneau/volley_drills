@@ -36,14 +36,41 @@ describe('SetupScreen (C-3)', () => {
     expect(await screen.findByText('skill-level-route')).toBeInTheDocument()
   })
 
-  it('onboarding: builds without a wind choice and routes to Tune today', async () => {
+  it('onboarding: starts with the one-tap Solo + Net default selected', () => {
+    render(
+      <MemoryRouter initialEntries={['/onboarding/todays-setup']}>
+        <Routes>
+          <Route path="/onboarding/todays-setup" element={<SetupScreen isOnboarding />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('radio', { name: 'Solo', checked: true })).toBeInTheDocument()
+    expect(
+      within(screen.getByRole('radiogroup', { name: 'Net available' })).getByRole('radio', {
+        name: 'Yes',
+        checked: true,
+      }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: '15 min', checked: true })).toBeInTheDocument()
+    expect(
+      within(screen.getByRole('radiogroup', { name: 'Focus' })).getByRole('radio', {
+        name: 'Recommended',
+        checked: true,
+      }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /focus \(optional\)/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /build session/i })).toBeEnabled()
+    expect(screen.queryByText(/choose .* to build/i)).not.toBeInTheDocument()
+  })
+
+  it('onboarding: builds without a wind choice and routes straight to Safety', async () => {
     const user = userEvent.setup()
     render(
       <MemoryRouter initialEntries={['/onboarding/todays-setup']}>
         <Routes>
           <Route path="/onboarding/todays-setup" element={<SetupScreen isOnboarding />} />
           <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
-          <Route path="/tune-today" element={<div data-testid="tune-route">tune</div>} />
         </Routes>
       </MemoryRouter>,
     )
@@ -54,17 +81,27 @@ describe('SetupScreen (C-3)', () => {
         name: 'No',
       }),
     )
+    expect(screen.getByText('Wall or fence nearby?')).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 3, name: /wall or fence nearby/i }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /build session/i })).toBeDisabled()
+    expect(screen.getByText('Choose wall or fence availability to build.')).toBeInTheDocument()
     expect(screen.queryByRole('radiogroup', { name: 'Wind' })).not.toBeInTheDocument()
     await user.click(
-      within(screen.getByRole('radiogroup', { name: 'Wall available' })).getByRole('radio', {
+      within(screen.getByRole('radiogroup', { name: /wall or fence nearby/i })).getByRole('radio', {
         name: 'No',
       }),
     )
+    expect(screen.getByRole('button', { name: /build session/i })).toBeEnabled()
+    expect(
+      within(screen.getByRole('radiogroup', { name: 'Focus' })).getByRole('radio', {
+        name: 'Recommended',
+      }),
+    ).toHaveAttribute('aria-checked', 'true')
     await user.click(screen.getByRole('button', { name: /build session/i }))
 
-    // Setup must hand off to Tune today — never directly to /safety.
-    expect(await screen.findByTestId('tune-route')).toBeInTheDocument()
-    expect(screen.queryByTestId('safety-route')).not.toBeInTheDocument()
+    expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
 
     const draft = await db.sessionDrafts.get('current')
     expect(draft?.context.wallAvailable).toBe(false)
@@ -83,7 +120,7 @@ describe('SetupScreen (C-3)', () => {
       </MemoryRouter>,
     )
 
-    expect(screen.queryByRole('radiogroup', { name: 'Wall available' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('radiogroup', { name: /wall or fence/i })).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('radio', { name: 'Solo' }))
     await user.click(
@@ -91,27 +128,26 @@ describe('SetupScreen (C-3)', () => {
         name: 'Yes',
       }),
     )
-    expect(screen.queryByRole('radiogroup', { name: 'Wall available' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('radiogroup', { name: /wall or fence/i })).not.toBeInTheDocument()
 
     await user.click(
       within(screen.getByRole('radiogroup', { name: 'Net available' })).getByRole('radio', {
         name: 'No',
       }),
     )
-    expect(screen.getByRole('radiogroup', { name: 'Wall available' })).toBeInTheDocument()
+    expect(screen.getByRole('radiogroup', { name: /wall or fence nearby/i })).toBeInTheDocument()
 
     await user.click(screen.getByRole('radio', { name: 'Pair' }))
-    expect(screen.queryByRole('radiogroup', { name: 'Wall available' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('radiogroup', { name: /wall or fence/i })).not.toBeInTheDocument()
   })
 
-  it('builds with wallAvailable false when Wall is hidden and routes to Tune today', async () => {
+  it('builds with wallAvailable false when Wall is hidden and routes straight to Safety', async () => {
     const user = userEvent.setup()
     render(
       <MemoryRouter initialEntries={['/onboarding/todays-setup']}>
         <Routes>
           <Route path="/onboarding/todays-setup" element={<SetupScreen isOnboarding />} />
           <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
-          <Route path="/tune-today" element={<div data-testid="tune-route">tune</div>} />
         </Routes>
       </MemoryRouter>,
     )
@@ -122,12 +158,11 @@ describe('SetupScreen (C-3)', () => {
         name: 'Yes',
       }),
     )
-    expect(screen.queryByRole('radiogroup', { name: 'Wall available' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('radiogroup', { name: /wall or fence/i })).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /build session/i }))
 
-    expect(await screen.findByTestId('tune-route')).toBeInTheDocument()
-    expect(screen.queryByTestId('safety-route')).not.toBeInTheDocument()
+    expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
 
     const draft = await db.sessionDrafts.get('current')
     expect(draft?.context.wallAvailable).toBe(false)
@@ -245,7 +280,7 @@ describe('SetupScreen (C-3)', () => {
         checked: true,
       }),
     ).toBeInTheDocument()
-    expect(screen.queryByRole('radiogroup', { name: 'Wall available' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('radiogroup', { name: /wall or fence/i })).not.toBeInTheDocument()
     expect(screen.getByRole('radio', { name: '40 min', checked: true })).toBeInTheDocument()
   })
 
@@ -265,7 +300,6 @@ describe('SetupScreen (C-3)', () => {
         <Routes>
           <Route path="/setup" element={<SetupScreen />} />
           <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
-          <Route path="/tune-today" element={<div data-testid="tune-route">tune</div>} />
         </Routes>
       </MemoryRouter>,
     )
@@ -277,19 +311,54 @@ describe('SetupScreen (C-3)', () => {
       }),
     )
     await user.click(
-      within(screen.getByRole('radiogroup', { name: 'Wall available' })).getByRole('radio', {
+      within(screen.getByRole('radiogroup', { name: /wall or fence nearby/i })).getByRole('radio', {
         name: 'No',
       }),
     )
     await user.click(screen.getByRole('button', { name: /build session/i }))
 
-    expect(await screen.findByTestId('tune-route')).toBeInTheDocument()
-    expect(screen.queryByTestId('safety-route')).not.toBeInTheDocument()
+    expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
 
     // Non-onboarding Build must NOT mutate the sentinel - updatedAt
     // unchanged from the seed, value unchanged.
     const row = await db.storageMeta.get('onboarding.completedAt')
     expect(row?.value).toBe(existingCompletedAt)
     expect(row?.updatedAt).toBe(existingCompletedAt)
+  })
+
+  it('builds the selected focus on the setup page instead of requiring a Tune today stop', async () => {
+    const existingCompletedAt = 1_700_000_000_000
+    await db.storageMeta.put({
+      key: 'onboarding.completedAt',
+      value: existingCompletedAt,
+      updatedAt: existingCompletedAt,
+    })
+
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter initialEntries={['/setup']}>
+        <Routes>
+          <Route path="/setup" element={<SetupScreen />} />
+          <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await user.click(await screen.findByRole('radio', { name: 'Pair' }))
+    await user.click(
+      within(screen.getByRole('radiogroup', { name: 'Net available' })).getByRole('radio', {
+        name: 'Yes',
+      }),
+    )
+    await user.click(
+      within(screen.getByRole('radiogroup', { name: 'Focus' })).getByRole('radio', {
+        name: 'Passing',
+      }),
+    )
+    await user.click(screen.getByRole('button', { name: /build session/i }))
+
+    expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
+    const draft = await db.sessionDrafts.get('current')
+    expect(draft?.context.sessionFocus).toBe('pass')
   })
 })
