@@ -61,6 +61,14 @@ export function findCandidates(
     // it remains available for the main-skill duration-pressure path it was
     // authored to solve.
     if (drill.id === 'd49' && slot.type !== 'main_skill') continue
+    // D50 is the long-envelope advanced passing sibling for D46 (FIVB 3.13
+    // Short/Deep). Same rationale as D49: keep it out of support slots so the
+    // main-skill duration-pressure reroute path stays its only entry point.
+    if (drill.id === 'd50' && slot.type !== 'main_skill') continue
+    // D51 is the long-envelope beginner serving sibling for D31 (FIVB 2.2
+    // Outside the Heart). Same main-skill-only constraint as d49 and d50;
+    // selection-path reroute in sessionBuilder is the sole entry point.
+    if (drill.id === 'd51' && slot.type !== 'main_skill') continue
     if (!isLevelEligible(drill, playerLevel)) continue
 
     const hasMatchingFocus =

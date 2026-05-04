@@ -56,8 +56,21 @@ describe('RunControls Swap button (Phase F Unit 4)', () => {
     expect(screen.getByRole('button', { name: /end session/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^swap$/i }).parentElement).toHaveClass(
       'grid',
-      'grid-cols-2',
+      'grid-cols-4',
     )
+  })
+
+  it('paused state + required block keeps three secondary controls in one row', () => {
+    const onSwap = vi.fn()
+    render(<RunControls {...baseProps} isPaused isRequired onSwap={onSwap} />)
+
+    const swap = screen.getByRole('button', { name: /^swap$/i })
+    const controlStrip = swap.parentElement
+
+    expect(controlStrip).toHaveClass('grid', 'grid-cols-3')
+    expect(screen.getByRole('button', { name: /shorten/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /end session/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /skip block/i })).not.toBeInTheDocument()
   })
 
   it('paused state + required block + onSwap undefined: Swap and Skip both hidden', () => {

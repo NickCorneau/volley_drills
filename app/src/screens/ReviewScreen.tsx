@@ -96,7 +96,7 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
 
       <ScreenShell.Body className="gap-6 pb-4">
         <Card className="flex flex-col gap-3">
-          <h2 id="rpe-heading" className="text-sm font-semibold text-text-primary">
+          <h2 id="rpe-heading" className="text-base font-semibold text-text-primary">
             {rpePrompt}
           </h2>
           {isPairMode && (
@@ -117,7 +117,7 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
             <Card className="flex flex-col gap-3">
               {useAggregateSummary && captureAggregate ? (
                 <>
-                  <h2 className="text-sm font-semibold text-text-primary">Good passes</h2>
+                  <h2 className="text-base font-semibold text-text-primary">Good passes</h2>
                   <p className="text-sm text-text-secondary">
                     Captured between blocks on{' '}
                     <span className="font-medium text-text-primary">
@@ -141,7 +141,7 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
               ) : (
                 <>
                   <div>
-                    <h2 className="text-sm font-semibold text-text-primary">Good passes</h2>
+                    <h2 className="text-base font-semibold text-text-primary">Good passes</h2>
                     <p className="mt-1 text-sm text-text-secondary">
                       <span className="font-medium text-text-primary">Success rule:</span> ball
                       reached the target zone or the next contact was playable.{' '}
@@ -166,13 +166,13 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
 
         {needsIncompleteReason && (
           <Card className="flex flex-col gap-3">
-            <h2 className="text-sm font-semibold text-text-primary">Why did you end early?</h2>
+            <h2 className="text-base font-semibold text-text-primary">Why did you end early?</h2>
             <IncompleteReasonChips value={incompleteReason} onChange={setIncompleteReason} />
           </Card>
         )}
 
         <section className="flex flex-col gap-2">
-          <label htmlFor="review-note" className="text-sm font-semibold text-text-primary">
+          <label htmlFor="review-note" className="text-base font-semibold text-text-primary">
             Short note <span className="font-normal text-text-secondary">(optional)</span>
           </label>
           <textarea

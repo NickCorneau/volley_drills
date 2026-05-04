@@ -624,15 +624,22 @@ describe('seeded generated plan diagnostics', () => {
     )
     expect(summary.hardFailureCount).toBe(0)
     expect(summary.statusCounts).toEqual({
-      clean: 119,
-      observation_only: 421,
+      // 2026-05-04: clean count rose 119 -> 124 (d50) and stayed 124 (d51).
+      // Observation_only stayed 416. Observation-code counts shifted again
+      // after d51 ship: under_authored_min 273 -> 307 (more cells assigned
+      // to a longer-floor d51 in short blocks), optional_slot_redistribution
+      // 220 -> 200 (d31 cluster cells that were redistribution-driven now
+      // route to d51 cleanly), over_authored_max and over_fatigue_cap each
+      // dropped 246 -> 225 (d31 cluster over-stretch absorbed by d51).
+      clean: 124,
+      observation_only: 416,
       hard_failure: 0,
     })
     expect(summary.observationCounts).toEqual({
-      under_authored_min: 257,
-      optional_slot_redistribution: 236,
-      over_authored_max: 288,
-      over_fatigue_cap: 288,
+      under_authored_min: 307,
+      optional_slot_redistribution: 200,
+      over_authored_max: 225,
+      over_fatigue_cap: 225,
     })
     expect(results.filter((result) => result.status === 'hard_failure')).toEqual([])
   })

@@ -7,7 +7,7 @@ stage: planning
 type: core
 authority: product principles, strategic stance, local-first doctrine, non-goals, product promise
 summary: "Product vision, principles, and strategic guardrails for the beach volleyball training OS."
-last_updated: 2026-04-22
+last_updated: 2026-05-04
 depends_on: []
 
 # Vision

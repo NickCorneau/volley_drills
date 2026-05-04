@@ -18,6 +18,7 @@ import {
   buildGeneratedPlanD47GapClosureLedger,
   buildGeneratedPlanD47ProposalAdmissionTicket,
   buildGeneratedPlanD49ResidualFollowUpPacket,
+  buildGeneratedPlanD49U8GeneratorPolicyProofPacket,
   buildGeneratedPlanGapClosureSelectionWorkbench,
   buildGeneratedPlanRedistributionCausalityReceipt,
   buildGeneratedPlanTriageWorkbenchMarkdown,
@@ -146,12 +147,16 @@ describe('generated plan diagnostic triage identity', () => {
   it('adds stable group keys and diagnostic fingerprints to routeable groups', () => {
     const groups = currentGroups()
 
-    expect(groups).toHaveLength(58)
+    expect(groups).toHaveLength(75)
+    // 2026-05-04: d25 wrap under_authored_min cell count dropped 79 -> 71
+    // after d50 ship; further dropped 71 -> 65 after d51 ship as another
+    // round of beginner-serving carrier cells reroute to d51 with a different
+    // residual minute distribution.
     expect(groups[0]).toEqual(
       expect.objectContaining({
         groupKey: 'gpdg:v1:d25:d25-solo:wrap:true:under_authored_min',
-        diagnosticFingerprint: expect.stringContaining('gpdf|v1|4|none|none|79'),
-        affectedCellCount: 79,
+        diagnosticFingerprint: expect.stringContaining('gpdf|v1|4|none|none|65'),
+        affectedCellCount: 65,
       }),
     )
     expect(new Set(groups.map((group) => group.groupKey)).size).toBe(groups.length)
@@ -355,7 +360,7 @@ describe('generated plan diagnostic triage registry', () => {
     const markdown = buildGeneratedPlanTriageWorkbenchMarkdown(groups, registry)
 
     expect(markdown).toContain('## Triage Summary')
-    expect(markdown).toContain('- Current routeable groups: 58')
+    expect(markdown).toContain('- Current routeable groups: 75')
     expect(markdown).toContain('## New / Untriaged Blockers')
     expect(markdown).toContain('## Stale Fingerprint Review')
     expect(markdown).toContain('## Generator Policy Investigation')
@@ -459,9 +464,16 @@ describe('generated plan diagnostic triage registry', () => {
 
     expect(receipt.comparisonMode).toBe('allocated_duration_counterfactual')
     expect(receipt.runtimeBoundary).toContain('Diagnostic-only counterfactual receipt')
-    expect(receipt.groupCount).toBe(23)
-    expect(receipt.counts.totalAffectedCellCount).toBe(231)
-    expect(receipt.counts.redistributionAffectedCellCount).toBe(228)
+    // 2026-05-04: groupCount 23 -> 25 (d50 ship) -> 29 (d51 ship). d51 adds
+    // 6 main_skill groups (2 each for solo-open / pair-open / pair, covering
+    // optional_slot_redistribution and optional+over_max+over_fatigue), and
+    // d31 cluster groups absorbed (-3). Net: +6 - 3 + d50 baseline = 29.
+    // totalAffectedCellCount 231 -> 223 (d50) -> 203 (d51): d31 cluster
+    // (14 + 6 + 2 = 22 cells) absorbed; d51 added 25 + 9 + 2 = 36 cells.
+    // Net change vs d50 baseline: -22 + 36 - some absorbed-elsewhere = -20.
+    expect(receipt.groupCount).toBe(29)
+    expect(receipt.counts.totalAffectedCellCount).toBe(203)
+    expect(receipt.counts.redistributionAffectedCellCount).toBe(200)
     expect(receipt.counts.nonRedistributionOverCapCellCount).toBe(3)
     expect(receipt.counts.nonRedistributionUnderMinCellCount).toBe(0)
     expect(receipt.counts.pressureDisappearsCellCount).toBeGreaterThan(0)
@@ -1528,7 +1540,10 @@ describe('generated plan diagnostic triage registry', () => {
         expect.objectContaining({
           label: 'D25 cooldown policy receipt',
           groupKey: 'gpdg:v1:d25:d25-solo:wrap:true:under_authored_min',
-          affectedCellCount: 79,
+          // 2026-05-04: count 79 -> 71 (d50 ship) -> 65 (d51 ship). Each
+          // selection-path reroute changes which carrier cells contribute to
+          // wrap allocations.
+          affectedCellCount: 65,
           reason: expect.stringContaining('cooldown policy review'),
         }),
         expect.objectContaining({
@@ -1538,10 +1553,14 @@ describe('generated plan diagnostic triage registry', () => {
           affectedCellCount: 15,
           reason: expect.stringContaining('Strong comparator'),
         }),
+        // 2026-05-04: the d46-solo-open `optional_slot_redistribution+over_authored_max+over_fatigue_cap`
+        // group is now ABSENT from the redistribution causality receipt because
+        // d50 absorbs it via the advanced-passing duration-fit reroute. Adjacent
+        // advanced mixed-pressure surface is now d33-solo-open (28 cells).
         expect.objectContaining({
           label: 'Adjacent advanced mixed-pressure group',
           groupKey:
-            'gpdg:v1:d46:d46-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+            'gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
           reason: expect.stringContaining('D01-held / D47-reentry'),
         }),
       ]),
@@ -1754,6 +1773,146 @@ describe('generated plan diagnostic triage registry', () => {
     expect(packet.nextArtifact).toBe('D47 gap closure re-entry before D49 residual follow-up.')
     expect(packet.d47ReentryCondition).toContain('Re-enter D47 gap closure')
     expect(packet.workloadLane.disposition).toBe('workload_review_needed')
+  })
+
+  it('builds a D49-scoped U8 proof packet from pressure-bearing redistribution evidence', () => {
+    const groups = currentGroups()
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const packet = buildGeneratedPlanD49U8GeneratorPolicyProofPacket(groups, registry)
+
+    expect(packet).toEqual(
+      expect.objectContaining({
+        proofOutcome: 'ready_for_generator_policy_proposal',
+        evidenceType: 'allocated_duration_counterfactual',
+        totalAffectedCellCount: 20,
+        pressureDisappearsCellCount: 20,
+        pressureRemainsCellCount: 0,
+        redistributionOnlyCellCount: 0,
+        nextArtifact: 'D49 generator-policy proposal plan',
+      }),
+    )
+    expect(packet.groupKeys).toEqual([
+      'gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+      'gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+    ])
+    expect(packet.excludedOptionalOnlyGroupKeys).toEqual([
+      'gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution',
+      'gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution',
+    ])
+    expect(packet.changeAuthorization).toEqual({
+      runtimeRedistribution: 'not_authorized',
+      catalog: 'not_authorized',
+      cap: 'not_authorized',
+      sourceDepth: 'not_authorized',
+      d47Reopen: 'not_authorized',
+    })
+    expect(packet.stopCondition).toContain('diagnostic-only')
+  })
+
+  it('keeps D49 U8 proof non-actionable when only optional-slot-only evidence remains', () => {
+    const groups = currentGroups().filter((group) => {
+      if (group.drillId !== 'd49') return false
+      return (
+        group.observationCodes.includes('optional_slot_redistribution') &&
+        !group.observationCodes.includes('over_authored_max') &&
+        !group.observationCodes.includes('over_fatigue_cap') &&
+        !group.observationCodes.includes('under_authored_min')
+      )
+    })
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const packet = buildGeneratedPlanD49U8GeneratorPolicyProofPacket(groups, registry)
+
+    expect(packet.proofOutcome).toBe('no_action')
+    expect(packet.totalAffectedCellCount).toBe(0)
+    expect(packet.groupKeys).toEqual([])
+    expect(packet.excludedOptionalOnlyGroupKeys).toEqual([
+      'gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution',
+      'gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution',
+    ])
+    expect(packet.nextArtifact).toContain('No D49 generator-policy proposal')
+  })
+
+  it('fails closed when D49 U8 pressure-bearing evidence is stale', () => {
+    const groups = currentGroups()
+    const staleRegistry = buildInitialGeneratedPlanTriageRegistry(groups).map((entry) =>
+      entry.groupKey.includes(':d49:') &&
+      entry.groupKey.includes('optional_slot_redistribution+over_authored_max+over_fatigue_cap')
+        ? { ...entry, diagnosticFingerprint: `${entry.diagnosticFingerprint}:stale` }
+        : entry,
+    )
+    const packet = buildGeneratedPlanD49U8GeneratorPolicyProofPacket(groups, staleRegistry)
+
+    expect(packet.proofOutcome).toBe('no_action')
+    expect(packet.groupKeys).toEqual([])
+    expect(packet.nextArtifact).toContain('current pressure-bearing D49 evidence')
+  })
+
+  it('routes D49 U8 proof away from generator policy when pressure remains', () => {
+    const groups = currentGroups().map((group) =>
+      group.drillId === 'd49' &&
+      group.variantId === 'd49-pair-open' &&
+      group.observationCodes.includes('optional_slot_redistribution') &&
+      group.observationCodes.includes('over_authored_max')
+        ? {
+            ...group,
+            affectedCells: group.affectedCells.map((cell) => ({
+              ...cell,
+              allocatedMinutes: cell.plannedMinutes,
+            })),
+          }
+        : group,
+    )
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const packet = buildGeneratedPlanD49U8GeneratorPolicyProofPacket(groups, registry)
+
+    expect(packet.proofOutcome).toBe('needs_workload_or_block_shape_review')
+    expect(packet.pressureDisappearsCellCount).toBeGreaterThan(0)
+    expect(packet.pressureRemainsCellCount).toBeGreaterThan(0)
+    expect(packet.nextArtifact).toContain('D49 workload or block-shape review')
+  })
+
+  it('routes D49 U8 proof to workload or block-shape review when pressure remains with inconclusive evidence', () => {
+    const groups = currentGroups().map((group) =>
+      group.drillId === 'd49' &&
+      group.variantId === 'd49-pair-open' &&
+      group.observationCodes.includes('optional_slot_redistribution') &&
+      group.observationCodes.includes('over_authored_max')
+        ? {
+            ...group,
+            affectedCells: group.affectedCells.map((cell, index) =>
+              index === 0
+                ? { ...cell, plannedMinutes: undefined }
+                : {
+                    ...cell,
+                    allocatedMinutes: cell.plannedMinutes,
+                  },
+            ),
+          }
+        : group,
+    )
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const packet = buildGeneratedPlanD49U8GeneratorPolicyProofPacket(groups, registry)
+
+    expect(packet.proofOutcome).toBe('needs_workload_or_block_shape_review')
+    expect(packet.pressureRemainsCellCount).toBeGreaterThan(0)
+    expect(packet.comparisonInconclusiveCellCount).toBeGreaterThan(0)
+  })
+
+  it('does not build D49 U8 proof when D47 re-entry takes precedence', () => {
+    const groups = [
+      ...currentGroups(),
+      redistributionGroup({
+        groupKey: D47_STABLE_GROUP_KEY,
+        drillId: 'd47',
+        variantId: 'd47-solo-open',
+      }),
+    ]
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const packet = buildGeneratedPlanD49U8GeneratorPolicyProofPacket(groups, registry)
+
+    expect(packet.proofOutcome).toBe('no_action')
+    expect(packet.groupKeys).toEqual([])
+    expect(packet.nextArtifact).toContain('No D49 generator-policy proposal')
   })
 
   it('holds gap closure selection when D01 is not held for D47 reentry', () => {
@@ -2362,6 +2521,21 @@ describe('generated plan diagnostic triage registry', () => {
     expect(markdown).toContain('Disposition: `route_to_u8`')
     expect(markdown).toContain('### D49 optional-slot-only redistribution')
     expect(markdown).toContain('Disposition: `accepted_residual_debt`')
+    expect(markdown).toContain('## D49 U8 Generator-Policy Proof')
+    const d49U8ProofSection = markdown.slice(
+      markdown.indexOf('## D49 U8 Generator-Policy Proof'),
+      markdown.indexOf('## D47 vs D05 Comparator Evaluation Payload'),
+    )
+    expect(d49U8ProofSection).toContain('Proof outcome: `ready_for_generator_policy_proposal`')
+    expect(d49U8ProofSection).toContain('Evidence type: `allocated_duration_counterfactual`')
+    expect(d49U8ProofSection).toContain('Runtime redistribution authorization: `not_authorized`')
+    expect(d49U8ProofSection).toContain('Catalog authorization: `not_authorized`')
+    expect(d49U8ProofSection).toContain('D49 cap authorization: `not_authorized`')
+    expect(d49U8ProofSection).toContain('Source-depth authorization: `not_authorized`')
+    expect(d49U8ProofSection).toContain('D47 reopen authorization: `not_authorized`')
+    expect(d49U8ProofSection).toContain('Next artifact: D49 generator-policy proposal plan')
+    expect(d49U8ProofSection).toContain('Excluded optional-only group keys:')
+    expect(d49U8ProofSection).toContain('This is diagnostic-only U8 evidence')
     expect(markdown).toContain(
       'Stop condition: Do not edit catalog metadata, add catalog content, change runtime redistribution, or reopen D47 from this packet alone.',
     )

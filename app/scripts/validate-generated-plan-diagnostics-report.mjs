@@ -154,7 +154,7 @@ stage: validation
 type: review-data
 summary: "Machine-readable generated-plan diagnostics summary for the current Tune today focus-readiness surface."
 authority: "Current generated-plan diagnostic snapshot for seeded buildDraft() stretch-pressure and duration-envelope classification."
-last_updated: 2026-05-02
+last_updated: 2026-05-03
 depends_on:
   - app/src/domain/generatedPlanDiagnostics.ts
   - app/src/domain/sessionBuilder.ts
@@ -212,7 +212,7 @@ stage: validation
 type: review
 summary: "Docs-first triage workbench and decision-debt compression review for generated-plan routeable observation groups."
 authority: "Current triage snapshot for generated-plan diagnostic observation groups; validates stable group identity, conservative routes, stale fingerprint review, and derived decision-debt compression lanes."
-last_updated: 2026-05-02
+last_updated: 2026-05-04
 depends_on:
   - app/src/domain/generatedPlanDiagnostics.ts
   - app/src/domain/generatedPlanDiagnosticTriage.ts
@@ -242,6 +242,16 @@ depends_on:
   - docs/plans/2026-05-02-013-feat-d47-d05-comparator-evaluation-payload-plan.md
   - docs/plans/2026-05-02-018-feat-d49-residual-follow-up-plan.md
   - docs/plans/2026-05-03-001-feat-d49-next-work-selection-plan.md
+  - docs/plans/2026-05-03-003-feat-d49-scoped-u8-generator-policy-follow-up-plan.md
+  - docs/plans/2026-05-04-001-feat-d46-pair-open-source-backed-gap-card-plan.md
+  - docs/plans/2026-05-04-002-feat-d46-pair-open-no-change-comparator-decision-packet-plan.md
+  - docs/reviews/2026-05-04-d46-pair-open-source-backed-gap-card.md
+  - docs/reviews/2026-05-04-d46-pair-open-no-change-comparator-decision-packet.md
+  - docs/brainstorms/2026-05-04-d50-advanced-passing-depth-requirements.md
+  - docs/plans/2026-05-04-003-feat-d50-advanced-passing-depth-plan.md
+  - docs/brainstorms/2026-05-04-d51-beginner-serving-tactical-zone-depth-requirements.md
+  - docs/plans/2026-05-04-004-feat-d51-beginner-serving-tactical-zone-depth-plan.md
+  - docs/solutions/2026-05-04-source-backed-content-depth-activation-pattern.md
 ---
 
 # Generated Plan Diagnostics Triage

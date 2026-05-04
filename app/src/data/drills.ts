@@ -2887,12 +2887,229 @@ const d49: Drill = {
   ],
 }
 
+// FIVB Drill-book 2.2 Serving Outside the Heart (Chapter 2 Serving,
+// beginner / intermediate level).
+// Source: docs/research/sources/FIVB_Beachvolley_Drill-Book_final.pdf
+// Cross-reference: docs/research/fivb-source-material.md (Tier 2 polish list,
+// flagged 2026-04-20 with the explicit note "Not cloned in Tier 1 because d31
+// is our first-rung anchor"). d51 is the longer-envelope beginner serving
+// sibling for d31. d31 trains single-target commitment at 4-8 min; d51 trains
+// tactical no-serve-zone awareness at 8-14 min. Selection-path reroute in
+// sessionBuilder prefers d51 over d31 for beginner serving main-skill blocks
+// above 8 minutes (third application of the source-backed content-depth
+// activation pattern after d49 and d50). Origin:
+// docs/brainstorms/2026-05-04-d51-beginner-serving-tactical-zone-depth-requirements.md
+// and docs/plans/2026-05-04-004-feat-d51-beginner-serving-tactical-zone-depth-plan.md.
+// M001 keeps only the one/two-player adaptation; rejects 3+ player source
+// forms (D101 boundary).
+const d51: Drill = {
+  id: 'd51',
+  name: 'Outside the Heart Serving',
+  shortName: 'Outside Heart',
+  skillFocus: ['serve'],
+  objective:
+    'Avoid the middle-front "heart" of the receiving court while landing serves anywhere in the outer ring across longer fatigue rounds. Honesty clause: trains tactical zone avoidance, not single-target accuracy (d31 owns single-target commitment).',
+  levelMin: 'beginner',
+  levelMax: 'intermediate',
+  chainId: 'chain-6-serving',
+  m001Candidate: true,
+  teachingPoints: [
+    'Mark the heart zone before you start.',
+    'Pick an outer direction before each toss.',
+    'Reset your routine after every miss into the heart.',
+  ],
+  progressionDescription: 'Shrink the outer ring or shorten rest cycles when accuracy stays stable.',
+  regressionDescription: 'Expand the heart zone, lengthen rest, or count any serve outside the heart as success.',
+  variants: [
+    {
+      id: 'd51-solo-open',
+      drillId: 'd51',
+      label: 'Solo open heart',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 8,
+        durationMaxMinutes: 14,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 32, maxMinutes: 14, restBetweenSetsSeconds: 30 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Self-toss serves landing on sand outside a marked 2 m heart zone across rest cycles.',
+        target: '24 of 32 serves outside the heart across three rounds',
+      },
+      courtsideInstructions:
+        'Serve toward sand outside a 2 m heart zone in the middle-front of an open sand area. Three rounds, then rest. Mark the heart with 4 markers first. Self-toss and pick an outer direction before each serve (left, right, deep, short). Rest 30 seconds between rounds.',
+      coachingCues: [
+        'Mark the heart first.',
+        'Call the outer direction before you toss.',
+        'Reset your routine after each heart miss.',
+      ],
+    },
+    // Pair-open variant: partner anchors the tactical commitment by calling
+    // the outer-zone direction before each toss. Mirrors d31-pair-open's
+    // caller / server role split but for tactical avoidance instead of single
+    // target accuracy.
+    {
+      id: 'd51-pair-open',
+      drillId: 'd51',
+      label: 'Pair open heart',
+      feedType: 'self-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['caller', 'server'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 8,
+        durationMaxMinutes: 14,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 32, maxMinutes: 14, restBetweenSetsSeconds: 30 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Self-toss serves landing outside the marked heart zone toward the called outer direction.',
+        target: '24 of 32 serves outside the heart toward the called direction',
+      },
+      courtsideInstructions:
+        'Serve toward the called outer zone of open sand, avoiding a 2 m heart zone in the middle-front. Three rounds, then switch. Caller names an outer direction before each toss (left, right, deep, short). Server resets routine, tosses, and serves toward the called zone. Switch every 10 serves. Rest 30 seconds between rounds.',
+      coachingCues: [
+        'Caller names the outer direction first.',
+        'Server picks the heart edge to clear.',
+        'Reset after each heart miss.',
+      ],
+    },
+    // Pair (net) variant: server serves over the net into the receiving
+    // court, partner shags from the receiving side. Net required to enforce
+    // serve clearance; mirrors d31-pair's net + shagger affordance.
+    {
+      id: 'd51-pair',
+      drillId: 'd51',
+      label: 'Pair heart',
+      feedType: 'self-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['server', 'shagger'] },
+      environmentFlags: env({ needsNet: true, lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 8,
+        durationMaxMinutes: 14,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 32, maxMinutes: 14, restBetweenSetsSeconds: 30 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Net-cleared serves landing outside the marked heart zone in the receiving court.',
+        target: '24 of 32 serves outside the heart and over the net across three rounds',
+      },
+      courtsideInstructions:
+        'Serve over the net toward sand outside a 2 m heart zone in the middle-front of the receiving court. Three rounds, then switch. Mark the heart first. Shagger collects between rounds and calls the next outer direction (left, right, deep, short) before the server tosses. Switch every 10 serves. Rest 30 seconds between rounds.',
+      coachingCues: [
+        'Clear the net first, then place the serve.',
+        'Shagger calls the outer direction before the toss.',
+        'Reset after each heart miss.',
+      ],
+    },
+  ],
+}
+
 // `d43 Triangle Setting` (BAB Drill Book Plans 5-7, 10, 11) is intentionally
 // not authored here. The source drill is a 3-player triangle route; the
 // honest M001 stance is that drills whose source form needs three or more
 // players wait for D101 3+ player support rather than getting forced into a
 // two-player adaptation. d47/d48/d49 above use one/two-player-compatible
 // setting concepts, not the deferred BAB triangle queue.
+
+// FIVB Drill-book 3.13 Short / Deep (Chapter 3 Passing, intermediate level).
+// Source: docs/research/sources/FIVB_Beachvolley_Drill-Book_final.pdf
+// Cross-reference: docs/research/fivb-source-material.md (Tier 2 polish list).
+// d50 is the longer-envelope advanced passing sibling for d46. d46 trains
+// spin-reading at 5-8 minutes; d50 trains short/deep zone decisioning under
+// fatigue at 8-14 minutes. Selection-path reroute in sessionBuilder prefers
+// d50 over d46 for advanced pair-open / solo-open passing main-skill blocks
+// above 8 minutes. Origin: docs/brainstorms/2026-05-04-d50-advanced-passing-depth-requirements.md
+// and docs/plans/2026-05-04-003-feat-d50-advanced-passing-depth-plan.md.
+// M001 keeps only the one/two-player adaptation; rejects 3+ player source
+// forms (D101 boundary).
+const d50: Drill = {
+  id: 'd50',
+  name: 'Short/Deep Pass Read',
+  shortName: 'Short/Deep Read',
+  skillFocus: ['pass', 'movement'],
+  objective:
+    'Read short vs deep zone early and pass into the set window across longer fatigue rounds. Honesty clause: trains zone decisioning + recovery, not spin reading (d46 owns spin reading).',
+  levelMin: 'advanced',
+  levelMax: 'advanced',
+  chainId: 'chain-4-serve-receive',
+  m001Candidate: true,
+  teachingPoints: [
+    'Read short vs deep before the ball arrives.',
+    'Beat the ball with your feet on deep reads; absorb in on short reads.',
+    'Recover home before the next feed.',
+  ],
+  progressionDescription: 'Tighten the target window or shrink rest between rounds when pass quality stays stable.',
+  regressionDescription: 'Use fewer alternations per round, longer rest, or a larger target window.',
+  variants: [
+    {
+      id: 'd50-pair-open',
+      drillId: 'd50',
+      label: 'Pair open',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['feeder', 'passer'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 8,
+        durationMaxMinutes: 14,
+        rpeMin: 6,
+        rpeMax: 8,
+        fatigueCap: { maxReps: 28, maxMinutes: 14, restBetweenSetsSeconds: 30 },
+      },
+      successMetric: {
+        type: 'pass-rate-good',
+        description: 'Short and deep partner feeds passed into a 1 m set window across recovery rounds.',
+        target: '20 of 28 passes land in the set window across three rounds',
+      },
+      courtsideInstructions:
+        'Pass short and deep partner feeds into a 1 m set window across recovery rounds. Three rounds, then switch. Set a short marker zone 2 m in front of passer and a deep marker zone 2 m behind home. Feeder alternates short and deep tosses from 4-6 m. Passer reads, moves early, passes into the window, recovers home before the next feed. Rest 30 seconds between rounds.',
+      coachingCues: [
+        'Call short or deep before you move.',
+        'Feet first, then platform.',
+        'Recover home before ready.',
+      ],
+    },
+    {
+      id: 'd50-solo-open',
+      drillId: 'd50',
+      label: 'Solo open',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 8,
+        durationMaxMinutes: 14,
+        rpeMin: 6,
+        rpeMax: 8,
+        fatigueCap: { maxReps: 28, maxMinutes: 14, restBetweenSetsSeconds: 30 },
+      },
+      successMetric: {
+        type: 'pass-rate-good',
+        description: 'Self-toss short and deep alternations passed into a 1 m set window.',
+        target: '20 of 28 passes land in the set window across three rounds',
+      },
+      courtsideInstructions:
+        'Pass self-toss short and deep alternations into a 1 m set window across recovery rounds. Three rounds. Set a short marker zone 2 m in front and a deep marker zone 2 m behind home. Self-toss alternating short and deep, pass each into the window, recover home before the next toss. Rest 30 seconds between rounds.',
+      coachingCues: [
+        'Decide short or deep before the toss leaves your hand.',
+        'Beat the ball on deep, absorb on short.',
+        'Quality beats speed.',
+      ],
+    },
+  ],
+}
 
 // ---------------------------------------------------------------------------
 // Chain warmup: Beach Prep (default warmup, D105 + BAB 2024)
@@ -3042,6 +3259,8 @@ export const DRILLS: readonly Drill[] = [
   d47,
   d48,
   d49,
+  d50,
+  d51,
 ] as const
 
 export const M001_DRILL_IDS: readonly string[] = DRILLS.filter((d) => d.m001Candidate).map(

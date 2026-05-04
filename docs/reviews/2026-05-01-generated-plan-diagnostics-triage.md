@@ -6,7 +6,7 @@ stage: validation
 type: review
 summary: "Docs-first triage workbench and decision-debt compression review for generated-plan routeable observation groups."
 authority: "Current triage snapshot for generated-plan diagnostic observation groups; validates stable group identity, conservative routes, stale fingerprint review, and derived decision-debt compression lanes."
-last_updated: 2026-05-02
+last_updated: 2026-05-04
 depends_on:
   - app/src/domain/generatedPlanDiagnostics.ts
   - app/src/domain/generatedPlanDiagnosticTriage.ts
@@ -36,6 +36,16 @@ depends_on:
   - docs/plans/2026-05-02-013-feat-d47-d05-comparator-evaluation-payload-plan.md
   - docs/plans/2026-05-02-018-feat-d49-residual-follow-up-plan.md
   - docs/plans/2026-05-03-001-feat-d49-next-work-selection-plan.md
+  - docs/plans/2026-05-03-003-feat-d49-scoped-u8-generator-policy-follow-up-plan.md
+  - docs/plans/2026-05-04-001-feat-d46-pair-open-source-backed-gap-card-plan.md
+  - docs/plans/2026-05-04-002-feat-d46-pair-open-no-change-comparator-decision-packet-plan.md
+  - docs/reviews/2026-05-04-d46-pair-open-source-backed-gap-card.md
+  - docs/reviews/2026-05-04-d46-pair-open-no-change-comparator-decision-packet.md
+  - docs/brainstorms/2026-05-04-d50-advanced-passing-depth-requirements.md
+  - docs/plans/2026-05-04-003-feat-d50-advanced-passing-depth-plan.md
+  - docs/brainstorms/2026-05-04-d51-beginner-serving-tactical-zone-depth-requirements.md
+  - docs/plans/2026-05-04-004-feat-d51-beginner-serving-tactical-zone-depth-plan.md
+  - docs/solutions/2026-05-04-source-backed-content-depth-activation-pattern.md
 ---
 
 # Generated Plan Diagnostics Triage
@@ -50,15 +60,15 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 
 ## Triage Summary
 
-- Current routeable groups: 58
-- Registry entries: 58
+- Current routeable groups: 75
+- Registry entries: 75
 - Blocking validation issues: 0
 - Warning validation issues: 0
 
 ## Route Counts
 
-- `defer`: 35
-- `generator_policy_investigation`: 23
+- `defer`: 46
+- `generator_policy_investigation`: 29
 
 ## Decision-Debt Compression
 
@@ -67,7 +77,7 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 - Lane: `short_session_cooldown_minimum`
 - Question: Is the short wrap envelope acceptable, or does this need cap/block/content follow-up?
 - Why this lane: Wrap under-min groups are likely cooldown policy questions before they are catalog gaps.
-- Groups: 1; total affected cells: 79
+- Groups: 1; total affected cells: 65
 - Redistribution-affected cells: 0
 - Non-redistribution over-cap cells: 0
 - Route mix: `defer` 1
@@ -99,73 +109,79 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 - Lane: `workload_envelope_review`
 - Question: Are duration and fatigue envelopes correct for these generated allocations?
 - Why this lane: Over/under envelope pressure is a workload-policy question before catalog edits.
-- Groups: 22; total affected cells: 132
+- Groups: 33; total affected cells: 188
 - Redistribution-affected cells: 0
 - Non-redistribution over-cap cells: 67
-- Route mix: `defer` 22
+- Route mix: `defer` 33
 - Disposition: `needs_human_decision`
 - Candidate dispositions: `metadata_review_needed`, `block_shape_review_needed`, `requires_U6_preview`, `no_implementation_action_yet`
 - Recommended follow-up: U7 workload envelope guidance
 - Guide: `docs/ops/workload-envelope-authoring-guide.md#workload-envelope-review`
 - Next evidence needed: Review cap policy and block split thresholds for the affected main-skill groups.
-- Group keys: `gpdg:v1:d33:d33-solo-open:main_skill:true:under_authored_min`, `gpdg:v1:d01:d01-solo:technique:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-pair-open:main_skill:true:under_authored_min`, `gpdg:v1:d49:d49-solo-open:main_skill:true:under_authored_min`, `gpdg:v1:d05:d05-pair:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-solo-open:main_skill:true:under_authored_min`, `gpdg:v1:d01:d01-solo:movement_proxy:false:over_authored_max+over_fatigue_cap`, `gpdg:v1:d01:d01-pair:pressure:false:over_authored_max+over_fatigue_cap`, `gpdg:v1:d11:d11-solo:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-pair-open:main_skill:true:under_authored_min`, `gpdg:v1:d47:d47-solo-open:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d10:d10-pair:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d49:d49-pair-open:main_skill:true:under_authored_min`, `gpdg:v1:d01:d01-solo:pressure:false:over_authored_max+over_fatigue_cap`, `gpdg:v1:d07:d07-solo-open:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-solo-net:main_skill:true:under_authored_min`, `gpdg:v1:d03:d03-pair:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-pair:main_skill:true:under_authored_min`, `gpdg:v1:d22:d22-solo:main_skill:true:under_authored_min`, `gpdg:v1:d38:d38-pair:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d01:d01-pair:technique:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d11:d11-pair:pressure:false:over_authored_max+over_fatigue_cap`
+- Group keys: `gpdg:v1:d51:d51-solo-open:main_skill:true:under_authored_min`, `gpdg:v1:d01:d01-solo:technique:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d49:d49-solo-open:main_skill:true:under_authored_min`, `gpdg:v1:d50:d50-solo-open:main_skill:true:under_authored_min`, `gpdg:v1:d51:d51-pair-open:main_skill:true:under_authored_min`, `gpdg:v1:d05:d05-pair:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-solo-open:main_skill:true:under_authored_min`, `gpdg:v1:d01:d01-solo:movement_proxy:false:over_authored_max+over_fatigue_cap`, `gpdg:v1:d01:d01-pair:pressure:false:over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-solo-open:main_skill:true:under_authored_min`, `gpdg:v1:d11:d11-solo:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-pair-open:main_skill:true:under_authored_min`, `gpdg:v1:d47:d47-solo-open:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-pair-open:main_skill:true:under_authored_min`, `gpdg:v1:d33:d33-solo-open:movement_proxy:false:under_authored_min`, `gpdg:v1:d10:d10-pair:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-pair-open:movement_proxy:false:under_authored_min`, `gpdg:v1:d49:d49-pair-open:main_skill:true:under_authored_min`, `gpdg:v1:d50:d50-pair-open:main_skill:true:under_authored_min`, `gpdg:v1:d01:d01-solo:pressure:false:over_authored_max+over_fatigue_cap`, `gpdg:v1:d07:d07-solo-open:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d03:d03-pair:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-pair:main_skill:true:under_authored_min`, `gpdg:v1:d22:d22-solo-open:movement_proxy:false:under_authored_min`, `gpdg:v1:d33:d33-pair:main_skill:true:under_authored_min`, `gpdg:v1:d38:d38-pair:main_skill:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d01:d01-pair:technique:true:over_authored_max+over_fatigue_cap`, `gpdg:v1:d11:d11-pair:pressure:false:over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-pair:movement_proxy:false:under_authored_min`, `gpdg:v1:d22:d22-solo:movement_proxy:false:under_authored_min`, `gpdg:v1:d22:d22-solo:main_skill:true:under_authored_min`, `gpdg:v1:d33:d33-solo-net:movement_proxy:false:under_authored_min`, `gpdg:v1:d33:d33-solo-net:main_skill:true:under_authored_min`
 
 ### Generator redistribution investigation
 
 - Lane: `generator_redistribution_investigation`
 - Question: Would these over-cap groups still exist without optional-slot redistribution?
 - Why this lane: Redistribution evidence means generator policy should be investigated before catalog changes.
-- Groups: 23; total affected cells: 231
-- Redistribution-affected cells: 228
+- Groups: 29; total affected cells: 203
+- Redistribution-affected cells: 200
 - Non-redistribution over-cap cells: 3
-- Route mix: `generator_policy_investigation` 23
+- Route mix: `generator_policy_investigation` 29
 - Disposition: `needs_human_decision`
 - Candidate dispositions: `route_to_U8`
 - Recommended follow-up: U8 redistribution comparison
 - Next evidence needed: Compare redistribution-affected cells against non-redistribution over-cap cells.
-- Group keys: `gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d46:d46-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d46:d46-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d05:d05-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d31:d31-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d40:d40-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d31:d31-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-solo-net:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d31:d31-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`
+- Group keys: `gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d51:d51-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d05:d05-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d40:d40-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d50:d50-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d50:d50-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d51:d51-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d50:d50-pair-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d50:d50-solo-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d33:d33-solo-net:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d51:d51-pair-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d51:d51-solo-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d51:d51-pair:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d51:d51-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`
 
 
 ## Redistribution Causality Receipt
 
 - Comparison mode: `allocated_duration_counterfactual`
 - Runtime boundary: Diagnostic-only counterfactual receipt; shipped buildDraft() behavior may include separately authorized fills such as the D01 block-shape fill.
-- Groups: 23; total affected cells: 231
-- Redistribution-affected cells: 228
-- Current pressure cells: over authored max 199, over fatigue cap 199, under authored min 0
-- Allocated-duration pressure cells: over authored max 52, over fatigue cap 52, under authored min 12
+- Groups: 29; total affected cells: 203
+- Redistribution-affected cells: 200
+- Current pressure cells: over authored max 158, over fatigue cap 158, under authored min 0
+- Allocated-duration pressure cells: over authored max 21, over fatigue cap 21, under authored min 29
 - Non-redistribution pressure cells: over cap 3, under authored min 0
-- Pressure disappears under allocated-duration counterfactual: 147
-- Pressure remains without redistribution: 52
+- Pressure disappears under allocated-duration counterfactual: 137
+- Pressure remains without redistribution: 21
 - Comparison inconclusive cells: 0
-- Redistribution without cap/min pressure cells: 32
-- Counterfactual unfilled minutes across affected cells: 2004
+- Redistribution without cap/min pressure cells: 45
+- Counterfactual unfilled minutes across affected cells: 1696
 
 ### Redistribution Causality Groups
 
-- `gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 28, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
-- `gpdg:v1:d33:d33-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 24, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
-- `gpdg:v1:d46:d46-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `mixed_cell_states`, incomplete evidence no, pressure disappears 12, pressure remains 12, non-redistribution pressure 0, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`, `future_generator_policy_decision`
-- `gpdg:v1:d46:d46-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `mixed_cell_states`, incomplete evidence no, pressure disappears 8, pressure remains 8, non-redistribution pressure 0, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`, `future_generator_policy_decision`
+- `gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 20, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d51:d51-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 16, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
 - `gpdg:v1:d05:d05-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `pressure_remains_without_redistribution`, incomplete evidence no, pressure disappears 6, pressure remains 9, non-redistribution pressure 3, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`, `future_generator_policy_decision`
-- `gpdg:v1:d31:d31-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `mixed_cell_states`, incomplete evidence no, pressure disappears 7, pressure remains 7, non-redistribution pressure 0, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`, `future_generator_policy_decision`
 - `gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `pressure_remains_without_redistribution`, incomplete evidence no, pressure disappears 0, pressure remains 12, non-redistribution pressure 0, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`
+- `gpdg:v1:d33:d33-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 12, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
 - `gpdg:v1:d40:d40-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 12, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
 - `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 12, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d50:d50-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 12, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
 - `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
-- `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 10, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 8, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
 - `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 8, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
-- `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
-- `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 6, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
-- `gpdg:v1:d31:d31-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `mixed_cell_states`, incomplete evidence no, pressure disappears 3, pressure remains 3, non-redistribution pressure 0, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`, `future_generator_policy_decision`
-- `gpdg:v1:d33:d33-solo-net:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 6, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d50:d50-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 8, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d51:d51-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 8, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
 - `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
 - `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
+- `gpdg:v1:d50:d50-pair-open:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
+- `gpdg:v1:d50:d50-solo-open:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
+- `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
+- `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 5, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d33:d33-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 4, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
 - `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
 - `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 2, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d33:d33-solo-net:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 2, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d51:d51-pair-open:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
+- `gpdg:v1:d51:d51-solo-open:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
 - `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
-- `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 2, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
-- `gpdg:v1:d31:d31-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `pressure_remains_without_redistribution`, dominant `mixed_cell_states`, incomplete evidence no, pressure disappears 1, pressure remains 1, non-redistribution pressure 0, inconclusive 0, follow-up `workload_review`, `block_shape_review`, `source_backed_proposal_work`, `u6_proposal_admission_candidate`, `future_generator_policy_decision`
+- `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 1, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
+- `gpdg:v1:d51:d51-pair:main_skill:true:optional_slot_redistribution`: action `redistribution_without_pressure`, dominant `redistribution_without_pressure`, incomplete evidence no, pressure disappears 0, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `no_implementation_action_yet`
+- `gpdg:v1:d51:d51-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`: action `likely_redistribution_caused`, dominant `likely_redistribution_caused`, incomplete evidence no, pressure disappears 1, pressure remains 0, non-redistribution pressure 0, inconclusive 0, follow-up `future_generator_policy_decision`
 
 ## D47 Proposal Admission Ticket
 
@@ -317,9 +333,9 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 
 ### Rejected Alternatives
 
-- D25 cooldown policy receipt (`gpdg:v1:d25:d25-solo:wrap:true:under_authored_min`, 79 cells): Largest affected count, but wrap under-min pressure routes to cooldown policy review before catalog work. Re-entry trigger: Promote when the next product question is accepting or revising short-session Downshift policy.
+- D25 cooldown policy receipt (`gpdg:v1:d25:d25-solo:wrap:true:under_authored_min`, 65 cells): Largest affected count, but wrap under-min pressure routes to cooldown policy review before catalog work. Re-entry trigger: Promote when the next product question is accepting or revising short-session Downshift policy.
 - D05 comparator proposal (`gpdg:v1:d05:d05-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, 15 cells): Strong comparator, but first use D47 reentry to decide whether D47 can name stronger causal warrant than the comparator. Re-entry trigger: Promote if D47 cannot name a concrete delta or if comparator evidence becomes the smaller artifact.
-- Adjacent advanced mixed-pressure group (`gpdg:v1:d46:d46-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, 24 cells): Relevant advanced-depth signal, but less directly tied to the current D01-held / D47-reentry fork. Re-entry trigger: Promote after D47 reentry closes, holds, or rejects its concrete-delta path.
+- Adjacent advanced mixed-pressure group (`gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, 20 cells): Relevant advanced-depth signal, but less directly tied to the current D01-held / D47-reentry fork. Re-entry trigger: Promote after D47 reentry closes, holds, or rejects its concrete-delta path.
 
 ## D49 Residual Follow-Up
 
@@ -364,6 +380,29 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 - Evidence summary: D49 optional-slot redistribution exists without cap, fatigue, or minimum pressure; keep it visible but do not promote it to U8 work.
 - Next artifact: No implementation action; revisit only if regenerated diagnostics add cap or fatigue pressure.
 - Group keys: `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution`
+
+## D49 U8 Generator-Policy Proof
+
+- Packet source: D49 residual route_to_u8 selection plus redistribution causality receipt.
+- Proof outcome: `ready_for_generator_policy_proposal`
+- Evidence type: `allocated_duration_counterfactual`
+- Total affected cells: 20
+- Pressure disappears cells: 20
+- Pressure remains cells: 0
+- Redistribution-only cells: 0
+- Comparison inconclusive cells: 0
+- Counterfactual unfilled minutes: 212
+- Runtime redistribution authorization: `not_authorized`
+- Catalog authorization: `not_authorized`
+- D49 cap authorization: `not_authorized`
+- Source-depth authorization: `not_authorized`
+- D47 reopen authorization: `not_authorized`
+- Proof summary: D49 pressure-bearing optional-slot redistribution has 20 cells where pressure disappears under allocated-duration counterfactual evidence and 0 cells where pressure remains. This is ready to plan a future generator-policy proposal, not to change runtime behavior.
+- Workload caveat: D49 under-min workload evidence remains visible as workload review evidence and does not authorize cap, catalog, source-depth, or runtime redistribution changes from this U8 proof.
+- Next artifact: D49 generator-policy proposal plan
+- Stop condition: This is diagnostic-only U8 evidence. Do not change runtime redistribution, catalog content, D49 caps, source-depth surfaces, or D47 reopening from this packet alone.
+- Proof group keys: `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`
+- Excluded optional-only group keys: `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution`
 
 ## D47 vs D05 Comparator Evaluation Payload
 
@@ -427,130 +466,164 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 
 ## Needs Human Review
 
-- `gpdg:v1:d25:d25-solo:wrap:true:under_authored_min` (79 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d25:d25-solo:wrap:true:under_authored_min` (65 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d51:d51-solo-open:main_skill:true:under_authored_min` (28 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d07:d07-solo-open:technique:true:under_authored_min` (18 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d33:d33-solo-open:technique:true:under_authored_min` (16 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
-- `gpdg:v1:d33:d33-solo-open:main_skill:true:under_authored_min` (14 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d01:d01-solo:technique:true:over_authored_max+over_fatigue_cap` (12 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d22:d22-solo-open:technique:true:under_authored_min` (12 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
-- `gpdg:v1:d33:d33-pair-open:main_skill:true:under_authored_min` (12 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d38:d38-solo:technique:true:under_authored_min` (12 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d39:d39-solo:technique:true:under_authored_min` (12 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d48:d48-solo-open:technique:true:under_authored_min` (12 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d49:d49-solo-open:main_skill:true:under_authored_min` (12 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d50:d50-solo-open:main_skill:true:under_authored_min` (12 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d51:d51-pair-open:main_skill:true:under_authored_min` (12 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d05:d05-pair:main_skill:true:over_authored_max+over_fatigue_cap` (10 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
-- `gpdg:v1:d22:d22-solo-open:main_skill:true:under_authored_min` (10 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d33:d33-solo-open:main_skill:true:under_authored_min` (10 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d01:d01-solo:movement_proxy:false:over_authored_max+over_fatigue_cap` (9 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d33:d33-pair-open:technique:true:under_authored_min` (9 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d01:d01-pair:pressure:false:over_authored_max+over_fatigue_cap` (8 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d07:d07-pair-open:technique:true:under_authored_min` (8 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d22:d22-pair-open:technique:true:under_authored_min` (8 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d22:d22-solo-open:main_skill:true:under_authored_min` (8 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d48:d48-pair-open:technique:true:under_authored_min` (8 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d11:d11-solo:main_skill:true:over_authored_max+over_fatigue_cap` (6 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
-- `gpdg:v1:d22:d22-pair-open:main_skill:true:under_authored_min` (6 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d33:d33-pair-open:main_skill:true:under_authored_min` (6 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d47:d47-solo-open:main_skill:true:over_authored_max+over_fatigue_cap` (6 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d22:d22-pair-open:main_skill:true:under_authored_min` (5 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d33:d33-solo-open:movement_proxy:false:under_authored_min` (5 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d10:d10-pair:main_skill:true:over_authored_max+over_fatigue_cap` (4 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d33:d33-pair-open:movement_proxy:false:under_authored_min` (4 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d49:d49-pair-open:main_skill:true:under_authored_min` (4 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d50:d50-pair-open:main_skill:true:under_authored_min` (4 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d01:d01-solo:pressure:false:over_authored_max+over_fatigue_cap` (3 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d07:d07-solo-open:main_skill:true:over_authored_max+over_fatigue_cap` (3 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d33:d33-pair:technique:true:under_authored_min` (3 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d33:d33-solo-net:technique:true:under_authored_min` (3 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
-- `gpdg:v1:d33:d33-solo-net:main_skill:true:under_authored_min` (3 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d03:d03-pair:main_skill:true:over_authored_max+over_fatigue_cap` (2 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d22:d22-pair:main_skill:true:under_authored_min` (2 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
-- `gpdg:v1:d22:d22-solo:main_skill:true:under_authored_min` (2 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d22:d22-solo-open:movement_proxy:false:under_authored_min` (2 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d33:d33-pair:main_skill:true:under_authored_min` (2 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d38:d38-pair:main_skill:true:over_authored_max+over_fatigue_cap` (2 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d01:d01-pair:technique:true:over_authored_max+over_fatigue_cap` (1 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 - `gpdg:v1:d11:d11-pair:pressure:false:over_authored_max+over_fatigue_cap` (1 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d22:d22-pair:movement_proxy:false:under_authored_min` (1 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d22:d22-solo:movement_proxy:false:under_authored_min` (1 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d22:d22-solo:main_skill:true:under_authored_min` (1 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d33:d33-solo-net:movement_proxy:false:under_authored_min` (1 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
+- `gpdg:v1:d33:d33-solo-net:main_skill:true:under_authored_min` (1 cells): Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.
 
 
 ## Generator Policy Investigation
 
-- `gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (28 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
-- `gpdg:v1:d33:d33-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (24 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
-- `gpdg:v1:d46:d46-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (24 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
-- `gpdg:v1:d46:d46-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (16 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (20 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d51:d51-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (16 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
 - `gpdg:v1:d05:d05-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (15 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
-- `gpdg:v1:d31:d31-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (14 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
 - `gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (12 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d33:d33-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (12 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
 - `gpdg:v1:d40:d40-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (12 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
 - `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (12 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
-- `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution` (10 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
-- `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (10 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d50:d50-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (12 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution` (8 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (8 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
 - `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (8 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
-- `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution` (6 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
-- `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (6 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
-- `gpdg:v1:d31:d31-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (6 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
-- `gpdg:v1:d33:d33-solo-net:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (6 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d50:d50-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (8 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d51:d51-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (8 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
 - `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution` (6 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
 - `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution` (6 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d50:d50-pair-open:main_skill:true:optional_slot_redistribution` (6 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d50:d50-solo-open:main_skill:true:optional_slot_redistribution` (6 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution` (5 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (5 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d33:d33-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (4 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
 - `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution` (2 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
 - `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (2 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
-- `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution` (2 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
-- `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (2 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
-- `gpdg:v1:d31:d31-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (2 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d33:d33-solo-net:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (2 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d51:d51-pair-open:main_skill:true:optional_slot_redistribution` (2 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d51:d51-solo-open:main_skill:true:optional_slot_redistribution` (2 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution` (1 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (1 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d51:d51-pair:main_skill:true:optional_slot_redistribution` (1 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
+- `gpdg:v1:d51:d51-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (1 cells): Redistribution evidence is present, so generator policy should be investigated before catalog changes.
 
 
 ## Top Affected Groups
 
-- `gpdg:v1:d25:d25-solo:wrap:true:under_authored_min` (79 cells, route: `defer`)
-- `gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (28 cells, route: `generator_policy_investigation`)
-- `gpdg:v1:d33:d33-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (24 cells, route: `generator_policy_investigation`)
-- `gpdg:v1:d46:d46-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (24 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d25:d25-solo:wrap:true:under_authored_min` (65 cells, route: `defer`)
+- `gpdg:v1:d51:d51-solo-open:main_skill:true:under_authored_min` (28 cells, route: `defer`)
+- `gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (20 cells, route: `generator_policy_investigation`)
 - `gpdg:v1:d07:d07-solo-open:technique:true:under_authored_min` (18 cells, route: `defer`)
 - `gpdg:v1:d33:d33-solo-open:technique:true:under_authored_min` (16 cells, route: `defer`)
-- `gpdg:v1:d46:d46-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (16 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d51:d51-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (16 cells, route: `generator_policy_investigation`)
 - `gpdg:v1:d05:d05-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (15 cells, route: `generator_policy_investigation`)
-- `gpdg:v1:d31:d31-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (14 cells, route: `generator_policy_investigation`)
-- `gpdg:v1:d33:d33-solo-open:main_skill:true:under_authored_min` (14 cells, route: `defer`)
 - `gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (12 cells, route: `generator_policy_investigation`)
 - `gpdg:v1:d01:d01-solo:technique:true:over_authored_max+over_fatigue_cap` (12 cells, route: `defer`)
 - `gpdg:v1:d22:d22-solo-open:technique:true:under_authored_min` (12 cells, route: `defer`)
-- `gpdg:v1:d33:d33-pair-open:main_skill:true:under_authored_min` (12 cells, route: `defer`)
+- `gpdg:v1:d33:d33-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (12 cells, route: `generator_policy_investigation`)
 - `gpdg:v1:d38:d38-solo:technique:true:under_authored_min` (12 cells, route: `defer`)
 - `gpdg:v1:d39:d39-solo:technique:true:under_authored_min` (12 cells, route: `defer`)
 - `gpdg:v1:d40:d40-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (12 cells, route: `generator_policy_investigation`)
 - `gpdg:v1:d48:d48-solo-open:technique:true:under_authored_min` (12 cells, route: `defer`)
 - `gpdg:v1:d49:d49-solo-open:main_skill:true:under_authored_min` (12 cells, route: `defer`)
 - `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (12 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d50:d50-solo-open:main_skill:true:under_authored_min` (12 cells, route: `defer`)
+- `gpdg:v1:d50:d50-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (12 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d51:d51-pair-open:main_skill:true:under_authored_min` (12 cells, route: `defer`)
 - `gpdg:v1:d05:d05-pair:main_skill:true:over_authored_max+over_fatigue_cap` (10 cells, route: `defer`)
-- `gpdg:v1:d22:d22-solo-open:main_skill:true:under_authored_min` (10 cells, route: `defer`)
-- `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution` (10 cells, route: `generator_policy_investigation`)
-- `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (10 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d33:d33-solo-open:main_skill:true:under_authored_min` (10 cells, route: `defer`)
 - `gpdg:v1:d01:d01-solo:movement_proxy:false:over_authored_max+over_fatigue_cap` (9 cells, route: `defer`)
 - `gpdg:v1:d33:d33-pair-open:technique:true:under_authored_min` (9 cells, route: `defer`)
 - `gpdg:v1:d01:d01-pair:pressure:false:over_authored_max+over_fatigue_cap` (8 cells, route: `defer`)
 - `gpdg:v1:d07:d07-pair-open:technique:true:under_authored_min` (8 cells, route: `defer`)
 - `gpdg:v1:d22:d22-pair-open:technique:true:under_authored_min` (8 cells, route: `defer`)
+- `gpdg:v1:d22:d22-solo-open:main_skill:true:under_authored_min` (8 cells, route: `defer`)
+- `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution` (8 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (8 cells, route: `generator_policy_investigation`)
 - `gpdg:v1:d48:d48-pair-open:technique:true:under_authored_min` (8 cells, route: `defer`)
 - `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (8 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d50:d50-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (8 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d51:d51-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (8 cells, route: `generator_policy_investigation`)
 - `gpdg:v1:d11:d11-solo:main_skill:true:over_authored_max+over_fatigue_cap` (6 cells, route: `defer`)
-- `gpdg:v1:d22:d22-pair-open:main_skill:true:under_authored_min` (6 cells, route: `defer`)
-- `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution` (6 cells, route: `generator_policy_investigation`)
-- `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (6 cells, route: `generator_policy_investigation`)
-- `gpdg:v1:d31:d31-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (6 cells, route: `generator_policy_investigation`)
-- `gpdg:v1:d33:d33-solo-net:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (6 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d33:d33-pair-open:main_skill:true:under_authored_min` (6 cells, route: `defer`)
 - `gpdg:v1:d47:d47-solo-open:main_skill:true:over_authored_max+over_fatigue_cap` (6 cells, route: `defer`)
 - `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution` (6 cells, route: `generator_policy_investigation`)
 - `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution` (6 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d50:d50-pair-open:main_skill:true:optional_slot_redistribution` (6 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d50:d50-solo-open:main_skill:true:optional_slot_redistribution` (6 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d22:d22-pair-open:main_skill:true:under_authored_min` (5 cells, route: `defer`)
+- `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution` (5 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (5 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d33:d33-solo-open:movement_proxy:false:under_authored_min` (5 cells, route: `defer`)
 - `gpdg:v1:d10:d10-pair:main_skill:true:over_authored_max+over_fatigue_cap` (4 cells, route: `defer`)
+- `gpdg:v1:d33:d33-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (4 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d33:d33-pair-open:movement_proxy:false:under_authored_min` (4 cells, route: `defer`)
 - `gpdg:v1:d49:d49-pair-open:main_skill:true:under_authored_min` (4 cells, route: `defer`)
+- `gpdg:v1:d50:d50-pair-open:main_skill:true:under_authored_min` (4 cells, route: `defer`)
 - `gpdg:v1:d01:d01-solo:pressure:false:over_authored_max+over_fatigue_cap` (3 cells, route: `defer`)
 - `gpdg:v1:d07:d07-solo-open:main_skill:true:over_authored_max+over_fatigue_cap` (3 cells, route: `defer`)
 - `gpdg:v1:d33:d33-pair:technique:true:under_authored_min` (3 cells, route: `defer`)
 - `gpdg:v1:d33:d33-solo-net:technique:true:under_authored_min` (3 cells, route: `defer`)
-- `gpdg:v1:d33:d33-solo-net:main_skill:true:under_authored_min` (3 cells, route: `defer`)
 - `gpdg:v1:d03:d03-pair:main_skill:true:over_authored_max+over_fatigue_cap` (2 cells, route: `defer`)
 - `gpdg:v1:d22:d22-pair:main_skill:true:under_authored_min` (2 cells, route: `defer`)
 - `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution` (2 cells, route: `generator_policy_investigation`)
 - `gpdg:v1:d22:d22-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (2 cells, route: `generator_policy_investigation`)
-- `gpdg:v1:d22:d22-solo:main_skill:true:under_authored_min` (2 cells, route: `defer`)
-- `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution` (2 cells, route: `generator_policy_investigation`)
-- `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (2 cells, route: `generator_policy_investigation`)
-- `gpdg:v1:d31:d31-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (2 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d22:d22-solo-open:movement_proxy:false:under_authored_min` (2 cells, route: `defer`)
+- `gpdg:v1:d33:d33-pair:main_skill:true:under_authored_min` (2 cells, route: `defer`)
+- `gpdg:v1:d33:d33-solo-net:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (2 cells, route: `generator_policy_investigation`)
 - `gpdg:v1:d38:d38-pair:main_skill:true:over_authored_max+over_fatigue_cap` (2 cells, route: `defer`)
+- `gpdg:v1:d51:d51-pair-open:main_skill:true:optional_slot_redistribution` (2 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d51:d51-solo-open:main_skill:true:optional_slot_redistribution` (2 cells, route: `generator_policy_investigation`)
 - `gpdg:v1:d01:d01-pair:technique:true:over_authored_max+over_fatigue_cap` (1 cells, route: `defer`)
 - `gpdg:v1:d11:d11-pair:pressure:false:over_authored_max+over_fatigue_cap` (1 cells, route: `defer`)
+- `gpdg:v1:d22:d22-pair:movement_proxy:false:under_authored_min` (1 cells, route: `defer`)
+- `gpdg:v1:d22:d22-solo:movement_proxy:false:under_authored_min` (1 cells, route: `defer`)
+- `gpdg:v1:d22:d22-solo:main_skill:true:under_authored_min` (1 cells, route: `defer`)
+- `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution` (1 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (1 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d33:d33-solo-net:movement_proxy:false:under_authored_min` (1 cells, route: `defer`)
+- `gpdg:v1:d33:d33-solo-net:main_skill:true:under_authored_min` (1 cells, route: `defer`)
+- `gpdg:v1:d51:d51-pair:main_skill:true:optional_slot_redistribution` (1 cells, route: `generator_policy_investigation`)
+- `gpdg:v1:d51:d51-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap` (1 cells, route: `generator_policy_investigation`)
 
 ## Machine-Readable Registry
 
@@ -559,14 +632,32 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 [
   {
     "groupKey": "gpdg:v1:d25:d25-solo:wrap:true:under_authored_min",
-    "diagnosticFingerprint": "gpdf|v1|4|none|none|79|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|pass/pair_net/advanced/15/matrix-b/block-3/3/3/under_authored_min|pass/pair_net/advanced/15/matrix-c/block-3/3/3/under_authored_min|pass/pair_net/advanced/15/matrix-d/block-3/3/3/under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|4|none|none|65|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|pass/pair_net/advanced/15/matrix-a/block-3/3/3/under_authored_min|pass/pair_net/advanced/15/matrix-c/block-3/3/3/under_authored_min|pass/pair_net/beginner/15/matrix-a/block-3/3/3/under_authored_min",
     "triageStatus": "observed",
     "route": "defer",
     "enforcementStatus": "observation_only",
     "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
     "owner": "agent",
     "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
-    "affectedCellCount": 79,
+    "affectedCellCount": 65,
+    "likelyFixPaths": [
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d51:d51-solo-open:main_skill:true:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|8|none|none|28|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/beginner/15/matrix-a/block-2/5/5/under_authored_min|serve/solo_net/beginner/15/matrix-b/block-2/5/5/under_authored_min|serve/solo_net/beginner/15/matrix-c/block-2/5/5/under_authored_min",
+    "triageStatus": "observed",
+    "route": "defer",
+    "enforcementStatus": "observation_only",
+    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 28,
     "likelyFixPaths": [
       "policy_allowance",
       "block_split",
@@ -577,52 +668,14 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
   },
   {
     "groupKey": "gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "diagnosticFingerprint": "gpdf|v1|none|10|10|28|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/25/matrix-d/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/advanced/40/matrix-d/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/intermediate/25/matrix-d/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "diagnosticFingerprint": "gpdf|v1|none|10|10|20|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/25/matrix-d/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/advanced/40/matrix-d/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/intermediate/25/matrix-d/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
     "triageStatus": "routed",
     "route": "generator_policy_investigation",
     "enforcementStatus": "observation_only",
     "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
     "owner": "agent",
     "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
-    "affectedCellCount": 28,
-    "likelyFixPaths": [
-      "generator_policy_investigation",
-      "policy_allowance",
-      "block_split",
-      "variant_cap_review",
-      "source_backed_content_depth"
-    ],
-    "evidence": []
-  },
-  {
-    "groupKey": "gpdg:v1:d33:d33-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "diagnosticFingerprint": "gpdf|v1|none|10|10|24|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/advanced/25/matrix-b/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/pair_net/advanced/25/matrix-d/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/pair_net/advanced/40/matrix-b/block-2/24/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "triageStatus": "routed",
-    "route": "generator_policy_investigation",
-    "enforcementStatus": "observation_only",
-    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
-    "owner": "agent",
-    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
-    "affectedCellCount": 24,
-    "likelyFixPaths": [
-      "generator_policy_investigation",
-      "policy_allowance",
-      "block_split",
-      "variant_cap_review",
-      "source_backed_content_depth"
-    ],
-    "evidence": []
-  },
-  {
-    "groupKey": "gpdg:v1:d46:d46-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "diagnosticFingerprint": "gpdf|v1|none|8|8|24|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|pass/solo_net/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|pass/solo_net/advanced/25/matrix-b/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|pass/solo_net/advanced/25/matrix-c/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "triageStatus": "routed",
-    "route": "generator_policy_investigation",
-    "enforcementStatus": "observation_only",
-    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
-    "owner": "agent",
-    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
-    "affectedCellCount": 24,
+    "affectedCellCount": 20,
     "likelyFixPaths": [
       "generator_policy_investigation",
       "policy_allowance",
@@ -669,8 +722,8 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "evidence": []
   },
   {
-    "groupKey": "gpdg:v1:d46:d46-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "diagnosticFingerprint": "gpdf|v1|none|8|8|16|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|pass/pair_net/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|pass/pair_net/advanced/25/matrix-b/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|pass/pair_net/advanced/25/matrix-c/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "groupKey": "gpdg:v1:d51:d51-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "diagnosticFingerprint": "gpdf|v1|none|14|14|16|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/beginner/40/matrix-a/block-3/17/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/beginner/40/matrix-b/block-3/17/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/beginner/40/matrix-c/block-3/17/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
     "triageStatus": "routed",
     "route": "generator_policy_investigation",
     "enforcementStatus": "observation_only",
@@ -699,43 +752,6 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "affectedCellCount": 15,
     "likelyFixPaths": [
       "generator_policy_investigation",
-      "policy_allowance",
-      "block_split",
-      "variant_cap_review",
-      "source_backed_content_depth"
-    ],
-    "evidence": []
-  },
-  {
-    "groupKey": "gpdg:v1:d31:d31-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "diagnosticFingerprint": "gpdf|v1|none|8|8|14|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/beginner/25/matrix-a/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/beginner/25/matrix-b/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/beginner/25/matrix-c/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "triageStatus": "routed",
-    "route": "generator_policy_investigation",
-    "enforcementStatus": "observation_only",
-    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
-    "owner": "agent",
-    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
-    "affectedCellCount": 14,
-    "likelyFixPaths": [
-      "generator_policy_investigation",
-      "policy_allowance",
-      "block_split",
-      "variant_cap_review",
-      "source_backed_content_depth"
-    ],
-    "evidence": []
-  },
-  {
-    "groupKey": "gpdg:v1:d33:d33-solo-open:main_skill:true:under_authored_min",
-    "diagnosticFingerprint": "gpdf|v1|6|none|none|14|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/15/matrix-d/block-2/5/5/under_authored_min|serve/solo_net/intermediate/15/matrix-d/block-2/5/5/under_authored_min|serve/solo_open/advanced/15/matrix-b/block-2/5/5/under_authored_min",
-    "triageStatus": "observed",
-    "route": "defer",
-    "enforcementStatus": "observation_only",
-    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
-    "owner": "agent",
-    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
-    "affectedCellCount": 14,
-    "likelyFixPaths": [
       "policy_allowance",
       "block_split",
       "variant_cap_review",
@@ -799,16 +815,17 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "evidence": []
   },
   {
-    "groupKey": "gpdg:v1:d33:d33-pair-open:main_skill:true:under_authored_min",
-    "diagnosticFingerprint": "gpdf|v1|6|none|none|12|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/advanced/15/matrix-b/block-2/5/5/under_authored_min|serve/pair_net/advanced/15/matrix-d/block-2/5/5/under_authored_min|serve/pair_net/beginner/15/matrix-b/block-2/5/5/under_authored_min",
-    "triageStatus": "observed",
-    "route": "defer",
+    "groupKey": "gpdg:v1:d33:d33-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "diagnosticFingerprint": "gpdf|v1|none|10|10|12|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/advanced/25/matrix-b/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/pair_net/advanced/25/matrix-d/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/pair_net/advanced/40/matrix-b/block-2/24/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
     "enforcementStatus": "observation_only",
-    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
     "owner": "agent",
     "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
     "affectedCellCount": 12,
     "likelyFixPaths": [
+      "generator_policy_investigation",
       "policy_allowance",
       "block_split",
       "variant_cap_review",
@@ -927,6 +944,61 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "evidence": []
   },
   {
+    "groupKey": "gpdg:v1:d50:d50-solo-open:main_skill:true:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|8|none|none|12|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|pass/solo_net/advanced/15/matrix-b/block-2/5/5/under_authored_min|pass/solo_net/advanced/15/matrix-c/block-2/5/5/under_authored_min|pass/solo_net/advanced/25/matrix-b/block-3/7/7/under_authored_min",
+    "triageStatus": "observed",
+    "route": "defer",
+    "enforcementStatus": "observation_only",
+    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 12,
+    "likelyFixPaths": [
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d50:d50-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "diagnosticFingerprint": "gpdf|v1|none|14|14|12|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|pass/solo_net/advanced/40/matrix-a/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|pass/solo_net/advanced/40/matrix-b/block-3/17/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|pass/solo_net/advanced/40/matrix-c/block-3/17/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 12,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d51:d51-pair-open:main_skill:true:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|8|none|none|12|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/beginner/15/matrix-a/block-2/5/5/under_authored_min|serve/pair_net/beginner/15/matrix-d/block-2/5/5/under_authored_min|serve/pair_net/beginner/25/matrix-a/block-3/7/7/under_authored_min",
+    "triageStatus": "observed",
+    "route": "defer",
+    "enforcementStatus": "observation_only",
+    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 12,
+    "likelyFixPaths": [
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
     "groupKey": "gpdg:v1:d05:d05-pair:main_skill:true:over_authored_max+over_fatigue_cap",
     "diagnosticFingerprint": "gpdf|v1|none|8|8|10|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|pass/pair_net/beginner/40/matrix-b/block-3/10/10/over_authored_max+over_fatigue_cap|pass/pair_net/beginner/40/matrix-d/block-3/10/10/over_authored_max+over_fatigue_cap|pass/pair_net/intermediate/40/matrix-b/block-3/10/10/over_authored_max+over_fatigue_cap",
     "triageStatus": "observed",
@@ -945,8 +1017,8 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "evidence": []
   },
   {
-    "groupKey": "gpdg:v1:d22:d22-solo-open:main_skill:true:under_authored_min",
-    "diagnosticFingerprint": "gpdf|v1|6|none|none|10|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/15/matrix-c/block-2/5/5/under_authored_min|serve/solo_net/intermediate/15/matrix-c/block-2/5/5/under_authored_min|serve/solo_open/advanced/15/matrix-a/block-2/5/5/under_authored_min",
+    "groupKey": "gpdg:v1:d33:d33-solo-open:main_skill:true:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|6|none|none|10|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/15/matrix-d/block-2/5/5/under_authored_min|serve/solo_net/intermediate/15/matrix-d/block-2/5/5/under_authored_min|serve/solo_open/advanced/15/matrix-b/block-2/5/5/under_authored_min",
     "triageStatus": "observed",
     "route": "defer",
     "enforcementStatus": "observation_only",
@@ -955,44 +1027,6 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
     "affectedCellCount": 10,
     "likelyFixPaths": [
-      "policy_allowance",
-      "block_split",
-      "variant_cap_review",
-      "source_backed_content_depth"
-    ],
-    "evidence": []
-  },
-  {
-    "groupKey": "gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution",
-    "diagnosticFingerprint": "gpdf|v1|none|none|none|10|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/25/matrix-c/block-2/12/7/optional_slot_redistribution|serve/solo_net/intermediate/25/matrix-c/block-2/12/7/optional_slot_redistribution|serve/solo_open/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution",
-    "triageStatus": "routed",
-    "route": "generator_policy_investigation",
-    "enforcementStatus": "observation_only",
-    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
-    "owner": "agent",
-    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
-    "affectedCellCount": 10,
-    "likelyFixPaths": [
-      "generator_policy_investigation",
-      "policy_allowance",
-      "block_split",
-      "variant_cap_review",
-      "source_backed_content_depth"
-    ],
-    "evidence": []
-  },
-  {
-    "groupKey": "gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "diagnosticFingerprint": "gpdf|v1|none|12|12|10|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/40/matrix-c/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/intermediate/40/matrix-c/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_open/advanced/40/matrix-a/block-2/22/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "triageStatus": "routed",
-    "route": "generator_policy_investigation",
-    "enforcementStatus": "observation_only",
-    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
-    "owner": "agent",
-    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
-    "affectedCellCount": 10,
-    "likelyFixPaths": [
-      "generator_policy_investigation",
       "policy_allowance",
       "block_split",
       "variant_cap_review",
@@ -1091,6 +1125,62 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "evidence": []
   },
   {
+    "groupKey": "gpdg:v1:d22:d22-solo-open:main_skill:true:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|6|none|none|8|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/15/matrix-c/block-2/5/5/under_authored_min|serve/solo_net/intermediate/15/matrix-a/block-2/5/5/under_authored_min|serve/solo_open/advanced/15/matrix-a/block-2/5/5/under_authored_min",
+    "triageStatus": "observed",
+    "route": "defer",
+    "enforcementStatus": "observation_only",
+    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 8,
+    "likelyFixPaths": [
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution",
+    "diagnosticFingerprint": "gpdf|v1|none|none|none|8|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/25/matrix-c/block-2/12/7/optional_slot_redistribution|serve/solo_net/intermediate/25/matrix-a/block-2/12/7/optional_slot_redistribution|serve/solo_open/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 8,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d22:d22-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "diagnosticFingerprint": "gpdf|v1|none|12|12|8|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/40/matrix-c/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/intermediate/40/matrix-a/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_open/advanced/40/matrix-a/block-2/22/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 8,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
     "groupKey": "gpdg:v1:d48:d48-pair-open:technique:true:under_authored_min",
     "diagnosticFingerprint": "gpdf|v1|5|none|none|8|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|set/pair_net/advanced/15/matrix-a/block-1/4/4/under_authored_min|set/pair_net/advanced/15/matrix-b/block-1/4/4/under_authored_min|set/pair_net/advanced/15/matrix-c/block-1/4/4/under_authored_min",
     "triageStatus": "observed",
@@ -1128,6 +1218,44 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "evidence": []
   },
   {
+    "groupKey": "gpdg:v1:d50:d50-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "diagnosticFingerprint": "gpdf|v1|none|14|14|8|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|pass/pair_net/advanced/40/matrix-a/block-3/18/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|pass/pair_net/advanced/40/matrix-b/block-2/24/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|pass/pair_net/advanced/40/matrix-c/block-2/24/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 8,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d51:d51-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "diagnosticFingerprint": "gpdf|v1|none|14|14|8|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/beginner/40/matrix-a/block-3/18/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/pair_net/beginner/40/matrix-d/block-3/18/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/pair_net/intermediate/40/matrix-a/block-3/18/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 8,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
     "groupKey": "gpdg:v1:d11:d11-solo:main_skill:true:over_authored_max+over_fatigue_cap",
     "diagnosticFingerprint": "gpdf|v1|none|7|7|6|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|pass/solo_net/intermediate/40/matrix-b/block-3/10/10/over_authored_max+over_fatigue_cap|pass/solo_net/intermediate/40/matrix-c/block-3/10/10/over_authored_max+over_fatigue_cap|pass/solo_open/intermediate/40/matrix-b/block-3/10/10/over_authored_max+over_fatigue_cap",
     "triageStatus": "observed",
@@ -1146,8 +1274,8 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "evidence": []
   },
   {
-    "groupKey": "gpdg:v1:d22:d22-pair-open:main_skill:true:under_authored_min",
-    "diagnosticFingerprint": "gpdf|v1|6|none|none|6|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/advanced/15/matrix-a/block-2/5/5/under_authored_min|serve/pair_net/intermediate/15/matrix-a/block-2/5/5/under_authored_min|serve/pair_open/advanced/15/matrix-b/block-2/5/5/under_authored_min",
+    "groupKey": "gpdg:v1:d33:d33-pair-open:main_skill:true:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|6|none|none|6|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/advanced/15/matrix-b/block-2/5/5/under_authored_min|serve/pair_net/advanced/15/matrix-d/block-2/5/5/under_authored_min|serve/pair_open/advanced/15/matrix-a/block-2/5/5/under_authored_min",
     "triageStatus": "observed",
     "route": "defer",
     "enforcementStatus": "observation_only",
@@ -1156,82 +1284,6 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
     "affectedCellCount": 6,
     "likelyFixPaths": [
-      "policy_allowance",
-      "block_split",
-      "variant_cap_review",
-      "source_backed_content_depth"
-    ],
-    "evidence": []
-  },
-  {
-    "groupKey": "gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution",
-    "diagnosticFingerprint": "gpdf|v1|none|none|none|6|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution|serve/pair_net/intermediate/25/matrix-a/block-2/12/7/optional_slot_redistribution|serve/pair_open/advanced/25/matrix-b/block-2/12/7/optional_slot_redistribution",
-    "triageStatus": "routed",
-    "route": "generator_policy_investigation",
-    "enforcementStatus": "observation_only",
-    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
-    "owner": "agent",
-    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
-    "affectedCellCount": 6,
-    "likelyFixPaths": [
-      "generator_policy_investigation",
-      "policy_allowance",
-      "block_split",
-      "variant_cap_review",
-      "source_backed_content_depth"
-    ],
-    "evidence": []
-  },
-  {
-    "groupKey": "gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "diagnosticFingerprint": "gpdf|v1|none|12|12|6|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/advanced/40/matrix-a/block-2/24/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/pair_net/intermediate/40/matrix-a/block-2/24/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/pair_open/advanced/40/matrix-b/block-2/22/9/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "triageStatus": "routed",
-    "route": "generator_policy_investigation",
-    "enforcementStatus": "observation_only",
-    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
-    "owner": "agent",
-    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
-    "affectedCellCount": 6,
-    "likelyFixPaths": [
-      "generator_policy_investigation",
-      "policy_allowance",
-      "block_split",
-      "variant_cap_review",
-      "source_backed_content_depth"
-    ],
-    "evidence": []
-  },
-  {
-    "groupKey": "gpdg:v1:d31:d31-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "diagnosticFingerprint": "gpdf|v1|none|8|8|6|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/beginner/25/matrix-c/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/pair_net/beginner/40/matrix-c/block-2/24/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/pair_open/beginner/25/matrix-b/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "triageStatus": "routed",
-    "route": "generator_policy_investigation",
-    "enforcementStatus": "observation_only",
-    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
-    "owner": "agent",
-    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
-    "affectedCellCount": 6,
-    "likelyFixPaths": [
-      "generator_policy_investigation",
-      "policy_allowance",
-      "block_split",
-      "variant_cap_review",
-      "source_backed_content_depth"
-    ],
-    "evidence": []
-  },
-  {
-    "groupKey": "gpdg:v1:d33:d33-solo-net:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "diagnosticFingerprint": "gpdf|v1|none|10|10|6|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/25/matrix-b/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/advanced/40/matrix-b/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/beginner/25/matrix-d/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "triageStatus": "routed",
-    "route": "generator_policy_investigation",
-    "enforcementStatus": "observation_only",
-    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
-    "owner": "agent",
-    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
-    "affectedCellCount": 6,
-    "likelyFixPaths": [
-      "generator_policy_investigation",
       "policy_allowance",
       "block_split",
       "variant_cap_review",
@@ -1296,6 +1348,118 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "evidence": []
   },
   {
+    "groupKey": "gpdg:v1:d50:d50-pair-open:main_skill:true:optional_slot_redistribution",
+    "diagnosticFingerprint": "gpdf|v1|none|none|none|6|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|pass/pair_net/advanced/25/matrix-b/block-2/12/7/optional_slot_redistribution|pass/pair_net/advanced/25/matrix-c/block-2/12/7/optional_slot_redistribution|pass/pair_net/advanced/25/matrix-d/block-2/12/7/optional_slot_redistribution",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 6,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d50:d50-solo-open:main_skill:true:optional_slot_redistribution",
+    "diagnosticFingerprint": "gpdf|v1|none|none|none|6|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|pass/solo_net/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution|pass/solo_net/advanced/25/matrix-d/block-2/12/7/optional_slot_redistribution|pass/solo_open/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 6,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d22:d22-pair-open:main_skill:true:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|6|none|none|5|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/advanced/15/matrix-a/block-2/5/5/under_authored_min|serve/pair_open/advanced/15/matrix-b/block-2/5/5/under_authored_min|serve/pair_open/advanced/15/matrix-c/block-2/5/5/under_authored_min",
+    "triageStatus": "observed",
+    "route": "defer",
+    "enforcementStatus": "observation_only",
+    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 5,
+    "likelyFixPaths": [
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution",
+    "diagnosticFingerprint": "gpdf|v1|none|none|none|5|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution|serve/pair_open/advanced/25/matrix-b/block-2/12/7/optional_slot_redistribution|serve/pair_open/advanced/25/matrix-c/block-2/12/7/optional_slot_redistribution",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 5,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d22:d22-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "diagnosticFingerprint": "gpdf|v1|none|12|12|5|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/advanced/40/matrix-a/block-2/24/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/pair_open/advanced/40/matrix-b/block-2/22/9/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/pair_open/advanced/40/matrix-c/block-2/22/9/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 5,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d33:d33-solo-open:movement_proxy:false:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|6|none|none|5|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/intermediate/25/matrix-b/block-2/5/5/under_authored_min|serve/solo_open/beginner/25/matrix-b/block-2/5/5/under_authored_min|serve/solo_open/intermediate/25/matrix-b/block-2/5/5/under_authored_min",
+    "triageStatus": "observed",
+    "route": "defer",
+    "enforcementStatus": "observation_only",
+    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 5,
+    "likelyFixPaths": [
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
     "groupKey": "gpdg:v1:d10:d10-pair:main_skill:true:over_authored_max+over_fatigue_cap",
     "diagnosticFingerprint": "gpdf|v1|none|8|8|4|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|pass/pair_net/beginner/40/matrix-c/block-3/10/10/over_authored_max+over_fatigue_cap|pass/pair_net/intermediate/40/matrix-a/block-3/10/10/over_authored_max+over_fatigue_cap|pass/pair_open/beginner/40/matrix-c/block-3/9/9/over_authored_max+over_fatigue_cap",
     "triageStatus": "observed",
@@ -1314,8 +1478,63 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "evidence": []
   },
   {
+    "groupKey": "gpdg:v1:d33:d33-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "diagnosticFingerprint": "gpdf|v1|none|10|10|4|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/beginner/25/matrix-b/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/pair_net/beginner/40/matrix-b/block-2/24/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/pair_net/intermediate/25/matrix-b/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 4,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d33:d33-pair-open:movement_proxy:false:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|6|none|none|4|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/beginner/25/matrix-d/block-2/5/5/under_authored_min|serve/pair_net/intermediate/25/matrix-d/block-2/5/5/under_authored_min|serve/pair_open/beginner/25/matrix-a/block-2/5/5/under_authored_min",
+    "triageStatus": "observed",
+    "route": "defer",
+    "enforcementStatus": "observation_only",
+    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 4,
+    "likelyFixPaths": [
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
     "groupKey": "gpdg:v1:d49:d49-pair-open:main_skill:true:under_authored_min",
     "diagnosticFingerprint": "gpdf|v1|8|none|none|4|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|set/pair_net/advanced/15/matrix-a/block-2/5/5/under_authored_min|set/pair_net/advanced/25/matrix-a/block-3/7/7/under_authored_min|set/pair_open/advanced/15/matrix-a/block-2/5/5/under_authored_min",
+    "triageStatus": "observed",
+    "route": "defer",
+    "enforcementStatus": "observation_only",
+    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 4,
+    "likelyFixPaths": [
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d50:d50-pair-open:main_skill:true:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|8|none|none|4|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|pass/pair_net/advanced/15/matrix-a/block-2/5/5/under_authored_min|pass/pair_net/advanced/25/matrix-a/block-3/7/7/under_authored_min|pass/pair_open/advanced/15/matrix-a/block-2/5/5/under_authored_min",
     "triageStatus": "observed",
     "route": "defer",
     "enforcementStatus": "observation_only",
@@ -1388,24 +1607,6 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
   {
     "groupKey": "gpdg:v1:d33:d33-solo-net:technique:true:under_authored_min",
     "diagnosticFingerprint": "gpdf|v1|6|none|none|3|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/beginner/15/matrix-a/block-1/4/4/under_authored_min|serve/solo_net/beginner/15/matrix-b/block-1/4/4/under_authored_min|serve/solo_net/beginner/15/matrix-c/block-1/4/4/under_authored_min",
-    "triageStatus": "observed",
-    "route": "defer",
-    "enforcementStatus": "observation_only",
-    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
-    "owner": "agent",
-    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
-    "affectedCellCount": 3,
-    "likelyFixPaths": [
-      "policy_allowance",
-      "block_split",
-      "variant_cap_review",
-      "source_backed_content_depth"
-    ],
-    "evidence": []
-  },
-  {
-    "groupKey": "gpdg:v1:d33:d33-solo-net:main_skill:true:under_authored_min",
-    "diagnosticFingerprint": "gpdf|v1|6|none|none|3|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/15/matrix-b/block-2/5/5/under_authored_min|serve/solo_net/beginner/15/matrix-d/block-2/5/5/under_authored_min|serve/solo_net/intermediate/15/matrix-b/block-2/5/5/under_authored_min",
     "triageStatus": "observed",
     "route": "defer",
     "enforcementStatus": "observation_only",
@@ -1496,8 +1697,8 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "evidence": []
   },
   {
-    "groupKey": "gpdg:v1:d22:d22-solo:main_skill:true:under_authored_min",
-    "diagnosticFingerprint": "gpdf|v1|6|none|none|2|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/15/matrix-a/block-2/5/5/under_authored_min|serve/solo_net/intermediate/15/matrix-a/block-2/5/5/under_authored_min",
+    "groupKey": "gpdg:v1:d22:d22-solo-open:movement_proxy:false:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|6|none|none|2|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_open/intermediate/25/matrix-c/block-2/5/5/under_authored_min|serve/solo_wall/intermediate/25/matrix-c/block-2/5/5/under_authored_min",
     "triageStatus": "observed",
     "route": "defer",
     "enforcementStatus": "observation_only",
@@ -1514,17 +1715,16 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "evidence": []
   },
   {
-    "groupKey": "gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution",
-    "diagnosticFingerprint": "gpdf|v1|none|none|none|2|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution|serve/solo_net/intermediate/25/matrix-a/block-2/12/7/optional_slot_redistribution",
-    "triageStatus": "routed",
-    "route": "generator_policy_investigation",
+    "groupKey": "gpdg:v1:d33:d33-pair:main_skill:true:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|6|none|none|2|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/beginner/15/matrix-b/block-2/5/5/under_authored_min|serve/pair_net/intermediate/15/matrix-b/block-2/5/5/under_authored_min",
+    "triageStatus": "observed",
+    "route": "defer",
     "enforcementStatus": "observation_only",
-    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
     "owner": "agent",
     "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
     "affectedCellCount": 2,
     "likelyFixPaths": [
-      "generator_policy_investigation",
       "policy_allowance",
       "block_split",
       "variant_cap_review",
@@ -1533,27 +1733,8 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "evidence": []
   },
   {
-    "groupKey": "gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "diagnosticFingerprint": "gpdf|v1|none|12|12|2|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/40/matrix-a/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/intermediate/40/matrix-a/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "triageStatus": "routed",
-    "route": "generator_policy_investigation",
-    "enforcementStatus": "observation_only",
-    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
-    "owner": "agent",
-    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
-    "affectedCellCount": 2,
-    "likelyFixPaths": [
-      "generator_policy_investigation",
-      "policy_allowance",
-      "block_split",
-      "variant_cap_review",
-      "source_backed_content_depth"
-    ],
-    "evidence": []
-  },
-  {
-    "groupKey": "gpdg:v1:d31:d31-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
-    "diagnosticFingerprint": "gpdf|v1|none|8|8|2|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/beginner/25/matrix-a/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/pair_net/beginner/40/matrix-a/block-2/24/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "groupKey": "gpdg:v1:d33:d33-solo-net:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "diagnosticFingerprint": "gpdf|v1|none|10|10|2|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/25/matrix-b/block-2/12/7/optional_slot_redistribution+over_authored_max+over_fatigue_cap|serve/solo_net/advanced/40/matrix-b/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
     "triageStatus": "routed",
     "route": "generator_policy_investigation",
     "enforcementStatus": "observation_only",
@@ -1581,6 +1762,44 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
     "affectedCellCount": 2,
     "likelyFixPaths": [
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d51:d51-pair-open:main_skill:true:optional_slot_redistribution",
+    "diagnosticFingerprint": "gpdf|v1|none|none|none|2|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_open/beginner/25/matrix-b/block-2/12/7/optional_slot_redistribution|serve/pair_open/beginner/25/matrix-c/block-2/12/7/optional_slot_redistribution",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 2,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d51:d51-solo-open:main_skill:true:optional_slot_redistribution",
+    "diagnosticFingerprint": "gpdf|v1|none|none|none|2|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_open/beginner/25/matrix-a/block-2/12/7/optional_slot_redistribution|serve/solo_wall/beginner/25/matrix-a/block-2/12/7/optional_slot_redistribution",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 2,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
       "policy_allowance",
       "block_split",
       "variant_cap_review",
@@ -1617,6 +1836,172 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
     "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
     "affectedCellCount": 1,
     "likelyFixPaths": [
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d22:d22-pair:movement_proxy:false:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|6|none|none|1|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/intermediate/25/matrix-a/block-2/5/5/under_authored_min",
+    "triageStatus": "observed",
+    "route": "defer",
+    "enforcementStatus": "observation_only",
+    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 1,
+    "likelyFixPaths": [
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d22:d22-solo:movement_proxy:false:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|6|none|none|1|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/intermediate/25/matrix-c/block-2/5/5/under_authored_min",
+    "triageStatus": "observed",
+    "route": "defer",
+    "enforcementStatus": "observation_only",
+    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 1,
+    "likelyFixPaths": [
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d22:d22-solo:main_skill:true:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|6|none|none|1|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/15/matrix-a/block-2/5/5/under_authored_min",
+    "triageStatus": "observed",
+    "route": "defer",
+    "enforcementStatus": "observation_only",
+    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 1,
+    "likelyFixPaths": [
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution",
+    "diagnosticFingerprint": "gpdf|v1|none|none|none|1|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/25/matrix-a/block-2/12/7/optional_slot_redistribution",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 1,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d22:d22-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "diagnosticFingerprint": "gpdf|v1|none|12|12|1|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/40/matrix-a/block-2/23/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 1,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d33:d33-solo-net:movement_proxy:false:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|6|none|none|1|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/beginner/25/matrix-d/block-2/5/5/under_authored_min",
+    "triageStatus": "observed",
+    "route": "defer",
+    "enforcementStatus": "observation_only",
+    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 1,
+    "likelyFixPaths": [
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d33:d33-solo-net:main_skill:true:under_authored_min",
+    "diagnosticFingerprint": "gpdf|v1|6|none|none|1|block_split+policy_allowance+source_backed_content_depth+variant_cap_review|serve/solo_net/advanced/15/matrix-b/block-2/5/5/under_authored_min",
+    "triageStatus": "observed",
+    "route": "defer",
+    "enforcementStatus": "observation_only",
+    "rationale": "Needs human review before deciding whether this is policy allowance, cap review, block split, or source-backed content depth.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 1,
+    "likelyFixPaths": [
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d51:d51-pair:main_skill:true:optional_slot_redistribution",
+    "diagnosticFingerprint": "gpdf|v1|none|none|none|1|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/beginner/25/matrix-c/block-2/12/7/optional_slot_redistribution",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 1,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
+      "policy_allowance",
+      "block_split",
+      "variant_cap_review",
+      "source_backed_content_depth"
+    ],
+    "evidence": []
+  },
+  {
+    "groupKey": "gpdg:v1:d51:d51-pair:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "diagnosticFingerprint": "gpdf|v1|none|14|14|1|block_split+generator_policy_investigation+policy_allowance+source_backed_content_depth+variant_cap_review|serve/pair_net/beginner/40/matrix-c/block-2/24/10/optional_slot_redistribution+over_authored_max+over_fatigue_cap",
+    "triageStatus": "routed",
+    "route": "generator_policy_investigation",
+    "enforcementStatus": "observation_only",
+    "rationale": "Redistribution evidence is present, so generator policy should be investigated before catalog changes.",
+    "owner": "agent",
+    "reviewedReportId": "generated-plan-diagnostics-report-2026-05-01",
+    "affectedCellCount": 1,
+    "likelyFixPaths": [
+      "generator_policy_investigation",
       "policy_allowance",
       "block_split",
       "variant_cap_review",

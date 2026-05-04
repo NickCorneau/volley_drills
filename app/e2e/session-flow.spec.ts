@@ -15,10 +15,12 @@ async function setupAndStart(
     .getByLabel('Net available')
     .getByRole('radio', { name: net ? 'Yes' : 'No' })
     .click()
-  await page
-    .getByLabel('Wall available')
-    .getByRole('radio', { name: wall ? 'Yes' : 'No' })
-    .click()
+  if (!net) {
+    await page
+      .getByRole('radiogroup', { name: /wall or fence nearby/i })
+      .getByRole('radio', { name: wall ? 'Yes' : 'No' })
+      .click()
+  }
   await page.getByRole('radio', { name: time }).click()
   await page.getByRole('button', { name: /build session/i }).click()
 
@@ -26,9 +28,9 @@ async function setupAndStart(
 }
 
 async function passSafety(page: import('@playwright/test').Page) {
-  await page.getByRole('button', { name: 'No' }).click()
-  await page.locator('button', { hasText: 'Yesterday' }).click()
-  await page.getByRole('button', { name: 'Continue' }).click()
+  await page.getByRole('radio', { name: 'No' }).click()
+  await page.getByRole('radio', { name: 'Yesterday' }).click()
+  await page.getByRole('button', { name: 'Start session' }).click()
 }
 
 async function waitForRunControls(page: import('@playwright/test').Page) {
@@ -95,14 +97,13 @@ test.describe('v0b session flow', () => {
     // D128: cold-state heading is solo voice.
     await expect(page.getByRole('heading', { name: /where are you today/i })).toBeVisible()
     await setupAndStart(page)
-    await expect(page.getByText(/Solo \+ Open/)).toBeVisible()
     await passSafety(page)
     await waitForRunControls(page)
   })
 
-  test('solo+net selects the Solo + Net archetype', async ({ page }) => {
+  test('solo+net reaches safety without asking for a wall choice', async ({ page }) => {
     await setupAndStart(page, { net: true, time: '25 min' })
-    await expect(page.getByText(/Solo \+ Net/)).toBeVisible()
+    await expect(page.getByText('Before we start')).toBeVisible()
   })
 
   test('end session early navigates to review', async ({ page }) => {

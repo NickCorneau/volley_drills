@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
@@ -136,6 +137,15 @@ describe('ReviewScreen 2026-04-23 polish (merged proposal)', () => {
   it('(d) footer exposes Done as primary and Finish later as a lower-emphasis link', async () => {
     await seedCompletedWithBlock('exec-buttons', makeSkillBlock())
     renderAt('exec-buttons')
+
+    // ReviewScreen disables the Done button until the user has tapped
+    // an RPE chip (canSubmit gating). The disabled state collapses to
+    // the `primaryBase` chrome only — `bg-accent` is the *enabled*
+    // primary background — so to verify the visible primary styling we
+    // must enable the button first by selecting an RPE chip. Tapping
+    // "Right" mirrors what a real reviewer does on submit.
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('radio', { name: /^right$/i }))
 
     const done = await screen.findByRole('button', { name: /^done$/i })
     const finishLater = screen.getByRole('button', { name: /finish later/i })

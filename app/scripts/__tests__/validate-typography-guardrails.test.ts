@@ -28,8 +28,22 @@ afterEach(() => {
 })
 
 describe('validate-typography-guardrails', () => {
+  it('passes the current full source tree with the documented default command', () => {
+    const result = runGuardrail()
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('Typography guardrails passed.')
+  })
+
   it('passes the current component allowlist when run from a focused root', () => {
     const result = runGuardrail(['--root', 'src/components'])
+
+    expect(result.status).toBe(0)
+    expect(result.stdout).toContain('Typography guardrails passed.')
+  })
+
+  it('passes the current screen allowlist when run from a focused root', () => {
+    const result = runGuardrail(['--root', 'src/screens'])
 
     expect(result.status).toBe(0)
     expect(result.stdout).toContain('Typography guardrails passed.')

@@ -17,6 +17,7 @@ related:
   - docs/research/README.md
   - docs/research/periodization-post-framework.md
   - docs/research/warmup-cooldown-minimum-protocols.md
+  - docs/research/practice-plan-authoring-synthesis.md
 decision_refs:
   - D6
   - D11
@@ -45,6 +46,10 @@ decision_refs:
   or the cue-reading / decision-making / execution demands taxonomy — all
   live in `docs/research/vdm-development-matrix-takeaways.md` with per-item
   disposition (Adopt / Candidate / Defer).
+- Not this note for the cross-source plan-builder synthesis that combines
+  this LTD 3.0 / Active-for-Life framing with BAB Practice Plans 1-6 and
+  FIVB guardrails — use
+  `docs/research/practice-plan-authoring-synthesis.md`.
 - Written 2026-04-20 after promoting **LTD 3.0 (2024-01-11)**,
   **VDM (Nov 2025)**, the four LTD stage one-pagers, and the
   **Person Pillar Guidebook** into `docs/research/sources/` — see that

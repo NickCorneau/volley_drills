@@ -101,10 +101,17 @@ describe('PROGRESSION_CHAINS catalog', () => {
 describe('chain-6-serving (Tier 1b-A serving wave)', () => {
   const chain = PROGRESSION_CHAINS.find((c) => c.id === 'chain-6-serving')
 
-  it('keeps the four authored serving drills and excludes unauthored placeholders', () => {
-    expect(chain?.drillIds).toEqual(['d22', 'd31', 'd23', 'd33'])
+  it('keeps the authored serving drills and excludes unauthored placeholders', () => {
+    // 2026-05-04: d51 (Outside the Heart Serving, FIVB 2.2) added as the
+    // lateral long-envelope sibling to d31. Slotted between d31 and d23.
+    expect(chain?.drillIds).toEqual(['d22', 'd31', 'd51', 'd23', 'd33'])
     expect(chain?.drillIds).not.toContain('d32')
     expect(chain?.drillIds).not.toContain('d36')
+    expect(
+      chain?.links
+        .filter((link) => link.direction === 'lateral')
+        .map((link) => [link.fromDrillId, link.toDrillId]),
+    ).toContainEqual(['d31', 'd51'])
   })
 
   it('routes both serving entry points to d33 instead of forcing a single linear ladder', () => {
@@ -152,12 +159,19 @@ describe('chain-4-serve-receive advanced branch', () => {
   const chain = PROGRESSION_CHAINS.find((c) => c.id === 'chain-4-serve-receive')
 
   it('keeps the FIVB spin-read progression on the reserved advanced id', () => {
-    expect(chain?.drillIds).toEqual(['d15', 'd16', 'd46', 'd17', 'd18'])
+    // 2026-05-04: d50 (Short/Deep Pass Read, FIVB 3.13) added as the lateral
+    // long-envelope sibling to d46. Slotted between d46 and d17 in chain order.
+    expect(chain?.drillIds).toEqual(['d15', 'd16', 'd46', 'd50', 'd17', 'd18'])
     expect(
       chain?.links
         .filter((link) => link.direction === 'progression')
         .map((link) => [link.fromDrillId, link.toDrillId]),
     ).toContainEqual(['d16', 'd46'])
+    expect(
+      chain?.links
+        .filter((link) => link.direction === 'lateral')
+        .map((link) => [link.fromDrillId, link.toDrillId]),
+    ).toContainEqual(['d46', 'd50'])
   })
 })
 

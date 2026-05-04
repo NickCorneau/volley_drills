@@ -251,7 +251,7 @@ export function RunScreen() {
       */}
       <ScreenShell.Footer className="flex flex-col gap-3 px-1 pt-4">
         {runError && (
-          <div role="alert" aria-atomic="true">
+          <div>
             <StatusMessage variant="error" message={runError} />
           </div>
         )}

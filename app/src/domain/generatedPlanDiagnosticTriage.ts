@@ -692,6 +692,39 @@ export interface GeneratedPlanD49ResidualFollowUpPacket {
   readonly d47ReentryCondition: string
 }
 
+export type GeneratedPlanD49U8GeneratorPolicyProofOutcome =
+  | 'ready_for_generator_policy_proposal'
+  | 'needs_workload_or_block_shape_review'
+  | 'inconclusive'
+  | 'no_action'
+
+export interface GeneratedPlanD49U8GeneratorPolicyChangeAuthorization {
+  readonly runtimeRedistribution: GeneratedPlanD49ResidualFollowUpAuthorizationStatus
+  readonly catalog: GeneratedPlanD49ResidualFollowUpAuthorizationStatus
+  readonly cap: GeneratedPlanD49ResidualFollowUpAuthorizationStatus
+  readonly sourceDepth: GeneratedPlanD49ResidualFollowUpAuthorizationStatus
+  readonly d47Reopen: GeneratedPlanD49ResidualFollowUpAuthorizationStatus
+}
+
+export interface GeneratedPlanD49U8GeneratorPolicyProofPacket {
+  readonly packetSource: string
+  readonly proofOutcome: GeneratedPlanD49U8GeneratorPolicyProofOutcome
+  readonly evidenceType: GeneratedPlanRedistributionCausalityComparisonMode
+  readonly groupKeys: readonly string[]
+  readonly excludedOptionalOnlyGroupKeys: readonly string[]
+  readonly totalAffectedCellCount: number
+  readonly pressureDisappearsCellCount: number
+  readonly pressureRemainsCellCount: number
+  readonly redistributionOnlyCellCount: number
+  readonly comparisonInconclusiveCellCount: number
+  readonly counterfactualUnfilledMinutes: number
+  readonly changeAuthorization: GeneratedPlanD49U8GeneratorPolicyChangeAuthorization
+  readonly proofSummary: string
+  readonly workloadCaveat: string
+  readonly nextArtifact: string
+  readonly stopCondition: string
+}
+
 export type GeneratedPlanD47D05ComparatorOutcome =
   | 'd47_wins'
   | 'd05_wins'
@@ -1190,6 +1223,19 @@ export function compressionLaneForGeneratedPlanTriageItem(
   }
 
   if (group.blockType === 'main_skill' && groupHasObservationCode(group, 'under_authored_min')) {
+    return 'workload_envelope_review'
+  }
+
+  // Movement_proxy under-min surfaces when a non-movement drill (e.g., a
+  // serving drill like d33) is the fallback pick for the movement_proxy slot
+  // because no movement-tagged drill is in the eligible pool. Pre-d51 ship
+  // these groups were absorbed by other shuffle paths; algorithm v6 surfaced
+  // them. Route to workload_envelope_review since the honest fix is either a
+  // movement-friendlier candidate pool or an envelope review of the fallback.
+  if (
+    group.blockType === 'movement_proxy' &&
+    groupHasObservationCode(group, 'under_authored_min')
+  ) {
     return 'workload_envelope_review'
   }
 
@@ -3235,6 +3281,17 @@ function d49RedistributionNoActionGroups(
   return groups.filter((group) => group.actionState === 'redistribution_without_pressure')
 }
 
+function d49U8PressureBearingGroups(
+  groups: readonly GeneratedPlanRedistributionCausalityGroupReceipt[],
+): GeneratedPlanRedistributionCausalityGroupReceipt[] {
+  return groups.filter(
+    (group) =>
+      group.observationCodes.includes('optional_slot_redistribution') &&
+      (group.counts.currentOverAuthoredMaxCellCount > 0 ||
+        group.counts.currentOverFatigueCapCellCount > 0),
+  )
+}
+
 function d49WorkloadLane(
   groups: readonly GeneratedPlanObservationGroup[],
 ): GeneratedPlanD49ResidualFollowUpLane {
@@ -3542,6 +3599,138 @@ export function formatGeneratedPlanD49ResidualFollowUpPacketMarkdown(
   ]
 }
 
+function d49U8ProofOutcome(
+  groups: readonly GeneratedPlanRedistributionCausalityGroupReceipt[],
+  counts: GeneratedPlanRedistributionCausalityCounts,
+): GeneratedPlanD49U8GeneratorPolicyProofOutcome {
+  if (groups.length === 0) return 'no_action'
+  if (counts.pressureRemainsCellCount > 0) return 'needs_workload_or_block_shape_review'
+  if (counts.comparisonInconclusiveCellCount > 0) return 'inconclusive'
+  if (counts.pressureDisappearsCellCount > 0) return 'ready_for_generator_policy_proposal'
+  return 'no_action'
+}
+
+function nextArtifactForD49U8ProofOutcome(
+  outcome: GeneratedPlanD49U8GeneratorPolicyProofOutcome,
+): string {
+  switch (outcome) {
+    case 'ready_for_generator_policy_proposal':
+      return 'D49 generator-policy proposal plan'
+    case 'needs_workload_or_block_shape_review':
+      return 'D49 workload or block-shape review before any generator-policy proposal.'
+    case 'inconclusive':
+      return 'Refresh D49 U8 evidence before planning generator-policy work.'
+    case 'no_action':
+      return 'No D49 generator-policy proposal until current pressure-bearing D49 evidence returns.'
+    default: {
+      const exhaustive: never = outcome
+      return exhaustive
+    }
+  }
+}
+
+function summaryForD49U8ProofOutcome(
+  outcome: GeneratedPlanD49U8GeneratorPolicyProofOutcome,
+  counts: GeneratedPlanRedistributionCausalityCounts,
+): string {
+  switch (outcome) {
+    case 'ready_for_generator_policy_proposal':
+      return `D49 pressure-bearing optional-slot redistribution has ${counts.pressureDisappearsCellCount} cells where pressure disappears under allocated-duration counterfactual evidence and ${counts.pressureRemainsCellCount} cells where pressure remains. This is ready to plan a future generator-policy proposal, not to change runtime behavior.`
+    case 'needs_workload_or_block_shape_review':
+      return `D49 pressure remains in ${counts.pressureRemainsCellCount} cells under allocated-duration counterfactual evidence, so workload or block-shape review must happen before generator-policy proposal readiness.`
+    case 'inconclusive':
+      return `D49 pressure-bearing optional-slot redistribution has ${counts.comparisonInconclusiveCellCount} inconclusive cells, so the proof cannot route to generator-policy proposal readiness.`
+    case 'no_action':
+      return 'No current pressure-bearing D49 optional-slot redistribution evidence is available for U8 proof.'
+    default: {
+      const exhaustive: never = outcome
+      return exhaustive
+    }
+  }
+}
+
+export function buildGeneratedPlanD49U8GeneratorPolicyProofPacket(
+  groups: readonly GeneratedPlanObservationGroup[],
+  registry: readonly GeneratedPlanTriageEntry[],
+): GeneratedPlanD49U8GeneratorPolicyProofPacket {
+  const validation = validateGeneratedPlanTriageCoverage(groups, registry)
+  const redistributionReceipt = buildGeneratedPlanRedistributionCausalityReceipt(groups, registry)
+  const residualPacket = buildGeneratedPlanD49ResidualFollowUpPacket(groups, registry)
+  const currentEvidenceGroupKeys = currentD49EvidenceGroupKeys(validation)
+  const d49RedistributionGroups = d49RedistributionResidualGroups(
+    redistributionReceipt,
+    currentEvidenceGroupKeys,
+  )
+  const proofGroups =
+    residualPacket.selectedNextWork === 'route_to_u8'
+      ? d49U8PressureBearingGroups(d49RedistributionGroups)
+      : []
+  const excludedOptionalOnlyGroups = d49RedistributionNoActionGroups(d49RedistributionGroups)
+  const counts = proofGroups.reduce(
+    (total, group) => addRedistributionCausalityCounts(total, group.counts),
+    emptyRedistributionCausalityCounts(),
+  )
+  const outcome = d49U8ProofOutcome(proofGroups, counts)
+
+  return {
+    packetSource: 'D49 residual route_to_u8 selection plus redistribution causality receipt.',
+    proofOutcome: outcome,
+    evidenceType: redistributionReceipt.comparisonMode,
+    groupKeys: proofGroups.map((group) => group.groupKey),
+    excludedOptionalOnlyGroupKeys: excludedOptionalOnlyGroups.map((group) => group.groupKey),
+    totalAffectedCellCount: counts.totalAffectedCellCount,
+    pressureDisappearsCellCount: counts.pressureDisappearsCellCount,
+    pressureRemainsCellCount: counts.pressureRemainsCellCount,
+    redistributionOnlyCellCount: counts.redistributionWithoutPressureCellCount,
+    comparisonInconclusiveCellCount: counts.comparisonInconclusiveCellCount,
+    counterfactualUnfilledMinutes: counts.counterfactualUnfilledMinutes,
+    changeAuthorization: {
+      runtimeRedistribution: 'not_authorized',
+      catalog: 'not_authorized',
+      cap: 'not_authorized',
+      sourceDepth: 'not_authorized',
+      d47Reopen: 'not_authorized',
+    },
+    proofSummary: summaryForD49U8ProofOutcome(outcome, counts),
+    workloadCaveat:
+      'D49 under-min workload evidence remains visible as workload review evidence and does not authorize cap, catalog, source-depth, or runtime redistribution changes from this U8 proof.',
+    nextArtifact: nextArtifactForD49U8ProofOutcome(outcome),
+    stopCondition:
+      'This is diagnostic-only U8 evidence. Do not change runtime redistribution, catalog content, D49 caps, source-depth surfaces, or D47 reopening from this packet alone.',
+  }
+}
+
+export function formatGeneratedPlanD49U8GeneratorPolicyProofPacketMarkdown(
+  packet: GeneratedPlanD49U8GeneratorPolicyProofPacket,
+): string[] {
+  return [
+    `- Packet source: ${packet.packetSource}`,
+    `- Proof outcome: \`${packet.proofOutcome}\``,
+    `- Evidence type: \`${packet.evidenceType}\``,
+    `- Total affected cells: ${packet.totalAffectedCellCount}`,
+    `- Pressure disappears cells: ${packet.pressureDisappearsCellCount}`,
+    `- Pressure remains cells: ${packet.pressureRemainsCellCount}`,
+    `- Redistribution-only cells: ${packet.redistributionOnlyCellCount}`,
+    `- Comparison inconclusive cells: ${packet.comparisonInconclusiveCellCount}`,
+    `- Counterfactual unfilled minutes: ${packet.counterfactualUnfilledMinutes}`,
+    `- Runtime redistribution authorization: \`${packet.changeAuthorization.runtimeRedistribution}\``,
+    `- Catalog authorization: \`${packet.changeAuthorization.catalog}\``,
+    `- D49 cap authorization: \`${packet.changeAuthorization.cap}\``,
+    `- Source-depth authorization: \`${packet.changeAuthorization.sourceDepth}\``,
+    `- D47 reopen authorization: \`${packet.changeAuthorization.d47Reopen}\``,
+    `- Proof summary: ${packet.proofSummary}`,
+    `- Workload caveat: ${packet.workloadCaveat}`,
+    `- Next artifact: ${packet.nextArtifact}`,
+    `- Stop condition: ${packet.stopCondition}`,
+    packet.groupKeys.length > 0
+      ? `- Proof group keys: ${packet.groupKeys.map((key) => `\`${key}\``).join(', ')}`
+      : '- Proof group keys: none',
+    packet.excludedOptionalOnlyGroupKeys.length > 0
+      ? `- Excluded optional-only group keys: ${packet.excludedOptionalOnlyGroupKeys.map((key) => `\`${key}\``).join(', ')}`
+      : '- Excluded optional-only group keys: none',
+  ]
+}
+
 function formatD47GapClosureSegmentLabel(segment: GeneratedPlanD47GapClosureSegmentLabel): string {
   switch (segment) {
     case 'pressure_disappears':
@@ -3809,6 +3998,10 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
   const d01CapCatalogForkPacket = buildGeneratedPlanD01CapCatalogForkPacket(groups, registry)
   const gapClosureSelection = buildGeneratedPlanGapClosureSelectionWorkbench(groups, registry)
   const d49ResidualFollowUpPacket = buildGeneratedPlanD49ResidualFollowUpPacket(groups, registry)
+  const d49U8GeneratorPolicyProofPacket = buildGeneratedPlanD49U8GeneratorPolicyProofPacket(
+    groups,
+    registry,
+  )
   const d47D05ComparatorPayload = buildCurrentGeneratedPlanD47D05ComparatorEvaluationPayload()
   const d47D05ComparatorPacket = buildGeneratedPlanD47D05ComparatorDecisionPacket(
     groups,
@@ -4024,6 +4217,8 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
     formatGeneratedPlanGapClosureSelectionWorkbenchMarkdown(gapClosureSelection)
   const d49ResidualFollowUpLines =
     formatGeneratedPlanD49ResidualFollowUpPacketMarkdown(d49ResidualFollowUpPacket)
+  const d49U8GeneratorPolicyProofLines =
+    formatGeneratedPlanD49U8GeneratorPolicyProofPacketMarkdown(d49U8GeneratorPolicyProofPacket)
   const d47D05ComparatorPayloadLines =
     formatGeneratedPlanD47D05ComparatorEvaluationPayloadMarkdown(d47D05ComparatorPayload)
   const d47D05ComparatorLines =
@@ -4080,6 +4275,10 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
     '## D49 Residual Follow-Up',
     '',
     ...d49ResidualFollowUpLines,
+    '',
+    '## D49 U8 Generator-Policy Proof',
+    '',
+    ...d49U8GeneratorPolicyProofLines,
     '',
     '## D47 vs D05 Comparator Evaluation Payload',
     '',

@@ -68,7 +68,7 @@ export function RecentSessionsList({ entries, now }: RecentSessionsListProps) {
 
   return (
     <section aria-label="Recent sessions" className="flex flex-col gap-2 px-1 pt-2">
-      <h2 className="text-sm font-semibold text-text-primary">Recent sessions</h2>
+      <h2 className="text-base font-semibold text-text-primary">Recent sessions</h2>
       <ul role="list" className="divide-y divide-text-primary/5">
         {entries.map((entry) => {
           const focus = inferSessionFocus(entry.plan.blocks)

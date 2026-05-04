@@ -22,6 +22,9 @@ decision_refs:
   - D124
 open_question_refs:
   - O2
+  - O22
+  - O23
+  - O24
 ---
 
 # M002: Weekly Confidence Loop

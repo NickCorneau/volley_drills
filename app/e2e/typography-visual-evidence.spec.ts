@@ -14,7 +14,7 @@ test.describe('typography visual evidence matrix', () => {
   test('captures browser-verified typography surfaces across the main session path', async ({
     page,
   }, testInfo) => {
-    await setupAndStart(page)
+    await setupAndStart(page, testInfo)
 
     await expect(page.getByText('Before we start')).toBeVisible()
     await attachScreenshot(page, testInfo, 'typography-safety-consequence')
@@ -63,22 +63,25 @@ test.describe('typography visual evidence matrix', () => {
   })
 })
 
-async function setupAndStart(page: Page) {
+async function setupAndStart(page: Page, testInfo: TestInfo) {
   await goToOnboardingTodaysSetup(page)
   await expect(page.getByText("Today's setup")).toBeVisible()
 
   await page.getByRole('radio', { name: 'Solo' }).click()
   await page.getByLabel('Net available').getByRole('radio', { name: 'No' }).click()
-  await page.getByLabel('Wall available').getByRole('radio', { name: 'No' }).click()
+  await page
+    .getByRole('radiogroup', { name: /wall or fence nearby/i })
+    .getByRole('radio', { name: 'No' })
+    .click()
   await page.getByRole('radio', { name: '15 min' }).click()
+  await attachScreenshot(page, testInfo, 'typography-setup-choices')
   await page.getByRole('button', { name: /build session/i }).click()
-  await expect(page.getByRole('heading', { name: /today.s focus/i })).toBeVisible()
-  await page.getByRole('button', { name: /continue/i }).click()
+  await expect(page.getByText('Before we start')).toBeVisible()
 }
 
 async function passSafety(page: Page) {
   await page.getByRole('radio', { name: 'No' }).click()
-  await page.locator('button', { hasText: 'Yesterday' }).click()
+  await page.getByRole('radio', { name: 'Yesterday' }).click()
   await page.getByRole('button', { name: /start session/i }).click()
 }
 

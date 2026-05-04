@@ -156,7 +156,7 @@ const chain4: ProgressionChain = {
   id: 'chain-4-serve-receive',
   name: 'Serve-Receive Variability and Pressure',
   focus: 'Short/deep reads, serve pressure, fatigue-aware caps.',
-  drillIds: ['d15', 'd16', 'd46', 'd17', 'd18'],
+  drillIds: ['d15', 'd16', 'd46', 'd50', 'd17', 'd18'],
   defaultGatingThreshold: 0.7,
   links: [
     {
@@ -172,6 +172,13 @@ const chain4: ProgressionChain = {
       direction: 'progression',
       gatingCriteria: '≥ 3/4 controlled passes per set in d16',
       description: 'Four-point movement stable → add advanced spin-read receive work.',
+    },
+    {
+      fromDrillId: 'd46',
+      toDrillId: 'd50',
+      direction: 'lateral',
+      description:
+        'Alternative advanced passing branch for longer short/deep zone decisioning under fatigue. d46 owns spin reading at 5-8 min; d50 owns short/deep zone decisioning at 8-14 min.',
     },
     {
       fromDrillId: 'd16',
@@ -233,7 +240,7 @@ const chain6: ProgressionChain = {
   id: 'chain-6-serving',
   name: 'Serving as the Enabling Skill',
   focus: 'Serve consistency, zone targeting, and transition movement.',
-  drillIds: ['d22', 'd31', 'd23', 'd33'],
+  drillIds: ['d22', 'd31', 'd51', 'd23', 'd33'],
   defaultGatingThreshold: 0.7,
   links: [
     {
@@ -258,6 +265,13 @@ const chain6: ProgressionChain = {
       direction: 'lateral',
       description:
         'Alternative entry point for ball-light or no-net sessions: tighten one small target instead of running zone scoring.',
+    },
+    {
+      fromDrillId: 'd31',
+      toDrillId: 'd51',
+      direction: 'lateral',
+      description:
+        'Alternative beginner serving branch for longer tactical zone-awareness blocks. d31 owns single-target commitment at 4-8 min; d51 owns no-serve-zone tactical awareness at 8-14 min.',
     },
   ],
 }

@@ -144,7 +144,7 @@ test.describe('Phase C-3 onboarding first-open flow', () => {
       .getByRole('radio', { name: 'No' })
       .click()
     await page
-      .getByRole('radiogroup', { name: 'Wall available' })
+      .getByRole('radiogroup', { name: /wall or fence nearby/i })
       .getByRole('radio', { name: 'No' })
       .click()
     await page.getByRole('radio', { name: '15 min' }).click()

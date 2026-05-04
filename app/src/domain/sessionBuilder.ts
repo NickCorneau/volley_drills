@@ -25,9 +25,11 @@ export {
 } from './sessionAssembly/swapAlternatives'
 export { deriveBlockRationale } from './sessionAssembly/rationale'
 
-export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 4
+export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 6
 
 const ADVANCED_SETTING_DURATION_FIT_DRILL_IDS = new Set(['d47', 'd48'])
+const ADVANCED_PASSING_DURATION_FIT_DRILL_IDS = new Set(['d46'])
+const BEGINNER_SERVING_DURATION_FIT_DRILL_IDS = new Set(['d31'])
 
 /**
  * Optional inputs that scope build-time drill substitution.
@@ -153,6 +155,49 @@ function shouldPreferAdvancedSettingDurationFit(
   )
 }
 
+// Advanced pair-open / solo-open passing main-skill blocks above D46's 8-minute
+// envelope used to silently over-stretch D46 (FIVB 3.16 spin-read receive).
+// D50 (FIVB 3.13 Short/Deep, 8-14 min envelope) is the source-backed long
+// envelope sibling; this predicate triggers the reroute when D46 was selected
+// for an advanced passing block it cannot carry. Mirrors
+// `shouldPreferAdvancedSettingDurationFit` for D47/D48 -> D49.
+function shouldPreferAdvancedPassingDurationFit(
+  slot: BlockSlot,
+  context: SetupContext,
+  selected: CandidateVariant,
+  plannedDurationMinutes: number,
+): boolean {
+  return (
+    slot.type === 'main_skill' &&
+    context.sessionFocus === 'pass' &&
+    context.playerLevel === 'advanced' &&
+    ADVANCED_PASSING_DURATION_FIT_DRILL_IDS.has(selected.drill.id) &&
+    !candidateCanCarryTargetDuration(selected, plannedDurationMinutes)
+  )
+}
+
+// Beginner serving main-skill blocks above D31's 8-minute envelope used to
+// silently over-stretch D31 (BAB Self-Toss Target Practice). D51 (FIVB 2.2
+// Outside the Heart, 8-14 min envelope) is the source-backed long envelope
+// sibling; this predicate triggers the reroute when D31 was selected for a
+// beginner serving block it cannot carry. Third application of the
+// source-backed content-depth activation pattern (after D49 and D50); first
+// application at the beginner level.
+function shouldPreferBeginnerServingDurationFit(
+  slot: BlockSlot,
+  context: SetupContext,
+  selected: CandidateVariant,
+  plannedDurationMinutes: number,
+): boolean {
+  return (
+    slot.type === 'main_skill' &&
+    context.sessionFocus === 'serve' &&
+    context.playerLevel === 'beginner' &&
+    BEGINNER_SERVING_DURATION_FIT_DRILL_IDS.has(selected.drill.id) &&
+    !candidateCanCarryTargetDuration(selected, plannedDurationMinutes)
+  )
+}
+
 function buildDraftResult(
   context: SetupContext,
   options?: BuildDraftOptions,
@@ -269,7 +314,24 @@ function buildDraftResult(
         selected.pick,
         plannedDurationMinutes,
       )
-      if (shouldRerouteD01 || shouldRerouteAdvancedSetting) {
+      const shouldRerouteAdvancedPassing = shouldPreferAdvancedPassingDurationFit(
+        slot,
+        effectiveContext,
+        selected.pick,
+        plannedDurationMinutes,
+      )
+      const shouldRerouteBeginnerServing = shouldPreferBeginnerServingDurationFit(
+        slot,
+        effectiveContext,
+        selected.pick,
+        plannedDurationMinutes,
+      )
+      if (
+        shouldRerouteD01 ||
+        shouldRerouteAdvancedSetting ||
+        shouldRerouteAdvancedPassing ||
+        shouldRerouteBeginnerServing
+      ) {
         const rerouted = pickForSlot(slot, effectiveContext, usedDrillIds, random, {
           playerLevel: options?.playerLevel,
           allowUsedFallback: false,

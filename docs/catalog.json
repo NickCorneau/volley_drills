@@ -1,7 +1,7 @@
 {
   "schema_version": 5,
   "repo_id": "volley_drills",
-  "last_updated": "2026-05-03",
+  "last_updated": "2026-05-04",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -379,6 +379,27 @@
       "path": "docs/research/beach-training-resources.md",
       "type": "research",
       "status": "active"
+    },
+    {
+      "id": "bab-source-material",
+      "path": "docs/research/bab-source-material.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "Better at Beach source/provenance archive: 2024 Essential Drills Book practice-plan TOC, **all 20 Practice Plans captured at source-detail level** plus partial-capture caveats per plan (Plan 4 Drills 5-6 only; Plan 9 Drill 6 captured via Plan 11 Drill 5; Plans 10-20 Drill 1 name-only; Plans 15-18 Drill 2 name-only; Plan 20 Drill 2 truncated source) and 2026-05-04 drill-level catalog markup, Beginner's Guide lesson/drill anchors, Coaches Guide practice-template excerpts, BAB glossary spanning attack-accuracy box vocabulary (Plan 7), per-shot / rule-restricted-variant authoring patterns (Plan 8), drill-name aliasing / vision-pepper vocabulary (Plan 9), defender-role-differentiated drill family / blocker-defender coupling / level-scaled rule / sideout-to-free-ball / fourth Triangle Setting source form vocabulary (Plan 10), reactive-blocker / rule-augmented-variant vocabulary (Plan 11), per-shot dig-technique / `4 Steps to Paradise` / drill-repurposing-across-focus vocabulary (Plan 12), `Dig from Knees` / hand-dig-vs-platform-dig / defender-perspective-framing vocabulary (Plan 13), `Pull Digs to Set` / smack-misdirection / attacker-deception read-drill vocabulary (Plan 14), `Shuffle to HL/CS to Live Play` / `win by 2` vocabulary (Plan 15), `Threat or No Threat` blocker-as-reader / set-quality cue / `third-to-15` tiebreaker vocabulary (Plan 16), `Race to 5 HL and CS` / `10 Sideouts` / `BIG point` / participant-structure axis vocabulary (Plan 17), `Triangle Setting with Attack (Serve)` / `Add In/Add Out` wash drill / conjunctive-wash with cancellation seventh composable scoring rule kind / single-passer-attacker pattern vocabulary (Plan 18), `Small Court: Mini Games to 7` scoring-zone gate eighth composable scoring rule kind / `Game to 21 (no regulations)` minimal-overlay base form vocabulary (Plan 19), and **`16-18 Run with It` reset-on-miss / consecutive-streak-required ninth composable scoring rule kind / asymmetric scoring tenth structural axis (per-team rule mechanism) / Game Play cluster grammar (cluster-complete) / T10 (read drills) narrowed to Defense/Attack-only pattern / captured BAB drill book complete vocabulary (Plan 20)**, and source-name to our-drill-id cross-reference. Plans 7-11 are the complete attacking-focused cluster; **Plans 12-16 are the complete defense-focused cluster**; **Plans 17-20 are the complete Game Play cluster**. Triangle Setting (4p hit-fed) and 14-15 Games to 21 are tied at eight plan references each; Comp Transition HL/CS Live at six; Cross Court Pepper at five; `3 Before 5` family at five across three clusters; Around the World (Serve) at four. **The captured BAB drill book is now structurally complete.** Supports candidate drill evaluation but does not authorize catalog changes without active decision/spec gates."
+    },
+    {
+      "id": "fivb-source-material",
+      "path": "docs/research/fivb-source-material.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "FIVB Beach Volleyball Drill-book source/provenance archive: source provenance, drill data model, chapter teaching frameworks, 104-drill TOC, selected drill excerpts, FIVB glossary, and FIVB-name to our-drill-id cross-reference. Supports candidate drill evaluation but does not authorize catalog changes without active decision/spec gates."
+    },
+    {
+      "id": "practice-plan-authoring-synthesis",
+      "path": "docs/research/practice-plan-authoring-synthesis.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "Cross-source synthesis of **all 20 BAB Practice Plans** (passing 1-4, setting 5-6, attacking 7-11 — full cluster, defense 12-16 — full cluster, **Plans 17-20 — complete Game Play cluster**), FIVB drill-book / coaches-manual, and Volleyball Canada VDM/LTD3 sources. **The captured BAB drill book is structurally complete (research-complete), but the 2026-05-04 ideation pass adversarial-filter found this is NOT milestone-ready** — see `docs/ideation/2026-05-04-bab-complete-plan-builder-ideation.md` for the survivor buckets and re-activation triggers (D101 unlocks; M002 needs plan-grammar input; or non-D101-gated source-priority drill clears the diagnostics activation pattern). The synthesis is **archived inventory + structural confirmation of canon** (T1/T2/T5/T7 confirm D76/D77/D101 + existing archetype shape), not a current-milestone build agenda. Names a six-slot focus-agnostic plan grammar confirmed across all five clusters with slot 4 (movement) cluster-complete-skipped in Game Play, maps cross-source convergence across 12 topics, synthesizes 13 cross-source theses (T1-T13). **Plans 17-20 triggered seven real falsification entries in `Theses Retired or Narrowed`:** T9 sharpened **four consecutive times** to nine composable rule kinds plus asymmetric scoring axis; T10 narrowed from universal to Defense/Attack-only; T12 graduated from sample-of-one to two-source pattern. Includes Adopt/Adapt/Reject ledger, plan-builder theses, candidate routing, and schema/product/cross-source open questions. Does not authorize catalog additions without active decision/spec gates; further BAB-derived schema work should defer past the 2026-05-21 D130 condition read-out."
     },
     {
       "id": "brand-ux-guidelines",
@@ -863,6 +884,13 @@
       "canonical_for": "Ranked ideation for turning generated diagnostics into concrete drill and programming gap fills. Selects the D47-piloted Diagnostic Gap Closure Ledger as the first brainstorm target, with evidence shopping lists, reassessment receipts, outcome coverage maps, source-backed gap-card drafts, counterfactual-first drill surgery, and one-gap-per-cycle queue as follow-up survivors."
     },
     {
+      "id": "bab-complete-plan-builder-ideation-2026-05-04",
+      "path": "docs/ideation/2026-05-04-bab-complete-plan-builder-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked ideation pass at the BAB-drill-book-complete milestone (all 20 BAB plans captured at source-detail level). Generated ~46 candidates across 6 ce-ideate frames + ce-architecture-strategist + ce-product-lens-reviewer adversarial critiques. **Load-bearing finding (product-lens):** the BAB synthesis is comprehensive research but premature for operationalization at the current milestone — D101 gates 5 of 6 BAB top-tier source-priority drill families; D130 founder-use mode has 17 days remaining; M001 is solo/pair-first; calm-courtside identity argues against importing BAB-grade schema complexity before content can ship. Survivors split into three buckets: **Bucket A — Now-shippable (4):** A1 refactor `shouldPrefer*DurationFit` predicates into a registry; A2 receipt canon-validating BAB confirmations (T1/T2/T5/T7 confirm D76/D77/D101 + existing archetype shape); A3 re-activation triggers in synthesis frontmatter (shipped); A4 small `O24` decision-pass packet engaging BAB Plan 1 integrative-focus evidence head-on. **Bucket B — Pre-D101 schema gates (3 decisions):** B1 T9 modeling stance (separate records vs sibling variants vs runtime overlays); B2 T6 zone-convention default; B3 slot-4-optional archetype work. **Bucket C — Post-D101 / M002 candidates (5; gated by re-activation triggers):** composable scoring grammar; problem-first plan flow; drill family abstraction; repetition-rank-aware catalog metadata; `compatibleFocuses` axis. **Sequencing recommendation (architecture-strategist):** resolve `O24` before any schema work — gates the read-drill schema, `compatibleFocuses`, and integrative-focus interpretation. **Anti-patterns avoided:** per-team rules without session-context; per-shot duplicate records; universal warm-up opener; credit-inflating BAB scoring grammar over FIVB Modified Games; alias-aware schema. **Rejected:** importing BAB plan generation wholesale into M001; BAB-grade complexity in calm courtside UI before D101; 3+ player drills before D101; read-drill 3-axis schema before D135 evidence."
+    },
+    {
       "id": "calm-courtside-ux-style-ideation-2026-05-02",
       "path": "docs/ideation/2026-05-02-calm-courtside-ux-style-ideation.md",
       "type": "ideation",
@@ -891,6 +919,28 @@
       "canonical_for": "Ranked typography and brand-fit ideation for Volleycraft. Selects keeping Inter Variable plus JetBrains Mono Variable while defining semantic type roles, selectively retuning courtside-critical scale, adding distance-aware Run typography scaffolding, and protecting the calm brand rhythm with lightweight guardrails."
     },
     {
+      "id": "setup-screen-default-path-polish-ideation-2026-05-04",
+      "path": "docs/ideation/2026-05-04-setup-screen-default-path-polish-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked ideation for polishing the setup screen after Focus moved into Today's setup and Solo/Net defaults were added. Selects an optional Focus cue plus clearer wall/fence follow-up copy while rejecting summary bars, stronger selected-chip states, enabled footer helper copy, and larger setup redesigns."
+    },
+    {
+      "id": "setup-screen-default-path-polish-requirements-2026-05-04",
+      "path": "docs/brainstorms/2026-05-04-setup-screen-default-path-polish-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for a narrow setup-screen polish pass: Focus must read as optional tuning, the default build-ready path must stay quiet, the no-net wall/fence follow-up must remain subordinate and practical, and existing setup behavior must be preserved."
+    },
+    {
+      "id": "setup-screen-default-path-polish-plan-2026-05-04",
+      "path": "docs/plans/2026-05-04-005-feat-setup-default-path-polish-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for the setup-screen default-path polish selected from the 2026-05-04 ideation and requirements. Covers the inline optional Focus cue, clearer wall/fence nearby copy, and focused setup tests without changing chip styling, setup flow, or D127 typography scope."
+    },
+    {
       "id": "volleycraft-typography-system-requirements-2026-05-02",
       "path": "docs/brainstorms/2026-05-02-volleycraft-typography-system-requirements.md",
       "type": "requirements",
@@ -901,7 +951,8 @@
       "id": "volleycraft-typography-system-plan-2026-05-03",
       "path": "docs/plans/2026-05-03-001-feat-volleycraft-typography-system-plan.md",
       "type": "plan",
-      "status": "active",
+      "status": "complete",
+      "active_registry": true,
       "canonical_for": "Implementation plan for the Volleycraft typography-system pass. Tracks the completed docs, guardrail, hard-violation fix, browser evidence, and verification work selected from the typography-system requirements."
     },
     {
@@ -1186,6 +1237,74 @@
       "canonical_for": "Completed implementation plan for refining the generated D49 residual follow-up packet so it selects the next useful work, routes only pressure-bearing D49 redistribution evidence to future U8/generator-policy follow-up, treats optional-slot-only redistribution as no action, and separates D47 resolution from D49 cap/catalog/runtime authorization."
     },
     {
+      "id": "d49-scoped-u8-generator-policy-follow-up-plan-2026-05-03",
+      "path": "docs/plans/2026-05-03-003-feat-d49-scoped-u8-generator-policy-follow-up-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for adding a D49-scoped U8 proof packet that evaluates pressure-bearing D49 optional-slot redistribution as diagnostic-only allocated-duration counterfactual evidence, preserving not-authorized status for runtime redistribution, catalog content, D49 caps, source depth, and D47 reopening."
+    },
+    {
+      "id": "pair-side-catalog-content-depth-requirements-2026-05-04",
+      "path": "docs/brainstorms/2026-05-04-pair-side-catalog-content-depth-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for closing the highest-leverage pair-side catalog content depth gap from current generated diagnostics. Names d46-pair-open as the primary candidate, d31-pair-open/d31-pair as secondary, and preserves comparator-gated activation plus the D101 (3+ player) boundary."
+    },
+    {
+      "id": "d50-advanced-passing-depth-requirements-2026-05-04",
+      "path": "docs/brainstorms/2026-05-04-d50-advanced-passing-depth-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for a new advanced passing depth drill family d50 sourced from FIVB Drill-book 3.13 Short/Deep, intended to absorb pressure_remains evidence on d46-pair-open and d46-solo-open without widening d46 caps or duplicating its spin-read objective. Implemented and shipped as d50 family on 2026-05-04 via docs/plans/2026-05-04-003-feat-d50-advanced-passing-depth-plan.md."
+    },
+    {
+      "id": "d50-advanced-passing-depth-plan-2026-05-04",
+      "path": "docs/plans/2026-05-04-003-feat-d50-advanced-passing-depth-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for the d50 Short/Deep Pass Read advanced passing depth drill family, sourced from FIVB Drill-book 3.13 Short/Deep. Authors d50-pair-open and d50-solo-open variants (8-14 min envelope), wires shouldPreferAdvancedPassingDurationFit selection-path reroute mirroring the d47/d48 -> d49 setting reroute, bumps SESSION_ASSEMBLY_ALGORITHM_VERSION 4 -> 5, and ships with regenerated diagnostics confirming d46-pair-open and d46-solo-open absorbed (groups absent from receipt) and new d50 groups all classifying as likely_redistribution_caused. First non-D47-derived advanced catalog add authored from the diagnostic kit's source_backed_content_depth lane."
+    },
+    {
+      "id": "source-backed-content-depth-activation-pattern-2026-05-04",
+      "path": "docs/solutions/2026-05-04-source-backed-content-depth-activation-pattern.md",
+      "type": "solution",
+      "status": "active",
+      "canonical_for": "Canonical end-to-end workflow learning for moving a generated-plan diagnostic group from pressure_remains_without_redistribution evidence to a shipped catalog drill addition, using the in-repo FIVB/BAB/VC source archives as load-bearing intermediates. Validated three times: D47 closed-by-D49 (2026-05-02 advanced setting), D46 closed-by-D50 (2026-05-04 advanced passing), D31 closed-by-D51 (2026-05-04 beginner serving). Names the implementation skeleton, required boundaries (no teaching-surface duplication, rollback criterion, D101 boundary, selection-path change paired with drill add, algorithm version bump on snapshot break), verification sequence, documentation trail, and remaining pre-mined Tier 2 polish candidates. Recipe proven level-agnostic (works at beginner + advanced)."
+    },
+    {
+      "id": "d51-beginner-serving-tactical-zone-depth-requirements-2026-05-04",
+      "path": "docs/brainstorms/2026-05-04-d51-beginner-serving-tactical-zone-depth-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for a new beginner serving tactical-zone depth drill family d51 (Outside the Heart Serving) sourced from FIVB Drill-book 2.2, intended to absorb pressure_remains evidence on the d31 cluster (d31-solo-open, d31-pair-open, d31-pair) without widening d31 caps or duplicating its single-target objective. Implemented and shipped as d51 family on 2026-05-04 via docs/plans/2026-05-04-004-feat-d51-beginner-serving-tactical-zone-depth-plan.md."
+    },
+    {
+      "id": "d51-beginner-serving-tactical-zone-depth-plan-2026-05-04",
+      "path": "docs/plans/2026-05-04-004-feat-d51-beginner-serving-tactical-zone-depth-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for the d51 Outside the Heart Serving beginner tactical-zone depth drill family, sourced from FIVB Drill-book 2.2. Authors d51-solo-open, d51-pair-open, d51-pair variants (8-14 min envelope), wires shouldPreferBeginnerServingDurationFit selection-path reroute mirroring the d49 setting and d50 passing reroutes, bumps SESSION_ASSEMBLY_ALGORITHM_VERSION 5 -> 6, ships with regenerated diagnostics confirming d31 cluster absorbed (groups absent from receipt) and new d51 groups all classifying as likely_redistribution_caused. Third validated application of the source-backed content-depth activation pattern; first at the beginner level. Also extends the compression-lane classifier to handle movement_proxy under_authored_min groups."
+    },
+    {
+      "id": "d46-pair-open-source-backed-gap-card-plan-2026-05-04",
+      "path": "docs/plans/2026-05-04-001-feat-d46-pair-open-source-backed-gap-card-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for shipping the d46-pair-open source-backed gap card and registering it in catalog routing metadata. Documentation-only slice; defers comparator decision packet and catalog implementation plan as named follow-up artefacts."
+    },
+    {
+      "id": "d46-pair-open-no-change-comparator-decision-packet-plan-2026-05-04",
+      "path": "docs/plans/2026-05-04-002-feat-d46-pair-open-no-change-comparator-decision-packet-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for a documentation-only comparator decision packet comparing d46-pair-open against no-change. The packet selects hold_for_source_evidence with all catalog, cap, workload, runtime, U6, and D101 changes not authorized, and names the D46 pair source evidence payload as next artifact."
+    },
+    {
       "id": "agent-architecture-cleanup-plan-2026-05-02",
       "path": "docs/plans/2026-05-02-019-refactor-agent-architecture-cleanup-plan.md",
       "type": "plan",
@@ -1235,7 +1354,7 @@
       "path": "docs/reviews/2026-05-01-generated-plan-diagnostics-triage.md",
       "type": "review",
       "status": "active",
-      "canonical_for": "Docs-first triage workbench for generated-plan routeable observation groups. Generated and validated with the diagnostics report; current snapshot records 58 registry entries, 0 blocking validation issues, 0 warning issues, 35 defer routes, 23 generator-policy-investigation routes, decision-debt compression, a redistribution causality receipt, the D47 proposal-admission ticket, the D47 gap closure ledger, D01 follow-up packets, gap-closure selection, the D49 residual follow-up packet, the D47-vs-D05 comparator evaluation payload, and the D47-vs-D05 comparator decision packet. Current D47 state is `closed_by_d49`: the original D47 comparator key is gone; D49 residual follow-up selects `route_to_u8` for pressure-bearing redistribution evidence, keeps workload review visible, treats optional-slot-only redistribution as no action, and leaves D49 cap/catalog/runtime activation not authorized."
+      "canonical_for": "Docs-first triage workbench for generated-plan routeable observation groups. Generated and validated with the diagnostics report; current snapshot records 75 registry entries (post-d51 ship 2026-05-04), 0 blocking validation issues, 0 warning issues, decision-debt compression including extended movement_proxy_under_min handling, a redistribution causality receipt, the D47 proposal-admission ticket, the D47 gap closure ledger, D01 follow-up packets, gap-closure selection, the D49 residual follow-up packet, the D49 U8 generator-policy proof packet, the D47-vs-D05 comparator evaluation payload, the D47-vs-D05 comparator decision packet, D46 pair-side gap/comparator follow-up docs, the D50 advanced passing depth catalog activation, and the D51 beginner serving tactical-zone depth catalog activation. Current D47 state is `closed_by_d49`; current D46 state is `closed_by_d50`; current D31 state is `closed_by_d51`: d31-solo-open, d31-pair-open, and d31-pair optional_slot_redistribution+over_authored_max+over_fatigue_cap groups absorbed by the d51 reroute, with new d51 groups all classifying as likely_redistribution_caused."
     },
     {
       "id": "d47-source-backed-gap-card-2026-05-02",
@@ -1252,11 +1371,32 @@
       "canonical_for": "D47-vs-D05 comparator evaluation payload. Selects `d47_wins`, keeps authorization `not_authorized`, records D47 source/adaptation and selection-path proof, preserves D05 re-entry triggers, and names the D47 source-backed catalog implementation plan as the follow-up artifact."
     },
     {
+      "id": "d05-solo-source-backed-gap-card-2026-05-04",
+      "path": "docs/reviews/2026-05-04-d05-solo-source-backed-gap-card.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Source-backed gap card for the remaining d05-solo beginner/intermediate solo passing pressure cluster. Records D05 as the only current catalog-ish re-entry candidate after D49/D50/D51, but keeps activation not authorized until a source-evidence payload proves a distinct longer solo passing carrier beyond current set-window passing."
+    },
+    {
       "id": "d49-source-backed-activation-manifest-2026-05-02",
       "path": "docs/reviews/2026-05-02-d49-source-backed-activation-manifest.md",
       "type": "review",
       "status": "active",
       "canonical_for": "Activation manifest for the D47-winning source-backed catalog gap. Authorizes only the bounded D49 advanced setting/movement implementation and selection-path proof while preserving D05 re-entry and rejecting D47 cap widening or 3+ player source forms."
+    },
+    {
+      "id": "d46-pair-open-source-backed-gap-card-2026-05-04",
+      "path": "docs/reviews/2026-05-04-d46-pair-open-source-backed-gap-card.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Source-backed gap card for the d46-pair-open advanced spin-read serve receive pressure cluster. Names a candidate longer pair-open serve receive conditioning sibling beyond existing FIVB 3.15/3.16 D46 coverage, and remains not authorized; the follow-up comparator packet selects hold_for_source_evidence pending exact source/adaptation proof."
+    },
+    {
+      "id": "d46-pair-open-no-change-comparator-decision-packet-2026-05-04",
+      "path": "docs/reviews/2026-05-04-d46-pair-open-no-change-comparator-decision-packet.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Comparator decision packet for d46-pair-open versus no-change. Selects hold_for_source_evidence, keeps all catalog/cap/workload/runtime/U6/D101 changes not authorized, rejects immediate no-change acceptance, and names the D46 pair source evidence payload as the next artifact."
     },
     {
       "id": "focus-coverage-gap-cards-2026-04-30",
@@ -1379,6 +1519,18 @@
     {
       "path": "docs/research/beach-training-resources.md",
       "focus": "broad product and training research"
+    },
+    {
+      "path": "docs/research/bab-source-material.md",
+      "focus": "Better at Beach source/provenance archive for evaluating candidate drill adaptations: **all 20 Practice Plans captured at source-detail level** (Plans 7-11 attacking cluster, Plans 12-16 complete defense-focused cluster, **Plans 17-20 complete Game Play cluster** — captured BAB drill book is now structurally complete), partial-capture caveats per plan (Plan 4 Drills 5-6 only; Plan 9 Drill 6 via Plan 11; Plans 10-20 Drill 1 name-only; Plans 15-18 Drill 2 name-only; Plan 20 Drill 2 truncated), and 2026-05-04 drill-level catalog markup, practice-plan TOC, BAB glossary including **all nine composable scoring rule kinds plus asymmetric scoring axis** (rule-restriction, rule-augmentation, tiebreaker, side-switch trigger, outcome-elevation gate, conditional-extension, conjunctive/wash with cancellation, scoring-zone gate, **reset-on-miss / consecutive-streak-required**, plus **asymmetric scoring tenth structural axis**) plus drill-name aliasing / vision-pepper / defender-role / blocker-defender-coupling / level-scaled-rule / reactive-blocker / defensive-movement / drill-repurposing-across-focus / hand-dig-vs-platform-dig / defender-perspective-framing / pull-block-dig / smack-misdirection / attacker-deception-read / transition-setting / live-point-integration / blocker-as-reader / set-quality-cue / toss-fed-to-serve-fed-sibling / Race-to-5 / 10-Sideouts / BIG-point / Triangle-Setting-with-Attack / Add-In-Add-Out / single-passer-attacker / Small Court Mini Games / scoring-zone-gate / Game to 21 (no regulations) / **16-18 Run with It / reset-on-miss-streak-required / asymmetric scoring per-team-rule / Game Play cluster grammar (cluster-complete) / T10 (read drills) narrowed to Defense/Attack-only / captured BAB drill book complete (Plan 20)** vocabulary, Coaches Guide practice template, and source-name to our-drill-id cross-reference. Not implementation authorization; check current decision/spec gates before catalog changes."
+    },
+    {
+      "path": "docs/research/fivb-source-material.md",
+      "focus": "FIVB Beach Volleyball Drill-book source/provenance archive for evaluating candidate drill adaptations: drill data model, chapter teaching frameworks, 104-drill TOC, selected drill excerpts, FIVB glossary, and FIVB-name to our-drill-id cross-reference. Not implementation authorization; check current decision/spec gates before catalog changes."
+    },
+    {
+      "path": "docs/research/practice-plan-authoring-synthesis.md",
+      "focus": "Cross-source synthesis for how Volleycraft should build focus-coherent practice plans from BAB, FIVB, and Volleyball Canada VDM/LTD3. **The captured BAB drill book is now structurally complete (all 20 plans captured at source-detail level).** Names a six-slot focus-agnostic plan grammar across passing/setting/attacking/defense and **cluster-complete-confirmed against game-play across all four Game Play plans (17, 18, 19, 20)** all fitting the spine with slot 4 intentionally skipped, maps cross-source convergence and divergence across 12 topics, and synthesizes 13 theses (T1-T13) plus 10 plan-builder theses, a `Theses Retired or Narrowed` falsification slot (Plans 17-20 triggered seven real entries: T9 broadened **four consecutive times** from two-pattern symmetry to nine composable scoring rule kinds plus asymmetric scoring as a tenth structural axis; slot 4 confirmed optional across all four Game Play plans; slot 2 primer narrowed to 'any 4-player chain primer'; T10 narrowed from universal to Defense/Attack-only; T12 graduated from sample-of-one to two-source pattern), candidate routing, and schema/product/cross-source open questions. Not implementation authorization; check current decision/spec gates before catalog changes."
     },
     {
       "path": "docs/research/outdoor-courtside-ui-brief.md",

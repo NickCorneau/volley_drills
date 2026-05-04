@@ -45,32 +45,59 @@ export function RunControls({
   onSwap,
 }: RunControlsProps) {
   if (isPaused) {
+    const pausedActions = [
+      onSwap && {
+        key: 'swap',
+        label: 'Swap',
+        onClick: onSwap,
+      },
+      {
+        key: 'shorten',
+        label: 'Shorten',
+        onClick: onShorten,
+      },
+      !isRequired && {
+        key: 'skip',
+        label: 'Skip block',
+        onClick: onSkip,
+      },
+      {
+        key: 'end',
+        label: 'End session',
+        onClick: onEndSession,
+        className: 'border-warning/20 text-warning',
+      },
+    ].filter(Boolean) as Array<{
+      key: string
+      label: string
+      onClick: () => void
+      className?: string
+    }>
+    const gridColumns =
+      pausedActions.length >= 4
+        ? 'grid-cols-4 gap-2'
+        : pausedActions.length === 3
+          ? 'grid-cols-3 gap-2'
+          : 'grid-cols-2 gap-3'
+    const compactButtonClass =
+      pausedActions.length >= 4 ? 'min-w-0 whitespace-nowrap px-2 text-xs' : 'min-w-0'
+
     return (
       <div className="flex flex-col gap-3">
         <Button variant="primary" fullWidth onClick={onResume}>
           Resume
         </Button>
-        <div className="grid grid-cols-2 gap-3">
-          {onSwap && (
-            <Button variant="secondary" onClick={onSwap}>
-              Swap
+        <div className={`grid ${gridColumns}`}>
+          {pausedActions.map((action) => (
+            <Button
+              key={action.key}
+              variant="secondary"
+              className={`${compactButtonClass} ${action.className ?? ''}`}
+              onClick={action.onClick}
+            >
+              {action.label}
             </Button>
-          )}
-          <Button variant="secondary" onClick={onShorten}>
-            Shorten
-          </Button>
-          {!isRequired && (
-            <Button variant="secondary" onClick={onSkip}>
-              Skip block
-            </Button>
-          )}
-          <Button
-            variant="secondary"
-            className="border-warning/20 text-warning"
-            onClick={onEndSession}
-          >
-            End session
-          </Button>
+          ))}
         </div>
       </div>
     )

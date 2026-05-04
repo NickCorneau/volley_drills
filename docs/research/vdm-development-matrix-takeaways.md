@@ -19,6 +19,7 @@ related:
   - docs/research/README.md
   - docs/research/binary-scoring-progression.md
   - docs/research/warmup-cooldown-minimum-protocols.md
+  - docs/research/practice-plan-authoring-synthesis.md
 ---
 
 # VDM (Volleyball Canada Development Matrix) Takeaways
@@ -28,6 +29,7 @@ related:
 - Use this note when you need the VDM's **skill-stage vocabulary**, the **time-to-consolidate** anchor, the **3×/week minimum** rule, the **structural-tolerance** framing, or the **0-10 pain scale** in one place, with explicit mapping to product surfaces.
 - Not this note for the three VDM findings already in canon: 70% progression threshold (`docs/research/binary-scoring-progression.md`, `D104`), side-specific passing targets and waterfall trajectory (`docs/research/beach-training-resources.md`), or Train-to-Train Beach skill list as the anchor for `chain-6-serving` / `chain-7-setting` (`docs/plans/2026-04-20-m001-tier1-implementation.md` Units 3 and 4).
 - Not this note for: the PERSON pillar (coaching soft skills), youth jump-volume caps, or national-team normative data — those do not apply to the 1-2 adult amateur self-coached M001 user.
+- Not this note for the cross-source plan-builder synthesis (how the VDM stage vocabulary combines with BAB practice grammar and FIVB guardrails to inform future Volleycraft plan-building): use `docs/research/practice-plan-authoring-synthesis.md`.
 - Status: **draft** — takeaways are captured but no new decision has been opened. Each item lists its disposition (**Adopt**, **Candidate**, or **Defer**) so an agent can route to the right surface without re-reading the PDF.
 
 ## Use This Note When

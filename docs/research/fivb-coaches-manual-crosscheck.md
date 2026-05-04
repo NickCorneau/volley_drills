@@ -20,6 +20,7 @@ related:
   - docs/research/sources/reference-only/README.md
   - docs/research/sources/reference-only/FIVB-Level-1-Coaches-Manual-2013.pdf
   - docs/research/sources/reference-only/2016_FIVB_DEV_Coaches_Manual_Level_II.pdf
+  - docs/research/practice-plan-authoring-synthesis.md
 ---
 
 # FIVB Level I And Level II Coaches Manual Crosscheck (Indoor Manuals)
@@ -31,6 +32,7 @@ related:
 - Net new ideas for the product are narrow but concrete: a **Fitts & Posner stage field** on drills, **cue-density rule** for cue cards, **feedback-cadence rule** for between-set prompts, **whole-practice bias** (explicit argument against part-practice), and **drill measurement modes** beyond binary Good/Not-Good.
 - Corroborates but does **not** materially sharpen: warm-up dosing, overload/progression/specificity principles, jump-volume as modifiable risk, LTAD stage naming, "play-through" overuse pattern that justifies the pain gate.
 - Not this note for broad product/training context (`docs/research/beach-training-resources.md`), the binary-score gate math (`docs/research/binary-scoring-progression.md`), the load engine (`docs/research/srpe-load-adaptation-rules.md`), warm-up dosing (`docs/research/warmup-cooldown-minimum-protocols.md`), or pain/safety copy (`docs/research/regulatory-boundary-pain-gated-training-apps.md`).
+- Not this note for the cross-source plan-builder synthesis that pulls the cue-density / feedback-cadence / whole-practice-bias / measurement-mode rules into a Volleycraft plan-building thesis — use `docs/research/practice-plan-authoring-synthesis.md`.
 - PDFs live in `docs/research/sources/reference-only/` — they are **not** primary sources for any existing claim. Do not promote them to `docs/research/sources/` without first rewriting a specific claim to depend on one of them.
 
 ## Bottom Line

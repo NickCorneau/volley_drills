@@ -108,7 +108,12 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
     const strict = findStrictSameFocusSwapAlternatives(currentServe, context)
     const runtime = findSwapAlternatives(currentServe, context)
 
-    expect(strict.map((alternate) => alternate.drillId).sort()).toEqual(['d22', 'd33'])
+    // 2026-05-04: `d51` (Open-Heart Tactical Serve Avoidance) joined the
+    // catalog as a beginner-friendly serve drill compatible with solo +
+    // no-net + no-wall (`env({ lowScreenTime: true })`). It is therefore
+    // a legitimate same-focus strict alternate to `d31` in this context.
+    // Origin: docs/plans/2026-05-04-004-feat-d51-beginner-serving-tactical-zone-depth-plan.md
+    expect(strict.map((alternate) => alternate.drillId).sort()).toEqual(['d22', 'd33', 'd51'])
     expect(
       strict.every((alternate) => {
         const drill = DRILLS.find((candidate) => candidate.id === alternate.drillId)

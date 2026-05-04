@@ -25,6 +25,8 @@ Platform-specific local-first and iPhone/PWA findings live in `docs/research/loc
 
 For a narrower, more machine-scannable courtside UI summary, use `docs/research/outdoor-courtside-ui-brief.md`.
 
+For the cross-source plan-builder synthesis (how BAB practice grammar, FIVB guardrails, and Volleyball Canada / VDM stage framing combine into theses for future Volleycraft plan-building), use `docs/research/practice-plan-authoring-synthesis.md`. The skill-acquisition synthesis section below remains the broader evidence base; the synthesis note is the focused plan-builder distillation.
+
 ## Use This Note When
 
 - you need broad product or training context rather than a narrow implementation note
