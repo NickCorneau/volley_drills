@@ -124,6 +124,7 @@ async function completeDrillCheckIfPresent(page: Page) {
 }
 
 async function attachScreenshot(page: Page, testInfo: TestInfo, name: string) {
-  const screenshot = await page.screenshot({ fullPage: false })
-  await testInfo.attach(name, { body: screenshot, contentType: 'image/png' })
+  const path = testInfo.outputPath(`${name}.png`)
+  await page.screenshot({ fullPage: false, path })
+  await testInfo.attach(name, { path, contentType: 'image/png' })
 }

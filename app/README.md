@@ -5,7 +5,7 @@ status: active
 stage: validation
 type: workspace-readme
 authority: current web app prototype state and implementation guardrails
-last_updated: 2026-05-02
+last_updated: 2026-05-03
 depends_on:
   - docs/prd-foundation.md
   - docs/decisions.md
@@ -115,7 +115,7 @@ npm run test:e2e
 npm run test:e2e:headed
 ```
 
-The E2E suite includes functional flow tests (`e2e/session-flow.spec.ts`, `e2e/edge-cases.spec.ts`), typography screenshot evidence (`e2e/typography-visual-evidence.spec.ts`), and WCAG 2.1 AA accessibility checks via `@axe-core/playwright` (`e2e/accessibility.spec.ts`). For a focused typography evidence run, use `npm run test:e2e -- e2e/typography-visual-evidence.spec.ts`; Playwright stores attached screenshots in that run's `test-results/` output and HTML report.
+The E2E suite includes functional flow tests (`e2e/session-flow.spec.ts`, `e2e/edge-cases.spec.ts`), typography screenshot evidence (`e2e/typography-visual-evidence.spec.ts`), and WCAG 2.1 AA accessibility checks via `@axe-core/playwright` (`e2e/accessibility.spec.ts`). For a focused typography evidence run, use `npm run test:e2e -- e2e/typography-visual-evidence.spec.ts`; the spec writes each screenshot to that run's per-test `test-results/` folder. The HTML report includes attachments in CI, or locally when Playwright is run with an HTML reporter.
 
 ## Deploy
 

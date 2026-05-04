@@ -6,7 +6,7 @@ stage: planning
 type: research
 authority: canonical UX behaviour reference — typography, color, copy voice, layout, iconography, states, and per-screen posture for the Volleycraft prototype and M001 build
 summary: "How Volleycraft should look and behave: a concrete, screen-by-screen reference for amateur athletes who take their sport seriously."
-last_updated: 2026-04-19
+last_updated: 2026-05-03
 depends_on:
   - docs/vision.md
   - docs/research/outdoor-courtside-ui-brief.md
@@ -209,7 +209,7 @@ Tokens live in `app/src/index.css` `@theme`. Do not hardcode hex values in compo
 | `--color-surface-calm` | `#fcfaf5` | Page field (warm off-white) |
 | `--color-bg-warm` | `#f5f5f0` | Secondary/soft card surface |
 | `--color-text-primary` | `#1a1a1a` | Primary body and display text |
-| `--color-text-secondary` | `#6b7280` | Labels, meta, support copy |
+| `--color-text-secondary` | `#4b5563` | Labels, meta, support copy |
 | `--color-success` | `#059669` | Completion markers, save confirmations |
 | `--color-warning` | `#dc2626` | Destructive/serious actions, pain flow, incomplete chips |
 | `--color-warning-surface` | `#fee2e2` | Pain-override card surface |
