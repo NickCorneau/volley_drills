@@ -1,7 +1,7 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "repo_id": "volley_drills",
-  "last_updated": "2026-05-05",
+  "last_updated": "2026-05-04",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -21,7 +21,7 @@
       "notes": "Editing from Windows Cursor is fine; repo automation assumes WSL/bash."
     },
     "active_milestone": "M001",
-    "stack": "Vite + React + TypeScript + PWA + Dexie (schema v5)",
+    "stack": "Vite + React + TypeScript + PWA + Dexie (schema v6)",
     "blocking_gate": "D130 founder-use conditions tracked in docs/research/founder-use-ledger.md; D91 retention gate deferred. See docs/status/current-state.md for current reads.",
     "prototype_feedback": "docs/research/2026-04-12-v0a-runner-probe-feedback.md",
     "v0b_field_look_feedback": "docs/research/2026-04-19-v0b-starter-loop-feedback.md",
@@ -110,32 +110,23 @@
       "path": "CLAUDE.md",
       "kind": "compatibility_surface",
       "always_read": false,
-      "use_when": [
-        "tool expects a Claude-specific root file"
-      ]
+      "use_when": ["tool expects a Claude-specific root file"]
     },
     {
       "path": "llms.txt",
       "kind": "compatibility_surface",
       "always_read": false,
-      "use_when": [
-        "tool expects a lightweight root summary"
-      ]
+      "use_when": ["tool expects a lightweight root summary"]
     },
     {
       "path": "agent-manifest.json",
       "kind": "compatibility_surface",
       "always_read": false,
-      "use_when": [
-        "tool expects a small JSON manifest"
-      ]
+      "use_when": ["tool expects a small JSON manifest"]
     }
   ],
   "read_packs": {
-    "cold_start_minimal": [
-      "AGENTS.md",
-      "docs/catalog.json"
-    ],
+    "cold_start_minimal": ["AGENTS.md", "docs/catalog.json"],
     "product_direction": [
       "docs/vision.md",
       "docs/decisions.md",
@@ -150,10 +141,7 @@
       "docs/research/2026-04-19-v0b-starter-loop-feedback.md",
       "app/README.md"
     ],
-    "research_question": [
-      "docs/research/README.md",
-      "docs/research/"
-    ],
+    "research_question": ["docs/research/README.md", "docs/research/"],
     "docs_editing": [
       "AGENTS.md",
       "docs/catalog.json",
@@ -178,81 +166,56 @@
     {
       "rank": 1,
       "path": "docs/vision.md",
-      "owns": [
-        "product principles",
-        "strategic stance"
-      ]
+      "owns": ["product principles", "strategic stance"]
     },
     {
       "rank": 2,
       "path": "docs/decisions.md",
-      "owns": [
-        "decided items (D*)",
-        "open questions (O*)",
-        "ruled-out items"
-      ]
+      "owns": ["decided items (D*)", "open questions (O*)", "ruled-out items"]
     },
     {
       "rank": 3,
       "path": "docs/prd-foundation.md",
-      "owns": [
-        "scope",
-        "workflow",
-        "object model",
-        "MVP requirements"
-      ]
+      "owns": ["scope", "workflow", "object model", "MVP requirements"]
     },
     {
       "rank": 4,
       "path": "docs/roadmap.md",
-      "owns": [
-        "phase sequencing",
-        "exit criteria"
-      ]
+      "owns": ["phase sequencing", "exit criteria"]
     },
     {
       "rank": 5,
       "path": "docs/milestones/",
-      "owns": [
-        "thin-slice charter scope"
-      ]
+      "owns": ["thin-slice charter scope"]
     },
     {
       "rank": 6,
       "path": "docs/specs/",
-      "owns": [
-        "milestone behavior details"
-      ]
+      "owns": ["milestone behavior details"]
     },
     {
       "rank": 7,
       "path": "docs/research/",
-      "owns": [
-        "curated research inputs"
-      ]
+      "owns": ["curated research inputs"]
     },
     {
       "rank": 8,
       "path": "docs/ops/",
       "owns": [
         "agent-facing doc rules",
-        "runtime/operations guidance"
+        "runtime/operations guidance",
+        "catalog authoring guidance"
       ]
     },
     {
       "rank": 9,
       "path": "AGENTS.md",
-      "owns": [
-        "repo-wide routing",
-        "working constraints"
-      ]
+      "owns": ["repo-wide routing", "working constraints"]
     },
     {
       "rank": 10,
       "path": "CLAUDE.md",
-      "owns": [
-        "tool-specific compatibility hints"
-      ]
+      "owns": ["tool-specific compatibility hints"]
     }
   ],
   "docs": [
@@ -289,6 +252,13 @@
       "path": "docs/README.md",
       "type": "index",
       "status": "active"
+    },
+    {
+      "id": "docs-archive",
+      "path": "docs/archive/README.md",
+      "type": "index",
+      "status": "active",
+      "canonical_for": "Index for completed or superseded historical docs moved out of active routing while preserving original doc family under docs/archive/<family>/."
     },
     {
       "id": "current-state",
@@ -328,7 +298,7 @@
       "id": "M001",
       "path": "docs/milestones/m001-solo-session-loop.md",
       "type": "milestone",
-      "status": "draft"
+      "status": "active"
     },
     {
       "id": "M002",
@@ -358,7 +328,7 @@
       "id": "M001-review",
       "path": "docs/specs/m001-review-micro-spec.md",
       "type": "spec",
-      "status": "draft"
+      "status": "active"
     },
     {
       "id": "M001-home-sync",
@@ -382,7 +352,9 @@
       "id": "phase-0-readiness-assessment",
       "path": "docs/discovery/phase-0-readiness-assessment.md",
       "type": "discovery",
-      "status": "superseded"
+      "status": "superseded",
+      "successor_disposition": "no_single_successor",
+      "successor_reason": "Current state split between app/README.md and v0a research feedback."
     },
     {
       "id": "phase-0-wedge-validation",
@@ -407,6 +379,34 @@
       "path": "docs/research/beach-training-resources.md",
       "type": "research",
       "status": "active"
+    },
+    {
+      "id": "bab-source-material",
+      "path": "docs/research/bab-source-material.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "Better at Beach source/provenance archive: 2024 Essential Drills Book practice-plan TOC, **all 20 Practice Plans captured at source-detail level** plus partial-capture caveats per plan (Plan 4 Drills 5-6 only; Plan 9 Drill 6 captured via Plan 11 Drill 5; Plans 10-20 Drill 1 name-only; Plans 15-18 Drill 2 name-only; Plan 20 Drill 2 truncated source) and 2026-05-04 drill-level catalog markup, Beginner's Guide lesson/drill anchors, Coaches Guide practice-template excerpts, BAB glossary spanning attack-accuracy box vocabulary (Plan 7), per-shot / rule-restricted-variant authoring patterns (Plan 8), drill-name aliasing / vision-pepper vocabulary (Plan 9), defender-role-differentiated drill family / blocker-defender coupling / level-scaled rule / sideout-to-free-ball / fourth Triangle Setting source form vocabulary (Plan 10), reactive-blocker / rule-augmented-variant vocabulary (Plan 11), per-shot dig-technique / `4 Steps to Paradise` / drill-repurposing-across-focus vocabulary (Plan 12), `Dig from Knees` / hand-dig-vs-platform-dig / defender-perspective-framing vocabulary (Plan 13), `Pull Digs to Set` / smack-misdirection / attacker-deception read-drill vocabulary (Plan 14), `Shuffle to HL/CS to Live Play` / `win by 2` vocabulary (Plan 15), `Threat or No Threat` blocker-as-reader / set-quality cue / `third-to-15` tiebreaker vocabulary (Plan 16), `Race to 5 HL and CS` / `10 Sideouts` / `BIG point` / participant-structure axis vocabulary (Plan 17), `Triangle Setting with Attack (Serve)` / `Add In/Add Out` wash drill / conjunctive-wash with cancellation seventh composable scoring rule kind / single-passer-attacker pattern vocabulary (Plan 18), `Small Court: Mini Games to 7` scoring-zone gate eighth composable scoring rule kind / `Game to 21 (no regulations)` minimal-overlay base form vocabulary (Plan 19), and **`16-18 Run with It` reset-on-miss / consecutive-streak-required ninth composable scoring rule kind / asymmetric scoring tenth structural axis (per-team rule mechanism) / Game Play cluster grammar (cluster-complete) / T10 (read drills) narrowed to Defense/Attack-only pattern / captured BAB drill book complete vocabulary (Plan 20)**, and source-name to our-drill-id cross-reference. Plans 7-11 are the complete attacking-focused cluster; **Plans 12-16 are the complete defense-focused cluster**; **Plans 17-20 are the complete Game Play cluster**. Triangle Setting (4p hit-fed) and 14-15 Games to 21 are tied at eight plan references each; Comp Transition HL/CS Live at six; Cross Court Pepper at five; `3 Before 5` family at five across three clusters; Around the World (Serve) at four. **The captured BAB drill book is now structurally complete.** Supports candidate drill evaluation but does not authorize catalog changes without active decision/spec gates."
+    },
+    {
+      "id": "fivb-source-material",
+      "path": "docs/research/fivb-source-material.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "FIVB Beach Volleyball Drill-book source/provenance archive: source provenance, drill data model, chapter teaching frameworks, 104-drill TOC, selected drill excerpts, FIVB glossary, and FIVB-name to our-drill-id cross-reference. Supports candidate drill evaluation but does not authorize catalog changes without active decision/spec gates."
+    },
+    {
+      "id": "practice-plan-authoring-synthesis",
+      "path": "docs/research/practice-plan-authoring-synthesis.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "Cross-source synthesis of **all 20 BAB Practice Plans** (passing 1-4, setting 5-6, attacking 7-11 — full cluster, defense 12-16 — full cluster, **Plans 17-20 — complete Game Play cluster**), FIVB drill-book / coaches-manual, and Volleyball Canada VDM/LTD3 sources. **The captured BAB drill book is structurally complete (research-complete), but the 2026-05-04 ideation pass adversarial-filter found this is NOT milestone-ready** — see `docs/ideation/2026-05-04-bab-complete-plan-builder-ideation.md` for the survivor buckets and re-activation triggers (D101 unlocks; M002 needs plan-grammar input; or non-D101-gated source-priority drill clears the diagnostics activation pattern). The synthesis is **archived inventory + structural confirmation of canon** (T1/T2/T5/T7 confirm D76/D77/D101 + existing archetype shape), not a current-milestone build agenda. Names a six-slot focus-agnostic plan grammar confirmed across all five clusters with slot 4 (movement) cluster-complete-skipped in Game Play, maps cross-source convergence across 12 topics, synthesizes 13 cross-source theses (T1-T13). **Plans 17-20 triggered seven real falsification entries in `Theses Retired or Narrowed`:** T9 sharpened **four consecutive times** to nine composable rule kinds plus asymmetric scoring axis; T10 narrowed from universal to Defense/Attack-only; T12 graduated from sample-of-one to two-source pattern. Includes Adopt/Adapt/Reject ledger, plan-builder theses, candidate routing, and schema/product/cross-source open questions. Does not authorize catalog additions without active decision/spec gates; further BAB-derived schema work should defer past the 2026-05-21 D130 condition read-out."
+    },
+    {
+      "id": "brand-ux-guidelines",
+      "path": "docs/research/brand-ux-guidelines.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "Canonical Volleycraft UX behavior reference for typography, color, copy voice, layout, iconography, states, and per-screen posture. Includes the 2026-05-03 first-pass typography role checklist, evidence lanes, route/state inventory, screenshot matrix, and narrow drift guardrail contract."
     },
     {
       "id": "outdoor-courtside-ui-brief",
@@ -484,7 +484,7 @@
       "id": "d91-retention-gate-evidence",
       "path": "docs/research/d91-retention-gate-evidence.md",
       "type": "research",
-      "status": "active",
+      "status": "complete",
       "canonical_for": "evidence base and interpretive framing for the D91 M001 go/no-go retention gate"
     },
     {
@@ -667,16 +667,25 @@
       "canonical_for": "Durable architecture principles, layer rules, extension points, testing posture, review gates, anti-patterns, and a feature-routing checklist for the app/ workspace. Written for future agents adding features or refactors. Routes to canonical product docs (`docs/vision.md`, `docs/decisions.md`, `docs/prd-foundation.md`), `app/README.md` for current state, and `.cursor/rules/*.mdc` for focused rules — does NOT duplicate them. Update only when a layer boundary, extension-point pattern, review gate, or testing pyramid materially changes."
     },
     {
+      "id": "workload-envelope-authoring-guide",
+      "path": "docs/ops/workload-envelope-authoring-guide.md",
+      "type": "ops",
+      "status": "active",
+      "canonical_for": "Decision guide for interpreting generated-plan workload envelope observations before catalog metadata, block-shape, source-backed content, U6 preview, or U8 redistribution work. Created from U7 generated diagnostics workload-envelope guidance requirements; does not authorize catalog edits or runtime generator changes."
+    },
+    {
       "id": "agent-runtime",
       "path": "docs/ops/agent-runtime.md",
       "type": "ops",
-      "status": "superseded"
+      "status": "superseded",
+      "canonical_successor": "docs/ops/agent-operations.md"
     },
     {
       "id": "autonomous-milestone-system",
       "path": "docs/ops/autonomous-milestone-system.md",
       "type": "ops",
-      "status": "superseded"
+      "status": "superseded",
+      "canonical_successor": "docs/ops/agent-operations.md"
     },
     {
       "id": "deploy-cloudflare-worker",
@@ -688,11 +697,12 @@
       "id": "deploy-cloudflare-pages",
       "path": "docs/ops/deploy-cloudflare-pages.md",
       "type": "ops",
-      "status": "superseded"
+      "status": "superseded",
+      "canonical_successor": "docs/ops/deploy-cloudflare-worker.md"
     },
     {
       "id": "v0a-runner-probe-plan",
-      "path": "docs/plans/2026-04-12-001-feat-v0a-runner-probe-plan.md",
+      "path": "docs/archive/plans/2026-04-12-001-feat-v0a-runner-probe-plan.md",
       "type": "plan",
       "status": "complete"
     },
@@ -713,17 +723,18 @@
       "path": "docs/plans/2026-04-22-tier1b-serving-setting-expansion.md",
       "type": "plan",
       "status": "complete",
+      "active_registry": true,
       "canonical_for": "Tier 1b Layer A drill-authoring plan: shipped four source-backed drill records (`d31`, `d33`, `d40`, `d42`) plus safe same-chain progression links for `chain-6-serving` and `chain-7-setting`, without schema/filter/UI/Dexie changes. Defers `d36 Jump Float Introduction` to `O7` sports-medicine / PT review and `d43 Triangle Setting` to `D101` 3+ player support; current Layer A cap consumption is 4/10."
     },
     {
       "id": "walkthrough-closeout-polish-2026-04-23",
-      "path": "docs/plans/2026-04-23-walkthrough-closeout-polish.md",
+      "path": "docs/archive/plans/2026-04-23-walkthrough-closeout-polish.md",
       "type": "plan",
       "status": "complete"
     },
     {
       "id": "pre-d91-editorial-polish-2026-04-26",
-      "path": "docs/plans/2026-04-26-pre-d91-editorial-polish.md",
+      "path": "docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md",
       "type": "plan",
       "status": "complete"
     },
@@ -732,11 +743,12 @@
       "path": "docs/plans/2026-04-26-pair-rep-capture-tier1b.md",
       "type": "plan",
       "status": "complete",
+      "active_registry": true,
       "canonical_for": "Tier 1b implementation plan for the post-2026-04-26 pair rep-capture work unlocked by the P2-3 founder-session trigger (`docs/research/founder-use-ledger.md` 2026-04-26 row). Implements `D133` (Framing D from `docs/research/2026-04-26-pair-rep-capture-options.md`): new `/run/check` route after completed blocks with required per-drill **Difficulty tag** plus optional per-drill **Good/Total**, Transition refocused on Up Next, Review-screen session-level count card removed for count drills, Complete drill-grain aggregation, plus a forward-only Dexie migration (`perDrillCaptures: PerDrillCapture[]`). Authors zero new drill records (does not consume the drill-record cap; sibling `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md` consumes 4/10). Defers Framing C (in-session counter on RunScreen) under explicit re-trigger condition. Spec contract in `docs/specs/m001-review-micro-spec.md` §'Per-drill capture at Transition (D133)'."
     },
     {
       "id": "skip-review-modal-and-investment-footer-2026-04-27",
-      "path": "docs/plans/2026-04-27-skip-review-and-investment-footer.md",
+      "path": "docs/archive/plans/2026-04-27-skip-review-and-investment-footer.md",
       "type": "plan",
       "status": "complete",
       "canonical_for": "Fourth successive editorial-class polish pass (after 2026-04-22 / 2026-04-23 / 2026-04-26) targeting the genuinely-open Tier 1b items in `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md`. Two items shipped: `R11` lifted the Home Skip-review confirm from an inline two-step row into a centered `role=dialog` `SkipReviewModal` matching `RunScreen`'s `End session early?` shape (safe-primary `Never mind` first, danger `Yes, skip` below; `Esc` closes; aria-modal + aria-labelledby + autofocus + Tab trap + restore-focus-on-close); `R13` added a quiet `Logged: N session{s} · H:MM total` line above the Settings privacy promise, gated on `count > 0`, sourced from a new `getSessionTallySummary()` query that mirrors `formatDurationLine` per-session minute math and excludes `discarded_resume` stubs via `isTerminalSession`. Two items demoted on close inspection: `R7` (Beach Prep Three truncate-with-expand — underlying blob no longer holds, `d28` reformatted 2026-04-21, and the 2026-04-22 Transition parity pass deliberately removed truncate-with-expand) and `R14` (Accent color demotion — audit-class scope, deferred to a separate pass). Authors zero new drill records; no Dexie migration; no metadata schema changes."
@@ -750,14 +762,14 @@
     },
     {
       "id": "solo-vs-pair-variant-sweep-2026-04-27",
-      "path": "docs/plans/2026-04-27-solo-vs-pair-variant-sweep.md",
+      "path": "docs/archive/plans/2026-04-27-solo-vs-pair-variant-sweep.md",
       "type": "plan",
       "status": "complete",
       "canonical_for": "Catalog-authoring sweep that closes the partner-voice gap on the active M001 drill set. Authors 8 new tuned Pair variants on `m001Candidate: true` Drill families (`d01`, `d05`, `d22`, `d31`, `d38`, `d39`, `d40`, plus a `d33-solo-net` rewrite-and-split into `d33-solo` + `d33-pair`); tightens `participants.max = 1` on the now-redundant Solo voices (`d22-solo`, `d33-solo`, `d38-solo`, `d39-solo`); renames `label: 'Solo'` to `label: 'Any'` on the broad-participation warmup/cooldown variants (`d25-solo`, `d26-solo`, `d28-solo`) so their existing `participants.max=14` doesn't trip the new rule; equipment.balls tightened from `'many'` to `1` on `d31-pair` and `d33-pair` so the pair-rounds reality (one ball, partner cadence) is honest and so `hasUnmodeledRequirements` doesn't filter them out of swap pools. Adds a permanent regression guard via a new `participants_label_mismatch` rule in `app/src/data/catalogValidation.ts`. Lifts the pair-mode menu from 'leaky solo voice' to a first-class pair drill catalog matching `D132`'s pair-first product stance. M001 catalog footprint stays at 19 active Drill records (variant count grows; Drill count unchanged); no schema bump, no Dexie migration, no new archetype rules."
     },
     {
       "id": "layer-2-reliability-and-audit-pass-2026-04-27",
-      "path": "docs/plans/2026-04-27-layer-2-reliability-and-audit-pass.md",
+      "path": "docs/archive/plans/2026-04-27-layer-2-reliability-and-audit-pass.md",
       "type": "plan",
       "status": "complete",
       "canonical_for": "Post-D133 Layer 2 queue closeout pass. Ships two reliability fixes first (`DrillCheckScreen` waits for per-drill capture persistence before navigating; draft edit Setup hydration reads `getCurrentDraft().context` instead of the last completed context), adds Playwright 375 px /review hit-area coverage against current controls, and demotes only decorative accent/readout uses (`PerDrillCapture` Quick tag eyebrow, `PassMetricInput` % good readout, Safety heat-tip bullets). Records `Beach Prep Three` truncate-with-expand as killed, and auto-fill training recency plus Net/Wall persistence as deferred behavior changes requiring a dedicated setup/safety/defaults spec."
@@ -767,11 +779,12 @@
       "path": "docs/plans/2026-04-26-app-architecture-pass.md",
       "type": "plan",
       "status": "complete",
+      "active_registry": true,
       "canonical_for": "Ten-unit architecture systematization pass for the app/ workspace. Lands the in-flight refactor as atomic commits (U0); fixes the field-merging review-draft write so Drill Check captures and Review form fields cannot clobber each other (U1); consolidates capture eligibility / merge / aggregate / meaningful-draft / window classification into one closed `app/src/domain/capture/` module with a `MetricTypeStrategy` registry (U2); decomposes `services/review.ts` along its true reasons-to-change into `services/review/{submit,expire,drafts,cohort,bundle}` behind a barrel (U3); introduces `app/src/model/` as the pure product-type home and demotes `app/src/db/types.ts` to a thin re-export adapter so `domain/` no longer depends on Dexie row shapes (U4); pulls browser-runtime concerns into `app/src/platform/` and hoists post-block routing into `app/src/domain/runFlow/postBlockRoute.ts` (U5); lays forward-compatibility seams `SessionParticipant[]` (`D115`/`D116`/`D117`), `SkillVector` (`D121`), `ExportSession` adapter (Phase 1.5), and `CoachPayload` type (Phase 2 / `D106`) without shipping new UX (U6); encodes the `docs/vision.md` P12 contract structurally in `app/src/contracts/screenContracts.ts` and reframes `runFlowInteractionContract` as a transitional characterization spec with a written sunset rule (U7); refreshes app-facing docs and the testing pyramid map in `app/README.md` and `.cursor/rules/` (U8); consolidates durable building guidance in `docs/ops/app-architecture-guidance.md` (U9); closes with a holistic red-team gate (U10). No Dexie schema bump, no new state-management framework, no UI changes during the architecture pass itself."
     },
     {
       "id": "per-drill-success-criterion-2026-04-27",
-      "path": "docs/plans/2026-04-27-per-drill-success-criterion.md",
+      "path": "docs/archive/plans/2026-04-27-per-drill-success-criterion.md",
       "type": "plan",
       "status": "complete",
       "canonical_for": "Spec-gap fix that re-aligned the per-drill capture surface (`DrillCheckScreen` + `PerDrillCapture`) with `docs/specs/m001-review-micro-spec.md` §Required (V0B-28 forced-criterion prompt, D104 layer-1 self-scoring bias correction). **Shipped 2026-04-28** as part of the architecture pass U2 capture-domain consolidation (`11fed34`). Five items landed: (1) `getBlockSuccessRule` helper in `app/src/domain/drillMetadata.ts` mirrors `getBlockMetricType`'s variant-resolution rule, and the success rule renders as `Success rule: <rule>. If unsure, don't count it as Good.` inside the expanded `Add counts` body inside `PerDrillCapture` so the chip-only fast path stays calm (pinned by `app/src/components/__tests__/PerDrillCapture.test.tsx` `describe('V0B-28 forced-criterion prompt', ...)` and `app/src/domain/__tests__/drillMetadata.test.ts` `describe('getBlockSuccessRule', ...)`); (2) `PassMetricInput`'s rate label changed from the pass-specific `% good pass rate` to the skill-neutral `% good`; (3) `d33 Around the World Serving`'s `successMetric.description` re-worded from a session-level zone enumeration to the per-attempt rule `Serve lands in the called zone.` on both Solo and Pair siblings (`target` retained as the session goal); (4) wire-up — eligibility resolver in `app/src/domain/capture/eligibility.ts` returns `successRule` on both eligible branches, `useDrillCheckController` exposes `captureSuccessRule`, `DrillCheckScreen` passes through; (5) spec sync — `primarySkillMetric` block now reads `the drill check surface (post-D133)` with the source-from-record clause and a 'Surface-move history (2026-04-27)' addendum. Legacy `ReviewScreen` fallback path intentionally out of scope (reached only by non-D133 legacy sessions). Authors zero new drill records; no Dexie migration; no metadata schema changes. Verification: 1065/1065 Vitest, lint clean, build clean."
@@ -795,20 +808,21 @@
       "path": "docs/brainstorms/2026-04-29-session-focus-picker-requirements.md",
       "type": "requirements",
       "status": "active",
-      "canonical_for": "Requirements for the D135-fired Tier 1c session focus picker. Resolves the draft-screen ambiguity by selecting a Tune today review step as the v1 surface and codifies the architectural rigor (shared focus resolver, in-transaction regeneration use case, stale-write guards, repeat / recovery focus strip, accessibility semantics, privacy boundaries). PARTIALLY SUPERSEDED 2026-04-30 by docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md: R4/R5 (four-chip Recommended-as-peer), R7/R32 (mandatory routing on every pre-run path), R8 (Safety read-only focus echo), R12 (all chips always enabled), R34 four-value source-aware Back. The architectural decisions and remaining R-IDs stay authoritative when Tune today is invoked under the new opt-in posture."
+      "canonical_for": "Requirements for the D135-fired Tier 1c session focus picker. Resolves the draft-screen ambiguity by selecting a Tune today review step as the v1 surface and codifies the architectural rigor (shared focus resolver, in-transaction regeneration use case, stale-write guards, repeat / recovery focus strip, accessibility semantics, privacy boundaries). PARTIALLY SUPERSEDED 2026-04-30: the short-lived opt-in fork in docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md was superseded by docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md, which shipped mandatory Tune today with four chips, source-aware Back collapsed to setup/home, and no default Safety focus echo."
     },
     {
       "id": "tier-1c-impl-skill-level-mutability-and-catalog-audit-2026-04-28",
       "path": "docs/plans/2026-04-28-tier-1c-prepay-and-catalog-audit.md",
       "type": "plan",
       "status": "active",
-      "canonical_for": "Post-D135 implementation plan for the triggered bundle: Stream 3 catalog reserve audit (implementation-ready as authored). Stream 1 (Tier 1c focus picker) is owned by docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md; the U1-U5 sketches in this plan are historical and not implementation-ready. Stream 2 skill-level mutability is paused pending Tune today dogfood. Authors zero new drill records and preserves D131 no-telemetry posture."
+      "canonical_for": "Post-D135 implementation plan for the triggered bundle: Stream 3 catalog reserve audit (implementation-ready as authored). Stream 1 (Tier 1c focus picker) is owned by docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md; the U1-U5 sketches in this plan are historical and not implementation-ready. Stream 2 skill-level mutability is paused pending Tune today dogfood. Authors zero new drill records and preserves D131 no-telemetry posture."
     },
     {
       "id": "tune-today-focus-picker-2026-04-29",
-      "path": "docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md",
+      "path": "docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md",
       "type": "plan",
       "status": "superseded",
+      "canonical_successor": "docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md",
       "canonical_for": "SUPERSEDED 2026-04-30 by docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md. Originally specced a mandatory pre-safety Tune today route on every pre-run path, optional SetupContext.sessionFocus, a shared focus resolver consumed by initial picks / build-time substitution / swap alternatives, an in-transaction draft regeneration use case, source-aware Back, repeat- and recovery-flow focus stripping, and a calm shibui screen. The architectural pieces (effectiveFocus.ts, services/session/regenerateDraftFocus.ts, stale-write guards, focus strip on buildDraftFromCompletedBlocks and buildRecoveryDraft) are preserved by reference in the 2026-04-30 plan; routing, chip set, and Safety echo are simplified."
     },
     {
@@ -816,21 +830,22 @@
       "path": "docs/ideation/2026-04-29-skill-scope-and-game-layers-ideation.md",
       "type": "ideation",
       "status": "active",
-      "canonical_for": "Ranked ideation answering 'how and when do we integrate attacking, team tactics, out-of-system, and live/adaptive layers?'. Seven survivors: forward-only `attack` SkillFocus reservation + `scenario` axis (S1), two-axis skill × scenario catalog reframe (S2), surfacing existing `MetricType` game-like patterns (S3), team-tactics deferred to M003+ (S4), attack clustered with serve as overhead-striking continuum (S5), out-of-system as scenario not skill (S6), live/adaptive as runner-surfacing not catalog expansion (S7). Recommended sequence: S1+S2 schema/docs reservation now (zero cap), trigger-gated attack exposure under D135-style discipline, team tactics deferred to M003+. S1+S2 consumed by docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md."
+      "canonical_for": "Ranked ideation answering 'how and when do we integrate attacking, team tactics, out-of-system, and live/adaptive layers?'. Seven survivors: forward-only `attack` SkillFocus reservation + `scenario` axis (S1), two-axis skill × scenario catalog reframe (S2), surfacing existing `MetricType` game-like patterns (S3), team-tactics deferred to M003+ (S4), attack clustered with serve as overhead-striking continuum (S5), out-of-system as scenario not skill (S6), live/adaptive as runner-surfacing not catalog expansion (S7). Recommended sequence: S1+S2 schema/docs reservation now (zero cap), trigger-gated attack exposure under D135-style discipline, team tactics deferred to M003+. S1+S2 consumed by docs/archive/brainstorms/2026-04-29-skill-scope-reservation-requirements.md."
     },
     {
       "id": "focus-picker-drill-depth-2026-04-30",
       "path": "docs/ideation/2026-04-30-focus-picker-drill-depth-ideation.md",
       "type": "ideation",
       "status": "active",
-      "canonical_for": "Ground-up audit plus synthesis of recent focus/skill ideation answering whether Tune today has enough active, source-backed drill depth for pass/serve/set practices and swaps across solo/pair, equipment, and long-session contexts. Finds Passing broadly covered, Setting buildable but thin, and Serving fragile (pair/no-net likely unbuildable; long serve sessions still pass-flavored in support slots; skill level not modeled). Recommends a coverage grid, serving-focus credibility pass, focus-aligned support-block definition, thin-focus honesty contract, long-session simulator, source-backed backlog cards, and variant-level provenance/adaptation checklist."
+      "canonical_for": "Ground-up audit plus synthesis of recent focus/skill ideation answering whether Tune today has enough active, source-backed drill depth for pass/serve/set practices and swaps across solo/pair, equipment, and long-session contexts. Consumed by the 2026-04-30 focus-coverage requirements and continued 2026-05-01 with the next quality layer: generated-plan stretch-pressure diagnostics and curated mixed-focus theme contracts such as Serve + Receive."
     },
     {
       "id": "skill-scope-reservation-requirements-2026-04-29",
-      "path": "docs/brainstorms/2026-04-29-skill-scope-reservation-requirements.md",
+      "path": "docs/archive/brainstorms/2026-04-29-skill-scope-reservation-requirements.md",
       "type": "requirements",
       "status": "superseded",
-      "canonical_for": "SUPERSEDED 2026-04-30 by docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md (Track 4: docs-only) on the grounds that types reservation + research note + catalog cross-links spend attention before D135-style trigger evidence has fired. The replacement records the policy ('out-of-system is scenario, not skill; attack is a future skill axis member when trigger fires; no schema changes until then') in a single decision row instead of a types PR. The skill-correlation insight and the cluster-pairing thesis remain valid as a future-state design check; only the implementation cost is deferred."
+      "canonical_successor": "docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md",
+      "canonical_for": "SUPERSEDED 2026-04-30 by docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md (Track 4: docs-only), then compressed to terminal successor docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md because the complete plan owns the shipped Track 4 JSDoc policy and no-schema-change outcome. The skill-correlation insight and the cluster-pairing thesis remain valid as a future-state design check; only the implementation cost is deferred."
     },
     {
       "id": "pre-run-simplification-requirements-2026-04-30",
@@ -844,14 +859,572 @@
       "path": "docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md",
       "type": "requirements",
       "status": "active",
-      "canonical_for": "Requirements for making Tune today focus choices fully catalog-backed across pass/serve/set, skill levels, setup configurations, long sessions, and swaps. Establishes that Volleycraft should not have thin or unavailable visible focus states; the catalog must meet a practical floor (2 main options, 1 support option, 1 pressure option where applicable, and 1 same-focus swap per focus-controlled slot) before the focus picker is considered complete. Expansion is variant-first, but catalog readiness overrides the earlier D130 authoring cap when required for focus trust."
+      "canonical_for": "Requirements for making Tune today focus choices fully catalog-backed across pass/serve/set, skill levels, setup configurations, long sessions, swaps, and generated-plan stretch-pressure diagnostics. Establishes that Volleycraft should not have thin or unavailable visible focus states; the catalog must meet a practical floor (2 main options, 1 support option, 1 pressure option where applicable, and 1 same-focus swap per focus-controlled slot) before the focus picker is considered complete. Expansion is variant-first, but catalog readiness overrides the earlier D130 authoring cap when required for focus trust. 2026-05-01 adds R33-R38 for generated-plan diagnostics, over-cap classification, and curated mixed-focus theme contracts."
     },
     {
       "id": "pre-run-simplification-2026-04-30",
       "path": "docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md",
       "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Canonical implementation plan (revised 2026-04-30 after agent red-team and user feedback). Ships Tune today MANDATORY between Setup and Safety with four chips (Recommended/Passing/Serving/Setting), all-enabled with fail-on-tap inline copy, source-aware Back ('setup' | 'home'), and the full 2026-04-29-001 architecture: effectiveFocus.ts shared resolver, services/session/regenerateDraftFocus.ts in-transaction use case, stale-write guard, repeat / recovery focus strip. Bundled with three orthogonal pre-run cuts: (1) full Wind delete (field, UI, fixtures, windFriendly catalog cleanup; no Dexie migration); (2) conditional Wall row (only when Solo + No Net) plus Wall-required catalog invariant test; (3) no default Safety focus echo, recovery-override line only when painFlag === true && draft.context.sessionFocus !== undefined. Track 4 ships skill-scope policy as JSDoc on SkillFocus (no D136 decision row). Includes explicit K-ID inheritance matrix from 2026-04-29-001 (K1-K13 with K7 collapsed to two values). Supersedes docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md (its design rationale is inherited; ~6 net-new files ship under this plan)."
+    },
+    {
+      "id": "focus-coverage-readiness-2026-04-30",
+      "path": "docs/archive/plans/2026-04-30-002-feat-focus-coverage-readiness-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "canonical_for": "Completed implementation plan for the focus coverage catalog readiness requirements: test-backed audit model and coverage engine, existing-onboarding skill-level consumption via skillLevelToDrillBand(), current 40-minute long-session readiness, focus-reinforcing support-slot semantics, strict same-focus swap readiness, durable gap-card / activation-manifest artifacts, and docs/verification sync. Completion state: 135/135 readiness cells verified after batch 3. 2026-05-01 follow-up routes stretch-pressure diagnostics and future curated mixed-focus themes such as Serve + Receive. Origin: docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md."
+    },
+    {
+      "id": "generated-plan-diagnostics-2026-05-01",
+      "path": "docs/archive/plans/2026-05-01-001-feat-generated-plan-diagnostics-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "canonical_for": "Completed follow-up implementation plan for R33-R38 generated-plan diagnostics: product-supported dimension registry that fails closed when focuses/configurations/levels/durations/themes expand, domain-level deterministic seeded buildDraft() matrix, hard-failure versus routeable-observation classification, selected-block duration-envelope comparison against workload.durationMinMinutes / workload.durationMaxMinutes / fatigueCap.maxMinutes, stable report/gap-card routing, and guardrails that keep future Serve + Receive work out of raw multi-select tag OR filtering. Origin: docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md."
+    },
+    {
+      "id": "generated-plan-diagnostics-next-steps-ideation-2026-05-01",
+      "path": "docs/ideation/2026-05-01-generated-plan-diagnostics-next-steps-ideation.md",
+      "type": "ideation",
       "status": "active",
-      "canonical_for": "Canonical implementation plan (revised 2026-04-30 after agent red-team and user feedback). Ships Tune today MANDATORY between Setup and Safety with four chips (Recommended/Passing/Serving/Setting), all-enabled with fail-on-tap inline copy, source-aware Back ('setup' | 'home'), and the full 2026-04-29-001 architecture: effectiveFocus.ts shared resolver, services/session/regenerateDraftFocus.ts in-transaction use case, stale-write guard, repeat / recovery focus strip. Bundled with three orthogonal pre-run cuts: (1) full Wind delete (field, UI, fixtures, windFriendly catalog cleanup; no Dexie migration); (2) conditional Wall row (only when Solo + No Net) plus Wall-required catalog invariant test; (3) no default Safety focus echo, recovery-override line only when painFlag === true && draft.context.sessionFocus !== undefined. Track 4 ships skill-scope policy as JSDoc on SkillFocus (no D136 decision row). Includes explicit K-ID inheritance matrix from 2026-04-29-001 (K1-K13 with K7 collapsed to two values). Supersedes docs/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md (its design rationale is inherited; ~6 net-new files ship under this plan)."
+      "canonical_for": "Ranked ideation for turning the generated-plan diagnostics report into a sequenced next-step program. Original six survivors: observation triage workbench, finding graduation ladder, dynamic surface/new focus sentinel, catalog change impact preview, workload envelope authoring guide, and redistribution-free builder comparison. 2026-05-01 continuation selects decision-debt compression review after U1-U3 completion; post-U7 continuation selects U5 dynamic surface/new focus sentinel; post-U5 continuation selected U8 redistribution causality receipt, now implemented. Consumed by the generated diagnostics requirements addenda."
+    },
+    {
+      "id": "docs-process-lifecycle-ideation-2026-05-02",
+      "path": "docs/ideation/2026-05-02-docs-process-lifecycle-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked ideation for the next docs/process lifecycle improvements after the docs validity and archive pass. Selects archive policy notes, active-registry catalog markers, and archive drift validation as the first three implementation moves; continuation selects canonical successor metadata as the next requirements target while leaving instruction-role metadata, audit verdict vocabulary, routing receipts, successor warnings, and lifecycle triage thresholds as future follow-up."
+    },
+    {
+      "id": "diagnostics-to-gap-fill-ideation-2026-05-02",
+      "path": "docs/ideation/2026-05-02-diagnostics-to-gap-fill-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked ideation for turning generated diagnostics into concrete drill and programming gap fills. Selects the D47-piloted Diagnostic Gap Closure Ledger as the first brainstorm target, with evidence shopping lists, reassessment receipts, outcome coverage maps, source-backed gap-card drafts, counterfactual-first drill surgery, and one-gap-per-cycle queue as follow-up survivors."
+    },
+    {
+      "id": "bab-complete-plan-builder-ideation-2026-05-04",
+      "path": "docs/ideation/2026-05-04-bab-complete-plan-builder-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked ideation pass at the BAB-drill-book-complete milestone (all 20 BAB plans captured at source-detail level). Generated ~46 candidates across 6 ce-ideate frames + ce-architecture-strategist + ce-product-lens-reviewer adversarial critiques. **Load-bearing finding (product-lens):** the BAB synthesis is comprehensive research but premature for operationalization at the current milestone — D101 gates 5 of 6 BAB top-tier source-priority drill families; D130 founder-use mode has 17 days remaining; M001 is solo/pair-first; calm-courtside identity argues against importing BAB-grade schema complexity before content can ship. Survivors split into three buckets: **Bucket A — Now-shippable (4):** A1 refactor `shouldPrefer*DurationFit` predicates into a registry; A2 receipt canon-validating BAB confirmations (T1/T2/T5/T7 confirm D76/D77/D101 + existing archetype shape); A3 re-activation triggers in synthesis frontmatter (shipped); A4 small `O24` decision-pass packet engaging BAB Plan 1 integrative-focus evidence head-on. **Bucket B — Pre-D101 schema gates (3 decisions):** B1 T9 modeling stance (separate records vs sibling variants vs runtime overlays); B2 T6 zone-convention default; B3 slot-4-optional archetype work. **Bucket C — Post-D101 / M002 candidates (5; gated by re-activation triggers):** composable scoring grammar; problem-first plan flow; drill family abstraction; repetition-rank-aware catalog metadata; `compatibleFocuses` axis. **Sequencing recommendation (architecture-strategist):** resolve `O24` before any schema work — gates the read-drill schema, `compatibleFocuses`, and integrative-focus interpretation. **Anti-patterns avoided:** per-team rules without session-context; per-shot duplicate records; universal warm-up opener; credit-inflating BAB scoring grammar over FIVB Modified Games; alias-aware schema. **Rejected:** importing BAB plan generation wholesale into M001; BAB-grade complexity in calm courtside UI before D101; 3+ player drills before D101; read-drill 3-axis schema before D135 evidence."
+    },
+    {
+      "id": "calm-courtside-ux-style-ideation-2026-05-02",
+      "path": "docs/ideation/2026-05-02-calm-courtside-ux-style-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked ideation for UX/design/style changes adjacent to the 2026-05-02 calm recurring-user Home pass. Six survivors: Active Session Glance System, Capture By Exception, Consequence-First Safety, Post-Session Receipt Layer, Local-First Trust Cues, and Tune Today Intent Dial. Selects Active Session Glance System as the ce-brainstorm target."
+    },
+    {
+      "id": "shadcn-courtside-overlay-ideation-2026-05-02",
+      "path": "docs/ideation/2026-05-02-shadcn-courtside-overlay-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked shadcn-informed frontend design ideation for Volleycraft overlays. Selects a local ActionOverlay primitive inspired by shadcn Dialog/AlertDialog interaction discipline while rejecting broad shadcn installation or theme replacement."
+    },
+    {
+      "id": "catalog-gap-closure-ideation-2026-05-02",
+      "path": "docs/ideation/2026-05-02-catalog-gap-closure-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked ideation for selecting the next minimal, high-quality catalog/config gap closure target from current generated-plan diagnostics. Selects the Gap Closure Selection Workbench with D47 reentry as the first concrete target-selection case, and includes the follow-up exercise explainer/instruction quality continuation that selected the Drill Copy Contract direction."
+    },
+    {
+      "id": "volleycraft-typography-ideation-2026-05-02",
+      "path": "docs/ideation/2026-05-02-volleycraft-typography-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked typography and brand-fit ideation for Volleycraft. Selects keeping Inter Variable plus JetBrains Mono Variable while defining semantic type roles, selectively retuning courtside-critical scale, adding distance-aware Run typography scaffolding, and protecting the calm brand rhythm with lightweight guardrails."
+    },
+    {
+      "id": "setup-screen-default-path-polish-ideation-2026-05-04",
+      "path": "docs/ideation/2026-05-04-setup-screen-default-path-polish-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked ideation for polishing the setup screen after Focus moved into Today's setup and Solo/Net defaults were added. Selects an optional Focus cue plus clearer wall/fence follow-up copy while rejecting summary bars, stronger selected-chip states, enabled footer helper copy, and larger setup redesigns."
+    },
+    {
+      "id": "setup-screen-default-path-polish-requirements-2026-05-04",
+      "path": "docs/brainstorms/2026-05-04-setup-screen-default-path-polish-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for a narrow setup-screen polish pass: Focus must read as optional tuning, the default build-ready path must stay quiet, the no-net wall/fence follow-up must remain subordinate and practical, and existing setup behavior must be preserved."
+    },
+    {
+      "id": "setup-screen-default-path-polish-plan-2026-05-04",
+      "path": "docs/plans/2026-05-04-005-feat-setup-default-path-polish-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for the setup-screen default-path polish selected from the 2026-05-04 ideation and requirements. Covers the inline optional Focus cue, clearer wall/fence nearby copy, and focused setup tests without changing chip styling, setup flow, or D127 typography scope."
+    },
+    {
+      "id": "volleycraft-typography-system-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-volleycraft-typography-system-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for a Volleycraft typography-system pass selected from the typography ideation. Bounds the work to preserving the current font families, defining semantic type roles, selectively retuning active-use and trust-critical copy, recording Run distance-ladder expectations, and adding typography drift guardrails without authorizing a font swap, broad theme replacement, global body-scale migration, or runtime behavior changes."
+    },
+    {
+      "id": "volleycraft-typography-system-plan-2026-05-03",
+      "path": "docs/plans/2026-05-03-001-feat-volleycraft-typography-system-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for the Volleycraft typography-system pass. Tracks the completed docs, guardrail, hard-violation fix, browser evidence, and verification work selected from the typography-system requirements."
+    },
+    {
+      "id": "typography-design-iteration-plan-2026-05-03",
+      "path": "docs/plans/2026-05-03-002-fix-typography-design-iteration-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Follow-up LFG plan for running ce-design-iterator over the completed typography-system changes, fixing concrete findings, and verifying the fixes without expanding typography scope."
+    },
+    {
+      "id": "active-session-glance-system-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-active-session-glance-system-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for Run Face v1, the selected Active Session Glance System survivor from the calm courtside UX/style ideation. Bounds the next Run design pass to answering 'what now?' in a five-second glance with one dominant live reading, one current cue, quiet session-position context, and preserved full-instruction access, without authorizing new routes, timer behavior, data model, or a whole-app visual system."
+    },
+    {
+      "id": "run-face-review-hardening-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-run-face-review-hardening-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Follow-up requirements for review-cleaning Run Face v1 after implementation. Narrows the selected follow-up ideation survivor to proofable inline disclosure, conservative cue fallback, sparse accessible state announcements, and doc/test standards cleanup without changing routes, timer mechanics, data, or drill assembly."
+    },
+    {
+      "id": "docs-canonical-successor-metadata-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-docs-canonical-successor-metadata-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for adding narrow `canonical_successor` metadata so archived or superseded docs can route agents to current truth. Includes an explicit no-single-successor escape hatch, compatibility treatment for existing `superseded_by`, and warning/report-first validation boundaries without authorizing a full lifecycle schema, audit verdict vocabulary, docs triage queue, or broad archived-doc backfill."
+    },
+    {
+      "id": "generated-plan-diagnostics-next-steps-requirements-2026-05-01",
+      "path": "docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for taking generated-plan diagnostic findings one by one through routeable observation triage, finding graduation policy, dynamic surface/new-focus gates, catalog impact previews, workload envelope metadata guidance, and diagnostic-only generator redistribution comparisons. First slice recommendation: R1/R2 observation triage workbench plus finding graduation ladder before adding drills or changing generator policy."
+    },
+    {
+      "id": "generated-diagnostics-decision-debt-compression-requirements-2026-05-01",
+      "path": "docs/brainstorms/2026-05-01-generated-diagnostics-decision-debt-compression-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for compressing generated diagnostics triage rows into human-sized decision prompts after U1-U3. Stages the output as a derived generated docs review aid, a freshness-validated artifact, and a narrow unknown/unclassified lane gate before dynamic surface, workload, redistribution, or concrete-proposal catalog-preview follow-up work."
+    },
+    {
+      "id": "generated-diagnostics-workload-envelope-guidance-requirements-2026-05-01",
+      "path": "docs/brainstorms/2026-05-01-generated-diagnostics-workload-envelope-guidance-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused U7 requirements addendum for a small workload envelope authoring guide covering short-session cooldown minimums, technique under-min review, and workload envelope review before catalog, cap, or generator changes."
+    },
+    {
+      "id": "generated-diagnostics-dynamic-surface-sentinel-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused U5 requirements addendum for ensuring newly supported generated-plan diagnostic surfaces are included, explicitly deferred with reasons, or reserved behind a real theme contract. Covers the surface contract, change guard, and theme reservation without authorizing new product-visible focuses, catalog changes, or runtime generator changes."
+    },
+    {
+      "id": "generated-diagnostics-redistribution-causality-receipt-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-redistribution-causality-receipt-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused U8 requirements addendum for a repeatable diagnostic-only redistribution causality receipt. Separates optional-slot redistribution pressure from catalog, workload, and block-shape pressure without authorizing runtime generator changes, catalog edits, workload metadata edits, or U6 preview tooling."
+    },
+    {
+      "id": "catalog-gap-closure-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-catalog-gap-closure-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Fresh requirements for choosing the next minimal, high-quality catalog/config gap closure move from current generated-plan diagnostics. Frames target selection as evidence-gated product work before any catalog, workload, source-backed, U6, or runtime generator edits."
+    },
+    {
+      "id": "exercise-copy-contract-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-exercise-copy-contract-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for turning the catalog-gap copy-quality continuation into an exercise-copy contract. Bounds the pass to active drill explainers, instructions, success rules, cues, scaling, warmup/cooldown, bonus, and segment copy without authorizing new drills, metadata/workload changes, generated behavior changes, or a new drill-card UI."
+    },
+    {
+      "id": "gap-closure-selection-workbench-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-gap-closure-selection-workbench-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for a generated Gap Closure Selection section in the diagnostics triage workbench. Selects exactly one next artifact from current evidence, handles D47 reentry after D01 is held, compares top alternatives, and blocks catalog/config edits until later evidence payloads are complete."
+    },
+    {
+      "id": "generated-diagnostics-d47-u6-proposal-admission-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d47-u6-proposal-admission-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for turning the U8 d47-solo-open receipt-backed candidate into a concrete U6 proposal-admission package. Defines the admission ticket before preview tooling, catalog edits, workload metadata edits, source-backed activation, or runtime generator changes."
+    },
+    {
+      "id": "generated-diagnostics-d47-gap-closure-ledger-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d47-gap-closure-ledger-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for using d47-solo-open as the first concrete gap-closure ledger pilot. Turns diagnostic evidence into a named drill/programming gap, closure path, evidence checklist, fill-readiness state, and reassessment receipt before catalog edits, workload metadata edits, source-backed activation, U6 preview tooling, or runtime generator changes."
+    },
+    {
+      "id": "generated-diagnostics-d47-reentry-selection-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d47-reentry-selection-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for the post-D01 catalog re-diagnosis step. Resumes D47 with D01 held, compares D47 against current top alternatives, and requires one evidence-ready next artifact before catalog, workload, block-shape, U6, or generator edits."
+    },
+    {
+      "id": "generated-diagnostics-d47-concrete-delta-proposal-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d47-concrete-delta-proposal-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for the D47 concrete-delta gate. Defines how D47 can proceed to source-backed gap-card planning only when changed or missing catalog surfaces, source needs, adaptation deltas, expected movement, verification, checkpoint criteria, and why D47 beats the current D05 comparator and no-change are named. Current comparator state is owned by the generated triage and D47-vs-D05 comparator evaluation payload."
+    },
+    {
+      "id": "generated-diagnostics-d01-comparator-gap-fill-proposal-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d01-comparator-gap-fill-proposal-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for turning the D47 ledger's d01-solo comparator receipt into the first concrete gap-fill proposal candidate. Frames D01 as a simpler workload/block-shape pilot before catalog edits, workload metadata edits, source-backed activation, U6 preview tooling, or runtime generator changes."
+    },
+    {
+      "id": "generated-diagnostics-d01-workload-block-shape-proposal-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d01-workload-block-shape-proposal-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for turning the D01 gap-fill proposal into a concrete workload/block-shape proposal. Selects block-shape review before cap widening, keeps metadata review secondary, and blocks catalog, source-backed, U6 preview, or generator edits until a later authorized fill."
+    },
+    {
+      "id": "generated-diagnostics-d01-block-shape-fill-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d01-block-shape-fill-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for applying the first concrete D01 block-shape fill. Authorizes narrow duration-aware main-skill rerouting plus generated diagnostics reassessment, while blocking D01 metadata edits, source-backed content, U6 preview tooling, broad theme work, and unrelated generator policy changes."
+    },
+    {
+      "id": "generated-diagnostics-d01-redistribution-handoff-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d01-redistribution-handoff-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for the D01 redistribution-specific block-shape follow-up. Authorizes a handoff admission check and, only when admissible, a narrow capacity-aware handoff of skipped optional minutes away from over-stretched d01-solo to another already-selected block that can honestly carry them without weakening training intent, while blocking D01 metadata edits, broad redistribution scoring, source-backed content, U6 preview tooling, and unrelated generator policy changes."
+    },
+    {
+      "id": "generated-diagnostics-d01-cap-catalog-fork-requirements-2026-05-02",
+      "path": "docs/brainstorms/2026-05-02-generated-diagnostics-d01-cap-catalog-fork-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Focused requirements addendum for turning the D01 insufficient allocated-pressure receipt into a decision-forcing cap/catalog/no-change/D47-resume packet, with source-backed catalog-fill planning gated on gap-card-ready evidence rather than presumed from allocated pressure alone."
+    },
+    {
+      "id": "generated-diagnostics-triage-workflow-plan-2026-05-01",
+      "path": "docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Implementation plan for the generated diagnostics triage workflow. Sequences the R1-R8 program from docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md plus the decision-debt, workload-envelope, dynamic-surface, redistribution-causality, D47 proposal-admission, D47 gap-closure, D01 comparator gap-fill, D01 workload/block-shape, D01 block-shape fill, D01 redistribution handoff, D01 cap/catalog fork, gap-closure selection, and D47-vs-D05 comparator decision addenda, with completed slices focused on stable observation group identity, triage registry/workbench, finding graduation gates, decision-debt compression, workload envelope guidance, dynamic surface sentinels, redistribution causality receipts, proposal handoffs, partial D01 fill reassessment, D01 insufficient-handoff admission, the current `resume_d47_with_d01_held` / `d47_resumed_d01_held` fork, and the comparator packet that currently holds D47 and D05 for a proof payload before U6 catalog impact preview."
+    },
+    {
+      "id": "generated-diagnostics-d47-proposal-admission-ticket-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-001-feat-d47-proposal-admission-ticket-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Implementation plan for generating the first D47 proposal-admission ticket from the U8 redistribution causality receipt. Keeps U6 preview tooling, catalog edits, workload metadata edits, source-backed activation, and runtime generator changes deferred until a concrete proposal passes the admission gate."
+    },
+    {
+      "id": "generated-diagnostics-d47-gap-closure-ledger-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-003-feat-d47-gap-closure-ledger-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for adding a comparator-first D47 gap closure ledger to the generated diagnostics triage workbench. Keeps D47 not authorized until comparator evidence chooses abandonment, no-change closure, or a primary fill path, without catalog edits, workload metadata edits, source-backed activation, U6 preview tooling, or runtime generator changes."
+    },
+    {
+      "id": "generated-diagnostics-d01-gap-fill-proposal-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-004-feat-d01-gap-fill-proposal-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for adding a D01 comparator gap-fill proposal to the generated diagnostics triage workbench. Keeps D01 as a derived workload/block-shape proposal candidate before catalog edits, workload metadata edits, source-backed activation, U6 preview tooling, or runtime generator changes."
+    },
+    {
+      "id": "generated-diagnostics-d01-workload-block-shape-proposal-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-006-feat-d01-workload-block-shape-proposal-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for adding a generated D01 workload/block-shape proposal. Selects block-shape review as the primary disposition, keeps workload metadata review secondary, and blocks catalog, source-backed, U6 preview, workload metadata, or generator edits until a later authorized fill."
+    },
+    {
+      "id": "generated-diagnostics-d01-block-shape-fill-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-007-feat-d01-block-shape-fill-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for applying the first concrete D01 block-shape fill through D01-scoped duration-aware main-skill candidate selection and a generated diagnostics reassessment receipt."
+    },
+    {
+      "id": "generated-diagnostics-d01-redistribution-handoff-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-008-feat-d01-redistribution-handoff-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for the D01 redistribution-specific follow-up. Adds an admission-first handoff check to the generated D01 fill receipt, records the current target as insufficient allocated-duration pressure, and states whether D01 still blocks the D47 gap-closure path."
+    },
+    {
+      "id": "generated-diagnostics-d01-cap-catalog-fork-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-010-feat-d01-cap-catalog-fork-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for adding a generated D01 cap/catalog fork packet. Turns the insufficient allocated-pressure receipt into an explicit cap, catalog/source-backed, no-change, or D47-resume decision, while requiring gap-card-ready evidence before catalog-fill planning blocks D47."
+    },
+    {
+      "id": "gap-closure-selection-workbench-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-011-feat-gap-closure-selection-workbench-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for adding a generated Gap Closure Selection section to the diagnostics triage workbench. Selects a D47-vs-D05 comparator proposal as the next not-authorized artifact after D01 is held, compares top alternatives, and preserves non-authorization for catalog/config edits."
+    },
+    {
+      "id": "d47-d05-comparator-decision-packet-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-012-feat-d47-d05-comparator-decision-packet-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for adding a generated D47-vs-D05 comparator decision packet. Introduced the hold/win/no-change packet contract and required a comparator evaluation payload before D47, D05, or accepted no-change could become the next not-authorized artifact; the current generated outcome is now owned by the D47-vs-D05 comparator evaluation payload."
+    },
+    {
+      "id": "d47-d05-comparator-evaluation-payload-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-013-feat-d47-d05-comparator-evaluation-payload-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for adding the D47-vs-D05 comparator evaluation payload. Moves the generated comparator packet from hold to a D47-winning, not-authorized outcome and names a D47 source-backed catalog implementation plan as the follow-up artifact."
+    },
+    {
+      "id": "d47-source-backed-catalog-implementation-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-014-feat-d47-source-backed-catalog-implementation-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for the D47-winning source-backed catalog gap. Added a bounded D49 advanced setting/movement family plus a narrow advanced-setting selection path; regenerated diagnostics now mark the original D47 comparator key `closed_by_d49` and route residual long-session setting pressure to D49 workload/redistribution follow-up."
+    },
+    {
+      "id": "action-overlay-primitive-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-015-feat-action-overlay-primitive-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for adding a local ActionOverlay primitive inspired by shadcn Dialog/AlertDialog accessibility discipline. Refactors SkipReviewModal and SoftBlockModal onto shared role, focus-trap, focus-restore, Escape, and safe-default focus behavior without installing shadcn or changing app routes/data/domain behavior."
+    },
+    {
+      "id": "action-overlay-consistency-pass-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-016-feat-action-overlay-consistency-pass-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed second ActionOverlay pass that migrates ResumePrompt, SchemaBlockedOverlay, and the Run end-session confirm onto the local overlay primitive while preserving behavior, copy, routes, reload semantics, and bottom-aligned Run placement."
+    },
+    {
+      "id": "exercise-copy-contract-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-017-feat-exercise-copy-contract-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for the exercise-copy contract pass. Extends the courtside-copy rule, adds focused mechanical copy tests, audits active drill explainers/instructions/success rules/cues/scaling copy, and preserves copy-only boundaries around workload, participants, equipment, source-backed catalog changes, and generated diagnostics."
+    },
+    {
+      "id": "d49-residual-follow-up-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-018-feat-d49-residual-follow-up-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for adding a generated D49 residual follow-up packet after D47 closed by D49. Splits D49 under-min workload evidence from optional-slot redistribution pressure while preserving not-authorized status for caps, catalog content, runtime redistribution, and D47 reopening."
+    },
+    {
+      "id": "d49-next-work-selection-plan-2026-05-03",
+      "path": "docs/plans/2026-05-03-001-feat-d49-next-work-selection-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for refining the generated D49 residual follow-up packet so it selects the next useful work, routes only pressure-bearing D49 redistribution evidence to future U8/generator-policy follow-up, treats optional-slot-only redistribution as no action, and separates D47 resolution from D49 cap/catalog/runtime authorization."
+    },
+    {
+      "id": "d49-scoped-u8-generator-policy-follow-up-plan-2026-05-03",
+      "path": "docs/plans/2026-05-03-003-feat-d49-scoped-u8-generator-policy-follow-up-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for adding a D49-scoped U8 proof packet that evaluates pressure-bearing D49 optional-slot redistribution as diagnostic-only allocated-duration counterfactual evidence, preserving not-authorized status for runtime redistribution, catalog content, D49 caps, source depth, and D47 reopening."
+    },
+    {
+      "id": "pair-side-catalog-content-depth-requirements-2026-05-04",
+      "path": "docs/brainstorms/2026-05-04-pair-side-catalog-content-depth-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for closing the highest-leverage pair-side catalog content depth gap from current generated diagnostics. Names d46-pair-open as the primary candidate, d31-pair-open/d31-pair as secondary, and preserves comparator-gated activation plus the D101 (3+ player) boundary."
+    },
+    {
+      "id": "d50-advanced-passing-depth-requirements-2026-05-04",
+      "path": "docs/brainstorms/2026-05-04-d50-advanced-passing-depth-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for a new advanced passing depth drill family d50 sourced from FIVB Drill-book 3.13 Short/Deep, intended to absorb pressure_remains evidence on d46-pair-open and d46-solo-open without widening d46 caps or duplicating its spin-read objective. Implemented and shipped as d50 family on 2026-05-04 via docs/plans/2026-05-04-003-feat-d50-advanced-passing-depth-plan.md."
+    },
+    {
+      "id": "d50-advanced-passing-depth-plan-2026-05-04",
+      "path": "docs/plans/2026-05-04-003-feat-d50-advanced-passing-depth-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for the d50 Short/Deep Pass Read advanced passing depth drill family, sourced from FIVB Drill-book 3.13 Short/Deep. Authors d50-pair-open and d50-solo-open variants (8-14 min envelope), wires shouldPreferAdvancedPassingDurationFit selection-path reroute mirroring the d47/d48 -> d49 setting reroute, bumps SESSION_ASSEMBLY_ALGORITHM_VERSION 4 -> 5, and ships with regenerated diagnostics confirming d46-pair-open and d46-solo-open absorbed (groups absent from receipt) and new d50 groups all classifying as likely_redistribution_caused. First non-D47-derived advanced catalog add authored from the diagnostic kit's source_backed_content_depth lane."
+    },
+    {
+      "id": "source-backed-content-depth-activation-pattern-2026-05-04",
+      "path": "docs/solutions/2026-05-04-source-backed-content-depth-activation-pattern.md",
+      "type": "solution",
+      "status": "active",
+      "canonical_for": "Canonical end-to-end workflow learning for moving a generated-plan diagnostic group from pressure_remains_without_redistribution evidence to a shipped catalog drill addition, using the in-repo FIVB/BAB/VC source archives as load-bearing intermediates. Validated three times: D47 closed-by-D49 (2026-05-02 advanced setting), D46 closed-by-D50 (2026-05-04 advanced passing), D31 closed-by-D51 (2026-05-04 beginner serving). Names the implementation skeleton, required boundaries (no teaching-surface duplication, rollback criterion, D101 boundary, selection-path change paired with drill add, algorithm version bump on snapshot break), verification sequence, documentation trail, and remaining pre-mined Tier 2 polish candidates. Recipe proven level-agnostic (works at beginner + advanced)."
+    },
+    {
+      "id": "d51-beginner-serving-tactical-zone-depth-requirements-2026-05-04",
+      "path": "docs/brainstorms/2026-05-04-d51-beginner-serving-tactical-zone-depth-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for a new beginner serving tactical-zone depth drill family d51 (Outside the Heart Serving) sourced from FIVB Drill-book 2.2, intended to absorb pressure_remains evidence on the d31 cluster (d31-solo-open, d31-pair-open, d31-pair) without widening d31 caps or duplicating its single-target objective. Implemented and shipped as d51 family on 2026-05-04 via docs/plans/2026-05-04-004-feat-d51-beginner-serving-tactical-zone-depth-plan.md."
+    },
+    {
+      "id": "d51-beginner-serving-tactical-zone-depth-plan-2026-05-04",
+      "path": "docs/plans/2026-05-04-004-feat-d51-beginner-serving-tactical-zone-depth-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for the d51 Outside the Heart Serving beginner tactical-zone depth drill family, sourced from FIVB Drill-book 2.2. Authors d51-solo-open, d51-pair-open, d51-pair variants (8-14 min envelope), wires shouldPreferBeginnerServingDurationFit selection-path reroute mirroring the d49 setting and d50 passing reroutes, bumps SESSION_ASSEMBLY_ALGORITHM_VERSION 5 -> 6, ships with regenerated diagnostics confirming d31 cluster absorbed (groups absent from receipt) and new d51 groups all classifying as likely_redistribution_caused. Third validated application of the source-backed content-depth activation pattern; first at the beginner level. Also extends the compression-lane classifier to handle movement_proxy under_authored_min groups."
+    },
+    {
+      "id": "d46-pair-open-source-backed-gap-card-plan-2026-05-04",
+      "path": "docs/plans/2026-05-04-001-feat-d46-pair-open-source-backed-gap-card-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for shipping the d46-pair-open source-backed gap card and registering it in catalog routing metadata. Documentation-only slice; defers comparator decision packet and catalog implementation plan as named follow-up artefacts."
+    },
+    {
+      "id": "d46-pair-open-no-change-comparator-decision-packet-plan-2026-05-04",
+      "path": "docs/plans/2026-05-04-002-feat-d46-pair-open-no-change-comparator-decision-packet-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for a documentation-only comparator decision packet comparing d46-pair-open against no-change. The packet selects hold_for_source_evidence with all catalog, cap, workload, runtime, U6, and D101 changes not authorized, and names the D46 pair source evidence payload as next artifact."
+    },
+    {
+      "id": "agent-architecture-cleanup-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-019-refactor-agent-architecture-cleanup-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Bounded implementation plan for making app architecture debt visible to future agents. Adds a report-mode layer-boundary check, safe product-type import cleanup, a canonical cleanup queue in app architecture guidance, and explicit deferrals for generated diagnostics, e2e fixture helpers, session selection policy, and broad controller extraction."
+    },
+    {
+      "id": "docs-canonical-successor-metadata-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-002-feat-docs-canonical-successor-metadata-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for adding catalog-first `canonical_successor`, `successor_disposition`, and `successor_reason` metadata plus validator coverage. Keeps missing-successor reports non-blocking while hard-failing malformed opted-in successor metadata, without introducing a broad lifecycle schema, audit verdict vocabulary, or docs triage queue."
+    },
+    {
+      "id": "run-face-v1-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-005-feat-run-face-v1-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Implementation plan for Run Face v1, a bounded active Run-screen presentation pass from docs/brainstorms/2026-05-02-active-session-glance-system-requirements.md. Sequences deterministic current-cue selection, one-cue Run body hierarchy, cockpit/state refinement, focused Run accessibility tests, and phone-width visual verification without adding new routes, timer behavior, data model, drill assembly behavior, or generated coaching labels."
+    },
+    {
+      "id": "run-face-review-hardening-plan-2026-05-02",
+      "path": "docs/plans/2026-05-02-009-feat-run-face-review-hardening-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan for hardening Run Face v1 review findings through proofable disclosure labels, conservative cue fallback, sparse accessible state announcements, and doc/test standards cleanup while preserving existing route, timer, data, controller, and drill assembly behavior."
+    },
+    {
+      "id": "focus-coverage-readiness-audit-2026-04-30",
+      "path": "docs/reviews/2026-04-30-focus-coverage-readiness-audit.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Generated-readiness audit snapshot for Tune today named-focus coverage across pass/serve/set, current setup configurations, beginner/intermediate/advanced levels, fixed 15/25/40-minute profiles, focus-reinforcing support, pressure applicability, and strict same-focus swaps. Records 135 cells after batch 3: pass 45 verified / 0 failing, serve 45 verified / 0 failing, set 45 verified / 0 failing; batches add focus-controlled support slots, serving depth on d22/d33, and FIVB-backed advanced Passing/Setting depth via d07/d46/d47/d48. 2026-05-01 generated-plan diagnostics classify generated buildDraft() cells with 0 hard failures and routeable duration-envelope observations recorded in docs/reviews/2026-05-01-generated-plan-diagnostics-report.md."
+    },
+    {
+      "id": "generated-plan-diagnostics-report-2026-05-01",
+      "path": "docs/reviews/2026-05-01-generated-plan-diagnostics-report.md",
+      "type": "review-data",
+      "status": "active",
+      "canonical_for": "Machine-readable generated-plan diagnostics summary for the current Tune today focus-readiness surface. Source: summarizeGeneratedPlanDiagnostics(buildGeneratedPlanDiagnostics()) and buildGeneratedPlanObservationGroups() in app/src/domain/generatedPlanDiagnostics.ts. Current snapshot: 540 seeded cells, 124 clean, 416 observation-only, 0 hard failures; observations classify under-authored-min duration, optional-slot redistribution, over-authored-max stretch, and fatigue-cap stretch as routeable policy/content signals rather than automatic product failures. Records 58 drill/variant/block routeable observation groups, top examples, surface-contract evidence, and the generated redistribution causality receipt."
+    },
+    {
+      "id": "generated-plan-diagnostics-triage-2026-05-01",
+      "path": "docs/reviews/2026-05-01-generated-plan-diagnostics-triage.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Docs-first triage workbench for generated-plan routeable observation groups. Generated and validated with the diagnostics report; current snapshot records 75 registry entries (post-d51 ship 2026-05-04), 0 blocking validation issues, 0 warning issues, decision-debt compression including extended movement_proxy_under_min handling, a redistribution causality receipt, the D47 proposal-admission ticket, the D47 gap closure ledger, D01 follow-up packets, gap-closure selection, the D49 residual follow-up packet, the D49 U8 generator-policy proof packet, the D47-vs-D05 comparator evaluation payload, the D47-vs-D05 comparator decision packet, D46 pair-side gap/comparator follow-up docs, the D50 advanced passing depth catalog activation, and the D51 beginner serving tactical-zone depth catalog activation. Current D47 state is `closed_by_d49`; current D46 state is `closed_by_d50`; current D31 state is `closed_by_d51`: d31-solo-open, d31-pair-open, and d31-pair optional_slot_redistribution+over_authored_max+over_fatigue_cap groups absorbed by the d51 reroute, with new d51 groups all classifying as likely_redistribution_caused."
+    },
+    {
+      "id": "d47-source-backed-gap-card-2026-05-02",
+      "path": "docs/reviews/2026-05-02-d47-source-backed-gap-card.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Source-backed gap-card candidate for the D47 advanced setting/movement pressure cluster. Names a possible D49-style setting conditioning sibling using Better at Beach, JVA, TAOCV, and existing FIVB 4.7 boundary evidence, but keeps activation not authorized; after the D47-winning comparator payload, it is follow-up catalog-planning input, not implementation approval."
+    },
+    {
+      "id": "d47-d05-comparator-evaluation-payload-2026-05-02",
+      "path": "docs/reviews/2026-05-02-d47-d05-comparator-evaluation-payload.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "D47-vs-D05 comparator evaluation payload. Selects `d47_wins`, keeps authorization `not_authorized`, records D47 source/adaptation and selection-path proof, preserves D05 re-entry triggers, and names the D47 source-backed catalog implementation plan as the follow-up artifact."
+    },
+    {
+      "id": "d05-solo-source-backed-gap-card-2026-05-04",
+      "path": "docs/reviews/2026-05-04-d05-solo-source-backed-gap-card.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Source-backed gap card for the remaining d05-solo beginner/intermediate solo passing pressure cluster. Records D05 as the only current catalog-ish re-entry candidate after D49/D50/D51, but keeps activation not authorized until a source-evidence payload proves a distinct longer solo passing carrier beyond current set-window passing."
+    },
+    {
+      "id": "d49-source-backed-activation-manifest-2026-05-02",
+      "path": "docs/reviews/2026-05-02-d49-source-backed-activation-manifest.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Activation manifest for the D47-winning source-backed catalog gap. Authorizes only the bounded D49 advanced setting/movement implementation and selection-path proof while preserving D05 re-entry and rejecting D47 cap widening or 3+ player source forms."
+    },
+    {
+      "id": "d46-pair-open-source-backed-gap-card-2026-05-04",
+      "path": "docs/reviews/2026-05-04-d46-pair-open-source-backed-gap-card.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Source-backed gap card for the d46-pair-open advanced spin-read serve receive pressure cluster. Names a candidate longer pair-open serve receive conditioning sibling beyond existing FIVB 3.15/3.16 D46 coverage, and remains not authorized; the follow-up comparator packet selects hold_for_source_evidence pending exact source/adaptation proof."
+    },
+    {
+      "id": "d46-pair-open-no-change-comparator-decision-packet-2026-05-04",
+      "path": "docs/reviews/2026-05-04-d46-pair-open-no-change-comparator-decision-packet.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Comparator decision packet for d46-pair-open versus no-change. Selects hold_for_source_evidence, keeps all catalog/cap/workload/runtime/U6/D101 changes not authorized, rejects immediate no-change acceptance, and names the D46 pair source evidence payload as the next artifact."
+    },
+    {
+      "id": "focus-coverage-gap-cards-2026-04-30",
+      "path": "docs/reviews/2026-04-30-focus-coverage-gap-cards.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Grouped source-backed gap cards for the focus coverage readiness audit. All current matrix groups are verified after batch 3. Includes batch 1 activation manifest for focus-controlled support slots plus no-net d31/d33 serving variants, batch 2 manifest for d22/d33 serving level/depth repair, and batch 3 manifest for FIVB-backed advanced Passing/Setting depth via d07/d46/d47/d48. 2026-05-01 stretch-pressure diagnostic card now points to generated-plan observations in docs/reviews/2026-05-01-generated-plan-diagnostics-report.md; future catalog activation still requires exact source references, adaptation deltas, cap delta, and checkpoint criteria."
     },
     {
       "id": "per-move-pacing-indicator-ideation-2026-04-28",
@@ -871,14 +1444,15 @@
       "id": "per-move-pacing-indicator-2026-04-28",
       "path": "docs/plans/2026-04-28-per-move-pacing-indicator.md",
       "type": "plan",
-      "status": "active",
-      "canonical_for": "Implementation plan and shipped ledger for the per-move pacing indicator. Adds `DrillSegment` type + `DrillVariant.segments?` + `courtsideInstructionsBonus?`; authors segments on `d28-solo` (4×45s), `d26-solo` (3×60s), `d25-solo` (5 segments / 60+30+30+30+30; durationMinMinutes bumped 2→3); pure helper at `app/src/domain/runFlow/segmentTiming.ts`; `<SegmentList>` at `app/src/components/run/SegmentList.tsx`; controller wiring in `useRunController` + extension of `useBlockPacingTicks` for per-segment end beep; catalog validation rule `segment_duration_mismatch`. Visible-channel half of S1 from `docs/ideation/2026-04-28-what-to-add-next-ideation.md`."
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan and shipped ledger for the per-move pacing indicator. Adds `DrillSegment` type + `DrillVariant.segments?` + `courtsideInstructionsBonus?`; authors segments on `d28-solo` (4×45s), `d26-solo` (3×60s), `d25-solo` (5 segments / 60+30+30+30+30; durationMinMinutes bumped 2→3); pure helper at `app/src/domain/runFlow/segmentTiming.ts`; `<SegmentList>` at `app/src/components/run/SegmentList.tsx`; controller wiring in `useRunController` + extension of `useBlockPacingTicks` for per-segment end beep; catalog validation rule `segment_duration_mismatch`. Shipped UI uses the V2 aligned accent-dot/checkmark marker system rather than the earlier `Now` pill, and later V3/V4 iterations made the list Shorten-aware and `eachSide`-aware. Visible-channel half of S1 from `docs/ideation/2026-04-28-what-to-add-next-ideation.md`."
     },
     {
       "id": "per-drill-capture-coverage-phase-2a-streak-2026-04-28",
-      "path": "docs/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md",
+      "path": "docs/archive/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md",
       "type": "plan",
-      "status": "active",
+      "status": "complete",
       "canonical_for": "Phase 2A of `docs/plans/2026-04-27-per-drill-capture-coverage.md`. Ships an optional `Add longest streak (optional)` drawer on `/run/check` for `streak`-typed `main_skill` / `pressure` drills (`d01-solo`, `d01-pair`, `d38-pair`, `d41-pair`). Architecture seam: `captureShape` discriminator added to the metric-strategy registry (semantic only, no UI copy); additive Dexie v6 `metricCapture?: { kind: 'streak'; longest: number }` field on `PerDrillCapture`; new pure-domain builders (`buildPerDrillCaptureRecord`, `validateStreakLongest`) that forbid impossible rows by construction; eligibility resolver extends `eligible_difficulty_only` with `optionalCaptureShape: CaptureShape`. UI: streak drawer is collapsed by default, `inputMode=numeric` whole numbers `0..99`, V0B-28 success rule renders above the input without the anti-generosity nudge (does not apply to streak). CompleteScreen renders `Longest streak: N` quietly under the drill name and suppresses the `Counts not logged` line for streak-logged drills. Pulled forward as a bounded D130 founder-use exception authorized by the new `D134` row, with a pre-registered falsification gate that freezes Phase 2B (`points-to-target`, `pass-grade-avg`) if streak capture is skipped or feels like bookkeeping in the next eligible sessions. `D131` posture preserved: telemetry stays off, export omits `metricCapture` in Phase 2A. Authors zero new drill records; consumes one Tier 1b authoring-attention slot; defers `points-to-target`, `pass-grade-avg`, `composite`, `completion` to Phase 2B."
     },
     {
@@ -966,6 +1540,18 @@
     {
       "path": "docs/research/beach-training-resources.md",
       "focus": "broad product and training research"
+    },
+    {
+      "path": "docs/research/bab-source-material.md",
+      "focus": "Better at Beach source/provenance archive for evaluating candidate drill adaptations: **all 20 Practice Plans captured at source-detail level** (Plans 7-11 attacking cluster, Plans 12-16 complete defense-focused cluster, **Plans 17-20 complete Game Play cluster** — captured BAB drill book is now structurally complete), partial-capture caveats per plan (Plan 4 Drills 5-6 only; Plan 9 Drill 6 via Plan 11; Plans 10-20 Drill 1 name-only; Plans 15-18 Drill 2 name-only; Plan 20 Drill 2 truncated), and 2026-05-04 drill-level catalog markup, practice-plan TOC, BAB glossary including **all nine composable scoring rule kinds plus asymmetric scoring axis** (rule-restriction, rule-augmentation, tiebreaker, side-switch trigger, outcome-elevation gate, conditional-extension, conjunctive/wash with cancellation, scoring-zone gate, **reset-on-miss / consecutive-streak-required**, plus **asymmetric scoring tenth structural axis**) plus drill-name aliasing / vision-pepper / defender-role / blocker-defender-coupling / level-scaled-rule / reactive-blocker / defensive-movement / drill-repurposing-across-focus / hand-dig-vs-platform-dig / defender-perspective-framing / pull-block-dig / smack-misdirection / attacker-deception-read / transition-setting / live-point-integration / blocker-as-reader / set-quality-cue / toss-fed-to-serve-fed-sibling / Race-to-5 / 10-Sideouts / BIG-point / Triangle-Setting-with-Attack / Add-In-Add-Out / single-passer-attacker / Small Court Mini Games / scoring-zone-gate / Game to 21 (no regulations) / **16-18 Run with It / reset-on-miss-streak-required / asymmetric scoring per-team-rule / Game Play cluster grammar (cluster-complete) / T10 (read drills) narrowed to Defense/Attack-only / captured BAB drill book complete (Plan 20)** vocabulary, Coaches Guide practice template, and source-name to our-drill-id cross-reference. Not implementation authorization; check current decision/spec gates before catalog changes."
+    },
+    {
+      "path": "docs/research/fivb-source-material.md",
+      "focus": "FIVB Beach Volleyball Drill-book source/provenance archive for evaluating candidate drill adaptations: drill data model, chapter teaching frameworks, 104-drill TOC, selected drill excerpts, FIVB glossary, and FIVB-name to our-drill-id cross-reference. Not implementation authorization; check current decision/spec gates before catalog changes."
+    },
+    {
+      "path": "docs/research/practice-plan-authoring-synthesis.md",
+      "focus": "Cross-source synthesis for how Volleycraft should build focus-coherent practice plans from BAB, FIVB, and Volleyball Canada VDM/LTD3. **The captured BAB drill book is now structurally complete (all 20 plans captured at source-detail level).** Names a six-slot focus-agnostic plan grammar across passing/setting/attacking/defense and **cluster-complete-confirmed against game-play across all four Game Play plans (17, 18, 19, 20)** all fitting the spine with slot 4 intentionally skipped, maps cross-source convergence and divergence across 12 topics, and synthesizes 13 theses (T1-T13) plus 10 plan-builder theses, a `Theses Retired or Narrowed` falsification slot (Plans 17-20 triggered seven real entries: T9 broadened **four consecutive times** from two-pattern symmetry to nine composable scoring rule kinds plus asymmetric scoring as a tenth structural axis; slot 4 confirmed optional across all four Game Play plans; slot 2 primer narrowed to 'any 4-player chain primer'; T10 narrowed from universal to Defense/Attack-only; T12 graduated from sample-of-one to two-source pattern), candidate routing, and schema/product/cross-source open questions. Not implementation authorization; check current decision/spec gates before catalog changes."
     },
     {
       "path": "docs/research/outdoor-courtside-ui-brief.md",
@@ -1098,22 +1684,10 @@
   ],
   "status_vocabularies": {
     "doc_status": {
-      "values": [
-        "draft",
-        "active",
-        "complete",
-        "superseded"
-      ]
+      "values": ["draft", "active", "complete", "superseded"]
     },
     "milestone_status": {
-      "values": [
-        "draft",
-        "ready",
-        "active",
-        "blocked",
-        "complete",
-        "deferred"
-      ]
+      "values": ["draft", "ready", "active", "blocked", "complete", "deferred"]
     }
   },
   "doc_conventions": {
@@ -1130,7 +1704,10 @@
       "flat lists for contracts and defaults",
       "cross-references instead of duplicated canon",
       "thin compatibility surfaces",
-      "explicit WSL/bash notes where automation is described"
+      "explicit WSL/bash notes where automation is described",
+      "archive completed/superseded historical docs under docs/archive/<family>/",
+      "mark complete plan registries kept in active folders with active_registry: true",
+      "route archived/superseded cataloged docs with canonical_successor or successor_disposition: no_single_successor plus successor_reason"
     ]
   }
 }

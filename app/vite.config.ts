@@ -41,7 +41,7 @@ import { VitePWA } from 'vite-plugin-pwa'
  * `define` block so the constants are safe to drop into source as
  * identifiers (Vite replaces references at build time).
  *
- * See `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 6.
+ * See `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 6.
  */
 function readBuildVersion(): string {
   try {

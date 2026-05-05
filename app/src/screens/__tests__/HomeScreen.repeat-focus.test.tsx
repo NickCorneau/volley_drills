@@ -8,14 +8,13 @@ import { HomeScreen } from '../HomeScreen'
 /**
  * 2026-04-30 focus policy regression guard.
  *
- * Full Repeat ("Repeat this session") carries the prior plan's
+ * Full Repeat ("Repeat last session") carries the prior plan's
  * `context.sessionFocus` forward — "same conditions" includes
  * yesterday's chosen focus. The user can still override on
  * Tune today before continuing.
  *
- * Partial Repeat ("Repeat what you did") deliberately strips focus;
- * see `buildDraftFromCompletedBlocks` and its dedicated test in
- * `domain/__tests__/buildDraftFromCompletedBlocks.test.ts`.
+ * Partial Repeat ("Repeat shorter version") preserves the completed
+ * blocks' plan context, focus included; see `buildDraftFromCompletedBlocks`.
  *
  * If a future change tries to strip focus from full Repeat, this
  * test should fail loudly so the policy decision gets re-litigated
@@ -88,13 +87,13 @@ describe('HomeScreen full Repeat carries prior session focus', () => {
     await clearDb()
   })
 
-  it('Repeat this session preserves sessionFocus on the rebuilt draft', async () => {
+  it('Repeat last session preserves sessionFocus on the rebuilt draft', async () => {
     const user = userEvent.setup()
     await seedFocusedLastComplete()
     renderHome()
 
     await user.click(
-      await screen.findByRole('button', { name: /repeat this session/i }),
+      await screen.findByRole('button', { name: /repeat last session/i }),
     )
 
     expect(await screen.findByTestId('tune-route')).toBeInTheDocument()
@@ -104,5 +103,26 @@ describe('HomeScreen full Repeat carries prior session focus', () => {
     expect(draft!.context.sessionFocus).toBe('serve')
     expect(draft!.context.playerMode).toBe('pair')
     expect(draft!.context.netAvailable).toBe(true)
+  })
+
+  it('Repeat last session applies the persisted onboarding skill level to legacy plan context', async () => {
+    const user = userEvent.setup()
+    await seedFocusedLastComplete()
+    await db.storageMeta.put({
+      key: 'onboarding.skillLevel',
+      value: 'competitive_pair',
+      updatedAt: Date.now(),
+    })
+    renderHome()
+
+    await user.click(
+      await screen.findByRole('button', { name: /repeat last session/i }),
+    )
+
+    expect(await screen.findByTestId('tune-route')).toBeInTheDocument()
+
+    const draft = await db.sessionDrafts.get('current')
+    expect(draft?.context.playerLevel).toBe('advanced')
+    expect(draft?.blocks.map((block) => block.drillId)).not.toContain('d31')
   })
 })

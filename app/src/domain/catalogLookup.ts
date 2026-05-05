@@ -23,6 +23,8 @@ export function drillForBlock(block: SessionPlanBlock | null | undefined): Drill
  * Resolution order:
  * 1. Exact `block.variantId` match.
  * 2. Participants-envelope bracket against `playerCount` for legacy blocks.
+ *    When both net and no-net variants bracket the count, prefer the
+ *    net variant to preserve pre-open-variant legacy behavior.
  * 3. First variant on the drill as a synthetic / legacy fallback.
  */
 export function variantForBlock(
@@ -35,10 +37,12 @@ export function variantForBlock(
     const exact = variantById(drill, block.variantId)
     if (exact) return exact
   }
+  const matchingVariants = drill.variants.filter(
+    (variant) => variant.participants.min <= playerCount && playerCount <= variant.participants.max,
+  )
   return (
-    drill.variants.find(
-      (variant) => variant.participants.min <= playerCount && playerCount <= variant.participants.max,
-    ) ??
+    matchingVariants.find((variant) => variant.environmentFlags.needsNet) ??
+    matchingVariants[0] ??
     drill.variants[0] ??
     null
   )

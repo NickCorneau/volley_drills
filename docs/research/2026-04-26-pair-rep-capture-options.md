@@ -38,7 +38,7 @@ open_question_refs:
 
 ## Why this doc exists
 
-The 2026-04-26 founder report (chat, 5:23 PM ET) named two distinct issues. The cooldown-stretch wording one is editorial and ships under `docs/plans/2026-04-26-pre-d91-editorial-polish.md`. The Good/Total one is a **product-and-design** question that touches contract:
+The 2026-04-26 founder report (chat, 5:23 PM ET) named two distinct issues. The cooldown-stretch wording one is editorial and ships under `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md`. The Good/Total one is a **product-and-design** question that touches contract:
 
 > "the 'passes and good passes' bit at the end is too hard to track and fill out post workout. maybe, we have an in-between drill screen, that asks for total passes and how many were good or not. or, we just drop this entirely, and just get the user to tag 'too hard; still learning; too easy' after each drill?"
 
@@ -50,7 +50,7 @@ Five canonical surfaces converge on this question:
 - `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md` §"Tier 1b — gated by founder-session trigger" listed three relevant gated items: (a) in-session running rep counter, (b) drill-metadata-driven capture UI, (c) per-drill capture-style branching.
 - `docs/research/founder-use-ledger.md` 2026-04-26 row is the triggering session.
 
-**One thing that looks like prior art but isn't.** The `QuickTagChips` card on Review (`Too easy / About right / Too hard / Need partner`) was deleted on 2026-04-23 (`docs/plans/2026-04-23-walkthrough-closeout-polish.md` item 3) because it duplicated the new 3-anchor RPE chips. That deletion was *session-level*. The founder's 2026-04-26 proposal ("tag 'too hard / still learning / too easy' after each drill") is **per-drill at Transition**, which is meaningfully different. The brainstorm acknowledges the surface-name history so labels can be picked that don't accidentally re-propose the deleted thing.
+**One thing that looks like prior art but isn't.** The `QuickTagChips` card on Review (`Too easy / About right / Too hard / Need partner`) was deleted on 2026-04-23 (`docs/archive/plans/2026-04-23-walkthrough-closeout-polish.md` item 3) because it duplicated the new 3-anchor RPE chips. That deletion was *session-level*. The founder's 2026-04-26 proposal ("tag 'too hard / still learning / too easy' after each drill") is **per-drill at Transition**, which is meaningfully different. The brainstorm acknowledges the surface-name history so labels can be picked that don't accidentally re-propose the deleted thing.
 
 **One thing that already exists and may not need to be invented.** The `TransitionScreen` (`app/src/screens/TransitionScreen.tsx`) is a real surface today, displayed between blocks. An "in-between drill ask" can live there; it does not require a new screen.
 
@@ -123,5 +123,5 @@ Detail per criterion:
 - Does not pick a framing. The framing decision lives in the next pathway step and in `docs/decisions.md`.
 - Does not propose new vocabulary for the difficulty-tag labels. Label-picking is part of the spec patch, gated by the courtside-copy invariants in `.cursor/rules/courtside-copy.mdc`.
 - Does not list the implementation file set. That belongs in the Tier 1b plan in `docs/plans/2026-04-26-pair-rep-capture-tier1b.md`.
-- Does not lump the cooldown-copy fix here. That ships under `docs/plans/2026-04-26-pre-d91-editorial-polish.md` as an editorial-class fix.
+- Does not lump the cooldown-copy fix here. That ships under `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` as an editorial-class fix.
 - Does not relitigate the `QuickTagChips` deletion. The 2026-04-23 cut stands. This doc proposes a *grain-different* surface, not a revival.

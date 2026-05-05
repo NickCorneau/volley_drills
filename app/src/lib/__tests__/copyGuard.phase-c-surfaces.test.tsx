@@ -262,7 +262,7 @@ describe('V0B-18 D86 per-surface regression scan', () => {
         <HomeScreen />
       </MemoryRouter>,
     )
-    await screen.findByRole('button', { name: /start first workout/i })
+    await screen.findByRole('button', { name: /start first session/i })
     assertClean(container, 'HomeScreen new_user')
   })
 

@@ -6,7 +6,7 @@ stage: validation
 type: ops
 authority: runtime posture, bounded-work rules, WSL/bash automation expectations, and archived control-plane guidance
 summary: "Consolidated agent operating model for this repo: current posture, automation constraints, and what remains intentionally manual."
-last_updated: 2026-04-15
+last_updated: 2026-05-02
 depends_on:
   - AGENTS.md
   - docs/catalog.json
@@ -50,8 +50,8 @@ Define the practical operating model for agents in this repo now that the produc
 
 ## Current Posture
 
-- The repo is in **Phase 0 validation** with a runnable v0a prototype under `app/`.
-- Product work remains **docs-first** for M001 scope beyond the current prototype until the field-test gate clears.
+- The repo is in **Phase 0 validation** with the runnable v0b Starter Loop under `app/`.
+- Product work remains **docs-first** for M001 scope beyond shipped v0b behavior; `D130` founder-use mode allows bounded implementation when logged demand or accepted plans authorize it.
 - The active agent workflow is **interactive and Cursor-first**, not queue-first.
 - The older `ops/agent/` task-queue control plane has been retired from the active workflow and archived as historical scaffolding.
 

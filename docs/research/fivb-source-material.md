@@ -6,7 +6,7 @@ stage: validation
 type: research
 authority: canonical local archive of the FIVB Beach Volleyball Drill-Book — the single most comprehensive external drill source behind M001 content authoring; captures the book's drill data model, chapter-level teaching frameworks, full drill TOC, verbatim excerpts of key drills, and the FIVB-name → our-drill-id cross-reference
 summary: "Local archive of the FIVB Beach Volleyball Drill-book (104 drills across 8 chapters, 130 pages). Captured so the book's teaching frameworks (moving-triangle passing, in-system / out-of-system definition, wind-adjusted passing and serving, hand-signal blocking conventions) and drill inventory stay referenceable without re-mining the PDF. Net-new findings (coaching cues, Tier 2 polish candidates, Tier 3+ backlog items) already live in the 'FIVB drill-book re-review (2026-04-20)' section of `docs/research/beach-training-resources.md`; this note preserves the source material those findings are derived from and the parts not yet explicitly mined."
-last_updated: 2026-04-20
+last_updated: 2026-05-04
 depends_on:
   - docs/decisions.md
   - docs/milestones/m001-solo-session-loop.md
@@ -15,6 +15,7 @@ depends_on:
 related:
   - docs/research/bab-source-material.md
   - docs/research/warmup-cooldown-minimum-protocols.md
+  - docs/research/practice-plan-authoring-synthesis.md
   - docs/research/sources/FIVB_Beachvolley_Drill-Book_final.pdf
 decision_refs:
   - D80
@@ -33,6 +34,7 @@ decision_refs:
 - **Authoritative for**: FIVB source provenance, the book's chapter/drill TOC, the drill data-model schema, the per-chapter teaching frameworks, the FIVB-name → our-drill-id cross-reference.
 - **Not authoritative for**: what our drills do (that lives in `app/src/data/drills.ts`), progression rules (`app/src/data/progressions.ts`, `docs/specs/m001-adaptation-rules.md`), or product decisions (`docs/decisions.md`).
 - **Read the sibling archives too**: `docs/research/bab-source-material.md` for BAB, and the existing FIVB re-review section in `docs/research/beach-training-resources.md` for the distilled findings that already informed Tier 1.
+- **Plan-builder synthesis lives elsewhere.** For the cross-source distillation of how Volleycraft should build practice plans using FIVB guardrails alongside BAB and VDM (feed-type honesty, whole-chain bias, cue density, fatigue caps, zone-convention disambiguation), see `docs/research/practice-plan-authoring-synthesis.md`. This archive remains the FIVB drill-book provenance surface.
 
 ## Why this note exists
 
@@ -367,7 +369,7 @@ These drills have load-bearing content that the M001 or Tier 2+ plan references 
 
 - **Zones**: 5 zones (numbered 1–5 in the drill), not 6 (FIVB serving) or 7 (BAB attacking). This is a third convention: FIVB's attack `Around the World` is a 5-zone grid.
 - **Rule**: attacker goes in order 1 → 5; if a zone is hit, the attacker can skip that zone on the next round; a player can also work 1 → 5 only moving forward on successful hits.
-- **Status**: Flag at Tier 3+ attack-chain authoring time. **Three conventions exist** — BAB uses 7 zones for attacking, FIVB uses 5. Our attack chain should pick **one** and document the choice. Lean BAB (7 zones) for continuity with the BAB-anchored serving ladder, but record FIVB's 5-zone version as an explicit alternative — do not silently assume one convention.
+- **Status**: Flag at Tier 3+ attack-chain authoring time. **Four conventions now exist** — BAB uses 7 zones for attacking (Plans 1, 4 Around the World), FIVB uses 5 (this drill), BAB serving scales separately as 4 / 6 / 8 zones by level, and BAB Plan 7 introduces **per-shot attack-accuracy boxes** (4×4 single-shot rectangles in Drill 4; two-shot boxes per attacker in Drill 6) that score one repeated shot rather than march through a numbered ladder. Our attack chain should pick the right convention(s) and document the choice using explicit criteria such as source authority, cognitive load, target measurability, and catalog consistency. Record FIVB's 5-zone version, BAB's 7-zone version, and BAB Plan 7's accuracy-box version as explicit alternatives — do not silently assume one convention. See `docs/research/bab-source-material.md` Plan 7 synthesis and `docs/research/practice-plan-authoring-synthesis.md` Thesis T6.
 
 ### 5.7 Spike Exhaustion Drill (intermediate / advanced)
 
@@ -411,7 +413,7 @@ Captured as reference; Tier 1 Unit 5 already uses BAB glossary as the authoritat
 | **Warm-up 1.8 Pass Tomahawk Turn and Dig** | Tier 2 polish candidate | Compound warm-up touching all four contact types. |
 | **Warm-up 1.11 Movement Drill** | Content-polish candidate | Possibly fits `chain-3-movement`. |
 | **Serving 2.1 Serve and Get Into Position** | Equivalent exists | Matches BAB Serve-and-Dash; do not duplicate. |
-| **Serving 2.2 Serving Outside the Heart** | Tier 2 polish candidate | Simpler tactical first-rung variant. |
+| **Serving 2.2 Serving Outside the Heart** | Activated as `d51` (2026-05-04) | Authored as the long-envelope beginner serving sibling for `d31`. New variants `d51-solo-open`, `d51-pair-open`, `d51-pair`; selection-path reroutes beginner serving main-skill blocks > 8 min from `d31` to `d51`. Provenance: `docs/plans/2026-05-04-004-feat-d51-beginner-serving-tactical-zone-depth-plan.md`. Third validated application of the source-backed content-depth activation pattern (after d49 and d50); first at the beginner level. |
 | **Serving 2.3 Deep Serve Practice** | Tier 1 source (cues) | Deep-serve trajectory cue ("must travel high") feeds `d34 Deep Rainbow Serves` in Tier 1 Unit 3. |
 | **Serving 2.4 Force Them Back** | Tier 2 polish candidate | Clean binary pressure-serving scoring. |
 | **Serving 2.5 Serving Variety Drill** | Equivalent exists | Serves-to-zones; our `d33 Around the World Serving (6 zones)` covers the shape. |
@@ -426,7 +428,7 @@ Captured as reference; Tier 1 Unit 5 already uses BAB glossary as the authoritat
 | **Passing 3.7 Passing In System** | Policy source only | The in-system/out-of-system definition feeds the `D104` scoring rubric note. |
 | **Passing 3.8 W Passing Drill** | Content-polish candidate | More advanced variant of 3.6. |
 | **Passing 3.11 Backspin and Topspin Passing** | Tier 2 polish candidate | Teaches reading of serve spin. |
-| **Passing 3.13 Short / Deep** | Content-polish candidate | Focused short-deep decision-making. |
+| **Passing 3.13 Short / Deep** | Activated as `d50` (2026-05-04) | Authored as the long-envelope advanced passing sibling for `d46`. New variants `d50-pair-open` and `d50-solo-open`; selection-path reroutes advanced pair-open/solo-open passing main-skill blocks > 8 min from `d46` to `d50`. Provenance: `docs/plans/2026-05-04-003-feat-d50-advanced-passing-depth-plan.md`. |
 | **Passing 3.15 Pass and Look** | Tier 3+ backlog | "Quick look" skill; belongs to attack-chain supporting work. |
 | **Passing 3.16 Topspin Serve Off Box** | Tier 3+ backlog | Requires a serving box; high-difficulty; advanced. |
 | **Setting 4.1 Set and Move** | Content-polish candidate | Beginner high-rep setting with movement; Tier 1 `d40 Footwork for Setting` covers similar ground. |

@@ -1,13 +1,13 @@
+import { useRef, useState } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { BlockTimer } from '../components/BlockTimer'
 import { RunControls } from '../components/RunControls'
-import { SafetyIcon } from '../components/SafetyIcon'
 import { SegmentList } from '../components/run/SegmentList'
-import { ELEVATED_PANEL_SURFACE } from '../components/ui/Card'
-import { Button, ScreenShell, StatusMessage } from '../components/ui'
+import { ConfirmModal, RunFlowHeader, ScreenShell, StatusMessage } from '../components/ui'
 import { getBlockSkillFocus } from '../domain/drillMetadata'
 import { blockEyebrowLabel } from '../lib/format'
 import { routes } from '../routes'
+import { segmentListOwnsCurrentCue, selectNonSegmentedCurrentCue } from './run/currentCue'
 import { useRunController } from './run/useRunController'
 
 export function RunScreen() {
@@ -15,6 +15,8 @@ export function RunScreen() {
   const location = useLocation()
   const executionLogId = searchParams.get('id') ?? ''
   const shortened = (location.state as { shortened?: boolean } | null)?.shortened ?? false
+  const [isEndingSession, setIsEndingSession] = useState(false)
+  const endingSessionInFlightRef = useRef(false)
 
   const {
     plan,
@@ -45,6 +47,23 @@ export function RunScreen() {
     handleEndSessionCancel,
   } = useRunController(executionLogId, shortened)
 
+  const handleEndSessionCancelOnce = () => {
+    if (endingSessionInFlightRef.current) return
+    void handleEndSessionCancel()
+  }
+
+  const handleEndSessionConfirmOnce = async () => {
+    if (endingSessionInFlightRef.current) return
+    endingSessionInFlightRef.current = true
+    setIsEndingSession(true)
+    try {
+      await handleEndSessionConfirm()
+    } finally {
+      endingSessionInFlightRef.current = false
+      setIsEndingSession(false)
+    }
+  }
+
   if (!plan || !execution || !currentBlock) {
     if (loaded) {
       return (
@@ -68,6 +87,19 @@ export function RunScreen() {
   // Swap is only offered when the block has at least one curated
   // alternate. Warmup/wrap are always empty per D85/D105. The memo
   // keeps catalog scans out of the 4 Hz timer render path.
+  const segmentListOwnsCue = segmentListOwnsCurrentCue(currentBlock)
+  const currentCue = segmentListOwnsCue ? null : selectNonSegmentedCurrentCue(currentBlock)
+  const hasVisibleSegmentInstructions =
+    segmentListOwnsCue && currentBlock.courtsideInstructions.trim().length > 0
+  const hasInstructionDetail =
+    !hasVisibleSegmentInstructions &&
+    currentBlock.courtsideInstructions.trim().length > 0 &&
+    currentBlock.courtsideInstructions.trim() !== currentCue?.text
+  const hasCueDetail =
+    currentBlock.coachingCue.trim().length > 0 &&
+    currentBlock.coachingCue.trim() !== currentCue?.text
+  const hasInlineDetail = hasInstructionDetail || hasCueDetail
+  const inlineDetailLabel = inlineDetailSummaryLabel(hasInstructionDetail, hasCueDetail)
 
   return (
     <ScreenShell>
@@ -114,52 +146,34 @@ export function RunScreen() {
         rendering it.
       */}
       {/*
-        Header layout: 3-column grid, NOT flex justify-between.
-        2026-04-27 cca2 dogfeed visual catch: the prior `flex
-        justify-between` pattern keeps the gap-left of the middle
-        item equal to the gap-right, but does NOT center the middle
-        item relative to the container — so the eyebrow drifts
-        right of true center by `(left_child_width -
-        right_child_width) / 2`. With `SafetyIcon` at `h-14 w-14`
-        (56 px touch target) and a short counter `N/M` (~22 px),
-        the math is `+17 px` right of center on RunScreen — visible
-        as misalignment when comparing to TransitionScreen (which
-        has the wider `Next: N/M` counter and reads visually
-        centered by accident).
+        2026-04-27 cca2 dogfeed F8 follow-up: eyebrow composes
+        slot role + drill skill (`Main drill · Serve`) via
+        `blockEyebrowLabel` so the courtside reader sees the skill
+        on first glance, not buried in the body. Skill omitted for
+        warmup / wrap by design (no per-skill identity). Falls back
+        to bare `phaseLabel` when the drill is unknown (synthetic
+        test, legacy plan, or non-pass/serve/set drill). Centralised
+        composition keeps Run + Transition in sync on separator and
+        vocabulary.
 
-        `grid-cols-3` + per-cell `justify-self-{start,center,end}`
-        forces the middle column to center on the container regardless
-        of side-cell widths. Symmetric column widths also let the
-        eyebrow auto-truncate cleanly if a future label (e.g. Tier
-        1c `Main drill · serve` composition) ever exceeds the
-        column width — the `truncate` class is reserved for that
-        eventuality without changing this layout.
+        The 3-column grid layout (and the "why grid not flex"
+        rationale) lives once on `RunFlowHeader` (plan U5).
       */}
-      <ScreenShell.Header className="grid grid-cols-3 items-center pt-2 pb-3">
-        <div className="justify-self-start">
-          <SafetyIcon />
-        </div>
-        {/*
-          2026-04-27 cca2 dogfeed F8 follow-up: eyebrow now composes
-          slot role + drill skill (`Main drill · Serve`) via
-          `blockEyebrowLabel` so the courtside reader sees the skill
-          on first glance, not buried in the body. Skill omitted for
-          warmup / wrap by design (no per-skill identity). Falls back
-          to bare `phaseLabel` when the drill is unknown (synthetic
-          test, legacy plan, or non-pass/serve/set drill). Centralised
-          composition keeps Run + Transition in sync on separator and
-          vocabulary.
-        */}
-        <span className="justify-self-center text-sm font-semibold text-accent">
-          {blockEyebrowLabel(
-            currentBlock.type,
-            getBlockSkillFocus(currentBlock, plan?.playerCount ?? 1),
-          )}
-        </span>
-        <span className="justify-self-end text-sm font-medium text-text-secondary">
-          {currentBlockIndex + 1}/{totalBlocks}
-        </span>
-      </ScreenShell.Header>
+      <RunFlowHeader
+        eyebrow={
+          <span className="text-sm font-semibold text-accent">
+            {blockEyebrowLabel(
+              currentBlock.type,
+              getBlockSkillFocus(currentBlock, plan?.playerCount ?? 1),
+            )}
+          </span>
+        }
+        counter={
+          <span className="text-sm font-medium text-text-secondary">
+            {currentBlockIndex + 1}/{totalBlocks}
+          </span>
+        }
+      />
 
       <ScreenShell.Body className="gap-4 pb-4">
         <div>
@@ -167,40 +181,24 @@ export function RunScreen() {
             {currentBlock.drillName}
           </h1>
         </div>
-        {/* `whitespace-pre-line` preserves `\n` in
-            `courtsideInstructions` for drills with naturally list-shaped
-            content (e.g. d26 stretch sequence).
 
-            Partner-walkthrough polish round 2 (2026-04-22): dropped
-            from `text-lg` (18 px) to `text-base` (16 px). The prior
-            pre-close bump to 18 px made the same paragraph render
-            visibly larger on Run than on Transition (where it was
-            `text-sm` / 14 px), producing a font-size jump for the
-            exact same drill copy between two adjacent screens in the
-            flow. 16 px sits on the outdoor-UI brief's body floor,
-            satisfies Seb P2-1 "readable at arm's length," and lets
-            TransitionScreen meet it mid-scale (see its matching
-            bump) so the paragraph reads as one voice across both
-            surfaces.
+        {currentCue && (
+          <section aria-labelledby="current-cue-title" className="border-l-2 border-accent/70 pl-3">
+            <span id="current-cue-title" className="text-xs font-medium text-accent">
+              Now
+            </span>
+            <p className="mt-1 whitespace-pre-line text-base leading-relaxed text-text-primary">
+              {currentCue.text}
+            </p>
+          </section>
+        )}
 
-            2026-04-28 (`docs/plans/2026-04-28-per-move-pacing-indicator.md`
-            U7): when the active block has structured `segments`
-            (warmup `d28-solo`; cooldown `d25-solo`, `d26-solo`),
-            `<SegmentList>` renders the structured per-move indicator
-            with the active row highlighted by a small "NOW" pill.
-            The intro paragraph (everything authored on
-            `courtsideInstructions` for these drills, post-U3/U4/U5
-            split) renders above the list. The bonus paragraph
-            (`courtsideInstructionsBonus`) is rendered by `<SegmentList>`
-            below the list when all segments have completed.
-            For drills without segments (every other timed drill,
-            future or current), the existing prose render is the
-            fallback path — no regression. */}
-        {currentBlock.courtsideInstructions && (
+        {hasVisibleSegmentInstructions && (
           <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
             {currentBlock.courtsideInstructions}
           </p>
         )}
+
         {/*
          * `effectiveSegments` is the controller's scaled view of
          * `currentBlock.segments` — same identity when the block runs
@@ -216,43 +214,29 @@ export function RunScreen() {
             bonus={currentBlock.courtsideInstructionsBonus}
           />
         )}
-        {/*
-          Coaching cue: 2026-04-22 quieted from the prior chunky card
-          (`rounded-2xl border border-accent/30 bg-info-surface p-4`
-          with an h2 "Coaching note" in accent + accent-colored body
-          copy) to a sidebar-voiced aside: a 2-px accent left-rule,
-          a small uppercase "Cue" label, and neutral body copy.
-          2026-04-22 round 2: dropped the preview + "Show full
-          coaching note" toggle. The ScreenShell body is a first-class
-          scroll container with top/bottom fade affordances; hiding
-          cue text behind a tap was a second scroll affordance for
-          the same information goal. Always rendering the full cue
-          respects the user's "one tap to everything" ask and lets
-          the scroll-with-fade pattern do the density work. Compact
-          cues (short one-breath lines under `CUE_COMPACT_MAX`)
-          render exactly as before; long cues simply extend down into
-          the scroll region with the bottom fade signaling "more
-          below." `CUE_COMPACT_MAX` remains in
-          `domain/policies.ts` as reserved — if a future drill ships
-          a genuinely 300+ char cue that feels wall-of-text even in
-          the scroll container, we can reintroduce a collapse, but
-          the current catalog does not have that shape.
-        */}
-        {currentBlock.coachingCue && (
-          <section
-            aria-labelledby="coaching-cue-title"
-            className="border-l-2 border-accent/70 pl-3"
-          >
-            <span
-              id="coaching-cue-title"
-              className="text-xs font-semibold uppercase tracking-wide text-accent"
-            >
-              Cue
-            </span>
-            <p className="mt-1 whitespace-pre-line text-base font-medium leading-relaxed text-text-primary">
-              {currentBlock.coachingCue}
-            </p>
-          </section>
+
+        {hasInlineDetail && (
+          <details className="rounded-[14px] border border-text-primary/10 bg-bg-primary px-3 py-2">
+            <summary className="cursor-pointer text-sm font-medium text-text-secondary">
+              {inlineDetailLabel}
+            </summary>
+            <div className="mt-3 flex flex-col gap-3">
+              {hasInstructionDetail && (
+                <section aria-label="Full drill instructions">
+                  <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
+                    {currentBlock.courtsideInstructions}
+                  </p>
+                </section>
+              )}
+              {hasCueDetail && (
+                <section aria-label="Full coaching cue">
+                  <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
+                    {currentBlock.coachingCue}
+                  </p>
+                </section>
+              )}
+            </div>
+          </details>
         )}
       </ScreenShell.Body>
 
@@ -266,9 +250,19 @@ export function RunScreen() {
         the tester never loses sight of the actionable message.
       */}
       <ScreenShell.Footer className="flex flex-col gap-3 px-1 pt-4">
-        {runError && <StatusMessage variant="error" message={runError} />}
+        {runError && (
+          <div>
+            <StatusMessage variant="error" message={runError} />
+          </div>
+        )}
         {prerollCount != null ? (
-          <div className="flex flex-col items-center gap-2 pb-2">
+          <div
+            className="flex flex-col items-center gap-2 pb-2"
+            role="timer"
+            aria-label={`${prerollCount} seconds until block starts`}
+            aria-live="polite"
+            aria-atomic="true"
+          >
             {/* Preroll countdown shares BlockTimer's display face
                 (`font-mono` / JetBrains Mono Variable + slashed-zero)
                 so the two timer surfaces read as one instrument; accent
@@ -315,7 +309,7 @@ export function RunScreen() {
             />
             {timer.isRunning && !isWakeLocked && (
               <p className="px-2 text-center text-xs leading-snug text-text-secondary">
-                Keep the screen on; locking your phone pauses the timer and sound.
+                Locking your phone pauses the timer and sound.
               </p>
             )}
           </>
@@ -323,29 +317,40 @@ export function RunScreen() {
       </ScreenShell.Footer>
 
       {showEndConfirm && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 pb-8">
-          <div className={`w-full max-w-[390px] rounded-[16px] p-6 ${ELEVATED_PANEL_SURFACE}`}>
-            <h2 className="text-lg font-bold text-text-primary">End session early?</h2>
-            <p className="mt-2 text-sm text-text-secondary">
-              {currentBlock.type === 'wrap'
-                ? 'You\u2019re in your downshift. Two or three minutes of easy walking before you leave is an honest finish. Your progress will be saved.'
-                : 'You still have blocks remaining. Your progress will be saved and you can review what you completed.'}
-            </p>
-            {/* Safe-primary first, destructive below: keeps "Go back" as the
-                default thumb-target after the pause, mirrors the iOS/Android
-                action-sheet convention, and prevents an accidental end of
-                session from the paused-timer state. Red-team UX #6. */}
-            <div className="mt-6 flex flex-col gap-3">
-              <Button variant="primary" fullWidth onClick={handleEndSessionCancel}>
-                Go back
-              </Button>
-              <Button variant="danger" fullWidth onClick={() => void handleEndSessionConfirm()}>
-                End session
-              </Button>
-            </div>
-          </div>
-        </div>
+        // Safe-primary first, destructive below: keeps "Go back" as the
+        // default thumb-target after the pause, mirrors the iOS/Android
+        // action-sheet convention, and prevents an accidental end of
+        // session from the paused-timer state. Red-team UX #6. Plan U8
+        // (2026-05-04): the title + description + safe + danger
+        // bottom-sheet shape lives on `ConfirmModal` with
+        // `placement="bottom-sheet"`.
+        <ConfirmModal
+          title="End session early?"
+          description={
+            currentBlock.type === 'wrap'
+              ? 'You\u2019re in your downshift. Two or three minutes of easy walking before you leave is an honest finish. Your progress will be saved.'
+              : 'You still have blocks remaining. Your progress will be saved and you can review what you completed.'
+          }
+          placement="bottom-sheet"
+          safeAction={{
+            label: 'Go back',
+            onClick: handleEndSessionCancelOnce,
+            disabled: isEndingSession,
+          }}
+          destructiveAction={{
+            label: 'End session',
+            onClick: () => void handleEndSessionConfirmOnce(),
+            disabled: isEndingSession,
+          }}
+          onDismiss={handleEndSessionCancelOnce}
+        />
       )}
     </ScreenShell>
   )
+}
+
+function inlineDetailSummaryLabel(hasInstructionDetail: boolean, hasCueDetail: boolean) {
+  if (hasInstructionDetail && hasCueDetail) return 'Full instructions and cue'
+  if (hasCueDetail) return 'Full coaching cue'
+  return 'Full instructions'
 }

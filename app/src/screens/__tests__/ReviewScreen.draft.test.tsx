@@ -15,7 +15,7 @@ import { ReviewScreen } from '../ReviewScreen'
  *
  * 2026-04-23 walkthrough closeout polish: RpeSelector collapsed from 11
  * numeric chips to 3 labelled chips (Easy=3 / Right=5 / Hard=7) per
- * `docs/plans/2026-04-23-walkthrough-closeout-polish.md`. Radio name
+ * `docs/archive/plans/2026-04-23-walkthrough-closeout-polish.md`. Radio name
  * matchers below use the new labels; sessionRpe values asserted below
  * match the canonical chip values. Non-canonical historical draft
  * values still rehydrate (snapped to nearest chip by

@@ -1,7 +1,8 @@
 import { cx } from '../../lib/cn'
 
-export type ToggleChipTone = 'accent' | 'warning'
+export type ToggleChipTone = 'accent' | 'warning' | 'success'
 export type ToggleChipSize = 'lg' | 'sm'
+export type ToggleChipShape = 'rounded' | 'pill'
 
 export interface ToggleChipProps {
   label: string
@@ -11,25 +12,44 @@ export interface ToggleChipProps {
   tone?: ToggleChipTone
   /** `lg` = 54 px min height (default); `sm` = 48 px (nested rows). */
   size?: ToggleChipSize
+  /** Rounded rectangle by default; pills fit short wrap rows. */
+  shape?: ToggleChipShape
+  /** Fill the available row cell by default. Disable for wrap rows. */
+  fill?: boolean
   /** Optional aria-label override when the visible label is ambiguous. */
   ariaLabel?: string
+  className?: string
 }
 
 const SIZE_CLASSES: Record<ToggleChipSize, string> = {
-  lg: 'min-h-[54px] rounded-[16px] px-2 py-2 text-sm',
-  sm: 'min-h-[48px] rounded-[12px] px-1 py-1 text-xs',
+  lg: 'min-h-[54px] px-2 py-2 text-sm',
+  sm: 'min-h-[48px] px-1 py-1 text-xs',
+}
+
+const SHAPE_CLASSES: Record<ToggleChipShape, Record<ToggleChipSize, string>> = {
+  rounded: {
+    lg: 'rounded-[16px]',
+    sm: 'rounded-[12px]',
+  },
+  pill: {
+    lg: 'rounded-full',
+    sm: 'rounded-full',
+  },
 }
 
 const SELECTED_TONE: Record<ToggleChipTone, string> = {
-  accent: 'border border-accent bg-info-surface text-accent focus-visible:ring-accent',
-  warning: 'border border-warning bg-warning-surface text-warning focus-visible:ring-warning',
+  accent: 'border-2 border-accent bg-info-surface text-accent focus-visible:ring-accent',
+  warning: 'border-2 border-warning bg-warning-surface text-warning focus-visible:ring-warning',
+  success: 'border-2 border-success bg-bg-warm text-success focus-visible:ring-success',
 }
 
 const UNSELECTED_TONE: Record<ToggleChipTone, string> = {
   accent:
-    'border border-gray-200 bg-bg-primary text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-accent',
+    'border border-text-primary/10 bg-bg-primary text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-accent',
   warning:
-    'border border-gray-200 bg-bg-primary text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-warning',
+    'border border-text-primary/10 bg-bg-primary text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-warning',
+  success:
+    'border border-text-primary/10 bg-bg-primary text-text-secondary hover:bg-bg-warm active:bg-bg-warm focus-visible:ring-success',
 }
 
 /**
@@ -45,7 +65,10 @@ export function ToggleChip({
   onTap,
   tone = 'accent',
   size = 'lg',
+  shape = 'rounded',
+  fill = true,
   ariaLabel,
+  className,
 }: ToggleChipProps) {
   return (
     <button
@@ -55,10 +78,13 @@ export function ToggleChip({
       aria-label={ariaLabel}
       onClick={onTap}
       className={cx(
-        'flex-1 font-medium transition-colors',
+        fill && 'flex-1',
+        'font-medium transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
         SIZE_CLASSES[size],
+        SHAPE_CLASSES[shape][size],
         selected ? SELECTED_TONE[tone] : UNSELECTED_TONE[tone],
+        className,
       )}
     >
       {label}

@@ -2,11 +2,18 @@ import { describe, expect, it } from 'vitest'
 import { DRILLS } from '../data/drills'
 import {
   buildDraft,
+  buildDraftWithAssemblyTrace,
   buildRecoveryDraft,
   deriveBlockRationale,
   estimateRecoverySessionMinutes,
 } from './sessionBuilder'
-import type { SetupContext } from '../model'
+import {
+  candidateDurationCapacity,
+  findCandidates,
+  pickForSlot,
+} from './sessionAssembly/candidates'
+import { createSeededRandom } from './sessionAssembly/random'
+import type { BlockSlot, PlayerLevel, SetupContext } from '../model'
 
 const variantById = new Map(
   DRILLS.flatMap((drill) => drill.variants.map((variant) => [variant.id, variant] as const)),
@@ -24,14 +31,7 @@ describe('sessionBuilder', () => {
       { assemblySeed: 'batch3-golden-pair-open-25' },
     )
 
-    expect(draft?.assemblyAlgorithmVersion).toBe(2)
-    // 2026-05-04 warmup/wrap segment-snap (algo v2): wrap was allocated
-    // 4 min; `d26-solo` carries a 3-min natural segment sum, so the
-    // snap brings wrap to 3. The freed minute redistributes via the
-    // default priority (no sessionFocus on this build) to technique,
-    // bumping it from 6 to 7. Total session minutes preserved at 25.
-    // warmup stays at 3 because `d28-solo` natural sum already equals
-    // the allocated slot. main_skill stays at 7 (already at cap).
+    expect(draft?.assemblyAlgorithmVersion).toBe(6)
     expect(
       draft?.blocks.map((block) => ({
         type: block.type,
@@ -61,8 +61,8 @@ describe('sessionBuilder', () => {
       {
         type: 'main_skill',
         durationMinutes: 7,
-        drillId: 'd11',
-        variantId: 'd11-pair',
+        drillId: 'd07',
+        variantId: 'd07-pair-open',
       },
       {
         type: 'wrap',
@@ -71,6 +71,556 @@ describe('sessionBuilder', () => {
         variantId: 'd26-solo',
       },
     ])
+  })
+
+  it('prefers a duration-fit main-skill candidate over D01 for longer allocations', () => {
+    const slot: BlockSlot = {
+      type: 'main_skill',
+      durationMinMinutes: 5,
+      durationMaxMinutes: 7,
+      intent: 'Fixture main-skill slot',
+      required: true,
+      skillTags: ['pass'],
+    }
+    const context: SetupContext = {
+      playerMode: 'solo',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'pass',
+      playerLevel: 'beginner',
+    }
+
+    let seedThatPicksD01: string | undefined
+    for (let i = 0; i < 500 && seedThatPicksD01 === undefined; i++) {
+      const seed = `d01-duration-fit-${i}`
+      const pick = pickForSlot(slot, context, new Set(), createSeededRandom(seed), {
+        playerLevel: 'beginner',
+      })
+      if (pick?.variant.id === 'd01-solo') {
+        seedThatPicksD01 = seed
+      }
+    }
+
+    expect(seedThatPicksD01).toBeDefined()
+    const rerouted = pickForSlot(slot, context, new Set(), createSeededRandom(seedThatPicksD01!), {
+      playerLevel: 'beginner',
+      targetDurationMinutes: 6,
+    })
+
+    expect(rerouted?.variant.id).not.toBe('d01-solo')
+    expect(rerouted?.variant.workload.durationMaxMinutes).toBeGreaterThanOrEqual(6)
+    expect(
+      rerouted?.variant.workload.fatigueCap?.maxMinutes ?? Number.POSITIVE_INFINITY,
+    ).toBeGreaterThanOrEqual(6)
+  })
+
+  it('keeps main-skill fallback behavior when no candidate fits the target duration', () => {
+    const slot: BlockSlot = {
+      type: 'main_skill',
+      durationMinMinutes: 5,
+      durationMaxMinutes: 7,
+      intent: 'Fixture main-skill slot',
+      required: true,
+      skillTags: ['pass'],
+    }
+    const context: SetupContext = {
+      playerMode: 'solo',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'pass',
+      playerLevel: 'beginner',
+    }
+
+    let seedThatPicksD01: string | undefined
+    for (let i = 0; i < 500 && seedThatPicksD01 === undefined; i++) {
+      const seed = `no-duration-fit-${i}`
+      const pick = pickForSlot(slot, context, new Set(), createSeededRandom(seed), {
+        playerLevel: 'beginner',
+      })
+      if (pick?.variant.id === 'd01-solo') {
+        seedThatPicksD01 = seed
+      }
+    }
+
+    expect(seedThatPicksD01).toBeDefined()
+    const pick = pickForSlot(slot, context, new Set(), createSeededRandom(seedThatPicksD01!), {
+      playerLevel: 'beginner',
+      targetDurationMinutes: 999,
+    })
+    const strongestNonD01 = findCandidates(slot, context, { playerLevel: 'beginner' })
+      .filter((candidate) => candidate.drill.id !== 'd01')
+      .reduce((best, candidate) =>
+        candidateDurationCapacity(candidate) > candidateDurationCapacity(best) ? candidate : best,
+      )
+
+    expect(pick?.variant.id).toBe(strongestNonD01.variant.id)
+  })
+
+  it('does not apply target-duration preference to non-D01 main-skill defaults', () => {
+    const slot: BlockSlot = {
+      type: 'main_skill',
+      durationMinMinutes: 5,
+      durationMaxMinutes: 7,
+      intent: 'Fixture main-skill slot',
+      required: true,
+      skillTags: ['pass'],
+    }
+    const context: SetupContext = {
+      playerMode: 'solo',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'pass',
+      playerLevel: 'beginner',
+    }
+
+    let seedThatPicksNonD01: string | undefined
+    let baselineVariantId: string | undefined
+    for (let i = 0; i < 500 && seedThatPicksNonD01 === undefined; i++) {
+      const seed = `non-d01-duration-fit-${i}`
+      const pick = pickForSlot(slot, context, new Set(), createSeededRandom(seed), {
+        playerLevel: 'beginner',
+      })
+      if (pick !== undefined && pick.drill.id !== 'd01') {
+        seedThatPicksNonD01 = seed
+        baselineVariantId = pick.variant.id
+      }
+    }
+
+    expect(seedThatPicksNonD01).toBeDefined()
+    const targeted = pickForSlot(
+      slot,
+      context,
+      new Set(),
+      createSeededRandom(seedThatPicksNonD01!),
+      {
+        playerLevel: 'beginner',
+        targetDurationMinutes: 999,
+      },
+    )
+
+    expect(targeted?.variant.id).toBe(baselineVariantId)
+  })
+
+  it('prefers D49 for over-cap advanced setting main-skill allocations', () => {
+    const slot: BlockSlot = {
+      type: 'main_skill',
+      durationMinMinutes: 5,
+      durationMaxMinutes: 7,
+      intent: 'Fixture advanced setting slot',
+      required: true,
+      skillTags: ['set'],
+    }
+    const context: SetupContext = {
+      playerMode: 'solo',
+      timeProfile: 25,
+      netAvailable: true,
+      wallAvailable: false,
+      sessionFocus: 'set',
+      playerLevel: 'advanced',
+    }
+
+    let seedThatPicksD47: string | undefined
+    for (let i = 0; i < 500 && seedThatPicksD47 === undefined; i++) {
+      const seed = `d47-duration-fit-${i}`
+      const pick = pickForSlot(slot, context, new Set(), createSeededRandom(seed), {
+        playerLevel: 'advanced',
+      })
+      if (pick?.variant.id === 'd47-solo-open') {
+        seedThatPicksD47 = seed
+      }
+    }
+
+    expect(seedThatPicksD47).toBeDefined()
+    const targeted = pickForSlot(slot, context, new Set(), createSeededRandom(seedThatPicksD47!), {
+      playerLevel: 'advanced',
+      targetDurationMinutes: 12,
+      preferTargetDurationFit: true,
+    })
+
+    expect(targeted?.variant.id).toBe('d49-solo-open')
+    expect(targeted?.variant.workload.durationMaxMinutes).toBeGreaterThanOrEqual(12)
+    expect(targeted?.variant.courtsideInstructions).toContain('rounds')
+  })
+
+  it('reroutes redistributed advanced setting sessions to D49 when D47 cannot carry the duration', () => {
+    const context: SetupContext = {
+      playerMode: 'solo',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'set',
+      playerLevel: 'advanced',
+    }
+
+    let d49Result: ReturnType<typeof buildDraftWithAssemblyTrace> | undefined
+    for (let i = 0; i < 500 && d49Result === undefined; i++) {
+      const result = buildDraftWithAssemblyTrace(context, {
+        assemblySeed: `d49-redistribution-${i}`,
+        playerLevel: 'advanced',
+      })
+      const mainSkill = result?.draft.blocks.find((block) => block.type === 'main_skill')
+      if (mainSkill?.drillId === 'd49' && mainSkill.durationMinutes > 9) {
+        d49Result = result
+      }
+    }
+
+    expect(d49Result).toBeDefined()
+    const mainSkill = d49Result!.draft.blocks.find((block) => block.type === 'main_skill')
+    expect(mainSkill?.variantId).toBe('d49-solo-open')
+    expect(mainSkill?.durationMinutes).toBeLessThanOrEqual(14)
+    expect(mainSkill?.courtsideInstructions).toContain('rounds')
+    expect(d49Result!.assemblyTrace.redistributionLayoutIndex).toBeDefined()
+  })
+
+  it('prefers D50 for over-cap advanced pair-open passing main-skill allocations', () => {
+    const slot: BlockSlot = {
+      type: 'main_skill',
+      durationMinMinutes: 5,
+      durationMaxMinutes: 7,
+      intent: 'Fixture advanced pair-open passing slot',
+      required: true,
+      skillTags: ['pass'],
+    }
+    const context: SetupContext = {
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'pass',
+      playerLevel: 'advanced',
+    }
+
+    let seedThatPicksD46: string | undefined
+    for (let i = 0; i < 500 && seedThatPicksD46 === undefined; i++) {
+      const seed = `d46-duration-fit-pair-${i}`
+      const pick = pickForSlot(slot, context, new Set(), createSeededRandom(seed), {
+        playerLevel: 'advanced',
+      })
+      if (pick?.variant.id === 'd46-pair-open') {
+        seedThatPicksD46 = seed
+      }
+    }
+
+    expect(seedThatPicksD46).toBeDefined()
+    const targeted = pickForSlot(slot, context, new Set(), createSeededRandom(seedThatPicksD46!), {
+      playerLevel: 'advanced',
+      targetDurationMinutes: 12,
+      preferTargetDurationFit: true,
+    })
+
+    expect(targeted?.variant.id).toBe('d50-pair-open')
+    expect(targeted?.variant.workload.durationMaxMinutes).toBeGreaterThanOrEqual(12)
+    expect(targeted?.variant.courtsideInstructions).toContain('rounds')
+  })
+
+  it('prefers D50 for over-cap advanced solo-open passing main-skill allocations', () => {
+    const slot: BlockSlot = {
+      type: 'main_skill',
+      durationMinMinutes: 5,
+      durationMaxMinutes: 7,
+      intent: 'Fixture advanced solo-open passing slot',
+      required: true,
+      skillTags: ['pass'],
+    }
+    const context: SetupContext = {
+      playerMode: 'solo',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'pass',
+      playerLevel: 'advanced',
+    }
+
+    let seedThatPicksD46: string | undefined
+    for (let i = 0; i < 500 && seedThatPicksD46 === undefined; i++) {
+      const seed = `d46-duration-fit-solo-${i}`
+      const pick = pickForSlot(slot, context, new Set(), createSeededRandom(seed), {
+        playerLevel: 'advanced',
+      })
+      if (pick?.variant.id === 'd46-solo-open') {
+        seedThatPicksD46 = seed
+      }
+    }
+
+    expect(seedThatPicksD46).toBeDefined()
+    const targeted = pickForSlot(slot, context, new Set(), createSeededRandom(seedThatPicksD46!), {
+      playerLevel: 'advanced',
+      targetDurationMinutes: 12,
+      preferTargetDurationFit: true,
+    })
+
+    expect(targeted?.variant.id).toBe('d50-solo-open')
+    expect(targeted?.variant.workload.durationMaxMinutes).toBeGreaterThanOrEqual(12)
+  })
+
+  it('reroutes redistributed advanced pair-open passing sessions to D50 when D46 cannot carry the duration', () => {
+    const context: SetupContext = {
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'pass',
+      playerLevel: 'advanced',
+    }
+
+    let d50Result: ReturnType<typeof buildDraftWithAssemblyTrace> | undefined
+    for (let i = 0; i < 500 && d50Result === undefined; i++) {
+      const result = buildDraftWithAssemblyTrace(context, {
+        assemblySeed: `d50-redistribution-pair-${i}`,
+        playerLevel: 'advanced',
+      })
+      const mainSkill = result?.draft.blocks.find((block) => block.type === 'main_skill')
+      if (mainSkill?.drillId === 'd50' && mainSkill.durationMinutes > 9) {
+        d50Result = result
+      }
+    }
+
+    expect(d50Result).toBeDefined()
+    const mainSkill = d50Result!.draft.blocks.find((block) => block.type === 'main_skill')
+    expect(mainSkill?.variantId).toBe('d50-pair-open')
+    expect(mainSkill?.durationMinutes).toBeLessThanOrEqual(14)
+    expect(mainSkill?.courtsideInstructions).toContain('rounds')
+    expect(d50Result!.assemblyTrace.redistributionLayoutIndex).toBeDefined()
+  })
+
+  it('does not reroute advanced setting sessions to D50 (focus gate)', () => {
+    const slot: BlockSlot = {
+      type: 'main_skill',
+      durationMinMinutes: 5,
+      durationMaxMinutes: 7,
+      intent: 'Fixture advanced setting slot for D50 negative gate',
+      required: true,
+      skillTags: ['set'],
+    }
+    const context: SetupContext = {
+      playerMode: 'solo',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'set',
+      playerLevel: 'advanced',
+    }
+
+    const targeted = pickForSlot(slot, context, new Set(), createSeededRandom('d50-focus-gate'), {
+      playerLevel: 'advanced',
+      targetDurationMinutes: 12,
+      preferTargetDurationFit: true,
+    })
+
+    expect(targeted?.drill.id).not.toBe('d50')
+  })
+
+  it('does not include D50 in non-main-skill candidate pools', () => {
+    const techniqueSlot: BlockSlot = {
+      type: 'technique',
+      durationMinMinutes: 4,
+      durationMaxMinutes: 5,
+      intent: 'Fixture technique slot for D50 main-skill-only gate',
+      required: true,
+      skillTags: ['pass'],
+    }
+    const context: SetupContext = {
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'pass',
+      playerLevel: 'advanced',
+    }
+
+    const candidates = findCandidates(techniqueSlot, context, { playerLevel: 'advanced' })
+    expect(candidates.find((candidate) => candidate.drill.id === 'd50')).toBeUndefined()
+  })
+
+  it('prefers D51 for over-cap beginner solo-open serving main-skill allocations', () => {
+    const slot: BlockSlot = {
+      type: 'main_skill',
+      durationMinMinutes: 5,
+      durationMaxMinutes: 7,
+      intent: 'Fixture beginner solo-open serving slot',
+      required: true,
+      skillTags: ['serve'],
+    }
+    const context: SetupContext = {
+      playerMode: 'solo',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'serve',
+      playerLevel: 'beginner',
+    }
+
+    let seedThatPicksD31: string | undefined
+    for (let i = 0; i < 500 && seedThatPicksD31 === undefined; i++) {
+      const seed = `d31-duration-fit-solo-${i}`
+      const pick = pickForSlot(slot, context, new Set(), createSeededRandom(seed), {
+        playerLevel: 'beginner',
+      })
+      if (pick?.variant.id === 'd31-solo-open') {
+        seedThatPicksD31 = seed
+      }
+    }
+
+    expect(seedThatPicksD31).toBeDefined()
+    const targeted = pickForSlot(slot, context, new Set(), createSeededRandom(seedThatPicksD31!), {
+      playerLevel: 'beginner',
+      targetDurationMinutes: 12,
+      preferTargetDurationFit: true,
+    })
+
+    expect(targeted?.variant.id).toBe('d51-solo-open')
+    expect(targeted?.variant.workload.durationMaxMinutes).toBeGreaterThanOrEqual(12)
+  })
+
+  it('prefers D51 for over-cap beginner pair-open serving main-skill allocations', () => {
+    const slot: BlockSlot = {
+      type: 'main_skill',
+      durationMinMinutes: 5,
+      durationMaxMinutes: 7,
+      intent: 'Fixture beginner pair-open serving slot',
+      required: true,
+      skillTags: ['serve'],
+    }
+    const context: SetupContext = {
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'serve',
+      playerLevel: 'beginner',
+    }
+
+    let seedThatPicksD31: string | undefined
+    for (let i = 0; i < 500 && seedThatPicksD31 === undefined; i++) {
+      const seed = `d31-duration-fit-pair-open-${i}`
+      const pick = pickForSlot(slot, context, new Set(), createSeededRandom(seed), {
+        playerLevel: 'beginner',
+      })
+      if (pick?.variant.id === 'd31-pair-open') {
+        seedThatPicksD31 = seed
+      }
+    }
+
+    expect(seedThatPicksD31).toBeDefined()
+    const targeted = pickForSlot(slot, context, new Set(), createSeededRandom(seedThatPicksD31!), {
+      playerLevel: 'beginner',
+      targetDurationMinutes: 12,
+      preferTargetDurationFit: true,
+    })
+
+    expect(targeted?.variant.id).toBe('d51-pair-open')
+    expect(targeted?.variant.workload.durationMaxMinutes).toBeGreaterThanOrEqual(12)
+  })
+
+  it('reroutes redistributed beginner solo-open serving sessions to D51 when D31 cannot carry the duration', () => {
+    const context: SetupContext = {
+      playerMode: 'solo',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'serve',
+      playerLevel: 'beginner',
+    }
+
+    let d51Result: ReturnType<typeof buildDraftWithAssemblyTrace> | undefined
+    for (let i = 0; i < 500 && d51Result === undefined; i++) {
+      const result = buildDraftWithAssemblyTrace(context, {
+        assemblySeed: `d51-redistribution-solo-${i}`,
+        playerLevel: 'beginner',
+      })
+      const mainSkill = result?.draft.blocks.find((block) => block.type === 'main_skill')
+      if (mainSkill?.drillId === 'd51' && mainSkill.durationMinutes > 9) {
+        d51Result = result
+      }
+    }
+
+    expect(d51Result).toBeDefined()
+    const mainSkill = d51Result!.draft.blocks.find((block) => block.type === 'main_skill')
+    expect(mainSkill?.variantId).toBe('d51-solo-open')
+    expect(mainSkill?.durationMinutes).toBeLessThanOrEqual(14)
+    expect(d51Result!.assemblyTrace.redistributionLayoutIndex).toBeDefined()
+  })
+
+  it('does not reroute beginner passing sessions to D51 (focus gate)', () => {
+    const slot: BlockSlot = {
+      type: 'main_skill',
+      durationMinMinutes: 5,
+      durationMaxMinutes: 7,
+      intent: 'Fixture beginner passing slot for D51 negative gate',
+      required: true,
+      skillTags: ['pass'],
+    }
+    const context: SetupContext = {
+      playerMode: 'solo',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'pass',
+      playerLevel: 'beginner',
+    }
+
+    const targeted = pickForSlot(slot, context, new Set(), createSeededRandom('d51-focus-gate'), {
+      playerLevel: 'beginner',
+      targetDurationMinutes: 12,
+      preferTargetDurationFit: true,
+    })
+
+    expect(targeted?.drill.id).not.toBe('d51')
+  })
+
+  it('does not include D51 in non-main-skill candidate pools', () => {
+    const techniqueSlot: BlockSlot = {
+      type: 'technique',
+      durationMinMinutes: 4,
+      durationMaxMinutes: 5,
+      intent: 'Fixture technique slot for D51 main-skill-only gate',
+      required: true,
+      skillTags: ['serve'],
+    }
+    const context: SetupContext = {
+      playerMode: 'solo',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'serve',
+      playerLevel: 'beginner',
+    }
+
+    const candidates = findCandidates(techniqueSlot, context, { playerLevel: 'beginner' })
+    expect(candidates.find((candidate) => candidate.drill.id === 'd51')).toBeUndefined()
+  })
+
+  it('does not apply target-duration preference to non-main slots', () => {
+    const slot: BlockSlot = {
+      type: 'technique',
+      durationMinMinutes: 4,
+      durationMaxMinutes: 5,
+      intent: 'Fixture technique slot',
+      required: true,
+      skillTags: ['pass'],
+    }
+    const context: SetupContext = {
+      playerMode: 'solo',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'pass',
+      playerLevel: 'beginner',
+    }
+
+    const seed = 'non-main-target-duration'
+    const baseline = pickForSlot(slot, context, new Set(), createSeededRandom(seed), {
+      playerLevel: 'beginner',
+    })
+    const targeted = pickForSlot(slot, context, new Set(), createSeededRandom(seed), {
+      playerLevel: 'beginner',
+      targetDurationMinutes: 999,
+    })
+
+    expect(targeted?.variant.id).toBe(baseline?.variant.id)
   })
 
   it.each([
@@ -164,6 +714,60 @@ describe('sessionBuilder', () => {
     }
   })
 
+  it.each([
+    [
+      'solo wall',
+      {
+        playerMode: 'solo',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: true,
+      } satisfies SetupContext,
+    ],
+    [
+      'solo net',
+      {
+        playerMode: 'solo',
+        timeProfile: 40,
+        netAvailable: true,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+    [
+      'solo open',
+      {
+        playerMode: 'solo',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+    [
+      'pair net',
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: true,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+    [
+      'pair open',
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+      } satisfies SetupContext,
+    ],
+  ])('buildDraft creates a pressure-bearing 40-minute %s session', (_label, context) => {
+    const draft = buildDraft(context)
+
+    expect(draft).not.toBeNull()
+    expect(draft!.blocks.reduce((sum, block) => sum + block.durationMinutes, 0)).toBe(40)
+    expect(draft!.blocks.some((block) => block.type === 'pressure')).toBe(true)
+  })
+
   /**
    * Tier 1a Unit 2 regression: Swap-pool expansion widened
    * `SKILL_TAGS_BY_TYPE.main_skill` to include `'set'`, but
@@ -230,6 +834,148 @@ describe('sessionBuilder', () => {
     expect(mainSkill).toBeDefined()
     const drill = DRILLS.find((d) => d.id === mainSkill!.drillId)
     expect(drill?.skillFocus).toContain('serve')
+  })
+
+  it('explicit setting focus makes generated support slots setting-reinforcing', () => {
+    const draft = buildDraft(
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+        sessionFocus: 'set',
+      },
+      { assemblySeed: 'setting-support-pair-open-40' },
+    )
+
+    expect(draft).not.toBeNull()
+    for (const block of draft!.blocks.filter(
+      (candidate) => candidate.type === 'technique' || candidate.type === 'movement_proxy',
+    )) {
+      const drill = DRILLS.find((candidate) => candidate.id === block.drillId)
+      expect(drill?.skillFocus).toContain('set')
+    }
+  })
+
+  it('explicit setting focus can use a movement-tagged setting drill in movement_proxy', () => {
+    const drillById = new Map(DRILLS.map((d) => [d.id, d] as const))
+    const draft = buildDraft(
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+        sessionFocus: 'set',
+      },
+      { assemblySeed: 'setting-movement-proxy-pair-open-40' },
+    )
+
+    expect(draft).not.toBeNull()
+    const movementProxy = draft!.blocks.find((block) => block.type === 'movement_proxy')
+    expect(movementProxy).toBeDefined()
+    const drill = drillById.get(movementProxy!.drillId)
+    expect(drill?.skillFocus).toContain('set')
+    expect(drill?.skillFocus).toContain('movement')
+  })
+
+  it('default movement_proxy fallback stays pass-scoped despite movement-tagged setting drills', () => {
+    const drillById = new Map(DRILLS.map((d) => [d.id, d] as const))
+    const draft = buildDraft(
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+      },
+      { assemblySeed: 'recommended-movement-proxy-pair-open-40' },
+    )
+
+    expect(draft).not.toBeNull()
+    const movementProxy = draft!.blocks.find((block) => block.type === 'movement_proxy')
+    expect(movementProxy).toBeDefined()
+    const drill = drillById.get(movementProxy!.drillId)
+    expect(drill?.skillFocus).toContain('pass')
+    expect(drill?.skillFocus).not.toContain('set')
+  })
+
+  it('explicit serving focus can build a pair open 40-minute practice', () => {
+    const draft = buildDraft(
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+        sessionFocus: 'serve',
+      },
+      { assemblySeed: 'serving-pair-open-40' },
+    )
+
+    expect(draft).not.toBeNull()
+    for (const block of draft!.blocks.filter(
+      (candidate) =>
+        candidate.type === 'technique' ||
+        candidate.type === 'movement_proxy' ||
+        candidate.type === 'main_skill' ||
+        candidate.type === 'pressure',
+    )) {
+      const drill = DRILLS.find((candidate) => candidate.id === block.drillId)
+      expect(drill?.skillFocus).toContain('serve')
+    }
+  })
+
+  it('advanced setting focus builds from advanced setting families instead of beginner fallback', () => {
+    const playerLevel: PlayerLevel = 'advanced'
+    const draft = buildDraft(
+      {
+        playerMode: 'solo',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+        sessionFocus: 'set',
+      },
+      { assemblySeed: 'advanced-setting-solo-open', playerLevel },
+    )
+
+    expect(draft).not.toBeNull()
+    const mainSkill = draft!.blocks.find((block) => block.type === 'main_skill')
+    expect(mainSkill).toBeDefined()
+    expect(['d47', 'd48', 'd49']).toContain(mainSkill!.drillId)
+  })
+
+  it('advanced passing focus builds from advanced passing families', () => {
+    const draft = buildDraft(
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+        sessionFocus: 'pass',
+      },
+      { assemblySeed: 'advanced-passing-pair-open', playerLevel: 'advanced' },
+    )
+
+    expect(draft).not.toBeNull()
+    const mainSkill = draft!.blocks.find((block) => block.type === 'main_skill')
+    expect(mainSkill).toBeDefined()
+    expect(['d07', 'd46', 'd50']).toContain(mainSkill!.drillId)
+  })
+
+  it('advanced serving focus can build a pair open 40-minute practice', () => {
+    const draft = buildDraft(
+      {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+        sessionFocus: 'serve',
+      },
+      { assemblySeed: 'advanced-serving-pair-open', playerLevel: 'advanced' },
+    )
+
+    expect(draft).not.toBeNull()
+    const mainSkill = draft!.blocks.find((block) => block.type === 'main_skill')
+    expect(mainSkill).toBeDefined()
+    expect(['d22', 'd33']).toContain(mainSkill!.drillId)
   })
 
   /**
@@ -311,14 +1057,16 @@ describe('sessionBuilder', () => {
   /**
    * **Solo content-gap finding (red-team 2026-04-27).** Solo
    * archetypes (`solo_wall` / `solo_net` / `solo_open`) have a
-   * `movement_proxy` slot in their 25-min and 40-min layouts, but
-   * **no `m001Candidate: true` drill carries `'movement'` in
-   * `skillFocus` AND a solo-compatible variant**:
+   * pass-scoped `movement_proxy` fallback in their 25-min and 40-min
+   * layouts, but **no `m001Candidate: true` pass drill carries
+   * `'movement'` in `skillFocus` AND a solo-compatible variant**:
    *
    *   - `d09` (`['pass', 'movement']`, m001=true) — pair-only.
    *   - `d10` (`['pass', 'movement']`, m001=true) — pair-only.
    *   - `d15` (`['pass', 'movement']`, m001=true) — pair-only.
-   *   - All other movement-tagged drills are `m001Candidate: false`.
+   *   - Setting drills such as `d40` / `d47` may carry secondary
+   *     movement tags, but they are intentionally excluded from
+   *     Recommended's pass-scoped movement fallback.
    *
    * As a result, the cca2 dogfeed F6 fix's prefer-`'movement'` branch
    * has no candidate to prefer in solo builds, and the slot falls
@@ -771,7 +1519,7 @@ describe('sessionBuilder', () => {
     expect(first).not.toBeNull()
     expect(second).not.toBeNull()
     expect(first?.assemblySeed).toBe('seed-replay')
-    expect(first?.assemblyAlgorithmVersion).toBe(2)
+    expect(first?.assemblyAlgorithmVersion).toBe(6)
     expect(second?.blocks.map((block) => [block.drillId, block.variantId])).toEqual(
       first?.blocks.map((block) => [block.drillId, block.variantId]),
     )
@@ -937,7 +1685,11 @@ describe('sessionBuilder', () => {
       // Hip stretch (s3) and shoulder stretch (s5) are unilateral.
       const eachSideCount = (wrap.segments ?? []).filter((s) => s.eachSide === true).length
       expect(eachSideCount).toBe(2)
-      expect(wrap.courtsideInstructionsBonus).toMatch(/hydrate/i)
+      // d25's bonus copy uses "Drink water" rather than "hydrate"; both convey
+      // the same hydration cue. Match either to keep the assertion robust to
+      // future copy revisions while still failing if the hydration footnote
+      // disappears entirely.
+      expect(wrap.courtsideInstructionsBonus).toMatch(/(hydrate|water)/i)
     }
   })
 

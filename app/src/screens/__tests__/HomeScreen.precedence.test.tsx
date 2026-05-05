@@ -145,17 +145,17 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     await clearDb()
   })
 
-  it('new_user: empty DB renders Start first workout', async () => {
+  it('new_user: empty DB renders Start first session', async () => {
     renderHome()
-    expect(await screen.findByRole('button', { name: /start first workout/i })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /start first session/i })).toBeInTheDocument()
   })
 
-  it('last_complete only: renders Repeat this session', async () => {
+  it('last_complete only: renders Repeat last session', async () => {
     await seedLastComplete('exec-lc')
     renderHome()
-    expect(await screen.findByRole('button', { name: /repeat this session/i })).toBeInTheDocument()
-    // No Session draft card.
-    expect(screen.queryByText(/session draft/i)).not.toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /repeat last session/i })).toBeInTheDocument()
+    // No Session ready card.
+    expect(screen.queryByText(/session ready/i)).not.toBeInTheDocument()
   })
 
   it('draft + last_complete: draft primary, last_complete as secondary row', async () => {
@@ -163,7 +163,7 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     await seedLastComplete('exec-lc')
     renderHome()
 
-    expect(await screen.findByRole('button', { name: /review session/i })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /^continue$/i })).toBeInTheDocument()
     expect(screen.getByText(/solo \+ open/i)).toBeInTheDocument()
 
     // Secondary row references the last completed preset.
@@ -213,7 +213,7 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     const secondary = screen.getByRole('list', {
       name: /other active actions/i,
     })
-    const draftOpen = screen.getByRole('button', { name: /^review$/i })
+    const draftOpen = screen.getByRole('button', { name: /^continue$/i })
     expect(secondary).toContainElement(draftOpen)
 
     await user.click(draftOpen)

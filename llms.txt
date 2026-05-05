@@ -11,7 +11,7 @@ Start here:
 Current state:
 - Phase 0 validation, operating in `D130` founder-use mode through 2026-07-20
 - v0b Starter Loop is the M001 base under `app/`; live at https://volleydrills.nicholascorneau.workers.dev
-- Dexie schema is v5; per-drill capture lives on `/run/check`
+- Dexie schema is v6; per-drill capture, including optional streak metric capture, lives on `/run/check`
 - D91 retention gate is deferred, not dropped; details live in `docs/status/current-state.md`
 
 Environment:

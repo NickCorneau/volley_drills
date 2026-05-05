@@ -21,7 +21,7 @@ personas_simulated:
   - Mobile Breakpoint Retester (fresh local mobile-style exploratory QA)
   - Offline Preview Verifier (production preview + offline survivability smoke)
 depends_on:
-  - docs/plans/2026-04-12-001-feat-v0a-runner-probe-plan.md
+  - docs/archive/plans/2026-04-12-001-feat-v0a-runner-probe-plan.md
   - docs/superpowers/specs/2026-04-11-v0-prototype-ladder-design.md
   - docs/specs/m001-courtside-run-flow.md
   - docs/specs/m001-review-micro-spec.md

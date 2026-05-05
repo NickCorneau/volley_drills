@@ -24,7 +24,7 @@ export function getBlockMetricType(
  * Sourcing from the drill record (vs hard-coded passing copy) is what
  * lets the prompt generalize across pass / serve / set drills as the
  * catalog grows. See `docs/specs/m001-review-micro-spec.md` §Required
- * (line 78) and `docs/plans/2026-04-27-per-drill-success-criterion.md`.
+ * (line 78) and `docs/archive/plans/2026-04-27-per-drill-success-criterion.md`.
  */
 export function getBlockSuccessRule(
   block: SessionPlanBlock | null | undefined,

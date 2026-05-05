@@ -5,16 +5,16 @@ import { test, expect, type BrowserContext, type Page } from '@playwright/test'
  *
  * This file keeps its historical `schema-v4` filename because older docs
  * route to the original Phase C-0 migration smoke. The assertions below
- * intentionally pin the current v5 boundary.
+ * intentionally pin the current v6 boundary.
  *
- * Real-browser proof that the current v5 Dexie boundary:
+ * Real-browser proof that the current v6 Dexie boundary:
  * - backfills `SessionReview.status` from legacy `sessionRpe` values,
  *   preserving the critical `sessionRpe === 0 -> 'submitted'` edge,
  * - creates the `storageMeta` table,
  * - backfills `storageMeta.onboarding.completedAt` when an `ExecutionLog`
  *   exists (H15 defense-in-depth), skips the onboarding backfill when
  *   no `ExecutionLog` is present,
- * - opens at schema version 5, and
+ * - opens at schema version 6, and
  * - preserves v4 records carrying optional `perDrillCaptures` data.
  *
  * Unit tests cover the backfill logic directly against `fake-indexeddb`;
@@ -25,7 +25,7 @@ import { test, expect, type BrowserContext, type Page } from '@playwright/test'
  * version and blocks the seed). We accomplish this by intercepting the
  * HTML document request via `page.route()` and serving a blank page on
  * the first navigation; the seed runs there, then we unroute and
- * navigate to `/` to trigger the real v3/v4 -> v5 upgrade path.
+ * navigate to `/` to trigger the real v3/v4 -> v6 upgrade path.
  *
  * We also clear IndexedDB at the CDP level per test so accumulated state
  * from prior `npx playwright test` invocations (for example the elevated
@@ -273,13 +273,13 @@ async function readStorageMetaKey(
   )
 }
 
-test.describe('current schema v5 migration', () => {
+test.describe('current schema v6 migration', () => {
   test.beforeEach(async ({ context, page }) => {
     // Land on the app origin via a blank shell so IndexedDB is reachable
     // without the React bundle opening Dexie.
     await gotoBlankOnAppOrigin(page)
     // Wipe any IDB state accumulated from prior spec runs (blocked-schema
-    // leaves the DB at version 99; other specs leave it at v5 with
+    // leaves the DB at version 99; other specs leave it at v6 with
     // records).
     await clearOriginStorage(context, page)
   })
@@ -378,7 +378,7 @@ test.describe('current schema v5 migration', () => {
     expect(reviews[0]?.status).toBe('submitted')
   })
 
-  test('preserves v4 perDrillCaptures while opening at v5', async ({ page }) => {
+  test('preserves v4 perDrillCaptures while opening at v6', async ({ page }) => {
     const now = 1_700_000_000_000
     const capture = {
       drillId: 'd03',

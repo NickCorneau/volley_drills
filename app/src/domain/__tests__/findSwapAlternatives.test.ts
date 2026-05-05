@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { DRILLS } from '../../data/drills'
 import type { SessionPlanBlock, SetupContext } from '../../model'
-import { findSwapAlternatives } from '../sessionBuilder'
+import { findStrictSameFocusSwapAlternatives, findSwapAlternatives } from '../sessionBuilder'
 
 /**
  * Phase F Unit 4 (2026-04-19): `findSwapAlternatives` derives the
@@ -89,6 +89,44 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
       const drill = DRILLS.find((d) => d.id === alt.drillId)
       expect(drill?.skillFocus).toContain('serve')
     }
+  })
+
+  it('keeps readiness swap checks strict to same-focus alternates', () => {
+    const currentServe = makeBlock({
+      type: 'main_skill',
+      drillId: 'd31',
+      variantId: 'd31-solo-open',
+      drillName: 'Self Toss Target Practice',
+    })
+    const context = makeContext({
+      playerMode: 'solo',
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'serve',
+    })
+
+    const strict = findStrictSameFocusSwapAlternatives(currentServe, context)
+    const runtime = findSwapAlternatives(currentServe, context)
+
+    // 2026-05-04: `d51` (Open-Heart Tactical Serve Avoidance) joined the
+    // catalog as a beginner-friendly serve drill compatible with solo +
+    // no-net + no-wall (`env({ lowScreenTime: true })`). It is therefore
+    // a legitimate same-focus strict alternate to `d31` in this context.
+    // Origin: docs/plans/2026-05-04-004-feat-d51-beginner-serving-tactical-zone-depth-plan.md
+    expect(strict.map((alternate) => alternate.drillId).sort()).toEqual(['d22', 'd33', 'd51'])
+    expect(
+      strict.every((alternate) => {
+        const drill = DRILLS.find((candidate) => candidate.id === alternate.drillId)
+        return drill?.skillFocus.includes('serve')
+      }),
+    ).toBe(true)
+    expect(runtime.length).toBeGreaterThan(0)
+    expect(
+      runtime.every((alternate) => {
+        const drill = DRILLS.find((candidate) => candidate.id === alternate.drillId)
+        return drill?.skillFocus.includes('serve')
+      }),
+    ).toBe(true)
   })
 
   it('does not fall back for warmup/wrap blocks (focus does not control them)', () => {
@@ -479,8 +517,8 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
    * eligible-drill pool contents — they do not claim "the user will
    * see this drill on the first Swap tap"; that depends on Swap
    * cycling order and is a separate UX concern. Around the World
-   * Serving (`d33`) requires a net, so it must NOT surface in solo
-   * no-net contexts. Triangle Setting (`d43`) is intentionally not in
+   * Serving (`d33`) now has a no-net sand-target variant, so it should
+   * surface in solo no-net contexts. Triangle Setting (`d43`) is intentionally not in
    * the catalog (deferred to D101 3+ player support); the negative
    * assertion guards against a regression that re-introduces it as a
    * forced two-player adaptation.
@@ -501,8 +539,8 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
 
       expect(names).toContain('Self Toss Target Practice')
       expect(names).toContain('Footwork for Setting')
-      // Net-required drills must not leak into a no-net context.
-      expect(names).not.toContain('Around the World Serving')
+      // Batch 1 added a no-net sand-target variant for Around the World.
+      expect(names).toContain('Around the World Serving')
       // Pair-only drills must not leak into a solo context.
       expect(names).not.toContain('Corner to Corner Setting')
       // d43 Triangle Setting is deferred to D101 3+ player support
@@ -558,6 +596,28 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
       expect(names).toContain('Around the World Serving')
       expect(names).toContain('Corner to Corner Setting')
       expect(names).not.toContain('Triangle Setting')
+    })
+
+    it('honors persisted player level when building focused swap pools', () => {
+      const out = findSwapAlternatives(
+        makeBlock({
+          type: 'main_skill',
+          drillId: 'd33',
+          variantId: 'd33-pair-open',
+          drillName: 'Around the World Serving',
+        }),
+        makeContext({
+          playerMode: 'pair',
+          timeProfile: 40,
+          netAvailable: false,
+          wallAvailable: false,
+          sessionFocus: 'serve',
+          playerLevel: 'advanced',
+        }),
+      )
+
+      expect(out.map((alternate) => alternate.drillId)).not.toContain('d31')
+      expect(out.map((alternate) => alternate.drillId)).toContain('d22')
     })
   })
 

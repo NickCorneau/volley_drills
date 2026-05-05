@@ -118,6 +118,19 @@ When authoring a drill with internal timed sub-segments:
 
 When pacing-audio infra ships, its spec owns the cross-drill invariant and this rule points to it.
 
+## Exercise copy contract
+
+Use this contract when reviewing any active drill (`m001Candidate: true`) or authoring a new drill. It maps the plain-language courtside shape onto the existing drill fields; it is not a request for a new schema.
+
+- **Why** (`objective`, `teachingPoints`): say the training job in player language. Avoid claims that need a source-backed catalog workflow unless that workflow already exists in the drill comments or supporting docs.
+- **Setup** (`courtsideInstructions`, `segments`, equipment / participant metadata): name players, ball count, target, court feature, and first role before the action depends on them.
+- **Do** (`courtsideInstructions`, `segments`): lead with the skill/action, keep one action per sentence where practical, and put repeated sequences in the order they happen.
+- **Score or stop** (`successMetric.description`, `successMetric.target`, instruction copy): say what counts, the count or time window, and when to reset, switch, repeat, or stop.
+- **Cue** (`coachingCues`): keep each cue to one physical idea. Prefer observable outcomes such as ball flight, target, arc, landing, partner reach, or reset timing; keep body-language cues only when they are needed and plain enough for a one-season rec player.
+- **Scale** (`progressionDescription`, `regressionDescription`): describe the easier or harder version without changing the variant's authored participants, equipment, workload, or source-backed training promise.
+
+Envelope-honesty rule: if better copy requires changing participants, equipment, workload, fatigue cap, source depth, generator policy, or session assembly, stop. That is not a copy-only fix. Route it through the relevant catalog, workload, source-backed, or generator workflow instead.
+
 ## Authoring checklist (paste into drill PRs)
 
 - [ ] Every term on the flagged-vocabulary table above is either renamed or glossed inline on first use in this drill.
@@ -127,6 +140,9 @@ When pacing-audio infra ships, its spec owns the cross-drill invariant and this 
 - [ ] Wrap/cooldown text has been read with the same attention as main-skill text.
 - [ ] If `skillFocus[0]` is `pass | serve | set`, the first sentence of `courtsideInstructions` contains the skill verb (rule 6). Pin with a `drillCopyRegressions.test.ts` case for any new authoring.
 - [ ] Any timed sub-blocks are described in firing order and the variant carries the audio-gap comment (until audio ships).
+- [ ] Active drill copy passes the exercise copy contract: why, setup, do, score/stop, cue, and scale are all clear in the existing fields.
+- [ ] Success and stop rules say what counts and when to reset, switch, repeat, or stop.
+- [ ] Variant copy matches its authored participant, equipment, workload, fatigue, segment, and source boundaries.
 
 ## What this rule is not
 

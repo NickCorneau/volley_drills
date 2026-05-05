@@ -1,4 +1,4 @@
-import { FOCAL_SURFACE_CLASS } from '../ui/Card'
+import { FOCAL_SURFACE_CLASS } from '../ui/surfaces'
 
 /**
  * Shared focal-zone surface for the four HomePrimaryCard variants so

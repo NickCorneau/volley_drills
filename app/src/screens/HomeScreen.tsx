@@ -8,12 +8,11 @@ import { SkipReviewModal } from '../components/SkipReviewModal'
 import { SoftBlockModal } from '../components/SoftBlockModal'
 import { UpdatePrompt } from '../components/UpdatePrompt'
 import { Button, ScreenShell } from '../components/ui'
-import { FOCAL_SURFACE_CLASS } from '../components/ui/Card'
 import { selectPrimaryCard, selectSecondaryRows } from '../domain/homePriority'
 import type { PrimaryVariant, SecondaryRow } from '../domain/homePriority'
 import { useAppRegisterSW } from '../lib/pwa-register'
 import { isSchemaBlocked } from '../lib/schema-blocked'
-import { isSkillLevel } from '../lib/skillLevel'
+import { isSkillLevel, skillLevelToDrillBand } from '../lib/skillLevel'
 import { routes } from '../routes'
 import { buildDraft, buildDraftFromCompletedBlocks } from '../domain/sessionBuilder'
 import { discardSession, saveDraft, skipReview, type PendingReview } from '../services/session'
@@ -47,6 +46,7 @@ export function HomeScreen() {
   const acting = useRef(false)
   const [confirmingSkip, setConfirmingSkip] = useState(false)
   const [softBlockTarget, setSoftBlockTarget] = useState<SoftBlockTarget>(null)
+  const [nonReviewActionPending, setNonReviewActionPending] = useState(false)
   const { needRefresh, updateApp } = useAppRegisterSW()
 
   // --- action handlers ---
@@ -109,7 +109,7 @@ export function HomeScreen() {
     navigate(routes.review(state.flags.reviewPending.executionId))
   }, [navigate, state])
 
-  const handleStartWorkout = useCallback(() => navigate(routes.setup()), [navigate])
+  const handleStartSession = useCallback(() => navigate(routes.setup()), [navigate])
 
   // --- soft-block interception + non-review CTA handlers ---
   //
@@ -147,10 +147,15 @@ export function HomeScreen() {
   // `priorContext.sessionFocus` forward — "same conditions" includes
   // yesterday's chosen focus. The user can still override on Tune
   // today before continuing. Partial repeat
-  // (`buildDraftFromCompletedBlocks`) and the pain-recovery rebuild
-  // (`buildRecoveryDraft`) strip focus by design; do NOT add a strip
-  // here without re-checking that decision.
+  // (`buildDraftFromCompletedBlocks`) preserves the completed-block
+  // context, focus included. Pain-recovery rebuilds strip focus by
+  // design; do NOT add a strip here without re-checking that decision.
   const interceptedHandlers = useMemo(() => {
+    const beginNonReviewAction = () => {
+      if (nonReviewActionPending) return false
+      setNonReviewActionPending(true)
+      return true
+    }
     const intercept = (inner: () => void | Promise<void>) => async () => {
       if (state.kind !== 'ready' || !state.flags.reviewPending) {
         await inner()
@@ -179,9 +184,18 @@ export function HomeScreen() {
       // pre-onboarding testers to /onboarding/skill-level first). The
       // Start CTA enters the regular Setup flow, which applies the
       // persisted skill level during plan build.
-      handleNewUserStart: intercept(() => navigate(routes.setup())),
-      handleDraftStart: intercept(() => navigate(routes.tuneToday(), { state: { source: 'home' } })),
-      handleDraftEdit: intercept(() => navigate(routes.setup(), { state: { editDraft: true } })),
+      handleNewUserStart: intercept(() => {
+        if (!beginNonReviewAction()) return
+        navigate(routes.setup())
+      }),
+      handleDraftStart: intercept(() => {
+        if (!beginNonReviewAction()) return
+        navigate(routes.tuneToday(), { state: { source: 'home' } })
+      }),
+      handleDraftEdit: intercept(() => {
+        if (!beginNonReviewAction()) return
+        navigate(routes.setup(), { state: { editDraft: true } })
+      }),
       // One-tap Repeat: rebuild a fresh full-plan draft from the last
       // session's SetupContext and route straight to Tune today. No
       // Setup detour, no stale-context banner, no toggle review. The
@@ -189,24 +203,17 @@ export function HomeScreen() {
       // escape hatch when today's conditions changed.
       handleRepeat: intercept(async () => {
         if (state.kind !== 'ready' || !state.flags.lastComplete) return
+        if (!beginNonReviewAction()) return
         const priorContext = state.flags.lastComplete.plan.context
         if (!priorContext) {
           navigate(routes.setup())
           return
         }
         try {
-          // Read onboarding skill level so the rebuilt draft honors
-          // the user's current saved level via `effectiveLevel`
-          // (2026-05-04 skill-level-mutability ship). Best-effort:
-          // a missing/failed read falls through to the pre-engine-
-          // wiring single-pass path.
-          let onboarding: unknown = undefined
-          try {
-            onboarding = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
-          } catch {
-            if (isSchemaBlocked()) return
-          }
-          const draft = buildDraft(priorContext, { onboarding })
+          const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
+          const playerLevel =
+            skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
+          const draft = buildDraft(priorContext, { playerLevel })
           if (!draft) {
             navigate(routes.setup())
             return
@@ -214,7 +221,10 @@ export function HomeScreen() {
           await saveDraft(draft)
           navigate(routes.tuneToday(), { state: { source: 'home' } })
         } catch (err) {
-          if (isSchemaBlocked()) return
+          if (isSchemaBlocked()) {
+            setNonReviewActionPending(false)
+            return
+          }
           console.error('Repeat session failed:', err)
           navigate(routes.setup())
         }
@@ -223,13 +233,17 @@ export function HomeScreen() {
       // the tester whose answer to "same as last time?" is *no*. The
       // intercept ensures review_pending still fires the soft-block
       // modal.
-      handleStartDifferentSession: intercept(() => navigate(routes.setup())),
+      handleStartDifferentSession: intercept(() => {
+        if (!beginNonReviewAction()) return
+        navigate(routes.setup())
+      }),
       // C-5 Unit 3: ended-early secondary CTA. Builds a partial draft
       // from only the blocks that actually completed and routes to
       // Tune today. Uses the state-captured `lastComplete` bundle so we
       // don't re-query Dexie for consistency with the render.
       handleRepeatWhatYouDid: intercept(async () => {
         if (state.kind !== 'ready' || !state.flags.lastComplete) return
+        if (!beginNonReviewAction()) return
         try {
           const draft = buildDraftFromCompletedBlocks(
             state.flags.lastComplete.log,
@@ -242,13 +256,16 @@ export function HomeScreen() {
           await saveDraft(draft)
           navigate(routes.tuneToday(), { state: { source: 'home' } })
         } catch (err) {
-          if (isSchemaBlocked()) return
+          if (isSchemaBlocked()) {
+            setNonReviewActionPending(false)
+            return
+          }
           console.error('Repeat-what-you-did failed:', err)
           navigate(routes.setup())
         }
       }),
     }
-  }, [navigate, state])
+  }, [navigate, nonReviewActionPending, state])
 
   const handleSoftBlockFinish = useCallback(() => {
     const t = softBlockTarget
@@ -281,7 +298,7 @@ export function HomeScreen() {
     return (
       <div className="mx-auto flex w-full max-w-[390px] flex-col items-center gap-6 pt-16">
         <Brandmark size={56} />
-        <p className="text-text-secondary">Loading...</p>
+        <p className="text-text-secondary">Loading…</p>
       </div>
     )
   }
@@ -341,27 +358,31 @@ export function HomeScreen() {
           handleFinishReview,
           handleRequestSkip,
           ...interceptedHandlers,
+          actionDisabled: nonReviewActionPending,
         })}
 
         {/* Phase F1 (2026-04-19): secondary rows used to render as a
           flex-col of independent bordered cards, which competed with
           the primary card for visual weight. They now sit inside a
-          single calmer container grouped by a hairline divider, so
+          single quiet container grouped by a hairline divider, so
           the Home screen reads as "one focal card, one supporting
           cluster" instead of a flat stack of competing mini-cards.
           Variant API unchanged; HomeSecondaryRow flattens its own
-          surface to match. */}
+          surface to match. 2026-05-02 recurrence pass: the rail keeps
+          the border/radius but drops the focal-card shadow so a saved
+          draft or last session does not ask for equal attention. */}
         {secondary.length > 0 && (
           <ul
             role="list"
             aria-label="Other active actions"
-            className={`divide-y divide-text-primary/5 overflow-hidden ${FOCAL_SURFACE_CLASS}`}
+            className="divide-y divide-text-primary/5 overflow-hidden rounded-[16px] border border-text-primary/10 bg-bg-primary"
           >
             {secondary.map((row) =>
               renderSecondary(row, flags, {
                 handleFinishReview,
                 handleDraftOpen: interceptedHandlers.handleDraftStart,
                 handleRepeat: interceptedHandlers.handleRepeat,
+                actionDisabled: nonReviewActionPending,
               }),
             )}
           </ul>
@@ -369,8 +390,8 @@ export function HomeScreen() {
 
         {flags.resume && (
           <section className="mt-4 flex flex-col gap-4">
-            <Button variant="outline" fullWidth onClick={handleStartWorkout}>
-              Start New Workout
+            <Button variant="outline" fullWidth onClick={handleStartSession}>
+              Start new session
             </Button>
           </section>
         )}
@@ -447,6 +468,7 @@ interface PrimaryHandlers {
    */
   handleStartDifferentSession: () => void
   handleNewUserStart: () => void
+  actionDisabled: boolean
 }
 
 function renderPrimary(primary: PrimaryVariant, flags: HomeFlags, h: PrimaryHandlers) {
@@ -492,6 +514,7 @@ function renderPrimary(primary: PrimaryVariant, flags: HomeFlags, h: PrimaryHand
           onRepeatWhatYouDid={
             flags.lastComplete.log.status === 'ended_early' ? h.handleRepeatWhatYouDid : undefined
           }
+          actionDisabled={h.actionDisabled}
         />
       )
     case 'new_user':
@@ -507,6 +530,7 @@ interface SecondaryHandlers {
   handleFinishReview: () => void
   handleDraftOpen: () => void
   handleRepeat: () => void
+  actionDisabled: boolean
 }
 
 function renderSecondary(row: SecondaryRow, flags: HomeFlags, h: SecondaryHandlers) {
@@ -539,6 +563,7 @@ function renderSecondary(row: SecondaryRow, flags: HomeFlags, h: SecondaryHandle
           variant="last_complete"
           data={flags.lastComplete}
           onRepeat={h.handleRepeat}
+          actionDisabled={h.actionDisabled}
         />
       )
     default: {

@@ -1,5 +1,6 @@
 import { selectArchetype } from '../data/archetypes'
 import type {
+  BlockSlot,
   BlockSlotType,
   DraftBlock,
   ExecutionLog,
@@ -8,7 +9,11 @@ import type {
   SessionPlan,
   SetupContext,
 } from '../model'
-import { pickForSlot, type CandidateVariant } from './sessionAssembly/candidates'
+import {
+  candidateCanCarryTargetDuration,
+  pickForSlot,
+  type CandidateVariant,
+} from './sessionAssembly/candidates'
 import { allocateDurations, allocateRecoveryDurations } from './sessionAssembly/durations'
 import { effectiveLevel } from './sessionAssembly/effectiveLevel'
 import { createAssemblySeed, createSeededRandom } from './sessionAssembly/random'
@@ -19,21 +24,17 @@ import {
 } from './sessionAssembly/snapDurations'
 import { pickMainSkillSubstitute } from './sessionAssembly/substitution'
 export {
+  findStrictSameFocusSwapAlternatives,
   findSwapAlternatives,
   type FindSwapAlternativesOptions,
 } from './sessionAssembly/swapAlternatives'
 export { deriveBlockRationale } from './sessionAssembly/rationale'
 
-/**
- * Bumped from 1 to 2 in the 2026-05-04 warmup/wrap segment-snap ship
- * (`docs/plans/2026-05-04-002-feat-warmup-wrap-segment-snap-plan.md`).
- * v2 assembly snaps warmup/wrap blocks down to the chosen variant's
- * natural segment sum (`workload.durationMinMinutes`) and redistributes
- * freed minutes into focus-aligned work slots. Plans persisted with v1
- * keep replaying as v1 (`buildDraftFromCompletedBlocks` reads the
- * version off the plan record); only freshly-built drafts use v2.
- */
-export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 2
+export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 6
+
+const ADVANCED_SETTING_DURATION_FIT_DRILL_IDS = new Set(['d47', 'd48'])
+const ADVANCED_PASSING_DURATION_FIT_DRILL_IDS = new Set(['d46'])
+const BEGINNER_SERVING_DURATION_FIT_DRILL_IDS = new Set(['d31'])
 
 /**
  * Optional inputs that scope build-time drill substitution.
@@ -66,20 +67,76 @@ export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 2
 export interface BuildDraftOptions {
   readonly lastCompletedByType?: Partial<Record<BlockSlotType, string>>
   readonly assemblySeed?: string
-  /**
-   * The user's onboarding skill level, read by the caller from
-   * `storageMeta.onboarding.skillLevel`. The build path projects
-   * this through `effectiveLevel(onboarding)` to a `PlayerLevel`
-   * band the catalog records via `levelMin` / `levelMax`. When
-   * omitted, the effective level falls through to `'beginner'`
-   * (the existing pre-engine-wiring behavior).
-   *
-   * Aggregated `levelRelaxed: boolean` is attached to the returned
-   * draft per K6 of the
-   * `2026-05-04-001-feat-skill-level-mutability-plan.md` so the Tune
-   * today controller can render the relaxation eyebrow.
-   */
-  readonly onboarding?: unknown
+  readonly playerLevel?: PlayerLevel
+}
+
+interface DraftAssemblyTraceSlotBase {
+  readonly layoutIndex: number
+  readonly type: BlockSlotType
+  readonly required: boolean
+  readonly allocatedMinutes: number
+}
+
+interface SelectedDraftAssemblyTraceSlot extends DraftAssemblyTraceSlotBase {
+  readonly selected: true
+  readonly blockId: string
+  readonly drillId: string
+  readonly variantId: string
+}
+
+interface UnselectedDraftAssemblyTraceSlot extends DraftAssemblyTraceSlotBase {
+  readonly selected: false
+  readonly blockId?: never
+  readonly drillId?: never
+  readonly variantId?: never
+}
+
+export type DraftAssemblyTraceSlot =
+  | SelectedDraftAssemblyTraceSlot
+  | UnselectedDraftAssemblyTraceSlot
+
+export interface DraftAssemblyTrace {
+  readonly slots: readonly DraftAssemblyTraceSlot[]
+  readonly skippedOptionalLayoutIndexes: readonly number[]
+  readonly redistributedMinutes: number
+  readonly redistributionLayoutIndex?: number
+}
+
+export interface BuildDraftWithAssemblyTraceResult {
+  readonly draft: SessionDraft
+  readonly assemblyTrace: DraftAssemblyTrace
+}
+
+function buildTraceSlot(
+  slot: BlockSlot,
+  layoutIndex: number,
+  allocatedMinutes: number,
+  selected: { readonly pick: CandidateVariant } | undefined,
+  blockId: string | undefined,
+): DraftAssemblyTraceSlot {
+  if (!selected) {
+    return {
+      layoutIndex,
+      type: slot.type,
+      required: slot.required,
+      allocatedMinutes,
+      selected: false,
+    }
+  }
+  if (!blockId) {
+    throw new Error('Selected draft trace slot is missing block identity.')
+  }
+
+  return {
+    layoutIndex,
+    type: slot.type,
+    required: slot.required,
+    allocatedMinutes,
+    selected: true,
+    blockId,
+    drillId: selected.pick.drill.id,
+    variantId: selected.pick.variant.id,
+  }
 }
 
 function stripSessionFocus(context: SetupContext): SetupContext {
@@ -88,21 +145,85 @@ function stripSessionFocus(context: SetupContext): SetupContext {
   return next
 }
 
-export function buildDraft(
+function shouldPreferAdvancedSettingDurationFit(
+  slot: BlockSlot,
+  context: SetupContext,
+  selected: CandidateVariant,
+  plannedDurationMinutes: number,
+): boolean {
+  return (
+    slot.type === 'main_skill' &&
+    context.sessionFocus === 'set' &&
+    context.playerLevel === 'advanced' &&
+    ADVANCED_SETTING_DURATION_FIT_DRILL_IDS.has(selected.drill.id) &&
+    !candidateCanCarryTargetDuration(selected, plannedDurationMinutes)
+  )
+}
+
+// Advanced pair-open / solo-open passing main-skill blocks above D46's 8-minute
+// envelope used to silently over-stretch D46 (FIVB 3.16 spin-read receive).
+// D50 (FIVB 3.13 Short/Deep, 8-14 min envelope) is the source-backed long
+// envelope sibling; this predicate triggers the reroute when D46 was selected
+// for an advanced passing block it cannot carry. Mirrors
+// `shouldPreferAdvancedSettingDurationFit` for D47/D48 -> D49.
+function shouldPreferAdvancedPassingDurationFit(
+  slot: BlockSlot,
+  context: SetupContext,
+  selected: CandidateVariant,
+  plannedDurationMinutes: number,
+): boolean {
+  return (
+    slot.type === 'main_skill' &&
+    context.sessionFocus === 'pass' &&
+    context.playerLevel === 'advanced' &&
+    ADVANCED_PASSING_DURATION_FIT_DRILL_IDS.has(selected.drill.id) &&
+    !candidateCanCarryTargetDuration(selected, plannedDurationMinutes)
+  )
+}
+
+// Beginner serving main-skill blocks above D31's 8-minute envelope used to
+// silently over-stretch D31 (BAB Self-Toss Target Practice). D51 (FIVB 2.2
+// Outside the Heart, 8-14 min envelope) is the source-backed long envelope
+// sibling; this predicate triggers the reroute when D31 was selected for a
+// beginner serving block it cannot carry. Third application of the
+// source-backed content-depth activation pattern (after D49 and D50); first
+// application at the beginner level.
+function shouldPreferBeginnerServingDurationFit(
+  slot: BlockSlot,
+  context: SetupContext,
+  selected: CandidateVariant,
+  plannedDurationMinutes: number,
+): boolean {
+  return (
+    slot.type === 'main_skill' &&
+    context.sessionFocus === 'serve' &&
+    context.playerLevel === 'beginner' &&
+    BEGINNER_SERVING_DURATION_FIT_DRILL_IDS.has(selected.drill.id) &&
+    !candidateCanCarryTargetDuration(selected, plannedDurationMinutes)
+  )
+}
+
+function buildDraftResult(
   context: SetupContext,
   options?: BuildDraftOptions,
-): SessionDraft | null {
-  const archetype = selectArchetype(context)
+): BuildDraftWithAssemblyTraceResult | null {
+  const effectiveContext: SetupContext =
+    options?.playerLevel === undefined ? context : { ...context, playerLevel: options.playerLevel }
+  const archetype = selectArchetype(effectiveContext)
   if (!archetype) return null
   const assemblySeed = options?.assemblySeed ?? createAssemblySeed()
   const random = createSeededRandom(assemblySeed)
 
-  const layout = archetype.layouts[context.timeProfile]
+  const layout = archetype.layouts[effectiveContext.timeProfile]
   if (!layout || layout.length === 0) return null
-  const durations = allocateDurations(layout, context.timeProfile)
+  const durations = allocateDurations(layout, effectiveContext.timeProfile)
   if (!durations) return null
 
   const usedDrillIds = new Set<string>()
+  const selectedByLayoutIndex = new Map<
+    number,
+    { readonly pick: CandidateVariant; readonly substitutionRationale?: string }
+  >()
 
   // Decide build-time substitution UP FRONT and reserve the
   // substitute drillId so earlier slots in the layout (e.g.,
@@ -133,10 +254,11 @@ export function buildDraft(
     if (mainSkillSlot) {
       const subResult = pickMainSkillSubstitute(
         mainSkillSlot,
-        context,
+        effectiveContext,
         usedDrillIds,
         lastMainSkillDrillId,
-        effectiveLevelValue,
+        undefined,
+        { playerLevel: options?.playerLevel },
       )
       if (subResult) {
         mainSkillSubstitute = {
@@ -149,68 +271,122 @@ export function buildDraft(
     }
   }
 
-  // Two-phase block construction: phase 1 resolves all picks so the
-  // warmup/wrap segment snap (phase 1.5) can see the full set, then
-  // phase 2 writes blocks using the snapped durations. Required-slot
-  // failure short-circuits during phase 1 so callers get the same
-  // null shape they did pre-snap.
-  const picks: (CandidateVariant | undefined)[] = new Array(layout.length).fill(undefined)
-  const rationales: (string | undefined)[] = new Array(layout.length).fill(undefined)
-
-  for (let i = 0; i < layout.length; i++) {
-    const slot = layout[i]
-
-    let pick: CandidateVariant | undefined
-    let substitutionRationale: string | undefined
-
+  function selectSlot(
+    slot: BlockSlot,
+    allowUsedFallback: boolean,
+    targetDurationMinutes: number,
+  ): { readonly pick: CandidateVariant; readonly substitutionRationale?: string } | undefined {
     if (slot.type === 'main_skill' && mainSkillSubstitute) {
-      pick = mainSkillSubstitute.candidate
-      substitutionRationale = mainSkillSubstitute.rationale
+      return {
+        pick: mainSkillSubstitute.candidate,
+        substitutionRationale: mainSkillSubstitute.rationale,
+      }
     }
 
-    if (!pick) {
-      const slotResult = pickForSlot(slot, context, usedDrillIds, random, effectiveLevelValue)
-      pick = slotResult.pick
-      if (slotResult.levelRelaxed) levelRelaxed = true
-    }
-
-    if (!pick) {
-      if (slot.required) return null
-      continue
-    }
-
-    usedDrillIds.add(pick.drill.id)
-    picks[i] = pick
-    rationales[i] = substitutionRationale
+    const pick = pickForSlot(slot, effectiveContext, usedDrillIds, random, {
+      playerLevel: options?.playerLevel,
+      allowUsedFallback,
+      targetDurationMinutes,
+    })
+    return pick ? { pick } : undefined
   }
 
-  // Phase 1.5: warmup/wrap segment snap + focus-aware redistribution.
-  // See `snapWarmupWrapDurations` for the rule. No-op for builds where
-  // every warmup/wrap variant's natural sum already equals the
-  // allocated slot duration (Solo + Wall 15-min with d28 + d25, etc.).
-  const snappedDurations = snapWarmupWrapDurations(
-    layout,
-    durations,
-    picks,
-    context.sessionFocus,
-  )
+  for (let i = 0; i < layout.length; i++) {
+    const slot = layout[i]
+    if (!slot.required) continue
 
-  const blocks: DraftBlock[] = []
-  let blockIndex = 0
+    const selected = selectSlot(slot, true, durations[i])
+    if (!selected) return null
+    selectedByLayoutIndex.set(i, selected)
+    usedDrillIds.add(selected.pick.drill.id)
+  }
 
   for (let i = 0; i < layout.length; i++) {
     const slot = layout[i]
-    const pick = picks[i]
-    if (!pick) continue
+    if (slot.required) continue
 
+    const selected = selectSlot(slot, false, durations[i])
+    if (!selected) continue
+    selectedByLayoutIndex.set(i, selected)
+    usedDrillIds.add(selected.pick.drill.id)
+  }
+
+  const blocks: DraftBlock[] = []
+  const blockIdByLayoutIndex = new Map<number, string>()
+  let blockIndex = 0
+  const selectedDurationTotal = [...selectedByLayoutIndex.keys()].reduce(
+    (sum, index) => sum + durations[index],
+    0,
+  )
+  const redistributedMinutes = effectiveContext.timeProfile - selectedDurationTotal
+  const redistributionIndex =
+    redistributedMinutes > 0
+      ? ([...selectedByLayoutIndex.keys()].find((index) => layout[index].type === 'main_skill') ??
+        [...selectedByLayoutIndex.keys()].at(-1))
+      : undefined
+
+  if (redistributionIndex !== undefined) {
+    const slot = layout[redistributionIndex]
+    const selected = selectedByLayoutIndex.get(redistributionIndex)
+    if (slot.type === 'main_skill' && selected) {
+      const plannedDurationMinutes = durations[redistributionIndex] + redistributedMinutes
+      const shouldRerouteD01 =
+        selected.pick.drill.id === 'd01' &&
+        !candidateCanCarryTargetDuration(selected.pick, plannedDurationMinutes)
+      const shouldRerouteAdvancedSetting = shouldPreferAdvancedSettingDurationFit(
+        slot,
+        effectiveContext,
+        selected.pick,
+        plannedDurationMinutes,
+      )
+      const shouldRerouteAdvancedPassing = shouldPreferAdvancedPassingDurationFit(
+        slot,
+        effectiveContext,
+        selected.pick,
+        plannedDurationMinutes,
+      )
+      const shouldRerouteBeginnerServing = shouldPreferBeginnerServingDurationFit(
+        slot,
+        effectiveContext,
+        selected.pick,
+        plannedDurationMinutes,
+      )
+      if (
+        shouldRerouteD01 ||
+        shouldRerouteAdvancedSetting ||
+        shouldRerouteAdvancedPassing ||
+        shouldRerouteBeginnerServing
+      ) {
+        const rerouted = pickForSlot(slot, effectiveContext, usedDrillIds, random, {
+          playerLevel: options?.playerLevel,
+          allowUsedFallback: false,
+          targetDurationMinutes: plannedDurationMinutes,
+          preferTargetDurationFit: true,
+        })
+        if (rerouted) {
+          selectedByLayoutIndex.set(redistributionIndex, { pick: rerouted })
+        }
+      }
+    }
+  }
+
+  for (let i = 0; i < layout.length; i++) {
+    const selected = selectedByLayoutIndex.get(i)
+    if (!selected) continue
+
+    const slot = layout[i]
+    const { pick, substitutionRationale } = selected
+
+    const blockId = `block-${blockIndex++}`
+    blockIdByLayoutIndex.set(i, blockId)
     blocks.push({
-      id: `block-${blockIndex++}`,
+      id: blockId,
       type: slot.type,
       drillId: pick.drill.id,
       variantId: pick.variant.id,
       drillName: pick.drill.name,
       shortName: pick.drill.shortName,
-      durationMinutes: snappedDurations[i],
+      durationMinutes: durations[i] + (i === redistributionIndex ? redistributedMinutes : 0),
       coachingCue:
         pick.variant.coachingCues.length > 0
           ? pick.variant.coachingCues.join(' · ')
@@ -218,7 +394,8 @@ export function buildDraft(
       courtsideInstructions: pick.variant.courtsideInstructions,
       courtsideInstructionsBonus: pick.variant.courtsideInstructionsBonus,
       required: slot.required,
-      rationale: rationales[i] ?? deriveBlockRationale(slot.type, pick.drill, context),
+      rationale:
+        substitutionRationale ?? deriveBlockRationale(slot.type, pick.drill, effectiveContext),
       subBlockIntervalSeconds: pick.variant.subBlockIntervalSeconds,
       segments: pick.variant.segments,
     })
@@ -226,9 +403,9 @@ export function buildDraft(
 
   if (blocks.length === 0) return null
 
-  return {
+  const draft: SessionDraft = {
     id: 'current',
-    context,
+    context: effectiveContext,
     archetypeId: archetype.id,
     archetypeName: archetype.name,
     assemblySeed,
@@ -237,6 +414,41 @@ export function buildDraft(
     updatedAt: Date.now(),
     levelRelaxed,
   }
+
+  return {
+    draft,
+    assemblyTrace: {
+      slots: layout.map((slot, index) =>
+        buildTraceSlot(
+          slot,
+          index,
+          durations[index],
+          selectedByLayoutIndex.get(index),
+          blockIdByLayoutIndex.get(index),
+        ),
+      ),
+      skippedOptionalLayoutIndexes: layout
+        .map((slot, index) => ({ slot, index }))
+        .filter(({ slot, index }) => !slot.required && !selectedByLayoutIndex.has(index))
+        .map(({ index }) => index),
+      redistributedMinutes,
+      redistributionLayoutIndex: redistributionIndex,
+    },
+  }
+}
+
+export function buildDraftWithAssemblyTrace(
+  context: SetupContext,
+  options?: BuildDraftOptions,
+): BuildDraftWithAssemblyTraceResult | null {
+  return buildDraftResult(context, options)
+}
+
+export function buildDraft(
+  context: SetupContext,
+  options?: BuildDraftOptions,
+): SessionDraft | null {
+  return buildDraftResult(context, options)?.draft ?? null
 }
 
 /**
@@ -470,4 +682,3 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
 // Swap alternate derivation lives in `sessionAssembly/swapAlternatives.ts`;
 // this module re-exports it above to keep the historical `sessionBuilder`
 // import path stable during the Batch 3 split.
-

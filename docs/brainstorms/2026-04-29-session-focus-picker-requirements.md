@@ -4,9 +4,9 @@ title: "Session focus picker requirements (partially superseded 2026-04-30)"
 status: active
 stage: validation
 type: requirements
-summary: "Requirements for the D135-fired Tier 1c session focus picker. Resolves the draft-screen ambiguity by selecting a Tune today review step as the v1 surface and codifies the architectural rigor (shared focus resolver, in-transaction regeneration use case, stale-write guards, repeat / recovery focus strip, accessibility semantics, privacy boundaries). PARTIALLY SUPERSEDED 2026-04-30 by docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md: R4/R5 (four-chip Recommended-as-peer), R7/R32 (mandatory routing on every pre-run path), R8 (Safety read-only focus echo), R12 (all chips always enabled), R34 four-value source-aware Back. The architectural decisions and remaining R-IDs stay authoritative when Tune today is invoked under the new opt-in posture."
-authority: "Requirements handoff for Tier 1c Stream 1 focus-picker behavior, draft-review surface, regeneration architecture, and repeat / recovery focus invariants. Routing, chip presentation, and Safety echo are superseded as noted; everything else remains authoritative."
-last_updated: 2026-04-30
+summary: "Requirements for the D135-fired Tier 1c session focus picker. Resolves the draft-screen ambiguity by selecting a Tune today review step as the v1 surface and codifies the architectural rigor (shared focus resolver, in-transaction regeneration use case, stale-write guards, repeat / recovery focus strip, accessibility semantics, privacy boundaries). PARTIALLY SUPERSEDED 2026-04-30: the short-lived opt-in fork in docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md was itself superseded by docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md, which shipped mandatory Tune today with four chips, source-aware Back collapsed to setup/home, and no default Safety focus echo."
+authority: "Requirements handoff for Tier 1c Stream 1 focus-picker behavior, draft-review surface, regeneration architecture, and repeat / recovery focus invariants. Final routing, chip presentation, and Safety echo are owned by docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md; everything else remains authoritative."
+last_updated: 2026-05-02
 depends_on:
   - docs/ideation/2026-04-28-what-to-add-next-ideation.md
   - docs/plans/2026-04-28-tier-1c-prepay-and-catalog-audit.md
@@ -21,7 +21,7 @@ decision_refs:
 
 # Session Focus Picker Requirements
 
-> **Partially superseded 2026-04-30** by `docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md`. The simplification brainstorm cuts the four-chip `Recommended`-as-peer pattern (R4 / R5), removes mandatory routing through Tune today on every pre-run path (R7 / R32), drops the default Safety focus echo (R8), pre-checks feasibility instead of enabling all chips (supersedes R12), and collapses source-aware Back to one value (supersedes R34's four-value model). Remaining requirements — including the architectural rigor for focus regeneration, shared resolver, stale-write guards, and repeat / recovery focus strip — stay authoritative when Tune today is invoked under the new opt-in posture.
+> **Partially superseded 2026-04-30.** The 2026-04-30 simplification brainstorm briefly proposed an opt-in Tune today path, but its own iteration log superseded that fork after red-team/user feedback. The final shipped plan is `docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md`: Tune today is mandatory on pre-run draft paths, renders four chips (`Recommended` / `Passing` / `Serving` / `Setting`) with fail-on-tap behavior, collapses source-aware Back to `setup` / `home`, and drops the default Safety focus echo. Remaining requirements here — especially focus regeneration, shared resolver, stale-write guards, and repeat / recovery focus strip — stay authoritative.
 
 ## Problem Frame
 

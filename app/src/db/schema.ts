@@ -109,7 +109,7 @@ export class VolleycraftDB extends Dexie {
     // (Phase 2B `points` / `grade` shapes) has a labelled boundary
     // to read from. Schema rollback to v5 is safe because v5
     // readers ignore the unknown nested key. See
-    // `docs/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md`
+    // `docs/archive/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md`
     // and the `D134` row in `docs/decisions.md`.
     this.version(6)
       .stores({

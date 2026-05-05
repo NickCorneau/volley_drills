@@ -9,7 +9,7 @@ import { pickChipForRpe } from '../rpeSelectorUtils'
  * 2026-04-23 walkthrough closeout polish item 2 (merged Review
  * proposal in
  * `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`
- * + plan `docs/plans/2026-04-23-walkthrough-closeout-polish.md`):
+ * + plan `docs/archive/plans/2026-04-23-walkthrough-closeout-polish.md`):
  * `RpeSelector` collapsed from 11 numeric chips to 3 labelled chips
  * (Easy=3 / Right=5 / Hard=7).
  *

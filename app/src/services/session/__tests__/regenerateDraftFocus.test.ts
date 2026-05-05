@@ -38,6 +38,7 @@ describe('regenerateDraftFocus', () => {
     await db.sessionDrafts.put(draft)
 
     const result = await regenerateDraftFocus({
+      mode: 'regenerate',
       expectedUpdatedAt: draft.updatedAt,
       sessionFocus: 'serve',
     })
@@ -53,6 +54,38 @@ describe('regenerateDraftFocus', () => {
     expect(mainSkill).toBeDefined()
   })
 
+  it('uses the persisted onboarding skill level when regenerating focus', async () => {
+    const draft = buildDraft(
+      {
+        playerMode: 'solo',
+        timeProfile: 40,
+        netAvailable: false,
+        wallAvailable: false,
+      },
+      { assemblySeed: 'advanced-regenerate-baseline' },
+    )
+    if (!draft) throw new Error('Expected fixture draft to build')
+    await db.sessionDrafts.put({ ...draft, updatedAt: 150 })
+    await db.storageMeta.put({
+      key: 'onboarding.skillLevel',
+      value: 'competitive_pair',
+      updatedAt: 1,
+    })
+
+    const result = await regenerateDraftFocus({
+      mode: 'regenerate',
+      expectedUpdatedAt: 150,
+      sessionFocus: 'serve',
+    })
+
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    const mainSkill = result.draft.blocks.find((block) => block.type === 'main_skill')
+    expect(mainSkill?.drillId).not.toBe('d31')
+    const saved = await db.sessionDrafts.get('current')
+    expect(saved?.context.sessionFocus).toBe('serve')
+  })
+
   it('restores a baseline draft through the guarded path', async () => {
     const baseline = makeDraft()
     const focused = {
@@ -63,8 +96,8 @@ describe('regenerateDraftFocus', () => {
     await db.sessionDrafts.put(focused)
 
     const result = await regenerateDraftFocus({
+      mode: 'restore_baseline',
       expectedUpdatedAt: focused.updatedAt,
-      useBaseline: true,
       baselineDraft: baseline,
     })
 
@@ -82,6 +115,7 @@ describe('regenerateDraftFocus', () => {
     await db.sessionDrafts.put({ ...draft, updatedAt: 200 })
 
     const result = await regenerateDraftFocus({
+      mode: 'regenerate',
       expectedUpdatedAt: 100,
       sessionFocus: 'serve',
     })
@@ -100,6 +134,7 @@ describe('regenerateDraftFocus', () => {
     await db.sessionDrafts.put(draft)
 
     const result = await regenerateDraftFocus({
+      mode: 'regenerate',
       expectedUpdatedAt: draft.updatedAt,
       sessionFocus: 'serve',
     })

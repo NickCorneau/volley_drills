@@ -126,11 +126,11 @@ function passAttemptStatsLine(goodPasses: number, totalAttempts: number): string
 // not actionable, and contributed to the "weirdly dense" feel that
 // the 2026-04-21 second-pass field-test feedback flagged. The lifetime
 // session-count signal is still surfaced through the Home recent-
-// workouts row's rolling-recency labels; deleting it from Complete
+// recent-sessions row's rolling-recency labels; deleting it from Complete
 // preserves the Jo-Ha-Kyu "kyu" beat per the brand's typography brief.
 // `sessionCount` is no longer threaded into `composeDefaultReason`
 // (kept on `SummaryInput` as data only — future surfaces may want
-// it). See `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 4.
+// it). See `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 4.
 //
 // 2026-04-22 honest-copy pass: the prior low-N branch rendered
 // "Pass-rate tuning waits until this session logs 50 attempts…" below

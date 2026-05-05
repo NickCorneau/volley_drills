@@ -4,7 +4,7 @@ import {
 } from '../../data/substitutionRules'
 import { findSubstitute } from '../drillSelection'
 import type { BlockSlot, PlayerLevel, SetupContext } from '../../model'
-import type { CandidateVariant } from './candidates'
+import type { CandidateVariant, FindCandidatesOptions } from './candidates'
 import { findCandidates } from './candidates'
 import { partitionByLevel } from './partitionByLevel'
 import { deriveSubstitutionRationale } from './rationale'
@@ -32,8 +32,13 @@ export function pickMainSkillSubstitute(
   lastMainSkillDrillId: string,
   effectiveLevelValue?: PlayerLevel,
   rules: readonly SubstitutionRule[] = SUBSTITUTION_RULES,
-): PickMainSkillSubstituteResult | undefined {
-  const candidates = findCandidates(slot, context)
+  options?: { readonly playerLevel?: PlayerLevel },
+): { candidate: CandidateVariant; rationale: string } | undefined {
+  const findOptions: FindCandidatesOptions | undefined =
+    options?.playerLevel === undefined ? undefined : { playerLevel: options.playerLevel }
+  const candidates = findCandidates(slot, context, findOptions)
+  const unused = candidates.filter((candidate) => !usedDrillIds.has(candidate.drill.id))
+  const pool = unused.length > 0 ? unused : candidates
 
   // Pre-engine-wiring single-pass behavior when no level value
   // provided. Preserves golden-seed pin tests that pre-date the

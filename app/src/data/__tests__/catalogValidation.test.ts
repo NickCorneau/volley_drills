@@ -89,6 +89,201 @@ describe('validateDrillCatalog', () => {
     expect(pairEligibleWallOnly).toEqual([])
   })
 
+  describe('skillFocus authoring semantics', () => {
+    it.each([
+      ['d08', ['pass', 'serve']],
+      ['d18', ['pass', 'serve']],
+      ['d40', ['set', 'movement']],
+      ['d42', ['set', 'movement']],
+      ['d47', ['set', 'movement']],
+      ['d49', ['set', 'movement']],
+      ['d50', ['pass', 'movement']],
+      ['d51', ['serve']],
+    ])('keeps intentional multi-skill tags on %s', (drillId, expectedTags) => {
+      const drillRecord = DRILLS.find((candidate) => candidate.id === drillId)
+      expect(drillRecord?.skillFocus).toEqual(expectedTags)
+    })
+
+    it.each(['d07', 'd15', 'd16', 'd46'])(
+      'does not add serve focus to %s when live serve/feed only trains the receiver',
+      (drillId) => {
+        const drillRecord = DRILLS.find((candidate) => candidate.id === drillId)
+        expect(drillRecord?.skillFocus).toContain('pass')
+        expect(drillRecord?.skillFocus).not.toContain('serve')
+      },
+    )
+  })
+
+  describe('D49 source-backed activation', () => {
+    it('adds only solo and pair open variants without unmodeled equipment requirements', () => {
+      const d49 = DRILLS.find((candidate) => candidate.id === 'd49')
+
+      expect(d49).toBeDefined()
+      expect(d49?.m001Candidate).toBe(true)
+      expect(d49?.levelMin).toBe('advanced')
+      expect(d49?.levelMax).toBe('advanced')
+      expect(d49?.variants.map((variant) => variant.id)).toEqual([
+        'd49-solo-open',
+        'd49-pair-open',
+      ])
+      for (const variant of d49?.variants ?? []) {
+        expect(variant.equipment.balls).toBe(1)
+        expect(variant.environmentFlags.needsWall).toBe(false)
+        expect(variant.environmentFlags.needsLines).toBe(false)
+        expect(variant.environmentFlags.needsCones).toBe(false)
+        expect(variant.workload.durationMaxMinutes).toBeGreaterThan(9)
+        expect(variant.courtsideInstructions).toContain('rounds')
+      }
+    })
+
+    it('keeps D47 workload caps unchanged while D49 carries longer setting blocks', () => {
+      const d47 = DRILLS.find((candidate) => candidate.id === 'd47')
+      const d49 = DRILLS.find((candidate) => candidate.id === 'd49')
+
+      expect(d47?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([9, 9])
+      expect(
+        d47?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes),
+      ).toEqual([9, 9])
+      expect(d49?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([
+        14,
+        14,
+      ])
+      expect(d49?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes)).toEqual([
+        14,
+        14,
+      ])
+    })
+  })
+
+  describe('D50 source-backed activation', () => {
+    it('adds only pair-open and solo-open variants without unmodeled equipment requirements', () => {
+      const d50 = DRILLS.find((candidate) => candidate.id === 'd50')
+
+      expect(d50).toBeDefined()
+      expect(d50?.m001Candidate).toBe(true)
+      expect(d50?.levelMin).toBe('advanced')
+      expect(d50?.levelMax).toBe('advanced')
+      expect(d50?.chainId).toBe('chain-4-serve-receive')
+      expect(d50?.variants.map((variant) => variant.id)).toEqual([
+        'd50-pair-open',
+        'd50-solo-open',
+      ])
+      for (const variant of d50?.variants ?? []) {
+        expect(variant.equipment.balls).toBe(1)
+        expect(variant.environmentFlags.needsWall).toBe(false)
+        expect(variant.environmentFlags.needsLines).toBe(false)
+        expect(variant.environmentFlags.needsCones).toBe(false)
+        expect(variant.environmentFlags.needsNet).toBe(false)
+        expect(variant.workload.durationMinMinutes).toBeGreaterThanOrEqual(8)
+        expect(variant.workload.durationMaxMinutes).toBeGreaterThanOrEqual(14)
+        expect(variant.courtsideInstructions).toContain('rounds')
+      }
+    })
+
+    it('keeps D46 workload caps unchanged while D50 carries longer pair-open passing blocks', () => {
+      const d46 = DRILLS.find((candidate) => candidate.id === 'd46')
+      const d50 = DRILLS.find((candidate) => candidate.id === 'd50')
+
+      expect(d46?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([8, 8])
+      expect(
+        d46?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes),
+      ).toEqual([8, 8])
+      expect(d50?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([
+        14,
+        14,
+      ])
+      expect(d50?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes)).toEqual([
+        14,
+        14,
+      ])
+    })
+
+    it('keeps D50 teaching content spin-reading-free per the d46 vs d50 honesty boundary', () => {
+      // Objective MAY mention spin in a disclaimer ("not spin reading - d46 owns
+      // that") because the boundary is load-bearing. Teaching points, courtside
+      // instructions, and coaching cues are the active teaching surface and must
+      // never instruct on spin reading - that surface belongs to d46.
+      const d50 = DRILLS.find((candidate) => candidate.id === 'd50')
+
+      const teachingPoints = (d50?.teachingPoints ?? []).join(' ').toLowerCase()
+      expect(teachingPoints).not.toContain('spin')
+      for (const variant of d50?.variants ?? []) {
+        expect(variant.courtsideInstructions.toLowerCase()).not.toContain('spin')
+        expect(variant.coachingCues.join(' ').toLowerCase()).not.toContain('spin')
+      }
+    })
+  })
+
+  describe('D51 source-backed activation', () => {
+    it('adds three serving variants matching d31 surface coverage without unmodeled equipment', () => {
+      const d51 = DRILLS.find((candidate) => candidate.id === 'd51')
+
+      expect(d51).toBeDefined()
+      expect(d51?.m001Candidate).toBe(true)
+      expect(d51?.levelMin).toBe('beginner')
+      expect(d51?.levelMax).toBe('intermediate')
+      expect(d51?.chainId).toBe('chain-6-serving')
+      expect(d51?.variants.map((variant) => variant.id)).toEqual([
+        'd51-solo-open',
+        'd51-pair-open',
+        'd51-pair',
+      ])
+      for (const variant of d51?.variants ?? []) {
+        expect(variant.equipment.balls).toBe(1)
+        expect(variant.environmentFlags.needsWall).toBe(false)
+        expect(variant.environmentFlags.needsLines).toBe(false)
+        expect(variant.environmentFlags.needsCones).toBe(false)
+        expect(variant.workload.durationMinMinutes).toBeGreaterThanOrEqual(8)
+        expect(variant.workload.durationMaxMinutes).toBeGreaterThanOrEqual(14)
+        expect(variant.courtsideInstructions).toContain('rounds')
+      }
+      // Only the pair (net) variant requires a net; solo-open and pair-open are
+      // open-sand drills mirroring d31's pair vs pair-open distinction.
+      const pair = d51?.variants.find((v) => v.id === 'd51-pair')
+      const pairOpen = d51?.variants.find((v) => v.id === 'd51-pair-open')
+      expect(pair?.environmentFlags.needsNet).toBe(true)
+      expect(pairOpen?.environmentFlags.needsNet).toBe(false)
+    })
+
+    it('keeps D31 workload caps unchanged while D51 carries longer beginner serving blocks', () => {
+      const d31 = DRILLS.find((candidate) => candidate.id === 'd31')
+      const d51 = DRILLS.find((candidate) => candidate.id === 'd51')
+
+      expect(d31?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([
+        8, 8, 8,
+      ])
+      expect(
+        d31?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes),
+      ).toEqual([8, 8, 8])
+      expect(d51?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([
+        14, 14, 14,
+      ])
+      expect(d51?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes)).toEqual([
+        14, 14, 14,
+      ])
+    })
+
+    it('keeps D51 teaching content single-target-free per the d31 vs d51 honesty boundary', () => {
+      // Objective MAY mention "single-target" in a disclaimer ("trains tactical
+      // zone avoidance, not single-target accuracy - d31 owns that") because
+      // the boundary is load-bearing. Teaching points, courtside instructions,
+      // and coaching cues are the active teaching surface and must never
+      // instruct on single-target commitment - that surface belongs to d31.
+      const d51 = DRILLS.find((candidate) => candidate.id === 'd51')
+
+      const teachingPoints = (d51?.teachingPoints ?? []).join(' ').toLowerCase()
+      expect(teachingPoints).not.toMatch(/single[\s-]target|one\s+target|target\s+circle/)
+      for (const variant of d51?.variants ?? []) {
+        expect(variant.courtsideInstructions.toLowerCase()).not.toMatch(
+          /single[\s-]target|one\s+target|target\s+circle/,
+        )
+        expect(variant.coachingCues.join(' ').toLowerCase()).not.toMatch(
+          /single[\s-]target|one\s+target|target\s+circle/,
+        )
+      }
+    })
+  })
+
   it('reports duplicate drill ids and duplicate variant ids', () => {
     const first = drill({ id: 'd-dup' })
     const second = drill({

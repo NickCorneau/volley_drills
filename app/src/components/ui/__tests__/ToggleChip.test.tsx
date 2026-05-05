@@ -36,6 +36,13 @@ describe('ToggleChip', () => {
     expect(btn.className).toContain('bg-info-surface')
   })
 
+  it('applies success tone when tone="success" and selected', () => {
+    render(<ToggleChip label="No pain" selected onTap={() => {}} tone="success" />)
+    const btn = screen.getByRole('radio', { name: 'No pain' })
+    expect(btn.className).toContain('border-success')
+    expect(btn.className).toContain('bg-bg-warm')
+  })
+
   it('respects size="sm" hit target', () => {
     render(<ToggleChip label="Small" selected={false} onTap={() => {}} size="sm" />)
     expect(screen.getByRole('radio', { name: 'Small' }).className).toContain('min-h-[48px]')
@@ -44,5 +51,12 @@ describe('ToggleChip', () => {
   it('uses lg hit target by default', () => {
     render(<ToggleChip label="Large" selected={false} onTap={() => {}} />)
     expect(screen.getByRole('radio', { name: 'Large' }).className).toContain('min-h-[54px]')
+  })
+
+  it('can render as a non-filling pill for wrap rows', () => {
+    render(<ToggleChip label="Time" selected={false} onTap={() => {}} fill={false} shape="pill" />)
+    const btn = screen.getByRole('radio', { name: 'Time' })
+    expect(btn.className).toContain('rounded-full')
+    expect(btn.className).not.toContain('flex-1')
   })
 })

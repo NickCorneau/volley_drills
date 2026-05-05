@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { ExecutionLog, SessionPlan, SessionPlanBlock } from '../db'
-import { effectiveLevel } from '../domain/sessionAssembly/effectiveLevel'
+import type { ExecutionLog, SessionPlan, SessionPlanBlock } from '../model'
 import { findSwapAlternatives } from '../domain/sessionBuilder'
 import type { PlayerLevel } from '../model'
 import { isSchemaBlocked } from '../lib/schema-blocked'
@@ -205,7 +204,8 @@ export function useSessionRunner(executionLogId: string, options?: SessionRunner
         if (!exec || !p) return
         const timer = await readTimerState()
         const ended = buildEndedSession(exec, reason)
-        const ownedElapsed = timer?.executionLogId === exec.id ? timer.accumulatedElapsed : undefined
+        const ownedElapsed =
+          timer?.executionLogId === exec.id ? timer.accumulatedElapsed : undefined
         ended.actualDurationMinutes = computeActualDurationMinutes(ended, p, ownedElapsed)
         await persist(ended)
         await clearTimerState()

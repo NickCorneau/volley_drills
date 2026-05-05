@@ -1,12 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { BackButton, Button, ScreenShell, ToggleChip } from '../components/ui'
+import {
+  Button,
+  ChoiceRow,
+  type ChoiceRowOption,
+  ChoiceSection,
+  ChoiceSubsection,
+  ScreenHeader,
+  ScreenShell,
+  StatusMessage,
+} from '../components/ui'
 import type { PlayerMode, TimeProfile } from '../types/session'
-import type { SetupContext } from '../db/types'
+import type { SetupContext } from '../model'
 import { buildDraft } from '../domain/sessionBuilder'
 import { isOnboardingStep } from '../lib/onboarding'
 import { isSchemaBlocked } from '../lib/schema-blocked'
-import { isSkillLevel } from '../lib/skillLevel'
+import { isSkillLevel, skillLevelToDrillBand } from '../lib/skillLevel'
 import {
   findLastCompletedDrillIdsByType,
   getCurrentDraft,
@@ -16,8 +25,17 @@ import {
 import type { BlockSlotType } from '../types/session'
 import { getStorageMeta, setStorageMeta } from '../services/storageMeta'
 import { routes } from '../routes'
+import type { PlayerLevel } from '../types/drill'
 
 const TIME_OPTIONS: TimeProfile[] = [15, 25, 40]
+const FOCUS_OPTIONS = [
+  { value: 'recommended', label: 'Recommended' },
+  { value: 'pass', label: 'Passing' },
+  { value: 'serve', label: 'Serving' },
+  { value: 'set', label: 'Setting' },
+] as const
+
+type SetupFocus = (typeof FOCUS_OPTIONS)[number]['value']
 
 const isTimestamp = (v: unknown): v is number =>
   typeof v === 'number' && Number.isFinite(v) && v > 0
@@ -39,22 +57,22 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const shouldHydrateDraft =
-    !isOnboarding &&
-    isSetupLocationState(location.state) &&
-    location.state.editDraft === true
+    !isOnboarding && isSetupLocationState(location.state) && location.state.editDraft === true
   // 2026-04-22 one-tap Repeat simplification: the `?from=repeat`
-  // branch + `StaleContextBanner` were retired here because `Repeat
-  // this session` on Home now rebuilds the draft and jumps straight
-  // to `/safety`. Setup only renders for fresh / "Start a different
-  // session" entries, where `getLastContext()` silently pre-fills the
-  // toggles from the last session as a convenience (no banner — the
-  // user explicitly asked to start something different, so naming the
-  // prior day is noise).
+  // branch + `StaleContextBanner` were retired here. Setup renders for
+  // fresh / "Start a different session" entries, where
+  // `getLastContext()` silently pre-fills the physical setup toggles
+  // from the last session as a convenience (no banner — the user
+  // explicitly asked to start something different, so naming the prior
+  // day is noise). Fresh setup defaults to the fastest common path
+  // (Solo + net available + Recommended focus); edit mode restores the
+  // current draft focus.
 
-  const [playerMode, setPlayerMode] = useState<PlayerMode | null>(null)
-  const [netAvailable, setNetAvailable] = useState<boolean | null>(null)
+  const [playerMode, setPlayerMode] = useState<PlayerMode | null>('solo')
+  const [netAvailable, setNetAvailable] = useState<boolean | null>(true)
   const [wallAvailable, setWallAvailable] = useState<boolean | null>(null)
   const [timeProfile, setTimeProfile] = useState<TimeProfile>(15)
+  const [sessionFocus, setSessionFocus] = useState<SetupFocus>('recommended')
   const [prefilled, setPrefilled] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -94,6 +112,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           setNetAvailable(ctx.netAvailable)
           setWallAvailable(ctx.wallAvailable)
           setTimeProfile(ctx.timeProfile)
+          setSessionFocus(shouldHydrateDraft ? (ctx.sessionFocus ?? 'recommended') : 'recommended')
         }
       } catch {
         // Prefill is best-effort; a failed read falls through to defaults.
@@ -107,7 +126,16 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   }, [isOnboarding, navigate, shouldHydrateDraft])
 
   const showWall = playerMode === 'solo' && netAvailable === false
-  const isComplete = playerMode !== null && netAvailable !== null && (!showWall || wallAvailable !== null)
+  const isComplete =
+    playerMode !== null && netAvailable !== null && (!showWall || wallAvailable !== null)
+  const incompleteHint =
+    playerMode === null
+      ? 'Choose players to build.'
+      : netAvailable === null
+        ? 'Choose net availability to build.'
+        : showWall && wallAvailable === null
+          ? 'Choose wall or fence availability to build.'
+          : null
 
   const submitting = useRef(false)
 
@@ -123,6 +151,9 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         timeProfile,
         netAvailable: netAvailable!,
         wallAvailable: showWall ? wallAvailable! : false,
+      }
+      if (sessionFocus !== 'recommended') {
+        context.sessionFocus = sessionFocus
       }
 
       // Phase 2.2 / 3.2 build-time substitution input. A fresh Setup
@@ -143,23 +174,16 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       // fallthroughs (empty `lastCompletedByType` map, 'beginner'
       // effective level) absorb each independently.
       let lastCompletedByType: Partial<Record<BlockSlotType, string>> = {}
-      let onboarding: unknown = undefined
-      const [lastResult, onboardingResult] = await Promise.allSettled([
-        findLastCompletedDrillIdsByType(),
-        getStorageMeta('onboarding.skillLevel', isSkillLevel),
-      ])
-      if (lastResult.status === 'fulfilled') {
-        lastCompletedByType = lastResult.value
-      } else if (isSchemaBlocked()) {
-        return
-      }
-      if (onboardingResult.status === 'fulfilled') {
-        onboarding = onboardingResult.value
-      } else if (isSchemaBlocked()) {
-        return
+      let playerLevel: PlayerLevel | undefined
+      try {
+        lastCompletedByType = await findLastCompletedDrillIdsByType()
+        const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
+        playerLevel = skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
+      } catch {
+        if (isSchemaBlocked()) return
       }
 
-      const draft = buildDraft(context, { lastCompletedByType, onboarding })
+      const draft = buildDraft(context, { lastCompletedByType, playerLevel })
       if (!draft) {
         setError("Can't build a session for these constraints. Try different options.")
         return
@@ -169,7 +193,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       if (isOnboarding) {
         await setStorageMeta('onboarding.completedAt', Date.now())
       }
-      navigate(routes.tuneToday(), { state: { source: 'setup' } })
+      navigate(routes.safety())
     } catch {
       setError('Failed to save session. Please try again.')
     } finally {
@@ -180,6 +204,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     isComplete,
     playerMode,
     timeProfile,
+    sessionFocus,
     netAvailable,
     wallAvailable,
     showWall,
@@ -188,11 +213,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   ])
 
   if (!prefilled) {
-    return (
-      <div className="mx-auto flex min-h-[60dvh] w-full max-w-[390px] flex-col items-center justify-center gap-4">
-        <p className="text-text-secondary">Loading setup...</p>
-      </div>
-    )
+    return <StatusMessage variant="loading" message="Loading setup…" />
   }
 
   return (
@@ -202,106 +223,93 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         the footer. The setup rows can slip below the fold on a 390 x 844
         iPhone when any section expands or a tester re-reads the options.
       */}
-      <ScreenShell.Header className="flex items-center gap-2 pt-2 pb-3">
-        <BackButton
-          label={isOnboarding ? 'Skill level' : 'Home'}
-          onClick={() => navigate(isOnboarding ? routes.onboardingSkillLevel() : routes.home())}
-        />
-        {/* Phase F12 (2026-04-19): screen title sentence case (was
-            "Today's Setup" Title Case). Matches "Before we start",
-            "Settings", and the rest of the app per brand-ux
-            guidelines §1.4. See
-            `docs/plans/2026-04-19-feat-phase-f12-ux-consistency-plan.md`. */}
-        <h1 className="flex-1 text-center text-xl font-semibold tracking-tight text-text-primary">
-          Today&apos;s setup
-        </h1>
-        <div className="w-12" />
-      </ScreenShell.Header>
+      {/* Phase F12 (2026-04-19): screen title sentence case (was
+          "Today's Setup" Title Case). Matches "Before we start",
+          "Settings", and the rest of the app per brand-ux
+          guidelines §1.4. See
+          `docs/archive/plans/2026-04-19-feat-phase-f12-ux-consistency-plan.md`. */}
+      <ScreenHeader
+        backLabel={isOnboarding ? 'Skill level' : 'Home'}
+        onBack={() => navigate(isOnboarding ? routes.onboardingSkillLevel() : routes.home())}
+        title={<>Today&apos;s setup</>}
+      />
 
       <ScreenShell.Body className="gap-6 pb-4">
-        {/* Phase F8 (2026-04-19): section h2s lifted from `text-sm` to
-          `text-base` to match Safety / Review / Settings (same
-          semantic role across the app). See
-          `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`. */}
-        <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-text-primary">Players</h2>
-          <div className="flex gap-2" role="radiogroup" aria-label="Player mode">
-            <ToggleChip
-              label="Solo"
-              selected={playerMode === 'solo'}
-              onTap={() => setPlayerMode('solo')}
-            />
-            <ToggleChip
-              label="Pair"
-              selected={playerMode === 'pair'}
-              onTap={() => setPlayerMode('pair')}
-            />
-          </div>
-        </section>
+        <ChoiceSection title="Players">
+          <ChoiceRow<PlayerMode>
+            value={playerMode}
+            onChange={setPlayerMode}
+            options={[
+              { value: 'solo', label: 'Solo' },
+              { value: 'pair', label: 'Pair' },
+            ]}
+            ariaLabel="Player mode"
+          />
+        </ChoiceSection>
 
-        <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-text-primary">Net</h2>
-          <div className="flex gap-2" role="radiogroup" aria-label="Net available">
-            <ToggleChip
-              label="Yes"
-              selected={netAvailable === true}
-              onTap={() => setNetAvailable(true)}
-            />
-            <ToggleChip
-              label="No"
-              selected={netAvailable === false}
-              onTap={() => setNetAvailable(false)}
-            />
-          </div>
-        </section>
+        <ChoiceSection title="Net">
+          <ChoiceRow<'yes' | 'no'>
+            value={netAvailable === null ? null : netAvailable ? 'yes' : 'no'}
+            onChange={(next) => setNetAvailable(next === 'yes')}
+            options={[
+              { value: 'yes', label: 'Yes' },
+              { value: 'no', label: 'No' },
+            ]}
+            ariaLabel="Net available"
+          />
+          {showWall && (
+            <ChoiceSubsection titleId="wall-available-label" title="Wall or fence nearby?">
+              <ChoiceRow<'yes' | 'no'>
+                value={wallAvailable === null ? null : wallAvailable ? 'yes' : 'no'}
+                onChange={(next) => setWallAvailable(next === 'yes')}
+                options={[
+                  { value: 'yes', label: 'Yes' },
+                  { value: 'no', label: 'No' },
+                ]}
+                ariaLabelledBy="wall-available-label"
+              />
+            </ChoiceSubsection>
+          )}
+        </ChoiceSection>
 
-        {showWall && (
-          <section className="flex flex-col gap-3">
-            <h2 className="text-sm font-semibold text-text-primary">Wall or fence</h2>
-            <div className="flex gap-2" role="radiogroup" aria-label="Wall available">
-              <ToggleChip
-                label="Yes"
-                selected={wallAvailable === true}
-                onTap={() => setWallAvailable(true)}
-              />
-              <ToggleChip
-                label="No"
-                selected={wallAvailable === false}
-                onTap={() => setWallAvailable(false)}
-              />
-            </div>
-          </section>
-        )}
-
-        <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-text-primary">Time</h2>
-          <div className="flex gap-2" role="radiogroup" aria-label="Time profile">
-            {TIME_OPTIONS.map((t) => (
-              <ToggleChip
-                key={t}
-                label={`${t} min`}
-                selected={timeProfile === t}
-                onTap={() => setTimeProfile(t)}
-              />
-            ))}
-          </div>
+        <ChoiceSection title="Time" footerNote="Includes warm-up and cool-down.">
           {/* 2026-04-21 partner-walkthrough P1-10: Seb expected 15 min to
             mean 15 min of main/technique work, not "total session
-            including warm-up and cool-down." One-line clarifier below
-            the picker surfaces the framing without inflating the setup
-            funnel. See
+            including warm-up and cool-down." Clarifier lives in the
+            shared `ChoiceSection` footerNote. See
             docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md. */}
-          <p className="text-xs text-text-secondary">Includes warm-up and cool-down.</p>
-        </section>
+          <ChoiceRow<string>
+            value={String(timeProfile)}
+            onChange={(next) => setTimeProfile(Number.parseInt(next, 10) as TimeProfile)}
+            options={TIME_OPTIONS.map(
+              (t): ChoiceRowOption<string> => ({ value: String(t), label: `${t} min` }),
+            )}
+            ariaLabel="Time profile"
+          />
+        </ChoiceSection>
 
-        {error && (
-          <p className="rounded-[12px] bg-warning-surface px-4 py-3 text-sm text-warning">
-            {error}
-          </p>
-        )}
+        <ChoiceSection title="Focus">
+          <ChoiceRow<SetupFocus>
+            value={sessionFocus}
+            onChange={setSessionFocus}
+            options={FOCUS_OPTIONS.map(
+              (option): ChoiceRowOption<SetupFocus> => ({
+                value: option.value,
+                label: option.label,
+              }),
+            )}
+            layout="grid-2"
+            ariaLabel="Focus"
+          />
+        </ChoiceSection>
+
+        {error && <StatusMessage variant="error" message={error} />}
       </ScreenShell.Body>
 
-      <ScreenShell.Footer className="flex flex-col gap-4 pt-4">
+      <ScreenShell.Footer className="flex flex-col gap-2 pt-3">
+        {incompleteHint && !isSaving && (
+          <p className="text-center text-xs text-text-secondary">{incompleteHint}</p>
+        )}
         <Button
           variant="primary"
           fullWidth

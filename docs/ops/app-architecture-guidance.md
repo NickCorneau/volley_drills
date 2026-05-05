@@ -6,7 +6,7 @@ stage: validation
 type: ops
 authority: durable architecture principles, layer rules, extension points, testing posture, and review gates for the app/ workspace
 summary: "Durable, principle-and-routing-oriented guide that future agents read before adding features to app/. Captures the layer model, decomplecting principle, DRY/OCP / SOLID posture, forward seams, testing posture, review gates, anti-patterns, and a routing checklist for new features. Points at canonical product docs rather than redefining them."
-last_updated: 2026-04-28
+last_updated: 2026-05-02
 depends_on:
   - AGENTS.md
   - docs/vision.md
@@ -21,6 +21,7 @@ depends_on:
   - docs/research/minimum-viable-test-stack.md
 related:
   - docs/plans/2026-04-26-app-architecture-pass.md
+  - docs/plans/2026-05-02-019-refactor-agent-architecture-cleanup-plan.md
   - app/src/model/
   - app/src/domain/
   - app/src/services/
@@ -78,17 +79,17 @@ contracts ───────────────────────�
 
 Dependencies point inward. Each outer ring may import from inner rings; the reverse is forbidden. CI greps and the layer rules in `.cursor/rules/data-access.mdc` enforce the boundary.
 
-| Layer | Path | Responsibility | Forbidden imports |
-|-------|------|----------------|-------------------|
-| **Data** | `app/src/data/` | Catalog constants (drills, archetypes). Static and pure. | React, Dexie, services. |
-| **Model** | `app/src/model/` | Pure product types: `SessionPlan`, `ExecutionLog`, `PerDrillCapture`, `SessionReview`, plus forward seams `SessionParticipant[]`, `SkillVector`, `CoachPayload`. | React, Dexie, services, platform. |
-| **Domain** | `app/src/domain/` | Pure rules: capture eligibility / merge / aggregate (`domain/capture/`), route policy (`domain/runFlow/`), session-assembly, `executionState`, `sessionParticipants`, scoring. | `db/`, `services/`, React, `platform/`. |
-| **Services** | `app/src/services/` | Dexie IO + orchestration. `services/session/`, `services/review/` (submit / drafts / expire / cohort / bundle), `services/timer.ts`, `services/storageMeta.ts`, `services/softBlock.ts`, `services/export/sessionExport.ts` (per-session adapter), `services/export.ts` (founder dump). | React, controllers, screens. |
-| **Platform** | `app/src/platform/` | Browser runtime ONLY: `vibrate`, audio cues, screen wake lock. No product semantics. | `db/`, `services/`, `domain/`. |
-| **Use-case hooks** | `app/src/hooks/` | `useSessionRunner` and friends — ordered service calls + serial mutation queue. | Direct UI policy. |
-| **Controllers** | `app/src/screens/**/use*Controller.ts` | Thin assemblers: route policy + use-case hook + platform hooks + local UI state. | Direct Dexie writes, inline route strings, `navigator.*` calls. |
-| **Screens / components** | `app/src/screens/`, `app/src/components/` | Render and dispatch UI events. No Dexie, no `navigator.*`, no product policy in JSX. | `db/`, `services/` (route through controllers / hooks). |
-| **Contracts** | `app/src/contracts/` | P12 `screenContracts.ts`; transitional `runFlowInteractionContract.ts` + `SUNSET_RUN_FLOW_CONTRACT`. | Anything beyond the contract types. |
+| Layer                    | Path                                      | Responsibility                                                                                                                                                                                                                                                                          | Forbidden imports                                               |
+| ------------------------ | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| **Data**                 | `app/src/data/`                           | Catalog constants (drills, archetypes). Static and pure.                                                                                                                                                                                                                                | React, Dexie, services.                                         |
+| **Model**                | `app/src/model/`                          | Pure product types: `SessionPlan`, `ExecutionLog`, `PerDrillCapture`, `SessionReview`, plus forward seams `SessionParticipant[]`, `SkillVector`, `CoachPayload`.                                                                                                                        | React, Dexie, services, platform.                               |
+| **Domain**               | `app/src/domain/`                         | Pure rules: capture eligibility / merge / aggregate (`domain/capture/`), route policy (`domain/runFlow/`), session-assembly, `executionState`, `sessionParticipants`, scoring.                                                                                                          | `db/`, `services/`, React, `platform/`.                         |
+| **Services**             | `app/src/services/`                       | Dexie IO + orchestration. `services/session/`, `services/review/` (submit / drafts / expire / cohort / bundle), `services/timer.ts`, `services/storageMeta.ts`, `services/softBlock.ts`, `services/export/sessionExport.ts` (per-session adapter), `services/export.ts` (founder dump). | React, controllers, screens.                                    |
+| **Platform**             | `app/src/platform/`                       | Browser runtime ONLY: `vibrate`, audio cues, screen wake lock. No product semantics. Transitional exception: `platform/index.ts` may re-export `hooks/useWakeLock` until the implementation moves fully under `platform/`.                                                              | `db/`, `data/`, `model/`, `domain/`, `services/`, `hooks/`.     |
+| **Use-case hooks**       | `app/src/hooks/`                          | `useSessionRunner` and friends — ordered service calls + serial mutation queue.                                                                                                                                                                                                         | Direct UI policy.                                               |
+| **Controllers**          | `app/src/screens/**/use*Controller.ts`    | Thin assemblers: route policy + use-case hook + platform hooks + local UI state.                                                                                                                                                                                                        | Direct Dexie writes, inline route strings, `navigator.*` calls. |
+| **Screens / components** | `app/src/screens/`, `app/src/components/` | Render and dispatch UI events. No Dexie, no `navigator.*`, no product policy in JSX.                                                                                                                                                                                                    | `db/`, `services/` (route through controllers / hooks).         |
+| **Contracts**            | `app/src/contracts/`                      | P12 `screenContracts.ts`; transitional `runFlowInteractionContract.ts` + `SUNSET_RUN_FLOW_CONTRACT`.                                                                                                                                                                                    | Anything beyond the contract types.                             |
 
 ## Decomplecting Principle
 
@@ -127,13 +128,13 @@ If a "new variant" is forcing edits across screens, services, AND domain, the ex
 
 Lay these now while in the relevant modules. No new UX ships.
 
-| Seam | Home | Future need |
-|------|------|------------|
-| `SessionParticipant[]` | `app/src/model/participant.ts`, projected via `domain/sessionParticipants.getSessionParticipants` | `D115`/`D116`/`D117` persistent pair, partner profiles, team consent. |
-| `SkillVector` | `app/src/model/skillVector.ts` | `D121` per-skill rollup; M002+ adaptation engine. |
-| `ExportSession` adapter | `app/src/services/export/sessionExport.ts` (`buildExportSession`) | Phase 1.5 share-sheet / clipboard / file export. |
-| `CoachPayload` type | `app/src/model/coachPayload.ts` | Phase 2 / `D106` coach sharing. |
-| Adaptation-replay hook | future `domain/adaptation/` consuming `SessionReview[]` from model | `D113` / `V0B-15`-style replay against model arrays, not Dexie rows. |
+| Seam                    | Home                                                                                              | Future need                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `SessionParticipant[]`  | `app/src/model/participant.ts`, projected via `domain/sessionParticipants.getSessionParticipants` | `D115`/`D116`/`D117` persistent pair, partner profiles, team consent. |
+| `SkillVector`           | `app/src/model/skillVector.ts`                                                                    | `D121` per-skill rollup; M002+ adaptation engine.                     |
+| `ExportSession` adapter | `app/src/services/export/sessionExport.ts` (`buildExportSession`)                                 | Phase 1.5 share-sheet / clipboard / file export.                      |
+| `CoachPayload` type     | `app/src/model/coachPayload.ts`                                                                   | Phase 2 / `D106` coach sharing.                                       |
+| Adaptation-replay hook  | future `domain/adaptation/` consuming `SessionReview[]` from model                                | `D113` / `V0B-15`-style replay against model arrays, not Dexie rows.  |
 
 A seam earns its place in `model/` only when it points at a canonical future need (a `D###` decision, a roadmap milestone, or a persistent-pair / coach / cloud peer surface). Speculative types are not seams — they are dead code.
 
@@ -163,6 +164,18 @@ Every implementation unit closes with a red-team gate before the next unit start
 Suggested review lenses: correctness (state transitions, data loss, concurrency), architecture (layer direction, dependency inversion, circular imports, hidden shared state), maintainability (file size, naming, cohesive modules, DRY, SOLID, over-abstraction), testing (right-tier coverage, missing red cases, brittle RTL), product vision (P1 courtside friction, P10 local-first, P12 action/signal/reason, P13 pair-first framing), reliability (Dexie failures, schema-blocked behavior, browser runtime quirks, persistence-before-navigation).
 
 After every set of unit-level red-team gates, run a holistic gate across the entire branch before declaring the work complete. The holistic gate checks layer integrity, decomplecting goals, DRY/OCP, SOLID, product vision, future seams, reliability, testing, docs, and git hygiene as a connected system.
+
+## Current Cleanup Queue
+
+**Owner:** this guide; implementation detail lives in `docs/plans/2026-05-02-019-refactor-agent-architecture-cleanup-plan.md`
+**Status:** active follow-up queue, added 2026-05-02
+**Sunset:** remove this queue when the boundary report is clean or has an explicit baseline/strict-mode contract and each deferred item has either shipped, moved to a successor plan, or been rejected.
+
+- Run `npm run architecture:check` from `app/` before architecture-heavy app changes. Default report mode is informational; use `npm run architecture:check:strict` when a hard-fail signal is needed. New findings in files touched by a change should be fixed or justified.
+- Treat remaining screen/component service imports as advisory P3 debt until a concrete screen change proves controller extraction is worth it.
+- Keep generated diagnostics splitting out of casual cleanup. Split `app/src/domain/generatedPlanDiagnosticTriage.ts` only in a separate characterization-heavy pass.
+- Consolidate repeated e2e IndexedDB seeding helpers separately from runtime cleanup.
+- Treat `app/src/lib/` as a legacy mixed helper area, not a new layer. Move helpers into existing layers only when ownership is clear from current use.
 
 ## Product Principle Reminders
 

@@ -24,6 +24,12 @@
  * are stable identifiers (seen in founder sessions and in Dexie
  * ExecutionLog.plan.blocks[].drillName) and are never renamed by this
  * sweep.
+ *
+ * `skillFocus` authoring: add secondary tags only for skills the drill
+ * materially trains, not for incidental feeds or future progressions.
+ * Example: `d18` is pass + serve because both server pressure and passing
+ * outcomes are part of the scored problem; `d15` remains pass + movement
+ * because the server/coach feed exists to train the receiver's read.
  */
 
 import type { Drill } from '../types/drill'
@@ -64,7 +70,7 @@ const d01: Drill = {
   chainId: 'chain-1-platform',
   m001Candidate: true,
   teachingPoints: [
-    'Athletic posture throughout.',
+    'Start in ready posture.',
     'Contact between wrists and elbows.',
     'Keep space between body and platform.',
     'Bend knees to keep platform stable.',
@@ -95,7 +101,7 @@ const d01: Drill = {
       courtsideInstructions:
         'Pass up to yourself off your own toss. Between each contact, clap behind your back, then rebuild your platform. Mix low, medium, and high arcs.',
       coachingCues: [
-        'Athletic posture.',
+        'Ready posture.',
         'Contact between wrists and elbows.',
         'Keep space between body and platform.',
         'Bend knees to keep platform stable.',
@@ -129,7 +135,7 @@ const d01: Drill = {
       courtsideInstructions:
         'Forearm-pass back to your partner with a clap reset. Stand 3 m apart; tosser sends an easy arc to the passer; passer forearm-passes back at catchable height, then claps behind the back while the tosser catches. Reset and repeat. Switch roles after every 10 reps or every miss.',
       coachingCues: [
-        'Athletic posture.',
+        'Ready posture.',
         'Contact between wrists and elbows.',
         'Pass back to your partner, not past them.',
         'Bend knees to keep platform stable.',
@@ -199,9 +205,9 @@ const d03: Drill = {
   m001Candidate: true,
   teachingPoints: [
     'Arms straight throughout.',
-    'Shoulder shrug assist.',
+    'Lift from your shoulders without swinging.',
     'Pass high enough to be settable.',
-    'Abs tucked.',
+    'Keep ribs stacked over hips.',
   ],
   progressionDescription: 'Increase toss speed; add 1-step movement every rep.',
   regressionDescription: 'Shorter distance; allow receiver to "freeze" before contact.',
@@ -230,9 +236,9 @@ const d03: Drill = {
         'Pass back to your partner from a kneel, then stand. Start kneeling; partner tosses; receiver passes back 10 reps. Then stand in serve-receive stance and repeat.',
       coachingCues: [
         'Arms straight.',
-        'Shoulder shrug assist.',
+        'Lift without swinging.',
         'Pass high enough to be settable.',
-        'Abs tucked.',
+        'Ribs over hips.',
       ],
     },
   ],
@@ -332,8 +338,8 @@ const d05: Drill = {
   m001Candidate: true,
   teachingPoints: [
     'Get behind ball horizontally.',
-    'Brake-step before contact.',
-    'Platform angle drives direction.',
+    'Plant to stop before contact.',
+    'Aim your arm angle toward the target.',
     'Transfer weight to front foot.',
   ],
   progressionDescription: 'Toss to left/right so you must move behind the ball.',
@@ -363,8 +369,8 @@ const d05: Drill = {
         'Pass into your set window off a self-toss. Place a marker at the set window (where the setter would stand, ~3 m off the net). Self-toss slightly in front; pass to land within that zone; retrieve quickly and repeat. Use 20 total reps.',
       coachingCues: [
         'Get behind ball horizontally.',
-        'Brake-step.',
-        'Platform angle drives direction.',
+        'Plant before contact.',
+        'Aim your arm angle.',
         'Transfer weight to front foot.',
       ],
     },
@@ -399,7 +405,7 @@ const d05: Drill = {
         'Pass back to your partner at the set window. Partner stands at the set window (where the setter would stand, ~3 m off the net) and tosses an arc 2–3 m in front of the passer. Passer passes back so partner catches without moving more than one step. Switch roles after 20 tosses.',
       coachingCues: [
         'Get behind ball horizontally.',
-        'Brake-step.',
+        'Plant before contact.',
         'Pass to your partner, not past them.',
         'Transfer weight to front foot.',
       ],
@@ -463,9 +469,9 @@ const d07: Drill = {
   skillFocus: ['pass'],
   objective: 'Stabilize platform + immediately look and decide (proto-game read).',
   levelMin: 'intermediate',
-  levelMax: 'intermediate',
+  levelMax: 'advanced',
   chainId: 'chain-2-direction',
-  m001Candidate: false,
+  m001Candidate: true,
   teachingPoints: [
     'Be stable during pass to buy time to look.',
     'Pass forward to keep vision.',
@@ -500,11 +506,73 @@ const d07: Drill = {
         target: '≥ 70% passes 2+ AND ≥ 80% correct calls',
       },
       courtsideInstructions:
-        'Server serves. After pass, passer immediately looks at partner/coach who flashes 1–5 and passer calls it before next action.',
+        'Pass a served ball to the set window, then immediately look at partner/coach flashing 1-5 and call it before the next action.',
       coachingCues: [
         'Be stable during pass to buy time to look.',
         'Pass forward to keep vision.',
         'Do not drift under ball.',
+      ],
+    },
+    {
+      // FIVB Drill-book 3.15 Pass and Look, adapted for solo/no-net
+      // readiness: the live reader is replaced with target cards so
+      // the post-pass head-up action remains the scored behavior.
+      id: 'd07-solo-open',
+      drillId: 'd07',
+      label: 'Solo open',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 8,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxReps: 24, maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'composite',
+        description: 'Passes graded 2+ AND correct target call after the pass.',
+        target: '16 of 24 passes 2+ and 20 of 24 correct calls',
+      },
+      courtsideInstructions:
+        'Pass to the set window from a self-toss, then immediately lift your eyes and call the nearest of four numbered targets before the ball lands.',
+      coachingCues: [
+        'Hold platform first; look after contact.',
+        'Pass forward enough to keep vision.',
+        'Call the target before you reset.',
+      ],
+    },
+    {
+      // Low-equipment two-player route for the same FIVB 3.15 behavior.
+      // Partner flashes the read after contact; no net or extra balls are
+      // required so pair-open and pair-net cells share the same variant.
+      id: 'd07-pair-open',
+      drillId: 'd07',
+      label: 'Pair open',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['feeder', 'passer'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1 },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 8,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxReps: 24, maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'composite',
+        description: 'Passes graded 2+ AND correct flash call after the pass.',
+        target: '16 of 24 passes 2+ and 20 of 24 correct calls',
+      },
+      courtsideInstructions:
+        'Pass a partner toss from 4-6 m away to the set window. Partner flashes 1-5 after contact; call the number before the next feed. Switch after 12 reps.',
+      coachingCues: [
+        'Be still through contact.',
+        'Eyes up after the ball leaves your platform.',
+        'Say the read before you admire the pass.',
       ],
     },
   ],
@@ -514,7 +582,10 @@ const d08: Drill = {
   id: 'd08',
   name: 'Plus Three / Minus Three',
   shortName: '+3 / −3',
-  skillFocus: ['pass'],
+  // 2026-05-01 tag audit: unlike live-serve drills where the server is
+  // only a feeder, this one scores service errors and target pressure,
+  // so the server has a real training job.
+  skillFocus: ['pass', 'serve'],
   objective: 'Serve pressure + passing accuracy under stakes.',
   levelMin: 'beginner',
   levelMax: 'intermediate',
@@ -927,7 +998,7 @@ const d15: Drill = {
   m001Candidate: true,
   teachingPoints: [
     'Centered ready position enables quick forward/back.',
-    "Read ball early - off the server's hand.",
+    "Read the ball early from the server's hand.",
     'Hands apart while moving.',
   ],
   progressionDescription: 'More random (mix all); faster serves.',
@@ -962,7 +1033,7 @@ const d15: Drill = {
         'Pass to the set window after reading short vs deep balls. Server/coach delivers short or deep balls; passer reads early, moves, and passes to the set window (where the setter would stand, ~3 m off the net).',
       coachingCues: [
         'Centered ready position enables quick forward/back.',
-        "Read ball early - off the server's hand.",
+        "Read the ball early from the server's hand.",
         'Hands apart while moving.',
       ],
     },
@@ -1022,6 +1093,87 @@ const d16: Drill = {
         'Do not cheat by moving early.',
         'On short balls, leg closer to sideline forward.',
         'Get back quickly so you pass while moving forward.',
+      ],
+    },
+  ],
+}
+
+// FIVB Drill-book 3.16 Topspin Serve Off Box Drill (advanced). The source
+// route uses a box to create a heavy topspin serve. M001 readiness keeps the
+// same advanced skill promise - read spin early and keep the pass usable -
+// while replacing the box with low-equipment spin feeds.
+const d46: Drill = {
+  id: 'd46',
+  name: 'Spin-Read Serve Receive',
+  shortName: 'Spin Read',
+  skillFocus: ['pass', 'movement'],
+  objective: 'Read topspin/backspin early and keep the pass in the set window.',
+  levelMin: 'advanced',
+  levelMax: 'advanced',
+  chainId: 'chain-4-serve-receive',
+  m001Candidate: true,
+  teachingPoints: [
+    'Read the spin before the bounce or peak.',
+    'Lower the platform for dropping topspin.',
+    'Hold the angle through contact.',
+  ],
+  progressionDescription: 'Increase feed pace or call spin type late.',
+  regressionDescription: 'Use slower partner tosses with obvious spin and a larger target window.',
+  variants: [
+    {
+      id: 'd46-solo-open',
+      drillId: 'd46',
+      label: 'Solo open',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 8,
+        rpeMin: 6,
+        rpeMax: 8,
+        fatigueCap: { maxReps: 24, maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'pass-rate-good',
+        description: 'Spin-fed self tosses passed into a 1 m set window.',
+        target: '16 of 24 passes land in the set window',
+      },
+      courtsideInstructions:
+        'Pass a topspin or backspin self-toss into a marked 1 m set window. Let the ball travel away from you, then move and pass it into the window. Alternate spin every 4 reps.',
+      coachingCues: [
+        'Call the spin before you move.',
+        'Beat the ball with your feet.',
+        'Freeze the platform at contact.',
+      ],
+    },
+    {
+      id: 'd46-pair-open',
+      drillId: 'd46',
+      label: 'Pair open',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['feeder', 'passer'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 8,
+        rpeMin: 6,
+        rpeMax: 8,
+        fatigueCap: { maxReps: 24, maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'pass-rate-good',
+        description: 'Partner spin feeds passed into a 1 m set window.',
+        target: '16 of 24 passes land in the set window',
+      },
+      courtsideInstructions:
+        'Pass a partner-fed topspin or backspin ball from 4-6 m away into the marked set window. Call the spin, move early, and switch after 12 feeds.',
+      coachingCues: [
+        'Read spin from the hand.',
+        'Move before the ball drops.',
+        'Keep the finish quiet.',
       ],
     },
   ],
@@ -1284,8 +1436,11 @@ const d22: Drill = {
   shortName: 'First to 10',
   skillFocus: ['serve'],
   objective: 'Serving consistency + serving to zones.',
-  levelMin: 'beginner',
-  levelMax: 'intermediate',
+  // Focus-readiness batch 2 (2026-04-30): align level band to
+  // FIVB 2.6 First to 10 Serving Drill (`intermediate / advanced`),
+  // recorded in docs/reviews/2026-04-22-drill-level-audit.md.
+  levelMin: 'intermediate',
+  levelMax: 'advanced',
   chainId: 'chain-6-serving',
   m001Candidate: true,
   teachingPoints: [
@@ -1310,7 +1465,9 @@ const d22: Drill = {
         needsNet: true,
         lowScreenTime: true,
       }),
-      equipment: { balls: 'many' },
+      // Focus-readiness batch 2: one-ball cadence is slower but
+      // playable, and keeps the drill inside the active M001 filter.
+      equipment: { balls: 1 },
       workload: {
         durationMinMinutes: 6,
         durationMaxMinutes: 12,
@@ -1321,7 +1478,7 @@ const d22: Drill = {
       successMetric: {
         type: 'points-to-target',
         description: 'Assign point values to zones; serve out loses a point.',
-        target: 'Reach 10 points with ≤ X errors (level-dependent)',
+        target: 'Reach 10 points with no more than 3 missed serves',
       },
       courtsideInstructions:
         'Serve to earn 10 points across self-assigned zones. Assign point values to zones; each serve in scores those points; a serve out loses a point. Adjust zone values for your level or objective.',
@@ -1346,7 +1503,9 @@ const d22: Drill = {
         needsNet: true,
         lowScreenTime: true,
       }),
-      equipment: { balls: 'many' },
+      // Focus-readiness batch 2: one shared ball is enough for
+      // alternating score reps; partner hands/shags between attempts.
+      equipment: { balls: 1 },
       workload: {
         durationMinMinutes: 6,
         durationMaxMinutes: 12,
@@ -1366,6 +1525,68 @@ const d22: Drill = {
         'Develop a serving routine.',
         'Consistent hand contact.',
         'Score honestly; this is your data, not your opponent\'s.',
+      ],
+    },
+    // Focus-readiness batch 2: no-net solo adaptation of FIVB 2.6
+    // First to 10. Targets become marked sand zones; scoring stays
+    // the point of the drill, not net clearance.
+    {
+      id: 'd22-solo-open',
+      drillId: 'd22',
+      label: 'Solo open points',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 6,
+        durationMaxMinutes: 12,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxMinutes: 12 },
+      },
+      successMetric: {
+        type: 'points-to-target',
+        description: 'Serve-toss contact scores against the called sand target zone.',
+        target: 'Reach 10 points with no more than 3 misses',
+      },
+      courtsideInstructions:
+        'Serve to earn 10 points across marked sand targets. Assign point values to short, middle, and deep targets. Each contact landing in the called target scores those points; a miss loses 1 point. Reset routine before every attempt.',
+      coachingCues: [
+        'Name the point target.',
+        'Consistent hand contact.',
+        'Score honestly; this is your data.',
+      ],
+    },
+    // Focus-readiness batch 2: no-net pair adaptation of FIVB 2.6.
+    // Partner supplies the called target and score pressure while the
+    // execution remains one-ball and target-only.
+    {
+      id: 'd22-pair-open',
+      drillId: 'd22',
+      label: 'Pair open points',
+      feedType: 'self-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['server', 'caller'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 6,
+        durationMaxMinutes: 12,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxMinutes: 12 },
+      },
+      successMetric: {
+        type: 'points-to-target',
+        description: 'Serve-toss contact scores against the target zone called before the toss.',
+        target: 'First partner to 10 points wins',
+      },
+      courtsideInstructions:
+        'Serve to earn points across shared sand targets. Caller names the next target and point value before the toss. Server resets routine, contacts toward the target, scores the result, then hands the ball over. First partner to 10 wins.',
+      coachingCues: [
+        'Caller names the point target.',
+        'Consistent hand contact.',
+        'Score honestly; this is your data.',
       ],
     },
   ],
@@ -1465,6 +1686,38 @@ const d31: Drill = {
         'Serve into a 2 m target circle. Mark the circle. Self-toss and serve toward it. Count only balls landing in or brushing the circle. Reset your routine before every rep.',
       coachingCues: ['One target before each serve.', 'Same toss height.', 'Watch the landing.'],
     },
+    // Focus-readiness batch 1 (2026-04-30): no-net pair adaptation of
+    // the BAB Serving Mission target drill. This deliberately trains
+    // toss/contact/target commitment only - no net-clearance claim.
+    {
+      id: 'd31-pair-open',
+      drillId: 'd31',
+      label: 'Pair open target',
+      feedType: 'self-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['server', 'caller'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 4,
+        durationMaxMinutes: 8,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 20, maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description:
+          'Serve-toss contacts landing in or near the target circle called before the toss.',
+        target: '8 of 10 near the called target',
+      },
+      courtsideInstructions:
+        'Serve toward a partner-called 2 m target circle on open sand. Mark the circle. Caller names the target before the server tosses. Server resets routine, tosses, and contacts toward the called circle. Switch after 10 attempts.',
+      coachingCues: [
+        'Caller names the target first.',
+        'Same toss height.',
+        'Watch the landing before you reset.',
+      ],
+    },
     // 2026-04-27 solo-vs-pair sweep. Pair variant: server serves to a
     // called zone; partner stands across the net, calls the next zone,
     // shags between rounds. Adds shaggable density (no walking the
@@ -1518,7 +1771,11 @@ const d33: Drill = {
   skillFocus: ['serve'],
   objective: 'Serve to six court zones in order so accuracy expands beyond one favorite spot.',
   levelMin: 'beginner',
-  levelMax: 'intermediate',
+  // Focus-readiness batch 2: FIVB 2.5 Serving Variety is
+  // intermediate/advanced while BAB places this family accessibly.
+  // Keep the beginner entry and extend the ceiling for advanced
+  // target-variety work.
+  levelMax: 'advanced',
   chainId: 'chain-6-serving',
   m001Candidate: true,
   teachingPoints: [
@@ -1529,6 +1786,34 @@ const d33: Drill = {
   progressionDescription: 'Require two makes per zone, then shrink each zone.',
   regressionDescription: 'Use three large zones: left, middle, right.',
   variants: [
+    // Focus-readiness batch 1 (2026-04-30): no-net adaptation of the
+    // BAB six-zone Around the World serving convention. Zones become
+    // sand target areas; this preserves target sequencing without
+    // claiming net clearance.
+    {
+      id: 'd33-solo-open',
+      drillId: 'd33',
+      label: 'Solo open target ladder',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 6,
+        durationMaxMinutes: 10,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxReps: 24, maxMinutes: 10 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Serve-toss contact lands in the called sand target zone.',
+        target: 'Hit all 6 target zones once',
+      },
+      courtsideInstructions:
+        'Serve through six marked sand targets in order: short-left, short-middle, short-right, deep-left, deep-middle, deep-right. Misses repeat the same target. Keep the routine identical even without a net.',
+      coachingCues: ['Name the target first.', 'Same toss and contact.', 'Reset after each miss.'],
+    },
     // 2026-04-27 solo-vs-pair sweep: variant ID `d33-solo-net` is
     // preserved (no rename) so any persisted ExecutionLog row that
     // references it stays valid. Label, copy, and `participants.max`
@@ -1561,7 +1846,7 @@ const d33: Drill = {
       // The 6-zone order and the "all 6 zones once" goal stay in
       // `target` and `courtsideInstructions` where they belong as the
       // session goal, not as the per-rep criterion. See
-      // `docs/plans/2026-04-27-per-drill-success-criterion.md`.
+      // `docs/archive/plans/2026-04-27-per-drill-success-criterion.md`.
       successMetric: {
         type: 'reps-successful',
         description: 'Serve lands in the called zone.',
@@ -1570,6 +1855,37 @@ const d33: Drill = {
       courtsideInstructions:
         'Serve through six zones in order: front-left, front-middle, front-right, back-left, back-middle, back-right. Misses repeat the same zone. Shag between rounds.',
       coachingCues: ['Name the zone first.', 'High arc for deep zones.', 'Reset after each miss.'],
+    },
+    // Focus-readiness batch 1 (2026-04-30): pair/no-net target ladder
+    // from the same BAB six-zone serving convention. Caller/shagger
+    // supplies commitment and cadence; the drill remains target-only.
+    {
+      id: 'd33-pair-open',
+      drillId: 'd33',
+      label: 'Pair open target ladder',
+      feedType: 'self-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['server', 'caller'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 6,
+        durationMaxMinutes: 10,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxReps: 24, maxMinutes: 10 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Serve-toss contact lands in the target zone called before the toss.',
+        target: 'Both partners hit all 6 target zones',
+      },
+      courtsideInstructions:
+        'Serve through six marked sand targets in order: short-left, short-middle, short-right, deep-left, deep-middle, deep-right. Caller names the next target before the toss and shags after the round. Misses repeat the same target. Switch after one 6-target round.',
+      coachingCues: [
+        'Caller names the target first.',
+        'Same toss and contact.',
+        'Reset after each miss.',
+      ],
     },
     // Pair sibling: round-based turn-taking, partner calls the zone
     // and shags. Same 6-zone ladder as the solo variant.
@@ -1688,7 +2004,7 @@ const d25: Drill = {
   shortName: 'Downshift',
   skillFocus: ['recovery'],
   objective:
-    'Transition out of the session: slow the heart rate, unload the feet and hips, do a quick symptom/hydration check. Not an injury-prevention or recovery claim.',
+    'Transition out of the session: settle breathing, unload the feet and hips, do a quick symptom/hydration check. Not an injury-prevention or recovery claim.',
   levelMin: 'beginner',
   levelMax: 'advanced',
   chainId: 'chain-cooldown',
@@ -1781,7 +2097,7 @@ const d25: Drill = {
       // bumped to 4 (see workload comment above).
       courtsideInstructions:
         'Walk first, then four short stretch holds. Gentle tension only; skip any move that hurts today.',
-      courtsideInstructionsBonus: 'Hydrate and note any pain.',
+      courtsideInstructionsBonus: 'Drink water and note any pain.',
       segments: [
         { id: 'd25-solo-s1', label: 'Walk with long exhales.', durationSec: 60 },
         {
@@ -1810,7 +2126,7 @@ const d25: Drill = {
       coachingCues: [
         'Long exhale, let heart rate come down.',
         'Gentle tension only.',
-        'Hot session? Rehydrate before you leave.',
+        'Hot session? Drink water before you leave.',
       ],
     },
   ],
@@ -1945,9 +2261,9 @@ const d26: Drill = {
 // d38, d39, and d40 are the default-unlocked fundamentals (Bump Set,
 // Hand Set, Footwork) - they are not gated on each other. d41 is the
 // pair entry (Partner Set Back-and-Forth); d42 (Corner to Corner)
-// extends pair setting to named targets. The chain currently links
-// only `d41 -> d42`; d43 Triangle Setting and other 3-player BAB
-// drills are deferred to D101 3+ player support rather than being
+// extends pair setting to named targets. d47/d48 are the FIVB-backed
+// advanced readiness branch. d43 Triangle Setting and other 3-player
+// BAB drills are deferred to D101 3+ player support rather than being
 // forced into two-player adaptations.
 //
 // Swap-only reachability: archetypes.ts main_skill / pressure block
@@ -1974,7 +2290,7 @@ const d38: Drill = {
   teachingPoints: [
     'Platform stays square to the target.',
     'Contact on the forearms, not the wrists.',
-    'Legs drive the set - the arms aim, the legs lift.',
+    'Legs lift the ball; arms aim it.',
   ],
   progressionDescription: 'Add a moving bump-set (one step in, one step back) between reps.',
   regressionDescription:
@@ -2007,8 +2323,8 @@ const d38: Drill = {
       courtsideInstructions:
         'Bump-set off your own toss into a 1 m landing circle around you. Self-toss to yourself ~1.5 m up; bump-set the ball back up with platform angled at the sky; aim for a settable arc landing within the circle. Reset and repeat.',
       coachingCues: [
-        'Platform square, not tilted.',
-        'Contact on the forearms.',
+        'Platform square to target.',
+        'Contact on forearms.',
         'Legs lift; arms aim.',
       ],
     },
@@ -2041,7 +2357,7 @@ const d38: Drill = {
       courtsideInstructions:
         'Bump-set back to your partner at catchable height. Stand 3 m apart; partner tosses an arc to the setter; setter bump-sets it back. Goal: unbroken rally. If it breaks, restart and count the new streak. Switch tosser and setter every 10 reps.',
       coachingCues: [
-        'Platform square, not tilted.',
+        'Platform square to partner.',
         'Set to your partner, not past them.',
         'Legs lift; arms aim.',
       ],
@@ -2144,7 +2460,11 @@ const d40: Drill = {
   id: 'd40',
   name: 'Footwork for Setting',
   shortName: 'Set Feet',
-  skillFocus: ['set'],
+  // Secondary movement tag is intentional: the training problem is
+  // moving, stopping, then setting from a balanced base. Recommended
+  // movement_proxy fallback stays pass-scoped in archetypes.ts so this
+  // does not leak into default pass/serve sessions.
+  skillFocus: ['set', 'movement'],
   objective: 'Move, stop, and set from a balanced base instead of reaching while drifting.',
   levelMin: 'beginner',
   levelMax: 'intermediate',
@@ -2232,7 +2552,7 @@ const d41: Drill = {
   chainId: 'chain-7-setting',
   m001Candidate: true,
   teachingPoints: [
-    'Set to a spot your partner does not have to move to - the ball is the message, the target is the apology.',
+    'Set to a spot your partner can hold without moving.',
     'Reset feet between sets; plant before you set.',
     'Arc the ball ~1.5 m above reach height so your partner has time to square up.',
   ],
@@ -2276,7 +2596,9 @@ const d42: Drill = {
   id: 'd42',
   name: 'Corner to Corner Setting',
   shortName: 'Corner Set',
-  skillFocus: ['set'],
+  // Named targets require court-position movement before the set; keep
+  // `set` primary and `movement` secondary for set-focus support slots.
+  skillFocus: ['set', 'movement'],
   objective: 'Set a partner to useful beach targets from changing court positions.',
   levelMin: 'intermediate',
   levelMax: 'intermediate',
@@ -2319,12 +2641,475 @@ const d42: Drill = {
   ],
 }
 
+// FIVB Drill-book 4.7 4 Great Sets (intermediate / advanced). Source form
+// varies the setter's starting/pass-quality problem across four balls; this
+// low-equipment route preserves the decision: move, choose bump/hand set,
+// and deliver a hittable ball from imperfect positions.
+const d47: Drill = {
+  id: 'd47',
+  name: 'Four Great Sets',
+  shortName: '4 Sets',
+  // Four-location setting is advanced setting plus movement/choice under
+  // imperfect positions, not a static hand-shape drill.
+  skillFocus: ['set', 'movement'],
+  objective: 'Choose bump or hand set from varied pass locations and still deliver a hittable arc.',
+  levelMin: 'intermediate',
+  levelMax: 'advanced',
+  chainId: 'chain-7-setting',
+  m001Candidate: true,
+  teachingPoints: [
+    'Move first, then decide hands or platform.',
+    'Set your hitter, not the drawn target.',
+    'Make the bad pass playable before making it perfect.',
+  ],
+  progressionDescription: 'Randomize the four positions and shrink the acceptable landing window.',
+  regressionDescription: 'Run the four positions in order and allow catch-reset between reps.',
+  variants: [
+    {
+      id: 'd47-solo-open',
+      drillId: 'd47',
+      label: 'Solo open',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 9,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxReps: 24, maxMinutes: 9 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description:
+          'Sets from four self-toss locations landing within one step of the target window.',
+        target: '3 clean sets from each of the four locations',
+      },
+      courtsideInstructions:
+        'Set into a target window from four start spots: tight, perfect, deep, and off-side. Self-toss from each spot, move, choose bump set or hand set, and rotate spots after each clean rep.',
+      coachingCues: [
+        'Read the ball before choosing hands or platform.',
+        'Stop drifting before release.',
+        'Give the target time to attack.',
+      ],
+    },
+    {
+      id: 'd47-pair-open',
+      drillId: 'd47',
+      label: 'Pair open',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['tosser', 'setter'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 9,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxReps: 24, maxMinutes: 9 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Sets from four tossed locations your partner can reach within one step.',
+        target: '3 clean sets from each of the four locations',
+      },
+      courtsideInstructions:
+        'Set a partner toss from four locations: tight, perfect, deep, and off-side. Move, choose bump set or hand set, and set back so your partner can reach it within one step. Switch after one full round.',
+      coachingCues: [
+        'Move first, then choose the set.',
+        'Set the partner, not the marker.',
+        'Keep the release predictable.',
+      ],
+    },
+  ],
+}
+
+// FIVB Drill-book 4.9 Set and Look (advanced), backed by the FIVB quick-look
+// attacking essay. M001 uses the call/read immediately after the set as the
+// scored behavior so the advanced setter keeps vision after delivery.
+const d48: Drill = {
+  id: 'd48',
+  name: 'Set and Look',
+  shortName: 'Set & Look',
+  skillFocus: ['set'],
+  objective: 'Deliver a stable set, then immediately find and call the open-court cue.',
+  levelMin: 'advanced',
+  levelMax: 'advanced',
+  chainId: 'chain-7-setting',
+  m001Candidate: true,
+  teachingPoints: [
+    'Finish the set before turning the eyes.',
+    'Call what is open, not what you hoped was open.',
+    'Keep the set arc predictable under the read.',
+  ],
+  progressionDescription: 'Flash the read later or shrink the set target window.',
+  regressionDescription: 'Use a known two-target call and slow partner tosses.',
+  variants: [
+    {
+      id: 'd48-solo-open',
+      drillId: 'd48',
+      label: 'Solo open',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 8,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxReps: 24, maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'composite',
+        description: 'Sets land in the target window AND the post-set cue is called.',
+        target: '16 of 24 sets in-window and 20 of 24 cue calls',
+      },
+      courtsideInstructions:
+        'Set into a marked window from a self-toss, then turn your eyes and call the first of four numbered cue markers you see before the ball lands.',
+      coachingCues: [
+        'Set first; look second.',
+        'Keep shoulders quiet through release.',
+        'Call early and clearly.',
+      ],
+    },
+    {
+      id: 'd48-pair-open',
+      drillId: 'd48',
+      label: 'Pair open',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['tosser', 'setter'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1 },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 8,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxReps: 24, maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'composite',
+        description: 'Partner-reachable sets AND correct post-set flash calls.',
+        target: '16 of 24 sets reachable and 20 of 24 correct calls',
+      },
+      courtsideInstructions:
+        'Set a partner toss back to partner height. After release, partner flashes 1-4 to represent the open call; call it before reset. Switch every 12 reps.',
+      coachingCues: [
+        'Do not peek before release.',
+        'Give your partner a hittable arc.',
+        'Make the call part of the set.',
+      ],
+    },
+  ],
+}
+
+// D47 source-backed activation (2026-05-02). Better at Beach solo setting
+// footwork, JVA out-of-system/up-and-back setting, and TAOCV set-and-go
+// conditioning all point at a distinct advanced setting problem: repeated
+// movement, recovery, and target quality under fatigue. M001 keeps only the
+// one/two-player adaptation and rejects 3+ player source forms.
+const d49: Drill = {
+  id: 'd49',
+  name: 'Set and Recover',
+  shortName: 'Set Recover',
+  skillFocus: ['set', 'movement'],
+  objective: 'Deliver controlled out-of-system sets while recovering to a home marker under fatigue.',
+  levelMin: 'advanced',
+  levelMax: 'advanced',
+  chainId: 'chain-7-setting',
+  m001Candidate: true,
+  teachingPoints: [
+    'Recover before the next feed.',
+    'Use legs for the high ball.',
+    'Protect set quality when breathing hard.',
+  ],
+  progressionDescription: 'Shorten recovery time or shrink the target window after quality stays stable.',
+  regressionDescription: 'Use fewer locations, longer rest, or a larger target window.',
+  variants: [
+    {
+      id: 'd49-solo-open',
+      drillId: 'd49',
+      label: 'Solo open',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 8,
+        durationMaxMinutes: 14,
+        rpeMin: 6,
+        rpeMax: 8,
+        fatigueCap: { maxReps: 36, maxMinutes: 14, restBetweenSetsSeconds: 30 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Out-of-system self-toss sets landing in the target window after recovery.',
+        target: '24 of 36 sets in-window across three rounds',
+      },
+      courtsideInstructions:
+        'Set from three recovery rounds. Start at a home marker, self-toss off-net or deep, move to set into a marked target window, then recover home before the next toss. Rest 30 seconds between rounds; stop early if set shape collapses.',
+      coachingCues: [
+        'Recover first, toss second.',
+        'Arrive low before you set.',
+        'Quality beats speed.',
+      ],
+    },
+    {
+      id: 'd49-pair-open',
+      drillId: 'd49',
+      label: 'Pair open',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['tosser', 'setter'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 8,
+        durationMaxMinutes: 14,
+        rpeMin: 6,
+        rpeMax: 8,
+        fatigueCap: { maxReps: 36, maxMinutes: 14, restBetweenSetsSeconds: 30 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Partner-reachable high sets after end-line, off-net, and side-line movement.',
+        target: '24 of 36 sets reachable within one step across three rounds',
+      },
+      courtsideInstructions:
+        'Set from three recovery rounds, then switch. Setter starts at a home marker. Partner tosses from end-line, off-net, or side-line markers; setter moves, sends a high controlled set to a reachable window, then recovers home. Rest 30 seconds between rounds.',
+      coachingCues: [
+        'Beat the toss with your feet.',
+        'Set high enough to attack.',
+        'Recover before calling ready.',
+      ],
+    },
+  ],
+}
+
+// FIVB Drill-book 2.2 Serving Outside the Heart (Chapter 2 Serving,
+// beginner / intermediate level).
+// Source: docs/research/sources/FIVB_Beachvolley_Drill-Book_final.pdf
+// Cross-reference: docs/research/fivb-source-material.md (Tier 2 polish list,
+// flagged 2026-04-20 with the explicit note "Not cloned in Tier 1 because d31
+// is our first-rung anchor"). d51 is the longer-envelope beginner serving
+// sibling for d31. d31 trains single-target commitment at 4-8 min; d51 trains
+// tactical no-serve-zone awareness at 8-14 min. Selection-path reroute in
+// sessionBuilder prefers d51 over d31 for beginner serving main-skill blocks
+// above 8 minutes (third application of the source-backed content-depth
+// activation pattern after d49 and d50). Origin:
+// docs/brainstorms/2026-05-04-d51-beginner-serving-tactical-zone-depth-requirements.md
+// and docs/plans/2026-05-04-004-feat-d51-beginner-serving-tactical-zone-depth-plan.md.
+// M001 keeps only the one/two-player adaptation; rejects 3+ player source
+// forms (D101 boundary).
+const d51: Drill = {
+  id: 'd51',
+  name: 'Outside the Heart Serving',
+  shortName: 'Outside Heart',
+  skillFocus: ['serve'],
+  objective:
+    'Avoid the middle-front "heart" of the receiving court while landing serves anywhere in the outer ring across longer fatigue rounds. Honesty clause: trains tactical zone avoidance, not single-target accuracy (d31 owns single-target commitment).',
+  levelMin: 'beginner',
+  levelMax: 'intermediate',
+  chainId: 'chain-6-serving',
+  m001Candidate: true,
+  teachingPoints: [
+    'Mark the heart zone before you start.',
+    'Pick an outer direction before each toss.',
+    'Reset your routine after every miss into the heart.',
+  ],
+  progressionDescription: 'Shrink the outer ring or shorten rest cycles when accuracy stays stable.',
+  regressionDescription: 'Expand the heart zone, lengthen rest, or count any serve outside the heart as success.',
+  variants: [
+    {
+      id: 'd51-solo-open',
+      drillId: 'd51',
+      label: 'Solo open heart',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 8,
+        durationMaxMinutes: 14,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 32, maxMinutes: 14, restBetweenSetsSeconds: 30 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Self-toss serves landing on sand outside a marked 2 m heart zone across rest cycles.',
+        target: '24 of 32 serves outside the heart across three rounds',
+      },
+      courtsideInstructions:
+        'Serve toward sand outside a 2 m heart zone in the middle-front of an open sand area. Three rounds, then rest. Mark the heart with 4 markers first. Self-toss and pick an outer direction before each serve (left, right, deep, short). Rest 30 seconds between rounds.',
+      coachingCues: [
+        'Mark the heart first.',
+        'Call the outer direction before you toss.',
+        'Reset your routine after each heart miss.',
+      ],
+    },
+    // Pair-open variant: partner anchors the tactical commitment by calling
+    // the outer-zone direction before each toss. Mirrors d31-pair-open's
+    // caller / server role split but for tactical avoidance instead of single
+    // target accuracy.
+    {
+      id: 'd51-pair-open',
+      drillId: 'd51',
+      label: 'Pair open heart',
+      feedType: 'self-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['caller', 'server'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 8,
+        durationMaxMinutes: 14,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 32, maxMinutes: 14, restBetweenSetsSeconds: 30 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Self-toss serves landing outside the marked heart zone toward the called outer direction.',
+        target: '24 of 32 serves outside the heart toward the called direction',
+      },
+      courtsideInstructions:
+        'Serve toward the called outer zone of open sand, avoiding a 2 m heart zone in the middle-front. Three rounds, then switch. Caller names an outer direction before each toss (left, right, deep, short). Server resets routine, tosses, and serves toward the called zone. Switch every 10 serves. Rest 30 seconds between rounds.',
+      coachingCues: [
+        'Caller names the outer direction first.',
+        'Server picks the heart edge to clear.',
+        'Reset after each heart miss.',
+      ],
+    },
+    // Pair (net) variant: server serves over the net into the receiving
+    // court, partner shags from the receiving side. Net required to enforce
+    // serve clearance; mirrors d31-pair's net + shagger affordance.
+    {
+      id: 'd51-pair',
+      drillId: 'd51',
+      label: 'Pair heart',
+      feedType: 'self-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['server', 'shagger'] },
+      environmentFlags: env({ needsNet: true, lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 8,
+        durationMaxMinutes: 14,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 32, maxMinutes: 14, restBetweenSetsSeconds: 30 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Net-cleared serves landing outside the marked heart zone in the receiving court.',
+        target: '24 of 32 serves outside the heart and over the net across three rounds',
+      },
+      courtsideInstructions:
+        'Serve over the net toward sand outside a 2 m heart zone in the middle-front of the receiving court. Three rounds, then switch. Mark the heart first. Shagger collects between rounds and calls the next outer direction (left, right, deep, short) before the server tosses. Switch every 10 serves. Rest 30 seconds between rounds.',
+      coachingCues: [
+        'Clear the net first, then place the serve.',
+        'Shagger calls the outer direction before the toss.',
+        'Reset after each heart miss.',
+      ],
+    },
+  ],
+}
+
 // `d43 Triangle Setting` (BAB Drill Book Plans 5-7, 10, 11) is intentionally
 // not authored here. The source drill is a 3-player triangle route; the
 // honest M001 stance is that drills whose source form needs three or more
 // players wait for D101 3+ player support rather than getting forced into a
-// two-player adaptation. Same deferral applies to BAB triangle/queue
-// drills d44 and d45. See docs/decisions.md D101 and the Tier 1b-A plan.
+// two-player adaptation. d47/d48/d49 above use one/two-player-compatible
+// setting concepts, not the deferred BAB triangle queue.
+
+// FIVB Drill-book 3.13 Short / Deep (Chapter 3 Passing, intermediate level).
+// Source: docs/research/sources/FIVB_Beachvolley_Drill-Book_final.pdf
+// Cross-reference: docs/research/fivb-source-material.md (Tier 2 polish list).
+// d50 is the longer-envelope advanced passing sibling for d46. d46 trains
+// spin-reading at 5-8 minutes; d50 trains short/deep zone decisioning under
+// fatigue at 8-14 minutes. Selection-path reroute in sessionBuilder prefers
+// d50 over d46 for advanced pair-open / solo-open passing main-skill blocks
+// above 8 minutes. Origin: docs/brainstorms/2026-05-04-d50-advanced-passing-depth-requirements.md
+// and docs/plans/2026-05-04-003-feat-d50-advanced-passing-depth-plan.md.
+// M001 keeps only the one/two-player adaptation; rejects 3+ player source
+// forms (D101 boundary).
+const d50: Drill = {
+  id: 'd50',
+  name: 'Short/Deep Pass Read',
+  shortName: 'Short/Deep Read',
+  skillFocus: ['pass', 'movement'],
+  objective:
+    'Read short vs deep zone early and pass into the set window across longer fatigue rounds. Honesty clause: trains zone decisioning + recovery, not spin reading (d46 owns spin reading).',
+  levelMin: 'advanced',
+  levelMax: 'advanced',
+  chainId: 'chain-4-serve-receive',
+  m001Candidate: true,
+  teachingPoints: [
+    'Read short vs deep before the ball arrives.',
+    'Beat the ball with your feet on deep reads; absorb in on short reads.',
+    'Recover home before the next feed.',
+  ],
+  progressionDescription: 'Tighten the target window or shrink rest between rounds when pass quality stays stable.',
+  regressionDescription: 'Use fewer alternations per round, longer rest, or a larger target window.',
+  variants: [
+    {
+      id: 'd50-pair-open',
+      drillId: 'd50',
+      label: 'Pair open',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['feeder', 'passer'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 8,
+        durationMaxMinutes: 14,
+        rpeMin: 6,
+        rpeMax: 8,
+        fatigueCap: { maxReps: 28, maxMinutes: 14, restBetweenSetsSeconds: 30 },
+      },
+      successMetric: {
+        type: 'pass-rate-good',
+        description: 'Short and deep partner feeds passed into a 1 m set window across recovery rounds.',
+        target: '20 of 28 passes land in the set window across three rounds',
+      },
+      courtsideInstructions:
+        'Pass short and deep partner feeds into a 1 m set window across recovery rounds. Three rounds, then switch. Set a short marker zone 2 m in front of passer and a deep marker zone 2 m behind home. Feeder alternates short and deep tosses from 4-6 m. Passer reads, moves early, passes into the window, recovers home before the next feed. Rest 30 seconds between rounds.',
+      coachingCues: [
+        'Call short or deep before you move.',
+        'Feet first, then platform.',
+        'Recover home before ready.',
+      ],
+    },
+    {
+      id: 'd50-solo-open',
+      drillId: 'd50',
+      label: 'Solo open',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 8,
+        durationMaxMinutes: 14,
+        rpeMin: 6,
+        rpeMax: 8,
+        fatigueCap: { maxReps: 28, maxMinutes: 14, restBetweenSetsSeconds: 30 },
+      },
+      successMetric: {
+        type: 'pass-rate-good',
+        description: 'Self-toss short and deep alternations passed into a 1 m set window.',
+        target: '20 of 28 passes land in the set window across three rounds',
+      },
+      courtsideInstructions:
+        'Pass self-toss short and deep alternations into a 1 m set window across recovery rounds. Three rounds. Set a short marker zone 2 m in front and a deep marker zone 2 m behind home. Self-toss alternating short and deep, pass each into the window, recover home before the next toss. Rest 30 seconds between rounds.',
+      coachingCues: [
+        'Decide short or deep before the toss leaves your hand.',
+        'Beat the ball on deep, absorb on short.',
+        'Quality beats speed.',
+      ],
+    },
+  ],
+}
 
 // ---------------------------------------------------------------------------
 // Chain warmup: Beach Prep (default warmup, D105 + BAB 2024)
@@ -2345,14 +3130,14 @@ const d28: Drill = {
   shortName: 'Beach Prep',
   skillFocus: ['warmup'],
   objective:
-    'Whole-body ramp, ankle proprioception, shoulder + trunk activation, and sand movement rehearsal in 3 minutes.',
+    'Whole-body ramp, ankle balance, shoulder and trunk activation, and sand movement rehearsal in 3 minutes.',
   levelMin: 'beginner',
   levelMax: 'advanced',
   chainId: 'chain-warmup',
   m001Candidate: true,
   teachingPoints: [
     'Move through full range before loading.',
-    'Ankles first - short hops and lateral shuffles wake proprioception faster than jogging on sand.',
+    'Ankles first: short hops and lateral shuffles wake up sand balance faster than jogging.',
     'End warmer than you started; cold shoulders do not pass well.',
   ],
   progressionDescription:
@@ -2425,7 +3210,7 @@ const d28: Drill = {
       coachingCues: [
         'Short hops, loud feet.',
         'Full range on arm swings.',
-        'Move your feet - ankles first, then legs.',
+        'Move ankles first, then legs.',
       ],
     },
   ],
@@ -2452,6 +3237,7 @@ export const DRILLS: readonly Drill[] = [
   d14,
   d15,
   d16,
+  d46,
   d17,
   d18,
   d19,
@@ -2470,6 +3256,11 @@ export const DRILLS: readonly Drill[] = [
   d40,
   d41,
   d42,
+  d47,
+  d48,
+  d49,
+  d50,
+  d51,
 ] as const
 
 export const M001_DRILL_IDS: readonly string[] = DRILLS.filter((d) => d.m001Candidate).map(

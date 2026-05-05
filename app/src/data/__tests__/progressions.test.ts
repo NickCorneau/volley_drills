@@ -11,6 +11,8 @@ import { DRILLS } from '../drills'
  * fail loudly: chain-level catalog sanity, the Tier 1b-A serving graph
  * (multiple paths, not a single ladder), and the Tier 1b-A setting
  * chain after deferring d43 Triangle Setting to D101 3+ player support.
+ * The focus-readiness batch adds FIVB-backed advanced d47/d48 without
+ * reopening the deferred BAB triangle geometry.
  */
 describe('PROGRESSION_CHAINS catalog', () => {
   it('has unique chain ids', () => {
@@ -99,10 +101,17 @@ describe('PROGRESSION_CHAINS catalog', () => {
 describe('chain-6-serving (Tier 1b-A serving wave)', () => {
   const chain = PROGRESSION_CHAINS.find((c) => c.id === 'chain-6-serving')
 
-  it('keeps the four authored serving drills and excludes unauthored placeholders', () => {
-    expect(chain?.drillIds).toEqual(['d22', 'd31', 'd23', 'd33'])
+  it('keeps the authored serving drills and excludes unauthored placeholders', () => {
+    // 2026-05-04: d51 (Outside the Heart Serving, FIVB 2.2) added as the
+    // lateral long-envelope sibling to d31. Slotted between d31 and d23.
+    expect(chain?.drillIds).toEqual(['d22', 'd31', 'd51', 'd23', 'd33'])
     expect(chain?.drillIds).not.toContain('d32')
     expect(chain?.drillIds).not.toContain('d36')
+    expect(
+      chain?.links
+        .filter((link) => link.direction === 'lateral')
+        .map((link) => [link.fromDrillId, link.toDrillId]),
+    ).toContainEqual(['d31', 'd51'])
   })
 
   it('routes both serving entry points to d33 instead of forcing a single linear ladder', () => {
@@ -142,7 +151,27 @@ describe('chain-6-serving (Tier 1b-A serving wave)', () => {
     expect(drillById.get('d33')?.skillFocus).toEqual(['serve'])
     expect(drillById.get('d33')?.m001Candidate).toBe(true)
     expect(drillById.get('d33')?.levelMin).toBe('beginner')
-    expect(drillById.get('d33')?.levelMax).toBe('intermediate')
+    expect(drillById.get('d33')?.levelMax).toBe('advanced')
+  })
+})
+
+describe('chain-4-serve-receive advanced branch', () => {
+  const chain = PROGRESSION_CHAINS.find((c) => c.id === 'chain-4-serve-receive')
+
+  it('keeps the FIVB spin-read progression on the reserved advanced id', () => {
+    // 2026-05-04: d50 (Short/Deep Pass Read, FIVB 3.13) added as the lateral
+    // long-envelope sibling to d46. Slotted between d46 and d17 in chain order.
+    expect(chain?.drillIds).toEqual(['d15', 'd16', 'd46', 'd50', 'd17', 'd18'])
+    expect(
+      chain?.links
+        .filter((link) => link.direction === 'progression')
+        .map((link) => [link.fromDrillId, link.toDrillId]),
+    ).toContainEqual(['d16', 'd46'])
+    expect(
+      chain?.links
+        .filter((link) => link.direction === 'lateral')
+        .map((link) => [link.fromDrillId, link.toDrillId]),
+    ).toContainEqual(['d46', 'd50'])
   })
 })
 
@@ -153,8 +182,8 @@ describe('chain-7-setting (Tier 1b-A setting progression)', () => {
     expect(chain).toBeDefined()
   })
 
-  it('has the five authored setting drills with d43 deferred to 3+ player support', () => {
-    expect(chain?.drillIds).toEqual(['d38', 'd39', 'd40', 'd41', 'd42'])
+  it('has the authored setting drills with d43 deferred to 3+ player support', () => {
+    expect(chain?.drillIds).toEqual(['d38', 'd39', 'd40', 'd41', 'd42', 'd47', 'd48', 'd49'])
     expect(chain?.drillIds).not.toContain('d43')
   })
 
@@ -166,12 +195,24 @@ describe('chain-7-setting (Tier 1b-A setting progression)', () => {
     expect(incomingProgressions).toEqual([])
   })
 
-  it('links pair setting progression from d41 to d42', () => {
+  it('links pair setting progression through the FIVB-backed advanced branch', () => {
     const progressions = chain?.links
       .filter((l) => l.direction === 'progression')
       .map((l) => [l.fromDrillId, l.toDrillId])
 
-    expect(progressions).toEqual([['d41', 'd42']])
+    expect(progressions).toEqual([
+      ['d41', 'd42'],
+      ['d42', 'd47'],
+      ['d47', 'd48'],
+    ])
+  })
+
+  it('keeps D49 as a source-backed advanced setting/movement lateral from D47', () => {
+    const laterals = chain?.links
+      .filter((l) => l.direction === 'lateral')
+      .map((l) => [l.fromDrillId, l.toDrillId])
+
+    expect(laterals).toContainEqual(['d47', 'd49'])
   })
 
   it('every drill in the chain declares skillFocus set', () => {
@@ -193,5 +234,17 @@ describe('chain-7-setting (Tier 1b-A setting progression)', () => {
     expect(drillById.get('d42')?.m001Candidate).toBe(true)
     expect(drillById.get('d42')?.levelMin).toBe('intermediate')
     expect(drillById.get('d42')?.levelMax).toBe('intermediate')
+
+    expect(drillById.get('d47')?.m001Candidate).toBe(true)
+    expect(drillById.get('d47')?.levelMin).toBe('intermediate')
+    expect(drillById.get('d47')?.levelMax).toBe('advanced')
+
+    expect(drillById.get('d48')?.m001Candidate).toBe(true)
+    expect(drillById.get('d48')?.levelMin).toBe('advanced')
+    expect(drillById.get('d48')?.levelMax).toBe('advanced')
+
+    expect(drillById.get('d49')?.m001Candidate).toBe(true)
+    expect(drillById.get('d49')?.levelMin).toBe('advanced')
+    expect(drillById.get('d49')?.levelMax).toBe('advanced')
   })
 })

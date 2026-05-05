@@ -10,6 +10,8 @@ alwaysApply: true
 - Treat `agent-manifest.json`, `llms.txt`, and `CLAUDE.md` as thin compatibility surfaces that should point back to the canonical files above.
 - Keep `AGENTS.md` concise and pointer-oriented. Use `docs/catalog.json` for the machine-readable doc map instead of duplicating inventories in `AGENTS.md`.
 - When adding or renaming canonical docs, update `docs/catalog.json` in the same pass. Update `docs/README.md`, `AGENTS.md`, and any affected compatibility surfaces when their routing or summary text changed.
+- Move completed or superseded historical plans/requirements to `docs/archive/<family>/` when they no longer own active routing. Keep complete-but-live plan registries in their active family and mark their catalog entries with `active_registry: true`.
+- For archived or superseded cataloged docs with one current route, set `canonical_successor` in `docs/catalog.json`. If no single current route exists, use `successor_disposition: no_single_successor` with a short `successor_reason`.
 - Durable docs under `docs/` should keep YAML frontmatter with at least `id`, `title`, `status`, `stage`, `type`, and `summary`.
 - For core, milestone, and spec docs, also keep `authority`, `last_updated`, and `depends_on` current.
 - Add `decision_refs` and `open_question_refs` when stable IDs materially constrain the doc.

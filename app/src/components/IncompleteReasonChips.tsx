@@ -1,6 +1,7 @@
-import type { IncompleteReason } from '../db'
+import type { IncompleteReason } from '../model'
+import { ChoiceRow, type ChoiceRowOption } from './ui'
 
-const OPTIONS: { value: IncompleteReason; label: string }[] = [
+const OPTIONS: readonly ChoiceRowOption<IncompleteReason>[] = [
   { value: 'time', label: 'Time' },
   { value: 'fatigue', label: 'Fatigue' },
   { value: 'pain', label: 'Pain' },
@@ -13,38 +14,17 @@ type IncompleteReasonChipsProps = {
 }
 
 export function IncompleteReasonChips({ value, onChange }: IncompleteReasonChipsProps) {
+  // Plan U3 (2026-05-04): deselect-on-retap stays caller-owned. ChoiceRow's
+  // onChange always receives a value; the wrapping lambda decides to forward
+  // null when the tapped option is already selected.
   return (
-    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Why did you end early?">
-      {OPTIONS.map((opt) => {
-        const selected = value === opt.value
-        return (
-          <button
-            key={opt.value}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            onClick={() => onChange(selected ? null : opt.value)}
-            className={[
-              'min-h-[54px] rounded-full px-4 py-2 text-sm font-semibold transition-colors',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning focus-visible:ring-offset-2',
-              // Phase F11 (2026-04-19): both chip states are
-              // clickable (tap to pick, tap again to clear). Hover
-              // and press cues mirror `QuickTagChips` / `RpeSelector`
-              // for consistency - selected chips use a
-              // slightly-darker `bg-warning/90` on hover/press
-              // (there is no pre-baked `warning-pressed` token, and
-              // `brightness-*` on a saturated red would shift hue
-              // noticeably), unselected chips keep warm tone via
-              // `brightness-*`.
-              selected
-                ? 'bg-warning text-white hover:bg-warning/90 active:bg-warning/90'
-                : 'bg-bg-warm text-text-primary hover:brightness-95 active:brightness-90',
-            ].join(' ')}
-          >
-            {opt.label}
-          </button>
-        )
-      })}
-    </div>
+    <ChoiceRow<IncompleteReason>
+      value={value}
+      onChange={(next) => onChange(value === next ? null : next)}
+      options={OPTIONS}
+      layout="grid-2"
+      defaultTone="warning"
+      ariaLabel="Why did you end early?"
+    />
   )
 }

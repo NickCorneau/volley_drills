@@ -10,7 +10,7 @@ import { formatTime } from '../lib/format'
  * contract in `docs/research/outdoor-courtside-ui-brief.md`. Every
  * other class on the countdown div is unchanged from pre-F10; this
  * is purely a display-face swap. See
- * `docs/plans/2026-04-19-feat-phase-f10-timer-display-face-plan.md`.
+ * `docs/archive/plans/2026-04-19-feat-phase-f10-timer-display-face-plan.md`.
  *
  * Pre-close 2026-04-21 (thought 3b from founder pre-close review):
  * when `remainingSeconds <= 3.5` the digits flip to accent color as
@@ -40,7 +40,7 @@ import { formatTime } from '../lib/format'
  * still the single visual countdown tick. Restraint over
  * redundancy. Future contributors: do NOT re-add the chip without
  * fresh courtside evidence that the bar alone fails. See
- * `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Post-ship
+ * `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Post-ship
  * amendment §"Item 7".
  */
 type BlockTimerProps = {
@@ -54,7 +54,15 @@ export function BlockTimer({ remainingSeconds, totalSeconds, isPaused }: BlockTi
   const isCountingDown = !isPaused && remainingSeconds > 0 && remainingSeconds <= 3.5
 
   return (
-    <div className="flex flex-col items-center gap-3" role="timer" aria-live="polite">
+    <div
+      className="flex flex-col items-center gap-3"
+      role="timer"
+      aria-label={`${formatTime(remainingSeconds)} remaining${isPaused ? ', paused' : ''}`}
+      aria-live="off"
+    >
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {isPaused ? 'Timer paused. Tap Resume to continue.' : ''}
+      </span>
       <div
         className={`font-mono text-[56px] font-bold leading-none tabular-nums transition-colors ${
           isCountingDown ? 'text-accent' : 'text-text-primary'

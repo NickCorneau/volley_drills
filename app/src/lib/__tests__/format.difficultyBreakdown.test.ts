@@ -10,7 +10,7 @@ import { formatDifficultyBreakdownLine } from '../format'
  * arbitrary placeholder value.
  *
  * Sources:
- *   docs/plans/2026-04-26-pre-d91-editorial-polish.md Item 8
+ *   docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md Item 8
  */
 
 describe('formatDifficultyBreakdownLine', () => {

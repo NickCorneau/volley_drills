@@ -6,7 +6,7 @@ stage: validation
 type: ops
 summary: "Conventions for agent-facing docs, compatibility surfaces, and change propagation."
 authority: doc-surface structure, machine-scannable patterns, and change propagation
-last_updated: 2026-04-15
+last_updated: 2026-05-02
 depends_on:
   - AGENTS.md
   - docs/catalog.json
@@ -80,6 +80,23 @@ For durable docs under `docs/`:
   - `Update When`
   - `Machine Contract`
 - prefer stable IDs (`P*`, `D*`, `O*`, `M*`, `R*`) over copied prose
+
+## Archive Lifecycle
+
+Use `docs/archive/<family>/` for completed or superseded historical docs that should no longer participate in active planning or requirements routing.
+
+Archive a doc only when:
+
+- its implementation or decision value is complete, superseded, or provenance-only
+- current active docs have a clearer successor or routing owner
+- direct links, `depends_on`, `related`, `origin`, and `docs/catalog.json` are updated in the same change
+- active docs that still cite it make the historical/provenance role clear
+
+Keep a doc in its active family, even when its work is complete, when it is still a shipped ledger, live registry, canonical implementation reference, current review, current research, status doc, or active spec. Mark complete plan registries in `docs/catalog.json` with `active_registry: true` so future archive passes do not mistake them for stale history.
+
+Do not use archived docs as current implementation instructions. If an archived or superseded doc has one clear current route, set `canonical_successor` in `docs/catalog.json` to the repo-relative path of that current doc. If no single successor exists, set `successor_disposition: no_single_successor` with a short `successor_reason` rather than inventing a fake chain.
+
+For cataloged docs, `docs/catalog.json` is the canonical successor surface. Existing frontmatter such as `superseded_by` may remain as compatibility metadata, but it must agree with `canonical_successor` when both are present. Missing successor metadata is currently report-only; malformed opted-in successor metadata fails `bash scripts/validate-agent-docs.sh`.
 
 ## Change Propagation
 

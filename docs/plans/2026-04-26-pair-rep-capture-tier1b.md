@@ -17,8 +17,8 @@ depends_on:
   - docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md
 related:
   - docs/plans/2026-04-22-tier1b-serving-setting-expansion.md
-  - docs/plans/2026-04-23-walkthrough-closeout-polish.md
-  - docs/plans/2026-04-26-pre-d91-editorial-polish.md
+  - docs/archive/plans/2026-04-23-walkthrough-closeout-polish.md
+  - docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md
   - docs/plans/2026-04-27-per-drill-capture-coverage.md
   - docs/research/2026-04-27-cca2-dogfeed-findings.md
 decision_refs:

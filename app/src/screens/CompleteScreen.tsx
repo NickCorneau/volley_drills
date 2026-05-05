@@ -52,7 +52,7 @@ function SavedCheckIcon() {
  * Screen readers skip it (`aria-hidden`) - the verdict word below
  * (with `aria-live="polite"`) carries the meaning. See
  * `docs/decisions.md` D86 and
- * `docs/plans/2026-04-19-feat-phase-f-d91-validity-hardening-plan.md`
+ * `docs/archive/plans/2026-04-19-feat-phase-f-d91-validity-hardening-plan.md`
  * Unit 5.
  */
 function VerdictGlyph() {
@@ -255,7 +255,7 @@ export function CompleteScreen() {
   // de facto page heading on solo. Single-heading-outline pages are
   // valid HTML5 — confirm before "fixing" by re-adding the solo
   // eyebrow. Future contributors: do NOT re-add the solo eyebrow.
-  // See `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 5.
+  // See `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 5.
   const isPairSummary = summary.header === "Today's pair verdict"
   return (
     <ScreenShell>
@@ -276,7 +276,7 @@ export function CompleteScreen() {
             to `<h1>` so the page has a valid heading outline (was h2-only
             before) and dropped the uppercase-eyebrow voice. The verdict
             `<h2>` below is unchanged - still the focal sub-heading. See
-            `docs/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`.
+            `docs/archive/plans/2026-04-19-feat-phase-f8-typography-foundation-plan.md`.
 
             2026-04-26 pre-D91 editorial polish (`F10`): conditional
             on pair — the solo case omits the eyebrow entirely so the
@@ -313,7 +313,7 @@ export function CompleteScreen() {
             and fit the 390 px viewport without a wrap on any of the
             three verdict strings ('Keep building', 'Lighter next',
             'No change'). See
-            `docs/plans/2026-04-19-feat-phase-f11-brand-hero-typography-plan.md`. */}
+            `docs/archive/plans/2026-04-19-feat-phase-f11-brand-hero-typography-plan.md`. */}
           <h2
             id="summary-verdict"
             aria-live="polite"
@@ -370,7 +370,7 @@ export function CompleteScreen() {
               dot-separated in block order. No comparison, no badges,
               no apology when blank — the row hides entirely on
               legacy / count-only sessions. See plan
-              `docs/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md`
+              `docs/archive/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md`
               §"Receipt-only Complete display". */}
             {hasStreakReceipt && (
               <div
@@ -440,7 +440,7 @@ export function CompleteScreen() {
               Review / Complete proposal in
               `docs/research/partner-walkthrough-results/2026-04-22-trifold-synthesis.md`
               + plan
-              `docs/plans/2026-04-23-walkthrough-closeout-polish.md`):
+              `docs/archive/plans/2026-04-23-walkthrough-closeout-polish.md`):
               the posture-sensitive Safari-eviction footnote was
               compressed off the terminal verdict surface and into the
               Settings "About local storage" sub-section. The save

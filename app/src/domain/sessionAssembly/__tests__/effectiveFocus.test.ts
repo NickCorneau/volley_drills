@@ -26,9 +26,14 @@ describe('effectiveSkillTags', () => {
     expect(resolve('pressure', 'pass')).toEqual(['pass'])
   })
 
-  it('keeps support slots recommendation-owned', () => {
+  it('keeps warmup and wrap recommendation-owned', () => {
     expect(resolve('warmup', 'serve', ['warmup', 'movement'])).toEqual(['warmup', 'movement'])
     expect(resolve('wrap', 'serve', ['recovery'])).toEqual(['recovery'])
+  })
+
+  it('narrows support slots to explicit session focus', () => {
+    expect(resolve('technique', 'serve', ['pass'])).toEqual(['serve'])
+    expect(resolve('movement_proxy', 'set', ['pass', 'movement'])).toEqual(['set'])
   })
 
   it('returns fallback when no session focus is set', () => {
@@ -40,7 +45,9 @@ describe('effectiveSkillTags', () => {
     expect(resolve('main_skill', 'serve', ['pass'])).toEqual(['serve'])
   })
 
-  it('preserves undefined fallback for recommendation-owned slots', () => {
-    expect(effectiveSkillTags('technique', { ...baseContext, sessionFocus: 'serve' }, undefined)).toBeUndefined()
+  it('narrows focus-controlled slots even when fallback is undefined', () => {
+    expect(effectiveSkillTags('technique', { ...baseContext, sessionFocus: 'serve' }, undefined)).toEqual([
+      'serve',
+    ])
   })
 })

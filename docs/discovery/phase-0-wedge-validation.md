@@ -6,7 +6,7 @@ stage: planning
 type: discovery
 authority: wedge scorecards, evidence capture template, M001 pre-build validation program and decision gate
 summary: "Dual-wedge scorecards, evidence capture, and Phase 0 decision rules."
-last_updated: 2026-04-19
+last_updated: 2026-05-02
 depends_on:
   - docs/roadmap.md
   - docs/prd-foundation.md
@@ -245,7 +245,7 @@ This founder/friend pilot is a **pre-gate filter**, not the full M001 evidence s
 - Expand toward the broader `6–12` participant target only if the founder and friend pilot feels strong enough to justify it
 
 - For each concierge participant:
-  - Minimal context capture for the **current v0b artifact baseline**: run the shipped first-open flow (`Skill Level -> Today's Setup -> Safety`) and record any inputs beyond `skill level` + today's `player count` as pre-reveal friction against the intended recommendation-first contract
+  - Minimal context capture for the **current v0b artifact baseline**: run the shipped first-open flow (`Skill Level -> Today's Setup -> Tune today -> Safety`) and record any inputs beyond `skill level` + today's player count / focus confirmation as pre-reveal friction against the intended recommendation-first contract
   - Deliver a passing session that matches their constraints
   - Have them run it within 3 days
   - Collect <60s review immediately after

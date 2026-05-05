@@ -6,7 +6,7 @@ stage: validation
 type: agent-contract
 summary: "Canonical prose repo contract: current state, read order, source-of-truth order, and repo-wide working constraints."
 authority: repo-wide routing, working constraints, and agent-facing orientation
-last_updated: 2026-05-04
+last_updated: 2026-05-02
 depends_on:
  - docs/catalog.json
  - docs/vision.md
@@ -79,6 +79,7 @@ Read only as much as the task needs.
    - Milestone/spec work: `docs/milestones/m001-solo-session-loop.md` -> relevant `docs/specs/`
    - Prototype work: `docs/research/2026-04-12-v0a-runner-probe-feedback.md` -> `docs/research/2026-04-19-v0b-starter-loop-feedback.md` -> `app/README.md`
    - **App architecture / new feature work**: `app/README.md` -> `docs/ops/app-architecture-guidance.md` -> `.cursor/rules/data-access.mdc` / `component-patterns.mdc` / `routing.mdc` / `testing.mdc`
+   - Documented solutions / known fixes: `docs/solutions/` (when present) for past bugs, best practices, and workflow patterns, organized by category with YAML frontmatter such as `module`, `tags`, and `problem_type`; relevant when implementing or debugging in documented areas
    - Research: `docs/research/README.md` -> narrowest relevant note
    - Design / UX work: `docs/design/README.md` -> referenced design-canonical doc (brand / visual / outdoor)
    - Docs editing: `docs/README.md` -> `docs/ops/agent-documentation-contract.md`
@@ -138,11 +139,16 @@ Durable docs under `docs/` should keep YAML frontmatter and explicit ownership. 
 - Optimize for fast, low-typing, readable courtside interaction.
 - Optimize for joy, trust, and investment together: the app should feel like a main training tool, not a data-entry form.
 - Prefer deleting or demoting stale documentation rather than leaving misleading material at canonical tiers.
+- Treat Volleycraft as pair-native while still supporting solo training as a common mode.
+- Prefer calm, shibui interfaces that reduce information overload and decision fatigue.
+- For UI/app changes, value manual mobile dogfood testing with screenshots and iterative polish before declaring done.
 
 ## Learned Workspace Facts
 
 - The v0b Starter Loop under `app/` is real, runnable, and deployed; M001 work continues in tiers on top of it under `D130` founder-use mode. Use `docs/status/current-state.md` for the current snapshot and recent shipped-history log.
 - Treat `docs/plans/2026-04-16-003-rest-of-v0b-plan.md` as the v0b landed registry; use the dated Tier 1a / Tier 1b plans cataloged in `docs/catalog.json` for implementation history.
-- The current Dexie schema is **v5**; per-drill capture lives on `/run/check` (`DrillCheckScreen`), not on Transition or Review.
+- The current Dexie schema is **v6**; per-drill capture, including optional streak metric capture, lives on `/run/check` (`DrillCheckScreen`), not on Transition or Review.
 - The active automation environment is WSL/bash-friendly.
 - Historical control-plane scaffolding now lives in `archive/agent-control-plane/`.
+- The live v0b PWA deploys as a Cloudflare Worker at <https://volleydrills.nicholascorneau.workers.dev>; use `app/README.md` and `docs/ops/deploy-cloudflare-worker.md` for deploy runbooks.
+- Generated-plan diagnostics are the active focus-readiness quality surface; `docs/reviews/2026-05-01-generated-plan-diagnostics-report.md`, `docs/reviews/2026-05-01-generated-plan-diagnostics-triage.md`, and `npm run diagnostics:report:*` own the report/triage loop.

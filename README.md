@@ -6,7 +6,7 @@ stage: validation
 type: hub
 summary: "Repo hub: quick start, top-level layout, and links into the canonical docs."
 authority: repo layout and human-facing orientation
-last_updated: 2026-04-27
+last_updated: 2026-05-02
 depends_on:
   - AGENTS.md
   - docs/catalog.json
@@ -17,9 +17,9 @@ depends_on:
 
 Volleyball personal training app for self-coached amateurs: structured session planning, courtside run mode, and rules-based adaptation. Beach-first in scope for M001 (see `docs/decisions.md` `D125` for the product-name rationale and beach-first / volleyball-inclusive positioning).
 
-**Stage**: Phase 0 validation, operating in `D130` founder-use mode through 2026-07-20.  
-**Build**: v0b Starter Loop is the M001 base. M001 Tier 1a and Tier 1b Layer A have shipped; remaining Tier 1b is gated by logged demand.  
-**Live**: https://volleydrills.nicholascorneau.workers.dev  
+**Stage**: Phase 0 validation, operating in `D130` founder-use mode through 2026-07-20.
+**Build**: v0b Starter Loop is the M001 base. M001 Tier 1a, Tier 1b Layer A, mandatory Tune today, focus-coverage readiness, and generated-plan diagnostics have shipped; remaining Tier 1b is gated by logged demand.
+**Live**: https://volleydrills.nicholascorneau.workers.dev
 **Status**: detailed posture and recent shipped history live in `docs/status/current-state.md`. The `D91` retention gate is deferred (not dropped); the active read is the `D130` partner-use Condition 3 final close on 2026-05-21.
 
 ## Quick Start
@@ -80,5 +80,6 @@ npm run deploy
 - Decision log: `docs/decisions.md`
 - PRD and object model: `docs/prd-foundation.md`
 - Roadmap: `docs/roadmap.md`
+- Current generated-plan diagnostics report: `docs/reviews/2026-05-01-generated-plan-diagnostics-report.md`
 - v0b status registry (what's landed, what's deferred): `docs/plans/2026-04-16-003-rest-of-v0b-plan.md`
 - v0a retrospective feedback backlog: `docs/research/2026-04-12-v0a-runner-probe-feedback.md`

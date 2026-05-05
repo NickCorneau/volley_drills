@@ -5,13 +5,13 @@ import type {
   BlockSlotType,
   PlayerLevel,
   SessionPlanBlock,
+  PlayerLevel,
   SetupContext,
   SkillFocus,
 } from '../../model'
 import { findPreferredCandidate, findSubstitute } from '../drillSelection'
 import { findCandidates } from './candidates'
-import { FOCUS_CONTROLLED_SLOT_TYPES } from './effectiveFocus'
-import { partitionByLevel } from './partitionByLevel'
+import { isFocusControlledSlotType } from './effectiveFocus'
 import { deriveBlockRationale, deriveSubstitutionRationale } from './rationale'
 
 const SKILL_TAGS_BY_TYPE: Record<BlockSlotType, readonly SkillFocus[]> = {
@@ -25,17 +25,7 @@ const SKILL_TAGS_BY_TYPE: Record<BlockSlotType, readonly SkillFocus[]> = {
 
 export type FindSwapAlternativesOptions = {
   readonly excludeDrillNames?: readonly string[]
-  /**
-   * Effective skill level for the active session. When provided, the
-   * swap alternatives are sorted `[in-band-first, out-of-band-after]`
-   * so the user's saved level shapes the visible order. When omitted
-   * (e.g., legacy test fixtures), no level-based reordering is
-   * applied. Per K5 of the
-   * `2026-05-04-001-feat-skill-level-mutability-plan.md`, swap is
-   * user-driven so this is sort-only — all alternatives stay visible.
-   * The build-time `levelRelaxed` flag does NOT fire from this path.
-   */
-  readonly effectiveLevelValue?: PlayerLevel
+  readonly playerLevel?: PlayerLevel
 }
 
 function findPreferredProgressionTarget(drillId: string): string | undefined {
@@ -67,14 +57,22 @@ export function findSwapAlternatives(
   // accept the small intent-violation (a passing alternate during
   // a "set session") because no-swap is a worse mid-run outcome and
   // the user can still see today's focus on the rest of the plan.
-  const isFocusControlled = FOCUS_CONTROLLED_SLOT_TYPES.has(block.type)
-  if (isFocusControlled && context.sessionFocus !== undefined) {
+  if (isFocusControlledSlotType(block.type) && context.sessionFocus !== undefined) {
     const widenedContext: SetupContext = { ...context }
     delete widenedContext.sessionFocus
     return computeAlternatives(block, widenedContext, options)
   }
 
   return focused
+}
+
+export function findStrictSameFocusSwapAlternatives(
+  block: SessionPlanBlock,
+  context: SetupContext,
+  options?: FindSwapAlternativesOptions,
+): SessionPlanBlock[] {
+  if (block.type === 'warmup' || block.type === 'wrap') return []
+  return computeAlternatives(block, context, options)
 }
 
 function computeAlternatives(
@@ -90,7 +88,9 @@ function computeAlternatives(
     required: block.required,
     skillTags: SKILL_TAGS_BY_TYPE[block.type],
   }
-  const candidates = findCandidates(slot, context).sort((a, b) =>
+  const candidates = findCandidates(slot, context, {
+    playerLevel: options?.playerLevel,
+  }).sort((a, b) =>
     a.drill.id.localeCompare(b.drill.id),
   )
 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button } from './ui'
+import { Button, Callout } from './ui'
 
 interface PainOverrideCardProps {
   recoveryMinutes: number
@@ -32,7 +32,7 @@ export function PainOverrideCard({
   const actionsDisabled = disabled || !canAct
 
   return (
-    <div className="flex flex-col gap-4 rounded-[12px] bg-warning-surface p-4">
+    <Callout tone="warning" className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
         {/* Phase F12 (2026-04-19): the old `⚠️` emoji was replaced
             with an inline stroke SVG so the warning triangle inherits
@@ -150,6 +150,6 @@ export function PainOverrideCard({
           Answer “When did you last train?” above to continue.
         </p>
       )}
-    </div>
+    </Callout>
   )
 }

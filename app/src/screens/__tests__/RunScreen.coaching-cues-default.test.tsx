@@ -1,21 +1,16 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
 import { RunScreen } from '../RunScreen'
 
 /**
- * RunScreen coaching note: quiet left-rule aside with a small "CUE"
- * label and the full cue body.
+ * Run Face v1: the live surface shows one "Now" cue and keeps full
+ * instructions/cue text reachable through inline detail.
  *
- * Regression contract (updated 2026-04-22, round 2): the cue renders
- * in full on mount regardless of length. The earlier preview +
- * "Show full coaching note" toggle was removed once the ScreenShell
- * body became a first-class scroll container with top/bottom fade
- * affordances — hiding cue text behind a tap was redundant with the
- * scroll affordance for the same information goal. If a future cue
- * genuinely warrants collapse, the decision will be driven by
- * founder-use evidence, not author preference.
+ * Regression contract (updated 2026-05-02): long cue bodies no
+ * longer compete with the live cue by default. Full detail stays
+ * reachable inline within Run.
  */
 
 async function clearDb() {
@@ -78,32 +73,30 @@ function renderAt(execId: string) {
   )
 }
 
-describe('RunScreen: coaching note renders in full (no expand toggle)', () => {
+describe('RunScreen: Run Face cue detail', () => {
   beforeEach(async () => {
     await clearDb()
   })
 
-  it('long cue: full text is present on mount, no expand/collapse button', async () => {
+  it('long cue: keeps one live cue and exposes full cue in inline detail', async () => {
+    const user = userEvent.setup()
     await seedPausedSession('exec-long', 'plan-long', LONG_CUE)
     renderAt('exec-long')
 
-    // Full cue marker is in the DOM without any interaction.
-    expect(await screen.findByText(/CUEFULLMARKER_9f3a/)).toBeInTheDocument()
+    expect(await screen.findByText(/^Now$/)).toBeInTheDocument()
+    expect(screen.getByText(/Self-toss; forearm pass up and down/i)).toBeInTheDocument()
 
-    // The prior preview/toggle controls are gone.
-    expect(
-      screen.queryByRole('button', { name: /show full coaching note/i }),
-    ).not.toBeInTheDocument()
+    await user.click(screen.getByText(/full coaching cue/i))
+    expect(screen.getByText(/CUEFULLMARKER_9f3a/)).toBeInTheDocument()
+
     expect(screen.queryByRole('button', { name: /show less/i })).not.toBeInTheDocument()
   })
 
-  it('short cue: renders in full with no toggle (same surface as long)', async () => {
+  it('short cue: renders as the live cue', async () => {
     await seedPausedSession('exec-short', 'plan-short', 'Athletic posture.')
     renderAt('exec-short')
 
+    expect(await screen.findByText(/^Now$/)).toBeInTheDocument()
     expect(await screen.findByText(/Athletic posture\./i)).toBeInTheDocument()
-    expect(
-      screen.queryByRole('button', { name: /show full coaching note/i }),
-    ).not.toBeInTheDocument()
   })
 })

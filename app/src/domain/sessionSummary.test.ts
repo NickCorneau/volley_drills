@@ -116,7 +116,7 @@ describe('composeSummary: Case C (default)', () => {
     // 2026-04-26 pre-D91 editorial polish (`F9`): the
     // `Completed session N:` ordinal prefix was dropped — the reason
     // line now leads with the stats sentence directly. See
-    // `docs/plans/2026-04-26-pre-d91-editorial-polish.md` Item 4.
+    // `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 4.
     expect(out.reason).toBe('40 good passes today out of 60 attempts. Ready when you are.')
     expect(out.reason).not.toContain('Completed session')
   })

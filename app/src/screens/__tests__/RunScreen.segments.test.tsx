@@ -1,6 +1,5 @@
 import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../db'
 import * as audio from '../../lib/audio'
 import * as platform from '../../platform'
@@ -159,9 +158,11 @@ describe('RunScreen segments rendering (U7)', () => {
     renderAt('exec-prose')
 
     expect(await screen.findByText(/Pass controlled balls to target/i)).toBeInTheDocument()
-    // No segment list rendered for a no-segments block.
+    // No segment list rendered for a no-segments block; the Run Face
+    // uses a single text cue instead.
     expect(screen.queryByRole('list', { name: 'Segments' })).toBeNull()
-    expect(screen.queryByText('Now')).toBeNull()
+    expect(screen.getByText('Now')).toBeInTheDocument()
+    expect(screen.getByText(/Quiet platform/i)).toBeInTheDocument()
   })
 
   /**

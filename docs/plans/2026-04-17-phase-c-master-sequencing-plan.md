@@ -8,12 +8,12 @@ supersedes: "Section 3 of docs/plans/2026-04-16-003-rest-of-v0b-plan.md for Phas
 depends_on:
   - docs/plans/2026-04-16-003-rest-of-v0b-plan.md
   - docs/plans/2026-04-16-004-red-team-fixes-plan.md
-  - docs/plans/2026-04-16-005-feat-phase-c0-schema-plan.md
-  - docs/plans/2026-04-17-feat-phase-c1-review-contract-plan.md
-  - docs/plans/2026-04-17-feat-phase-c2-session-summary-plan.md
-  - docs/plans/2026-04-17-feat-phase-c3-two-screen-onboarding-plan.md
-  - docs/plans/2026-04-17-feat-phase-c4-home-priority-plan.md
-  - docs/plans/2026-04-17-feat-phase-c5-repeat-path-plan.md
+  - docs/archive/plans/2026-04-16-005-feat-phase-c0-schema-plan.md
+  - docs/archive/plans/2026-04-17-feat-phase-c1-review-contract-plan.md
+  - docs/archive/plans/2026-04-17-feat-phase-c2-session-summary-plan.md
+  - docs/archive/plans/2026-04-17-feat-phase-c3-two-screen-onboarding-plan.md
+  - docs/archive/plans/2026-04-17-feat-phase-c4-home-priority-plan.md
+  - docs/archive/plans/2026-04-17-feat-phase-c5-repeat-path-plan.md
   - docs/specs/m001-phase-c-ux-decisions.md
   - docs/decisions.md
 ---
@@ -55,12 +55,12 @@ The DAG is intentionally shallow: five edges, one diamond at C-4 (depends on bot
 
 | Sub-phase | Plan | Status | Gated on |
 |-----------|------|--------|----------|
-| C-0 schema | [2026-04-16-005-feat-phase-c0-schema-plan.md](2026-04-16-005-feat-phase-c0-schema-plan.md) | **landed 2026-04-17** | Phase B complete (landed) |
-| C-1 review contract + V0B-02 | [2026-04-17-feat-phase-c1-review-contract-plan.md](2026-04-17-feat-phase-c1-review-contract-plan.md) | **landed 2026-04-17** | C-0 shipped |
-| C-2 session summary | [2026-04-17-feat-phase-c2-session-summary-plan.md](2026-04-17-feat-phase-c2-session-summary-plan.md) | **landed 2026-04-17** | C-1 shipped |
-| C-3 two-screen onboarding | [2026-04-17-feat-phase-c3-two-screen-onboarding-plan.md](2026-04-17-feat-phase-c3-two-screen-onboarding-plan.md) | **landed 2026-04-17** | C-0 shipped (parallelizable with C-1) |
-| C-4 home priority + soft-block | [2026-04-17-feat-phase-c4-home-priority-plan.md](2026-04-17-feat-phase-c4-home-priority-plan.md) | landed | C-1 + C-3 shipped |
-| C-5 repeat path | [2026-04-17-feat-phase-c5-repeat-path-plan.md](2026-04-17-feat-phase-c5-repeat-path-plan.md) | landed | C-2 + C-4 shipped |
+| C-0 schema | [2026-04-16-005-feat-phase-c0-schema-plan.md](../archive/plans/2026-04-16-005-feat-phase-c0-schema-plan.md) | **landed 2026-04-17** | Phase B complete (landed) |
+| C-1 review contract + V0B-02 | [2026-04-17-feat-phase-c1-review-contract-plan.md](../archive/plans/2026-04-17-feat-phase-c1-review-contract-plan.md) | **landed 2026-04-17** | C-0 shipped |
+| C-2 session summary | [2026-04-17-feat-phase-c2-session-summary-plan.md](../archive/plans/2026-04-17-feat-phase-c2-session-summary-plan.md) | **landed 2026-04-17** | C-1 shipped |
+| C-3 two-screen onboarding | [2026-04-17-feat-phase-c3-two-screen-onboarding-plan.md](../archive/plans/2026-04-17-feat-phase-c3-two-screen-onboarding-plan.md) | **landed 2026-04-17** | C-0 shipped (parallelizable with C-1) |
+| C-4 home priority + soft-block | [2026-04-17-feat-phase-c4-home-priority-plan.md](../archive/plans/2026-04-17-feat-phase-c4-home-priority-plan.md) | landed | C-1 + C-3 shipped |
+| C-5 repeat path | [2026-04-17-feat-phase-c5-repeat-path-plan.md](../archive/plans/2026-04-17-feat-phase-c5-repeat-path-plan.md) | landed | C-2 + C-4 shipped |
 
 **Phase C is complete end-to-end** (2026-04-17). Post-landing UX polish (SafetyCheckScreen escape hatch, Brandmark / HomeScreen polish) documented in [rest-of-v0b §"Phase C post-landing polish"](./2026-04-16-003-rest-of-v0b-plan.md#phase-c-post-landing-polish--safetycheckscreen-escape-hatch-complete-2026-04-17).
 

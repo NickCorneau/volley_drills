@@ -78,7 +78,7 @@ describe('HomeSecondaryRow (C-4 Unit 3)', () => {
     expect(onFinish).toHaveBeenCalledTimes(1)
   })
 
-  it('draft: Review CTA + archetype label', async () => {
+  it('draft: Continue CTA + archetype label', async () => {
     const user = userEvent.setup()
     const onOpen = vi.fn()
 
@@ -89,7 +89,7 @@ describe('HomeSecondaryRow (C-4 Unit 3)', () => {
     )
 
     expect(screen.getByText(/solo \+ open/i)).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /^review$/i }))
+    await user.click(screen.getByRole('button', { name: /^continue$/i }))
     expect(onOpen).toHaveBeenCalledTimes(1)
   })
 

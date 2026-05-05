@@ -5,8 +5,8 @@ type: ideation
 status: active
 stage: validation
 authority: "Ranked ideation answering whether the new Tune today focus picker has enough source-backed drill depth for believable practices and swaps across pass/serve/set, solo/pair, equipment, and long-session configurations."
-summary: "Ground-up audit plus synthesis of recent focus/skill ideation. Finds that Passing is broadly covered, Setting is buildable but thin, and Serving is fragile: pair/no-net serving likely cannot build a focused main-skill block, long serving sessions still get pass-flavored technique/movement support blocks, and skill level is not currently modeled by assembly. Recommends a coverage audit grid, serving-focus credibility pass, focus-aligned support-block definition, thin-focus honesty contract, long-session simulator, source-backed backlog cards, and variant-level provenance/adaptation checklist."
-last_updated: 2026-04-30
+summary: "Ground-up audit plus synthesis of recent focus/skill ideation. The 2026-04-30 pass led to the focus-readiness matrix and source-backed gap-card system; the 2026-05-01 continuation adds the next quality layer: generated-plan stretch-pressure diagnostics and future curated mixed-focus theme contracts such as Serve + Receive."
+last_updated: 2026-05-01
 related:
   - docs/ideation/2026-04-28-what-to-add-next-ideation.md
   - docs/ideation/2026-04-29-skill-scope-and-game-layers-ideation.md
@@ -37,6 +37,18 @@ This ideation starts from the recent focus-picker and skill-scope docs, then re-
 This ideation was consumed by `docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md`.
 
 The user resolved the product posture more strongly than the original survivor list: **Volleycraft should not have planned thin or unavailable visible focus states.** Passing, Serving, and Setting should be fully catalog-backed across the required setup/skill/duration/swap matrix. The requirements doc therefore rejects the "Thin-Focus Honesty Contract" as a steady-state product answer and replaces it with a full catalog-readiness bar.
+
+## Continuation (2026-05-01)
+
+Dogfood after the readiness pass surfaced a new question: a 40-minute Serving draft can be valid and full-duration while still stretching one serving block to ~24 minutes because optional focus-controlled slots were skipped and redistributed into `main_skill`.
+
+Architecture-strategist review recommends a second diagnostic layer rather than weakening the current readiness contract:
+
+- Keep catalog-depth readiness candidate-based.
+- Add generated-plan diagnostics that sweep real `buildDraft()` outputs across a deterministic seed corpus.
+- Add stretch-pressure diagnostics that compare each selected block to the selected variant's `workload.durationMaxMinutes` and `fatigueCap.maxMinutes`.
+- Treat unclassified stretch as a hard failure, but treat known over-cap stretch as a warning/gap-card signal until product policy decides which long blocks are acceptable.
+- Use curated mixed-focus themes such as `Serve + Receive` as explicit session contracts, not arbitrary multi-select OR filters.
 
 ## Grounding Context
 

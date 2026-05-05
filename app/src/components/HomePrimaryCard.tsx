@@ -1,4 +1,4 @@
-import type { SessionDraft } from '../db'
+import type { SessionDraft } from '../model'
 import { formatInterruptedAgo } from '../lib/format'
 import type { LastCompleteBundle, PendingReview, ResumableSession } from '../services/session'
 import { DraftCard, LastCompleteCard, NewUserCard, ReviewPendingCard } from './home'
@@ -46,6 +46,7 @@ type HomePrimaryCardProps =
       onRepeat: () => void
       onStartDifferent: () => void
       onRepeatWhatYouDid?: () => void
+      actionDisabled?: boolean
     }
   | {
       variant: 'new_user'

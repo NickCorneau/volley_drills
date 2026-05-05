@@ -131,7 +131,10 @@ async function buildAndStartSoloOpen(page: import('@playwright/test').Page) {
   await goToOnboardingTodaysSetup(page)
   await page.getByRole('radio', { name: 'Solo' }).click()
   await page.getByLabel('Net available').getByRole('radio', { name: 'No' }).click()
-  await page.getByLabel('Wall available').getByRole('radio', { name: 'No' }).click()
+  await page
+    .getByRole('radiogroup', { name: /wall or fence nearby/i })
+    .getByRole('radio', { name: 'No' })
+    .click()
   await page.getByRole('radio', { name: '15 min' }).click()
   await page.getByRole('button', { name: /build session/i }).click()
 

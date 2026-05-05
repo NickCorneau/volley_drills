@@ -15,7 +15,7 @@ related:
   - docs/plans/2026-04-22-tier1b-serving-setting-expansion.md
   - docs/plans/2026-04-20-m001-tier1-implementation.md
   - docs/plans/2026-04-20-m001-adversarial-memo.md
-  - docs/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md
+  - docs/archive/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md
   - docs/plans/2026-04-28-tier-1c-prepay-and-catalog-audit.md
   - docs/brainstorms/2026-04-29-session-focus-picker-requirements.md
   - docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md
@@ -109,7 +109,7 @@ Produce a ranked menu of "what's next" candidates after Tier 1b Layer A landed (
 - `docs/reviews/2026-04-22-drill-level-audit.md` (advanced-band gap, distribution skew)
 - `docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md` (genuinely-open Tier 1b bundle)
 - `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md` (cap state, deferred candidates)
-- `docs/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md` (D134 falsification gate)
+- `docs/archive/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md` (D134 falsification gate)
 - `app/src/data/drills.ts` + `archetypes.ts` + `progressions.ts` (catalog inventory)
 
 ## Survivors
@@ -168,7 +168,7 @@ Ranked by leverage × evidence-fired. **All five survivors consume zero authorin
 | Author solo movement-tagged drill (F7)        | Reject (defer)                      | F7 doc itself recommends hold; no post-2026-04-26 solo session has flagged the slot; authoring without trigger = the substitution shape the adversarial memo Cond 1 names |
 | Tier-1c-lite (draft-screen Switch-focus chip) | Reject                              | Crosses the strict Tier 1c trigger; "lite" is the exact substitution shape the cap exists to prevent                                                                      |
 | `d27`/`d29` as variants on `d28`              | Reject (clever but wrong)           | Conflates compliance-fallback vs longer-warmup distinction; sidesteps cap dishonestly; their separate trigger gates exist for reasons                                     |
-| Auto-fill / Net/Wall persistence              | Reject (deferred)                   | Already explicitly deferred in `docs/plans/2026-04-27-layer-2-reliability-and-audit-pass.md` pending dedicated setup/safety/defaults spec — respect the deferral          |
+| Auto-fill / Net/Wall persistence              | Reject (deferred)                   | Already explicitly deferred in `docs/archive/plans/2026-04-27-layer-2-reliability-and-audit-pass.md` pending dedicated setup/safety/defaults spec — respect the deferral          |
 | Home "Pick up where you left off" eyebrow     | Reject (Tier-1c-shaped, no trigger) | Solves a problem that hasn't fired; ship after Tier 1c                                                                                                                    |
 | Settings skill heat-map (28-day)              | Reject (cute, no logged demand)     | Polish-class; defer until a session note explicitly flags monoculture training                                                                                            |
 | Replace beep entirely with screen-flash       | Reject (over-corrects)              | Paired audio + visible chip is the right shape (covered by S1)                                                                                                            |

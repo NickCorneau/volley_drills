@@ -6,7 +6,7 @@ stage: validation
 type: spec
 authority: trust invariants, test layers, minimum verification bar for M001
 summary: "Trust invariants, test layers, and minimum verification bar for M001."
-last_updated: 2026-04-16
+last_updated: 2026-05-02
 depends_on:
   - docs/milestones/m001-solo-session-loop.md
   - docs/research/m001-testing-quality-strategy.md
@@ -27,7 +27,7 @@ decision_refs:
 
 Define the trust invariants, test layers, and minimum verification bar for the first implementation-ready M001 slice.
 
-The v0a validation prototype intentionally deferred automated testing (Vitest, RTL, Playwright) to prioritize speed-to-sand. Full M001 implementation must build this test stack. See `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for as-built deviations.
+The v0a validation prototype intentionally deferred automated testing to prioritize speed-to-sand. The current v0b app now has Vitest, React Testing Library, fake-indexeddb, and Playwright coverage; this spec remains the quality bar for choosing the lowest test tier that proves each M001 invariant. See `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for retrospective v0a deviations.
 
 ## Quality priority
 

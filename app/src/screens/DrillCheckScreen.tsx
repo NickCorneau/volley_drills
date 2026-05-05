@@ -1,7 +1,12 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { PerDrillCapture } from '../components/PerDrillCapture'
-import { SafetyIcon } from '../components/SafetyIcon'
-import { Button, ScreenShell, StatusMessage } from '../components/ui'
+import {
+  Button,
+  JustFinishedPill,
+  RunFlowHeader,
+  ScreenShell,
+  StatusMessage,
+} from '../components/ui'
 import { routes } from '../routes'
 import { useDrillCheckController } from './drillCheck/useDrillCheckController'
 
@@ -113,26 +118,23 @@ export function DrillCheckScreen() {
           immediately downstream looks forward to block N+1. The pair
           (Last → Next) makes the run-flow rhythm feel intentional
           rather than incidental. */}
-      {/*
-        Header layout: 3-column grid for true center-alignment of
-        the middle eyebrow. See `RunScreen.tsx`'s header block
-        comment for the math on why `flex justify-between` drifts
-        the middle item off-center when SafetyIcon (56 px) and the
-        counter have asymmetric widths. Same fix applied here for
-        run-flow visual consistency across Run / Transition /
-        DrillCheck.
-      */}
-      <ScreenShell.Header className="grid grid-cols-3 items-center pt-2 pb-3">
-        <div className="justify-self-start">
-          <SafetyIcon />
-        </div>
-        <span className="justify-self-center text-sm font-medium text-text-secondary">
-          Drill check
-        </span>
-        <span className="justify-self-end text-sm font-medium text-text-secondary">
-          Last: {prevBlockIdx + 1}/{totalBlocks}
-        </span>
-      </ScreenShell.Header>
+      {/* The 3-column grid layout (and the "why grid not flex"
+          rationale) lives once on `RunFlowHeader` (plan U5). The
+          eyebrow says "Drill check" instead of "Transition" so the
+          user's mental model differentiates the reflective beat from
+          the rehearsal beat — same rhythm, different job. Block
+          counter uses the *previous* block index since we're
+          reflecting on the just-finished block. */}
+      <RunFlowHeader
+        eyebrow={
+          <span className="text-sm font-medium text-text-secondary">Drill check</span>
+        }
+        counter={
+          <span className="text-sm font-medium text-text-secondary">
+            Last: {prevBlockIdx + 1}/{totalBlocks}
+          </span>
+        }
+      />
 
       {/*
         Body is intentionally sparse: the just-finished pill (so the
@@ -149,26 +151,7 @@ export function DrillCheckScreen() {
         — that lives on the next screen by design.
       */}
       <ScreenShell.Body className="items-stretch gap-6 pb-4 pt-2">
-        <div className="flex items-start gap-2.5 rounded-[12px] bg-bg-warm p-3">
-          <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success text-white">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          </div>
-          <div>
-            <p className="font-semibold text-text-primary">{captureTarget.drillName}</p>
-            <p className="text-sm text-success">Complete</p>
-          </div>
-        </div>
+        <JustFinishedPill drillName={captureTarget.drillName} status="completed" />
 
         {/*
           D134 (2026-04-28): the controller exposes a `CaptureShape`

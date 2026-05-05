@@ -8,7 +8,7 @@ stage: validation
 type: spec
 authority: home screen states, weak-connectivity behavior, sync copy principles
 summary: "Home screen states, first-run activation path, weak-connectivity behavior, and the three-state save copy that matches the iPhone durability model."
-last_updated: 2026-04-19
+last_updated: 2026-05-02
 depends_on:
 
 - docs/milestones/m001-solo-session-loop.md
@@ -33,7 +33,7 @@ decision_refs:
 
 Capture the first mobile home-state assumptions and the user-visible behavior under weak connectivity.
 
-The v0a validation prototype in `app/` currently implements a partial version of this spec. M001 full build remains gated by field testing. See `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for as-built deviations.
+The v0b Starter Loop in `app/` implements the current Home, local-save, and installed-PWA posture. Older v0a deviations are preserved in `docs/research/2026-04-12-v0a-runner-probe-feedback.md` for retrospective context.
 
 ## Default home state
 

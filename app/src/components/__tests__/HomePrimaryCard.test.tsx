@@ -94,7 +94,7 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
     const region = screen.getByRole('region')
     expect(region).toHaveAttribute('aria-label', expect.stringMatching(/first/i))
 
-    await user.click(screen.getByRole('button', { name: /start first workout/i }))
+    await user.click(screen.getByRole('button', { name: /start first session/i }))
     expect(onStart).toHaveBeenCalledTimes(1)
   })
 
@@ -149,7 +149,7 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('draft: renders Session draft + Review session + Change setup', async () => {
+  it('draft: renders Session ready + Continue + Change setup', async () => {
     const user = userEvent.setup()
     const onStart = vi.fn()
     const onEdit = vi.fn()
@@ -158,11 +158,11 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
 
     expect(screen.getByRole('region')).toHaveAttribute(
       'aria-label',
-      expect.stringMatching(/session draft/i),
+      expect.stringMatching(/session ready/i),
     )
     expect(screen.getByText(/solo \+ wall/i)).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /review session/i }))
+    await user.click(screen.getByRole('button', { name: /^continue$/i }))
     expect(onStart).toHaveBeenCalledTimes(1)
 
     // Phase F Unit 1: button text renamed from "Edit" to "Change setup"
@@ -174,7 +174,7 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
     expect(screen.queryByRole('button', { name: /^edit$/i })).not.toBeInTheDocument()
   })
 
-  it('last_complete ended-early: renders TWO buttons (Repeat full N-min + Repeat what you did M min)', async () => {
+  it('last_complete ended-early: renders TWO buttons (Repeat full plan + Repeat shorter version)', async () => {
     const user = userEvent.setup()
     const onRepeat = vi.fn()
     const onRepeatWhatYouDid = vi.fn()
@@ -239,12 +239,12 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
       />,
     )
 
-    // Primary: "Repeat full 25-min plan" (3 + 11 + 11).
-    await user.click(screen.getByRole('button', { name: /repeat full 25-min plan/i }))
+    // Primary: "Repeat full plan" (3 + 11 + 11).
+    await user.click(screen.getByRole('button', { name: /repeat full plan/i }))
     expect(onRepeat).toHaveBeenCalledTimes(1)
 
-    // Secondary: "Repeat what you did (14 min)" (3 + 11).
-    await user.click(screen.getByRole('button', { name: /repeat what you did \(14 min\)/i }))
+    // Secondary: "Repeat shorter version (14 min)" (3 + 11).
+    await user.click(screen.getByRole('button', { name: /repeat shorter version \(14 min\)/i }))
     expect(onRepeatWhatYouDid).toHaveBeenCalledTimes(1)
 
     // "ended early" annotation in the body.
@@ -302,12 +302,12 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
       />,
     )
 
-    expect(screen.queryByRole('button', { name: /repeat what you did/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /repeat shorter version/i })).not.toBeInTheDocument()
     // Primary still renders.
-    expect(screen.getByRole('button', { name: /repeat full 14-min plan/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /repeat full plan/i })).toBeInTheDocument()
   })
 
-  it('last_complete (Phase F Unit 1): renders Repeat + Start a different session, no Edit or Same-as-last-time', async () => {
+  it('last_complete (Phase F Unit 1): renders Repeat last session + Start a different session, no Edit or Same-as-last-time', async () => {
     const user = userEvent.setup()
     const onRepeat = vi.fn()
     const onStartDifferent = vi.fn()
@@ -323,10 +323,10 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
 
     expect(screen.getByRole('region')).toHaveAttribute(
       'aria-label',
-      expect.stringMatching(/last session/i),
+      expect.stringMatching(/train again/i),
     )
 
-    await user.click(screen.getByRole('button', { name: /repeat this session/i }))
+    await user.click(screen.getByRole('button', { name: /repeat last session/i }))
     expect(onRepeat).toHaveBeenCalledTimes(1)
 
     await user.click(screen.getByRole('button', { name: /start a different session/i }))
