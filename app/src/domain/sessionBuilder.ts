@@ -11,6 +11,10 @@ import { pickForSlot, type CandidateVariant } from './sessionAssembly/candidates
 import { allocateDurations, allocateRecoveryDurations } from './sessionAssembly/durations'
 import { createAssemblySeed, createSeededRandom } from './sessionAssembly/random'
 import { deriveBlockRationale } from './sessionAssembly/rationale'
+import {
+  RECOVERY_REDISTRIBUTION_PRIORITY,
+  snapWarmupWrapDurations,
+} from './sessionAssembly/snapDurations'
 import { pickMainSkillSubstitute } from './sessionAssembly/substitution'
 export {
   findSwapAlternatives,
@@ -18,7 +22,16 @@ export {
 } from './sessionAssembly/swapAlternatives'
 export { deriveBlockRationale } from './sessionAssembly/rationale'
 
-export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 1
+/**
+ * Bumped from 1 to 2 in the 2026-05-04 warmup/wrap segment-snap ship
+ * (`docs/plans/2026-05-04-002-feat-warmup-wrap-segment-snap-plan.md`).
+ * v2 assembly snaps warmup/wrap blocks down to the chosen variant's
+ * natural segment sum (`workload.durationMinMinutes`) and redistributes
+ * freed minutes into focus-aligned work slots. Plans persisted with v1
+ * keep replaying as v1 (`buildDraftFromCompletedBlocks` reads the
+ * version off the plan record); only freshly-built drafts use v2.
+ */
+export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 2
 
 /**
  * Optional inputs that scope build-time drill substitution.
@@ -74,8 +87,6 @@ export function buildDraft(
   if (!durations) return null
 
   const usedDrillIds = new Set<string>()
-  const blocks: DraftBlock[] = []
-  let blockIndex = 0
 
   // Decide build-time substitution UP FRONT and reserve the
   // substitute drillId so earlier slots in the layout (e.g.,
@@ -101,6 +112,14 @@ export function buildDraft(
     }
   }
 
+  // Two-phase block construction: phase 1 resolves all picks so the
+  // warmup/wrap segment snap (phase 1.5) can see the full set, then
+  // phase 2 writes blocks using the snapped durations. Required-slot
+  // failure short-circuits during phase 1 so callers get the same
+  // null shape they did pre-snap.
+  const picks: (CandidateVariant | undefined)[] = new Array(layout.length).fill(undefined)
+  const rationales: (string | undefined)[] = new Array(layout.length).fill(undefined)
+
   for (let i = 0; i < layout.length; i++) {
     const slot = layout[i]
 
@@ -122,6 +141,28 @@ export function buildDraft(
     }
 
     usedDrillIds.add(pick.drill.id)
+    picks[i] = pick
+    rationales[i] = substitutionRationale
+  }
+
+  // Phase 1.5: warmup/wrap segment snap + focus-aware redistribution.
+  // See `snapWarmupWrapDurations` for the rule. No-op for builds where
+  // every warmup/wrap variant's natural sum already equals the
+  // allocated slot duration (Solo + Wall 15-min with d28 + d25, etc.).
+  const snappedDurations = snapWarmupWrapDurations(
+    layout,
+    durations,
+    picks,
+    context.sessionFocus,
+  )
+
+  const blocks: DraftBlock[] = []
+  let blockIndex = 0
+
+  for (let i = 0; i < layout.length; i++) {
+    const slot = layout[i]
+    const pick = picks[i]
+    if (!pick) continue
 
     blocks.push({
       id: `block-${blockIndex++}`,
@@ -130,7 +171,7 @@ export function buildDraft(
       variantId: pick.variant.id,
       drillName: pick.drill.name,
       shortName: pick.drill.shortName,
-      durationMinutes: durations[i],
+      durationMinutes: snappedDurations[i],
       coachingCue:
         pick.variant.coachingCues.length > 0
           ? pick.variant.coachingCues.join(' · ')
@@ -138,7 +179,7 @@ export function buildDraft(
       courtsideInstructions: pick.variant.courtsideInstructions,
       courtsideInstructionsBonus: pick.variant.courtsideInstructionsBonus,
       required: slot.required,
-      rationale: substitutionRationale ?? deriveBlockRationale(slot.type, pick.drill, context),
+      rationale: rationales[i] ?? deriveBlockRationale(slot.type, pick.drill, context),
       subBlockIntervalSeconds: pick.variant.subBlockIntervalSeconds,
       segments: pick.variant.segments,
     })
@@ -305,15 +346,37 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
   if (!durations) return null
 
   const usedDrillIds = new Set<string>()
+
+  // Two-phase build matching `buildDraft`. Recovery redistribution
+  // targets technique/movement_proxy only — `main_skill` and
+  // `pressure` are not in `RECOVERY_BLOCK_SLOT_TYPES` so they're
+  // already absent from `recoveryLayout`. Recovery strips
+  // `sessionFocus` (see `stripSessionFocus` above), so we pass an
+  // explicit recovery priority instead of letting focus drive.
+  const picks: (CandidateVariant | undefined)[] = new Array(recoveryLayout.length).fill(undefined)
+  for (let i = 0; i < recoveryLayout.length; i++) {
+    const slot = recoveryLayout[i]
+    const pick = pickForSlot(slot, recoveryContext, usedDrillIds, random)
+    if (!pick) continue
+    usedDrillIds.add(pick.drill.id)
+    picks[i] = pick
+  }
+
+  const snappedDurations = snapWarmupWrapDurations(
+    recoveryLayout,
+    durations,
+    picks,
+    undefined,
+    { priority: RECOVERY_REDISTRIBUTION_PRIORITY, allowSlotMaxOverflow: true },
+  )
+
   const blocks: DraftBlock[] = []
   let blockIndex = 0
 
   for (let i = 0; i < recoveryLayout.length; i++) {
     const slot = recoveryLayout[i]
-    const pick = pickForSlot(slot, recoveryContext, usedDrillIds, random)
+    const pick = picks[i]
     if (!pick) continue
-
-    usedDrillIds.add(pick.drill.id)
 
     blocks.push({
       id: `block-${blockIndex++}`,
@@ -322,7 +385,7 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
       variantId: pick.variant.id,
       drillName: pick.drill.name,
       shortName: pick.drill.shortName,
-      durationMinutes: durations[i],
+      durationMinutes: snappedDurations[i],
       coachingCue:
         pick.variant.coachingCues.length > 0
           ? pick.variant.coachingCues.join(' · ')
