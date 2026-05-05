@@ -5,9 +5,15 @@ import { useInstallPosture } from '../hooks/useInstallPosture'
 import { BUILD_DATE, BUILD_VERSION } from '../lib/buildInfo'
 import { formatTotalDurationLine } from '../lib/format'
 import { isSchemaBlocked } from '../lib/schema-blocked'
+import {
+  isSkillLevel,
+  SKILL_LEVEL_LABEL,
+  type SkillLevel,
+} from '../lib/skillLevel'
 import { getStorageCopy } from '../lib/storageCopy'
 import { downloadExport } from '../services/export'
 import { getSessionTallySummary, type SessionTallySummary } from '../services/session'
+import { getStorageMeta } from '../services/storageMeta'
 import { routes } from '../routes'
 
 /**
@@ -55,6 +61,29 @@ export function SettingsScreen() {
         if (isSchemaBlocked()) return
         // Fail quiet — the footer simply hides for this render.
         console.error('Settings tally read failed:', err)
+      },
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // 2026-05-04 skill-level-mutability ship, U5: read the user's
+  // saved onboarding.skillLevel for the Skill level section's
+  // current-value display. Single-shot read on mount (matches the
+  // tally pattern); the section hides when no value is present
+  // (defensive — FirstOpenGate normally guarantees a value before
+  // Settings is reachable).
+  const [skillLevel, setSkillLevel] = useState<SkillLevel | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    getStorageMeta('onboarding.skillLevel', isSkillLevel).then(
+      (value) => {
+        if (!cancelled) setSkillLevel(value ?? null)
+      },
+      (err) => {
+        if (isSchemaBlocked()) return
+        console.error('Settings skill level read failed:', err)
       },
     )
     return () => {
@@ -141,6 +170,53 @@ export function SettingsScreen() {
           )}
           {state.kind === 'error' && <StatusMessage variant="error" message={state.message} />}
         </Card>
+
+        {/* 2026-05-04 skill-level-mutability ship (R2): Skill level
+            section between Export card and About local storage.
+            Displays the user's current saved level using the 5-tier
+            SKILL_LEVEL_LABEL (the user-facing identity vocabulary)
+            and offers a Change affordance routing to the new
+            sub-route. When the read returns `null` (key absent or
+            value fails `isSkillLevel` — defensive; FirstOpenGate
+            normally guarantees a value), render a fallback "Set your
+            skill level" row instead of hiding the section entirely.
+            The Tune today eyebrow tells users to "adjust in
+            Settings" — silently hiding the surface there would be a
+            broken promise (per ce-adversarial-reviewer ADV-9). */}
+        <section
+          aria-labelledby="settings-skill-level-heading"
+          data-testid="settings-skill-level"
+          className="flex flex-col gap-2 rounded-[12px] border border-text-secondary/15 bg-bg-warm/40 p-4"
+        >
+          <h2 id="settings-skill-level-heading" className="text-sm font-semibold text-text-primary">
+            Skill level
+          </h2>
+          {skillLevel ? (
+            <>
+              <p className="text-sm text-text-secondary">
+                Your level:{' '}
+                <span className="font-medium text-text-primary">
+                  {SKILL_LEVEL_LABEL[skillLevel]}
+                </span>
+                .
+              </p>
+              <div>
+                <Button variant="link" onClick={() => navigate(routes.settingsSkillLevel())}>
+                  Change
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-text-secondary">No level saved yet.</p>
+              <div>
+                <Button variant="link" onClick={() => navigate(routes.settingsSkillLevel())}>
+                  Set your skill level
+                </Button>
+              </div>
+            </>
+          )}
+        </section>
 
         {/* 2026-04-23 walkthrough closeout polish item 3: About local
             storage sub-section, below the Export card. Scope-guardian

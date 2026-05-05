@@ -45,4 +45,26 @@ export interface SessionDraft {
   blocks: DraftBlock[]
   updatedAt: number
   rationale?: string
+  /**
+   * Build-time signal computed by `buildDraft` and persisted on the
+   * draft row so the Tune today eyebrow survives reload. `true` when
+   * the assembly engine had to relax the user's saved skill level
+   * for ≥1 focus-controlled slot (`main_skill` / `pressure`) to
+   * fill the draft. See R10 / KD9 of
+   * `docs/brainstorms/2026-05-04-skill-level-mutability-requirements.md`.
+   *
+   * Lifecycle: `buildDraft` → `sessionDrafts` row → `useTuneTodayController`
+   * → eyebrow render. Intentionally NOT promoted to `SessionPlan`
+   * because the draft is the only surface that needs it (the
+   * eyebrow lives on Tune today, which only sees drafts) — the
+   * boundary is build-vs-plan, not domain-vs-UI. Legacy drafts (pre-
+   * 2026-05-04) read as `undefined`; the eyebrow's strict-equality
+   * `=== true` check renders nothing in that case.
+   *
+   * Drafts produced by `buildDraftFromCompletedBlocks` and
+   * `buildRecoveryDraft` set `false` unconditionally: recovery is
+   * load-down regardless of level; repeat carries the original plan
+   * context but does not re-run the level-relax detection.
+   */
+  levelRelaxed?: boolean
 }

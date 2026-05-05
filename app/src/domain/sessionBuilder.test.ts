@@ -1195,4 +1195,87 @@ describe('sessionBuilder', () => {
       }
     })
   })
+
+  describe('skill-level engine wiring (2026-05-04 brainstorm v3 / KD2 / KD9)', () => {
+    // The engine wiring for onboarding skill level is opt-in: when
+    // `options.onboarding` is omitted, pickers use the pre-engine-
+    // wiring single-pass path (golden-seed pin tests above remain
+    // green). When `options.onboarding` is provided, the in-band
+    // partition + focus-held level-relax fallback fires.
+    const baseContext: SetupContext = {
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: true,
+      wallAvailable: false,
+    }
+
+    it('attaches levelRelaxed: false to the returned draft when onboarding is omitted', () => {
+      const draft = buildDraft(baseContext, { assemblySeed: 'level-omit-test' })
+      expect(draft).not.toBeNull()
+      expect(draft!.levelRelaxed).toBe(false)
+    })
+
+    it('attaches levelRelaxed: false to the draft when onboarding maps to beginner and catalog has full pass coverage', () => {
+      // 'foundations' → 'beginner'; the catalog has 26 beginner-min
+      // drills so a Pass + Beginner build never triggers relaxation.
+      const draft = buildDraft(baseContext, {
+        assemblySeed: 'level-beginner-test',
+        onboarding: 'foundations',
+      })
+      expect(draft).not.toBeNull()
+      expect(draft!.levelRelaxed).toBe(false)
+    })
+
+    it('attaches levelRelaxed: true when onboarding is competitive_pair (advanced) on a focus-controlled session', () => {
+      // 'competitive_pair' → 'advanced'; catalog has zero
+      // levelMax: 'advanced' drills with serve focus, so any serving
+      // session forces the focus-controlled main_skill / pressure
+      // slots to relax level.
+      const draft = buildDraft(
+        { ...baseContext, sessionFocus: 'serve' },
+        {
+          assemblySeed: 'level-advanced-serve-test',
+          onboarding: 'competitive_pair',
+        },
+      )
+      expect(draft).not.toBeNull()
+      expect(draft!.levelRelaxed).toBe(true)
+    })
+
+    it('treats unsure as beginner per KD8 (engine read post-engine-wiring re-validation)', () => {
+      const draft = buildDraft(baseContext, {
+        assemblySeed: 'level-unsure-test',
+        onboarding: 'unsure',
+      })
+      expect(draft).not.toBeNull()
+      // 'unsure' → 'beginner'; same outcome as 'foundations' for a
+      // pass-focused build with full beginner catalog coverage.
+      expect(draft!.levelRelaxed).toBe(false)
+    })
+
+    it('falls through to beginner for missing or malformed onboarding values', () => {
+      const draftNull = buildDraft(baseContext, {
+        assemblySeed: 'level-malformed-null',
+        onboarding: null,
+      })
+      expect(draftNull).not.toBeNull()
+      expect(draftNull!.levelRelaxed).toBe(false)
+
+      const draftUnknown = buildDraft(baseContext, {
+        assemblySeed: 'level-malformed-unknown',
+        onboarding: 'expert',
+      })
+      expect(draftUnknown).not.toBeNull()
+      expect(draftUnknown!.levelRelaxed).toBe(false)
+    })
+
+    it('buildRecoveryDraft sets levelRelaxed: false unconditionally (recovery is load-down)', () => {
+      const recovery = buildRecoveryDraft({
+        ...baseContext,
+        sessionFocus: 'serve',
+      })
+      expect(recovery).not.toBeNull()
+      expect(recovery!.levelRelaxed).toBe(false)
+    })
+  })
 })

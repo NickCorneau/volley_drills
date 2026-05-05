@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
   "repo_id": "volley_drills",
-  "last_updated": "2026-05-04",
+  "last_updated": "2026-05-05",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -632,6 +632,20 @@
       "type": "research",
       "status": "active",
       "canonical_for": "Curated field feedback from the 2026-05-04 founder + Seb pair + net 40-min serving-led session against the post-Tune-today (2026-04-30) build (`assemblyAlgorithmVersion: 6`). Plan `d8b1ac8f-…` / execution `3d8ac8f9-…`, completed, RPE 5, one swap (`d10-pair` → `d40-pair`), four `still_learning` per-drill captures with no Good/Total counts entered. **Positives validated** (F1–F5): Tune today + Recommended-as-peer worked at courtside speed; the longer 10-min `main_skill` block (`d51-pair` Outside the Heart Serving) was appreciated; the per-move pacing indicator V1–V4 reads as direct; drill copy felt 'dummy proof' with less coach-side commentary than prior pair sessions. **Frictions** (F6, F7): warmup and cooldown still felt timing-off — three plausible axes recorded (planned-block-duration > segment-sum gap on 5-min slots, audio-pacing platform residual, bonus-copy discoverability); reading drill copy aloud felt 'a little inconvenient' on the partner side (single-instance soft signal). **Wishlist named in one session** (F8–F11): clickable glossary for technical terms (e.g. 'set window'), optional YouTube example links per drill, tappable past-session list with captured drill data ('every time I open the app and I see my past sessions, I want to click on this'), trends/dashboard for skill progress over time and as input to focus recommendations. F8 / F9 routed to ideation backlog under D135 founder-feature-wish framing; F10 and F11 are partner-walkthrough-class behavioral input for the M001 Tier 2 'full session history screen' surface and the M002 weekly-receipt scope, but neither flips Tier 2 by itself (still gated on Tier 1a acceptance + Condition 3 pass). F6 strengthens the still-fired `S1` line in `docs/ideation/2026-04-28-what-to-add-next-ideation.md`. Does not modify D26, D27, D74, D124, D130, D133, D135, or any milestone scope row."
+    },
+    {
+      "id": "skill-level-mutability-requirements-2026-05-04",
+      "path": "docs/brainstorms/2026-05-04-skill-level-mutability-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for the D135-fired skill-level mutability surface. v3 pivot (recorded in iteration log) replaces the original Tune today second-row chip design with a Settings + Tune today eyebrow shape — Settings hosts the durable change to `storageMeta.onboarding.skillLevel` (reusing the 5-tier `SkillLevelScreen` UI via shared `SkillLevelPicker`), Tune today renders one inline eyebrow above Continue when the engine had to relax the user's saved level for ≥1 focus-controlled slot today (tappable to Settings). Engine wiring (effectiveLevel resolver, partitionByLevel primitive, two-pass candidate-pool wiring across pickForSlot / pickMainSkillSubstitute / findSwapAlternatives, buildDraft attaching levelRelaxed to SessionDraft) survives intact — the engine has been silently ignoring `onboarding.skillLevel` since v0b. No `SetupContext.skillLevelOverride?` field; no per-session calibration chip; no `regenerateDraftFocus` extension; no asymmetric strip discipline; no Dexie schema migration."
+    },
+    {
+      "id": "skill-level-mutability-2026-05-04",
+      "path": "docs/plans/2026-05-04-001-feat-skill-level-mutability-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "canonical_for": "Implementation plan for the 2026-05-04 skill-level mutability ship (post-pivot to Settings + Tune today eyebrow). 9 implementation units: U1 effectiveLevel resolver + partitionByLevel primitive, U2 wire resolver into pickForSlot / pickMainSkillSubstitute / findSwapAlternatives + buildDraft attaches levelRelaxed to SessionDraft (both opt-in via the new `onboarding?` BuildDraftOptions field — preserves golden-seed pin tests), U3 wire onboarding through SetupScreen.handleConfirm + HomeScreen.handleRepeat + regenerateDraftFocus (read outside the rw transaction), U4 extract SkillLevelPicker shared component (zero behavior change to onboarding), U5 SettingsSkillLevelScreen sub-route at /settings/skill-level + Skill level section on SettingsScreen + route + P12 contract, U6 TuneTodayScreen inline relaxation eyebrow above Continue (tappable to Settings) + controller exposes levelRelaxed, U7 JSDoc note on `skillLevelToDrillBand` documenting the post-engine-wiring re-validation of `unsure → beginner`, U8 cross-cutting buildDraft callsite sweep (1053/1053 tests green), U9 catalog + status sync. No SetupContext field added; no Dexie schema migration; no telemetry; no Tier 1b cap consumption."
     },
     {
       "id": "agent-documentation-contract",

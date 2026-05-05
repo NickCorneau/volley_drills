@@ -152,4 +152,88 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
 
     downloadSpy.mockRestore()
   })
+
+  describe('Skill level section (2026-05-04 skill-level-mutability ship, U5)', () => {
+    it('renders the saved skill level using the 5-tier label', async () => {
+      await db.storageMeta.put({
+        key: 'onboarding.skillLevel',
+        value: 'rally_builders',
+        updatedAt: Date.now(),
+      })
+
+      render(
+        <MemoryRouter initialEntries={['/settings']}>
+          <Routes>
+            <Route path="/settings" element={<SettingsScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      // The section renders immediately (always-on per the
+      // ADV-9-driven fallback), but its body waits for the async
+      // skillLevel read. Wait for the resolved label text to
+      // appear rather than asserting on the initial fallback state.
+      expect(await screen.findByText('Rally builders')).toBeInTheDocument()
+      const section = screen.getByTestId('settings-skill-level')
+      expect(section).toHaveTextContent('Skill level')
+      expect(section).toHaveTextContent(/Your level/i)
+    })
+
+    it('Change button navigates to /settings/skill-level', async () => {
+      await db.storageMeta.put({
+        key: 'onboarding.skillLevel',
+        value: 'side_out_builders',
+        updatedAt: Date.now(),
+      })
+
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/settings']}>
+          <Routes>
+            <Route path="/settings" element={<SettingsScreen />} />
+            <Route
+              path="/settings/skill-level"
+              element={<div data-testid="settings-skill-level-route">sub-route</div>}
+            />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      await screen.findByTestId('settings-skill-level')
+      await user.click(screen.getByRole('button', { name: /change/i }))
+      expect(await screen.findByTestId('settings-skill-level-route')).toBeInTheDocument()
+    })
+
+    it('renders a "Set your skill level" fallback when no level is persisted (defensive — preserves the eyebrow promise)', async () => {
+      // Defensive path: FirstOpenGate normally guarantees a value
+      // before Settings is reachable, but if onboarding.skillLevel
+      // is somehow missing (legacy upgrade path, malformed value),
+      // the section MUST surface a Set affordance instead of
+      // hiding silently — the Tune today eyebrow tells users to
+      // "adjust in Settings", and a hidden section breaks that
+      // promise (per ce-adversarial-reviewer ADV-9).
+      render(
+        <MemoryRouter initialEntries={['/settings']}>
+          <Routes>
+            <Route path="/settings" element={<SettingsScreen />} />
+            <Route
+              path="/settings/skill-level"
+              element={<div data-testid="settings-skill-level-route">sub-route</div>}
+            />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      // Wait for the section to render.
+      const section = await screen.findByTestId('settings-skill-level')
+      expect(section).toBeInTheDocument()
+      expect(section).toHaveTextContent(/no level saved yet/i)
+
+      // Set affordance navigates to the sub-route, where the user
+      // can pick a level.
+      const user = userEvent.setup()
+      await user.click(screen.getByRole('button', { name: /set your skill level/i }))
+      expect(await screen.findByTestId('settings-skill-level-route')).toBeInTheDocument()
+    })
+  })
 })

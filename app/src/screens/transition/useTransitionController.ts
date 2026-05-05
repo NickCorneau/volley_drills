@@ -71,6 +71,13 @@ export function useTransitionController(executionLogId: string) {
     }
   }, [runner])
 
+  // hasAlternates is a boolean count check; the K5 level partition
+  // is sort-only (doesn't change the count), so we deliberately omit
+  // `effectiveLevelValue` here. The actual mid-session swap path in
+  // `useSessionRunner.swapBlock` IS level-aware (passes the cached
+  // effective level into `findSwapAlternatives`), so the displayed
+  // Swap button accurately reflects whether at least one alternate
+  // exists, and the executed swap honors the user's saved level.
   const hasAlternates = plan?.context && nextBlock
     ? findSwapAlternatives(nextBlock, plan.context).length > 0
     : false

@@ -3,12 +3,15 @@ import { SUBSTITUTION_RULES } from '../../data/substitutionRules'
 import type {
   BlockSlot,
   BlockSlotType,
+  PlayerLevel,
   SessionPlanBlock,
   SetupContext,
   SkillFocus,
 } from '../../model'
 import { findPreferredCandidate, findSubstitute } from '../drillSelection'
 import { findCandidates } from './candidates'
+import { FOCUS_CONTROLLED_SLOT_TYPES } from './effectiveFocus'
+import { partitionByLevel } from './partitionByLevel'
 import { deriveBlockRationale, deriveSubstitutionRationale } from './rationale'
 
 const SKILL_TAGS_BY_TYPE: Record<BlockSlotType, readonly SkillFocus[]> = {
@@ -22,6 +25,17 @@ const SKILL_TAGS_BY_TYPE: Record<BlockSlotType, readonly SkillFocus[]> = {
 
 export type FindSwapAlternativesOptions = {
   readonly excludeDrillNames?: readonly string[]
+  /**
+   * Effective skill level for the active session. When provided, the
+   * swap alternatives are sorted `[in-band-first, out-of-band-after]`
+   * so the user's saved level shapes the visible order. When omitted
+   * (e.g., legacy test fixtures), no level-based reordering is
+   * applied. Per K5 of the
+   * `2026-05-04-001-feat-skill-level-mutability-plan.md`, swap is
+   * user-driven so this is sort-only — all alternatives stay visible.
+   * The build-time `levelRelaxed` flag does NOT fire from this path.
+   */
+  readonly effectiveLevelValue?: PlayerLevel
 }
 
 function findPreferredProgressionTarget(drillId: string): string | undefined {
@@ -53,7 +67,7 @@ export function findSwapAlternatives(
   // accept the small intent-violation (a passing alternate during
   // a "set session") because no-swap is a worse mid-run outcome and
   // the user can still see today's focus on the rest of the plan.
-  const isFocusControlled = block.type === 'main_skill' || block.type === 'pressure'
+  const isFocusControlled = FOCUS_CONTROLLED_SLOT_TYPES.has(block.type)
   if (isFocusControlled && context.sessionFocus !== undefined) {
     const widenedContext: SetupContext = { ...context }
     delete widenedContext.sessionFocus
@@ -124,6 +138,35 @@ function computeAlternatives(
         )
       }
     }
+  }
+
+  // K5: apply level partition LAST (after preferred-progression and
+  // substitute promotion). Promotion wins ties; level breaks order
+  // among unrelated drills. Only sorts when an effectiveLevelValue
+  // was provided so legacy callers and test fixtures see no
+  // ordering change.
+  //
+  // Critical: the promoted target (preferred-progression next or
+  // blocked-progression substitute) must stay at index 0 even when
+  // it falls in the out-of-band partition, otherwise level sorting
+  // would bury the user's natural next progression behind every
+  // in-band alternative. Capture the promoted candidate before
+  // partitioning, partition the rest, prepend the promoted candidate.
+  if (options?.effectiveLevelValue !== undefined && filtered.length > 0) {
+    const promotedIds = new Set(rationaleByDrillId.keys())
+    // The preferred-progression-target promotion (above) does not
+    // populate `rationaleByDrillId`; check the head element for that
+    // case by detecting whether `findPreferredProgressionTarget`
+    // landed at index 0.
+    const head = filtered[0]
+    const isPromotedHead =
+      promotedIds.has(head.drill.id) ||
+      (block.drillId !== undefined &&
+        findPreferredProgressionTarget(block.drillId) === head.drill.id)
+    const promoted = isPromotedHead ? head : undefined
+    const tail = isPromotedHead ? filtered.slice(1) : filtered
+    const { inBand, outOfBand } = partitionByLevel(tail, options.effectiveLevelValue)
+    filtered = promoted ? [promoted, ...inBand, ...outOfBand] : [...inBand, ...outOfBand]
   }
 
   return filtered.map((candidate) => ({

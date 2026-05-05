@@ -99,6 +99,13 @@ export const SCREEN_CONTRACTS: Record<RouteKey, ScreenContract> = {
       'Settings is multi-purpose founder/founder-mode tooling (export, replay, build info). It deliberately surfaces several actions and is reviewed against `docs/vision.md` P14, not P12.',
     trackedIn: 'docs/plans/2026-04-26-app-architecture-pass.md (U7)',
   }),
+  settingsSkillLevel: defineScreenContract({
+    route: '/settings/skill-level',
+    screen: 'SettingsSkillLevel',
+    action: 'Update your saved skill level so future sessions match where you actually are today.',
+    signal: 'The same 5-card SkillLevelPicker from onboarding, with a Settings-flavored heading.',
+    reason: 'Per the 2026-05-04 skill-level-mutability ship, the durable change surface for the user\'s onboarding skill level — fixes mis-onboarded answers without re-running the first-open flow.',
+  }),
   onboardingSkillLevel: defineScreenContract({
     route: '/onboarding/skill-level',
     screen: 'SkillLevel',

@@ -6,6 +6,7 @@ import type { SetupContext } from '../db/types'
 import { buildDraft } from '../domain/sessionBuilder'
 import { isOnboardingStep } from '../lib/onboarding'
 import { isSchemaBlocked } from '../lib/schema-blocked'
+import { isSkillLevel } from '../lib/skillLevel'
 import {
   findLastCompletedDrillIdsByType,
   getCurrentDraft,
@@ -133,14 +134,32 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       // fails (Dexie schema-blocked, etc.) we fall back to the legacy
       // default selection path - substitution is an enhancement, not
       // a requirement for build to proceed.
+      //
+      // Onboarding skill level read in parallel so the engine can
+      // honor the user's saved level via `effectiveLevel` (2026-05-04
+      // skill-level-mutability ship). Reads are independent
+      // (`Promise.allSettled`) so a non-schema-blocked failure of one
+      // does not drop the other — the engine's documented
+      // fallthroughs (empty `lastCompletedByType` map, 'beginner'
+      // effective level) absorb each independently.
       let lastCompletedByType: Partial<Record<BlockSlotType, string>> = {}
-      try {
-        lastCompletedByType = await findLastCompletedDrillIdsByType()
-      } catch {
-        if (isSchemaBlocked()) return
+      let onboarding: unknown = undefined
+      const [lastResult, onboardingResult] = await Promise.allSettled([
+        findLastCompletedDrillIdsByType(),
+        getStorageMeta('onboarding.skillLevel', isSkillLevel),
+      ])
+      if (lastResult.status === 'fulfilled') {
+        lastCompletedByType = lastResult.value
+      } else if (isSchemaBlocked()) {
+        return
+      }
+      if (onboardingResult.status === 'fulfilled') {
+        onboarding = onboardingResult.value
+      } else if (isSchemaBlocked()) {
+        return
       }
 
-      const draft = buildDraft(context, { lastCompletedByType })
+      const draft = buildDraft(context, { lastCompletedByType, onboarding })
       if (!draft) {
         setError("Can't build a session for these constraints. Try different options.")
         return

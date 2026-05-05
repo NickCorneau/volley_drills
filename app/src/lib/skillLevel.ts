@@ -89,6 +89,36 @@ export const SKILL_LEVEL_LABEL: Record<SkillLevel, string> = {
  * the engine should happen by extending the drill metadata (e.g. adding a
  * finer-grained `skillBandRecommendation` field) rather than by widening
  * `PlayerLevel`, so that drill rows stay readable.
+ *
+ * **2026-05-04 (skill-level-mutability ship): re-validated post-engine-wiring.**
+ * The mapping above was authored when the assembly engine ignored
+ * `skillLevel` entirely. The 2026-05-04 ship wires the engine to
+ * read `effectiveLevel(onboarding)` (see
+ * `app/src/domain/sessionAssembly/effectiveLevel.ts`), so the
+ * `'unsure' → 'beginner'` row now has user-visible weight: an
+ * `'unsure'` user is pinned to the Beginner band by every focus-
+ * controlled candidate-pool query.
+ *
+ * Three alternatives were evaluated and rejected (KD8 of
+ * `docs/brainstorms/2026-05-04-skill-level-mutability-requirements.md`):
+ *
+ * 1. Map `'unsure'` to "no level constraint." Rejected: the
+ *    resolver always needs a concrete `PlayerLevel` value;
+ *    introducing a wildcard would force a wider engine refactor.
+ * 2. Force a one-time explicit pick on first Tune today visit for
+ *    `'unsure'` users. Rejected: adds friction for the user least
+ *    likely to know the answer.
+ * 3. Keep `'unsure' → 'beginner'` (selected). The Settings sub-route
+ *    (`/settings/skill-level`) is the durable escape hatch when an
+ *    `'unsure'` user discovers their actual level; the Tune today
+ *    relaxation eyebrow surfaces engine relaxation when the catalog
+ *    cannot honor a non-Beginner pick.
+ *
+ * If a future ship (e.g., the catalog gains Advanced focus-
+ * controlled drills) re-opens this question, also re-read
+ * `docs/research/2026-04-28-build17-pair-dogfeed-feedback.md` F4
+ * and any newer founder-ledger evidence about `'unsure'` user
+ * behavior before changing this mapping.
  */
 export function skillLevelToDrillBand(level: SkillLevel): PlayerLevel {
   switch (level) {

@@ -560,4 +560,72 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
       expect(names).not.toContain('Triangle Setting')
     })
   })
+
+  describe('K5 level-aware ordering (2026-05-04 skill-level-mutability ship)', () => {
+    // K5 contract: when `effectiveLevelValue` is provided, alternatives
+    // are sorted [in-band-first, out-of-band-after]. Critical sub-rule:
+    // a preferred-progression-target promoted to index 0 must STAY at
+    // index 0 even when out-of-band, otherwise level sorting would
+    // bury the user's natural next progression behind every in-band
+    // alternative.
+
+    it('orders alternatives in-band-first when effectiveLevelValue is provided', () => {
+      // Pair + open + main_skill: pool includes pass main_skill drills
+      // with mixed levelMax. effectiveLevelValue='beginner' should put
+      // beginner-eligible drills first.
+      const block = makeBlock({
+        type: 'main_skill',
+        drillName: 'Does Not Exist',
+        drillId: 'no-such-id',
+      })
+      const context = makeContext({
+        playerMode: 'pair',
+        timeProfile: 25,
+        netAvailable: true,
+        wallAvailable: false,
+      })
+      const baseline = findSwapAlternatives(block, context)
+      const sorted = findSwapAlternatives(block, context, { effectiveLevelValue: 'beginner' })
+
+      // The same set of drills is returned (level partition is sort-only,
+      // not a filter); assertion is on ordering, not membership.
+      const baselineNames = baseline.map((b) => b.drillName).sort()
+      const sortedNames = sorted.map((b) => b.drillName).sort()
+      expect(sortedNames).toEqual(baselineNames)
+
+      // The first sorted drill should be in-band for 'beginner' (i.e.,
+      // levelMin <= 'beginner' <= levelMax).
+      const firstDrill = DRILLS.find((d) => d.name === sorted[0].drillName)
+      expect(firstDrill).toBeDefined()
+      expect(firstDrill?.levelMin === 'beginner').toBe(true)
+    })
+
+    it('keeps a promoted preferred-progression target at index 0 even when out-of-band (the K5 critical sub-rule)', () => {
+      // d05 (Self-Toss Pass to Set Window) progresses to d10 (6-Legged Monster).
+      // Block currently runs d05 → preferred next is d10. With
+      // effectiveLevelValue='advanced', d10 is out-of-band (levelMax='intermediate').
+      // The K5 ordering must keep d10 at index 0 (the user's natural
+      // progression wins over the level sort).
+      const block = makeBlock({
+        type: 'main_skill',
+        drillName: 'Self-Toss Pass to Set Window',
+        drillId: 'd05',
+        variantId: 'd05-pair',
+      })
+      const context = makeContext({
+        playerMode: 'pair',
+        timeProfile: 25,
+        netAvailable: true,
+        wallAvailable: false,
+      })
+      // Without level: preferred-progression target d10 is at index 0
+      // (or near the front; assertion below accepts the head).
+      const baseline = findSwapAlternatives(block, context)
+      expect(baseline[0]?.drillId).toBe('d10')
+
+      // With level=advanced (d10 is out-of-band): d10 must STAY at index 0.
+      const sorted = findSwapAlternatives(block, context, { effectiveLevelValue: 'advanced' })
+      expect(sorted[0]?.drillId).toBe('d10')
+    })
+  })
 })

@@ -134,4 +134,74 @@ describe('TuneTodayScreen', () => {
 
     expect(await screen.findByText('setup-route')).toBeInTheDocument()
   })
+
+  describe('relaxation eyebrow (2026-05-04 skill-level-mutability ship, U6)', () => {
+    function renderScreenWithSettings(initialState: unknown = { source: 'home' }) {
+      render(
+        <MemoryRouter initialEntries={[{ pathname: '/tune-today', state: initialState }]}>
+          <Routes>
+            <Route path="/tune-today" element={<TuneTodayScreen />} />
+            <Route path="/safety" element={<div>safety-route</div>} />
+            <Route path="/setup" element={<div>setup-route</div>} />
+            <Route path="/settings" element={<div data-testid="settings-route">settings</div>} />
+            <Route path="/" element={<div>home-route</div>} />
+          </Routes>
+        </MemoryRouter>,
+      )
+    }
+
+    it('does NOT render the eyebrow when active draft has levelRelaxed: false', async () => {
+      await seedDraft({ levelRelaxed: false })
+      renderScreenWithSettings()
+
+      // Wait for screen to render before asserting absence.
+      await screen.findByRole('button', { name: /continue to safety check/i })
+      expect(
+        screen.queryByTestId('tune-today-level-relaxed-eyebrow'),
+      ).not.toBeInTheDocument()
+    })
+
+    it('does NOT render the eyebrow when active draft has no levelRelaxed field (legacy draft)', async () => {
+      await seedDraft()
+      renderScreenWithSettings()
+
+      await screen.findByRole('button', { name: /continue to safety check/i })
+      expect(
+        screen.queryByTestId('tune-today-level-relaxed-eyebrow'),
+      ).not.toBeInTheDocument()
+    })
+
+    it('renders the eyebrow when active draft has levelRelaxed: true', async () => {
+      await seedDraft({ levelRelaxed: true })
+      renderScreenWithSettings()
+
+      const eyebrow = await screen.findByTestId('tune-today-level-relaxed-eyebrow')
+      expect(eyebrow).toBeInTheDocument()
+      expect(eyebrow).toHaveTextContent(/calibrated to your saved level/i)
+    })
+
+    it('navigates to /settings when the eyebrow is tapped (active draft preserved)', async () => {
+      const user = userEvent.setup()
+      await seedDraft({ levelRelaxed: true })
+      renderScreenWithSettings()
+
+      await user.click(await screen.findByTestId('tune-today-level-relaxed-eyebrow'))
+      expect(await screen.findByTestId('settings-route')).toBeInTheDocument()
+
+      // Active draft is preserved (the navigation does not touch sessionDrafts).
+      const stillThere = await db.sessionDrafts.get('current')
+      expect(stillThere).toBeDefined()
+      expect(stillThere?.levelRelaxed).toBe(true)
+    })
+
+    it('Continue button still routes to Safety regardless of eyebrow presence', async () => {
+      const user = userEvent.setup()
+      await seedDraft({ levelRelaxed: true })
+      renderScreenWithSettings()
+
+      await screen.findByTestId('tune-today-level-relaxed-eyebrow')
+      await user.click(screen.getByRole('button', { name: /continue to safety check/i }))
+      expect(await screen.findByText('safety-route')).toBeInTheDocument()
+    })
+  })
 })

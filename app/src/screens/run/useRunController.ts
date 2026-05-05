@@ -401,6 +401,10 @@ export function useRunController(executionLogId: string, shortened: boolean) {
   }, [executionLogId, execution, plan, navigate])
 
   const planContext = plan?.context
+  // hasAlternates is a boolean count check; the K5 level partition
+  // is sort-only (doesn't change the count), so we deliberately omit
+  // `effectiveLevelValue` here. The actual mid-session swap path in
+  // `useSessionRunner.swapBlock` IS level-aware.
   const hasAlternates = useMemo(
     () =>
       planContext && currentBlock

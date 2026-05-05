@@ -144,6 +144,14 @@ export function useTuneTodayController() {
     navigate(routes.setup())
   }, [navigate])
 
+  // 2026-05-04 skill-level-mutability ship (R10 / KD5): the
+  // relaxation eyebrow on TuneTodayScreen taps through to Settings
+  // for a durable level change. The active draft is preserved (the
+  // navigation does not touch sessionDrafts).
+  const goToSettings = useCallback(() => {
+    navigate(routes.settings())
+  }, [navigate])
+
   return {
     draft,
     focus,
@@ -157,5 +165,7 @@ export function useTuneTodayController() {
     continueToSafety,
     goBack,
     goBackToSetup,
+    goToSettings,
+    levelRelaxed: draft?.levelRelaxed === true,
   }
 }

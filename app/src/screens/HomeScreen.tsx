@@ -13,10 +13,12 @@ import { selectPrimaryCard, selectSecondaryRows } from '../domain/homePriority'
 import type { PrimaryVariant, SecondaryRow } from '../domain/homePriority'
 import { useAppRegisterSW } from '../lib/pwa-register'
 import { isSchemaBlocked } from '../lib/schema-blocked'
+import { isSkillLevel } from '../lib/skillLevel'
 import { routes } from '../routes'
 import { buildDraft, buildDraftFromCompletedBlocks } from '../domain/sessionBuilder'
 import { discardSession, saveDraft, skipReview, type PendingReview } from '../services/session'
 import { markSoftBlockDismissed, readSoftBlockDismissed } from '../services/softBlock'
+import { getStorageMeta } from '../services/storageMeta'
 import { useHomeScreenState, type HomeFlags } from './home/useHomeScreenState'
 
 /**
@@ -193,7 +195,18 @@ export function HomeScreen() {
           return
         }
         try {
-          const draft = buildDraft(priorContext)
+          // Read onboarding skill level so the rebuilt draft honors
+          // the user's current saved level via `effectiveLevel`
+          // (2026-05-04 skill-level-mutability ship). Best-effort:
+          // a missing/failed read falls through to the pre-engine-
+          // wiring single-pass path.
+          let onboarding: unknown = undefined
+          try {
+            onboarding = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
+          } catch {
+            if (isSchemaBlocked()) return
+          }
+          const draft = buildDraft(priorContext, { onboarding })
           if (!draft) {
             navigate(routes.setup())
             return

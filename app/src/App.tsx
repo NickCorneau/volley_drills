@@ -9,6 +9,7 @@ import { ReviewScreen } from './screens/ReviewScreen'
 import { RunScreen } from './screens/RunScreen'
 import { SafetyCheckScreen } from './screens/SafetyCheckScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
+import { SettingsSkillLevelScreen } from './screens/SettingsSkillLevelScreen'
 import { SetupScreen } from './screens/SetupScreen'
 import { SkillLevelScreen } from './screens/SkillLevelScreen'
 import { TodaysSetupScreen } from './screens/TodaysSetupScreen'
@@ -105,6 +106,7 @@ export default function App() {
             <Route path={routePaths.review} element={<ReviewScreen />} />
             <Route path={routePaths.complete} element={<CompleteScreen />} />
             <Route path={routePaths.settings} element={<SettingsScreen />} />
+            <Route path={routePaths.settingsSkillLevel} element={<SettingsSkillLevelScreen />} />
             <Route path={routePaths.onboardingSkillLevel} element={<SkillLevelScreen />} />
             <Route path={routePaths.onboardingTodaysSetup} element={<TodaysSetupScreen />} />
             <Route path="*" element={<Navigate to={routePaths.home} replace />} />

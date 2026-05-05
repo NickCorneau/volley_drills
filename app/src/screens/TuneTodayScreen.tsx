@@ -16,7 +16,9 @@ export function TuneTodayScreen() {
     focus,
     goBack,
     goBackToSetup,
+    goToSettings,
     heading,
+    levelRelaxed,
     loadError,
     loading,
     pending,
@@ -88,7 +90,27 @@ export function TuneTodayScreen() {
         </section>
       </ScreenShell.Body>
 
-      <ScreenShell.Footer className="flex flex-col gap-4 pt-4">
+      <ScreenShell.Footer className="flex flex-col gap-2 pt-4">
+        {/* 2026-05-04 skill-level-mutability ship (R10 / KD9): inline
+            relaxation eyebrow above Continue when the engine had to
+            relax the user's saved level for >=1 focus-controlled slot
+            in the active draft. Tappable to Settings; Continue still
+            routes to Safety unchanged. Renders nothing on legacy
+            drafts (levelRelaxed undefined) or fully-honored builds.
+            Uses the shared Button `link` variant per
+            .cursor/rules/component-patterns.mdc so the tap target
+            meets the same 44px floor as every other tertiary action
+            in the app. */}
+        {levelRelaxed && (
+          <Button
+            variant="link"
+            onClick={goToSettings}
+            aria-live="polite"
+            data-testid="tune-today-level-relaxed-eyebrow"
+          >
+            Today&apos;s session is calibrated to your saved level. Adjust in Settings.
+          </Button>
+        )}
         <Button
           variant="primary"
           fullWidth

@@ -19,6 +19,15 @@ export const routePaths = {
   review: '/review',
   complete: '/complete',
   settings: '/settings',
+  /**
+   * 2026-05-04 skill-level-mutability ship: dedicated sub-route for
+   * the durable Settings change to `storageMeta.onboarding.skillLevel`.
+   * Reuses the 5-card `SkillLevelPicker` body via the new shared
+   * component (U4). `FirstOpenGate` continues to route fresh installs
+   * to `/onboarding/skill-level` per the C-3 Unit 1 contract — this
+   * sub-route is reachable from Settings only.
+   */
+  settingsSkillLevel: '/settings/skill-level',
   onboardingSkillLevel: '/onboarding/skill-level',
   onboardingTodaysSetup: '/onboarding/todays-setup',
 } as const
@@ -34,6 +43,7 @@ export const routes = {
   review: (execId: string) => `${routePaths.review}?id=${encodeURIComponent(execId)}`,
   complete: (execId: string) => `${routePaths.complete}?id=${encodeURIComponent(execId)}`,
   settings: () => routePaths.settings,
+  settingsSkillLevel: () => routePaths.settingsSkillLevel,
   onboardingSkillLevel: () => routePaths.onboardingSkillLevel,
   onboardingTodaysSetup: () => routePaths.onboardingTodaysSetup,
 } as const
