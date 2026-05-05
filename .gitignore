@@ -5,3 +5,10 @@ ops/agent/runs/*
 .cursor/hooks/state/
 .cursor/plans/
 .cursor/state/
+
+# Compound Engineering local config (per-machine; never committed).
+.compound-engineering/
+
+# Playwright run artifacts (per-run output; never committed).
+app/test-results/
+
