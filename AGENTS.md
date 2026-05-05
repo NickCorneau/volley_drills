@@ -6,7 +6,7 @@ stage: validation
 type: agent-contract
 summary: "Canonical prose repo contract: current state, read order, source-of-truth order, and repo-wide working constraints."
 authority: repo-wide routing, working constraints, and agent-facing orientation
-last_updated: 2026-05-02
+last_updated: 2026-05-05
 depends_on:
  - docs/catalog.json
  - docs/vision.md
@@ -126,6 +126,7 @@ Durable docs under `docs/` should keep YAML frontmatter and explicit ownership. 
 - The older queued-task control plane is archived; do not assume `ops/agent/` is an active workflow surface.
 - Keep recommendations aligned with courtside mobile use, low typing, and local-first behavior.
 - New durable findings should move into canonical docs; `research-output/` remains frozen provenance.
+- **Single-branch flow (2026-05-05 onward).** All work happens on `main`. Push to `origin` after every commit. No long-lived feature branches — if a change needs review-time isolation, branch for the duration of the work and merge back the same session. Branch-vs-origin divergence has been a repeated source of confusion; the discipline is human-owned and intended to keep `main` and `origin/main` in lock-step. The pre-2026-05-05 feat/* branches were collapsed into `main` via `pre-focus-coverage-merge-2026-05-05` (backup tag) and the 2026-05-05 merge plan.
 
 ## Verification Hints
 

@@ -1,7 +1,7 @@
 {
   "schema_version": 5,
   "repo_id": "volley_drills",
-  "last_updated": "2026-05-04",
+  "last_updated": "2026-05-05",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -639,6 +639,13 @@
       "type": "requirements",
       "status": "active",
       "canonical_for": "Requirements for the D135-fired skill-level mutability surface. v3 pivot (recorded in iteration log) replaces the original Tune today second-row chip design with a Settings + Tune today eyebrow shape — Settings hosts the durable change to `storageMeta.onboarding.skillLevel` (reusing the 5-tier `SkillLevelScreen` UI via shared `SkillLevelPicker`), Tune today renders one inline eyebrow above Continue when the engine had to relax the user's saved level for ≥1 focus-controlled slot today (tappable to Settings). Engine wiring (effectiveLevel resolver, partitionByLevel primitive, two-pass candidate-pool wiring across pickForSlot / pickMainSkillSubstitute / findSwapAlternatives, buildDraft attaching levelRelaxed to SessionDraft) survives intact — the engine has been silently ignoring `onboarding.skillLevel` since v0b. No `SetupContext.skillLevelOverride?` field; no per-session calibration chip; no `regenerateDraftFocus` extension; no asymmetric strip discipline; no Dexie schema migration."
+    },
+    {
+      "id": "merge-focus-coverage-and-collapse-branches-2026-05-05",
+      "path": "docs/plans/2026-05-05-001-merge-focus-coverage-and-collapse-branches-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "canonical_for": "2026-05-05 merge of feat/focus-coverage-readiness into main + adoption of single-branch flow. Strategy: git merge --no-ff -X theirs (accept feat on conflicts). Lossy outcomes documented + accepted: d135 two-pass pickForSlot mechanism overwritten in favor of feat's playerLevel hard-filter (`d67f65d`); SessionDraft.levelRelaxed + Tune today eyebrow render survived but functionally dead until follow-up re-wires the relax signal in feat's pickForSlot. Preserved: SkillLevelPicker, SettingsSkillLevelScreen + sub-route, focusCoverageAudit. Branch hygiene: feat/focus-coverage-readiness + feat/warmup-wrap-segment-snap deleted; backup tag pre-focus-coverage-merge-2026-05-05 pushed."
     },
     {
       "id": "skill-level-mutability-2026-05-04",

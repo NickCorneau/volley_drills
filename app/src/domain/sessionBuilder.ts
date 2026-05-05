@@ -15,13 +15,8 @@ import {
   type CandidateVariant,
 } from './sessionAssembly/candidates'
 import { allocateDurations, allocateRecoveryDurations } from './sessionAssembly/durations'
-import { effectiveLevel } from './sessionAssembly/effectiveLevel'
 import { createAssemblySeed, createSeededRandom } from './sessionAssembly/random'
 import { deriveBlockRationale } from './sessionAssembly/rationale'
-import {
-  RECOVERY_REDISTRIBUTION_PRIORITY,
-  snapWarmupWrapDurations,
-} from './sessionAssembly/snapDurations'
 import { pickMainSkillSubstitute } from './sessionAssembly/substitution'
 export {
   findStrictSameFocusSwapAlternatives,
@@ -232,27 +227,12 @@ function buildDraftResult(
   // technique slot's seeded shuffle determines whether the substitute
   // survives, so reservation keeps main_skill identity stable for a
   // given seed.
-  // Compute effective level once per build, but only when the caller
-  // has opted into the engine wiring by passing `onboarding`. When
-  // omitted (legacy callers, golden-seed pin tests, recovery
-  // rebuild), the pickers fall through to single-pass pre-engine-
-  // wiring behavior — preserves deterministic seed regressions and
-  // existing test fixtures untouched.
-  const effectiveLevelValue: PlayerLevel | undefined =
-    options?.onboarding === undefined ? undefined : effectiveLevel(options.onboarding)
-
-  // Aggregate per-slot relaxation flags into one build-level boolean
-  // attached to the returned draft per K6 of the
-  // 2026-05-04-001-feat-skill-level-mutability-plan.md. Used by Tune
-  // today to render the relaxation eyebrow above Continue.
-  let levelRelaxed = false
-
   let mainSkillSubstitute: { candidate: CandidateVariant; rationale: string } | undefined
   const lastMainSkillDrillId = options?.lastCompletedByType?.main_skill
   if (lastMainSkillDrillId) {
     const mainSkillSlot = layout.find((s) => s.type === 'main_skill')
     if (mainSkillSlot) {
-      const subResult = pickMainSkillSubstitute(
+      mainSkillSubstitute = pickMainSkillSubstitute(
         mainSkillSlot,
         effectiveContext,
         usedDrillIds,
@@ -260,12 +240,7 @@ function buildDraftResult(
         undefined,
         { playerLevel: options?.playerLevel },
       )
-      if (subResult) {
-        mainSkillSubstitute = {
-          candidate: subResult.candidate,
-          rationale: subResult.rationale,
-        }
-        if (subResult.levelRelaxed) levelRelaxed = true
+      if (mainSkillSubstitute) {
         usedDrillIds.add(mainSkillSubstitute.candidate.drill.id)
       }
     }
@@ -412,7 +387,6 @@ function buildDraftResult(
     assemblyAlgorithmVersion: SESSION_ASSEMBLY_ALGORITHM_VERSION,
     blocks,
     updatedAt: Date.now(),
-    levelRelaxed,
   }
 
   return {
@@ -521,13 +495,6 @@ export function buildDraftFromCompletedBlocks(
   // Pick a reasonable archetype label for the rebuilt draft. Plan
   // stores `presetId` as the archetype id (see `createSessionFromDraft`),
   // so we carry that through verbatim.
-  //
-  // levelRelaxed: false on this path. We don't re-run the level-relax
-  // detection here (the function carries forward completed plan blocks
-  // as-is rather than re-picking against today's catalog). If the
-  // user's level changed between the original session and the repeat,
-  // the next regeneration via Tune today's focus picker will surface
-  // any current-day relaxation.
   return {
     id: 'current',
     context: plan.context,
@@ -537,7 +504,6 @@ export function buildDraftFromCompletedBlocks(
     assemblyAlgorithmVersion: plan.assemblyAlgorithmVersion ?? SESSION_ASSEMBLY_ALGORITHM_VERSION,
     blocks: completedBlocks,
     updatedAt: Date.now(),
-    levelRelaxed: false,
   }
 }
 
@@ -606,42 +572,15 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
   if (!durations) return null
 
   const usedDrillIds = new Set<string>()
-
-  // Two-phase build matching `buildDraft`. Recovery redistribution
-  // targets technique/movement_proxy only — `main_skill` and
-  // `pressure` are not in `RECOVERY_BLOCK_SLOT_TYPES` so they're
-  // already absent from `recoveryLayout`. Recovery strips
-  // `sessionFocus` (see `stripSessionFocus` above), so we pass an
-  // explicit recovery priority instead of letting focus drive.
-  // Recovery is load-down regardless of skill level. Skip the
-  // level-aware path entirely (omit effectiveLevelValue) so recovery
-  // continues to behave as it did pre-engine-wiring. The returned
-  // draft sets levelRelaxed: false unconditionally (recovery does
-  // not surface a relaxation eyebrow per K3 / brainstorm KD9).
-  const picks: (CandidateVariant | undefined)[] = new Array(recoveryLayout.length).fill(undefined)
-  for (let i = 0; i < recoveryLayout.length; i++) {
-    const slot = recoveryLayout[i]
-    const result = pickForSlot(slot, recoveryContext, usedDrillIds, random)
-    if (!result.pick) continue
-    usedDrillIds.add(result.pick.drill.id)
-    picks[i] = result.pick
-  }
-
-  const snappedDurations = snapWarmupWrapDurations(
-    recoveryLayout,
-    durations,
-    picks,
-    undefined,
-    { priority: RECOVERY_REDISTRIBUTION_PRIORITY, allowSlotMaxOverflow: true },
-  )
-
   const blocks: DraftBlock[] = []
   let blockIndex = 0
 
   for (let i = 0; i < recoveryLayout.length; i++) {
     const slot = recoveryLayout[i]
-    const pick = picks[i]
+    const pick = pickForSlot(slot, recoveryContext, usedDrillIds, random)
     if (!pick) continue
+
+    usedDrillIds.add(pick.drill.id)
 
     blocks.push({
       id: `block-${blockIndex++}`,
@@ -650,7 +589,7 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
       variantId: pick.variant.id,
       drillName: pick.drill.name,
       shortName: pick.drill.shortName,
-      durationMinutes: snappedDurations[i],
+      durationMinutes: durations[i],
       coachingCue:
         pick.variant.coachingCues.length > 0
           ? pick.variant.coachingCues.join(' · ')
@@ -675,7 +614,6 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
     assemblyAlgorithmVersion: SESSION_ASSEMBLY_ALGORITHM_VERSION,
     blocks,
     updatedAt: Date.now(),
-    levelRelaxed: false,
   }
 }
 

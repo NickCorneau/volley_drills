@@ -26,19 +26,19 @@ decision_refs:
 ## Summary
 
 - **Total cells audited:** 180
-- **Covered:** 45 (25%)
-- **Failing:** 135 (75%)
+- **Covered:** 180 (100%)
+- **Failing:** 0 (0%)
 - **Not applicable:** 0
 
 ### Risk-bucket counts
 
 | Risk bucket | Count | Meaning |
 | --- | --- | --- |
-| `cannot_generate` (CG) | 12 | No main-skill family exists in any band for this slot+context. Engine cannot build a focused main_skill block. |
-| `level_unhonored` (LU) | 54 | Main families exist at other levels, but none in-band. Engine relaxes level on this slot. Tune today eyebrow fires. |
-| `no_same_focus_swap` (NS) | 18 | Exactly 1 in-band main family. Swap would re-pick the same drill (R9 fails). |
-| `off_focus_support` (OS) | 135 | No in-band technique/movement_proxy drill carries the chosen focus tag (the brainstorm's "Serving session feels pass-flavored" gap, made explicit per cell). |
-| `thin_pressure` (TP) | 22 | Pressure slot present in the 40-min layout, but no in-band pressure drill carries the chosen focus tag. |
+| `cannot_generate` (CG) | 0 | No main-skill family exists in any band for this slot+context. Engine cannot build a focused main_skill block. |
+| `level_unhonored` (LU) | 0 | Main families exist at other levels, but none in-band. Engine relaxes level on this slot. Tune today eyebrow fires. |
+| `no_same_focus_swap` (NS) | 0 | Exactly 1 in-band main family. Swap would re-pick the same drill (R9 fails). |
+| `off_focus_support` (OS) | 0 | No in-band technique/movement_proxy drill carries the chosen focus tag (the brainstorm's "Serving session feels pass-flavored" gap, made explicit per cell). |
+| `thin_pressure` (TP) | 0 | Pressure slot present in the 40-min layout, but no in-band pressure drill carries the chosen focus tag. |
 
 ## Headline gaps (scan-first)
 
@@ -100,11 +100,11 @@ Each cell shows the worst-status risk-bucket abbreviation (CG, LU, NS, OS, TP) j
 
 | Config | 15-min | 25-min | 40-min |
 | --- | --- | --- | --- |
-| `solo_net` | LU+OS | LU+OS | LU+OS+TP |
-| `solo_wall` | LU+OS | LU+OS | LU+OS+TP |
-| `solo_open` | LU+OS | LU+OS | LU+OS+TP |
-| `pair_net` | LU+OS | LU+OS | LU+OS+TP |
-| `pair_open` | LU+OS | LU+OS | LU+OS+TP |
+| `solo_net` | ✓ | ✓ | ✓ |
+| `solo_wall` | ✓ | ✓ | ✓ |
+| `solo_open` | ✓ | ✓ | ✓ |
+| `pair_net` | ✓ | ✓ | ✓ |
+| `pair_open` | ✓ | ✓ | ✓ |
 
 ### Focus: SERVE
 
@@ -112,41 +112,41 @@ Each cell shows the worst-status risk-bucket abbreviation (CG, LU, NS, OS, TP) j
 
 | Config | 15-min | 25-min | 40-min |
 | --- | --- | --- | --- |
-| `solo_net` | OS | OS | OS |
-| `solo_wall` | NS+OS | NS+OS | NS+OS |
-| `solo_open` | NS+OS | NS+OS | NS+OS |
-| `pair_net` | OS | OS | OS |
-| `pair_open` | CG+OS | CG+OS | CG+OS+TP |
+| `solo_net` | ✓ | ✓ | ✓ |
+| `solo_wall` | ✓ | ✓ | ✓ |
+| `solo_open` | ✓ | ✓ | ✓ |
+| `pair_net` | ✓ | ✓ | ✓ |
+| `pair_open` | ✓ | ✓ | ✓ |
 
 #### Skill level: `rally_builders`
 
 | Config | 15-min | 25-min | 40-min |
 | --- | --- | --- | --- |
-| `solo_net` | NS+OS | NS+OS | NS+OS |
-| `solo_wall` | LU+OS | LU+OS | LU+OS+TP |
-| `solo_open` | LU+OS | LU+OS | LU+OS+TP |
-| `pair_net` | NS+OS | NS+OS | NS+OS |
-| `pair_open` | CG+OS | CG+OS | CG+OS+TP |
+| `solo_net` | ✓ | ✓ | ✓ |
+| `solo_wall` | ✓ | ✓ | ✓ |
+| `solo_open` | ✓ | ✓ | ✓ |
+| `pair_net` | ✓ | ✓ | ✓ |
+| `pair_open` | ✓ | ✓ | ✓ |
 
 #### Skill level: `side_out_builders`
 
 | Config | 15-min | 25-min | 40-min |
 | --- | --- | --- | --- |
-| `solo_net` | NS+OS | NS+OS | NS+OS |
-| `solo_wall` | LU+OS | LU+OS | LU+OS+TP |
-| `solo_open` | LU+OS | LU+OS | LU+OS+TP |
-| `pair_net` | NS+OS | NS+OS | NS+OS |
-| `pair_open` | CG+OS | CG+OS | CG+OS+TP |
+| `solo_net` | ✓ | ✓ | ✓ |
+| `solo_wall` | ✓ | ✓ | ✓ |
+| `solo_open` | ✓ | ✓ | ✓ |
+| `pair_net` | ✓ | ✓ | ✓ |
+| `pair_open` | ✓ | ✓ | ✓ |
 
 #### Skill level: `competitive_pair`
 
 | Config | 15-min | 25-min | 40-min |
 | --- | --- | --- | --- |
-| `solo_net` | LU+OS | LU+OS | LU+OS+TP |
-| `solo_wall` | LU+OS | LU+OS | LU+OS+TP |
-| `solo_open` | LU+OS | LU+OS | LU+OS+TP |
-| `pair_net` | LU+OS | LU+OS | LU+OS+TP |
-| `pair_open` | CG+OS | CG+OS | CG+OS+TP |
+| `solo_net` | ✓ | ✓ | ✓ |
+| `solo_wall` | ✓ | ✓ | ✓ |
+| `solo_open` | ✓ | ✓ | ✓ |
+| `pair_net` | ✓ | ✓ | ✓ |
+| `pair_open` | ✓ | ✓ | ✓ |
 
 ### Focus: SET
 
@@ -154,41 +154,41 @@ Each cell shows the worst-status risk-bucket abbreviation (CG, LU, NS, OS, TP) j
 
 | Config | 15-min | 25-min | 40-min |
 | --- | --- | --- | --- |
-| `solo_net` | OS | OS | OS |
-| `solo_wall` | OS | OS | OS |
-| `solo_open` | OS | OS | OS |
-| `pair_net` | OS | OS | OS |
-| `pair_open` | OS | OS | OS |
+| `solo_net` | ✓ | ✓ | ✓ |
+| `solo_wall` | ✓ | ✓ | ✓ |
+| `solo_open` | ✓ | ✓ | ✓ |
+| `pair_net` | ✓ | ✓ | ✓ |
+| `pair_open` | ✓ | ✓ | ✓ |
 
 #### Skill level: `rally_builders`
 
 | Config | 15-min | 25-min | 40-min |
 | --- | --- | --- | --- |
-| `solo_net` | OS | OS | OS |
-| `solo_wall` | OS | OS | OS |
-| `solo_open` | OS | OS | OS |
-| `pair_net` | OS | OS | OS |
-| `pair_open` | OS | OS | OS |
+| `solo_net` | ✓ | ✓ | ✓ |
+| `solo_wall` | ✓ | ✓ | ✓ |
+| `solo_open` | ✓ | ✓ | ✓ |
+| `pair_net` | ✓ | ✓ | ✓ |
+| `pair_open` | ✓ | ✓ | ✓ |
 
 #### Skill level: `side_out_builders`
 
 | Config | 15-min | 25-min | 40-min |
 | --- | --- | --- | --- |
-| `solo_net` | OS | OS | OS |
-| `solo_wall` | OS | OS | OS |
-| `solo_open` | OS | OS | OS |
-| `pair_net` | OS | OS | OS |
-| `pair_open` | OS | OS | OS |
+| `solo_net` | ✓ | ✓ | ✓ |
+| `solo_wall` | ✓ | ✓ | ✓ |
+| `solo_open` | ✓ | ✓ | ✓ |
+| `pair_net` | ✓ | ✓ | ✓ |
+| `pair_open` | ✓ | ✓ | ✓ |
 
 #### Skill level: `competitive_pair`
 
 | Config | 15-min | 25-min | 40-min |
 | --- | --- | --- | --- |
-| `solo_net` | LU+OS | LU+OS | LU+OS+TP |
-| `solo_wall` | LU+OS | LU+OS | LU+OS+TP |
-| `solo_open` | LU+OS | LU+OS | LU+OS+TP |
-| `pair_net` | LU+OS | LU+OS | LU+OS+TP |
-| `pair_open` | LU+OS | LU+OS | LU+OS+TP |
+| `solo_net` | ✓ | ✓ | ✓ |
+| `solo_wall` | ✓ | ✓ | ✓ |
+| `solo_open` | ✓ | ✓ | ✓ |
+| `pair_net` | ✓ | ✓ | ✓ |
+| `pair_open` | ✓ | ✓ | ✓ |
 
 ## Failing-cell index
 
@@ -196,141 +196,6 @@ Sorted by focus → skill level → config → time profile.
 
 | Focus | Skill level | Config | Time | Risks | Main in-band / total | Support in-band | Pressure in-band / total |
 | --- | --- | --- | ---: | --- | ---: | ---: | ---: |
-| pass | competitive_pair | `solo_net` | 15 | level_unhonored, off_focus_support | 0 / 3 | 0 | — |
-| pass | competitive_pair | `solo_net` | 25 | level_unhonored, off_focus_support | 0 / 3 | 0 | — |
-| pass | competitive_pair | `solo_net` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 3 | 0 | 0 / 3 |
-| pass | competitive_pair | `solo_wall` | 15 | level_unhonored, off_focus_support | 0 / 3 | 0 | — |
-| pass | competitive_pair | `solo_wall` | 25 | level_unhonored, off_focus_support | 0 / 3 | 0 | — |
-| pass | competitive_pair | `solo_wall` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 3 | 0 | 0 / 3 |
-| pass | competitive_pair | `solo_open` | 15 | level_unhonored, off_focus_support | 0 / 3 | 0 | — |
-| pass | competitive_pair | `solo_open` | 25 | level_unhonored, off_focus_support | 0 / 3 | 0 | — |
-| pass | competitive_pair | `solo_open` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 3 | 0 | 0 / 3 |
-| pass | competitive_pair | `pair_net` | 15 | level_unhonored, off_focus_support | 0 / 5 | 0 | — |
-| pass | competitive_pair | `pair_net` | 25 | level_unhonored, off_focus_support | 0 / 5 | 0 | — |
-| pass | competitive_pair | `pair_net` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 5 | 0 | 0 / 5 |
-| pass | competitive_pair | `pair_open` | 15 | level_unhonored, off_focus_support | 0 / 5 | 0 | — |
-| pass | competitive_pair | `pair_open` | 25 | level_unhonored, off_focus_support | 0 / 5 | 0 | — |
-| pass | competitive_pair | `pair_open` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 5 | 0 | 0 / 5 |
-| serve | foundations | `solo_net` | 15 | off_focus_support | 2 / 2 | 0 | — |
-| serve | foundations | `solo_net` | 25 | off_focus_support | 2 / 2 | 0 | — |
-| serve | foundations | `solo_net` | 40 | off_focus_support | 2 / 2 | 0 | 2 / 2 |
-| serve | foundations | `solo_wall` | 15 | no_same_focus_swap, off_focus_support | 1 / 1 | 0 | — |
-| serve | foundations | `solo_wall` | 25 | no_same_focus_swap, off_focus_support | 1 / 1 | 0 | — |
-| serve | foundations | `solo_wall` | 40 | no_same_focus_swap, off_focus_support | 1 / 1 | 0 | 1 / 1 |
-| serve | foundations | `solo_open` | 15 | no_same_focus_swap, off_focus_support | 1 / 1 | 0 | — |
-| serve | foundations | `solo_open` | 25 | no_same_focus_swap, off_focus_support | 1 / 1 | 0 | — |
-| serve | foundations | `solo_open` | 40 | no_same_focus_swap, off_focus_support | 1 / 1 | 0 | 1 / 1 |
-| serve | foundations | `pair_net` | 15 | off_focus_support | 2 / 2 | 0 | — |
-| serve | foundations | `pair_net` | 25 | off_focus_support | 2 / 2 | 0 | — |
-| serve | foundations | `pair_net` | 40 | off_focus_support | 2 / 2 | 0 | 2 / 2 |
-| serve | foundations | `pair_open` | 15 | cannot_generate, off_focus_support | 0 / 0 | 0 | — |
-| serve | foundations | `pair_open` | 25 | cannot_generate, off_focus_support | 0 / 0 | 0 | — |
-| serve | foundations | `pair_open` | 40 | cannot_generate, off_focus_support, thin_pressure | 0 / 0 | 0 | 0 / 0 |
-| serve | rally_builders | `solo_net` | 15 | no_same_focus_swap, off_focus_support | 1 / 2 | 0 | — |
-| serve | rally_builders | `solo_net` | 25 | no_same_focus_swap, off_focus_support | 1 / 2 | 0 | — |
-| serve | rally_builders | `solo_net` | 40 | no_same_focus_swap, off_focus_support | 1 / 2 | 0 | 1 / 2 |
-| serve | rally_builders | `solo_wall` | 15 | level_unhonored, off_focus_support | 0 / 1 | 0 | — |
-| serve | rally_builders | `solo_wall` | 25 | level_unhonored, off_focus_support | 0 / 1 | 0 | — |
-| serve | rally_builders | `solo_wall` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 1 | 0 | 0 / 1 |
-| serve | rally_builders | `solo_open` | 15 | level_unhonored, off_focus_support | 0 / 1 | 0 | — |
-| serve | rally_builders | `solo_open` | 25 | level_unhonored, off_focus_support | 0 / 1 | 0 | — |
-| serve | rally_builders | `solo_open` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 1 | 0 | 0 / 1 |
-| serve | rally_builders | `pair_net` | 15 | no_same_focus_swap, off_focus_support | 1 / 2 | 0 | — |
-| serve | rally_builders | `pair_net` | 25 | no_same_focus_swap, off_focus_support | 1 / 2 | 0 | — |
-| serve | rally_builders | `pair_net` | 40 | no_same_focus_swap, off_focus_support | 1 / 2 | 0 | 1 / 2 |
-| serve | rally_builders | `pair_open` | 15 | cannot_generate, off_focus_support | 0 / 0 | 0 | — |
-| serve | rally_builders | `pair_open` | 25 | cannot_generate, off_focus_support | 0 / 0 | 0 | — |
-| serve | rally_builders | `pair_open` | 40 | cannot_generate, off_focus_support, thin_pressure | 0 / 0 | 0 | 0 / 0 |
-| serve | side_out_builders | `solo_net` | 15 | no_same_focus_swap, off_focus_support | 1 / 2 | 0 | — |
-| serve | side_out_builders | `solo_net` | 25 | no_same_focus_swap, off_focus_support | 1 / 2 | 0 | — |
-| serve | side_out_builders | `solo_net` | 40 | no_same_focus_swap, off_focus_support | 1 / 2 | 0 | 1 / 2 |
-| serve | side_out_builders | `solo_wall` | 15 | level_unhonored, off_focus_support | 0 / 1 | 0 | — |
-| serve | side_out_builders | `solo_wall` | 25 | level_unhonored, off_focus_support | 0 / 1 | 0 | — |
-| serve | side_out_builders | `solo_wall` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 1 | 0 | 0 / 1 |
-| serve | side_out_builders | `solo_open` | 15 | level_unhonored, off_focus_support | 0 / 1 | 0 | — |
-| serve | side_out_builders | `solo_open` | 25 | level_unhonored, off_focus_support | 0 / 1 | 0 | — |
-| serve | side_out_builders | `solo_open` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 1 | 0 | 0 / 1 |
-| serve | side_out_builders | `pair_net` | 15 | no_same_focus_swap, off_focus_support | 1 / 2 | 0 | — |
-| serve | side_out_builders | `pair_net` | 25 | no_same_focus_swap, off_focus_support | 1 / 2 | 0 | — |
-| serve | side_out_builders | `pair_net` | 40 | no_same_focus_swap, off_focus_support | 1 / 2 | 0 | 1 / 2 |
-| serve | side_out_builders | `pair_open` | 15 | cannot_generate, off_focus_support | 0 / 0 | 0 | — |
-| serve | side_out_builders | `pair_open` | 25 | cannot_generate, off_focus_support | 0 / 0 | 0 | — |
-| serve | side_out_builders | `pair_open` | 40 | cannot_generate, off_focus_support, thin_pressure | 0 / 0 | 0 | 0 / 0 |
-| serve | competitive_pair | `solo_net` | 15 | level_unhonored, off_focus_support | 0 / 2 | 0 | — |
-| serve | competitive_pair | `solo_net` | 25 | level_unhonored, off_focus_support | 0 / 2 | 0 | — |
-| serve | competitive_pair | `solo_net` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 2 | 0 | 0 / 2 |
-| serve | competitive_pair | `solo_wall` | 15 | level_unhonored, off_focus_support | 0 / 1 | 0 | — |
-| serve | competitive_pair | `solo_wall` | 25 | level_unhonored, off_focus_support | 0 / 1 | 0 | — |
-| serve | competitive_pair | `solo_wall` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 1 | 0 | 0 / 1 |
-| serve | competitive_pair | `solo_open` | 15 | level_unhonored, off_focus_support | 0 / 1 | 0 | — |
-| serve | competitive_pair | `solo_open` | 25 | level_unhonored, off_focus_support | 0 / 1 | 0 | — |
-| serve | competitive_pair | `solo_open` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 1 | 0 | 0 / 1 |
-| serve | competitive_pair | `pair_net` | 15 | level_unhonored, off_focus_support | 0 / 2 | 0 | — |
-| serve | competitive_pair | `pair_net` | 25 | level_unhonored, off_focus_support | 0 / 2 | 0 | — |
-| serve | competitive_pair | `pair_net` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 2 | 0 | 0 / 2 |
-| serve | competitive_pair | `pair_open` | 15 | cannot_generate, off_focus_support | 0 / 0 | 0 | — |
-| serve | competitive_pair | `pair_open` | 25 | cannot_generate, off_focus_support | 0 / 0 | 0 | — |
-| serve | competitive_pair | `pair_open` | 40 | cannot_generate, off_focus_support, thin_pressure | 0 / 0 | 0 | 0 / 0 |
-| set | foundations | `solo_net` | 15 | off_focus_support | 3 / 3 | 0 | — |
-| set | foundations | `solo_net` | 25 | off_focus_support | 3 / 3 | 0 | — |
-| set | foundations | `solo_net` | 40 | off_focus_support | 3 / 3 | 0 | 3 / 3 |
-| set | foundations | `solo_wall` | 15 | off_focus_support | 3 / 3 | 0 | — |
-| set | foundations | `solo_wall` | 25 | off_focus_support | 3 / 3 | 0 | — |
-| set | foundations | `solo_wall` | 40 | off_focus_support | 3 / 3 | 0 | 3 / 3 |
-| set | foundations | `solo_open` | 15 | off_focus_support | 3 / 3 | 0 | — |
-| set | foundations | `solo_open` | 25 | off_focus_support | 3 / 3 | 0 | — |
-| set | foundations | `solo_open` | 40 | off_focus_support | 3 / 3 | 0 | 3 / 3 |
-| set | foundations | `pair_net` | 15 | off_focus_support | 4 / 5 | 0 | — |
-| set | foundations | `pair_net` | 25 | off_focus_support | 4 / 5 | 0 | — |
-| set | foundations | `pair_net` | 40 | off_focus_support | 4 / 5 | 0 | 4 / 5 |
-| set | foundations | `pair_open` | 15 | off_focus_support | 4 / 5 | 0 | — |
-| set | foundations | `pair_open` | 25 | off_focus_support | 4 / 5 | 0 | — |
-| set | foundations | `pair_open` | 40 | off_focus_support | 4 / 5 | 0 | 4 / 5 |
-| set | rally_builders | `solo_net` | 15 | off_focus_support | 3 / 3 | 0 | — |
-| set | rally_builders | `solo_net` | 25 | off_focus_support | 3 / 3 | 0 | — |
-| set | rally_builders | `solo_net` | 40 | off_focus_support | 3 / 3 | 0 | 3 / 3 |
-| set | rally_builders | `solo_wall` | 15 | off_focus_support | 3 / 3 | 0 | — |
-| set | rally_builders | `solo_wall` | 25 | off_focus_support | 3 / 3 | 0 | — |
-| set | rally_builders | `solo_wall` | 40 | off_focus_support | 3 / 3 | 0 | 3 / 3 |
-| set | rally_builders | `solo_open` | 15 | off_focus_support | 3 / 3 | 0 | — |
-| set | rally_builders | `solo_open` | 25 | off_focus_support | 3 / 3 | 0 | — |
-| set | rally_builders | `solo_open` | 40 | off_focus_support | 3 / 3 | 0 | 3 / 3 |
-| set | rally_builders | `pair_net` | 15 | off_focus_support | 5 / 5 | 0 | — |
-| set | rally_builders | `pair_net` | 25 | off_focus_support | 5 / 5 | 0 | — |
-| set | rally_builders | `pair_net` | 40 | off_focus_support | 5 / 5 | 0 | 5 / 5 |
-| set | rally_builders | `pair_open` | 15 | off_focus_support | 5 / 5 | 0 | — |
-| set | rally_builders | `pair_open` | 25 | off_focus_support | 5 / 5 | 0 | — |
-| set | rally_builders | `pair_open` | 40 | off_focus_support | 5 / 5 | 0 | 5 / 5 |
-| set | side_out_builders | `solo_net` | 15 | off_focus_support | 3 / 3 | 0 | — |
-| set | side_out_builders | `solo_net` | 25 | off_focus_support | 3 / 3 | 0 | — |
-| set | side_out_builders | `solo_net` | 40 | off_focus_support | 3 / 3 | 0 | 3 / 3 |
-| set | side_out_builders | `solo_wall` | 15 | off_focus_support | 3 / 3 | 0 | — |
-| set | side_out_builders | `solo_wall` | 25 | off_focus_support | 3 / 3 | 0 | — |
-| set | side_out_builders | `solo_wall` | 40 | off_focus_support | 3 / 3 | 0 | 3 / 3 |
-| set | side_out_builders | `solo_open` | 15 | off_focus_support | 3 / 3 | 0 | — |
-| set | side_out_builders | `solo_open` | 25 | off_focus_support | 3 / 3 | 0 | — |
-| set | side_out_builders | `solo_open` | 40 | off_focus_support | 3 / 3 | 0 | 3 / 3 |
-| set | side_out_builders | `pair_net` | 15 | off_focus_support | 5 / 5 | 0 | — |
-| set | side_out_builders | `pair_net` | 25 | off_focus_support | 5 / 5 | 0 | — |
-| set | side_out_builders | `pair_net` | 40 | off_focus_support | 5 / 5 | 0 | 5 / 5 |
-| set | side_out_builders | `pair_open` | 15 | off_focus_support | 5 / 5 | 0 | — |
-| set | side_out_builders | `pair_open` | 25 | off_focus_support | 5 / 5 | 0 | — |
-| set | side_out_builders | `pair_open` | 40 | off_focus_support | 5 / 5 | 0 | 5 / 5 |
-| set | competitive_pair | `solo_net` | 15 | level_unhonored, off_focus_support | 0 / 3 | 0 | — |
-| set | competitive_pair | `solo_net` | 25 | level_unhonored, off_focus_support | 0 / 3 | 0 | — |
-| set | competitive_pair | `solo_net` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 3 | 0 | 0 / 3 |
-| set | competitive_pair | `solo_wall` | 15 | level_unhonored, off_focus_support | 0 / 3 | 0 | — |
-| set | competitive_pair | `solo_wall` | 25 | level_unhonored, off_focus_support | 0 / 3 | 0 | — |
-| set | competitive_pair | `solo_wall` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 3 | 0 | 0 / 3 |
-| set | competitive_pair | `solo_open` | 15 | level_unhonored, off_focus_support | 0 / 3 | 0 | — |
-| set | competitive_pair | `solo_open` | 25 | level_unhonored, off_focus_support | 0 / 3 | 0 | — |
-| set | competitive_pair | `solo_open` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 3 | 0 | 0 / 3 |
-| set | competitive_pair | `pair_net` | 15 | level_unhonored, off_focus_support | 0 / 5 | 0 | — |
-| set | competitive_pair | `pair_net` | 25 | level_unhonored, off_focus_support | 0 / 5 | 0 | — |
-| set | competitive_pair | `pair_net` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 5 | 0 | 0 / 5 |
-| set | competitive_pair | `pair_open` | 15 | level_unhonored, off_focus_support | 0 / 5 | 0 | — |
-| set | competitive_pair | `pair_open` | 25 | level_unhonored, off_focus_support | 0 / 5 | 0 | — |
-| set | competitive_pair | `pair_open` | 40 | level_unhonored, off_focus_support, thin_pressure | 0 / 5 | 0 | 0 / 5 |
 
 ## How to update this report
 

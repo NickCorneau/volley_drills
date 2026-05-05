@@ -4,7 +4,6 @@ import { buildDraft } from '../../domain/sessionBuilder'
 import { isSchemaBlocked } from '../../lib/schema-blocked'
 import { isSkillLevel, skillLevelToDrillBand } from '../../lib/skillLevel'
 import { findLastCompletedDrillIdsByType } from './queries'
-import { getStorageMeta } from '../storageMeta'
 
 export type RegenerateDraftFocusResult =
   | { ok: true; draft: SessionDraft; changed: boolean }
@@ -53,16 +52,6 @@ export async function regenerateDraftFocus(
   input: RegenerateDraftFocusInput,
 ): Promise<RegenerateDraftFocusResult> {
   try {
-    // Read onboarding OUTSIDE the rw transaction below — `storageMeta`
-    // is a separate Dexie table not in the transaction's scope, and
-    // including it would require widening the table list (which would
-    // serialize unrelated writes). Reading before the transaction is
-    // safe because the value is identity-shaped (changes via Settings
-    // are infrequent); there's no race between this read and a
-    // simultaneous Settings write that would matter for the build.
-    // 2026-05-04 skill-level-mutability ship.
-    const onboarding = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
-
     let result: RegenerateDraftFocusResult | undefined
 
     await db.transaction(

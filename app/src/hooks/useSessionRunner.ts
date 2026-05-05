@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ExecutionLog, SessionPlan, SessionPlanBlock } from '../model'
 import { findSwapAlternatives } from '../domain/sessionBuilder'
-import type { PlayerLevel } from '../model'
 import { isSchemaBlocked } from '../lib/schema-blocked'
-import { isSkillLevel } from '../lib/skillLevel'
 import {
   buildAdvancedBlock,
   buildEndedSession,
@@ -15,7 +13,6 @@ import {
   saveExecution,
   swapActiveBlock,
 } from '../services/session'
-import { getStorageMeta } from '../services/storageMeta'
 import {
   clearTimerState,
   flushTimerForBlock,
@@ -42,13 +39,6 @@ export function useSessionRunner(executionLogId: string, options?: SessionRunner
 
   const executionRef = useRef<ExecutionLog | null>(null)
   const planRef = useRef<SessionPlan | null>(null)
-  // 2026-05-04 skill-level-mutability ship (R14 / K5 wire-through):
-  // cache the user's effective skill level once at session-load time
-  // so mid-session Swap can pass it to `findSwapAlternatives` and
-  // honor the saved level (in-band-first ordering with focus-held
-  // level-relax fallback). Defaults to 'beginner' when onboarding
-  // is missing/malformed/unsure (matches the engine's fallthrough).
-  const effectiveLevelRef = useRef<PlayerLevel>('beginner')
 
   useEffect(() => {
     executionRef.current = execution
@@ -59,28 +49,14 @@ export function useSessionRunner(executionLogId: string, options?: SessionRunner
     let cancelled = false
     ;(async () => {
       try {
-        const [result, onboarding] = await Promise.allSettled([
-          loadSession(executionLogId),
-          getStorageMeta('onboarding.skillLevel', isSkillLevel),
-        ])
+        const result = await loadSession(executionLogId)
         if (cancelled) return
-        // Onboarding read failure falls through to 'beginner' — the
-        // engine's documented default for missing/malformed values.
-        if (onboarding.status === 'fulfilled') {
-          effectiveLevelRef.current = effectiveLevel(onboarding.value)
-        }
-        if (result.status !== 'fulfilled') {
-          if (!isSchemaBlocked()) {
-            console.error('useSessionRunner load failed:', result.reason)
-          }
-          setExecution(null)
-          setPlan(null)
-        } else if (!result.value) {
+        if (!result) {
           setExecution(null)
           setPlan(null)
         } else {
-          setExecution(result.value.execution)
-          setPlan(result.value.plan)
+          setExecution(result.execution)
+          setPlan(result.plan)
         }
         setLoaded(true)
       } catch (err) {
@@ -249,7 +225,6 @@ export function useSessionRunner(executionLogId: string, options?: SessionRunner
         ].filter((n): n is string => typeof n === 'string' && n.length > 0)
         const alternates = findSwapAlternatives(currentBlock, p.context, {
           excludeDrillNames: neighborNames,
-          effectiveLevelValue: effectiveLevelRef.current,
         })
         if (alternates.length === 0) return false
         const next = alternates[0]

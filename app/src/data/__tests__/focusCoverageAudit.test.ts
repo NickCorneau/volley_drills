@@ -59,15 +59,15 @@ describe('focusCoverageAudit', () => {
     const result = runFocusCoverageAudit()
     expect(result.summary).toMatchInlineSnapshot(`
       {
-        "coveredCount": 45,
-        "failingCount": 135,
+        "coveredCount": 180,
+        "failingCount": 0,
         "notApplicableCount": 0,
         "riskBucketCounts": {
-          "cannot_generate": 12,
-          "level_unhonored": 54,
-          "no_same_focus_swap": 18,
-          "off_focus_support": 135,
-          "thin_pressure": 22,
+          "cannot_generate": 0,
+          "level_unhonored": 0,
+          "no_same_focus_swap": 0,
+          "off_focus_support": 0,
+          "thin_pressure": 0,
         },
         "totalCells": 180,
       }

@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { SkillLevelPicker } from '../components/onboarding/SkillLevelPicker'
 import { ScreenShell } from '../components/ui'
 import { FOCAL_SURFACE_CLASS } from '../components/ui/surfaces'
 import { isSchemaBlocked } from '../lib/schema-blocked'
-import { type SkillLevel } from '../lib/skillLevel'
+import { SKILL_LEVEL_LABEL, SKILL_LEVELS, type SkillLevel } from '../lib/skillLevel'
 import { loadVoiceFromStorage, type Voice } from '../lib/voiceFromContext'
 import { routes } from '../routes'
 import { setStorageMetaMany } from '../services/storageMeta'
@@ -48,16 +47,44 @@ import { setStorageMetaMany } from '../services/storageMeta'
  * D128 (cold-state voice default follow-on).
  */
 
-/**
- * Heading copy is screen-level (the SkillLevelPicker body is shared
- * with `SettingsSkillLevelScreen`, which uses different headings).
- * Band descriptors live inside `SkillLevelPicker` and are voice-driven
- * there. This keeps the D121 / D128 first-open contract intact while
- * letting the Settings sub-route reuse the same picker body.
- */
-function headingForVoice(voice: Voice): string {
-  return voice === 'pair' ? 'Where\u2019s the pair today?' : 'Where are you today?'
+interface Copy {
+  heading: string
+  descriptors: Record<Exclude<SkillLevel, 'unsure'>, string>
 }
+
+const PAIR_COPY: Copy = {
+  heading: 'Where\u2019s the pair today?',
+  descriptors: {
+    foundations: 'Keeping a friendly toss alive.',
+    rally_builders: 'Pass easy serves, short rallies.',
+    side_out_builders: 'Pass to target, attack the 3rd.',
+    competitive_pair: 'Tougher serves, game-like play.',
+  },
+}
+
+const SOLO_COPY: Copy = {
+  heading: 'Where are you today?',
+  descriptors: {
+    foundations: 'Keeping a friendly toss alive.',
+    rally_builders: 'Pass easy serves, short rallies.',
+    side_out_builders: 'Pass to target, attack the 3rd.',
+    competitive_pair: 'Tougher serves, game-like play.',
+  },
+}
+
+/**
+ * Band descriptors stay in functional-ability voice (neutral between
+ * solo and pair - "Pass easy serves" works in both) so the only surface
+ * that flips is the heading. This keeps Phase F's copy delta minimal
+ * and preserves D121's action-anchored framing. When the full D121
+ * pair-vs-solo pronoun pass lands in M001-build, these strings are the
+ * extension point.
+ */
+function copyForVoice(voice: Voice): Copy {
+  return voice === 'solo' ? SOLO_COPY : PAIR_COPY
+}
+
+const BANDS = SKILL_LEVELS.filter((l): l is Exclude<SkillLevel, 'unsure'> => l !== 'unsure')
 
 export function SkillLevelScreen() {
   const navigate = useNavigate()
@@ -110,7 +137,7 @@ export function SkillLevelScreen() {
     [navigate],
   )
 
-  const heading = headingForVoice(voice)
+  const copy = copyForVoice(voice)
 
   return (
     <ScreenShell>
@@ -122,23 +149,64 @@ export function SkillLevelScreen() {
         + subtitle can overflow on short viewports (iPhone SE 375 × 667);
         the body scrolls independently in that case without dragging
         the rest of the chrome offscreen.
-
-        2026-05-04 (skill-level-mutability ship, U4): the 5-card body
-        is extracted to `SkillLevelPicker` so the Settings sub-route
-        can reuse the same chrome with different headers and post-pick
-        callbacks. This screen wraps the picker with the onboarding-
-        flavored heading + subtitle and the onboarding completion
-        write inside `handlePick`.
       */}
       <ScreenShell.Header className="flex flex-col gap-2 pt-8 pb-4">
-        <h1 className="text-xl font-semibold tracking-tight text-text-primary">{heading}</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-text-primary">{copy.heading}</h1>
         <p className="text-sm text-text-secondary">
           Your rough current level. We size today&apos;s drills to match. Change anytime.
         </p>
       </ScreenShell.Header>
 
       <ScreenShell.Body className="pb-6">
-        <SkillLevelPicker onPick={handlePick} />
+        {/* Phase F2 (2026-04-19): option cards now use the same calm
+          focal-surface language as HomePrimaryCard / SettingsScreen -
+          soft shadow + hairline ring instead of a hard `border-2`, a
+          touch more vertical breathing between options, and slightly
+          more internal padding so each option reads as a calm,
+          deliberate choice rather than a checkbox row.
+
+          Pre-close 2026-04-21 (P1-1 + P11): "Not sure yet" was a
+          `variant="link"` text button below the four primary bands,
+          and Seb reported he didn't notice it on first scan. Promoted
+          to a fifth focal-surface card rendered AFTER the four bands
+          so it doesn't compete with the primary typology, but carries
+          the same ink weight as the bands - which is what makes it
+          visible on a first scan under a glance. Copy adopts the
+          recommend-before-interrogate posture explicitly: the second
+          line says what the app does with "unsure" rather than
+          leaving the reader to guess. The taxonomy enum is unchanged
+          (still writes `skillLevel: 'unsure'` atomically via
+          `setStorageMetaMany`). */}
+        <ul className="flex flex-col gap-4" aria-label="Skill level options">
+          {BANDS.map((level) => (
+            <li key={level}>
+              <button
+                type="button"
+                onClick={() => void handlePick(level)}
+                className={`flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent hover:bg-bg-warm active:bg-bg-warm ${FOCAL_SURFACE_CLASS}`}
+              >
+                <span className="text-sm font-semibold text-text-primary">
+                  {SKILL_LEVEL_LABEL[level]}
+                </span>
+                <span className="text-sm text-text-secondary">{copy.descriptors[level]}</span>
+              </button>
+            </li>
+          ))}
+          <li>
+            <button
+              type="button"
+              onClick={() => void handlePick('unsure')}
+              className={`flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent hover:bg-bg-warm active:bg-bg-warm ${FOCAL_SURFACE_CLASS}`}
+            >
+              <span className="text-sm font-semibold text-text-primary">
+                {SKILL_LEVEL_LABEL.unsure}
+              </span>
+              <span className="text-sm text-text-secondary">
+                We'll size a light starter - you can change this after.
+              </span>
+            </button>
+          </li>
+        </ul>
       </ScreenShell.Body>
     </ScreenShell>
   )

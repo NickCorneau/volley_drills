@@ -3,7 +3,6 @@ import { SUBSTITUTION_RULES } from '../../data/substitutionRules'
 import type {
   BlockSlot,
   BlockSlotType,
-  PlayerLevel,
   SessionPlanBlock,
   PlayerLevel,
   SetupContext,
@@ -138,35 +137,6 @@ function computeAlternatives(
         )
       }
     }
-  }
-
-  // K5: apply level partition LAST (after preferred-progression and
-  // substitute promotion). Promotion wins ties; level breaks order
-  // among unrelated drills. Only sorts when an effectiveLevelValue
-  // was provided so legacy callers and test fixtures see no
-  // ordering change.
-  //
-  // Critical: the promoted target (preferred-progression next or
-  // blocked-progression substitute) must stay at index 0 even when
-  // it falls in the out-of-band partition, otherwise level sorting
-  // would bury the user's natural next progression behind every
-  // in-band alternative. Capture the promoted candidate before
-  // partitioning, partition the rest, prepend the promoted candidate.
-  if (options?.effectiveLevelValue !== undefined && filtered.length > 0) {
-    const promotedIds = new Set(rationaleByDrillId.keys())
-    // The preferred-progression-target promotion (above) does not
-    // populate `rationaleByDrillId`; check the head element for that
-    // case by detecting whether `findPreferredProgressionTarget`
-    // landed at index 0.
-    const head = filtered[0]
-    const isPromotedHead =
-      promotedIds.has(head.drill.id) ||
-      (block.drillId !== undefined &&
-        findPreferredProgressionTarget(block.drillId) === head.drill.id)
-    const promoted = isPromotedHead ? head : undefined
-    const tail = isPromotedHead ? filtered.slice(1) : filtered
-    const { inBand, outOfBand } = partitionByLevel(tail, options.effectiveLevelValue)
-    filtered = promoted ? [promoted, ...inBand, ...outOfBand] : [...inBand, ...outOfBand]
   }
 
   return filtered.map((candidate) => ({
