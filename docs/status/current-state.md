@@ -6,12 +6,13 @@ stage: validation
 type: status
 summary: "Canonical current-state snapshot and recent shipped-history log for Volleycraft."
 authority: current project posture, recent shipped history, and active validation gates
-last_updated: 2026-04-30
+last_updated: 2026-05-04
 depends_on:
   - AGENTS.md
   - docs/catalog.json
   - docs/decisions.md
   - docs/research/founder-use-ledger.md
+  - docs/research/2026-05-04-pair-serving-session-feedback.md
 ---
 
 # Current State
@@ -57,6 +58,7 @@ Keep detailed project posture and recent shipped-history out of entry surfaces w
 
 ## Recent Shipped History
 
+- 2026-05-04: founder + Seb pair + net 40-min serving-led session — first real-use exercise of the post-Tune-today (2026-04-30) build (`assemblyAlgorithmVersion: 6`), completed, RPE 5, one swap (movement_proxy `d10-pair` → `d40-pair`), four `still_learning` per-drill captures with no Good/Total counts entered. Plan `d8b1ac8f-…`, execution `3d8ac8f9-…`. Composition: `d28` warmup → `d05-pair` technique → `d40-pair` movement_proxy (set) → `d51-pair` main_skill (Outside the Heart Serving, 10 min) → `d03-pair` pressure → `d25-solo` wrap. **Positives validated**: Tune today + Recommended-as-peer worked at courtside speed ("could pick a focus, including the recommended"), the longer main_skill block hierarchy was appreciated, the per-move pacing indicator V1–V4 reads as direct, and drill copy felt "dummy proof" with less coach-side commentary than prior pair sessions. **Frictions repeated**: warmup and cooldown still felt timing-off (likely the planned-block-duration > segment-sum gap on 5-min slots — `d28` segments=3min, `d25` segments=4min, both ran to segment exhaustion not full timer; audio-pacing residual under platform boundaries also still in scope), and reading drill copy aloud felt "a little inconvenient" on the partner side. **Wishlist named in one session**: clickable glossary for technical terms (e.g. "set window"), optional YouTube example links per drill, tappable past-session list ("every time I open the app and I see my past sessions, I want to click on this and see what I did last time"), trends/dashboard for skill progress over time and as input to focus recommendations. **Trigger reads**: F10 (session history pull) and F11 (trends/dashboard ask) are partner-walkthrough-class behavioral input for the M001 Tier 2 "full session history screen" surface and the M002 weekly-receipt scope, but neither flips Tier 2 by itself (still gated on Tier 1a acceptance + Condition 3 pass). F8 / F9 are single-instance soft asks parked under `D135` founder-feature-wish framing. F6 strengthens the still-fired `S1` line in the 2026-04-28 next-chunk ideation. Findings F1–F11 recorded in `docs/research/2026-05-04-pair-serving-session-feedback.md`; ledger row appended in `docs/research/founder-use-ledger.md`. Provenance: founder voice memo + short follow-up clip + Dexie export `volley-drills-export-2026-05-04.json`.
 - 2026-04-30: pre-run flow simplification shipped (`docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md`, status: active during implementation). Tune today is now the mandatory pre-safety focus step for every pre-run draft path, with four chips (Recommended / Passing / Serving / Setting), shared focus resolution across initial picks / substitution / swaps, in-transaction draft regeneration, and repeat / recovery focus stripping. Setup drops Wind entirely and only asks Wall for Solo + No Net; Safety has no default focus echo and only notes focus when recovery overrides an explicit choice. Skill-scope policy lives as JSDoc on `SkillFocus`; no attack/scenario type reservation shipped.
 - 2026-04-21: M001 Tier 1a landed in `docs/plans/2026-04-20-m001-tier1-implementation.md`.
 - 2026-04-22 to 2026-04-24: partner-walkthrough polish, review closeout polish, and wake-lock/audio-priming infrastructure shipped.

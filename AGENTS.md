@@ -6,7 +6,7 @@ stage: validation
 type: agent-contract
 summary: "Canonical prose repo contract: current state, read order, source-of-truth order, and repo-wide working constraints."
 authority: repo-wide routing, working constraints, and agent-facing orientation
-last_updated: 2026-04-27
+last_updated: 2026-05-04
 depends_on:
  - docs/catalog.json
  - docs/vision.md
@@ -114,6 +114,8 @@ Rules of thumb:
 - `R*` — requirements in specs where used
 
 Durable docs under `docs/` should keep YAML frontmatter and explicit ownership. Prefer cross-references over copying canon into multiple places.
+
+- `docs/solutions/` stores documented solutions to past problems (bugs, best practices, workflow patterns), organized by category with YAML frontmatter (`module`, `tags`, `problem_type`). Relevant when implementing or debugging in documented areas.
 
 ## Operational Constraints
 
