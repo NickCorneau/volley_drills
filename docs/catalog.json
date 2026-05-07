@@ -1,7 +1,7 @@
 {
   "schema_version": 5,
   "repo_id": "volley_drills",
-  "last_updated": "2026-05-05",
+  "last_updated": "2026-05-06",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -637,22 +637,39 @@
       "id": "skill-level-mutability-requirements-2026-05-04",
       "path": "docs/brainstorms/2026-05-04-skill-level-mutability-requirements.md",
       "type": "requirements",
-      "status": "active",
-      "canonical_for": "Requirements for the D135-fired skill-level mutability surface. v3 pivot (recorded in iteration log) replaces the original Tune today second-row chip design with a Settings + Tune today eyebrow shape — Settings hosts the durable change to `storageMeta.onboarding.skillLevel` (reusing the 5-tier `SkillLevelScreen` UI via shared `SkillLevelPicker`), Tune today renders one inline eyebrow above Continue when the engine had to relax the user's saved level for ≥1 focus-controlled slot today (tappable to Settings). Engine wiring (effectiveLevel resolver, partitionByLevel primitive, two-pass candidate-pool wiring across pickForSlot / pickMainSkillSubstitute / findSwapAlternatives, buildDraft attaching levelRelaxed to SessionDraft) survives intact — the engine has been silently ignoring `onboarding.skillLevel` since v0b. No `SetupContext.skillLevelOverride?` field; no per-session calibration chip; no `regenerateDraftFocus` extension; no asymmetric strip discipline; no Dexie schema migration."
+      "status": "complete",
+      "canonical_for": "Requirements for the D135-fired skill-level mutability surface. PARTIALLY SUPERSEDED 2026-05-06 by D137: Tune today eyebrow, `SessionDraft.levelRelaxed`, and `regenerateDraftFocus` are retired by docs/brainstorms/2026-05-06-001-d137-tune-today-routing-resolution-requirements.md. Still current: Settings hosts the durable change to `storageMeta.onboarding.skillLevel` through `/settings/skill-level`, reusing the 5-tier `SkillLevelPicker`; onboarding skill level remains the persisted identity/capability marker. D137 keeps `effectiveLevel` and `partitionByLevel` as audit consumers but does not preserve the relax-signal UI."
     },
     {
       "id": "merge-focus-coverage-and-collapse-branches-2026-05-05",
       "path": "docs/plans/2026-05-05-001-merge-focus-coverage-and-collapse-branches-plan.md",
       "type": "plan",
       "status": "complete",
-      "canonical_for": "2026-05-05 merge of feat/focus-coverage-readiness into main + adoption of single-branch flow. Strategy: git merge --no-ff -X theirs (accept feat on conflicts). Lossy outcomes documented + accepted: d135 two-pass pickForSlot mechanism overwritten in favor of feat's playerLevel hard-filter (`d67f65d`); SessionDraft.levelRelaxed + Tune today eyebrow render survived but functionally dead until follow-up re-wires the relax signal in feat's pickForSlot. Preserved: SkillLevelPicker, SettingsSkillLevelScreen + sub-route, focusCoverageAudit. Branch hygiene: feat/focus-coverage-readiness + feat/warmup-wrap-segment-snap deleted; backup tag pre-focus-coverage-merge-2026-05-05 pushed."
+      "active_registry": true,
+      "canonical_for": "2026-05-05 merge of feat/focus-coverage-readiness into main + adoption of single-branch flow. Strategy: git merge --no-ff -X theirs (accept feat on conflicts). Lossy outcomes documented + accepted at merge time: d135 two-pass pickForSlot mechanism overwritten in favor of feat's playerLevel hard-filter (`d67f65d`); SessionDraft.levelRelaxed + Tune today eyebrow render survived but were functionally dead. D137 follow-up (2026-05-06) deletes Tune today and the relax-signal plumbing instead of re-wiring it. Preserved: SkillLevelPicker, SettingsSkillLevelScreen + sub-route, focusCoverageAudit. Branch hygiene: feat/focus-coverage-readiness + feat/warmup-wrap-segment-snap deleted; backup tag pre-focus-coverage-merge-2026-05-05 pushed."
+    },
+    {
+      "id": "d137-tune-today-routing-resolution-requirements-2026-05-06",
+      "path": "docs/brainstorms/2026-05-06-001-d137-tune-today-routing-resolution-requirements.md",
+      "type": "requirements",
+      "status": "complete",
+      "canonical_for": "Requirements for D137: ratifies the post-2026-05-05 Setup -> Safety routing shape, deletes Tune today and the now-dead 2026-05-04 skill-level relax-signal infrastructure, keeps Settings as the manual skill-level override, renames the focus coverage audit's misleading level bucket, and reserves D138 / D139 for diagnostics and validator follow-ups. D136 is not reused because its provisional single-focus-per-session row was retracted under O24; the unrelated D135 row in docs/decisions.md remains untouched."
+    },
+    {
+      "id": "d137-tune-today-routing-cleanup-plan-2026-05-06",
+      "path": "docs/plans/2026-05-06-001-refactor-d137-tune-today-routing-cleanup-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed implementation plan for D137 route cleanup: remove `/tune-today`, TuneTodayScreen, Tune today controller, regenerateDraftFocus, and SessionDraft.levelRelaxed; route Home repeat/draft-start paths directly to Safety; preserve `/settings/skill-level` with current-level marking and a migrated-user correction path; add ChoiceSubsection reveal polish; rename focusCoverageAudit's `level_unhonored` bucket to `cannot_generate_at_level`; sync decisions/status/catalog/app docs."
     },
     {
       "id": "skill-level-mutability-2026-05-04",
       "path": "docs/plans/2026-05-04-001-feat-skill-level-mutability-plan.md",
       "type": "plan",
       "status": "complete",
-      "canonical_for": "Implementation plan for the 2026-05-04 skill-level mutability ship (post-pivot to Settings + Tune today eyebrow). 9 implementation units: U1 effectiveLevel resolver + partitionByLevel primitive, U2 wire resolver into pickForSlot / pickMainSkillSubstitute / findSwapAlternatives + buildDraft attaches levelRelaxed to SessionDraft (both opt-in via the new `onboarding?` BuildDraftOptions field — preserves golden-seed pin tests), U3 wire onboarding through SetupScreen.handleConfirm + HomeScreen.handleRepeat + regenerateDraftFocus (read outside the rw transaction), U4 extract SkillLevelPicker shared component (zero behavior change to onboarding), U5 SettingsSkillLevelScreen sub-route at /settings/skill-level + Skill level section on SettingsScreen + route + P12 contract, U6 TuneTodayScreen inline relaxation eyebrow above Continue (tappable to Settings) + controller exposes levelRelaxed, U7 JSDoc note on `skillLevelToDrillBand` documenting the post-engine-wiring re-validation of `unsure → beginner`, U8 cross-cutting buildDraft callsite sweep (1053/1053 tests green), U9 catalog + status sync. No SetupContext field added; no Dexie schema migration; no telemetry; no Tier 1b cap consumption."
+      "active_registry": true,
+      "canonical_for": "Implementation plan for the 2026-05-04 skill-level mutability ship. Complete active registry; PARTIALLY SUPERSEDED 2026-05-06 by D137 for TuneTodayScreen inline relaxation eyebrow, controller-exposed levelRelaxed, regenerateDraftFocus, and SessionDraft.levelRelaxed. Current surviving behavior: shared SkillLevelPicker, SettingsSkillLevelScreen sub-route at /settings/skill-level, Settings skill-level section with a migrated-user correction path when a saved level is missing, and the skillLevelToDrillBand unsure -> beginner re-validation note. No SetupContext field added; no Dexie schema migration; no telemetry; no Tier 1b cap consumption."
     },
     {
       "id": "agent-documentation-contract",
@@ -815,7 +832,7 @@
       "path": "docs/brainstorms/2026-04-29-session-focus-picker-requirements.md",
       "type": "requirements",
       "status": "active",
-      "canonical_for": "Requirements for the D135-fired Tier 1c session focus picker. Resolves the draft-screen ambiguity by selecting a Tune today review step as the v1 surface and codifies the architectural rigor (shared focus resolver, in-transaction regeneration use case, stale-write guards, repeat / recovery focus strip, accessibility semantics, privacy boundaries). PARTIALLY SUPERSEDED 2026-04-30: the short-lived opt-in fork in docs/brainstorms/2026-04-30-pre-run-simplification-requirements.md was superseded by docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md, which shipped mandatory Tune today with four chips, source-aware Back collapsed to setup/home, and no default Safety focus echo."
+      "canonical_for": "Requirements for the D135-fired Tier 1c session focus picker. Historical v1 selected a Tune today review step and codified the architectural rigor (shared focus resolver, in-transaction regeneration use case, stale-write guards, repeat / recovery focus strip, accessibility semantics, privacy boundaries). PARTIALLY SUPERSEDED 2026-04-30 by docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md, then PARTIALLY SUPERSEDED 2026-05-06 by D137: `/tune-today`, TuneTodayScreen, source-aware Tune today Back, and regenerateDraftFocus are deleted; current focus selection lives inline on Setup before Safety."
     },
     {
       "id": "tier-1c-impl-skill-level-mutability-and-catalog-audit-2026-04-28",
@@ -866,7 +883,7 @@
       "path": "docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md",
       "type": "requirements",
       "status": "active",
-      "canonical_for": "Requirements for making Tune today focus choices fully catalog-backed across pass/serve/set, skill levels, setup configurations, long sessions, swaps, and generated-plan stretch-pressure diagnostics. Establishes that Volleycraft should not have thin or unavailable visible focus states; the catalog must meet a practical floor (2 main options, 1 support option, 1 pressure option where applicable, and 1 same-focus swap per focus-controlled slot) before the focus picker is considered complete. Expansion is variant-first, but catalog readiness overrides the earlier D130 authoring cap when required for focus trust. 2026-05-01 adds R33-R38 for generated-plan diagnostics, over-cap classification, and curated mixed-focus theme contracts."
+      "canonical_for": "Requirements for making visible Setup focus choices fully catalog-backed across pass/serve/set, skill levels, setup configurations, long sessions, swaps, and generated-plan stretch-pressure diagnostics. Establishes that Volleycraft should not have thin or unavailable visible focus states; the catalog must meet a practical floor (2 main options, 1 support option, 1 pressure option where applicable, and 1 same-focus swap per focus-controlled slot) before the focus picker is considered complete. Expansion is variant-first, but catalog readiness overrides the earlier D130 authoring cap when required for focus trust. PARTIALLY SUPERSEDED 2026-05-06 by D137 for route placement only: readiness now applies to inline Setup focus choices, not a Tune today route. 2026-05-01 adds R33-R38 for generated-plan diagnostics, over-cap classification, and curated mixed-focus theme contracts."
     },
     {
       "id": "pre-run-simplification-2026-04-30",
@@ -874,7 +891,7 @@
       "type": "plan",
       "status": "complete",
       "active_registry": true,
-      "canonical_for": "Canonical implementation plan (revised 2026-04-30 after agent red-team and user feedback). Ships Tune today MANDATORY between Setup and Safety with four chips (Recommended/Passing/Serving/Setting), all-enabled with fail-on-tap inline copy, source-aware Back ('setup' | 'home'), and the full 2026-04-29-001 architecture: effectiveFocus.ts shared resolver, services/session/regenerateDraftFocus.ts in-transaction use case, stale-write guard, repeat / recovery focus strip. Bundled with three orthogonal pre-run cuts: (1) full Wind delete (field, UI, fixtures, windFriendly catalog cleanup; no Dexie migration); (2) conditional Wall row (only when Solo + No Net) plus Wall-required catalog invariant test; (3) no default Safety focus echo, recovery-override line only when painFlag === true && draft.context.sessionFocus !== undefined. Track 4 ships skill-scope policy as JSDoc on SkillFocus (no D136 decision row). Includes explicit K-ID inheritance matrix from 2026-04-29-001 (K1-K13 with K7 collapsed to two values). Supersedes docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md (its design rationale is inherited; ~6 net-new files ship under this plan)."
+      "canonical_for": "Canonical implementation plan (revised 2026-04-30 after agent red-team and user feedback). Complete active registry for the shipped pre-run simplification. PARTIALLY SUPERSEDED 2026-05-06 by D137: the mandatory Tune today route, services/session/regenerateDraftFocus.ts, source-aware Tune today Back, and Tune today controller/screen are deleted; current pre-run shape is Setup -> Safety with focus inline on Setup. Still current from this plan: full Wind delete, conditional Wall row only when Solo + No Net, no default Safety focus echo except recovery override, and Track 4 skill-scope JSDoc on SkillFocus. Supersedes docs/archive/plans/2026-04-29-001-feat-tune-today-focus-picker-plan.md for historical rationale."
     },
     {
       "id": "focus-coverage-readiness-2026-04-30",
@@ -1300,6 +1317,13 @@
       "type": "solution",
       "status": "active",
       "canonical_for": "Canonical end-to-end workflow learning for moving a generated-plan diagnostic group from pressure_remains_without_redistribution evidence to a shipped catalog drill addition, using the in-repo FIVB/BAB/VC source archives as load-bearing intermediates. Validated three times: D47 closed-by-D49 (2026-05-02 advanced setting), D46 closed-by-D50 (2026-05-04 advanced passing), D31 closed-by-D51 (2026-05-04 beginner serving). Names the implementation skeleton, required boundaries (no teaching-surface duplication, rollback criterion, D101 boundary, selection-path change paired with drill add, algorithm version bump on snapshot break), verification sequence, documentation trail, and remaining pre-mined Tier 2 polish candidates. Recipe proven level-agnostic (works at beginner + advanced)."
+    },
+    {
+      "id": "d137-canonical-pre-run-spine-setup-safety-2026-05-07",
+      "path": "docs/solutions/architecture-patterns/d137-canonical-pre-run-spine-setup-safety-2026-05-07.md",
+      "type": "solution",
+      "status": "active",
+      "canonical_for": "Architecture-pattern learning for D137: retired /tune-today pre-run route; live routePaths use Setup → Safety only; stale tune-today deep links handled via FirstOpenGate (onboarding) and App shell (completed users to Home); remove dead Tune today modules and tune-only session helpers; pointers to D137 in docs/decisions.md and related plans/brainstorms."
     },
     {
       "id": "d51-beginner-serving-tactical-zone-depth-requirements-2026-05-04",

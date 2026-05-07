@@ -27,7 +27,7 @@ export type ScreenHeaderProps = {
 /**
  * Plan U4 (2026-05-04): the canonical `BackButton + centered title +
  * spacer` row used across the pre-run/settings flow (SetupScreen,
- * SafetyCheckScreen, SettingsScreen, TuneTodayScreen).
+ * SafetyCheckScreen, SettingsScreen, SettingsSkillLevelScreen).
  *
  * Distinct from `RunFlowHeader` (U5) which is the run-flow shape
  * (SafetyIcon + 3-grid eyebrow + counter). This one always carries a

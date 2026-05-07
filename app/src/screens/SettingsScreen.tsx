@@ -71,10 +71,10 @@ export function SettingsScreen() {
   // 2026-05-04 skill-level-mutability ship, U5: read the user's
   // saved onboarding.skillLevel for the Skill level section's
   // current-value display. Single-shot read on mount (matches the
-  // tally pattern); the section hides when no value is present
-  // (defensive — FirstOpenGate normally guarantees a value before
-  // Settings is reachable).
-  const [skillLevel, setSkillLevel] = useState<SkillLevel | null>(null)
+  // tally pattern); `undefined` means the read is still loading,
+  // while `null` means a backfilled/malformed profile needs a visible
+  // correction path.
+  const [skillLevel, setSkillLevel] = useState<SkillLevel | null | undefined>(undefined)
   useEffect(() => {
     let cancelled = false
     getStorageMeta('onboarding.skillLevel', isSkillLevel).then(
@@ -161,28 +161,19 @@ export function SettingsScreen() {
           {state.kind === 'error' && <StatusMessage variant="error" message={state.message} />}
         </Card>
 
-        {/* 2026-05-04 skill-level-mutability ship (R2): Skill level
-            section between Export card and About local storage.
-            Displays the user's current saved level using the 5-tier
-            SKILL_LEVEL_LABEL (the user-facing identity vocabulary)
-            and offers a Change affordance routing to the new
-            sub-route. When the read returns `null` (key absent or
-            value fails `isSkillLevel` — defensive; FirstOpenGate
-            normally guarantees a value), render a fallback "Set your
-            skill level" row instead of hiding the section entirely.
-            The Tune today eyebrow tells users to "adjust in
-            Settings" — silently hiding the surface there would be a
-            broken promise (per ce-adversarial-reviewer ADV-9). */}
-        <section
-          aria-labelledby="settings-skill-level-heading"
-          data-testid="settings-skill-level"
-          className="flex flex-col gap-2 rounded-[12px] border border-text-secondary/15 bg-bg-warm/40 p-4"
-        >
-          <h2 id="settings-skill-level-heading" className="text-sm font-semibold text-text-primary">
-            Skill level
-          </h2>
-          {skillLevel ? (
-            <>
+        {skillLevel !== undefined ? (
+          <section
+            aria-labelledby="settings-skill-level-heading"
+            data-testid="settings-skill-level"
+            className="flex flex-col gap-2 rounded-[12px] border border-text-secondary/15 bg-bg-warm/40 p-4"
+          >
+            <h2
+              id="settings-skill-level-heading"
+              className="text-sm font-semibold text-text-primary"
+            >
+              Skill level
+            </h2>
+            {skillLevel ? (
               <p className="text-sm text-text-secondary">
                 Your level:{' '}
                 <span className="font-medium text-text-primary">
@@ -190,23 +181,18 @@ export function SettingsScreen() {
                 </span>
                 .
               </p>
-              <div>
-                <Button variant="link" onClick={() => navigate(routes.settingsSkillLevel())}>
-                  Change
-                </Button>
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="text-sm text-text-secondary">No level saved yet.</p>
-              <div>
-                <Button variant="link" onClick={() => navigate(routes.settingsSkillLevel())}>
-                  Set your skill level
-                </Button>
-              </div>
-            </>
-          )}
-        </section>
+            ) : (
+              <p className="text-sm text-text-secondary">
+                Choose your level so Volleycraft can size sessions to you.
+              </p>
+            )}
+            <div>
+              <Button variant="link" onClick={() => navigate(routes.settingsSkillLevel())}>
+                {skillLevel ? 'Change' : 'Set skill level'}
+              </Button>
+            </div>
+          </section>
+        ) : null}
 
         {/* 2026-04-23 walkthrough closeout polish item 3: About local
             storage sub-section, below the Export card. Scope-guardian

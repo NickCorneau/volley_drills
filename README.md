@@ -6,7 +6,7 @@ stage: validation
 type: hub
 summary: "Repo hub: quick start, top-level layout, and links into the canonical docs."
 authority: repo layout and human-facing orientation
-last_updated: 2026-05-02
+last_updated: 2026-05-07
 depends_on:
   - AGENTS.md
   - docs/catalog.json
@@ -18,19 +18,30 @@ depends_on:
 Volleyball personal training app for self-coached amateurs: structured session planning, courtside run mode, and rules-based adaptation. Beach-first in scope for M001 (see `docs/decisions.md` `D125` for the product-name rationale and beach-first / volleyball-inclusive positioning).
 
 **Stage**: Phase 0 validation, operating in `D130` founder-use mode through 2026-07-20.
-**Build**: v0b Starter Loop is the M001 base. M001 Tier 1a, Tier 1b Layer A, mandatory Tune today, focus-coverage readiness, and generated-plan diagnostics have shipped; remaining Tier 1b is gated by logged demand.
+**Build**: v0b Starter Loop is the M001 base. M001 Tier 1a, Tier 1b Layer A, D137 Setup-direct-to-Safety cleanup, focus-coverage readiness, and generated-plan diagnostics have shipped; remaining Tier 1b is gated by logged demand.
 **Live**: https://volleydrills.nicholascorneau.workers.dev
 **Status**: detailed posture and recent shipped history live in `docs/status/current-state.md`. The `D91` retention gate is deferred (not dropped); the active read is the `D130` partner-use Condition 3 final close on 2026-05-21.
 
 ## Quick Start
 
 ```bash
-cd app
-npm install
+npm --prefix app install
 npm run dev
 ```
 
 Expected URL: `http://localhost:5173`
+
+Common root checks delegate to the runnable app under `app/`:
+
+```bash
+npm run typecheck
+npm run lint
+npm test
+npm run build
+npm run validate:docs
+```
+
+Use `npm run validate` for the root typecheck + lint + unit test + agent-doc validation bundle. App-local commands in `app/README.md` remain supported.
 
 ## Start Here
 

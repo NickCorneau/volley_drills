@@ -1,7 +1,6 @@
 export const routePaths = {
   home: '/',
   setup: '/setup',
-  tuneToday: '/tune-today',
   safety: '/safety',
   run: '/run',
   /**
@@ -35,7 +34,6 @@ export const routePaths = {
 export const routes = {
   home: () => routePaths.home,
   setup: () => routePaths.setup,
-  tuneToday: () => routePaths.tuneToday,
   safety: () => routePaths.safety,
   run: (execId: string) => `${routePaths.run}?id=${encodeURIComponent(execId)}`,
   drillCheck: (execId: string) => `${routePaths.drillCheck}?id=${encodeURIComponent(execId)}`,

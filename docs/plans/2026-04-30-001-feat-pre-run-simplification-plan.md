@@ -28,6 +28,10 @@ decision_refs:
 
 # Pre-run flow
 
+## 2026-05-06 D137 Supersession Note
+
+This completed registry still records the shipped 2026-04-30 pre-run simplification, but D137 supersedes the mandatory Tune today route surface. Current behavior is Setup -> Safety with focus inline on Setup; `/tune-today`, `regenerateDraftFocus`, and the Tune today controller are deleted by `docs/plans/2026-05-06-001-refactor-d137-tune-today-routing-cleanup-plan.md`.
+
 ## Overview
 
 Bundles four tracks into one PR (or two natural splits — see Phased Delivery):

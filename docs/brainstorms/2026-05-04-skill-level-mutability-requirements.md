@@ -1,12 +1,12 @@
 ---
 id: skill-level-mutability-requirements-2026-05-04
-title: "Skill-level mutability requirements (Settings durable change + Tune today relaxation eyebrow)"
-status: active
+title: "Skill-level mutability requirements (Settings durable change; D137 supersedes Tune today eyebrow)"
+status: complete
 stage: validation
 type: requirements
-summary: "Requirements for the D135-fired skill-level mutability surface. Pivots from the original Tune today second-row chip design (rejected by ce-product-lens and ce-design-lens reviewers) to a Settings + Tune today relaxation eyebrow shape. Settings hosts a durable change to the user's onboarding skill level (reusing the existing 5-tier SkillLevelScreen UI verbatim with a heading swap); Tune today renders a single quiet inline eyebrow above Continue when the assembly engine could not honor the user's saved level for ≥1 focus-controlled slot today, tappable to Settings. The assembly engine reads effective skill level for the first time at the same ship — picking a level the engine ignored would be dishonest. No per-session override field; onboarding skill level IS the runtime input. Match between trigger evidence (Seb's verbatim 'to better reflect my skill set' / 'difficulty setting') and surface is now direct."
-authority: "Requirements handoff for the skill-level mutability surface (Settings durable change + Tune today relaxation eyebrow). Owns surface placement, taxonomy choice, engine wiring contract, candidate-pool preference and fallback rule with build-time relaxation flag, accessibility, and the skill-level-screen reuse pattern. Does not own UI copy strings (deferred to planning) or future per-session chip surface (out of scope; if real evidence ever surfaces, the engine wiring shipped here is the chassis)."
-last_updated: 2026-05-04
+summary: "Completed requirements for D135-fired skill-level mutability. Current after D137: Settings hosts the durable skill-level change at /settings/skill-level, onboarding skill level remains the runtime input, and engine level filtering remains current. PARTIALLY SUPERSEDED 2026-05-06: Tune today relaxation eyebrow, levelRelaxed, regenerateDraftFocus, and /tune-today are retired."
+authority: "Completed requirements handoff for skill-level mutability. Owns the surviving Settings/onboarding skill-level override, taxonomy choice, engine wiring contract, accessibility, and shared SkillLevelPicker reuse. D137 supersedes the Tune today eyebrow, relaxation flag, and regenerateDraftFocus requirements."
+last_updated: 2026-05-06
 depends_on:
   - docs/brainstorms/2026-04-29-session-focus-picker-requirements.md
   - docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md
@@ -21,11 +21,14 @@ decision_refs:
   - D130
   - D131
   - D135
+  - D137
 ---
 
 # Skill-Level Mutability Requirements
 
 ## Iteration log
+
+**2026-05-06 D137 supersession note.** Settings remains canonical for durable skill-level changes, but this document's Tune today relaxation-eyebrow and `levelRelaxed` requirements are superseded by `docs/brainstorms/2026-05-06-001-d137-tune-today-routing-resolution-requirements.md` and `docs/plans/2026-05-06-001-refactor-d137-tune-today-routing-cleanup-plan.md`. D137 deleted `/tune-today`, the controller, `regenerateDraftFocus`, and `SessionDraft.levelRelaxed`; skill level is now surfaced only through onboarding and `/settings/skill-level`.
 
 **2026-05-04, post-`ce-doc-review`.** Six parallel reviewers (coherence, feasibility, product-lens, design-lens, scope-guardian, adversarial) surfaced findings the original draft glossed: assemblyMeta phantom, focus-strip mirror claim wrong, R6 vs R10/R22 contradiction, R3 saved-override gap, premise-framing single-reading. Material changes applied. Net: 35 R-IDs, 11 KDs, 2 DQs.
 

@@ -28,20 +28,20 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
 
   test('home screen (new user, onboarding complete)', async ({ page }) => {
     await seedOnboardingAndOpenHome(page)
-    await expect(page.getByRole('button', { name: /start first workout/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /start first session/i })).toBeVisible()
     await checkA11y(page, 'home – new user')
   })
 
   test('setup screen', async ({ page }) => {
     await seedOnboardingAndOpenHome(page)
-    await page.getByRole('button', { name: /start.*workout/i }).click()
+    await page.getByRole('button', { name: /start.*session/i }).click()
     await expect(page.getByText("Today's setup")).toBeVisible()
     await checkA11y(page, 'setup')
   })
 
   test('safety check screen', async ({ page }) => {
     await seedOnboardingAndOpenHome(page)
-    await page.getByRole('button', { name: /start.*workout/i }).click()
+    await page.getByRole('button', { name: /start.*session/i }).click()
     await page.getByRole('radio', { name: 'Solo' }).click()
     await page.getByLabel('Net available').getByRole('radio', { name: 'No' }).click()
     await page
@@ -57,7 +57,7 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
 
   test('run screen', async ({ page }) => {
     await seedOnboardingAndOpenHome(page)
-    await page.getByRole('button', { name: /start.*workout/i }).click()
+    await page.getByRole('button', { name: /start.*session/i }).click()
     await page.getByRole('radio', { name: 'Solo' }).click()
     await page.getByLabel('Net available').getByRole('radio', { name: 'No' }).click()
     await page
@@ -67,9 +67,15 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
     await page.getByRole('radio', { name: '15 min' }).click()
     await page.getByRole('button', { name: /build session/i }).click()
 
-    await page.getByRole('button', { name: 'No' }).click()
-    await page.locator('button', { hasText: 'Yesterday' }).click()
-    await page.getByRole('button', { name: 'Continue' }).click()
+    await page
+      .getByRole('radiogroup', { name: /Sharp pain or guarding/i })
+      .getByRole('radio', { name: 'No' })
+      .click()
+    await page
+      .getByRole('radiogroup', { name: /When did you last train/i })
+      .getByRole('radio', { name: 'Yesterday' })
+      .click()
+    await page.getByRole('button', { name: /^Start session$/i }).click()
 
     const pause = page.getByRole('button', { name: /pause/i })
     const startNext = page.getByRole('button', { name: /start next block/i })
@@ -85,7 +91,7 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
 
   test('run screen – paused state', async ({ page }) => {
     await seedOnboardingAndOpenHome(page)
-    await page.getByRole('button', { name: /start.*workout/i }).click()
+    await page.getByRole('button', { name: /start.*session/i }).click()
     await page.getByRole('radio', { name: 'Solo' }).click()
     await page.getByLabel('Net available').getByRole('radio', { name: 'No' }).click()
     await page
@@ -95,9 +101,15 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
     await page.getByRole('radio', { name: '15 min' }).click()
     await page.getByRole('button', { name: /build session/i }).click()
 
-    await page.getByRole('button', { name: 'No' }).click()
-    await page.locator('button', { hasText: 'Yesterday' }).click()
-    await page.getByRole('button', { name: 'Continue' }).click()
+    await page
+      .getByRole('radiogroup', { name: /Sharp pain or guarding/i })
+      .getByRole('radio', { name: 'No' })
+      .click()
+    await page
+      .getByRole('radiogroup', { name: /When did you last train/i })
+      .getByRole('radio', { name: 'Yesterday' })
+      .click()
+    await page.getByRole('button', { name: /^Start session$/i }).click()
 
     const pause = page.getByRole('button', { name: /pause/i })
     const startNext = page.getByRole('button', { name: /start next block/i })
@@ -109,7 +121,7 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
     }
 
     await pause.click()
-    await expect(page.getByText(/paused/i)).toBeVisible()
+    await expect(page.getByText('Paused', { exact: true })).toBeVisible()
     await checkA11y(page, 'run – paused')
   })
 

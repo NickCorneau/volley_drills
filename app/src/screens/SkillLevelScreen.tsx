@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { SkillLevelPicker } from '../components/onboarding/SkillLevelPicker'
 import { ScreenShell } from '../components/ui'
-import { FOCAL_SURFACE_CLASS } from '../components/ui/surfaces'
 import { isSchemaBlocked } from '../lib/schema-blocked'
-import { SKILL_LEVEL_LABEL, SKILL_LEVELS, type SkillLevel } from '../lib/skillLevel'
+import { type SkillLevel } from '../lib/skillLevel'
 import { loadVoiceFromStorage, type Voice } from '../lib/voiceFromContext'
 import { routes } from '../routes'
 import { setStorageMetaMany } from '../services/storageMeta'
@@ -49,42 +49,19 @@ import { setStorageMetaMany } from '../services/storageMeta'
 
 interface Copy {
   heading: string
-  descriptors: Record<Exclude<SkillLevel, 'unsure'>, string>
 }
 
 const PAIR_COPY: Copy = {
   heading: 'Where\u2019s the pair today?',
-  descriptors: {
-    foundations: 'Keeping a friendly toss alive.',
-    rally_builders: 'Pass easy serves, short rallies.',
-    side_out_builders: 'Pass to target, attack the 3rd.',
-    competitive_pair: 'Tougher serves, game-like play.',
-  },
 }
 
 const SOLO_COPY: Copy = {
   heading: 'Where are you today?',
-  descriptors: {
-    foundations: 'Keeping a friendly toss alive.',
-    rally_builders: 'Pass easy serves, short rallies.',
-    side_out_builders: 'Pass to target, attack the 3rd.',
-    competitive_pair: 'Tougher serves, game-like play.',
-  },
 }
 
-/**
- * Band descriptors stay in functional-ability voice (neutral between
- * solo and pair - "Pass easy serves" works in both) so the only surface
- * that flips is the heading. This keeps Phase F's copy delta minimal
- * and preserves D121's action-anchored framing. When the full D121
- * pair-vs-solo pronoun pass lands in M001-build, these strings are the
- * extension point.
- */
 function copyForVoice(voice: Voice): Copy {
   return voice === 'solo' ? SOLO_COPY : PAIR_COPY
 }
-
-const BANDS = SKILL_LEVELS.filter((l): l is Exclude<SkillLevel, 'unsure'> => l !== 'unsure')
 
 export function SkillLevelScreen() {
   const navigate = useNavigate()
@@ -177,36 +154,10 @@ export function SkillLevelScreen() {
           leaving the reader to guess. The taxonomy enum is unchanged
           (still writes `skillLevel: 'unsure'` atomically via
           `setStorageMetaMany`). */}
-        <ul className="flex flex-col gap-4" aria-label="Skill level options">
-          {BANDS.map((level) => (
-            <li key={level}>
-              <button
-                type="button"
-                onClick={() => void handlePick(level)}
-                className={`flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent hover:bg-bg-warm active:bg-bg-warm ${FOCAL_SURFACE_CLASS}`}
-              >
-                <span className="text-sm font-semibold text-text-primary">
-                  {SKILL_LEVEL_LABEL[level]}
-                </span>
-                <span className="text-sm text-text-secondary">{copy.descriptors[level]}</span>
-              </button>
-            </li>
-          ))}
-          <li>
-            <button
-              type="button"
-              onClick={() => void handlePick('unsure')}
-              className={`flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent hover:bg-bg-warm active:bg-bg-warm ${FOCAL_SURFACE_CLASS}`}
-            >
-              <span className="text-sm font-semibold text-text-primary">
-                {SKILL_LEVEL_LABEL.unsure}
-              </span>
-              <span className="text-sm text-text-secondary">
-                We'll size a light starter - you can change this after.
-              </span>
-            </button>
-          </li>
-        </ul>
+        <SkillLevelPicker
+          onPick={handlePick}
+          unsureSubtext="We'll size a light starter - you can change this after."
+        />
       </ScreenShell.Body>
     </ScreenShell>
   )

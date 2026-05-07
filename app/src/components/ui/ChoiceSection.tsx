@@ -14,7 +14,7 @@ export type ChoiceSectionProps = {
 }
 
 /**
- * Shared layout for every choice row in the pre-run flow (Setup, Tune Today,
+ * Shared layout for every choice row in the pre-run flow (Setup,
  * Safety): one heading scale (`text-base` semibold), shared gap, optional
  * description above the chips, optional footnote below.
  *
@@ -64,7 +64,7 @@ export type ChoiceSubsectionProps = {
  */
 export function ChoiceSubsection({ titleId, title, description, children }: ChoiceSubsectionProps) {
   return (
-    <div className="flex flex-col gap-3 rounded-[12px] bg-bg-warm/60 p-3">
+    <div className="flex animate-[choice-subsection-reveal_180ms_ease-out] flex-col gap-3 rounded-[12px] bg-bg-warm/60 p-3 motion-reduce:animate-none">
       <h3 id={titleId} className="text-base font-semibold text-text-primary">
         {title}
       </h3>

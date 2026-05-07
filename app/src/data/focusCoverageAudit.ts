@@ -46,8 +46,8 @@ import type { SkillLevel } from '../lib/skillLevel'
  * **Skill-level (R21):** the audit consumes onboarding skill level
  * via `effectiveLevel(onboarding)` exactly the way the live engine
  * does (from the 2026-05-04 skill-level mutability ship), so
- * skill-level coverage cannot pass on paper while generation
- * silently relaxes.
+ * skill-level coverage cannot pass on paper while generation cannot
+ * honor the saved level.
  *
  * **Support-reinforcing (R7):** for v1, "focus-reinforcing" means
  * the support drill's `skillFocus` includes the chosen focus tag
@@ -110,7 +110,7 @@ export type CoverageRiskBucket =
   | 'off_focus_support' // R7 — no focus-reinforcing support drill in band
   | 'thin_pressure' // R8 — pressure slot present but no in-band pressure
   | 'no_same_focus_swap' // R9 — only 1 main family (swap would re-pick the same)
-  | 'level_unhonored' // R21 — engine would relax level for this combination
+  | 'cannot_generate_at_level' // R21 — focus-capable families exist, but not in-band
 
 export interface CellCounts {
   readonly mainFamiliesInBand: number
@@ -271,7 +271,7 @@ function evaluateCell(
   const risks: CoverageRiskBucket[] = []
   if (main.inBand < 2) {
     if (main.total === 0) risks.push('cannot_generate')
-    else if (main.inBand === 0) risks.push('level_unhonored')
+    else if (main.inBand === 0) risks.push('cannot_generate_at_level')
     else risks.push('no_same_focus_swap')
   }
   if (supportInBand < 1) risks.push('off_focus_support')
@@ -323,7 +323,7 @@ export function runFocusCoverageAudit(): CoverageAuditResult {
       off_focus_support: 0,
       thin_pressure: 0,
       no_same_focus_swap: 0,
-      level_unhonored: 0,
+      cannot_generate_at_level: 0,
     },
   }
   for (const cell of cells) {

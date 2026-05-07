@@ -168,11 +168,11 @@ test.describe('phase-c5 repeat path', () => {
     await seedLastComplete(page)
     await page.reload()
 
-    await expect(page.getByRole('button', { name: /repeat this session/i })).toBeVisible({
+    await expect(page.getByRole('button', { name: /repeat last session/i })).toBeVisible({
       timeout: 10_000,
     })
 
-    await page.getByRole('button', { name: /repeat this session/i }).click()
+    await page.getByRole('button', { name: /repeat last session/i }).click()
 
     // 2026-04-22 one-tap Repeat: direct to /safety, no Setup detour,
     // no stale-context banner. The draft was rebuilt silently via
@@ -185,12 +185,12 @@ test.describe('phase-c5 repeat path', () => {
     // is the D83 contract — the Repeat shortcut must not leak any
     // prior safety answers.
     await expect(page.getByText(/before we start/i)).toBeVisible()
-    await expect(page.getByRole('button', { name: /^continue$/i })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /^start session$/i })).toBeDisabled()
 
     // Answer safety and proceed to /run.
-    await page.getByRole('button', { name: 'No' }).click()
-    await page.locator('button', { hasText: 'Yesterday' }).click()
-    await page.getByRole('button', { name: 'Continue' }).click()
+    await page.getByRole('radio', { name: /^no$/i }).click()
+    await page.getByRole('radio', { name: /^yesterday$/i }).click()
+    await page.getByRole('button', { name: /^start session$/i }).click()
     // /run uses a query-string id (`/run?id=...`) in v0b, not a path segment.
     await expect(page).toHaveURL(/\/run\?id=/, { timeout: 15_000 })
   })
@@ -201,12 +201,12 @@ test.describe('phase-c5 repeat path', () => {
     await seedLastComplete(page, { ended_early: true })
     await page.reload()
 
-    // Primary: Repeat full 25-min plan. Secondary: Repeat what you did (14 min).
+    // Primary: Repeat full plan. Secondary: Repeat shorter version (14 min).
     const full = page.getByRole('button', {
-      name: /repeat full 25-min plan/i,
+      name: /repeat full plan/i,
     })
     const partial = page.getByRole('button', {
-      name: /repeat what you did \(14 min\)/i,
+      name: /repeat shorter version \(14 min\)/i,
     })
     await expect(full).toBeVisible({ timeout: 10_000 })
     await expect(partial).toBeVisible()
@@ -229,7 +229,7 @@ test.describe('phase-c5 repeat path', () => {
     // `Same as last time` affordances must NOT render — the single-
     // choice model (same-as-last or different) is the whole point of
     // the Phase F cleanup.
-    await expect(page.getByRole('button', { name: /repeat this session/i })).toBeVisible({
+    await expect(page.getByRole('button', { name: /repeat last session/i })).toBeVisible({
       timeout: 10_000,
     })
     await expect(page.getByRole('button', { name: /start a different session/i })).toBeVisible()

@@ -27,7 +27,7 @@ export type ReadinessRiskBucket =
   | 'off_focus_support'
   | 'no_same_focus_swap'
   | 'thin_long_session'
-  | 'skill_level_unhonored'
+  | 'cannot_generate_at_level'
   | 'source_trace_missing'
 
 export type FocusReadinessSlotType = Extract<
@@ -174,7 +174,7 @@ const READINESS_RISK_BUCKETS: readonly ReadinessRiskBucket[] = [
   'off_focus_support',
   'no_same_focus_swap',
   'thin_long_session',
-  'skill_level_unhonored',
+  'cannot_generate_at_level',
   'source_trace_missing',
 ] as const
 

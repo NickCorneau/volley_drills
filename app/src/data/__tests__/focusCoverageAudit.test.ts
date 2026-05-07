@@ -17,7 +17,7 @@ import {
  * The snapshot below is the authoritative baseline. When a future
  * change to `app/src/data/drills.ts` (new variant, new drill,
  * eligibility relaxation) closes a gap, that cell's snapshot entry
- * flips from a risk-bucket string (e.g., `'level_unhonored'`) to
+ * flips from a risk-bucket string (e.g., `'cannot_generate_at_level'`) to
  * `'covered'` — `npm test -- -u` updates the snapshot, the diff
  * reads as "✗ → ✓ for cell X", and code review can confirm the
  * improvement is real. When a change opens a new gap (e.g., a
@@ -30,8 +30,9 @@ import {
  *   (currently zero — every (config, timeProfile) pair has a layout).
  * - `'cannot_generate'` — main_skill family pool is empty across all
  *   levels; engine cannot build a focused main_skill block.
- * - `'level_unhonored'` — main families exist at other levels, but
- *   none in-band; engine would relax level on this slot.
+ * - `'cannot_generate_at_level'` — main families exist at other levels,
+ *   but none in-band; the engine cannot generate this focused slot at
+ *   the saved level.
  * - `'no_same_focus_swap'` — exactly 1 in-band main family; swap
  *   would re-pick the same drill.
  * - `'off_focus_support'` — no in-band technique/movement_proxy drill
@@ -64,7 +65,7 @@ describe('focusCoverageAudit', () => {
         "notApplicableCount": 0,
         "riskBucketCounts": {
           "cannot_generate": 0,
-          "level_unhonored": 0,
+          "cannot_generate_at_level": 0,
           "no_same_focus_swap": 0,
           "off_focus_support": 0,
           "thin_pressure": 0,
@@ -94,7 +95,7 @@ describe('focusCoverageAudit', () => {
       off_focus_support: 0,
       thin_pressure: 0,
       no_same_focus_swap: 0,
-      level_unhonored: 0,
+      cannot_generate_at_level: 0,
     }
     for (const cell of result.cells) {
       for (const risk of cell.risks) {

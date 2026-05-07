@@ -102,6 +102,6 @@ test.describe('phase-e settings + export', () => {
     await page.getByRole('button', { name: /back/i }).click()
     await expect(page).toHaveURL(/\/$/)
     // NewUser empty state (no seeded LastComplete) still renders.
-    await expect(page.getByRole('button', { name: /start first workout/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /start first session/i })).toBeVisible()
   })
 })

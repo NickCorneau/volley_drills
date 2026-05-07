@@ -35,6 +35,16 @@ describe('SkillLevelPicker', () => {
     expect(screen.queryByText(/We'll size a light starter/)).not.toBeInTheDocument()
   })
 
+  it('marks the current saved level when provided', () => {
+    render(<SkillLevelPicker onPick={vi.fn()} currentLevel="side_out_builders" />)
+
+    const current = screen.getByRole('button', { name: /Side-out builders.*Current/i })
+    expect(current).toHaveAttribute('aria-current', 'true')
+    expect(screen.getByRole('button', { name: /Rally builders/ })).not.toHaveAttribute(
+      'aria-current',
+    )
+  })
+
   it('fires onPick with the picked SkillLevel value', async () => {
     const user = userEvent.setup()
     const onPick = vi.fn()

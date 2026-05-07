@@ -143,6 +143,8 @@ Durable docs under `docs/` should keep YAML frontmatter and explicit ownership. 
 - Treat Volleycraft as pair-native while still supporting solo training as a common mode.
 - Prefer calm, shibui interfaces that reduce information overload and decision fatigue.
 - For UI/app changes, value manual mobile dogfood testing with screenshots and iterative polish before declaring done.
+- When a deliverable may be read on a phone, prefer concise, skimmable structure over dense prose.
+- Session focus is mandatory in the product: **Recommended** is the default and focus cannot be deselected—avoid implying optional focus or “skip choosing focus” semantics when describing behavior.
 
 ## Learned Workspace Facts
 
@@ -153,3 +155,4 @@ Durable docs under `docs/` should keep YAML frontmatter and explicit ownership. 
 - Historical control-plane scaffolding now lives in `archive/agent-control-plane/`.
 - The live v0b PWA deploys as a Cloudflare Worker at <https://volleydrills.nicholascorneau.workers.dev>; use `app/README.md` and `docs/ops/deploy-cloudflare-worker.md` for deploy runbooks.
 - Generated-plan diagnostics are the active focus-readiness quality surface; `docs/reviews/2026-05-01-generated-plan-diagnostics-report.md`, `docs/reviews/2026-05-01-generated-plan-diagnostics-triage.md`, and `npm run diagnostics:report:*` own the report/triage loop.
+- **D137** retired the standalone `/tune-today` pre-run screen: it is not part of `routePaths` in `app/src/routes.ts`; stale `/tune-today` entry is handled via `FirstOpenGate` and tests while Setup → Safety remains the active pre-run spine.

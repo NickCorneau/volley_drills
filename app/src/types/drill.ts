@@ -32,7 +32,7 @@ export type FeedType = 'self-toss' | 'partner-toss' | 'live-serve' | 'wall-rebou
  * `app/src/data/archetypes.ts` and `pickForSlot` in
  * `app/src/domain/sessionAssembly/candidates.ts`.
  *
- * `'movement'` is a support tag, not a standalone Tune today focus. In
+ * `'movement'` is a support tag, not a standalone setup focus. In
  * default Recommended sessions, archetype fallbacks keep movement_proxy
  * pass-scoped so set/serve drills that also train movement do not leak
  * across primary focus chains. Named-focus sessions can still use

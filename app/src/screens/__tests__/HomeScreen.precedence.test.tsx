@@ -135,6 +135,7 @@ function renderHome() {
         <Route path="/" element={<HomeScreen />} />
         <Route path="/complete" element={<div data-testid="complete-route">complete</div>} />
         <Route path="/review" element={<div data-testid="review-route">review</div>} />
+        <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -171,6 +172,15 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
       name: /other active actions/i,
     })
     expect(secondary).toHaveTextContent(/solo \+ wall \(yesterday\)/i)
+  })
+
+  it('draft primary Continue routes directly to Safety', async () => {
+    const user = userEvent.setup()
+    await seedDraft()
+    renderHome()
+
+    await user.click(await screen.findByRole('button', { name: /^continue$/i }))
+    expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
   })
 
   it('review_pending + draft + last_complete: review primary + both secondaries', async () => {

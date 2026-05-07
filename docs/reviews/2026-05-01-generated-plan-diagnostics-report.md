@@ -4,7 +4,7 @@ title: "Generated Plan Diagnostics Report"
 status: active
 stage: validation
 type: review-data
-summary: "Machine-readable generated-plan diagnostics summary for the current Tune today focus-readiness surface."
+summary: "Machine-readable generated-plan diagnostics summary for the current Setup inline-focus readiness surface."
 authority: "Current generated-plan diagnostic snapshot for seeded buildDraft() stretch-pressure and duration-envelope classification."
 last_updated: 2026-05-03
 depends_on:
@@ -19,7 +19,7 @@ depends_on:
 
 ## Purpose
 
-Record the current generated-plan diagnostic snapshot for the Tune today supported surface. This file is fully generated and validated by `npm run diagnostics:report:check`.
+Record the current generated-plan diagnostic snapshot for the Setup inline-focus supported surface. This file is fully generated and validated by `npm run diagnostics:report:check`.
 
 ## Summary
 

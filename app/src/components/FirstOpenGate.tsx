@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { isOnboardingStep } from '../lib/onboarding'
 import { isSchemaBlocked } from '../lib/schema-blocked'
+import { isSkillLevel } from '../lib/skillLevel'
 import { routes } from '../routes'
 import { getStorageMeta } from '../services/storageMeta'
 
@@ -30,6 +31,13 @@ import { getStorageMeta } from '../services/storageMeta'
 const isTimestamp = (v: unknown): v is number =>
   typeof v === 'number' && Number.isFinite(v) && v > 0
 
+const FIRST_OPEN_ENTRY_PATHS = new Set(['/', '/tune-today', '/settings', '/settings/skill-level'])
+
+const normalizeEntryPath = (path: string) => {
+  const withoutTrailingSlash = path.replace(/\/+$/, '')
+  return withoutTrailingSlash === '' ? '/' : withoutTrailingSlash
+}
+
 export function FirstOpenGate({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
@@ -41,7 +49,13 @@ export function FirstOpenGate({ children }: { children: ReactNode }) {
       try {
         const completedAt = await getStorageMeta('onboarding.completedAt', isTimestamp)
         if (cancelled) return
+        const entryPath = normalizeEntryPath(pathname)
         if (completedAt != null) {
+          const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
+          if (cancelled) return
+          if (skillLevel == null && FIRST_OPEN_ENTRY_PATHS.has(entryPath)) {
+            navigate(routes.onboardingSkillLevel(), { replace: true })
+          }
           setResolved(true)
           return
         }
@@ -51,11 +65,10 @@ export function FirstOpenGate({ children }: { children: ReactNode }) {
         if (cancelled) return
         const target =
           step === 'todays_setup' ? routes.onboardingTodaysSetup() : routes.onboardingSkillLevel()
-        // R1 (C-3): only `/` is the first-open entry; deep links like `/run`
-        // or `/safety` must still resolve so those screens can handle errors
-        // and redirects without being forced through onboarding first.
-        const isHomePath = pathname === '/' || pathname === ''
-        if (isHomePath) {
+        // D137: `/tune-today` is a retired pre-run route, but stale
+        // first-open deep links should still enter onboarding instead
+        // of falling through to Home before skill level is collected.
+        if (FIRST_OPEN_ENTRY_PATHS.has(entryPath)) {
           navigate(target, { replace: true })
         }
         setResolved(true)

@@ -204,14 +204,7 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
       expect(await screen.findByTestId('settings-skill-level-route')).toBeInTheDocument()
     })
 
-    it('renders a "Set your skill level" fallback when no level is persisted (defensive — preserves the eyebrow promise)', async () => {
-      // Defensive path: FirstOpenGate normally guarantees a value
-      // before Settings is reachable, but if onboarding.skillLevel
-      // is somehow missing (legacy upgrade path, malformed value),
-      // the section MUST surface a Set affordance instead of
-      // hiding silently — the Tune today eyebrow tells users to
-      // "adjust in Settings", and a hidden section breaks that
-      // promise (per ce-adversarial-reviewer ADV-9).
+    it('keeps a correction path visible when no level is persisted', async () => {
       render(
         <MemoryRouter initialEntries={['/settings']}>
           <Routes>
@@ -224,15 +217,27 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
         </MemoryRouter>,
       )
 
-      // Wait for the section to render.
       const section = await screen.findByTestId('settings-skill-level')
-      expect(section).toBeInTheDocument()
-      expect(section).toHaveTextContent(/no level saved yet/i)
+      expect(section).toHaveTextContent(/choose your level/i)
+      expect(screen.getByRole('button', { name: /set skill level/i })).toBeInTheDocument()
+    })
 
-      // Set affordance navigates to the sub-route, where the user
-      // can pick a level.
+    it('Set skill level navigates to /settings/skill-level for backfilled users', async () => {
       const user = userEvent.setup()
-      await user.click(screen.getByRole('button', { name: /set your skill level/i }))
+      render(
+        <MemoryRouter initialEntries={['/settings']}>
+          <Routes>
+            <Route path="/settings" element={<SettingsScreen />} />
+            <Route
+              path="/settings/skill-level"
+              element={<div data-testid="settings-skill-level-route">sub-route</div>}
+            />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      await screen.findByTestId('settings-skill-level')
+      await user.click(screen.getByRole('button', { name: /set skill level/i }))
       expect(await screen.findByTestId('settings-skill-level-route')).toBeInTheDocument()
     })
   })

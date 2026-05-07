@@ -75,10 +75,11 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
     await screen.findByRole('heading', { level: 1, name: /today\?/i })
 
     // Pick a band - SkillLevelScreen writes skillLevel + step via
-    // setStorageMetaMany before navigating. We're testing the RESUME
-    // contract, so we unmount BEFORE the in-memory navigation settles
-    // on the new page. Unmount simulates tab-close mid-onboarding.
+    // setStorageMetaMany before navigating. Wait for the in-memory
+    // navigation to settle so React has no pending router update when
+    // this test simulates a tab close via unmount.
     await user.click(screen.getByRole('button', { name: /rally builders/i }))
+    await screen.findByTestId('todays-setup')
 
     // Verify the persistence landed (this matches SkillLevelScreen's
     // existing assertions - belt).
@@ -106,10 +107,11 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
     expect(await screen.findByRole('heading', { level: 1, name: /today\?/i })).toBeInTheDocument()
   })
 
-  it('C-0 backfill coverage (H15): ExecutionLog + onboarding.completedAt keep the tester out of onboarding on next open', async () => {
+  it('C-0 backfill coverage (H15): completedAt without skillLevel re-enters onboarding on entry paths', async () => {
     // H15 defense-in-depth: existing v3 testers with ExecutionLog records
-    // get `onboarding.completedAt` backfilled at v4 upgrade time. Verify
-    // the gate recognizes the sentinel and routes them to Home.
+    // get `onboarding.completedAt` backfilled at v4 upgrade time. D137
+    // requires a skill level before level-filtered sessions, so entry
+    // paths collect the missing level instead of treating Home as ready.
     await db.executionLogs.put({
       id: 'exec-existing-1',
       planId: 'plan-existing-1',
@@ -126,7 +128,7 @@ describe('FirstOpenGate resume semantics (C-3 Unit 5)', () => {
     })
 
     renderTree('/')
-    expect(await screen.findByTestId('home')).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { level: 1, name: /today\?/i })).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: /today\?/i })).toBeInTheDocument()
+    expect(screen.queryByTestId('home')).not.toBeInTheDocument()
   })
 })

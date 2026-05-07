@@ -62,8 +62,8 @@ const LAYOUT_CLASSES: Record<ChoiceRowLayout, string> = {
 
 /**
  * Plan U3 (2026-05-04): atomic primitive for the `<div role="radiogroup">
- * + .map(ToggleChip)` pattern that was inlined across 8+ call sites
- * (SetupScreen ×5, SafetyCheckScreen ×2, TuneTodayScreen, RpeSelector,
+ * + .map(ToggleChip)` pattern that was inlined across 7+ call sites
+ * (SetupScreen ×5, SafetyCheckScreen ×2, RpeSelector,
  * IncompleteReasonChips, PerDrillCapture). Sibling to `ChoiceSection`
  * — `ChoiceSection` owns heading + description + footnote + opaque
  * children; `ChoiceRow` owns the chip-row body and its accessibility

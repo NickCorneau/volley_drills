@@ -6,7 +6,7 @@ stage: validation
 type: index
 summary: "Editorial index for the docs tree: what each doc family owns and where to route changes."
 authority: documentation structure and editorial routing
-last_updated: 2026-05-02
+last_updated: 2026-05-06
 depends_on:
   - docs/catalog.json
   - docs/ops/agent-documentation-contract.md
@@ -76,6 +76,10 @@ Provide the prose editorial index for the docs system:
 4. `docs/decisions.md`
 5. `docs/prd-foundation.md`
 6. relevant milestone/spec/research docs
+
+## Recent Routing Notes
+
+- `D137` retired `/tune-today` as an active route. For current pre-run behavior, route through `docs/brainstorms/2026-05-06-001-d137-tune-today-routing-resolution-requirements.md` and `docs/plans/2026-05-06-001-refactor-d137-tune-today-routing-cleanup-plan.md`; Setup owns inline focus choice before Safety.
 
 ## Related Folders
 

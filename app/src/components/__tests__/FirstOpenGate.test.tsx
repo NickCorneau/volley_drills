@@ -42,6 +42,7 @@ function renderAt(initial: string) {
             path="/onboarding/todays-setup"
             element={<div data-testid="todays-setup">setup</div>}
           />
+          <Route path="*" element={<div data-testid="fallback">fallback</div>} />
         </Routes>
         <LocationProbe />
       </FirstOpenGate>
@@ -88,10 +89,29 @@ describe('FirstOpenGate (C-3 Unit 1)', () => {
     expect(screen.getByTestId('current-path').textContent).toBe('/onboarding/skill-level')
   })
 
-  it('respects the C-0 backfill: ExecutionLog existed + completedAt backfilled -> children render', async () => {
+  it('redirects stale /tune-today deep links to onboarding on first open', async () => {
+    renderAt('/tune-today')
+    expect(await screen.findByTestId('skill-level')).toBeInTheDocument()
+    expect(screen.getByTestId('current-path').textContent).toBe('/onboarding/skill-level')
+  })
+
+  it('redirects stale /tune-today/ deep links to onboarding on first open', async () => {
+    renderAt('/tune-today/')
+    expect(await screen.findByTestId('skill-level')).toBeInTheDocument()
+    expect(screen.getByTestId('current-path').textContent).toBe('/onboarding/skill-level')
+  })
+
+  it('redirects first-open Settings skill-level deep links to onboarding', async () => {
+    renderAt('/settings/skill-level')
+    expect(await screen.findByTestId('skill-level')).toBeInTheDocument()
+    expect(screen.getByTestId('current-path').textContent).toBe('/onboarding/skill-level')
+  })
+
+  it('backfilled completedAt without skillLevel re-enters Skill Level on entry paths', async () => {
     // H15 defense-in-depth: existing v3 testers with ExecutionLog records
-    // get `onboarding.completedAt` backfilled at v4 upgrade time. The
-    // gate must recognize that as "onboarding is done" and render Home.
+    // get `onboarding.completedAt` backfilled at v4 upgrade time. D137
+    // added skill-level-gated assembly, so entry paths now collect the
+    // missing skill level before rendering Home.
     await db.executionLogs.put({
       id: 'exec-existing',
       planId: 'plan-existing',
@@ -106,6 +126,23 @@ describe('FirstOpenGate (C-3 Unit 1)', () => {
       value: 3,
       updatedAt: 3,
     })
+    renderAt('/')
+    expect(await screen.findByTestId('skill-level')).toBeInTheDocument()
+  })
+
+  it('renders children when completedAt and skillLevel are both set', async () => {
+    await db.storageMeta.bulkPut([
+      {
+        key: 'onboarding.completedAt',
+        value: 3,
+        updatedAt: 3,
+      },
+      {
+        key: 'onboarding.skillLevel',
+        value: 'rally_builders',
+        updatedAt: 3,
+      },
+    ])
     renderAt('/')
     expect(await screen.findByTestId('home')).toBeInTheDocument()
   })

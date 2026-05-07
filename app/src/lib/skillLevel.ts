@@ -14,10 +14,10 @@
  * lets the user-facing taxonomy and the drill-metadata taxonomy evolve
  * independently without a Dexie migration.
  *
- * v0b ships the screen and persists the value but does not gate any code
- * path on it (per D-C4); the shim is in place so that when M001-build wires
- * assembly / progression against skill level, the mapping is already the
- * single source of truth.
+ * D137 keeps the persisted value as the durable user-level override; session
+ * assembly consumes the mapped drill band through `effectiveLevel` /
+ * `skillLevelToDrillBand` while the five-band user-facing taxonomy remains
+ * free to evolve independently.
  *
  * See:
  * - `docs/specs/m001-phase-c-ux-decisions.md` → Surface 1 for the
@@ -105,14 +105,12 @@ export const SKILL_LEVEL_LABEL: Record<SkillLevel, string> = {
  * 1. Map `'unsure'` to "no level constraint." Rejected: the
  *    resolver always needs a concrete `PlayerLevel` value;
  *    introducing a wildcard would force a wider engine refactor.
- * 2. Force a one-time explicit pick on first Tune today visit for
+ * 2. Force another explicit pick before every first session build for
  *    `'unsure'` users. Rejected: adds friction for the user least
  *    likely to know the answer.
  * 3. Keep `'unsure' → 'beginner'` (selected). The Settings sub-route
  *    (`/settings/skill-level`) is the durable escape hatch when an
- *    `'unsure'` user discovers their actual level; the Tune today
- *    relaxation eyebrow surfaces engine relaxation when the catalog
- *    cannot honor a non-Beginner pick.
+ *    `'unsure'` user discovers their actual level.
  *
  * If a future ship (e.g., the catalog gains Advanced focus-
  * controlled drills) re-opens this question, also re-read

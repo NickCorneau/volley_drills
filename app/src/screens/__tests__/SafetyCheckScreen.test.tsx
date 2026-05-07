@@ -284,6 +284,40 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     expect(request).toHaveBeenCalledWith('screen')
     expect(await screen.findByTestId('run-route')).toBeInTheDocument()
   })
+
+  it('promotes legacy drafts with stale levelRelaxed data without copying it to the plan', async () => {
+    const user = userEvent.setup()
+    await clearDb()
+    const draft = buildDraft({
+      playerMode: 'solo',
+      timeProfile: 15,
+      netAvailable: false,
+      wallAvailable: false,
+    })
+    expect(draft).toBeDefined()
+    await db.sessionDrafts.put({ ...draft!, levelRelaxed: true } as unknown as NonNullable<
+      typeof draft
+    >)
+
+    render(
+      <MemoryRouter initialEntries={['/safety']}>
+        <Routes>
+          <Route path="/safety" element={<SafetyCheckScreen />} />
+          <Route path="/run" element={<div data-testid="run-route">run</div>} />
+          <Route path="/setup" element={<div data-testid="setup">setup</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await user.click(await screen.findByRole('radio', { name: /^today$/i }))
+    await user.click(screen.getByRole('radio', { name: /^no$/i }))
+    await user.click(screen.getByRole('button', { name: /^start session$/i }))
+
+    expect(await screen.findByTestId('run-route')).toBeInTheDocument()
+    const plans = await db.sessionPlans.toArray()
+    expect(plans).toHaveLength(1)
+    expect(plans[0]).not.toHaveProperty('levelRelaxed')
+  })
 })
 
 describe('SafetyCheckScreen escape hatch', () => {

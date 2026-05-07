@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SkillLevelPicker } from '../components/onboarding/SkillLevelPicker'
-import { BackButton, ScreenShell } from '../components/ui'
+import { ScreenHeader, ScreenShell } from '../components/ui'
 import { isSchemaBlocked } from '../lib/schema-blocked'
-import { type SkillLevel } from '../lib/skillLevel'
+import { isSkillLevel, type SkillLevel } from '../lib/skillLevel'
 import { loadVoiceFromStorage, type Voice } from '../lib/voiceFromContext'
 import { routes } from '../routes'
-import { setStorageMetaMany } from '../services/storageMeta'
+import { getStorageMeta, setStorageMetaMany } from '../services/storageMeta'
 
 /**
  * 2026-05-04 skill-level-mutability ship, U5: Settings sub-route for
  * the durable change to `storageMeta.onboarding.skillLevel`.
  *
- * Reuses the 5-card `SkillLevelPicker` body verbatim with a
- * Settings-flavored heading and back navigation. Critically distinct
+ * Reuses the shared 5-card `SkillLevelPicker` with a Settings-flavored
+ * heading, current-level marker, and back navigation. Critically distinct
  * from `SkillLevelScreen` (the first-open onboarding screen):
  *
  * - Heading reads as a change-flavored prompt ("Update your level"),
@@ -33,6 +33,7 @@ export function SettingsSkillLevelScreen() {
   const navigate = useNavigate()
   const acting = useRef(false)
   const [voice, setVoice] = useState<Voice>('solo')
+  const [currentLevel, setCurrentLevel] = useState<SkillLevel | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -43,6 +44,22 @@ export function SettingsSkillLevelScreen() {
       .catch((err) => {
         if (!cancelled && !isSchemaBlocked()) {
           console.error('SettingsSkillLevelScreen: voice load failed', err)
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    void getStorageMeta('onboarding.skillLevel', isSkillLevel)
+      .then((level) => {
+        if (!cancelled) setCurrentLevel(level ?? null)
+      })
+      .catch((err) => {
+        if (!cancelled && !isSchemaBlocked()) {
+          console.error('SettingsSkillLevelScreen: skill level load failed', err)
         }
       })
     return () => {
@@ -73,13 +90,7 @@ export function SettingsSkillLevelScreen() {
 
   return (
     <ScreenShell>
-      <ScreenShell.Header className="flex items-center gap-2 pt-2 pb-3">
-        <BackButton label="Back" onClick={() => navigate(routes.settings())} />
-        <h1 className="flex-1 text-center text-xl font-semibold tracking-tight text-text-primary">
-          {heading}
-        </h1>
-        <div className="w-12" />
-      </ScreenShell.Header>
+      <ScreenHeader backLabel="Back" onBack={() => navigate(routes.settings())} title={heading} />
 
       <ScreenShell.Body className="pb-6">
         <p className="mb-4 text-sm text-text-secondary">
@@ -87,6 +98,7 @@ export function SettingsSkillLevelScreen() {
         </p>
         <SkillLevelPicker
           onPick={handlePick}
+          currentLevel={currentLevel ?? undefined}
           unsureSubtext="We'll size a light starter."
         />
       </ScreenShell.Body>

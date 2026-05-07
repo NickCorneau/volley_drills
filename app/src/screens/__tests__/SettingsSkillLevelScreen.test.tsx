@@ -75,6 +75,41 @@ describe('SettingsSkillLevelScreen (2026-05-04 skill-level-mutability ship, U5)'
     expect(saved).toBe('competitive_pair')
   })
 
+  it('marks the current saved level when one exists', async () => {
+    await db.storageMeta.put({
+      key: 'onboarding.skillLevel',
+      value: 'rally_builders',
+      updatedAt: Date.now(),
+    })
+
+    renderScreen()
+
+    const current = await screen.findByRole('button', { name: /Rally builders.*Current/i })
+    expect(current).toHaveAttribute('aria-current', 'true')
+  })
+
+  it('current saved level card remains tappable and returns to Settings', async () => {
+    await db.storageMeta.put({
+      key: 'onboarding.skillLevel',
+      value: 'rally_builders',
+      updatedAt: Date.now(),
+    })
+
+    const user = userEvent.setup()
+    renderScreen()
+
+    await user.click(await screen.findByRole('button', { name: /Rally builders.*Current/i }))
+    expect(await screen.findByTestId('settings-route')).toBeInTheDocument()
+    expect(await getStorageMeta('onboarding.skillLevel', isSkillLevel)).toBe('rally_builders')
+  })
+
+  it('renders without a current marker when opened directly with no saved level', async () => {
+    renderScreen()
+
+    expect(await screen.findByRole('button', { name: /Foundations/ })).toBeInTheDocument()
+    expect(screen.queryByText('Current')).not.toBeInTheDocument()
+  })
+
   it('does NOT mutate onboarding.step on pick (R5 — distinguishes from first-open SkillLevelScreen)', async () => {
     // Pre-set a step value to confirm it's preserved.
     await db.storageMeta.put({

@@ -1,4 +1,5 @@
 import { FOCAL_SURFACE_CLASS } from '../ui/Card'
+import { cx } from '../../lib/cn'
 import { SKILL_LEVEL_LABEL, SKILL_LEVELS, type SkillLevel } from '../../lib/skillLevel'
 
 /**
@@ -37,6 +38,7 @@ const BANDS = SKILL_LEVELS.filter((l): l is Exclude<SkillLevel, 'unsure'> => l !
 
 export interface SkillLevelPickerProps {
   onPick: (level: SkillLevel) => Promise<void> | void
+  currentLevel?: SkillLevel
   /**
    * Custom copy under the "Not sure yet" card. Defaults to the
    * onboarding-flavored copy. The Settings sub-route uses a more
@@ -47,36 +49,42 @@ export interface SkillLevelPickerProps {
 
 const DEFAULT_UNSURE_SUBTEXT = "We'll size a light starter. You can change this after."
 
-export function SkillLevelPicker({ onPick, unsureSubtext }: SkillLevelPickerProps) {
+export function SkillLevelPicker({ onPick, currentLevel, unsureSubtext }: SkillLevelPickerProps) {
+  const renderCard = (level: SkillLevel, description: string) => {
+    const isCurrent = level === currentLevel
+    return (
+      <button
+        type="button"
+        onClick={() => void onPick(level)}
+        aria-current={isCurrent ? 'true' : undefined}
+        className={cx(
+          'flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent hover:bg-bg-warm active:bg-bg-warm',
+          FOCAL_SURFACE_CLASS,
+          isCurrent && 'outline outline-1 outline-accent',
+        )}
+      >
+        <span className="flex w-full items-center justify-between gap-3 text-sm font-semibold text-text-primary">
+          <span>{SKILL_LEVEL_LABEL[level]}</span>
+          {isCurrent ? (
+            <span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent">
+              Current
+            </span>
+          ) : null}
+        </span>
+        <span className="text-sm text-text-secondary">{description}</span>
+      </button>
+    )
+  }
+
   return (
     <ul className="flex flex-col gap-4" aria-label="Skill level options">
       {BANDS.map((level) => (
         <li key={level}>
-          <button
-            type="button"
-            onClick={() => void onPick(level)}
-            className={`flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent hover:bg-bg-warm active:bg-bg-warm ${FOCAL_SURFACE_CLASS}`}
-          >
-            <span className="text-sm font-semibold text-text-primary">
-              {SKILL_LEVEL_LABEL[level]}
-            </span>
-            <span className="text-sm text-text-secondary">{BAND_DESCRIPTORS[level]}</span>
-          </button>
+          {renderCard(level, BAND_DESCRIPTORS[level])}
         </li>
       ))}
       <li>
-        <button
-          type="button"
-          onClick={() => void onPick('unsure')}
-          className={`flex min-h-[64px] w-full flex-col items-start gap-1 px-5 py-4 text-left outline-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent hover:bg-bg-warm active:bg-bg-warm ${FOCAL_SURFACE_CLASS}`}
-        >
-          <span className="text-sm font-semibold text-text-primary">
-            {SKILL_LEVEL_LABEL.unsure}
-          </span>
-          <span className="text-sm text-text-secondary">
-            {unsureSubtext ?? DEFAULT_UNSURE_SUBTEXT}
-          </span>
-        </button>
+        {renderCard('unsure', unsureSubtext ?? DEFAULT_UNSURE_SUBTEXT)}
       </li>
     </ul>
   )

@@ -114,6 +114,8 @@ describe('focus readiness model', () => {
     expect(isReadinessStatus('verified')).toBe(true)
     expect(isReadinessStatus('done')).toBe(false)
     expect(isReadinessRiskBucket('no_same_focus_swap')).toBe(true)
+    expect(isReadinessRiskBucket('cannot_generate_at_level')).toBe(true)
+    expect(isReadinessRiskBucket('skill_level_unhonored')).toBe(false)
     expect(isReadinessRiskBucket('missing_swap')).toBe(false)
   })
 

@@ -6,9 +6,8 @@ import { test, expect, type BrowserContext, type Page } from '@playwright/test'
  * Real-browser proof that:
  * - A fresh install routes through Skill Level -> Today's Setup -> Tune Today
  *   -> Safety -> Run (no Home bounce until onboarding completes).
- * - An existing tester (seeded `ExecutionLog` + `onboarding.completedAt`
- *   sentinel, simulating a post-C-0-backfill device) skips onboarding
- *   and lands on Home directly.
+ * - A backfilled tester with `ExecutionLog` + `onboarding.completedAt`
+ *   but no D137 skill level is routed back through Skill Level.
  *
  * Uses the CDP + route-interception pattern established by
  * `phase-c0-schema-v4.spec.ts` to wipe state between tests and to reach
@@ -48,9 +47,9 @@ async function gotoBlankOnAppOrigin(page: Page): Promise<void> {
 }
 
 async function seedV4ExistingTester(page: Page, completedAt: number): Promise<void> {
-  // Simulate the post-C-0-backfill device: executionLogs has one record
-  // AND storageMeta.onboarding.completedAt is set. FirstOpenGate should
-  // recognize this and let the tester land on Home.
+  // Simulate a post-C-0-backfill device: executionLogs has one record
+  // and storageMeta.onboarding.completedAt is set, but D137's
+  // storageMeta.onboarding.skillLevel does not exist yet.
   await page.evaluate(
     async ({ dbName, version, completedAt }) => {
       const dbInstance = await new Promise<IDBDatabase>((resolve, reject) => {
@@ -183,7 +182,7 @@ test.describe('Phase C-3 onboarding first-open flow', () => {
     expect(completedAt).toBeGreaterThan(0)
   })
 
-  test('existing tester (ExecutionLog + completedAt seeded) skips onboarding and lands on Home (H15)', async ({
+  test('backfilled tester without skill level re-enters Skill Level on first open (H15 + D137)', async ({
     context,
     page,
   }) => {
@@ -194,16 +193,14 @@ test.describe('Phase C-3 onboarding first-open flow', () => {
     await gotoBlankOnAppOrigin(page)
     await seedV4ExistingTester(page, Date.now())
 
-    // Navigate to the real app; FirstOpenGate should recognize the
-    // sentinel and NOT bounce to /onboarding/*.
+    // Navigate to the real app; D137 should collect the missing skill
+    // level before letting the tester reach Home.
     await page.goto('/')
-    await expect(page).toHaveURL(/\/$/)
+    await expect(page).toHaveURL(/\/onboarding\/skill-level$/)
 
-    // Home headline ("Volleycraft") renders, and there is NO Skill
-    // Level welcome preamble.
-    await expect(page.getByRole('heading', { level: 1, name: /volleycraft/i })).toBeVisible({
+    await expect(page.getByRole('heading', { level: 1, name: /today\?/i })).toBeVisible({
       timeout: 10_000,
     })
-    await expect(page.getByText(/welcome\. let.?s get you started\./i)).toHaveCount(0)
+    await expect(page.getByRole('heading', { level: 1, name: /volleycraft/i })).toHaveCount(0)
   })
 })

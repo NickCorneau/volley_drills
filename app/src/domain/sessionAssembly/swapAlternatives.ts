@@ -50,7 +50,7 @@ export function findSwapAlternatives(
   // 2026-04-30 focus fallback: when an explicit `sessionFocus`
   // narrowed the pool to empty for a focus-controlled slot, retry
   // with the focus stripped so mid-run Swap stays usable. Without
-  // this, picking 'Setting' on Tune today would silently disable
+  // this, picking 'Setting' on Setup would silently disable
   // Swap on `main_skill` / `pressure` blocks whenever the catalog
   // happens to have only one set drill in the current context. We
   // accept the small intent-violation (a passing alternate during

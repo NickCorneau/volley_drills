@@ -29,7 +29,7 @@ const RISK_LABELS: Record<string, string> = {
   covered: '✓',
   not_applicable: '—',
   cannot_generate: 'CG',
-  level_unhonored: 'LU',
+  cannot_generate_at_level: 'CL',
   no_same_focus_swap: 'NS',
   off_focus_support: 'OS',
   thin_pressure: 'TP',
@@ -55,7 +55,8 @@ function generate(): string {
     'authority: "Generated diagnostic from `app/src/data/focusCoverageAudit.ts` walking the focus × player-mode × net/wall × time-profile × skill-level matrix against the practical depth floor in `docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md` (R6-R10). The Vitest snapshot at `app/src/data/__tests__/focusCoverageAudit.snapshot.json` is the authoritative regression baseline; this markdown is the scan-friendly human view."',
   )
   lines.push(
-    'summary: "First-run audit after the 2026-05-04 skill-level mutability ship made the engine read effective skill level for the first time. 180 cells total: 45 covered (25%), 135 failing (75%). Every failing cell carries `off_focus_support` (the strict R7 read — no support drill in technique/movement_proxy carries the chosen focus tag directly). 12 cells are unbuildable (`cannot_generate`) — all `serve` × `pair_open` (no net). 54 cells fail with `level_unhonored` — every `competitive_pair` (mapped to advanced) user hits this for at least pass + serve focuses. 22 cells fail with `thin_pressure` (40-min layouts where pressure slot lacks an in-band focused option). 18 cells fail with `no_same_focus_swap` (only 1 in-band main family — mostly `serve` × foundations/rally_builders × solo). The audit is a Vitest test; CI fails on regression."')
+    `summary: "Current generated audit: ${result.summary.totalCells} cells total, ${result.summary.coveredCount} covered, ${result.summary.failingCount} failing, ${result.summary.notApplicableCount} not applicable. The audit is a Vitest-backed diagnostic; snapshot diffs expose coverage regressions or intentional catalog improvements."`,
+  )
   lines.push('last_updated: 2026-05-04')
   lines.push('related:')
   lines.push('  - docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md')
@@ -92,7 +93,7 @@ function generate(): string {
     `| \`cannot_generate\` (CG) | ${result.summary.riskBucketCounts.cannot_generate} | No main-skill family exists in any band for this slot+context. Engine cannot build a focused main_skill block. |`,
   )
   lines.push(
-    `| \`level_unhonored\` (LU) | ${result.summary.riskBucketCounts.level_unhonored} | Main families exist at other levels, but none in-band. Engine relaxes level on this slot. Tune today eyebrow fires. |`,
+    `| \`cannot_generate_at_level\` (CL) | ${result.summary.riskBucketCounts.cannot_generate_at_level} | Main families exist at other levels, but none in-band. The engine cannot generate this focused slot at the saved level. |`,
   )
   lines.push(
     `| \`no_same_focus_swap\` (NS) | ${result.summary.riskBucketCounts.no_same_focus_swap} | Exactly 1 in-band main family. Swap would re-pick the same drill (R9 fails). |`,
@@ -104,42 +105,22 @@ function generate(): string {
     `| \`thin_pressure\` (TP) | ${result.summary.riskBucketCounts.thin_pressure} | Pressure slot present in the 40-min layout, but no in-band pressure drill carries the chosen focus tag. |`,
   )
   lines.push('')
-  lines.push('## Headline gaps (scan-first)')
+  lines.push('## Current diagnostic read')
   lines.push('')
-  lines.push('### 1. `off_focus_support` is universal (135/135 failing cells)')
-  lines.push('')
-  lines.push(
-    'Every failing cell carries `off_focus_support`. The strict R7 read — a support drill must include the chosen focus tag in its `skillFocus` — surfaces that **no current `technique` or `movement_proxy` drill carries `serve` or `set`** in its `skillFocus`. Pass-focused sessions pass R7 because the existing technique drills (d05, d10, d11, etc.) are all `pass`-tagged.',
-  )
-  lines.push('')
-  lines.push(
-    'This is the brainstorm\'s "long Serving session still has pass-flavored support blocks" gap (`docs/ideation/2026-04-30-focus-picker-drill-depth-ideation.md` Idea #3 "Focus-Aligned Support Blocks"). Resolution path: either (a) author serve-reinforcing technique/movement_proxy drills, or (b) relax R7 to allow source-backed adjacent tags (e.g., movement work counts for serving via footwork-routine reinforcement).',
-  )
-  lines.push('')
-  lines.push('### 2. `serve` × `pair_open` is unbuildable at every level (12 cells)')
-  lines.push('')
-  lines.push(
-    "Pair + open sand (no net) cannot generate a serving main_skill block — the brainstorm flagged this. Resolution path: source-backed pair-without-net serving drill (e.g., target practice with a partner shagging) or accept this as a permanent `not_applicable` per the brainstorm's `D101` 3+ player gating.",
-  )
-  lines.push('')
-  lines.push('### 3. `competitive_pair` users hit `level_unhonored` on 54 cells')
-  lines.push('')
-  lines.push(
-    'Catalog inspection: zero drills with `levelMax: \'advanced\'` carry `pass | serve | set` focus. Every `competitive_pair` (mapped to `advanced`) user hits the relaxation eyebrow for any focused session. Resolution path: source-backed advanced variants (FIVB Level II coaches manual, BAB advanced material) or accept the eyebrow as the honest signal.',
-  )
-  lines.push('')
-  lines.push(
-    '### 4. Serve × foundations/rally_builders × solo configurations have only 1 main family',
-  )
-  lines.push('')
-  lines.push(
-    "18 cells fall into `no_same_focus_swap`. The brainstorm's serving credibility pass (Idea #2) targets this directly.",
-  )
+  if (result.summary.failingCount === 0) {
+    lines.push(
+      'All audited cells meet the current practical depth floor. Risk buckets remain in the report as regression sentinels for future drill-catalog changes.',
+    )
+  } else {
+    lines.push(
+      'One or more cells are failing. Use the risk-bucket counts and per-focus matrices below to locate the exact focus × level × configuration cells before changing catalog content.',
+    )
+  }
   lines.push('')
   lines.push('## Per-focus matrices')
   lines.push('')
   lines.push(
-    'Each cell shows the worst-status risk-bucket abbreviation (CG, LU, NS, OS, TP) joined by `+` when multiple risks apply. `✓` is a covered cell.',
+    'Each cell shows the worst-status risk-bucket abbreviation (CG, CL, NS, OS, TP) joined by `+` when multiple risks apply. `✓` is a covered cell.',
   )
   lines.push('')
 

@@ -70,7 +70,7 @@ function renderHome() {
     <MemoryRouter>
       <Routes>
         <Route path="/" element={<HomeScreen />} />
-        <Route path="/tune-today" element={<div data-testid="tune-route">tune</div>} />
+        <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
         <Route path="/setup" element={<div data-testid="setup-route">setup</div>} />
       </Routes>
     </MemoryRouter>,
@@ -103,7 +103,7 @@ describe('HomeScreen Repeat race guard', () => {
       await Promise.resolve()
     })
 
-    expect(await screen.findByTestId('tune-route')).toBeInTheDocument()
+    expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
     expect(await db.sessionDrafts.get('current')).toBeDefined()
   })
 })

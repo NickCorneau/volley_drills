@@ -24,8 +24,8 @@ export async function clearIndexedDB(page: Page) {
 }
 
 /**
- * Writes `onboarding.completedAt` so FirstOpenGate and `/setup` allow the
- * legacy “home → start workout” e2e path without walking onboarding UI.
+ * Writes the onboarding completion keys so FirstOpenGate and `/setup` allow
+ * the legacy “home → start session” e2e path without walking onboarding UI.
  * Call after a navigation that has opened the DB at least once.
  */
 export async function seedOnboardingCompletedAt(page: Page) {
@@ -44,6 +44,11 @@ export async function seedOnboardingCompletedAt(page: Page) {
         tx.objectStore('storageMeta').put({
           key: 'onboarding.completedAt',
           value: now,
+          updatedAt: now,
+        })
+        tx.objectStore('storageMeta').put({
+          key: 'onboarding.skillLevel',
+          value: 'rally_builders',
           updatedAt: now,
         })
         tx.oncomplete = () => {

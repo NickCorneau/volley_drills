@@ -1,0 +1,22 @@
+{
+  "name": "volleycraft",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "dev": "npm --prefix app run dev",
+    "build": "npm --prefix app run build",
+    "typecheck": "npm --prefix app run typecheck",
+    "lint": "npm --prefix app run lint",
+    "test": "npm --prefix app test",
+    "test:e2e": "npm --prefix app run test:e2e",
+    "format:check": "npm --prefix app run format:check",
+    "architecture:check": "npm --prefix app run architecture:check",
+    "diagnostics:report:check": "npm --prefix app run diagnostics:report:check",
+    "diagnostics:triage:check": "npm --prefix app run diagnostics:triage:check",
+    "validate:docs": "bash scripts/validate-agent-docs.sh",
+    "validate": "npm run typecheck && npm run lint && npm run test && npm run validate:docs",
+    "deploy": "npm --prefix app run deploy",
+    "deploy:dry-run": "npm --prefix app run deploy:dry-run"
+  }
+}

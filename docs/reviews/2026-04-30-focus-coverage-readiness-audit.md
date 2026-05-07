@@ -61,7 +61,7 @@ Risk bucket counts:
 - `off_focus_support`: 0 after batch 1 focus-controlled support wiring
 - `no_same_focus_swap`: 0
 - `thin_long_session`: 0
-- `skill_level_unhonored`: 0 after U3 wiring
+- `cannot_generate_at_level`: 0 after D137 bucket rename
 - `source_trace_missing`: 0 in generated mechanics; source trace remains a gap-card requirement before activation
 
 Generated-plan diagnostics:

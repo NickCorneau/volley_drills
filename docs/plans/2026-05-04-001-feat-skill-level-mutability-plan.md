@@ -1,14 +1,13 @@
 ---
-
-## id: skill-level-mutability-2026-05-04
-title: "feat: Skill-level mutability (engine wiring + Settings durable change + Tune today relaxation eyebrow)"
+id: skill-level-mutability-2026-05-04
+title: "feat: Skill-level mutability (engine wiring + Settings durable change)"
 type: feat
-status: active
+status: complete
 stage: validation
 date: 2026-05-04
-authority: "Canonical implementation plan for the D135-fired skill-level mutability surface, post-pivot to the Settings + Tune today eyebrow shape recommended by ce-product-lens and ce-design-lens reviewers. Ships effectiveLevel resolver, partitionByLevel primitive, candidate-pool wiring across pickForSlot/pickMainSkillSubstitute/findSwapAlternatives with build-time levelRelaxed flag, a Settings sub-route reusing the existing 5-tier SkillLevelScreen UI via shared SkillLevelPicker extraction, the Tune today inline eyebrow when relaxation fires, and the unsure-shim re-validation note. No SetupContext.skillLevelOverride field; no per-session chip surface; no asymmetric strip discipline; no Dexie schema migration."
-summary: "Adds a new pure resolver effectiveLevel(onboarding) that reads storageMeta.onboarding.skillLevel via the existing skillLevelToDrillBand shim; wires the assembly engine to read effective level for the first time via in-band-preferred candidate pools with focus-held level-relax fallback in pickForSlot, pickMainSkillSubstitute, and findSwapAlternatives; adds a build-time levelRelaxed boolean on the buildDraft return so the Tune today controller can render a single inline eyebrow above Continue when the engine could not honor the user's saved level for ≥1 focus-controlled slot; adds a Settings section + sub-route where the user can durably change their onboarding skill level (reusing the existing 5-tier SkillLevelScreen UI verbatim via a new shared SkillLevelPicker component); adds a JSDoc note to skillLevel.ts documenting the unsure→beginner shim was reconsidered post-engine-wiring; preserves D131 no-telemetry posture; no SetupContext field added; no Dexie schema migration."
-last_updated: 2026-05-04
+authority: "Completed implementation plan for the D135-fired skill-level mutability surface. Current after D137: Settings/onboarding skill-level persistence and engine level filtering remain current; Tune today, regenerateDraftFocus, and SessionDraft.levelRelaxed tracks are superseded."
+summary: "Completed registry for the 2026-05-04 skill-level mutability work: effectiveLevel/partitionByLevel engine wiring, Settings skill-level override at /settings/skill-level, shared SkillLevelPicker extraction, and unsure-shim re-validation. PARTIALLY SUPERSEDED 2026-05-06 by D137: Tune today eyebrow, regenerateDraftFocus, and SessionDraft.levelRelaxed are deleted; current pre-run shape is Setup -> Safety with focus inline on Setup."
+last_updated: 2026-05-06
 related:
   - docs/brainstorms/2026-05-04-skill-level-mutability-requirements.md
   - docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md
@@ -22,10 +21,14 @@ decision_refs:
   - D130
   - D131
   - D135
+  - D137
+---
 
 # Skill-level mutability
 
 ## Iteration log
+
+**2026-05-06 D137 supersession note.** This plan remains a completed registry for the 2026-05-04 skill-level mutability work, but its Tune today eyebrow, `regenerateDraftFocus`, and `SessionDraft.levelRelaxed` tracks are superseded by `docs/plans/2026-05-06-001-refactor-d137-tune-today-routing-cleanup-plan.md`. The surviving current behavior is the Settings override at `/settings/skill-level` plus onboarding skill-level persistence; no Tune today route or relax-signal UI remains.
 
 **2026-05-04 v1** — original plan: Tune today second-row chip + per-session `skillLevelOverride` field + asymmetric strip + R36 inline note + `ToggleChip` disabled prop + dual-radiogroup keyboard contract + pair/solo group label structural branching + 9 implementation units / 14 KDs / 3 DQs.
 

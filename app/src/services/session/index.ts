@@ -27,7 +27,6 @@ export {
 } from './queries'
 
 export type { CreateSessionFromDraftParams } from './commands'
-export type { RegenerateDraftFocusInput, RegenerateDraftFocusResult } from './regenerateDraftFocus'
 export {
   clearDraft,
   createSessionFromDraft,
@@ -38,7 +37,6 @@ export {
   skipReview,
   swapActiveBlock,
 } from './commands'
-export { regenerateDraftFocus } from './regenerateDraftFocus'
 
 // Pure state transitions, re-exported so existing call sites
 // (`useSessionRunner`, session tests) don't have to change.

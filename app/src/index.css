@@ -123,3 +123,15 @@ body {
    */
   font-feature-settings: 'cv11' 1;
 }
+
+@keyframes choice-subsection-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
