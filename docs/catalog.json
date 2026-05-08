@@ -1369,6 +1369,14 @@
       "canonical_for": "Completed decision-spine cleanup plan that refreshed docs/milestones/m001-solo-session-loop.md after D137-D140 and resolved O24 as D141: M001 keeps a single-skill-chain generation constraint, but that constraint is not a permanent skill-isolation product principle. Documentation/comment-only change; no runtime, route, schema, catalog, or UI behavior changed."
     },
     {
+      "id": "source-backed-reroute-registry-refactor-plan-2026-05-08",
+      "path": "docs/plans/2026-05-08-004-refactor-source-backed-reroute-registry-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed A1 refactor plan that consolidated the three shouldPrefer*DurationFit predicates plus the inline d01 reroute check in app/src/domain/sessionBuilder.ts into a single declarative SOURCE_BACKED_REROUTES registry under app/src/domain/sessionAssembly/sourceBackedReroutes.ts (with a shouldRerouteForSourceBackedSibling predicate and dedicated unit tests). Internal refactor only: byte-equivalent runtime behavior, no schema, route, catalog data, or UI surface change; no SESSION_ASSEMBLY_ALGORITHM_VERSION bump; future source-backed reroutes added by registry entry rather than new predicate helpers."
+    },
+    {
       "id": "pair-side-catalog-content-depth-requirements-2026-05-04",
       "path": "docs/brainstorms/2026-05-04-pair-side-catalog-content-depth-requirements.md",
       "type": "requirements",

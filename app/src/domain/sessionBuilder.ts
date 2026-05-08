@@ -10,13 +10,13 @@ import type {
   SetupContext,
 } from '../model'
 import {
-  candidateCanCarryTargetDuration,
   pickForSlot,
   type CandidateVariant,
 } from './sessionAssembly/candidates'
 import { allocateDurations, allocateRecoveryDurations } from './sessionAssembly/durations'
 import { createAssemblySeed, createSeededRandom } from './sessionAssembly/random'
 import { deriveBlockRationale } from './sessionAssembly/rationale'
+import { shouldRerouteForSourceBackedSibling } from './sessionAssembly/sourceBackedReroutes'
 import { pickMainSkillSubstitute } from './sessionAssembly/substitution'
 export {
   findStrictSameFocusSwapAlternatives,
@@ -26,10 +26,6 @@ export {
 export { deriveBlockRationale } from './sessionAssembly/rationale'
 
 export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 6
-
-const ADVANCED_SETTING_DURATION_FIT_DRILL_IDS = new Set(['d47', 'd48'])
-const ADVANCED_PASSING_DURATION_FIT_DRILL_IDS = new Set(['d46'])
-const BEGINNER_SERVING_DURATION_FIT_DRILL_IDS = new Set(['d31'])
 
 /**
  * Optional inputs that scope build-time drill substitution.
@@ -140,64 +136,6 @@ function stripSessionFocus(context: SetupContext): SetupContext {
   return next
 }
 
-function shouldPreferAdvancedSettingDurationFit(
-  slot: BlockSlot,
-  context: SetupContext,
-  selected: CandidateVariant,
-  plannedDurationMinutes: number,
-): boolean {
-  return (
-    slot.type === 'main_skill' &&
-    context.sessionFocus === 'set' &&
-    context.playerLevel === 'advanced' &&
-    ADVANCED_SETTING_DURATION_FIT_DRILL_IDS.has(selected.drill.id) &&
-    !candidateCanCarryTargetDuration(selected, plannedDurationMinutes)
-  )
-}
-
-// Advanced pair-open / solo-open passing main-skill blocks above D46's 8-minute
-// envelope used to silently over-stretch D46 (FIVB 3.16 spin-read receive).
-// D50 (FIVB 3.13 Short/Deep, 8-14 min envelope) is the source-backed long
-// envelope sibling; this predicate triggers the reroute when D46 was selected
-// for an advanced passing block it cannot carry. Mirrors
-// `shouldPreferAdvancedSettingDurationFit` for D47/D48 -> D49.
-function shouldPreferAdvancedPassingDurationFit(
-  slot: BlockSlot,
-  context: SetupContext,
-  selected: CandidateVariant,
-  plannedDurationMinutes: number,
-): boolean {
-  return (
-    slot.type === 'main_skill' &&
-    context.sessionFocus === 'pass' &&
-    context.playerLevel === 'advanced' &&
-    ADVANCED_PASSING_DURATION_FIT_DRILL_IDS.has(selected.drill.id) &&
-    !candidateCanCarryTargetDuration(selected, plannedDurationMinutes)
-  )
-}
-
-// Beginner serving main-skill blocks above D31's 8-minute envelope used to
-// silently over-stretch D31 (BAB Self-Toss Target Practice). D51 (FIVB 2.2
-// Outside the Heart, 8-14 min envelope) is the source-backed long envelope
-// sibling; this predicate triggers the reroute when D31 was selected for a
-// beginner serving block it cannot carry. Third application of the
-// source-backed content-depth activation pattern (after D49 and D50); first
-// application at the beginner level.
-function shouldPreferBeginnerServingDurationFit(
-  slot: BlockSlot,
-  context: SetupContext,
-  selected: CandidateVariant,
-  plannedDurationMinutes: number,
-): boolean {
-  return (
-    slot.type === 'main_skill' &&
-    context.sessionFocus === 'serve' &&
-    context.playerLevel === 'beginner' &&
-    BEGINNER_SERVING_DURATION_FIT_DRILL_IDS.has(selected.drill.id) &&
-    !candidateCanCarryTargetDuration(selected, plannedDurationMinutes)
-  )
-}
-
 function buildDraftResult(
   context: SetupContext,
   options?: BuildDraftOptions,
@@ -305,32 +243,17 @@ function buildDraftResult(
     const selected = selectedByLayoutIndex.get(redistributionIndex)
     if (slot.type === 'main_skill' && selected) {
       const plannedDurationMinutes = durations[redistributionIndex] + redistributedMinutes
-      const shouldRerouteD01 =
-        selected.pick.drill.id === 'd01' &&
-        !candidateCanCarryTargetDuration(selected.pick, plannedDurationMinutes)
-      const shouldRerouteAdvancedSetting = shouldPreferAdvancedSettingDurationFit(
-        slot,
-        effectiveContext,
-        selected.pick,
-        plannedDurationMinutes,
-      )
-      const shouldRerouteAdvancedPassing = shouldPreferAdvancedPassingDurationFit(
-        slot,
-        effectiveContext,
-        selected.pick,
-        plannedDurationMinutes,
-      )
-      const shouldRerouteBeginnerServing = shouldPreferBeginnerServingDurationFit(
-        slot,
-        effectiveContext,
-        selected.pick,
-        plannedDurationMinutes,
-      )
+      // Source-backed reroute triggers (D01 default-leaf duration-fit, plus the
+      // D47/D48 -> D49, D46 -> D50, D31 -> D51 source-backed activations) are
+      // declared as data in `sessionAssembly/sourceBackedReroutes.ts`. Adding
+      // a fifth source-backed activation is one entry in that registry.
       if (
-        shouldRerouteD01 ||
-        shouldRerouteAdvancedSetting ||
-        shouldRerouteAdvancedPassing ||
-        shouldRerouteBeginnerServing
+        shouldRerouteForSourceBackedSibling(
+          slot,
+          effectiveContext,
+          selected.pick,
+          plannedDurationMinutes,
+        )
       ) {
         const rerouted = pickForSlot(slot, effectiveContext, usedDrillIds, random, {
           playerLevel: options?.playerLevel,

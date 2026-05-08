@@ -14,6 +14,7 @@ depends_on:
   - docs/reviews/2026-05-01-generated-plan-diagnostics-triage.md
   - app/src/domain/generatedPlanDiagnosticTriage.ts
   - app/src/domain/sessionBuilder.ts
+  - app/src/domain/sessionAssembly/sourceBackedReroutes.ts
 related:
   - docs/plans/2026-05-02-014-feat-d47-source-backed-catalog-implementation-plan.md
   - docs/plans/2026-05-04-003-feat-d50-advanced-passing-depth-plan.md
@@ -74,7 +75,7 @@ These boundaries are load-bearing and have failed quietly in prior attempts:
 1. **No teaching-surface duplication.** The new drill's `objective`, `teachingPoints`, `courtsideInstructions`, and `coachingCues` must not teach the same skill the existing drill teaches. The honesty boundary may be stated in the `objective` as a disclaimer ("trains X, not Y — that surface belongs to drillId"). See `app/src/data/__tests__/catalogValidation.test.ts` "keeps D50 teaching content spin-reading-free" for the enforced version.
 2. **Rollback criterion in the brainstorm.** Every requirements doc must name diagnostic movement thresholds and a "revert if no movement" rule. D50's was: revert if d46 cells don't drop or new d50 cells appear with `pressure_remains > 2`.
 3. **D101 (3+ player) boundary.** Source drills written for 4+ athletes plus coach must adapt to 1–2 players or be deferred. Never silently import 3+ player forms.
-4. **Selection-path change is part of the slice.** Adding a drill record alone does not move diagnostics. A new `shouldPreferAdvanced<Focus>DurationFit` predicate plus reroute-condition extension in `sessionBuilder.ts` is the load-bearing half.
+4. **Selection-path change is part of the slice.** Adding a drill record alone does not move diagnostics. A new entry in `SOURCE_BACKED_REROUTES` (registry in `app/src/domain/sessionAssembly/sourceBackedReroutes.ts`) naming `id`, `fromDrillIds`, `sessionFocus`, `playerLevel`, and metadata `destinationDrillIds` is the load-bearing half. **Note (post-A1, 2026-05-08):** before the registry refactor, this was a per-focus `shouldPreferAdvanced<Focus>DurationFit` predicate plus a reroute-condition extension in `sessionBuilder.ts`. The boundary is unchanged — only the surface moved into a registry so future activations are one-line additive. See `docs/plans/2026-05-08-004-refactor-source-backed-reroute-registry-plan.md`.
 5. **Algorithm version bump if golden snapshots break.** Adding a new drill to `DRILLS` changes `findCandidates` output for main_skill (and propagates through `usedDrillIds` to subsequent slots). Bump `SESSION_ASSEMBLY_ALGORITHM_VERSION` and update affected snapshots; preserve the old assertion intent.
 
 ## Implementation Skeleton (Mirror, Don't Reinvent)
@@ -85,9 +86,8 @@ These boundaries are load-bearing and have failed quietly in prior attempts:
 | Variant count | 2 (mirrors d47 open variants) | 2 (mirrors d46 open variants) | 3 (mirrors d31 open + open-pair + net-pair coverage) |
 | Chain wiring | `chain-7-setting` `drillIds: [..., 'd49']` | `chain-4-serve-receive` `drillIds: [..., 'd50', ...]` | `chain-6-serving` `drillIds: [..., 'd51', ...]` |
 | Main-skill-only constraint | `app/src/domain/sessionAssembly/candidates.ts` `if (drill.id === 'd49' && slot.type !== 'main_skill') continue` | Same pattern with `'d50'` | Same pattern with `'d51'` |
-| Hard-coded "duration-fit needs reroute" set | `ADVANCED_SETTING_DURATION_FIT_DRILL_IDS = new Set(['d47', 'd48'])` | `ADVANCED_PASSING_DURATION_FIT_DRILL_IDS = new Set(['d46'])` | `BEGINNER_SERVING_DURATION_FIT_DRILL_IDS = new Set(['d31'])` |
-| Predicate helper | `shouldPreferAdvancedSettingDurationFit` (focus=`set` + level=`advanced`) | `shouldPreferAdvancedPassingDurationFit` (focus=`pass` + level=`advanced`) | `shouldPreferBeginnerServingDurationFit` (focus=`serve` + level=`beginner`) |
-| Reroute trigger extension | `if (shouldRerouteD01 \|\| shouldRerouteAdvancedSetting)` | `... \|\| shouldRerouteAdvancedPassing` | `... \|\| shouldRerouteBeginnerServing` |
+| Reroute registry entry | `SOURCE_BACKED_REROUTES` entry `id: 'd47-d48-to-d49'`, `fromDrillIds: new Set(['d47', 'd48'])`, `sessionFocus: 'set'`, `playerLevel: 'advanced'`, `destinationDrillIds: ['d49']` | `id: 'd46-to-d50'`, `fromDrillIds: new Set(['d46'])`, `sessionFocus: 'pass'`, `playerLevel: 'advanced'`, `destinationDrillIds: ['d50']` | `id: 'd31-to-d51'`, `fromDrillIds: new Set(['d31'])`, `sessionFocus: 'serve'`, `playerLevel: 'beginner'`, `destinationDrillIds: ['d51']` |
+| Reroute trigger extension | (none — adding a registry entry alone fires the reroute via `shouldRerouteForSourceBackedSibling`) | (none) | (none) |
 | Catalog tests | `describe('D49 source-backed activation')` | Mirror with `'D50 source-backed activation'` | Mirror with `'D51 source-backed activation'` |
 | Selection-path tests | "prefers D49 for over-cap advanced setting" + "reroutes redistributed advanced setting sessions to D49" | Same pattern for D50 advanced pair-open + solo-open passing | Same pattern for D51 beginner solo-open + pair-open serving (3 variants → 3 happy-path tests) |
 | Algorithm version | (no bump) | 4 → 5 | 5 → 6 |
@@ -156,7 +156,7 @@ These were attempted in earlier sessions and rejected:
 - Source archives: `docs/research/fivb-source-material.md`, `docs/research/bab-source-material.md`, `docs/research/sources/README.md`
 - Cross-source plan-builder synthesis (when picking which source family or variation axis to expand): `docs/research/practice-plan-authoring-synthesis.md`
 - Diagnostic kit triage routes: `app/src/domain/generatedPlanDiagnosticTriage.ts` `GeneratedPlanTriageRoute`
-- Selection-path reroute logic: `app/src/domain/sessionBuilder.ts` `shouldPreferAdvanced*DurationFit` and `shouldPreferBeginner*DurationFit` helpers
+- Selection-path reroute logic: `app/src/domain/sessionAssembly/sourceBackedReroutes.ts` `SOURCE_BACKED_REROUTES` registry + `shouldRerouteForSourceBackedSibling` (consumed by the redistribution branch in `app/src/domain/sessionBuilder.ts`)
 - Compression lane classifier (extended in d51 ship to handle `movement_proxy + under_authored_min` → `workload_envelope_review`): `app/src/domain/generatedPlanDiagnosticTriage.ts` `compressionLaneForGeneratedPlanTriageItem`
 
 ## Lessons Specific to d51 (Third Application)
