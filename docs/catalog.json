@@ -1377,6 +1377,35 @@
       "canonical_for": "Completed A1 refactor plan that consolidated the three shouldPrefer*DurationFit predicates plus the inline d01 reroute check in app/src/domain/sessionBuilder.ts into a single declarative SOURCE_BACKED_REROUTES registry under app/src/domain/sessionAssembly/sourceBackedReroutes.ts (with a shouldRerouteForSourceBackedSibling predicate and dedicated unit tests). Internal refactor only: byte-equivalent runtime behavior, no schema, route, catalog data, or UI surface change; no SESSION_ASSEMBLY_ALGORITHM_VERSION bump; future source-backed reroutes added by registry entry rather than new predicate helpers."
     },
     {
+      "id": "bucket-b-pre-d101-schema-decision-passes-plan-2026-05-08",
+      "path": "docs/plans/2026-05-08-002-feat-bucket-b-pre-d101-schema-decision-passes-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Completed LFG plan for the three pre-D101 Bucket B decision passes named in the 2026-05-04 BAB ideation: B1 T9 scoring-overlay-grammar modeling stance (D142), B2 T6 attack-zone-convention default (D143), B3 slot-4 (movement) optionality in archetype contracts (D144). Decision-spine cleanup only: three brainstorm packets + three decision rows + one comment-only addition to app/src/data/archetypes.ts citing D144 alongside D141. No runtime, route, schema, catalog data, or UI behavior changed; no archetype layout, BlockSlot, or selectArchetype mutation."
+    },
+    {
+      "id": "b1-t9-scoring-overlay-modeling-stance-requirements-2026-05-08",
+      "path": "docs/brainstorms/2026-05-08-002-b1-t9-scoring-overlay-modeling-stance-requirements.md",
+      "type": "requirements",
+      "status": "complete",
+      "canonical_for": "Requirements for D142: pick the modeling stance for the captured BAB scoring-overlay grammar (T9: nine composable rule kinds plus asymmetric-scoring axis) ahead of any future scoringRules schema work. Recommended stance is sibling variants on a parent drill with composable overlay metadata, supporting rule-restriction and rule-augmentation symmetrically. Asymmetric scoring (Plan 20) is deferred indefinitely until a second source case surfaces. Authorization boundary: no schema, Dexie field, UI surface, or diagnostic classifier change is authorized; implementation lands behind a future plan gated by D101 unlocks or an Around-the-World-Serve-class non-D101 wrapper clearing diagnostics activation."
+    },
+    {
+      "id": "b2-t6-attack-zone-convention-default-requirements-2026-05-08",
+      "path": "docs/brainstorms/2026-05-08-003-b2-t6-attack-zone-convention-default-requirements.md",
+      "type": "requirements",
+      "status": "complete",
+      "canonical_for": "Requirements for D143: pick the default attack-zone convention before the first attack-chain catalog row commits to one by accident. Recommended default is FIVB 5-zone for chain-wide numbered-zone attack drills, with BAB attack-accuracy boxes (Plan 7) reserved for per-shot-accuracy drills. Mixing 5-zone and 7-zone inside one chain is forbidden. Authorization boundary: no attackZone schema, Dexie field, zone enum, chain-attack constant, UI surface, or diagnostic classifier change is authorized; implementation lands behind a future plan gated by D101 unlocks plus the first attack-chain candidate."
+    },
+    {
+      "id": "b3-slot-4-movement-optionality-requirements-2026-05-08",
+      "path": "docs/brainstorms/2026-05-08-004-b3-slot-4-movement-optionality-requirements.md",
+      "type": "requirements",
+      "status": "complete",
+      "canonical_for": "Requirements for D144: decide whether slot 4 (movement) becomes optional in archetype contracts, given the captured BAB Game Play cluster's cluster-complete confirmation that all four Game Play plans (17–20) skip slot 4. Recommended stance is adopt a new pair_game archetype variant with a slot-4-skipped layout as the canonical shape (peer of pair_net / pair_open), not runtime layout compression of existing pair_net. Implementation deferred behind partner-walkthrough P1 / founder-ledger tournament-prep / D101 triggers. Authorization boundary: no BlockSlot.required flag flip, SessionArchetype shape change, new archetype record, selectArchetype change, or UI surface change is authorized; comment-only citation added to app/src/data/archetypes.ts alongside D141."
+    },
+    {
       "id": "pair-side-catalog-content-depth-requirements-2026-05-04",
       "path": "docs/brainstorms/2026-05-04-pair-side-catalog-content-depth-requirements.md",
       "type": "requirements",

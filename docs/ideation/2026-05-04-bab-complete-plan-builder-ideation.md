@@ -159,6 +159,8 @@ These are decisions, not implementations. Each gates a downstream schema decisio
 
 #### B1. Pick a T9 modeling stance (separate records vs sibling variants vs runtime overlays)
 
+**Landed 2026-05-08 as `D142`** — sibling variants on a parent drill with composable overlay metadata, supporting restriction + augmentation symmetrically; asymmetric scoring deferred indefinitely. See `docs/brainstorms/2026-05-08-002-b1-t9-scoring-overlay-modeling-stance-requirements.md` and `docs/plans/2026-05-08-002-feat-bucket-b-pre-d101-schema-decision-passes-plan.md`.
+
 **Source frames:** Frame 1 #3; Frame 2 #3; Frame 3 #2; Frame 4 #2; architecture-strategist explicit recommendation.
 
 **What:** decide whether the captured BAB scoring-overlay grammar (rule-restriction, rule-augmentation, tiebreaker, side-switch, outcome-elevation, conditional-extension, conjunctive/wash, scoring-zone gate, reset-on-miss + asymmetric axis) lands as separate drill records (BAB's source pattern), sibling variants on a parent drill (catalog-parsimonious), or runtime constraint toggles. The synthesis itself explicitly flags "mixing approaches will create diagnostic noise."
@@ -173,6 +175,8 @@ These are decisions, not implementations. Each gates a downstream schema decisio
 
 #### B2. Pick a T6 zone-convention default (BAB 7-zone vs FIVB 5-zone vs attack-accuracy boxes vs product-reduced grid)
 
+**Landed 2026-05-08 as `D143`** — FIVB 5-zone for chain-wide numbered-zone attack drills; BAB attack-accuracy boxes (Plan 7) reserved for per-shot-accuracy drills; mixing 5-zone and 7-zone inside one chain forbidden. See `docs/brainstorms/2026-05-08-003-b2-t6-attack-zone-convention-default-requirements.md` and `docs/plans/2026-05-08-002-feat-bucket-b-pre-d101-schema-decision-passes-plan.md`.
+
 **Source frames:** Frame 4 (deliberately deferred to a "Zone-Conventions frame"); architecture-strategist explicit deferral.
 
 **What:** decide which attack-zone convention Volleycraft adopts as the default. Plan 20's Around the World (Serve) capture confirmed BAB 7-zone source-authority across four plans (1, 4, 8, 20), but FIVB 5-zone is the institutional alternative.
@@ -186,6 +190,8 @@ These are decisions, not implementations. Each gates a downstream schema decisio
 **Sequencing:** can resolve any time before attack-chain authoring starts. Not blocking near-term work.
 
 #### B3. Decide whether slot 4 (movement) becomes optional in archetype contracts
+
+**Landed 2026-05-08 as `D144`** — adopt a new `pair_game` archetype variant with a slot-4-skipped layout as the canonical shape (peer of `pair_net` / `pair_open`), not runtime layout compression of existing `pair_net`. Implementation deferred behind partner-walkthrough / founder-ledger / `D101` triggers. See `docs/brainstorms/2026-05-08-004-b3-slot-4-movement-optionality-requirements.md` and `docs/plans/2026-05-08-002-feat-bucket-b-pre-d101-schema-decision-passes-plan.md`.
 
 **Source frames:** Frame 1 #5; Frame 4 #1; cluster-complete confirmation in synthesis (all four Game Play plans skip slot 4).
 

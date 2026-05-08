@@ -54,6 +54,23 @@
 //    not support those claims at this dose; see
 //    docs/research/warmup-cooldown-minimum-protocols.md).
 //
+// 5. Slot-4 (movement_proxy) optionality stance (D144; BAB Game Play
+//    cluster-complete evidence; M001 Tier 1b pair-opening-block precedent).
+//    The captured BAB Game Play cluster (Plans 17–20) cluster-complete-
+//    confirms that all four Game Play plans intentionally skip slot 4
+//    (movement). The current pair_net 25-min and 40-min layouts below
+//    deliberately keep movementProxy with `required: false`; D144 does
+//    NOT flip that flag, mutate any layout, or remove movement_proxy.
+//    The architectural shape D144 settles is: a future "match play /
+//    tournament prep" mode lands as a NEW `pair_game` archetype variant
+//    (peer of pair_net / pair_open) with a slot-4-skipped layout, NOT as
+//    runtime layout compression of pair_net (which would replay the
+//    M001 Tier 1b pair-opening-block precedent's wrong shape — runtime
+//    compression overflows session durations). Implementation is gated
+//    on partner-walkthrough ≥P1 / founder-use ledger tournament-prep
+//    row / D101 unlock. Until any of those triggers fires, no archetype
+//    record is added and no layout shape changes.
+//
 // ---------------------------------------------------------------------------
 
 import type { SessionArchetype, BlockSlot } from '../types/session'

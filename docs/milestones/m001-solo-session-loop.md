@@ -27,6 +27,7 @@ depends_on:
   - docs/plans/2026-05-07-001-engine-two-pass-band-relax-plan.md
   - docs/plans/2026-05-07-002-d138-diagnostic-spine-canonicality-plan.md
   - docs/plans/2026-05-08-001-refactor-m001-o24-decision-spine-plan.md
+  - docs/plans/2026-05-08-002-feat-bucket-b-pre-d101-schema-decision-passes-plan.md
 decision_refs:
   - D6
   - D21
@@ -52,6 +53,9 @@ decision_refs:
   - D139
   - D140
   - D141
+  - D142
+  - D143
+  - D144
 open_question_refs:
   - O4
   - O5
@@ -274,7 +278,7 @@ If the adversarial-memo Condition 3 fails (partner did not open the app unprompt
 
 **Current remaining M001 routing (2026-05-08):**
 
-- **Agent-actionable decision-spine work:** `O24` is resolved by `D141`; the next BAB-derived agent-actionable items are separate follow-ups (A1 source-backed reroute registry; Bucket B decision passes for T9, T6, and slot-4 optionality) and are not required to close this milestone doc.
+- **Agent-actionable decision-spine work:** `O24` is resolved by `D141`; Bucket B decision passes landed 2026-05-08 as `D142` (T9 scoring-overlay-grammar modeling stance — sibling variants on a parent drill), `D143` (T6 attack-zone-convention default — FIVB 5-zone with BAB attack-accuracy boxes for per-shot-accuracy drills), and `D144` (slot-4 optionality — new `pair_game` archetype variant deferred behind partner-walkthrough / founder-ledger / `D101` triggers); see `docs/plans/2026-05-08-002-feat-bucket-b-pre-d101-schema-decision-passes-plan.md`. The remaining BAB-derived agent-actionable item is the A1 source-backed reroute registry; it is a separate follow-up and is not required to close this milestone doc.
 - **Evidence-gated M001 work:** Phase 2B capture shapes wait on `D134`; pair opening-block waits on partner-walkthrough evidence; `d36` waits on `O7`; `d43` waits on `D101`; Tier 2 surfaces wait on the 2026-05-21 Condition 3 read-out and founder-use evidence.
 - **Date-gated validation:** `D130` keeps founder-use mode active through the 2026-07-20 re-evaluation. `D91` remains deferred, not dropped.
 
