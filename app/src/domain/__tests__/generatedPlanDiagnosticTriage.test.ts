@@ -17,9 +17,11 @@ import {
   buildGeneratedPlanD47D05ComparatorDecisionPacket,
   buildGeneratedPlanD47GapClosureLedger,
   buildGeneratedPlanD47ProposalAdmissionTicket,
+  buildGeneratedPlanD49GeneratorPolicyProposalPacket,
   buildGeneratedPlanD49ResidualFollowUpPacket,
   buildGeneratedPlanD49U8GeneratorPolicyProofPacket,
   buildGeneratedPlanGapClosureSelectionWorkbench,
+  formatGeneratedPlanD49GeneratorPolicyProposalPacketMarkdown,
   buildGeneratedPlanRedistributionCausalityReceipt,
   buildGeneratedPlanTriageWorkbenchMarkdown,
   buildInitialGeneratedPlanTriageRegistry,
@@ -1913,6 +1915,136 @@ describe('generated plan diagnostic triage registry', () => {
     expect(packet.proofOutcome).toBe('no_action')
     expect(packet.groupKeys).toEqual([])
     expect(packet.nextArtifact).toContain('No D49 generator-policy proposal')
+  })
+
+  it('commits the D49 generator-policy proposal when the U8 proof is ready', () => {
+    const groups = currentGroups()
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const packet = buildGeneratedPlanD49GeneratorPolicyProposalPacket(groups, registry)
+
+    expect(packet.proposalOutcome).toBe('generator_policy_proposal_committed')
+    expect(packet.scope).toBe('d49_only')
+    expect(packet.proposedDirection).toBe('cap_redistribution_at_carrier_max')
+    expect(packet.proposedDirectionRationale).toContain('authored max')
+    expect(packet.proofGroupKeys).toEqual([
+      'gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+      'gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+    ])
+    expect(packet.rejectedAlternatives.map((alt) => alt.id)).toEqual([
+      'status_quo_with_policy_allowance',
+      'preferential_in_band_reroute',
+      'early_block_truncation',
+    ])
+    expect(packet.falsificationThreshold).toContain('5 over-cap')
+    expect(packet.revisitTrigger).toContain('non-D49')
+    expect(packet.changeAuthorization).toEqual({
+      runtimeRedistribution: 'not_authorized',
+      catalog: 'not_authorized',
+      cap: 'not_authorized',
+      sourceDepth: 'not_authorized',
+      d47Reopen: 'not_authorized',
+    })
+    expect(packet.stopCondition).toContain('proposal packet')
+  })
+
+  it('defers the D49 generator-policy proposal when the U8 proof has no current evidence', () => {
+    const groups = currentGroups().filter((group) => {
+      if (group.drillId !== 'd49') return false
+      return (
+        group.observationCodes.includes('optional_slot_redistribution') &&
+        !group.observationCodes.includes('over_authored_max') &&
+        !group.observationCodes.includes('over_fatigue_cap') &&
+        !group.observationCodes.includes('under_authored_min')
+      )
+    })
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const packet = buildGeneratedPlanD49GeneratorPolicyProposalPacket(groups, registry)
+
+    expect(packet.proposalOutcome).toBe('no_action_yet')
+    expect(packet.proofGroupKeys).toEqual([])
+    expect(packet.changeAuthorization.runtimeRedistribution).toBe('not_authorized')
+  })
+
+  it('holds the D49 generator-policy proposal when pressure remains under counterfactual evidence', () => {
+    const groups = currentGroups().map((group) =>
+      group.drillId === 'd49' &&
+      group.variantId === 'd49-pair-open' &&
+      group.observationCodes.includes('optional_slot_redistribution') &&
+      group.observationCodes.includes('over_authored_max')
+        ? {
+            ...group,
+            affectedCells: group.affectedCells.map((cell) => ({
+              ...cell,
+              allocatedMinutes: cell.plannedMinutes,
+            })),
+          }
+        : group,
+    )
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const packet = buildGeneratedPlanD49GeneratorPolicyProposalPacket(groups, registry)
+
+    expect(packet.proposalOutcome).toBe('no_action_yet')
+    expect(packet.proofGroupKeys).toEqual([])
+  })
+
+  it('keeps every authorization field at not_authorized across all D49 generator-policy proposal outcomes', () => {
+    const readyGroups = currentGroups()
+    const readyRegistry = buildInitialGeneratedPlanTriageRegistry(readyGroups)
+    const readyPacket = buildGeneratedPlanD49GeneratorPolicyProposalPacket(
+      readyGroups,
+      readyRegistry,
+    )
+    const noActionGroups = readyGroups.filter((group) => {
+      if (group.drillId !== 'd49') return false
+      return (
+        group.observationCodes.includes('optional_slot_redistribution') &&
+        !group.observationCodes.includes('over_authored_max') &&
+        !group.observationCodes.includes('over_fatigue_cap') &&
+        !group.observationCodes.includes('under_authored_min')
+      )
+    })
+    const noActionRegistry = buildInitialGeneratedPlanTriageRegistry(noActionGroups)
+    const noActionPacket = buildGeneratedPlanD49GeneratorPolicyProposalPacket(
+      noActionGroups,
+      noActionRegistry,
+    )
+
+    for (const packet of [readyPacket, noActionPacket]) {
+      expect(packet.changeAuthorization.runtimeRedistribution).toBe('not_authorized')
+      expect(packet.changeAuthorization.catalog).toBe('not_authorized')
+      expect(packet.changeAuthorization.cap).toBe('not_authorized')
+      expect(packet.changeAuthorization.sourceDepth).toBe('not_authorized')
+      expect(packet.changeAuthorization.d47Reopen).toBe('not_authorized')
+    }
+  })
+
+  it('renders the D49 generator-policy proposal packet markdown with every required field', () => {
+    const groups = currentGroups()
+    const registry = buildInitialGeneratedPlanTriageRegistry(groups)
+    const packet = buildGeneratedPlanD49GeneratorPolicyProposalPacket(groups, registry)
+    const markdown = formatGeneratedPlanD49GeneratorPolicyProposalPacketMarkdown(packet).join('\n')
+
+    expect(markdown).toContain('Proposal outcome: `generator_policy_proposal_committed`')
+    expect(markdown).toContain('Scope: `d49_only`')
+    expect(markdown).toContain('Proposed direction: `cap_redistribution_at_carrier_max`')
+    expect(markdown).toContain('Falsification threshold:')
+    expect(markdown).toContain('Revisit trigger:')
+    expect(markdown).toContain('Stop condition:')
+    expect(markdown).toContain('Runtime redistribution authorization: `not_authorized`')
+    expect(markdown).toContain('Catalog authorization: `not_authorized`')
+    expect(markdown).toContain('D49 cap authorization: `not_authorized`')
+    expect(markdown).toContain('Source-depth authorization: `not_authorized`')
+    expect(markdown).toContain('D47 reopen authorization: `not_authorized`')
+    expect(markdown).toContain(
+      'Rejected alternative `status_quo_with_policy_allowance`',
+    )
+    expect(markdown).toContain(
+      'Rejected alternative `preferential_in_band_reroute`',
+    )
+    expect(markdown).toContain('Rejected alternative `early_block_truncation`')
+    expect(markdown).toContain(
+      'gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+    )
   })
 
   it('holds gap closure selection when D01 is not held for D47 reentry', () => {

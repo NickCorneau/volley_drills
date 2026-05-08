@@ -5,9 +5,19 @@ import type { SelectionCandidate } from '../drillSelection'
  * Partition a candidate pool by whether each drill's `[levelMin,
  * levelMax]` band contains the effective player level.
  *
- * The two-pool primitive `pickForSlot`, `pickMainSkillSubstitute`, and
- * `findSwapAlternatives` compose to honor the user's saved skill level
- * with a focus-held level-relax fallback (R14 / R15 of the brainstorm).
+ * Consumers (current, post-2026-05-07):
+ *
+ *   - `focusCoverageAudit.ts` reports per-cell `mainFamiliesInBand`
+ *     and `mainFamiliesTotal` counts so the audit's "covered" rule
+ *     can hold against the band, not the unfiltered pool.
+ *   - `pickForSlot` (in `candidates.ts`) uses the `outOfBand` arm to
+ *     run a single relaxation pass: when a focus-controlled REQUIRED
+ *     slot has zero in-band UNUSED candidates left, it prefers an
+ *     out-of-band UNUSED drill of the same focus over duplicating an
+ *     already-picked in-band drill. This restores the engine intent
+ *     that the 2026-05-05 `feat/focus-coverage-readiness` merge
+ *     overwrote (no UI surface — `D137` retired the `levelRelaxed`
+ *     eyebrow and is not reversed here).
  *
  * The band-overlap predicate is a single-point membership test:
  * `levelMin <= effective <= levelMax`. The ordinal map below is the

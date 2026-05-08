@@ -37,6 +37,7 @@ depends_on:
   - docs/plans/2026-05-02-018-feat-d49-residual-follow-up-plan.md
   - docs/plans/2026-05-03-001-feat-d49-next-work-selection-plan.md
   - docs/plans/2026-05-03-003-feat-d49-scoped-u8-generator-policy-follow-up-plan.md
+  - docs/plans/2026-05-07-004-feat-d49-generator-policy-proposal-plan.md
   - docs/plans/2026-05-04-001-feat-d46-pair-open-source-backed-gap-card-plan.md
   - docs/plans/2026-05-04-002-feat-d46-pair-open-no-change-comparator-decision-packet-plan.md
   - docs/reviews/2026-05-04-d46-pair-open-source-backed-gap-card.md
@@ -403,6 +404,27 @@ This workbench does not authorize catalog changes. It routes generated-plan obse
 - Stop condition: This is diagnostic-only U8 evidence. Do not change runtime redistribution, catalog content, D49 caps, source-depth surfaces, or D47 reopening from this packet alone.
 - Proof group keys: `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`
 - Excluded optional-only group keys: `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution`, `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution`
+
+## D49 Generator-Policy Proposal Packet
+
+- Packet source: D49 U8 generator-policy proof packet plus 2026-05-07 D140 decision row.
+- Proposal outcome: `generator_policy_proposal_committed`
+- Scope: `d49_only`
+- Proposed direction: `cap_redistribution_at_carrier_max`
+- Proposed direction rationale: Cap optional-slot redistribution at the carrier drill's authored max minutes and fatigue cap; let unfilled minutes remain unfilled. The U8 proof's allocated-duration counterfactual already established that over-cap pressure disappears when redistribution stops at the carrier max — this is the smallest runtime change consistent with honest workload metadata.
+- Falsification threshold: Reopen the proposal if regenerated diagnostics show 5 over-cap or more cells in D49 main_skill groups after a future implementation lands; reopen if courtside dogfood reports D49 sessions feel materially anemic with the new policy.
+- Revisit trigger: Revisit after a non-D49 redistribution group's U8 proof selects a different direction; revisit after 4 weeks of courtside dogfood with the new policy applied; revisit if regenerated diagnostics show D49 pressure-bearing redistribution evidence has moved off ready_for_generator_policy_proposal.
+- Stop condition: This is a proposal packet, not an implementation authorization. Do not change runtime redistribution, catalog content, D49 caps, source-depth surfaces, or D47 reopening from this packet alone. Generalization to non-D49 groups is also out of scope; each non-D49 group requires its own U8 proof first.
+- Runtime redistribution authorization: `not_authorized`
+- Catalog authorization: `not_authorized`
+- D49 cap authorization: `not_authorized`
+- Source-depth authorization: `not_authorized`
+- D47 reopen authorization: `not_authorized`
+- Next artifact: D49 generator-policy implementation plan (blocked behind runtime_redistribution_authorization).
+- Proof group keys: `gpdg:v1:d49:d49-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`, `gpdg:v1:d49:d49-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap`
+- Rejected alternative `status_quo_with_policy_allowance`: Accept current optional-slot redistribution and record D49 over-cap pressure as policy-allowance without runtime change. Rejected because: Authored max and fatigue cap are honest workload metadata; silently accepting violations turns the metadata into a polite fiction.
+- Rejected alternative `preferential_in_band_reroute`: Reroute redistribution onto a different focus-eligible in-band drill instead of the carrier when one is available. Rejected because: Plausible but adds engine complexity and depends on per-cell candidate availability; defer until current direction is falsified.
+- Rejected alternative `early_block_truncation`: Truncate the main-skill block before optional-slot minutes are scheduled so the block never overruns. Rejected because: Changes session shape further than necessary; the current direction lets the block keep its shape and only refuses surplus.
 
 ## D47 vs D05 Comparator Evaluation Payload
 

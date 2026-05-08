@@ -57,6 +57,15 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Architecture boundaries (strict)
+        run: npm run architecture:check -- --strict
+
+      - name: Typography guardrails
+        run: npm run typography:guardrails:check
+
+      - name: Generated plan diagnostics report freshness
+        run: npm run diagnostics:report:check
+
       - name: Test
         run: npm test
 

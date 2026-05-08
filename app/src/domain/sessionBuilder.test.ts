@@ -979,6 +979,110 @@ describe('sessionBuilder', () => {
   })
 
   /**
+   * 2026-05-07 engine two-pass band relax (resolves the 2026-05-05
+   * `feat/focus-coverage-readiness` merge follow-up). When all in-band
+   * drills for a focus-controlled REQUIRED slot are already used,
+   * `pickForSlot` now prefers an out-of-band UNUSED drill of the same
+   * focus over duplicating an in-band drill. The pre-merge two-pass
+   * mechanism was overwritten by `feat`'s hard-filter `playerLevel`
+   * design; D137 retired the user-visible `levelRelaxed` eyebrow but
+   * intentionally left the engine question open. This restores the
+   * engine intent without any UI surface.
+   *
+   * Worked example: `competitive_pair × serve × pair_open` resolves to
+   * `playerLevel: 'advanced'`. The advanced-band serve drill set is
+   * `{d22, d33}` (d23 is `m001Candidate: false`, d51 is gated to
+   * `main_skill` only). With both already used, the technique slot's
+   * old behavior was to silently re-pick d22 or d33; the new behavior
+   * relaxes to d31 (beginner-band, but a real same-focus drill) so a
+   * 40-minute serve session does not duplicate a single drill across
+   * three focus-controlled slots.
+   */
+  it('relaxes to an out-of-band same-focus drill when in-band candidates are exhausted', () => {
+    const slot: BlockSlot = {
+      type: 'technique',
+      durationMinMinutes: 5,
+      durationMaxMinutes: 7,
+      intent: 'Fixture technique slot',
+      required: true,
+      skillTags: ['pass'],
+    }
+    const context: SetupContext = {
+      playerMode: 'pair',
+      timeProfile: 40,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'serve',
+      playerLevel: 'advanced',
+    }
+
+    const used = new Set(['d22', 'd33'])
+    const pick = pickForSlot(slot, context, used, createSeededRandom('two-pass-relax-positive'), {
+      playerLevel: 'advanced',
+      allowUsedFallback: true,
+    })
+
+    expect(pick).toBeDefined()
+    expect(['d22', 'd33']).not.toContain(pick!.drill.id)
+    expect(pick!.drill.skillFocus).toContain('serve')
+  })
+
+  it('does not relax when an in-band unused candidate is still available', () => {
+    const slot: BlockSlot = {
+      type: 'technique',
+      durationMinMinutes: 5,
+      durationMaxMinutes: 7,
+      intent: 'Fixture technique slot',
+      required: true,
+      skillTags: ['pass'],
+    }
+    const context: SetupContext = {
+      playerMode: 'pair',
+      timeProfile: 40,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'serve',
+      playerLevel: 'advanced',
+    }
+
+    const used = new Set(['d22'])
+    const pick = pickForSlot(slot, context, used, createSeededRandom('two-pass-relax-negative'), {
+      playerLevel: 'advanced',
+      allowUsedFallback: true,
+    })
+
+    expect(pick).toBeDefined()
+    expect(pick!.drill.id).toBe('d33')
+  })
+
+  it('still returns undefined for an exhausted optional slot (no allowUsedFallback)', () => {
+    const slot: BlockSlot = {
+      type: 'movement_proxy',
+      durationMinMinutes: 4,
+      durationMaxMinutes: 5,
+      intent: 'Fixture optional movement_proxy slot',
+      required: false,
+      skillTags: ['pass', 'movement'],
+    }
+    const context: SetupContext = {
+      playerMode: 'pair',
+      timeProfile: 40,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'serve',
+      playerLevel: 'advanced',
+    }
+
+    const used = new Set(['d22', 'd33'])
+    const pick = pickForSlot(slot, context, used, createSeededRandom('two-pass-relax-optional'), {
+      playerLevel: 'advanced',
+      allowUsedFallback: false,
+    })
+
+    expect(pick).toBeUndefined()
+  })
+
+  /**
    * 2026-04-27 cca2 dogfeed F6 (`docs/research/2026-04-27-cca2-dogfeed-
    * findings.md`): the `movement_proxy` slot must prefer drills carrying
    * `'movement'` in `skillFocus` over drills with only `'pass'`. Pre-fix,

@@ -5,10 +5,13 @@ status: active
 stage: validation
 type: plan
 authority: "Implementation plan for merging the unmerged feat/focus-coverage-readiness line into main, deleting feat branches, restoring lost skill-level mutability features as a follow-up commit, and adopting a single-branch (push-immediately) policy."
-last_updated: 2026-05-05
+last_updated: 2026-05-07
 depends_on:
  - docs/plans/2026-05-04-001-feat-skill-level-mutability-plan.md
  - docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md
+ - docs/plans/2026-05-06-001-refactor-d137-tune-today-routing-cleanup-plan.md
+ - docs/plans/2026-05-07-001-engine-two-pass-band-relax-plan.md
+ - docs/plans/2026-05-07-002-d138-diagnostic-spine-canonicality-plan.md
  - docs/status/current-state.md
 summary: "Strategy: accept feat/focus-coverage-readiness on overlapping-file conflicts (-X theirs), preserve main-only adds (focusCoverageAudit, SettingsSkillLevelScreen, SkillLevelPicker), then port the Tune today relaxation eyebrow + Settings sub-route forward in a follow-up commit on the merged base. Tag main pre-merge for safety. Delete both feat branches after merge. Document single-branch push-immediately policy in AGENTS.md."
 ---
@@ -262,9 +265,50 @@ The backup tag exists exactly for this.
 
 ## Open follow-ups (after pipeline DONE)
 
-- "Skill stuff fix" — full rebase of the skill-level mutability work
+- ~~"Skill stuff fix" — full rebase of the skill-level mutability work
   (engine wiring, two-pass picker, eyebrow if deferred in U6) onto the
-  merged base. Not in this pipeline.
+  merged base. Not in this pipeline.~~ **Resolved 2026-05-07** in two
+  passes:
+  1. The user-visible `levelRelaxed` eyebrow + `regenerateDraftFocus`
+     plumbing was retired by `D137` (`docs/plans/2026-05-06-001-refactor-d137-tune-today-routing-cleanup-plan.md`).
+     No replacement UI is shipping; that part of the thread is closed
+     by intent.
+  2. The engine question — does the post-merge hard `playerLevel`
+     filter silently produce thin sessions for `competitive_pair` on
+     serve / set? — was investigated and resolved in
+     `docs/plans/2026-05-07-001-engine-two-pass-band-relax-plan.md`.
+     `pickForSlot` now prefers an out-of-band UNUSED same-focus drill
+     over duplicating an in-band drill on a focus-controlled REQUIRED
+     slot whose in-band UNUSED pool has been exhausted. Engine-only,
+     no UI surface; the audit and the runtime engine now share
+     `partitionByLevel` as the single band-membership predicate.
 - Reconciliation between feat's `focusReadiness` diagnostic output and
   the new `focusCoverageAudit` module — they overlap in intent but
-  produce different artifacts. Possible follow-up plan.
+  produce different artifacts. **Resolved 2026-05-07** as `D138`
+  (`docs/plans/2026-05-07-002-d138-diagnostic-spine-canonicality-plan.md`,
+  `docs/decisions.md` `D138`). Investigation showed the overlap was
+  not "two complementary surfaces" but "two parallel implementations
+  where one was already retired by attrition." `focusCoverageAudit`
+  is the live detection diagnostic (snapshot regression test, markdown
+  report at `docs/reviews/2026-05-04-focus-coverage-audit.md`, walks
+  the user-facing 5-tier `SkillLevel`, risk-bucket vocabulary
+  maintained by `D137`). `focusReadiness`'s audit logic
+  (`buildFocusReadinessAudit`, `evaluateFocusReadinessCell`) and
+  gap-card / activation-manifest remediation API were a parallel
+  implementation whose only remaining consumers were its own tests;
+  no script, plan, or product surface ever consumed the gap-card /
+  activation-manifest workflow. Resolution: prune `focusReadiness.ts`
+  to the dimension constants and types still imported by
+  `app/src/domain/generatedPlanDiagnostics.ts` (`VisibleFocus`,
+  `ReadinessConfiguration`, `ReadinessConfigurationId`,
+  `VISIBLE_FOCUSES`, `PLAYER_LEVELS`, `READINESS_DURATIONS`,
+  `READINESS_CONFIGURATIONS`); delete `focusReadiness.test.ts`
+  (the dimension constants are exercised through
+  `generatedPlanDiagnostics.test.ts`); rewrite the doc-comment to
+  declare the file's narrower role and record why the speculative
+  remediation API was retired so future agents do not silently
+  restore an unmaintained surface. Engine-only — zero behavior
+  change in any live diagnostic; zero UI surface change;
+  `focusCoverageAudit` snapshot unchanged at 180/180 covered;
+  `generatedPlanDiagnostics` 540 cells unchanged. `D139`
+  (validator script gating / compression) remains separately deferred.

@@ -725,6 +725,43 @@ export interface GeneratedPlanD49U8GeneratorPolicyProofPacket {
   readonly stopCondition: string
 }
 
+export type GeneratedPlanD49GeneratorPolicyProposalOutcome =
+  | 'generator_policy_proposal_committed'
+  | 'no_action_yet'
+  | 'inconclusive'
+
+export type GeneratedPlanD49GeneratorPolicyProposalScope = 'd49_only'
+
+export type GeneratedPlanD49GeneratorPolicyProposedDirection =
+  | 'cap_redistribution_at_carrier_max'
+  | 'unspecified'
+
+export type GeneratedPlanD49GeneratorPolicyRejectedAlternativeId =
+  | 'status_quo_with_policy_allowance'
+  | 'preferential_in_band_reroute'
+  | 'early_block_truncation'
+
+export interface GeneratedPlanD49GeneratorPolicyRejectedAlternative {
+  readonly id: GeneratedPlanD49GeneratorPolicyRejectedAlternativeId
+  readonly summary: string
+  readonly rejectedReason: string
+}
+
+export interface GeneratedPlanD49GeneratorPolicyProposalPacket {
+  readonly packetSource: string
+  readonly proposalOutcome: GeneratedPlanD49GeneratorPolicyProposalOutcome
+  readonly scope: GeneratedPlanD49GeneratorPolicyProposalScope
+  readonly proposedDirection: GeneratedPlanD49GeneratorPolicyProposedDirection
+  readonly proposedDirectionRationale: string
+  readonly rejectedAlternatives: readonly GeneratedPlanD49GeneratorPolicyRejectedAlternative[]
+  readonly falsificationThreshold: string
+  readonly revisitTrigger: string
+  readonly stopCondition: string
+  readonly proofGroupKeys: readonly string[]
+  readonly changeAuthorization: GeneratedPlanD49U8GeneratorPolicyChangeAuthorization
+  readonly nextArtifact: string
+}
+
 export type GeneratedPlanD47D05ComparatorOutcome =
   | 'd47_wins'
   | 'd05_wins'
@@ -3731,6 +3768,133 @@ export function formatGeneratedPlanD49U8GeneratorPolicyProofPacketMarkdown(
   ]
 }
 
+const D49_GENERATOR_POLICY_REJECTED_ALTERNATIVES: readonly GeneratedPlanD49GeneratorPolicyRejectedAlternative[] = [
+  {
+    id: 'status_quo_with_policy_allowance',
+    summary:
+      'Accept current optional-slot redistribution and record D49 over-cap pressure as policy-allowance without runtime change.',
+    rejectedReason:
+      'Authored max and fatigue cap are honest workload metadata; silently accepting violations turns the metadata into a polite fiction.',
+  },
+  {
+    id: 'preferential_in_band_reroute',
+    summary:
+      'Reroute redistribution onto a different focus-eligible in-band drill instead of the carrier when one is available.',
+    rejectedReason:
+      'Plausible but adds engine complexity and depends on per-cell candidate availability; defer until current direction is falsified.',
+  },
+  {
+    id: 'early_block_truncation',
+    summary:
+      'Truncate the main-skill block before optional-slot minutes are scheduled so the block never overruns.',
+    rejectedReason:
+      'Changes session shape further than necessary; the current direction lets the block keep its shape and only refuses surplus.',
+  },
+] as const
+
+function nextArtifactForD49GeneratorPolicyProposalOutcome(
+  outcome: GeneratedPlanD49GeneratorPolicyProposalOutcome,
+): string {
+  switch (outcome) {
+    case 'generator_policy_proposal_committed':
+      return 'D49 generator-policy implementation plan (blocked behind runtime_redistribution_authorization).'
+    case 'inconclusive':
+      return 'Refresh D49 U8 evidence before the proposal can commit a direction.'
+    case 'no_action_yet':
+      return 'No D49 generator-policy proposal until the U8 proof returns ready_for_generator_policy_proposal.'
+    default: {
+      const exhaustive: never = outcome
+      return exhaustive
+    }
+  }
+}
+
+function proposalOutcomeFromU8Proof(
+  proofOutcome: GeneratedPlanD49U8GeneratorPolicyProofOutcome,
+): GeneratedPlanD49GeneratorPolicyProposalOutcome {
+  switch (proofOutcome) {
+    case 'ready_for_generator_policy_proposal':
+      return 'generator_policy_proposal_committed'
+    case 'inconclusive':
+      return 'inconclusive'
+    case 'needs_workload_or_block_shape_review':
+    case 'no_action':
+      return 'no_action_yet'
+    default: {
+      const exhaustive: never = proofOutcome
+      return exhaustive
+    }
+  }
+}
+
+export function buildGeneratedPlanD49GeneratorPolicyProposalPacket(
+  groups: readonly GeneratedPlanObservationGroup[],
+  registry: readonly GeneratedPlanTriageEntry[],
+): GeneratedPlanD49GeneratorPolicyProposalPacket {
+  const u8Proof = buildGeneratedPlanD49U8GeneratorPolicyProofPacket(groups, registry)
+  const outcome = proposalOutcomeFromU8Proof(u8Proof.proofOutcome)
+  const proofGroupKeys =
+    outcome === 'generator_policy_proposal_committed' ? u8Proof.groupKeys : []
+
+  return {
+    packetSource: 'D49 U8 generator-policy proof packet plus 2026-05-07 D140 decision row.',
+    proposalOutcome: outcome,
+    scope: 'd49_only',
+    proposedDirection:
+      outcome === 'generator_policy_proposal_committed'
+        ? 'cap_redistribution_at_carrier_max'
+        : 'unspecified',
+    proposedDirectionRationale:
+      'Cap optional-slot redistribution at the carrier drill\'s authored max minutes and fatigue cap; let unfilled minutes remain unfilled. The U8 proof\'s allocated-duration counterfactual already established that over-cap pressure disappears when redistribution stops at the carrier max — this is the smallest runtime change consistent with honest workload metadata.',
+    rejectedAlternatives: D49_GENERATOR_POLICY_REJECTED_ALTERNATIVES,
+    falsificationThreshold:
+      'Reopen the proposal if regenerated diagnostics show 5 over-cap or more cells in D49 main_skill groups after a future implementation lands; reopen if courtside dogfood reports D49 sessions feel materially anemic with the new policy.',
+    revisitTrigger:
+      'Revisit after a non-D49 redistribution group\'s U8 proof selects a different direction; revisit after 4 weeks of courtside dogfood with the new policy applied; revisit if regenerated diagnostics show D49 pressure-bearing redistribution evidence has moved off ready_for_generator_policy_proposal.',
+    stopCondition:
+      'This is a proposal packet, not an implementation authorization. Do not change runtime redistribution, catalog content, D49 caps, source-depth surfaces, or D47 reopening from this packet alone. Generalization to non-D49 groups is also out of scope; each non-D49 group requires its own U8 proof first.',
+    proofGroupKeys,
+    changeAuthorization: {
+      runtimeRedistribution: 'not_authorized',
+      catalog: 'not_authorized',
+      cap: 'not_authorized',
+      sourceDepth: 'not_authorized',
+      d47Reopen: 'not_authorized',
+    },
+    nextArtifact: nextArtifactForD49GeneratorPolicyProposalOutcome(outcome),
+  }
+}
+
+export function formatGeneratedPlanD49GeneratorPolicyProposalPacketMarkdown(
+  packet: GeneratedPlanD49GeneratorPolicyProposalPacket,
+): string[] {
+  const lines: string[] = [
+    `- Packet source: ${packet.packetSource}`,
+    `- Proposal outcome: \`${packet.proposalOutcome}\``,
+    `- Scope: \`${packet.scope}\``,
+    `- Proposed direction: \`${packet.proposedDirection}\``,
+    `- Proposed direction rationale: ${packet.proposedDirectionRationale}`,
+    `- Falsification threshold: ${packet.falsificationThreshold}`,
+    `- Revisit trigger: ${packet.revisitTrigger}`,
+    `- Stop condition: ${packet.stopCondition}`,
+    `- Runtime redistribution authorization: \`${packet.changeAuthorization.runtimeRedistribution}\``,
+    `- Catalog authorization: \`${packet.changeAuthorization.catalog}\``,
+    `- D49 cap authorization: \`${packet.changeAuthorization.cap}\``,
+    `- Source-depth authorization: \`${packet.changeAuthorization.sourceDepth}\``,
+    `- D47 reopen authorization: \`${packet.changeAuthorization.d47Reopen}\``,
+    `- Next artifact: ${packet.nextArtifact}`,
+    packet.proofGroupKeys.length > 0
+      ? `- Proof group keys: ${packet.proofGroupKeys.map((key) => `\`${key}\``).join(', ')}`
+      : '- Proof group keys: none',
+  ]
+  for (const alternative of packet.rejectedAlternatives) {
+    lines.push(
+      `- Rejected alternative \`${alternative.id}\`: ${alternative.summary} Rejected because: ${alternative.rejectedReason}`,
+    )
+  }
+  return lines
+}
+
 function formatD47GapClosureSegmentLabel(segment: GeneratedPlanD47GapClosureSegmentLabel): string {
   switch (segment) {
     case 'pressure_disappears':
@@ -4002,6 +4166,10 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
     groups,
     registry,
   )
+  const d49GeneratorPolicyProposalPacket = buildGeneratedPlanD49GeneratorPolicyProposalPacket(
+    groups,
+    registry,
+  )
   const d47D05ComparatorPayload = buildCurrentGeneratedPlanD47D05ComparatorEvaluationPayload()
   const d47D05ComparatorPacket = buildGeneratedPlanD47D05ComparatorDecisionPacket(
     groups,
@@ -4219,6 +4387,8 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
     formatGeneratedPlanD49ResidualFollowUpPacketMarkdown(d49ResidualFollowUpPacket)
   const d49U8GeneratorPolicyProofLines =
     formatGeneratedPlanD49U8GeneratorPolicyProofPacketMarkdown(d49U8GeneratorPolicyProofPacket)
+  const d49GeneratorPolicyProposalLines =
+    formatGeneratedPlanD49GeneratorPolicyProposalPacketMarkdown(d49GeneratorPolicyProposalPacket)
   const d47D05ComparatorPayloadLines =
     formatGeneratedPlanD47D05ComparatorEvaluationPayloadMarkdown(d47D05ComparatorPayload)
   const d47D05ComparatorLines =
@@ -4279,6 +4449,10 @@ export function buildGeneratedPlanTriageWorkbenchMarkdown(
     '## D49 U8 Generator-Policy Proof',
     '',
     ...d49U8GeneratorPolicyProofLines,
+    '',
+    '## D49 Generator-Policy Proposal Packet',
+    '',
+    ...d49GeneratorPolicyProposalLines,
     '',
     '## D47 vs D05 Comparator Evaluation Payload',
     '',

@@ -2,6 +2,7 @@ import { DRILLS } from '../../data/drills'
 import type { BlockSlot, DrillVariant, PlayerLevel, SetupContext } from '../../model'
 import type { SelectionCandidate } from '../drillSelection'
 import { effectiveSkillTags, isFocusControlledSlotType } from './effectiveFocus'
+import { partitionByLevel } from './partitionByLevel'
 import type { RandomSource } from './random'
 import { shuffle } from './random'
 
@@ -129,7 +130,38 @@ export function pickForSlot(
   const candidates = findCandidates(slot, context, options)
   const unused = candidates.filter((candidate) => !usedDrillIds.has(candidate.drill.id))
   if (unused.length === 0 && options?.allowUsedFallback === false) return undefined
-  const pool = shuffle(unused.length > 0 ? unused : candidates, random)
+
+  // Two-pass band relax. When the in-band unused pool is exhausted but
+  // we still have a level filter active, prefer an out-of-band UNUSED
+  // drill of the same focus over an in-band USED drill. This restores
+  // the pre-merge engine intent that the 2026-05-05 feat/focus-coverage
+  // merge overwrote: without it, e.g. a `competitive_pair` user on a
+  // 25-min serve session would silently see one of the 2 advanced-band
+  // serve drills picked twice (technique + main_skill) instead of
+  // pulling in a near-band serve drill once. No UI surface — `D137`
+  // retired the `levelRelaxed` eyebrow and is not reversed here.
+  // `partitionByLevel` drives the relax so the audit and the runtime
+  // engine share one band-membership predicate.
+  let pool: readonly CandidateVariant[]
+  if (unused.length > 0) {
+    pool = shuffle(unused, random)
+  } else if (
+    options?.playerLevel !== undefined &&
+    isFocusControlledSlotType(slot.type)
+  ) {
+    // Strip both `options.playerLevel` and `context.playerLevel` so the
+    // wider pool ignores band membership entirely. Tests (and any
+    // future caller) sometimes carry `playerLevel` on the context, so
+    // dropping only the option would still leave the hard filter on.
+    const widerContext: SetupContext = { ...context }
+    delete widerContext.playerLevel
+    const wider = findCandidates(slot, widerContext)
+    const { outOfBand } = partitionByLevel(wider, options.playerLevel)
+    const widerUnused = outOfBand.filter((candidate) => !usedDrillIds.has(candidate.drill.id))
+    pool = shuffle(widerUnused.length > 0 ? widerUnused : candidates, random)
+  } else {
+    pool = shuffle(candidates, random)
+  }
 
   if (pool.length === 0) return undefined
 

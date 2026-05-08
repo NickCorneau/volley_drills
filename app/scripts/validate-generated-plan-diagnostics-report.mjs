@@ -243,6 +243,7 @@ depends_on:
   - docs/plans/2026-05-02-018-feat-d49-residual-follow-up-plan.md
   - docs/plans/2026-05-03-001-feat-d49-next-work-selection-plan.md
   - docs/plans/2026-05-03-003-feat-d49-scoped-u8-generator-policy-follow-up-plan.md
+  - docs/plans/2026-05-07-004-feat-d49-generator-policy-proposal-plan.md
   - docs/plans/2026-05-04-001-feat-d46-pair-open-source-backed-gap-card-plan.md
   - docs/plans/2026-05-04-002-feat-d46-pair-open-no-change-comparator-decision-packet-plan.md
   - docs/reviews/2026-05-04-d46-pair-open-source-backed-gap-card.md
