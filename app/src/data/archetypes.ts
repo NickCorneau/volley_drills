@@ -13,18 +13,21 @@
 // Session-assembly invariants (content-authoring and maintenance reference)
 // ---------------------------------------------------------------------------
 //
-// 1. Single-focus-per-session invariant (BAB coaches guide; D105; M001 Tier 1).
-//    Every session targets ONE skill focus (pass / serve / set). The
-//    `main_skill` block populates from the chain matching that focus
-//    (chain-1..5 for pass, chain-6-serving for serve, chain-7-setting for set).
+// 1. M001 single-skill-chain generation constraint (D141; D105; M001 Tier 1).
+//    The current M001 generator targets ONE selected skill chain
+//    (pass / serve / set). The `main_skill` block populates from the chain
+//    matching that focus (chain-1..5 for pass, chain-6-serving for serve,
+//    chain-7-setting for set).
 //    Warmup and wrap blocks are focus-agnostic (they key off skillFocus
 //    'warmup' and 'recovery' respectively, not the session focus).
 //    Technique and movement_proxy blocks MAY support-focus. In default
 //    Recommended sessions the movement_proxy fallback remains pass-scoped
 //    so secondary tags like `['set', 'movement']` do not leak setting
-//    content into a pass/serve session. Never author a session template
-//    that mixes two primary main-skill chains unless a future curated
-//    session-theme surface owns the mixed-skill contract explicitly.
+//    content into a pass/serve session. D141 explicitly keeps this as an
+//    M001 implementation constraint, not a permanent product claim that
+//    practice focus can never be integrative. Never author a session
+//    template that mixes two primary main-skill chains unless a future
+//    curated session-theme surface owns the mixed-skill contract explicitly.
 //
 // 2. Serve-to-attack convertibility (BAB 2024 drill book intro).
 //    "All of the drills under the Serving header can be easily converted
