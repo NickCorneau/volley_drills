@@ -28,6 +28,7 @@ depends_on:
   - docs/plans/2026-05-07-002-d138-diagnostic-spine-canonicality-plan.md
   - docs/plans/2026-05-08-001-refactor-m001-o24-decision-spine-plan.md
   - docs/plans/2026-05-08-002-feat-bucket-b-pre-d101-schema-decision-passes-plan.md
+  - docs/plans/2026-05-08-004-refactor-source-backed-reroute-registry-plan.md
 decision_refs:
   - D6
   - D21
@@ -278,7 +279,7 @@ If the adversarial-memo Condition 3 fails (partner did not open the app unprompt
 
 **Current remaining M001 routing (2026-05-08):**
 
-- **Agent-actionable decision-spine work:** `O24` is resolved by `D141`; Bucket B decision passes landed 2026-05-08 as `D142` (T9 scoring-overlay-grammar modeling stance — sibling variants on a parent drill), `D143` (T6 attack-zone-convention default — FIVB 5-zone with BAB attack-accuracy boxes for per-shot-accuracy drills), and `D144` (slot-4 optionality — new `pair_game` archetype variant deferred behind partner-walkthrough / founder-ledger / `D101` triggers); see `docs/plans/2026-05-08-002-feat-bucket-b-pre-d101-schema-decision-passes-plan.md`. The remaining BAB-derived agent-actionable item is the A1 source-backed reroute registry; it is a separate follow-up and is not required to close this milestone doc.
+- **Agent-actionable decision-spine work:** all BAB-derived agent-actionable items have shipped. `O24` is resolved by `D141`; Bucket B decision passes landed 2026-05-08 as `D142` (T9 scoring-overlay-grammar modeling stance — sibling variants on a parent drill), `D143` (T6 attack-zone-convention default — FIVB 5-zone with BAB attack-accuracy boxes for per-shot-accuracy drills), and `D144` (slot-4 optionality — new `pair_game` archetype variant deferred behind partner-walkthrough / founder-ledger / `D101` triggers); see `docs/plans/2026-05-08-002-feat-bucket-b-pre-d101-schema-decision-passes-plan.md`. Bucket A1 source-backed reroute registry refactor shipped 2026-05-08 as `docs/plans/2026-05-08-004-refactor-source-backed-reroute-registry-plan.md` (commit `fb631dd`) — `app/src/domain/sessionAssembly/sourceBackedReroutes.ts` registry replaces the three per-focus duration-fit predicates plus the inline `d01` reroute; future source-backed activations are one registry entry append.
 - **Evidence-gated M001 work:** Phase 2B capture shapes wait on `D134`; pair opening-block waits on partner-walkthrough evidence; `d36` waits on `O7`; `d43` waits on `D101`; Tier 2 surfaces wait on the 2026-05-21 Condition 3 read-out and founder-use evidence.
 - **Date-gated validation:** `D130` keeps founder-use mode active through the 2026-07-20 re-evaluation. `D91` remains deferred, not dropped.
 

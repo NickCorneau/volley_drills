@@ -89,6 +89,8 @@ These survive both critiques: each is small, citable, and either receipts canon-
 
 #### A1. Refactor `shouldPrefer*DurationFit` predicate family into a `SourceBackedReroute[]` registry
 
+**Landed 2026-05-08** — `app/src/domain/sessionAssembly/sourceBackedReroutes.ts` registry (4 entries: `d01-duration-fit`, `d47-d48-to-d49`, `d46-to-d50`, `d31-to-d51`) plus `shouldRerouteForSourceBackedSibling` predicate replaces three per-focus duration-fit helpers + the inline `d01` reroute in `app/src/domain/sessionBuilder.ts`. Internal refactor only; byte-equivalent behavior; no algorithm-version bump. Future source-backed activations are one entry append. See `docs/plans/2026-05-08-004-refactor-source-backed-reroute-registry-plan.md` and commit `fb631dd`.
+
 **Source frames:** Frame 1 #6 (substitution surface doesn't scale); Frame 2 #6 (substitution rules as data); Frame 4 implicit; architecture-strategist explicit recommendation.
 
 **What:** the three near-identical `shouldPreferAdvancedSettingDurationFit`, `shouldPreferAdvancedPassingDurationFit`, `shouldPreferBeginnerServingDurationFit` predicates plus the inline D01 reroute become entries in a single registry table indexed by `(focus × level × duration × from-drill-id × to-drill-id)`. The pattern has 3 validated applications (D49 setting, D50 advanced passing, D51 beginner serving); a fourth would be the moment the registry pays off.
@@ -102,6 +104,8 @@ These survive both critiques: each is small, citable, and either receipts canon-
 **Sequencing:** can land before any BAB-derived schema decision. Independent of D101.
 
 #### A2. Receipt the canon-validating BAB confirmations (T1, T2, T5, T7 + spine generalization)
+
+**Landed 2026-05-08** — confirmation receipts wired into `docs/decisions.md` rows for `D76` (T2 feed-type honesty), `D77` (T5 cap-attempts policy), and `D101` (T7 3+ player participant honesty); T1 confirmation flagged as integrative-focus reading on `O24` and resolved by `D141` (see A4). Spine generalization confirmed by the existing six-slot archetype shape — no new decision needed. See commit `553aae2`.
 
 **Source frames:** Frame 4 #1 / #6; product-lens explicit recommendation.
 
@@ -140,6 +144,8 @@ These survive both critiques: each is small, citable, and either receipts canon-
 **Sequencing:** can land alongside A2.
 
 #### A4. Open a small `O24` decision-pass packet that engages the BAB Plan 1 integrative-focus evidence head-on
+
+**Resolved 2026-05-08 as `D141`** — M001 keeps the single-skill-chain generation constraint for focus-controlled slots, but that implementation constraint is not a permanent product principle that future focused sessions must be skill-isolation-only. See `docs/plans/2026-05-08-001-refactor-m001-o24-decision-spine-plan.md` and `docs/decisions.md` `D141`.
 
 **Source frames:** Frame 1 #2; Frame 3 #1; architecture-strategist explicit recommendation; previous reverted `D136` `2026-05-04` revert.
 
@@ -291,6 +297,23 @@ For traceability when future agents resume from this ideation:
 | C5 `compatibleFocuses` | 2#7, 3#1, 4#6 | architecture-strategist (gated on `O24`) |
 
 ## Recommended Next Moves
+
+**Status update 2026-05-08 — all Bucket A and Bucket B items have shipped.** A3 landed in the original 2026-05-04 ideation pass; A1, A2, A4, B1, B2, B3 all landed 2026-05-08. The original sequencing recommendation is preserved below as the historical record of how this ideation pass was prioritized.
+
+| Item | Status | Landing reference |
+|------|--------|-------------------|
+| A1 — `SourceBackedReroute[]` registry refactor | shipped 2026-05-08 | `docs/plans/2026-05-08-004-refactor-source-backed-reroute-registry-plan.md` (commit `fb631dd`) |
+| A2 — BAB confirmation receipts | shipped 2026-05-08 | commit `553aae2` (T2/T5/T7 → `D76`/`D77`/`D101`) |
+| A3 — re-activation triggers in synthesis frontmatter | shipped 2026-05-04 | original ideation pass |
+| A4 — `O24` decision-pass packet | resolved 2026-05-08 as `D141` | `docs/plans/2026-05-08-001-refactor-m001-o24-decision-spine-plan.md` |
+| B1 — T9 modeling stance | landed 2026-05-08 as `D142` | `docs/brainstorms/2026-05-08-002-b1-t9-scoring-overlay-modeling-stance-requirements.md` |
+| B2 — T6 zone convention default | landed 2026-05-08 as `D143` | `docs/brainstorms/2026-05-08-003-b2-t6-attack-zone-convention-default-requirements.md` |
+| B3 — slot-4 optionality | landed 2026-05-08 as `D144` | `docs/brainstorms/2026-05-08-004-b3-slot-4-movement-optionality-requirements.md` |
+| C1–C5 | deferred | gated by re-activation triggers in synthesis frontmatter |
+
+**The remaining queue is all Bucket C, gated by explicit re-activation triggers** (`D101` unlocks 3+ player support, `M002` plan-grammar input, or a non-`D101`-gated source-priority drill clears the existing `d49 / d50 / d51` activation pattern). Do not promote any Bucket C candidate without one of those triggers firing.
+
+### Original sequencing recommendation (historical, all items now landed)
 
 If the team wants to act on this ideation pass, the smallest-cost-highest-value sequence is:
 

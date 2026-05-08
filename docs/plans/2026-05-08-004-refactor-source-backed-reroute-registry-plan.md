@@ -1,8 +1,9 @@
 ---
 title: "refactor: Consolidate source-backed reroute predicates into SourceBackedReroute[] registry"
 type: refactor
-status: active
+status: complete
 date: 2026-05-08
+completed: 2026-05-08
 ---
 
 # refactor: Consolidate source-backed reroute predicates into SourceBackedReroute[] registry
