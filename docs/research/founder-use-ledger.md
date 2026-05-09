@@ -6,7 +6,7 @@ status: active
 stage: validation
 authority: "Append-only dated log of founder sessions during the D130 founder-use window (2026-04-20 → 2026-07-20). Captures the behavioral signal that the founder-use mode assumes exists, in a form that is legible at the 2026-07-20 re-eval without depending on any in-app surface."
 summary: "One line per founder session: date, playerMode, focus, duration, completed Y/N, RPE, one-sentence note. Designed to be appended in under 30 seconds right after a session. Read at every weekly adversarial-memo review and at the 2026-07-20 D130 re-eval."
-last_updated: 2026-05-04
+last_updated: 2026-05-09
 related:
 
 - docs/research/2026-05-04-pair-serving-session-feedback.md
@@ -117,6 +117,15 @@ Named explicitly so the Tier 1b trigger's "specific content gap" half reads legi
 
 Implication for Tier 1b authoring: the founder-session half of the Tier 1b trigger (`docs/plans/2026-04-20-m001-tier1-implementation.md` lines 272–276) is formally met as of 2026-04-24. The serving-first sequencing is supported by founder-session evidence (gaps 2 + 3). Tier 1b content authoring may begin per the scope in `docs/plans/2026-04-22-tier1b-serving-setting-expansion.md`. **§R7 exit-3 decision discharged 2026-04-26:** founder chose exit-3 — `d36 Jump Float Introduction` is removed from Tier 1b entirely and re-enters under `O7` track 2 (sports-medicine / PT review). **2026-04-27 source red-team correction:** `d43 Triangle Setting` is also deferred to `D101` 3+ player support because the BAB source geometry is 3-player. Current Layer A ships 4 drills (`d31`, `d33`, `d40`, `d42`); cap consumption is 4/10, not 6/10. The freed slots stay open and are not auto-backfilled. No founder-cadence threshold or evidence-channel weighting is changed by this decision — only the Tier 1b drill-count arithmetic.
 
+### Cross-session reflections (captured 2026-05-09)
+
+Founder reflections delivered conversationally on 2026-05-09 from "latest training runs," not tied to a single ledger row. Captured here so the 2026-07-20 D130 re-eval can read them alongside the row data; classified per `D135`.
+
+1. **3+ player primary-context gap (content-gap-evidence per `D135`).** Founder named two active practice configurations where the current build does not fit — a 3-person team and a 4-person team — and an adoption headwind: *"i would like to have people use it more but not many people in my network are in 2s right now, its a lot of beach 3s/4s/6s."* Quoted on the build itself: *"this app is basically useless in those cases."* Real build, real practice configurations the founder is regularly training in, named friction → first-class content-gap-evidence per `D135`'s source-validity rule, even though it is not tied to a single attempted session. **Trigger-fire reading:** does NOT fire `D101` early — `D101` is sequenced post-M001 / `M002` per `D124`, not gated on a founder-evidence trigger. **Sequencing reading:** this is one substantive input to the post-M001 ordering question (`M002` Weekly Confidence Loop first vs `D101` 3+ player content track earlier) at the 2026-07-20 re-eval, recorded as a cross-reference in `docs/milestones/m001-solo-session-loop.md` §"Post-M001 sequencing inputs."
+2. **90-min custom duration (feature-wish per `D135`).** Quoted: *"it could be fun to be able to add custom timing, s.a. 90 min for longer sessions."* No specific session attempted at 90 minutes; no friction observed; framing is wishful — `D135` feature-wish class, input to founder reasoning, not trigger evidence. Already captured as deferred future work in `docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md` R4 + Out-of-scope, `docs/reviews/2026-04-30-focus-coverage-readiness-audit.md`, and `docs/archive/plans/2026-05-01-001-feat-generated-plan-diagnostics-plan.md`. Restated here for re-eval legibility; no sequencing implication.
+
+**No schema, scope, or sequencing change** is authorized by this reflection block. Both items remain on their existing canonical paths (90-min as deferred future work after fixed-profile readiness is trustworthy; 3+ player support as `D101`, post-M001 / `M002`). The block exists so the 2026-07-20 re-eval reads them as named signal rather than rediscovering them in chat history.
+
 ### Operating notes (courtside / device audio)
 
 - **iOS hardware silent mode (mute switch).** The physical ring/silent switch can suppress audible Web Audio beeps and ticks in Safari/PWA—including block-end cues—even when the app, Screen Wake Lock, and first-interaction audio priming are working as intended. That behavior respects user hardware intent; it is not an app bug. The founder confirmed this as the root cause after debugging "no beeps on phone" (see reconciled Tier 1b item #17 and the wake-lock / audio-context work tied to content-gap item 4 above).
@@ -126,10 +135,12 @@ Implication for Tier 1b authoring: the founder-session half of the Tier 1b trigg
 
 At the start of each Monday's adversarial-memo review, append a one-line roll-up here for the week just completed. This is a convenience view, not an authoritative one — the authoritative log is the Sessions table above.
 
+*Backfilled 2026-05-09 from the Sessions table; the Monday weekly-rollup ritual was not yet adopted. The week of 2026-05-04 is in progress and will be rolled up after Sunday 2026-05-10.*
 
-| week start (Monday)                         | total sessions | solo n | pair n | pass n | serve n | set n | mixed n | outside-app planning events |
-| ------------------------------------------- | -------------- | ------ | ------ | ------ | ------- | ----- | ------- | --------------------------- |
-| *template row, delete on first real rollup* | 2026-04-20     | 0      | 0      | 0      | 0       | 0     | 0       | 0                           |
+| week start (Monday) | total sessions | solo n | pair n | pass n | serve n | set n | mixed n | outside-app planning events |
+| ------------------- | -------------- | ------ | ------ | ------ | ------- | ----- | ------- | --------------------------- |
+| 2026-04-27          | 2              | 0      | 2      | 2      | 0       | 0     | 0       | 0                           |
+| 2026-04-20          | 3              | 1      | 2      | 3      | 0       | 0     | 0       | 0                           |
 
 
 ## Interpreting this ledger at the re-eval
