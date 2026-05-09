@@ -1,8 +1,9 @@
 ---
 title: "M001 build-complete relabel + validation-overhang scoreboard"
 type: docs
-status: active
+status: complete
 date: 2026-05-09
+completed: 2026-05-09
 ---
 
 # M001 build-complete relabel + validation-overhang scoreboard
