@@ -2,11 +2,11 @@
 id: M001
 title: Solo Session Loop
 status: active
-stage: validation
+stage: build-complete-validating
 type: milestone
 authority: M001 thin-slice scope, acceptance evidence, validation gate
-summary: "Thinnest believable end-to-end solo session loop for pass / serve-receive."
-last_updated: 2026-05-08
+summary: "Thinnest believable end-to-end solo session loop for pass / serve-receive. Build phase complete (2026-05-08); validation phase active through 2026-07-20 D130 re-eval."
+last_updated: 2026-05-09
 depends_on:
   - docs/prd-foundation.md
   - docs/decisions.md
@@ -29,6 +29,9 @@ depends_on:
   - docs/plans/2026-05-08-001-refactor-m001-o24-decision-spine-plan.md
   - docs/plans/2026-05-08-002-feat-bucket-b-pre-d101-schema-decision-passes-plan.md
   - docs/plans/2026-05-08-004-refactor-source-backed-reroute-registry-plan.md
+  - docs/plans/2026-05-09-001-docs-m001-build-complete-relabel-plan.md
+  - docs/status/m001-validation-overhang.md
+  - docs/status/post-m001-content-backlog.md
 decision_refs:
   - D6
   - D21
@@ -65,6 +68,16 @@ open_question_refs:
 ---
 
 # M001: Solo Session Loop
+
+## Phase Posture
+
+**Build:** complete as of 2026-05-08. All Tier 1a, Tier 1b Layer A, and Tier 1c work has shipped; all BAB-derived agent-actionable items closed (`A1` source-backed reroute registry refactor `fb631dd`; `D141` resolves `O24`; `D142`/`D143`/`D144` resolve T9/T6/slot-4). There are zero remaining agent-actionable code tasks for M001.
+
+**Validation:** active through 2026-07-20 (`D130` re-eval, or earlier if an early trigger fires). Read `docs/status/m001-validation-overhang.md` for the calendar-dated reads (2026-05-12 / 2026-05-21 / 2026-07-20), the three `D130` falsification conditions, the five early-re-eval triggers, and the `D134` Phase 2A streak gate.
+
+**Polish (Tier 2):** deferred. Tier 2 surfaces — "See why this session was chosen" modal, richer summary copy, full session history screen, recommendation-first onboarding polish — start only if the 2026-05-21 `D130` Condition 3 read-out passes.
+
+**Trigger-gated content adds:** parked. The Tier 1b drill-cap residual (4/10 consumed; 6 slots reserved), `d36` (waiting on `O7`), `d43` (waiting on `D101`), and conditional Phase 2B capture shapes are routed to `docs/status/post-m001-content-backlog.md`.
 
 ## Agent Quick Scan
 
@@ -277,11 +290,11 @@ If the adversarial-memo Condition 3 fails (partner did not open the app unprompt
 
 **Tier 3+ — M002 territory and beyond:** governed by `docs/milestones/m002-weekly-confidence-loop.md` and `docs/roadmap.md`, not by this milestone doc.
 
-**Current remaining M001 routing (2026-05-08):**
+**Current remaining M001 routing (2026-05-09):**
 
-- **Agent-actionable decision-spine work:** all BAB-derived agent-actionable items have shipped. `O24` is resolved by `D141`; Bucket B decision passes landed 2026-05-08 as `D142` (T9 scoring-overlay-grammar modeling stance — sibling variants on a parent drill), `D143` (T6 attack-zone-convention default — FIVB 5-zone with BAB attack-accuracy boxes for per-shot-accuracy drills), and `D144` (slot-4 optionality — new `pair_game` archetype variant deferred behind partner-walkthrough / founder-ledger / `D101` triggers); see `docs/plans/2026-05-08-002-feat-bucket-b-pre-d101-schema-decision-passes-plan.md`. Bucket A1 source-backed reroute registry refactor shipped 2026-05-08 as `docs/plans/2026-05-08-004-refactor-source-backed-reroute-registry-plan.md` (commit `fb631dd`) — `app/src/domain/sessionAssembly/sourceBackedReroutes.ts` registry replaces the three per-focus duration-fit predicates plus the inline `d01` reroute; future source-backed activations are one registry entry append.
-- **Evidence-gated M001 work:** Phase 2B capture shapes wait on `D134`; pair opening-block waits on partner-walkthrough evidence; `d36` waits on `O7`; `d43` waits on `D101`; Tier 2 surfaces wait on the 2026-05-21 Condition 3 read-out and founder-use evidence.
-- **Date-gated validation:** `D130` keeps founder-use mode active through the 2026-07-20 re-evaluation. `D91` remains deferred, not dropped.
+- **Agent-actionable decision-spine work:** none. All BAB-derived agent-actionable items have shipped. `O24` is resolved by `D141`; Bucket B decision passes landed 2026-05-08 as `D142` / `D143` / `D144` (see `docs/plans/2026-05-08-002-feat-bucket-b-pre-d101-schema-decision-passes-plan.md`). Bucket A1 source-backed reroute registry refactor shipped 2026-05-08 (`fb631dd`, plan `docs/plans/2026-05-08-004-refactor-source-backed-reroute-registry-plan.md`).
+- **Evidence-gated and date-gated work:** see `docs/status/m001-validation-overhang.md` for the validation gates (calendar reads 2026-05-12 / 2026-05-21 / 2026-07-20, `D130` falsification conditions, `D130` early re-eval triggers, `D134` Phase 2A streak gate) and `docs/status/post-m001-content-backlog.md` for the trigger-gated content adds (Tier 1b residual cap, `d36` / `d43`, conditional Phase 2B capture shapes). The milestone-doc body no longer carries those lists inline.
+- **Date-gated closure:** `D130` keeps founder-use mode active through the 2026-07-20 re-evaluation. `D91` remains deferred, not dropped.
 
 **Re-evaluation (2026-07-20 or earlier if a `D130` early trigger fires — including new trigger (d): Tier 1a shipped + ≥10 founder sessions + no open walkthrough P0).** Founder-use mode is **not** an escape hatch from external validation; `D130` pre-schedules a re-eval and the adversarial memo pre-registers the decision rule. At that point the default decision (when all three falsification conditions pass and Tier 1a + Tier 2 have shipped) is **option (a): friends-of-friends cohort** — one expansion stage before full `D91` stranger-launch. Continuing founder-only is no longer a default-available outcome; it requires a written falsifiable justification co-signed by a named non-founder reader, pasted into the adversarial memo's Amendment Log. Resuming `D91` preparation is always available as an opt-in alternative. Tier 1a and Tier 2 being complete is the minimum state for that conversation to be informed rather than speculative.
 
@@ -338,6 +351,12 @@ The post-M001 ordering is no longer open. See `docs/roadmap.md`, `docs/decisions
 - **M002 Weekly Confidence Loop (always first):** shallow next 2-6 session queue, minimal weekly receipt, visible carry-forward, and the smallest accumulation surfaces that make the app feel like the user's training home.
 - **Coach clipboard (gated after the self-coached layer is stronger):** assign a structured session, see whether it happened, get a tiny outcome signal, adjust the next one. Development should not begin until the self-coached loop shows strong repeat usage and main-tool pull.
 - **If the gate does not clear:** focus entirely on hardening the self-coached loop and data ownership before extending to any coach workflow.
+
+## Post-M001 sequencing inputs
+
+Append-only dated signals that may inform the post-M001 ordering question at the 2026-07-20 D130 re-eval. None of these by itself changes the sequencing above — `D124` is intact. Each entry should explicitly name what it is NOT authorizing.
+
+- **2026-05-09 — Founder content-gap signal on 3+ player primary contexts.** Founder named two active training configurations where the current build does not fit — a 3-person team and a 4-person team — and a network adoption headwind skewed toward 3s/4s/6s rather than 2s. Quoted on the build: *"this app is basically useless in those cases."* Classified per `D135` as first-class content-gap-evidence (real build, real practice configurations, named friction), not a feature wish. Full capture in `docs/research/founder-use-ledger.md` §"Cross-session reflections (captured 2026-05-09)." **Sequencing question this informs:** at the 2026-07-20 re-eval, should `M002` Weekly Confidence Loop continue to come before any `D101` 3+ player content track (as `D124` currently sequences under solo/pair-first assumptions), or does founder primary-context evidence justify earlier `D101` content authoring? **Does NOT authorize `D101` work now** — `D101` remains tracked future requirement per its decision row; M001 still scopes 1-2 players only. Read at the re-eval as one input among many (`D124`, `M002` planning readiness in `docs/milestones/m002-weekly-confidence-loop.md`, Conditions 1-3 status in `docs/plans/2026-04-20-m001-adversarial-memo.md`, partner-walkthrough or partner-side content-gap evidence accumulated during the window, and any further founder ledger rows or reflections).
 
 ## v0b implementation decisions (2026-04-15)
 

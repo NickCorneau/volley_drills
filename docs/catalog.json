@@ -1,7 +1,7 @@
 {
   "schema_version": 5,
   "repo_id": "volley_drills",
-  "last_updated": "2026-05-08",
+  "last_updated": "2026-05-09",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -306,6 +306,20 @@
       "canonical_for": "current project posture, recent shipped history, and active validation gates"
     },
     {
+      "id": "m001-validation-overhang",
+      "path": "docs/status/m001-validation-overhang.md",
+      "type": "status",
+      "status": "active",
+      "canonical_for": "Single-page scoreboard of M001 validation gates: D130 falsification conditions, D130 early re-eval triggers, D134 Phase 2A streak gate, and the calendar-dated reads (2026-05-12 / 2026-05-21 / 2026-07-20). Build phase complete; this doc tracks what closes M001."
+    },
+    {
+      "id": "post-m001-content-backlog",
+      "path": "docs/status/post-m001-content-backlog.md",
+      "type": "status",
+      "status": "active",
+      "canonical_for": "Backlog of trigger-gated content adds parked outside the M001 milestone body: Tier 1b drill-cap residual (4/10 consumed), externally gated drills (d36 / d43), and conditional Phase 2B per-drill capture shapes."
+    },
+    {
       "id": "milestones-readme",
       "path": "docs/milestones/README.md",
       "type": "index",
@@ -337,7 +351,7 @@
       "path": "docs/milestones/m001-solo-session-loop.md",
       "type": "milestone",
       "status": "active",
-      "canonical_for": "M001 Solo Session Loop milestone scope and current remaining-work routing. Refreshed 2026-05-08 to reflect D137 Setup -> Safety pre-run spine, shipped Tier 1a / Tier 1b Layer A, D141/O24 decision-spine resolution, and the evidence-gated remaining work before M002."
+      "canonical_for": "M001 Solo Session Loop milestone scope and current remaining-work routing. Refreshed 2026-05-09 to reflect build-complete-validating posture: stage flipped from 'validation' to 'build-complete-validating'; new Phase Posture section names build complete (2026-05-08), validation active (through 2026-07-20), polish (Tier 2) deferred. Validation gates routed to docs/status/m001-validation-overhang.md and trigger-gated content adds routed to docs/status/post-m001-content-backlog.md."
     },
     {
       "id": "M002",
