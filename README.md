@@ -15,7 +15,9 @@ depends_on:
 
 # Volleycraft
 
-Volleyball personal training app for self-coached amateurs: structured session planning, courtside run mode, and rules-based adaptation. Built and tested in pair-mode with one volleyball partner across the M001 founder-use window. The partner came back unprompted within 24 hours of first use, has continued running sessions both with the founder and on his own, and the two now use it together at every practice (~2x weekly). Both report it makes training easier and feels like it's helping them get better. Beach-first in scope for M001 (see `docs/decisions.md` `D125` for the product-name rationale and beach-first / volleyball-inclusive positioning).
+Volleyball personal training app for self-coached amateurs: structured session planning, courtside run mode, and rules-based adaptation. Beach-first in scope for M001 (see `docs/decisions.md` `D125` for the product-name rationale and beach-first / volleyball-inclusive positioning).
+
+Built and tested in pair-mode with one volleyball partner across the M001 founder-use window. The partner came back unprompted within 24 hours of first use, has continued running sessions both with the founder and on his own, and the two now use it together at every practice (~2x weekly). Both report it makes training easier and feels like it's helping them get better.
 
 **Stage**: Phase 0 validation, operating in `D130` founder-use mode through 2026-07-20.
 **Build**: v0b Starter Loop is the M001 base. M001 build phase complete as of 2026-05-08 (Tier 1a + Tier 1b Layer A + Tier 1c shipped, Tier 2 deferred behind Condition 3); validation phase active through the 2026-07-20 `D130` re-eval.

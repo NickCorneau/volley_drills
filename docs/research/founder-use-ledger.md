@@ -1,5 +1,5 @@
-## id: founder-use-ledger
-
+---
+id: founder-use-ledger
 title: "Founder-Use Ledger (Dated append-only log during D130 window)"
 type: research
 status: active
@@ -7,21 +7,20 @@ stage: validation
 authority: "Append-only dated log of founder sessions during the D130 founder-use window (2026-04-20 → 2026-07-20). Captures the behavioral signal that the founder-use mode assumes exists, in a form that is legible at the 2026-07-20 re-eval without depending on any in-app surface."
 summary: "One line per founder session: date, playerMode, focus, duration, completed Y/N, RPE, one-sentence note. Designed to be appended in under 30 seconds right after a session. Read at every weekly adversarial-memo review and at the 2026-07-20 D130 re-eval."
 last_updated: 2026-05-10
-related:
-
-- docs/research/2026-05-10-pair-net-serving-duration-feedback.md
-- docs/research/2026-05-04-pair-serving-session-feedback.md
-- docs/research/2026-04-27-cca2-dogfeed-findings.md
 depends_on:
-- docs/decisions.md
-- docs/plans/2026-04-20-m001-adversarial-memo.md
-- docs/milestones/m001-solo-session-loop.md
+  - docs/decisions.md
+  - docs/plans/2026-04-20-m001-adversarial-memo.md
+  - docs/milestones/m001-solo-session-loop.md
 related:
-- docs/research/partner-walkthrough-script.md
-- docs/research/d91-retention-gate-evidence.md
+  - docs/research/2026-05-10-pair-net-serving-duration-feedback.md
+  - docs/research/2026-05-04-pair-serving-session-feedback.md
+  - docs/research/2026-04-27-cca2-dogfeed-findings.md
+  - docs/research/partner-walkthrough-script.md
+  - docs/research/d91-retention-gate-evidence.md
 decision_refs:
-- D91
-- D130
+  - D91
+  - D130
+---
 
 # Founder-Use Ledger
 
