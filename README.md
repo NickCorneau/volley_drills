@@ -6,7 +6,7 @@ stage: validation
 type: hub
 summary: "Repo hub: quick start, top-level layout, and links into the canonical docs."
 authority: repo layout and human-facing orientation
-last_updated: 2026-05-07
+last_updated: 2026-05-10
 depends_on:
   - AGENTS.md
   - docs/catalog.json
@@ -15,12 +15,12 @@ depends_on:
 
 # Volleycraft
 
-Volleyball personal training app for self-coached amateurs: structured session planning, courtside run mode, and rules-based adaptation. Beach-first in scope for M001 (see `docs/decisions.md` `D125` for the product-name rationale and beach-first / volleyball-inclusive positioning).
+Volleyball personal training app for self-coached amateurs: structured session planning, courtside run mode, and rules-based adaptation. Built and tested in pair-mode with one volleyball partner across the M001 founder-use window. The partner came back unprompted within 24 hours of first use, has continued running sessions both with the founder and on his own, and the two now use it together at every practice (~2x weekly). Both report it makes training easier and feels like it's helping them get better. Beach-first in scope for M001 (see `docs/decisions.md` `D125` for the product-name rationale and beach-first / volleyball-inclusive positioning).
 
 **Stage**: Phase 0 validation, operating in `D130` founder-use mode through 2026-07-20.
-**Build**: v0b Starter Loop is the M001 base. M001 Tier 1a, Tier 1b Layer A, D137 Setup-direct-to-Safety cleanup, focus-coverage readiness, and generated-plan diagnostics have shipped; remaining Tier 1b is gated by logged demand.
+**Build**: v0b Starter Loop is the M001 base. M001 build phase complete as of 2026-05-08 (Tier 1a + Tier 1b Layer A + Tier 1c shipped, Tier 2 deferred behind Condition 3); validation phase active through the 2026-07-20 `D130` re-eval.
 **Live**: https://volleydrills.nicholascorneau.workers.dev
-**Status**: detailed posture and recent shipped history live in `docs/status/current-state.md`. The `D91` retention gate is deferred (not dropped); the active read is the `D130` partner-use Condition 3 final close on 2026-05-21.
+**Status**: detailed posture and recent shipped history live in `docs/status/current-state.md`. The `D91` retention gate is deferred (not dropped). `D130` partner-use Condition 3 is at provisional pass — strengthened by the partner's T+1 unprompted message, T+2 instrumented session, and sustained co-use — with the final 30-day quiet-window close on 2026-05-21.
 
 ## Quick Start
 
