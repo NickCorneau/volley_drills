@@ -15,7 +15,7 @@ Run the documented Monday weekly trigger-review ritual for `docs/plans/2026-04-2
 
 ## Problem Frame
 
-The memo's Weekly Log only has one entry (week 1, 2026-04-20). Weeks 2 and 3 have been silently skipped. Tomorrow (2026-05-11) is week 4. If it is missed too, the memo's own clause fires: *"If three consecutive Mondays are missed, that is itself evidence the founder-use premise is underwater; trigger a re-eval at the next weekly slot."* Beyond avoiding the consecutive-miss trigger, the freshly-backfilled founder-use ledger now has clean data to read against and the rolled-up week tables surface a Condition 1 read (~17% solo vs ≥40% target, 0 set-focused sessions vs ≥3 target) that should land in canonical form, not chat history.
+The memo's Weekly Log only has one entry (week 1, 2026-04-20). Weeks 2 and 3 have been silently skipped. Tomorrow (2026-05-11) is week 4. If it is missed too, the memo's own clause fires: *"If three consecutive Mondays are missed, that is itself evidence the founder-use premise is underwater; trigger a re-eval at the next weekly slot."* Beyond avoiding the consecutive-miss trigger, the freshly-backfilled founder-use ledger now has clean data to read against and the rolled-up week tables surface a Condition 1 read (~14% solo vs ≥40% target after the 2026-05-10 founder + Seb export, 0 set-focused sessions vs ≥3 target) that should land in canonical form, not chat history.
 
 ---
 
@@ -54,7 +54,8 @@ The memo's Weekly Log only has one entry (week 1, 2026-04-20). Weeks 2 and 3 hav
 - `scripts/dream.sh` — alarm-clock script. Six inputs: recent commits (14d), uncommitted churn, ledger Sessions tail, stale-doc candidates (>21d untouched), P0/P1 review flags, A3 ligament status. Writes `.cursor/state/dreams/dream-YYYY-MM-DD.md`. No network call. Idempotent per day.
 - `docs/plans/2026-04-20-m001-adversarial-memo.md` lines 126-164 — Weekly Trigger-Review Ritual section, including the entry template at lines 130-152, the five recognized behavioral-evidence channels, and the three-consecutive-misses clause (line 154).
 - `docs/plans/2026-04-20-m001-adversarial-memo.md` lines 397-448 — week 1 entry, including 2026-04-24 mid-week addendums. Demonstrates the format is "template + however much honest mid-week supplementing makes sense."
-- `docs/research/founder-use-ledger.md` — data source, freshly backfilled in `256ad8b` (2026-05-09). Six logged sessions. Two-week rollup table (week-of-2026-04-20 and week-of-2026-04-27 backfilled; week-of-2026-05-04 in progress).
+- `docs/research/founder-use-ledger.md` — data source, freshly backfilled in `256ad8b` (2026-05-09), then updated with the 2026-05-10 founder + Seb export. Seven logged sessions. Three-week rollup table (week-of-2026-04-20, 2026-04-27, and 2026-05-04); week-of-2026-05-04 closes at two pair sessions.
+- `docs/research/2026-05-10-pair-net-serving-duration-feedback.md` — same-day evidence update after the initial ritual pass: second week-of-2026-05-04 pair session, standard Condition 1 count moves from solo 1/6 to 1/7, and warmup / duration-budget risk strengthens.
 - `docs/status/m001-validation-overhang.md` — scoreboard for M001's validation gates, created in `1d54600` (2026-05-09). Routes to D130 Conditions 1/2/3, D130 early triggers (a)-(e), D134 Phase 2A streak gate. Currently states the readings as of 2026-05-09.
 
 ### Institutional Learnings
@@ -71,11 +72,11 @@ The memo's Weekly Log only has one entry (week 1, 2026-04-20). Weeks 2 and 3 hav
 ## Key Technical Decisions
 
 - **Treat weeks 2-3 as missed, not backfilled.** The memo's three-consecutive-misses clause is the load-bearing signal here. Backfilling would launder it. The week-4 entry names the misses explicitly so the 2026-07-20 re-eval reads them as data.
-- **Validation Posture String defaults to L1.** The 30-day partner quiet window from the 2026-04-21 walkthrough closes 2026-05-21; until then, posture is L1 ("tested on one device only"). Any external-claim language anywhere in the repo this week is checked against L1.
+- **Validation Posture String is L2, not L1.** The 30-day partner quiet window from the 2026-04-21 walkthrough closes 2026-05-21, which is exactly the memo's L2-pending state ("tested with one partner, 30-day quiet-window outcome pending/observed"). Any external-claim language anywhere in the repo this week is checked against L2's limit: case-study framing is allowed only with partner outcome explicitly named; retention-percentage claims remain prohibited.
 - **Dream pass executes against today's repo state, not tomorrow's.** Running dream.sh today (Sunday 2026-05-10) and tomorrow (Monday 2026-05-11) would produce nearly-identical input data. The memo specifies "once per Monday as the first step of the weekly ritual" — but the user has explicitly asked to run the ritual now. We honor that and timestamp the dream prompt and the week-4 entry as 2026-05-10, with a one-line note that the ritual was performed on Sunday for week-4 of 13 (week starting 2026-05-11).
 - **Trigger (e) read uses git log as the agent-assisted open proxy.** Every commit since 2026-04-26 (start of the 14-day window) was authored in an agent session. Agent-free check requires founder self-report — surface the question in the entry; do not synthesize an answer.
 - **Pruning bar stays high.** From the dream-pass output, only propose archive candidates that meet the memo's stated bar (canonicality overtaken by a later decision, topic covered more tightly elsewhere, never referenced from any active plan). "Nothing meets the prune bar this week because [specific justification]" is a valid output and may well be the right one.
-- **Scoreboard update is conditional.** If the week-4 read produces no status change relative to the 2026-05-09 scoreboard (which captured Condition 1 ~17% solo / 0 set, Condition 2 pass, Condition 3 pending, etc.), the scoreboard's `last_updated` and a one-line "no changes from week-4 read" entry suffice. Don't churn the file for no reason.
+- **Scoreboard update is required after the same-day export.** The 2026-05-10 founder + Seb export changes the week-4 read relative to the initial 2026-05-09 scoreboard: total sessions 6 -> 7, solo share ~17% -> ~14%, focus breakdown gains one serve-focused pair session, early trigger (d) moves to 7/10, and D134 remains unmoved because no streak drill ran.
 
 ---
 
@@ -175,26 +176,26 @@ The memo's Weekly Log only has one entry (week 1, 2026-04-20). Weeks 2 and 3 hav
 **Approach:**
 - **Header:** `## 2026-05-11 (week 4 of 13)` followed by a one-line note that the ritual was performed on Sunday 2026-05-10 (one day early per founder ask), reading week-of-2026-05-04 data + cumulative.
 - **Template fields** (lines 132-151), filled honestly from the live ledger:
-  - **Sessions logged this past week (week of 2026-05-04):** 1 (the 2026-05-04 pair mixed session). Running total: 6 of 13-week target (under-pace at 6 of 13).
-  - **Sessions that actually ran but are not yet in the ledger:** founder self-report needed — surface as an open ask under this field.
-  - **Solo share so far:** 1 of 6 = ~17%. Below the ≥40% bar. Name as Condition 1 sub-constraint failing under standard-D130 reading; carry the `D132` re-read pattern from the 2026-04-24 addendum if applicable.
-  - **Focus breakdown so far:** pass 5 / serve 0 / set 0 / mixed 1. Set-floor 0 of 3 — also failing.
+  - **Sessions logged this past week (week of 2026-05-04):** 2 (the 2026-05-04 pair mixed session and the 2026-05-10 Pair + Net serve-focused session). Running total: 7 of 13-week target (under-pace at 7 of 13).
+  - **Sessions that actually ran but are not yet in the ledger:** none known after the 2026-05-10 export update; founder self-report needed only for any out-of-band session not represented in the export or ledger.
+  - **Solo share so far:** 1 of 7 = ~14%. Below the ≥40% bar. Name as Condition 1 sub-constraint failing under standard-D130 reading; carry the `D132` re-read pattern from the 2026-04-24 addendum if applicable.
+  - **Focus breakdown so far:** pass 5 / serve 1 / set 0 / mixed 1. Set-floor 0 of 3 — also failing.
   - **Outside-app planning this week:** no observable evidence; founder self-report needed.
   - **D130 early triggers check (a)-(e):**
-    - (a) <5 sessions in 45 days: 6 founder/joint sessions in 19 days elapsed — pace OK; not tripped.
-    - (b) 3-week silence: most recent session 2026-05-04 (6 days ago) — not tripped.
+    - (a) <5 sessions in 45 days: 7 founder/joint sessions in 20 days elapsed — pace OK; not tripped.
+    - (b) 3-week silence: most recent session 2026-05-10 — not tripped.
     - (c) invited anyone outside partner: no observable evidence; surface as ask.
-    - (d) Tier 1a + ≥10 sessions + no open P0: Tier 1a + Tier 1b Layer A + Tier 1c shipped; founder/joint sessions 6/10; partner walkthrough 0 P0 — on the clock, not yet firing.
-    - (e) agent-assisted open asymmetry: ≥5 agent-assisted opens in last 14 days — yes (commits 2026-04-26 onward all agent-authored). Agent-free check: founder self-report needed; default reading without self-report is "ambiguous; surface for closure."
+    - (d) Tier 1a + ≥10 sessions + no open P0: Tier 1a + Tier 1b Layer A + Tier 1c shipped; founder/joint sessions 7/10; partner walkthrough 0 P0 — on the clock, not yet firing.
+    - (e) agent-assisted open asymmetry: ≥5 agent-assisted opens in last 14 days — yes (commits 2026-04-26 onward all agent-authored). Agent-free check now includes the 2026-05-04 and 2026-05-10 founder + Seb sessions plus the 2026-05-09 content-gap report; founder self-report on agent-free repo work would still close definitively.
   - **Non-ledger behavioral-evidence channels this week:**
-    - Partner usage (Seb): no Dexie exports / unprompted messages observed since 2026-05-04 walkthrough findings; surface as ask.
+    - Partner usage (Seb): 2026-05-10 Dexie export includes a founder + Seb Pair + Net session. Treat as partner usage evidence, not unprompted-open proof.
     - Founder chat / voice-memo feedback to repo: substantive — drove 2026-05-08 Bucket B decisions (D141/D142/D143/D144), 2026-05-08 A1 SourceBackedReroute refactor decision, 2026-05-09 M001 build-complete relabel, 2026-05-09 ledger-backfill decision and reflections. ≥4 substantive chat threads landed canon edits.
-    - Joint-session evidence: none new this week.
+    - Joint-session evidence: 2026-05-10 Pair + Net session with Seb; warmup timing still wrong and drill durations felt over-budgeted.
   - **Falsification conditions status:**
-    - 1: **fail-trending under standard reading** — solo share 17% (below 40%); set floor 0/3. Apply `D132` re-reading: under D132, Condition 1 measures whether the *accommodated solo case works*, not whether the founder runs solo dominantly. Re-read net: still fail-trending on set-floor; ambiguous on solo-share under D132.
+    - 1: **fail-trending under standard reading** — solo share 14% (below 40%); set floor 0/3. Apply `D132` re-reading: under D132, Condition 1 measures whether the *accommodated solo case works*, not whether the founder runs solo dominantly. Re-read net: still fail-trending on set-floor; ambiguous on solo-share under D132.
     - 2: **pass** — no observable outside-app planning; founder self-report would close definitively.
     - 3: **pending** — 30-day clock from 2026-04-21 partner walkthrough closes 2026-05-21 (11 days). Quiet-window invariants holding.
-- **Validation Posture String (per A2):** L1 — "tested on one device only." 30-day partner quiet window has not closed (closes 2026-05-21). Pin L1 with rationale.
+- **Validation Posture String (per A2):** L2 — "Tested with one partner, 30-day quiet-window outcome pending/observed." Walkthrough happened 2026-04-21; the quiet-window clock closes 2026-05-21, which is L2-pending territory. Pin L2 with rationale and explicitly prohibit retention-percentage claims.
 - **A3 ligament status:** Founder has no logged memo re-read in the Weekly Log. **Action for founder:** read the memo end-to-end (≤5 min) and append `A3 re-read YYYY-MM-DD — <n> min` as a sub-line under this entry. Mandatory before next plan/research file lands or any >50-line plan/research edit.
 - **Authoring-budget cap check:** 0 new drill records authored this week. Cap consumed: 4 / 10 (Tier 1b Layer A: d31, d33, d40, d42). 5th-session gate not yet hit; cap remains at 4/10.
 - **Missed-weeks call-out (sub-section):**
@@ -215,7 +216,7 @@ The memo's Weekly Log only has one entry (week 1, 2026-04-20). Weeks 2 and 3 hav
 
 **Verification:**
 - `docs/plans/2026-04-20-m001-adversarial-memo.md` contains a new `## 2026-05-11 (week 4 of 13)` section with all required fields.
-- Validation Posture String is pinned to L1 with rationale.
+- Validation Posture String is pinned to L2 with rationale.
 - Missed-weeks sub-section explicitly names weeks 2 and 3 as missed and the discoverability finding.
 - Dream-pass sub-section contains the U2 output in the script-specified format.
 - Open `[founder self-report needed]` placeholders are explicit and findable, not hidden as fake certainty.
@@ -235,7 +236,7 @@ The memo's Weekly Log only has one entry (week 1, 2026-04-20). Weeks 2 and 3 hav
 
 **Approach:**
 - Diff the week-4 readings against the scoreboard's current readings (from `1d54600`, last_updated 2026-05-09).
-- Likely-changed: the 2026-05-09 reflection block already surfaced ~17% solo / 0 set; the scoreboard already reflects this. Week-4 entry adds (a) D130 trigger (e) read with founder-self-report-needed tag; (b) authoring-budget cap consumption refreshed; (c) memo-discoverability routing finding.
+- Changed after the same-day export: the 2026-05-10 founder + Seb session moves the standard Condition 1 read to ~14% solo / 0 set, adds one serve-focused pair session, resets the silence clock, moves early trigger (d) to 7/10, and leaves D134 unmoved because no streak drill ran. Week-4 entry also adds (a) D130 trigger (e) read with founder-self-report-needed tag; (b) authoring-budget cap consumption refreshed; (c) memo-discoverability routing finding.
 - **Discoverability fix (in scope):** Add a one-line pointer in `m001-validation-overhang.md` §"Calendar-Dated Reads" or §"Agent Quick Scan" naming the Monday weekly ritual, citing memo line 126, so future agents and the founder discover it from the scoreboard rather than only from the memo body. This addresses the meta-finding from U3's missed-weeks sub-section.
 - Bump `last_updated: 2026-05-10` (since today's run is the source-of-truth date).
 
@@ -267,7 +268,7 @@ The memo's Weekly Log only has one entry (week 1, 2026-04-20). Weeks 2 and 3 hav
 
 **Approach:**
 - After U3 has appended the dream-pass output to the memo, delete the prompt file.
-- Run `git status --short` and confirm the only changes are: `M docs/plans/2026-04-20-m001-adversarial-memo.md` and `M docs/status/m001-validation-overhang.md`. The `.cursor/state/dreams/` directory is .gitignored or ephemeral; confirm by checking the existing repo `.gitignore` posture.
+- Run `git status --short` and confirm the changes are the intended docs-only propagation set: memo, scoreboard, founder-use ledger, research note/index, catalog, roadmap/current-state/milestone surfaces, and this plan if the same-day export correction has landed. The `.cursor/state/dreams/` directory is .gitignored or ephemeral; confirm by checking the existing repo `.gitignore` posture.
 
 **Patterns to follow:**
 - Script post-condition (lines 27-34): consume → append → delete.
@@ -277,7 +278,7 @@ The memo's Weekly Log only has one entry (week 1, 2026-04-20). Weeks 2 and 3 hav
 
 **Verification:**
 - `.cursor/state/dreams/dream-2026-05-10.md` no longer exists.
-- `git status --short` shows only the two intended modified files (memo + scoreboard) plus possibly `?? .cursor/state/` if not gitignored — handle gitignore separately if found.
+- `git status --short` shows only the intended docs-only propagation set plus possibly `?? .cursor/state/` if not gitignored — handle gitignore separately if found.
 
 ---
 
@@ -300,7 +301,7 @@ The memo's Weekly Log only has one entry (week 1, 2026-04-20). Weeks 2 and 3 hav
 | Pruning bar pulled too low; suggests archiving still-load-bearing docs | Only propose archiving items already-superseded or with `canonical_successor` set; explicitly justify each candidate against the memo's stated bar. "Nothing meets the bar" is a valid output. |
 | Founder self-report fields filled in synthetically rather than left as explicit asks | Use `[founder self-report needed]` placeholders; do not synthesize answers for outside-app planning, agent-free work check, or partner-side observations the agent cannot see. |
 | Scoreboard update churn for no real change | If no gate status changed, file diff is `last_updated` bump + one line — accept that minimal diff as success. |
-| Validation Posture String drift | Pin L1 with explicit rationale (30-day quiet window closes 2026-05-21). Reading L2 before quiet window closes would be a discipline failure. |
+| Validation Posture String drift | Pin L2 with explicit rationale (30-day quiet window closes 2026-05-21). Reading L1 after the partner walkthrough would be a discipline failure; L2 still prohibits retention-percentage claims. |
 
 ---
 

@@ -6,7 +6,7 @@ stage: planning
 type: index
 authority: research-note routing, note selection guidance, and AI-native research-note conventions
 summary: "Fast-path routing for research notes; selection rules and AI-native conventions."
-last_updated: 2026-05-04
+last_updated: 2026-05-10
 depends_on:
   - docs/README.md
   - docs/catalog.json
@@ -133,6 +133,8 @@ Research notes inform canon. They do not outrank `docs/decisions.md`, `docs/prd-
   - `docs/research/2026-04-28-build17-pair-dogfeed-feedback.md`
 - Need the follow-up investigation for build-17 missing cooldown/sub-block beeps, including wake-lock handoff, active wrap metadata, cooldown cue existence, and platform-boundary residuals:
   - `docs/research/2026-04-28-audio-pacing-reliability-investigation.md`
+- Need the latest pair + net long-session evidence for D130 counts, per-drill capture quality, and the repeated warmup / duration-budget issue:
+  - `docs/research/2026-05-10-pair-net-serving-duration-feedback.md`
 
 ## Selection Rules
 
@@ -182,6 +184,7 @@ Research notes inform canon. They do not outrank `docs/decisions.md`, `docs/prd-
 | `docs/research/2026-04-27-cca2-dogfeed-findings.md` | validated findings from the 2026-04-27 founder + Seb pair dogfeed against the cca2 build: per-drill capture under-instrumentation, pass-counter coverage gaps, in-session counter re-trigger evidence, Tier 1c focus-picker / skill-level-mutability evidence, cooldown copy mismatch, movement_proxy slot inversion, skill-marker/courtside-copy fixes, and solo movement_proxy content gap | routes to dated plans and shipped fixes; does not change canon on its own |
 | `docs/research/2026-04-28-build17-pair-dogfeed-feedback.md` | qualitative field feedback from the 2026-04-28 build-17 no-net pair dogfeed: drill subcategories/eyebrows useful, optional counts appreciated because counting is not forced, cooldown/sub-block beeps missing or inaudible, landing page and difficulty-setting mutability repeated as Seb's consistent point | strengthens existing evidence tracks for audio pacing reliability and skill-level mutability; adds optionality constraint to any future Framing C live-counter design; does not fire a new plan by itself |
 | `docs/research/2026-04-28-audio-pacing-reliability-investigation.md` | follow-up investigation for build-17 F3: confirms the Safety Continue audio/wake-lock path, the Run preroll wake-lock release regression, active warmup/wrap `subBlockIntervalSeconds` coverage, and which cooldown audio cues exist | records the narrow app-side fix and preserves the platform boundary: silent switch, manual lock, and unsupported/denied Wake Lock remain residual; no new feature scope |
+| `docs/research/2026-05-10-pair-net-serving-duration-feedback.md` | latest founder + Seb Pair + Net 40-min profile export: app marked the session `ended_early` with wrap skipped, but the review note says it did not really end early; warmup timing is still wrong and the drills had too many minutes; three captured drills (`d10-pair`, `d33-pair-open`, `d22-pair`) were all `still_learning` | updates D130 weekly counts and cadence; strengthens warmup / duration-budget validation reads; does not fire D134, new content scope, or a 40-minute-profile decision by itself |
 
 ## AI-Native Conventions For Future Research Notes
 

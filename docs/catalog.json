@@ -687,6 +687,13 @@
       "canonical_for": "Curated field feedback from the 2026-05-04 founder + Seb pair + net 40-min serving-led session against the post-Tune-today (2026-04-30) build (`assemblyAlgorithmVersion: 6`). Plan `d8b1ac8f-…` / execution `3d8ac8f9-…`, completed, RPE 5, one swap (`d10-pair` → `d40-pair`), four `still_learning` per-drill captures with no Good/Total counts entered. **Positives validated** (F1–F5): Tune today + Recommended-as-peer worked at courtside speed; the longer 10-min `main_skill` block (`d51-pair` Outside the Heart Serving) was appreciated; the per-move pacing indicator V1–V4 reads as direct; drill copy felt 'dummy proof' with less coach-side commentary than prior pair sessions. **Frictions** (F6, F7): warmup and cooldown still felt timing-off — three plausible axes recorded (planned-block-duration > segment-sum gap on 5-min slots, audio-pacing platform residual, bonus-copy discoverability); reading drill copy aloud felt 'a little inconvenient' on the partner side (single-instance soft signal). **Wishlist named in one session** (F8–F11): clickable glossary for technical terms (e.g. 'set window'), optional YouTube example links per drill, tappable past-session list with captured drill data ('every time I open the app and I see my past sessions, I want to click on this'), trends/dashboard for skill progress over time and as input to focus recommendations. F8 / F9 routed to ideation backlog under D135 founder-feature-wish framing; F10 and F11 are partner-walkthrough-class behavioral input for the M001 Tier 2 'full session history screen' surface and the M002 weekly-receipt scope, but neither flips Tier 2 by itself (still gated on Tier 1a acceptance + Condition 3 pass). F6 strengthens the still-fired `S1` line in `docs/ideation/2026-04-28-what-to-add-next-ideation.md`. Does not modify D26, D27, D74, D124, D130, D133, D135, or any milestone scope row."
     },
     {
+      "id": "2026-05-10-pair-net-serving-duration-feedback",
+      "path": "docs/research/2026-05-10-pair-net-serving-duration-feedback.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "Curated field feedback from the 2026-05-10 founder + Seb Pair + Net 40-min profile export. Plan `5210a07e-...` / execution `9529becd-...`, `actualDurationMinutes: 38`, app status `ended_early` with wrap skipped, RPE 5, main_skill swapped from `d11-pair` to `d33-pair-open` Around the World Serving. Review note: 'We did not end early - warmup timing still wrong. Too many minutes for drills.' Captures: `d10-pair`, `d33-pair-open`, and `d22-pair`, all `still_learning`; no Good/Total counts and no `metricCapture`. Updates D130 weekly counts to 7 logged founder/joint sessions, keeps Condition 1 fail-trending under the standard read (solo 1/7, set floor 0/3), adds one serve-focused pair session, strengthens warmup / duration-budget validation reads, and does not fire D134, new content scope, or a 40-minute-profile decision by itself."
+    },
+    {
       "id": "skill-level-mutability-requirements-2026-05-04",
       "path": "docs/brainstorms/2026-05-04-skill-level-mutability-requirements.md",
       "type": "requirements",
@@ -1841,6 +1848,10 @@
     {
       "path": "docs/research/2026-05-04-pair-serving-session-feedback.md",
       "focus": "field feedback from the 2026-05-04 founder + Seb pair + net 40-min serving-led session against the post-Tune-today build (`assemblyAlgorithmVersion: 6`); positives validate Tune today + Recommended-as-peer, longer main_skill block hierarchy, per-move pacing indicator V1–V4, and 'dummy proof' drill copy; persistent frictions are warmup/cooldown timing (three hypothesised axes including planned-block-duration > segment-sum gap on 5-min slots) and partner-side inconvenience of reading drill copy aloud; four wishlist surfaces named in one session — clickable glossary, optional YouTube example links per drill, tappable past-session list, trends/dashboard — with F10/F11 recorded as partner-walkthrough-class behavioral input for the M001 Tier 2 history surface and M002 weekly receipt while F8/F9 route to the ideation backlog under D135 founder-feature-wish framing"
+    },
+    {
+      "path": "docs/research/2026-05-10-pair-net-serving-duration-feedback.md",
+      "focus": "latest founder + Seb Pair + Net 40-min profile export: app marked the session ended_early with wrap skipped, but the review note says it did not really end early; warmup timing is still wrong and the drills had too many minutes. Three captured drills (`d10-pair`, `d33-pair-open`, `d22-pair`) were all `still_learning`; no Good/Total counts and no streak metric capture. Use for D130 weekly count/cadence updates and warmup / duration-budget validation reads; does not fire D134 or new content scope by itself"
     }
   ],
   "status_vocabularies": {

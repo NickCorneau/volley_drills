@@ -71,7 +71,7 @@ Make every M001 validation gate scannable in under 30 seconds without opening th
 | Every Monday | Adversarial-memo Weekly trigger-review ritual + dream pass | `docs/plans/2026-04-20-m001-adversarial-memo.md` lines 126-164 (Weekly trigger-review ritual + recognized behavioral-evidence channels) + `scripts/dream.sh` (alarm-clock script) | Founder-use ledger Sessions table + recent commits + A3 ligament status. **Three consecutive missed Mondays = early `D130` re-eval at the next weekly slot** (memo line 154). Last entry: see most recent `## YYYY-MM-DD (week N of 13)` block in memo. Step 1: `bash scripts/dream.sh`. Step 2: hand-execute DDL. Step 3: append weekly-log entry. Step 4: delete dream prompt file. |
 | Every >50-line plan or research edit (continuous) | A3 ligament — founder memo re-read within preceding 7 days | `docs/plans/2026-04-20-m001-adversarial-memo.md` lines 214-222 (`A3 — Beach Prep Three for the founder`) | Most recent `A3 re-read YYYY-MM-DD — <n> min` line in the memo's Weekly Log. Agents authoring on the founder's behalf must surface the check before proposing a new plan/research file. **Currently overdue** as of 2026-05-10 (no logged read-through; chronic gap named in 2026-04-24 addendum and 2026-05-11 week-4 entry). |
 | 2026-05-12 | `D134` Phase 2A optional-streak falsification gate read-out | `docs/research/founder-use-ledger.md` "Bounded D130 exceptions and falsification gates" section | Founder/partner sessions where a `streak` drill ran (`d38-pair`, `d01-pair`, `d41-pair` at `main_skill` / `pressure`); ledger rows mentioning `streak`, `metricCapture`, `d38-pair`, or "longest" in the note field |
-| 2026-05-21 | `D130` Condition 3 final read-out (partner unprompted-open within 30 days of Tier 1a walkthrough) | `docs/plans/2026-04-20-m001-adversarial-memo.md` Condition 3 + the 2026-04-22 Amendment Log entry | Partner (Seb) device-export evidence; current state is **provisional pass, strengthened** per the 2026-04-22 / 2026-04-23 polish-pass landings (see `docs/milestones/m001-solo-session-loop.md` Agent Quick Scan) |
+| 2026-05-21 | `D130` Condition 3 final read-out (partner unprompted-open within 30 days of Tier 1a walkthrough) | `docs/plans/2026-04-20-m001-adversarial-memo.md` Condition 3 + the 2026-04-22 Amendment Log entry | Partner (Seb) device-export evidence; current state is **provisional pass, strengthened** per the 2026-04-22 / 2026-04-23 polish-pass landings and the 2026-05-10 partner session export. 2026-05-10 is usage evidence, not proof of an unprompted open by itself. |
 | 2026-07-20 | `D130` founder-use mode scheduled re-evaluation | `docs/decisions.md` `D130` + `docs/plans/2026-04-20-m001-adversarial-memo.md` Decision Rule | Founder-use ledger row count + channel-mix evidence (chat / voice memo / partner walkthrough / Dexie exports) per the five-channel list in the adversarial memo |
 
 **Decision rule at 2026-07-20** (per `docs/plans/2026-04-20-m001-adversarial-memo.md` and `docs/milestones/m001-solo-session-loop.md` lines ~286): when all three Falsification Conditions pass and Tier 1a + Tier 2 have shipped, the default move is **option (a) friends-of-friends cohort** — one expansion stage before full `D91` stranger-launch. Continuing founder-only is **not** a default-available outcome; it requires a written falsifiable justification co-signed by a named non-founder reader, pasted into the adversarial memo's Amendment Log. Resuming `D91` preparation is always available as an opt-in alternative.
@@ -80,9 +80,9 @@ Make every M001 validation gate scannable in under 30 seconds without opening th
 
 Read at the 2026-07-20 re-eval (or earlier if an early-re-eval trigger fires). Authoritative definitions in `docs/plans/2026-04-20-m001-adversarial-memo.md` Falsification Conditions section.
 
-- **Condition 1 — solo / set focus usage.** ≥40% solo-share + ≥3 set-focused sessions across the founder-use window. Evidence channel: founder-use ledger rows (`docs/research/founder-use-ledger.md`) + the four other channels per `D135` (chat / voice memo / partner walkthrough / Dexie export). Current state: evidence-pending, no fabricated read.
+- **Condition 1 — solo / set focus usage.** ≥40% solo-share + ≥3 set-focused sessions across the founder-use window. Evidence channel: founder-use ledger rows (`docs/research/founder-use-ledger.md`) + the four other channels per `D135` (chat / voice memo / partner walkthrough / Dexie export). Current state: fail-trending under standard read as of the 2026-05-10 week-4 update: solo 1/7 (~14%); set-focused 0/3. Ambiguous under `D132` pair-first / solo-accommodating re-read; do not amend until a dated decision pass.
 - **Condition 2 — zero outside-app planning.** Founder did not plan sessions outside the app during the window. Evidence channel: founder self-report, weekly Monday review attestation. Current state: evidence-pending, no fabricated read.
-- **Condition 3 — partner unprompted-open within 30 days of Tier 1a walkthrough.** Evidence channel: partner Dexie export + partner unprompted-open observation. Current state: **provisional pass, strengthened** per the 2026-04-22 (T+1-day message-only) and 2026-04-23 (T+2-day Dexie-instrumented) observations. Final read-out 2026-05-21.
+- **Condition 3 — partner unprompted-open within 30 days of Tier 1a walkthrough.** Evidence channel: partner Dexie export + partner unprompted-open observation. Current state: **provisional pass, strengthened** per the 2026-04-22 (T+1-day message-only) and 2026-04-23 (T+2-day Dexie-instrumented) observations, with additional 2026-05-10 partner-session evidence. The 2026-05-10 export is not by itself proof of an unprompted open. Final read-out 2026-05-21.
 
 ## D130 Early Re-eval Triggers
 
@@ -94,7 +94,7 @@ Authoritative definitions in `docs/plans/2026-04-20-m001-adversarial-memo.md` Ea
 - **(d) UP trigger** — Tier 1a shipped + ≥10 founder sessions logged + no open partner-walkthrough P0 findings (added 2026-04-25, see adversarial memo).
 - **(e) Agent-asymmetry** — repo / agent conversation is being used as a substitute for the app itself (researched-velocity-as-substitute, per `docs/roadmap.md` Risks-and-mitigations).
 
-Current state (2026-05-10 week-4 read): no early triggers fired. (e) is closest to firing — agent-assisted opens are heavy in the last 14 days; agent-free check holds via 2026-05-04 pair session + 2026-05-09 founder content-gap report under the 2026-04-24 addendum's reframed posture. Read at every Monday review.
+Current state (2026-05-10 week-4 read): no early triggers fired. Trigger (d) is now on the clock at 7/10 founder/joint sessions with 0 partner-walkthrough P0s. Trigger (e) is closest to firing — agent-assisted opens are heavy in the last 14 days; agent-free check holds via 2026-05-04 and 2026-05-10 founder + Seb sessions plus the 2026-05-09 founder content-gap report under the 2026-04-24 addendum's reframed posture. Read at every Monday review.
 
 ## D134 Phase 2A Streak Gate
 
@@ -107,7 +107,7 @@ Authoritative definition in `docs/research/founder-use-ledger.md` "Bounded D130 
 
 Either gate triggers a freeze on `points-to-target` / `pass-grade-avg` / `composite` shape work until the standard founder-trigger conditions are met cleanly.
 
-Current state: evidence-pending, no fabricated read. 2026-05-12 read-out is the firing date.
+Current state: evidence-pending, no fabricated read. The 2026-05-10 export included no streak drill and no `metricCapture`, so it does not move the D134 gate. 2026-05-12 read-out is the firing date.
 
 ## What Closes M001
 
