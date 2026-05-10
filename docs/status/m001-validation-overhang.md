@@ -6,7 +6,7 @@ stage: build-complete-validating
 type: status
 summary: "Single-page scoreboard of M001 validation gates: D130 falsification conditions, D130 early re-eval triggers, D134 Phase 2A streak gate, and the calendar-dated reads (2026-05-12 / 2026-05-21 / 2026-07-20). Build phase complete; this doc tracks what closes M001."
 authority: read-only scoreboard for M001 validation gates; cites authoritative sources, does not restate them
-last_updated: 2026-05-09
+last_updated: 2026-05-10
 depends_on:
   - docs/decisions.md
   - docs/plans/2026-04-20-m001-adversarial-memo.md
@@ -30,6 +30,7 @@ decision_refs:
 - Read this doc to answer: "what am I waiting on for M001, and when do I check next?"
 - Read this doc **before** suggesting M001 work; the answer is almost always "wait for evidence on a gate already listed here, not new code."
 - Periodic read-out cadence is owned by the weekly Monday adversarial-memo review (`docs/plans/2026-04-20-m001-adversarial-memo.md` Weekly trigger-review ritual). This scoreboard is the **what**; the memo is the **when**.
+- **Monday ritual is mandatory and discoverable here** (added 2026-05-10 after weeks 2 and 3 were silently missed; see `docs/plans/2026-04-20-m001-adversarial-memo.md` `## 2026-05-11 (week 4 of 13)` entry's "Missed weeks" sub-section). Three consecutive missed Mondays trigger an early `D130` re-eval at the next weekly slot per memo line 154. Run `bash scripts/dream.sh` first, then append the weekly-log entry to the memo. See Calendar-Dated Reads table below for the recurring weekly slot and the A3 ligament check.
 
 ## Purpose
 
@@ -67,6 +68,8 @@ Make every M001 validation gate scannable in under 30 seconds without opening th
 
 | Date | Gate | Source | Reads from |
 | --- | --- | --- | --- |
+| Every Monday | Adversarial-memo Weekly trigger-review ritual + dream pass | `docs/plans/2026-04-20-m001-adversarial-memo.md` lines 126-164 (Weekly trigger-review ritual + recognized behavioral-evidence channels) + `scripts/dream.sh` (alarm-clock script) | Founder-use ledger Sessions table + recent commits + A3 ligament status. **Three consecutive missed Mondays = early `D130` re-eval at the next weekly slot** (memo line 154). Last entry: see most recent `## YYYY-MM-DD (week N of 13)` block in memo. Step 1: `bash scripts/dream.sh`. Step 2: hand-execute DDL. Step 3: append weekly-log entry. Step 4: delete dream prompt file. |
+| Every >50-line plan or research edit (continuous) | A3 ligament — founder memo re-read within preceding 7 days | `docs/plans/2026-04-20-m001-adversarial-memo.md` lines 214-222 (`A3 — Beach Prep Three for the founder`) | Most recent `A3 re-read YYYY-MM-DD — <n> min` line in the memo's Weekly Log. Agents authoring on the founder's behalf must surface the check before proposing a new plan/research file. **Currently overdue** as of 2026-05-10 (no logged read-through; chronic gap named in 2026-04-24 addendum and 2026-05-11 week-4 entry). |
 | 2026-05-12 | `D134` Phase 2A optional-streak falsification gate read-out | `docs/research/founder-use-ledger.md` "Bounded D130 exceptions and falsification gates" section | Founder/partner sessions where a `streak` drill ran (`d38-pair`, `d01-pair`, `d41-pair` at `main_skill` / `pressure`); ledger rows mentioning `streak`, `metricCapture`, `d38-pair`, or "longest" in the note field |
 | 2026-05-21 | `D130` Condition 3 final read-out (partner unprompted-open within 30 days of Tier 1a walkthrough) | `docs/plans/2026-04-20-m001-adversarial-memo.md` Condition 3 + the 2026-04-22 Amendment Log entry | Partner (Seb) device-export evidence; current state is **provisional pass, strengthened** per the 2026-04-22 / 2026-04-23 polish-pass landings (see `docs/milestones/m001-solo-session-loop.md` Agent Quick Scan) |
 | 2026-07-20 | `D130` founder-use mode scheduled re-evaluation | `docs/decisions.md` `D130` + `docs/plans/2026-04-20-m001-adversarial-memo.md` Decision Rule | Founder-use ledger row count + channel-mix evidence (chat / voice memo / partner walkthrough / Dexie exports) per the five-channel list in the adversarial memo |
@@ -91,7 +94,7 @@ Authoritative definitions in `docs/plans/2026-04-20-m001-adversarial-memo.md` Ea
 - **(d) UP trigger** — Tier 1a shipped + ≥10 founder sessions logged + no open partner-walkthrough P0 findings (added 2026-04-25, see adversarial memo).
 - **(e) Agent-asymmetry** — repo / agent conversation is being used as a substitute for the app itself (researched-velocity-as-substitute, per `docs/roadmap.md` Risks-and-mitigations).
 
-Current state: no early triggers fired as of 2026-05-09. Read at every Monday review.
+Current state (2026-05-10 week-4 read): no early triggers fired. (e) is closest to firing — agent-assisted opens are heavy in the last 14 days; agent-free check holds via 2026-05-04 pair session + 2026-05-09 founder content-gap report under the 2026-04-24 addendum's reframed posture. Read at every Monday review.
 
 ## D134 Phase 2A Streak Gate
 
