@@ -963,6 +963,509 @@ path.write_text(json.dumps(data, indent=2) + '\\n', encoding='utf-8')
     bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
 }
 
+# ---------------------------------------------------------------------------
+# Cap-status contract tests (Tier 1b slot expiry contract, 2026-05-10)
+# ---------------------------------------------------------------------------
+
+write_post_m001_backlog() {
+  local body="${1:-}"
+  if [[ -z "$body" ]]; then
+    body='{
+      "cap_total": 10,
+      "consumed": 4,
+      "reserved": 6,
+      "expiry_date": "2026-07-20",
+      "last_validated": "2026-05-10",
+      "tier_1a_authored": [
+        {"slot_id": "t1a-d31", "drill_id": "d31", "tier": "1a", "status": "authored"},
+        {"slot_id": "t1a-d33", "drill_id": "d33", "tier": "1a", "status": "authored"},
+        {"slot_id": "t1a-d40", "drill_id": "d40", "tier": "1a", "status": "authored"},
+        {"slot_id": "t1a-d42", "drill_id": "d42", "tier": "1a", "status": "authored"}
+      ],
+      "reserved_slots": [
+        {"slot_id": "t1b-slot-1", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "fixture trigger", "trigger_source": "docs/decisions.md", "description": "fixture slot 1"},
+        {"slot_id": "t1b-slot-2", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "fixture trigger", "trigger_source": "docs/decisions.md", "description": "fixture slot 2"},
+        {"slot_id": "t1b-slot-3", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "fixture trigger", "trigger_source": "docs/decisions.md", "description": "fixture slot 3"},
+        {"slot_id": "t1b-slot-4", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "fixture trigger", "trigger_source": "docs/decisions.md", "description": "fixture slot 4"},
+        {"slot_id": "t1b-slot-5", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "fixture trigger", "trigger_source": "docs/decisions.md", "description": "fixture slot 5"},
+        {"slot_id": "t1b-slot-6", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "fixture trigger", "trigger_source": "docs/decisions.md", "description": "fixture slot 6"}
+      ]
+    }'
+  fi
+  mkdir -p "$CURRENT_FIXTURE/docs/status"
+  cat > "$CURRENT_FIXTURE/docs/status/post-m001-content-backlog.md" <<EOF
+---
+id: post-m001-content-backlog
+title: Post-M001 Content Backlog
+status: active
+stage: trigger-gated
+type: status
+summary: "Fixture cap-status backlog."
+authority: fixture
+last_updated: 2026-05-10
+depends_on: []
+---
+
+# Fixture Backlog
+
+<!-- cap-status-data:start -->
+\`\`\`json
+$body
+\`\`\`
+<!-- cap-status-data:end -->
+EOF
+}
+
+write_post_m001_backlog_without_fence() {
+  mkdir -p "$CURRENT_FIXTURE/docs/status"
+  cat > "$CURRENT_FIXTURE/docs/status/post-m001-content-backlog.md" <<'EOF'
+---
+id: post-m001-content-backlog
+title: Post-M001 Content Backlog
+status: active
+stage: trigger-gated
+type: status
+summary: "Fixture cap-status backlog without fence."
+authority: fixture
+last_updated: 2026-05-10
+depends_on: []
+---
+
+# Fixture Backlog
+
+No cap-status block here.
+EOF
+}
+
+test_cap_status_passes_when_backlog_absent() {
+  make_fixture_root
+  write_common_files
+  assert_command_succeeds \
+    "cap-status check skips when post-m001-content-backlog.md absent" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_passes_on_valid_fixture() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog
+  assert_command_succeeds \
+    "cap-status check passes on a valid fixture backlog" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_fails_on_missing_fence() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog_without_fence
+  assert_command_fails_with_output \
+    "cap-status check fails when post-m001-content-backlog.md is missing the cap-status JSON fence" \
+    "missing cap-status JSON block" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_fails_on_invalid_json() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{ "cap_total": 10, "consumed": 4, "reserved": 6, '
+  assert_command_fails_with_output \
+    "cap-status check fails on malformed JSON" \
+    "cap-status JSON block is not valid JSON" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_fails_on_cap_total_mismatch() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 12,
+    "consumed": 4,
+    "reserved": 8,
+    "expiry_date": "2026-07-20",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [],
+    "reserved_slots": []
+  }'
+  assert_command_fails_with_output \
+    "cap-status check fails when cap_total differs from documented Tier 1b cap (10)" \
+    "cap_total must be 10" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_fails_on_sum_mismatch() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 10,
+    "consumed": 5,
+    "reserved": 6,
+    "expiry_date": "2026-07-20",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [],
+    "reserved_slots": [
+      {"slot_id": "t1b-a", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-b", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-c", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-d", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-e", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-f", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"}
+    ]
+  }'
+  assert_command_fails_with_output \
+    "cap-status check fails when consumed + reserved does not equal cap_total" \
+    "consumed + reserved (11) must equal cap_total (10)" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_fails_on_bad_slot_status() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 10,
+    "consumed": 4,
+    "reserved": 6,
+    "expiry_date": "2026-07-20",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [],
+    "reserved_slots": [
+      {"slot_id": "t1b-a", "tier": "1b", "status": "pending", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-b", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-c", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-d", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-e", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-f", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"}
+    ]
+  }'
+  assert_command_fails_with_output \
+    "cap-status check fails on slot status outside the closed vocabulary" \
+    "uses unknown status 'pending'" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_fails_on_missing_required_field() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 10,
+    "consumed": 4,
+    "reserved": 6,
+    "expiry_date": "2026-07-20",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [],
+    "reserved_slots": [
+      {"slot_id": "t1b-a", "tier": "1b", "status": "reserved", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-b", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-c", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-d", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-e", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-f", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"}
+    ]
+  }'
+  assert_command_fails_with_output \
+    "cap-status check fails when a reserved slot lacks the expiry field" \
+    "slot 't1b-a' missing required field 'expiry'" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_fails_on_expired_reserved_slot() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 10,
+    "consumed": 4,
+    "reserved": 6,
+    "expiry_date": "2026-07-20",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [],
+    "reserved_slots": [
+      {"slot_id": "t1b-expired", "tier": "1b", "status": "reserved", "expiry": "2020-01-01", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "expired slot"},
+      {"slot_id": "t1b-b", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-c", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-d", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-e", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-f", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"}
+    ]
+  }'
+  assert_command_fails_with_output \
+    "cap-status check fails when a reserved slot has expired without transitioning" \
+    "slot 't1b-expired' expired on 2020-01-01" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_fails_on_authored_without_citation() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 10,
+    "consumed": 5,
+    "reserved": 5,
+    "expiry_date": "2026-07-20",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [],
+    "reserved_slots": [
+      {"slot_id": "t1b-authored-no-evidence", "tier": "1b", "status": "authored"},
+      {"slot_id": "t1b-b", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-c", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-d", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-e", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-f", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"}
+    ]
+  }'
+  assert_command_fails_with_output \
+    "cap-status check fails when authored slot lacks evidence citation" \
+    "is missing evidence citation" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_fails_on_killed_missing_reason() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 10,
+    "consumed": 4,
+    "reserved": 6,
+    "expiry_date": "2026-07-20",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [],
+    "reserved_slots": [
+      {"slot_id": "t1b-killed-no-reason", "tier": "1b", "status": "killed", "killed_date": "2026-07-21"},
+      {"slot_id": "t1b-b", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-c", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-d", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-e", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-f", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"}
+    ]
+  }'
+  assert_command_fails_with_output \
+    "cap-status check fails when a killed slot is missing kill_reason" \
+    "slot 't1b-killed-no-reason' missing required field 'kill_reason'" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_passes_on_in_place_authored_transition() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 10,
+    "consumed": 5,
+    "reserved": 5,
+    "expiry_date": "2026-07-20",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [],
+    "reserved_slots": [
+      {"slot_id": "t1b-newly-authored", "tier": "1b", "status": "authored", "drill_id": "d52", "shipped_date": "2026-06-15", "authored_record_ref": "docs/plans/example.md"},
+      {"slot_id": "t1b-r1", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-r2", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-r3", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-r4", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-r5", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"}
+    ]
+  }'
+  assert_command_succeeds_without_output \
+    "cap-status check passes on in-place reserved->authored transition (status-aware reserved count, not array length)" \
+    "reserved_slots[] has" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_fails_on_killed_with_short_kill_reason() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 10,
+    "consumed": 4,
+    "reserved": 6,
+    "expiry_date": "2026-07-20",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [],
+    "reserved_slots": [
+      {"slot_id": "t1b-killed-short", "tier": "1b", "status": "killed", "killed_date": "2026-07-21", "kill_reason": "no"},
+      {"slot_id": "t1b-b", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-c", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-d", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-e", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-f", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"}
+    ]
+  }'
+  assert_command_fails_with_output \
+    "cap-status check fails when a killed slot's kill_reason is too short" \
+    "killed slot 't1b-killed-short' is malformed (kill_reason_too_short)" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_fails_on_killed_with_bad_killed_date_format() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 10,
+    "consumed": 4,
+    "reserved": 6,
+    "expiry_date": "2026-07-20",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [],
+    "reserved_slots": [
+      {"slot_id": "t1b-killed-bad-date", "tier": "1b", "status": "killed", "killed_date": "2026/07/21", "kill_reason": "founder ledger shows trigger never fired in 90-day window"},
+      {"slot_id": "t1b-b", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-c", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-d", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-e", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-f", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"}
+    ]
+  }'
+  assert_command_fails_with_output \
+    "cap-status check fails when a killed slot's killed_date is not YYYY-MM-DD" \
+    "killed slot 't1b-killed-bad-date' is malformed (killed_date_bad_format)" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_passes_on_killed_slot_with_proper_record() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 10,
+    "consumed": 4,
+    "reserved": 6,
+    "expiry_date": "2026-07-20",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [],
+    "reserved_slots": [
+      {"slot_id": "t1b-killed-clean", "tier": "1b", "status": "killed", "killed_date": "2026-07-21", "kill_reason": "founder ledger shows trigger never fired in 90-day window"},
+      {"slot_id": "t1b-b", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-c", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-d", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-e", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-f", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"}
+    ]
+  }'
+  assert_command_succeeds \
+    "cap-status check passes when a slot is killed with proper killed_date and kill_reason (U2 post-expiry transition happy path)" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_passes_on_authored_slot_with_drill_id() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 10,
+    "consumed": 5,
+    "reserved": 5,
+    "expiry_date": "2026-07-20",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [],
+    "reserved_slots": [
+      {"slot_id": "t1b-authored-clean", "tier": "1b", "status": "authored", "drill_id": "d99", "shipped_date": "2026-06-15"},
+      {"slot_id": "t1b-b", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-c", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-d", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-e", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-f", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"}
+    ]
+  }'
+  assert_command_succeeds \
+    "cap-status check passes when an authored slot cites drill_id evidence" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_fails_on_duplicate_slot_id() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 10,
+    "consumed": 4,
+    "reserved": 6,
+    "expiry_date": "2026-07-20",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [],
+    "reserved_slots": [
+      {"slot_id": "t1b-dup", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-dup", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-c", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-d", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-e", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-f", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"}
+    ]
+  }'
+  assert_command_fails_with_output \
+    "cap-status check fails when two slot records share the same slot_id" \
+    "duplicate slot_id 't1b-dup'" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_fails_on_top_level_expiry_date_mismatch() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 10,
+    "consumed": 4,
+    "reserved": 6,
+    "expiry_date": "2026-08-01",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [],
+    "reserved_slots": [
+      {"slot_id": "t1b-a", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-b", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-c", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-d", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-e", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-f", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"}
+    ]
+  }'
+  assert_command_fails_with_output \
+    "cap-status check fails when top-level expiry_date is not 2026-07-20" \
+    "expiry_date must be 2026-07-20 (found 2026-08-01)" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_fails_on_reserved_slot_count_mismatch() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 10,
+    "consumed": 4,
+    "reserved": 6,
+    "expiry_date": "2026-07-20",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [],
+    "reserved_slots": [
+      {"slot_id": "t1b-a", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-b", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-c", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-d", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-e", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"}
+    ]
+  }'
+  assert_command_fails_with_output \
+    "cap-status check fails when declared reserved count differs from reserved_slots[] length" \
+    "reserved=6 but reserved_slots[] has 5 entries" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
+test_cap_status_fails_on_bad_tier_1a_authored_record() {
+  make_fixture_root
+  write_common_files
+  write_post_m001_backlog '{
+    "cap_total": 10,
+    "consumed": 4,
+    "reserved": 6,
+    "expiry_date": "2026-07-20",
+    "last_validated": "2026-05-10",
+    "tier_1a_authored": [
+      {"slot_id": "t1a-bad", "drill_id": "d99", "tier": "1a", "status": "reserved"}
+    ],
+    "reserved_slots": [
+      {"slot_id": "t1b-a", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-b", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-c", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-d", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-e", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"},
+      {"slot_id": "t1b-f", "tier": "1b", "status": "reserved", "expiry": "2026-07-20", "last_checked": "2026-05-10", "required_trigger": "t", "trigger_source": "docs/decisions.md", "description": "d"}
+    ]
+  }'
+  assert_command_fails_with_output \
+    "cap-status check fails when a tier_1a_authored record has status != authored" \
+    "tier_1a_authored record 't1a-bad' is malformed (status_not_authored)" \
+    bash "$REPO_ROOT/scripts/validate-agent-docs.sh" "$CURRENT_FIXTURE"
+}
+
 test_direct_validator_passes_on_valid_fixture
 test_direct_validator_fails_on_missing_required_heading
 test_direct_validator_fails_on_pseudo_frontmatter
@@ -992,5 +1495,25 @@ test_direct_validator_fails_on_empty_doc_status
 test_direct_validator_fails_on_malformed_status_vocab
 test_direct_validator_fails_on_entrypoint_missing_path_field
 test_direct_validator_fails_on_manifest_current_state_pointing_at_missing_path
+test_cap_status_passes_when_backlog_absent
+test_cap_status_passes_on_valid_fixture
+test_cap_status_fails_on_missing_fence
+test_cap_status_fails_on_invalid_json
+test_cap_status_fails_on_cap_total_mismatch
+test_cap_status_fails_on_sum_mismatch
+test_cap_status_fails_on_bad_slot_status
+test_cap_status_fails_on_missing_required_field
+test_cap_status_fails_on_expired_reserved_slot
+test_cap_status_fails_on_authored_without_citation
+test_cap_status_fails_on_killed_missing_reason
+test_cap_status_passes_on_in_place_authored_transition
+test_cap_status_fails_on_killed_with_short_kill_reason
+test_cap_status_fails_on_killed_with_bad_killed_date_format
+test_cap_status_passes_on_killed_slot_with_proper_record
+test_cap_status_passes_on_authored_slot_with_drill_id
+test_cap_status_fails_on_duplicate_slot_id
+test_cap_status_fails_on_top_level_expiry_date_mismatch
+test_cap_status_fails_on_reserved_slot_count_mismatch
+test_cap_status_fails_on_bad_tier_1a_authored_record
 
 echo "All validator tests passed."

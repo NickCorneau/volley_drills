@@ -793,6 +793,293 @@ PY
   return 0
 }
 
+cap_status_must_be_consistent() {
+  local backlog_path="$REPO_ROOT/docs/status/post-m001-content-backlog.md"
+
+  if [[ ! -f "$backlog_path" ]]; then
+    return 0
+  fi
+
+  local findings
+  findings="$(python3 - "$backlog_path" <<'PY' 2>/dev/null || true
+import json
+import re
+import sys
+from datetime import date
+from pathlib import Path
+
+backlog_path = Path(sys.argv[1])
+text = backlog_path.read_text(encoding='utf-8')
+
+EXPECTED_CAP_TOTAL = 10
+EXPECTED_EXPIRY = '2026-07-20'
+ALLOWED_STATUSES = {'reserved', 'authored', 'killed'}
+REQUIRED_RESERVED_FIELDS = ['slot_id', 'tier', 'status', 'expiry', 'last_checked', 'required_trigger', 'trigger_source', 'description']
+REQUIRED_AUTHORED_FIELDS = ['slot_id', 'status']
+REQUIRED_KILLED_FIELDS = ['slot_id', 'status', 'killed_date', 'kill_reason']
+DATE_PATTERN = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+
+match = re.search(
+    r'<!--\s*cap-status-data:start\s*-->\s*```json\s*(.*?)\s*```\s*<!--\s*cap-status-data:end\s*-->',
+    text,
+    re.DOTALL,
+)
+if not match:
+    print('__cap_status_block_missing__')
+    raise SystemExit(0)
+
+try:
+    data = json.loads(match.group(1))
+except json.JSONDecodeError as exc:
+    print(f'__cap_status_block_invalid_json__:{exc.msg}_line_{exc.lineno}')
+    raise SystemExit(0)
+
+if not isinstance(data, dict):
+    print('__cap_status_block_not_object__')
+    raise SystemExit(0)
+
+cap_total = data.get('cap_total')
+consumed = data.get('consumed')
+reserved = data.get('reserved')
+expiry_date = data.get('expiry_date')
+reserved_slots = data.get('reserved_slots')
+authored_layer_a = data.get('tier_1a_authored')
+
+if not isinstance(cap_total, int):
+    print('__cap_total_not_int__')
+else:
+    if cap_total != EXPECTED_CAP_TOTAL:
+        print(f'__cap_total_mismatch__:{EXPECTED_CAP_TOTAL}:{cap_total}')
+
+if not isinstance(consumed, int):
+    print('__consumed_not_int__')
+if not isinstance(reserved, int):
+    print('__reserved_not_int__')
+
+if isinstance(cap_total, int) and isinstance(consumed, int) and isinstance(reserved, int):
+    if consumed + reserved != cap_total:
+        print(f'__cap_sum_mismatch__:{consumed + reserved}:{cap_total}')
+
+if expiry_date != EXPECTED_EXPIRY:
+    print(f'__expiry_date_mismatch__:{EXPECTED_EXPIRY}:{expiry_date}')
+
+if not isinstance(reserved_slots, list):
+    print('__reserved_slots_not_list__')
+    reserved_slots = []
+
+if isinstance(reserved, int):
+    # `reserved` tracks the count of slots whose individual status is not yet
+    # `authored` (i.e., `reserved` + `killed`). When a slot transitions in
+    # place from `reserved` to `authored`, the cap accounting must move
+    # consumed+1 / reserved-1 (cap_total = consumed + reserved is preserved).
+    # When a slot transitions to `killed`, no drill was authored, so consumed
+    # stays put and the killed slot still counts as a non-authored entry
+    # against `reserved`. Counting raw array length here would force a false
+    # positive on the first reserved -> authored transition.
+    actually_reserved = sum(
+        1 for s in reserved_slots
+        if isinstance(s, dict) and s.get('status') != 'authored'
+    )
+    if actually_reserved != reserved:
+        print(f'__reserved_slot_count_mismatch__:{reserved}:{actually_reserved}')
+
+today = date.today()
+expected_expiry_date = None
+try:
+    if expiry_date and DATE_PATTERN.match(expiry_date):
+        expected_expiry_date = date.fromisoformat(expiry_date)
+except ValueError:
+    pass
+
+slot_ids_seen = set()
+
+for slot in reserved_slots:
+    if not isinstance(slot, dict):
+        print('__bad_slot_record_shape__:non_object')
+        continue
+    slot_id = slot.get('slot_id', '<unknown>')
+    if not isinstance(slot_id, str) or not slot_id:
+        print('__bad_slot_record_shape__:missing_slot_id')
+        continue
+    if slot_id in slot_ids_seen:
+        print(f'__duplicate_slot_id__:{slot_id}')
+    slot_ids_seen.add(slot_id)
+
+    status = slot.get('status')
+    if status not in ALLOWED_STATUSES:
+        print(f'__bad_slot_status__:{slot_id}:{status}')
+        continue
+
+    if status == 'reserved':
+        for field in REQUIRED_RESERVED_FIELDS:
+            if field not in slot or slot[field] in (None, ''):
+                print(f'__missing_slot_field__:{slot_id}:{field}')
+        expiry = slot.get('expiry')
+        if expiry != EXPECTED_EXPIRY:
+            print(f'__slot_expiry_mismatch__:{slot_id}:{EXPECTED_EXPIRY}:{expiry}')
+        last_checked = slot.get('last_checked')
+        if isinstance(last_checked, str) and not DATE_PATTERN.match(last_checked):
+            print(f'__slot_last_checked_bad_format__:{slot_id}:{last_checked}')
+        if isinstance(expiry, str) and DATE_PATTERN.match(expiry):
+            try:
+                expiry_dt = date.fromisoformat(expiry)
+                if today > expiry_dt:
+                    print(f'__expired_reserved_slot__:{slot_id}:{expiry}')
+            except ValueError:
+                print(f'__slot_expiry_bad_format__:{slot_id}:{expiry}')
+    elif status == 'authored':
+        for field in REQUIRED_AUTHORED_FIELDS:
+            if field not in slot or slot[field] in (None, ''):
+                print(f'__missing_slot_field__:{slot_id}:{field}')
+        drill_id = slot.get('drill_id')
+        shipped_under = slot.get('shipped_under')
+        shipped_date = slot.get('shipped_date')
+        authored_record_ref = slot.get('authored_record_ref')
+        if not (drill_id or shipped_under or shipped_date or authored_record_ref):
+            print(f'__bad_authored_record__:{slot_id}:missing_evidence_citation')
+    elif status == 'killed':
+        for field in REQUIRED_KILLED_FIELDS:
+            if field not in slot or slot[field] in (None, ''):
+                print(f'__missing_slot_field__:{slot_id}:{field}')
+        killed_date = slot.get('killed_date')
+        if isinstance(killed_date, str) and not DATE_PATTERN.match(killed_date):
+            print(f'__bad_killed_record__:{slot_id}:killed_date_bad_format')
+        kill_reason = slot.get('kill_reason')
+        if isinstance(kill_reason, str) and len(kill_reason.strip()) < 12:
+            print(f'__bad_killed_record__:{slot_id}:kill_reason_too_short')
+
+if isinstance(authored_layer_a, list):
+    for record in authored_layer_a:
+        if not isinstance(record, dict):
+            print('__bad_authored_layer_a_record__:non_object')
+            continue
+        slot_id = record.get('slot_id', '<unknown>')
+        if record.get('status') != 'authored':
+            print(f'__bad_authored_layer_a_record__:{slot_id}:status_not_authored')
+        if not record.get('drill_id'):
+            print(f'__bad_authored_layer_a_record__:{slot_id}:missing_drill_id')
+PY
+)"
+
+  while IFS= read -r item; do
+    [[ -z "$item" ]] && continue
+    case "$item" in
+      "__cap_status_block_missing__")
+        errors+=("docs/status/post-m001-content-backlog.md: missing cap-status JSON block (expected '<!-- cap-status-data:start -->' fence)")
+        ;;
+      "__cap_status_block_invalid_json__:"*)
+        errors+=("docs/status/post-m001-content-backlog.md: cap-status JSON block is not valid JSON (${item#__cap_status_block_invalid_json__:})")
+        ;;
+      "__cap_status_block_not_object__")
+        errors+=("docs/status/post-m001-content-backlog.md: cap-status JSON block must be a JSON object")
+        ;;
+      "__cap_total_not_int__")
+        errors+=("docs/status/post-m001-content-backlog.md: cap_total must be an integer")
+        ;;
+      "__cap_total_mismatch__:"*)
+        rest="${item#__cap_total_mismatch__:}"
+        expected="${rest%%:*}"
+        found="${rest#*:}"
+        errors+=("docs/status/post-m001-content-backlog.md: cap_total must be $expected (found $found)")
+        ;;
+      "__consumed_not_int__")
+        errors+=("docs/status/post-m001-content-backlog.md: consumed must be an integer")
+        ;;
+      "__reserved_not_int__")
+        errors+=("docs/status/post-m001-content-backlog.md: reserved must be an integer")
+        ;;
+      "__cap_sum_mismatch__:"*)
+        rest="${item#__cap_sum_mismatch__:}"
+        sum="${rest%%:*}"
+        total="${rest#*:}"
+        errors+=("docs/status/post-m001-content-backlog.md: consumed + reserved ($sum) must equal cap_total ($total)")
+        ;;
+      "__expiry_date_mismatch__:"*)
+        rest="${item#__expiry_date_mismatch__:}"
+        expected="${rest%%:*}"
+        found="${rest#*:}"
+        errors+=("docs/status/post-m001-content-backlog.md: expiry_date must be $expected (found $found)")
+        ;;
+      "__reserved_slots_not_list__")
+        errors+=("docs/status/post-m001-content-backlog.md: reserved_slots must be a list")
+        ;;
+      "__reserved_slot_count_mismatch__:"*)
+        rest="${item#__reserved_slot_count_mismatch__:}"
+        declared="${rest%%:*}"
+        found="${rest#*:}"
+        errors+=("docs/status/post-m001-content-backlog.md: reserved=$declared but reserved_slots[] has $found entries")
+        ;;
+      "__bad_slot_record_shape__:"*)
+        errors+=("docs/status/post-m001-content-backlog.md: malformed slot record (${item#__bad_slot_record_shape__:})")
+        ;;
+      "__duplicate_slot_id__:"*)
+        errors+=("docs/status/post-m001-content-backlog.md: duplicate slot_id '${item#__duplicate_slot_id__:}'")
+        ;;
+      "__bad_slot_status__:"*)
+        rest="${item#__bad_slot_status__:}"
+        slot_id="${rest%%:*}"
+        status="${rest#*:}"
+        errors+=("docs/status/post-m001-content-backlog.md: slot '$slot_id' uses unknown status '$status' (must be reserved/authored/killed)")
+        ;;
+      "__missing_slot_field__:"*)
+        rest="${item#__missing_slot_field__:}"
+        slot_id="${rest%%:*}"
+        field="${rest#*:}"
+        errors+=("docs/status/post-m001-content-backlog.md: slot '$slot_id' missing required field '$field'")
+        ;;
+      "__slot_expiry_mismatch__:"*)
+        rest="${item#__slot_expiry_mismatch__:}"
+        slot_id="${rest%%:*}"
+        rest2="${rest#*:}"
+        expected="${rest2%%:*}"
+        found="${rest2#*:}"
+        errors+=("docs/status/post-m001-content-backlog.md: slot '$slot_id' expiry must be $expected (found $found)")
+        ;;
+      "__slot_last_checked_bad_format__:"*)
+        rest="${item#__slot_last_checked_bad_format__:}"
+        slot_id="${rest%%:*}"
+        value="${rest#*:}"
+        errors+=("docs/status/post-m001-content-backlog.md: slot '$slot_id' last_checked must be YYYY-MM-DD (found '$value')")
+        ;;
+      "__slot_expiry_bad_format__:"*)
+        rest="${item#__slot_expiry_bad_format__:}"
+        slot_id="${rest%%:*}"
+        value="${rest#*:}"
+        errors+=("docs/status/post-m001-content-backlog.md: slot '$slot_id' expiry is not a valid YYYY-MM-DD date (found '$value')")
+        ;;
+      "__expired_reserved_slot__:"*)
+        rest="${item#__expired_reserved_slot__:}"
+        slot_id="${rest%%:*}"
+        expiry="${rest#*:}"
+        errors+=("docs/status/post-m001-content-backlog.md: slot '$slot_id' expired on $expiry while still status=reserved (must transition to authored or killed)")
+        ;;
+      "__bad_authored_record__:"*)
+        rest="${item#__bad_authored_record__:}"
+        slot_id="${rest%%:*}"
+        reason="${rest#*:}"
+        errors+=("docs/status/post-m001-content-backlog.md: authored slot '$slot_id' is missing evidence citation ($reason)")
+        ;;
+      "__bad_killed_record__:"*)
+        rest="${item#__bad_killed_record__:}"
+        slot_id="${rest%%:*}"
+        reason="${rest#*:}"
+        errors+=("docs/status/post-m001-content-backlog.md: killed slot '$slot_id' is malformed ($reason)")
+        ;;
+      "__bad_authored_layer_a_record__:"*)
+        rest="${item#__bad_authored_layer_a_record__:}"
+        slot_id="${rest%%:*}"
+        reason="${rest#*:}"
+        errors+=("docs/status/post-m001-content-backlog.md: tier_1a_authored record '$slot_id' is malformed ($reason)")
+        ;;
+      "__"*)
+        errors+=("docs/status/post-m001-content-backlog.md: unknown cap-status validator finding '$item'")
+        ;;
+    esac
+  done <<< "$findings"
+
+  return 0
+}
+
 for rel_path in "${required_paths[@]}"; do
   require_path "$rel_path"
 done
@@ -805,6 +1092,7 @@ catalog_must_have_keys
 catalog_doc_paths_must_exist_and_use_known_status
 archive_lifecycle_must_be_consistent
 successor_metadata_must_be_consistent
+cap_status_must_be_consistent
 
 for rel_path in "${canonical_frontmatter_docs[@]}"; do
   canonical_frontmatter_must_be_valid "$rel_path"

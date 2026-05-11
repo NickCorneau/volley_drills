@@ -1,7 +1,7 @@
 {
   "schema_version": 5,
   "repo_id": "volley_drills",
-  "last_updated": "2026-05-09",
+  "last_updated": "2026-05-10",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -317,7 +317,7 @@
       "path": "docs/status/post-m001-content-backlog.md",
       "type": "status",
       "status": "active",
-      "canonical_for": "Backlog of trigger-gated content adds parked outside the M001 milestone body: Tier 1b drill-cap residual (4/10 consumed), externally gated drills (d36 / d43), and conditional Phase 2B per-drill capture shapes."
+      "canonical_for": "Backlog of trigger-gated content adds parked outside the M001 milestone body: Tier 1b drill-cap residual (4/10 consumed), externally gated drills (d36 / d43), and conditional Phase 2B per-drill capture shapes. Also owns the Tier 1b slot expiry contract landed 2026-05-10 (`<!-- cap-status-data:start -->` JSON block + `cap_status_must_be_consistent` validator in `scripts/validate-agent-docs.sh`) under D135 source-validity gating; each of the 6 unconsumed slots carries a 2026-07-20 hard expiry, and reserved-slot drift becomes structurally indistinguishable from cap-discipline failure at that date. See `docs/plans/2026-05-10-005-feat-tier-1b-slot-expiry-contract-plan.md` for the authoring rationale."
     },
     {
       "id": "milestones-readme",
@@ -1055,6 +1055,13 @@
       "canonical_for": "Ranked ideation for polishing the setup screen after Focus moved into Today's setup and Solo/Net defaults were added. Selects an optional Focus cue plus clearer wall/fence follow-up copy while rejecting summary bars, stronger selected-chip states, enabled footer helper copy, and larger setup redesigns."
     },
     {
+      "id": "open-ideation-2026-05-10",
+      "path": "docs/ideation/2026-05-10-open-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Cross-pass synthesis of two same-day surprise-me open ideation runs (Pass A in-session run a7f3c2e9, 7 survivors; Pass B separately recorded, 7 survivors). 14 candidates ranked against docs/vision.md P1-P13 and the strategic stance. Recommended 6-pack ship-now ordering: A5 Tier 1b Slot Expiry Contract (kill-or-author by 2026-07-20), A3 + B2 state-aware partner-readable cue registry + Rally Co-Driver iconography (coordinate with the in-flight 2026-05-10 first-time-runnability brainstorm), A4 visual-first cue discipline (Rule 15 in courtside-copy.mdc + count-not-timer migration), A1 script-derived founder-use ledger + auto-computed D130 gate-state (absorbs B3 telemetry instinct), A6 CaptureRow + Pair entity + ambient timestamps, A7 plan-shape snapshot harness. A2 cross-session review card + FSRS scheduler queued for M002 boot via ce-brainstorm. Three Pass B survivors named vision-misaligned with explicit principle citations: B1 audio appliance deferred for iOS PWA Web Audio cutoff platform reality, B5 mycelial content ingestion rejected (P7 + D135 + cap-discipline violation), B6 sniper's spotter rejected (P11 violation + 2024 Bayesian reanalysis collapse of the external-focus warrant). Doc is an ideation artifact; route through ce-brainstorm and ce-plan before any schema-, catalog-, or cap-coupled work."
+    },
+    {
       "id": "setup-screen-default-path-polish-requirements-2026-05-04",
       "path": "docs/brainstorms/2026-05-04-setup-screen-default-path-polish-requirements.md",
       "type": "requirements",
@@ -1348,6 +1355,13 @@
       "status": "complete",
       "active_registry": true,
       "canonical_for": "Implementation plan for the exercise-copy contract pass. Extends the courtside-copy rule, adds focused mechanical copy tests, audits active drill explainers/instructions/success rules/cues/scaling copy, and preserves copy-only boundaries around workload, participants, equipment, source-backed catalog changes, and generated diagnostics."
+    },
+    {
+      "id": "tier-1b-slot-expiry-contract-plan-2026-05-10",
+      "path": "docs/plans/2026-05-10-005-feat-tier-1b-slot-expiry-contract-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Implementation plan for the Tier 1b slot expiry contract — sourced from docs/ideation/2026-05-10-open-ideation.md A5 survivor. Five implementation units: U1 promotes the post-m001-content-backlog Tier 1b residual section to structured slot records (4 named + 2 unallocated, each with slot_id / expiry 2026-07-20 / status reserved / required_trigger / trigger_source / last_checked) plus a machine-readable cap-status-data JSON block, U2 adds cap_status_must_be_consistent to scripts/validate-agent-docs.sh with 13 fixture-driven test cases (closed-vocabulary statuses, cap-sum consistency, expired-reserved hard failure post-2026-07-20, authored-record evidence citation, killed-record kill_reason requirement), U3 cross-references the contract from docs/status/m001-validation-overhang.md Calendar-Dated Reads 2026-07-20 row and adds a 2026-05-10 amendment-log entry to docs/plans/2026-04-20-m001-adversarial-memo.md, U4 updates this catalog entry, U5 runs end-to-end validation. Plan does not author or kill any slot — those decisions remain owned by partner-walkthrough / founder-ledger triggers under D135 source-validity gating. Cap value (10), anti-displacement enforcement, D135 framing, and per-slot trigger conditions are unchanged."
     },
     {
       "id": "d49-residual-follow-up-plan-2026-05-02",
