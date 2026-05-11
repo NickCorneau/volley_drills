@@ -40,6 +40,11 @@ export type { StorageMetaEntry } from './storage'
 export type { SessionParticipant, SessionParticipantRole } from './participant'
 export type { SkillSample, SkillVector } from './skillVector'
 export type {
+  CueCadenceContext,
+  CueCadenceEntry,
+  CueCadenceRule,
+} from './cueCadence'
+export type {
   CoachBlockSummary,
   CoachPayload,
   CoachPerDrillCapture,
