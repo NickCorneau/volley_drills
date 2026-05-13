@@ -1,20 +1,43 @@
 ---
 id: generated-plan-diagnostics-next-steps-requirements-2026-05-01
 title: "Generated-Plan Diagnostics Next Steps Requirements"
-status: active
+status: superseded
 stage: validation
 type: requirements
-summary: "Requirements for taking generated-plan diagnostic findings one by one through triage, policy decisions, dynamic surface gates, catalog impact previews, workload metadata guidance, and generator-policy experiments."
-authority: "Product requirements for the next workflow layer after generated-plan diagnostics; does not authorize direct catalog activation without source-backed gap cards."
-last_updated: 2026-05-01
+summary: "Original R1-R6 requirements set for the generated-plan diagnostics workflow program. Superseded 2026-05-10 — R1 (Observation Triage Workbench), R2 (Finding Graduation Ladder), R3 (Dynamic Surface / New Focus Sentinel), R5 (Workload Envelope Authoring Guide), and R6 (Redistribution-Free Builder Comparison) are all implemented as units U1-U5/U7/U8 of the active triage workflow plan. R4 (Catalog Change Impact Preview) remains intentionally deferred until a concrete catalog/cap proposal exists. For current state route to docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md."
+authority: "Historical requirements record; the surviving open requirement is R4 catalog impact preview, intentionally deferred."
+last_updated: 2026-05-10
+canonical_successor: docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md
 depends_on:
   - docs/ideation/2026-05-01-generated-plan-diagnostics-next-steps-ideation.md
   - docs/reviews/2026-05-01-generated-plan-diagnostics-report.md
   - docs/reviews/2026-04-30-focus-coverage-gap-cards.md
   - docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md
+  - docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md
 ---
 
 # Generated-Plan Diagnostics Next Steps Requirements
+
+## Closeout note (2026-05-10) — superseded
+
+Per `docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md` (status: active) and `docs/status/current-state.md` Recent Shipped History through 2026-05-08:
+
+| Requirement | Disposition (2026-05-10) | Implementing unit / packet |
+| --- | --- | --- |
+| R1 — Observation Triage Workbench | implemented | U1-U2 (stable diagnostic identity + triage registry/workbench) |
+| R2 — Finding Graduation Ladder | implemented | U3 (freshness + graduation gates) |
+| R3 — Dynamic Surface / New Focus Sentinel | implemented | U5 (per `docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md`) |
+| R4 — Catalog Change Impact Preview | **deferred (open)** | U6 — intentionally gated on a concrete source-backed catalog, workload-cap, or activation proposal; `D47` cap/catalog fork packet currently selects `hold_both_for_evidence`, so no admission-ticket-ready proposal exists |
+| R5 — Workload Envelope Authoring Guide | implemented | U7 (`docs/ops/workload-envelope-authoring-guide.md`) |
+| R6 — Redistribution-Free Builder Comparison | implemented | U8 + `D140` D49 generator-policy proposal packet (2026-05-07) |
+
+Acceptance examples AE1–AE15 from this doc were rolled into the per-unit acceptance criteria of the implementing plan and addenda.
+
+The downstream cascade after the original R1–R6 set landed was authored as follow-on requirements docs at `docs/brainstorms/2026-05-01-generated-diagnostics-decision-debt-compression-requirements.md`, `docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md`, `docs/brainstorms/2026-05-02-generated-diagnostics-redistribution-causality-receipt-requirements.md`, `docs/brainstorms/2026-05-02-generated-diagnostics-d47-u6-proposal-admission-requirements.md`, `docs/brainstorms/2026-05-02-generated-diagnostics-d47-gap-closure-ledger-requirements.md`, and the D01 comparator / fill / handoff / fork brainstorm chain. Those addenda inherit any requirements work that is still active.
+
+The body below is preserved for historical decision-provenance and to record the original R1–R6 framing; do not author new requirements against this doc.
+
+---
 
 ## Purpose
 

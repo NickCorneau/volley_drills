@@ -2,11 +2,12 @@
 id: what-to-add-next-2026-04-28
 title: "Ideation: what to add next (2026-04-28)"
 type: ideation
-status: active
+status: superseded
 stage: validation
-authority: "Ranked ideation artifact for the post-Tier-1b-Layer-A 'what's next' question. Identifies the strongest directions worth exploring under the current evidence base, the active D130 founder-use mode (2026-04-20 → 2026-07-20), the 4/10 Tier 1b authoring-budget cap consumption, and the D134 falsification gate read on 2026-05-12. Does not author requirements; ce-brainstorm picks one survivor and defines it."
-summary: "Original 2026-04-28 ideation plus 2026-04-29 refresh. D135 superseded the pre-D135 Tier 1c-prepay reading: Tier 1c focus picker and skill-level mutability are triggered live implementation, while the catalog reserve audit remains the clean first chunk. Current sequence: catalog reserve audit -> Tier 1c focus picker -> skill-level override -> evidence loop. The 2026-04-29 focus-picker deepening selected the draft-surface decision as the first focus-picker brainstorm target."
-last_updated: 2026-04-29
+authority: "Historical post-Tier-1b-Layer-A 'what's next' ideation snapshot. Superseded 2026-05-10 — every survivor in the recommended sequence has shipped or moved into routine ops. Retained for historical context on the post-D135 reasoning that produced the Tune today / skill-level / catalog-audit ship. For current 'what to do next' orientation, route to the live status surfaces named in the 2026-05-10 closeout note below."
+summary: "Superseded 2026-05-10. Original 2026-04-28 ideation + 2026-04-29 refresh + 2026-04-29 focus-picker deepening. Recommended sequence (catalog reserve audit -> Tier 1c focus picker -> skill-level override -> evidence loop) all shipped between 2026-04-30 and 2026-05-10. Tier 1c focus picker shipped 2026-04-30 then refactored to Setup -> Safety under D137 (2026-05-06). Skill-level override shipped under /settings/skill-level. Catalog reserve audit shipped. S1 audio-pacing shipped (multiple iterations). S2 evidence loop is ongoing (7/13 founder/joint sessions logged through 2026-05-10). For current next-action orientation use docs/status/current-state.md, docs/status/m001-validation-overhang.md, docs/status/post-m001-content-backlog.md, and the 2026-05-10 drill-first-time-runnability ideation."
+last_updated: 2026-05-10
+canonical_successor: docs/status/m001-validation-overhang.md
 related:
   - docs/research/founder-use-ledger.md
   - docs/research/2026-04-27-cca2-dogfeed-findings.md
@@ -19,6 +20,10 @@ related:
   - docs/plans/2026-04-28-tier-1c-prepay-and-catalog-audit.md
   - docs/brainstorms/2026-04-29-session-focus-picker-requirements.md
   - docs/research/partner-walkthrough-results/2026-04-22-all-passes-reconciled.md
+  - docs/status/current-state.md
+  - docs/status/m001-validation-overhang.md
+  - docs/status/post-m001-content-backlog.md
+  - docs/ideation/2026-05-10-drill-first-time-runnability-ideation.md
 decision_refs:
   - D91
   - D130
@@ -26,8 +31,38 @@ decision_refs:
   - D133
   - D134
   - D135
+  - D137
+  - D141
+---
 
 # Ideation: what to add next (2026-04-28)
+
+## Closeout note (2026-05-10) — superseded
+
+Twelve days after this ideation pass, every survivor in the recommended sequence has shipped or moved into routine ops. Treat this doc as **historical**; for current "what to do next" orientation, read these in order:
+
+1. `docs/status/current-state.md` — live posture, Recent Shipped History (M001 build complete 2026-05-08).
+2. `docs/status/m001-validation-overhang.md` — what closes M001: D130 falsification conditions, D130 early-re-eval triggers, D134 Phase 2A streak gate, calendar-dated reads (2026-05-12, 2026-05-21, 2026-07-20), Monday adversarial-memo ritual.
+3. `docs/status/post-m001-content-backlog.md` — trigger-gated content adds: Tier 1b drill-cap residual (still 4/10 consumed), externally gated drills (`d36` / `d43`), conditional Phase 2B capture shapes (frozen pending 2026-05-12 D134 read-out).
+4. `docs/ideation/2026-05-10-drill-first-time-runnability-ideation.md` — the active "what to do next" ideation pass after the 2026-05-10 founder + Seb pair + net session surfaced the "peak and flash / number drill" copy-runnability class.
+
+### Survivor disposition (2026-05-10)
+
+- **S1 — Audio-pacing infra + visible block-end chip.** **SHIPPED.** 2026-04-24 wake lock + audio-primer; 2026-04-26 visible block-end chip in `BlockTimer.tsx`; 2026-04-28 follow-up investigation (Run holds wake lock through preroll/timer; `d25-solo` carries 30 s pacing metadata); 2026-04-28 per-move pacing indicator V1/V2/V3/V4. Residual boundary unchanged: silent switch + manual lock + unsupported Wake Lock can still suspend audio. Cooldown phase still has no separate phase-start audio cue (relies on shared preroll / sub-block / end-countdown / block-end). Not currently a fired open item.
+- **S2 — Founder-ledger discipline + D134 streak-signal force.** **ONGOING.** 7/13-week founder/joint sessions logged through 2026-05-10 (under-target pace ~10 by week 4); D134 Phase 2A read-out is 2 days away (2026-05-12) with evidence-pending state — no streak drill ran in the 2026-05-10 export; no negative-evidence or contamination hits in the 14-day window. The S2 paired ops move ("at least one session that exercises a `streak`-typed `main_skill` / `pressure` drill so the D134 falsification gate read on 2026-05-12 has real input") **did not happen** — no logged session in the window ran `d38-pair`, `d01-pair`, or `d41-pair`. The 2026-05-12 read will be evidence-pending, not a clean pass.
+- **S3 — Partner walkthrough re-run on BAB-vocabulary surfaces.** **PARTIALLY SHIPPED.** The 2026-05-04 pair serving session and the 2026-05-10 Pair + Net serve-focused session both exercised `d33` six-zone naming, `d31` target-circle voice, and (2026-05-10) `d22-pair` pair-net serving structure. The 2026-05-10 session captured three drills as `still_learning` with the founder-named "peak and flash / number drill" confusion class — direct evidence that BAB-vocabulary copy is not first-time-runnable, even after the 2026-05-02 exercise-copy-contract sweep. Routed to `docs/ideation/2026-05-10-drill-first-time-runnability-ideation.md`. The narrower `d40` planted-feet voice has not been deliberately walked through (no setting-focused session in the window).
+- **S4 — Tier 1c architectural prepay (post-D135 rewrite: live focus picker).** **SHIPPED, then refactored.** Tune today shipped 2026-04-30 (mandatory `/tune-today` route after draft creation/opening, before Safety; `sessionFocus` field, shared focus resolver, in-transaction draft regeneration). Refactored under `D137` (2026-05-06) — `/tune-today`, `TuneTodayScreen`, `regenerateDraftFocus`, and `SessionDraft.levelRelaxed` are removed; Setup -> Safety is the canonical pre-run route; Home draft-start / Repeat / Repeat-what-you-did paths route directly to Safety after saving a draft. Skill-level mutability sibling **SHIPPED** as `/settings/skill-level` durable manual override.
+- **S5 — `m001Candidate: false` retirement/promotion pass.** **SHIPPED** as Stream 3 of `docs/plans/2026-04-28-tier-1c-prepay-and-catalog-audit.md` (the catalog reserve audit was the named #1 brainstorm target in the 2026-04-29 refresh). The 15 `m001Candidate:false` records were audited; retire-only application + drills.ts pointer landed.
+
+### What this ideation no longer governs
+
+- **The "what's next" decision queue.** Owned by `docs/status/post-m001-content-backlog.md` (trigger-gated content adds) plus the live ideation pass at `docs/ideation/2026-05-10-drill-first-time-runnability-ideation.md` (drill copy-runnability sweep awaiting `/ce-brainstorm` extension of the existing 2026-05-02 exercise-copy-contract baseline).
+- **Cap accounting.** Cap state is owned by `docs/plans/2026-04-20-m001-adversarial-memo.md` (still 4/10 from Tier 1b Layer A) and re-stated in `docs/status/post-m001-content-backlog.md` with a 2026-05-10 cap-accounting note clarifying that `d46`/`d47`/`d48`/`d49`/`d50`/`d51` shipped under different lanes and did not consume Tier 1b slots.
+- **Trigger reads.** Owned by the weekly Monday adversarial-memo review (per `docs/plans/2026-04-20-m001-adversarial-memo.md` Weekly trigger-review ritual) and surfaced in `docs/status/m001-validation-overhang.md` Calendar-Dated Reads.
+
+The original ideation body below is preserved for historical context and decision provenance; do not act on its recommended sequence.
+
+---
 
 ## Revision note (2026-04-28, post-D135 same-day)
 

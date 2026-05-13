@@ -901,8 +901,9 @@
       "id": "what-to-add-next-2026-04-28",
       "path": "docs/ideation/2026-04-28-what-to-add-next-ideation.md",
       "type": "ideation",
-      "status": "active",
-      "canonical_for": "Post-Tier-1b-Layer-A next-chunk ideation, refreshed 2026-04-29 after D135. Current sequence: catalog reserve audit first, then Tier 1c focus picker, then skill-level override, then founder/Seb evidence loop. The 2026-04-29 focus-picker deepening selects the draft-surface decision as the first focus-picker brainstorm target. Preserves the pre-D135 survivor list as historical context and records rejection lines for substitution-class work."
+      "status": "superseded",
+      "canonical_successor": "docs/status/m001-validation-overhang.md",
+      "canonical_for": "Historical post-Tier-1b-Layer-A 'what's next' ideation snapshot. Superseded 2026-05-10 — every survivor in the recommended sequence (catalog reserve audit, Tier 1c focus picker, skill-level override, evidence loop, S1 audio-pacing, S3 partner-walkthrough) has shipped or moved into routine ops between 2026-04-30 and 2026-05-10. Tier 1c focus picker shipped via Tune today (2026-04-30), then refactored to Setup -> Safety under D137 (2026-05-06). For current 'what to do next' orientation, route to docs/status/current-state.md, docs/status/m001-validation-overhang.md, docs/status/post-m001-content-backlog.md, and docs/ideation/2026-05-10-drill-first-time-runnability-ideation.md."
     },
     {
       "id": "tier-1c-prepay-and-catalog-audit-2026-04-28",
@@ -995,8 +996,9 @@
       "id": "generated-plan-diagnostics-next-steps-ideation-2026-05-01",
       "path": "docs/ideation/2026-05-01-generated-plan-diagnostics-next-steps-ideation.md",
       "type": "ideation",
-      "status": "active",
-      "canonical_for": "Ranked ideation for turning the generated-plan diagnostics report into a sequenced next-step program. Original six survivors: observation triage workbench, finding graduation ladder, dynamic surface/new focus sentinel, catalog change impact preview, workload envelope authoring guide, and redistribution-free builder comparison. 2026-05-01 continuation selects decision-debt compression review after U1-U3 completion; post-U7 continuation selects U5 dynamic surface/new focus sentinel; post-U5 continuation selected U8 redistribution causality receipt, now implemented. Consumed by the generated diagnostics requirements addenda."
+      "status": "superseded",
+      "canonical_successor": "docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md",
+      "canonical_for": "Multi-continuation ideation that drove the generated-plan diagnostics workflow program. Superseded 2026-05-10 — every continuation-pass selection (Observation Triage Workbench, Finding Graduation Ladder, Decision-Debt Compression, Dynamic Surface Sentinel, Workload Envelope Authoring Guide, U8 Redistribution Causality Receipt, D47 Proposal Admission Ticket and downstream D47/D01/D49 cascade packets) has shipped. Three downstream decision packets shipped after the most recent continuation pass: D140 D49 generator-policy proposal packet, D138 focusReadiness retirement, D139 validator-script CI gating (all 2026-05-07). Only U6 catalog impact preview remains intentionally deferred until a concrete catalog/cap proposal exists, plus the D47-vs-D05 comparator evaluation payload remains the named next artifact for the current hold_both_for_evidence selection."
     },
     {
       "id": "docs-process-lifecycle-ideation-2026-05-02",
@@ -1055,6 +1057,13 @@
       "canonical_for": "Ranked ideation for polishing the setup screen after Focus moved into Today's setup and Solo/Net defaults were added. Selects an optional Focus cue plus clearer wall/fence follow-up copy while rejecting summary bars, stronger selected-chip states, enabled footer helper copy, and larger setup redesigns."
     },
     {
+      "id": "drill-first-time-runnability-ideation-2026-05-10",
+      "path": "docs/ideation/2026-05-10-drill-first-time-runnability-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Ranked ideation for the principles, rubric criteria, copy invariants, schema fields, and assessment lenses a Volleycraft drill must hold to be runnable by a first-time courtside reader without a coach. Extends the 2026-05-02 exercise-copy-contract baseline; targets the founder's 2026-05-10 'peak and flash / number drill' confusion class with synthesis from BAB / FIVB / Volleyball Canada Person Pillar Guidebook plus Wulf / Vickers / Bandura / Mayer / Gawande external warrants. Nineteen survivors organized into six themes (pair-drill coordination clarity, structural sufficiency for re-glance reading, cue ordering for cognitive load, extended jargon gate, scoring/termination operational completeness, capture/review template) plus a deferred Theme G of schema additions. Routes to docs/brainstorms/2026-05-10-drill-first-time-runnability-requirements.md and docs/plans/2026-05-10-004-feat-drill-first-time-runnability-assessment-plan.md."
+    },
+    {
       "id": "open-ideation-2026-05-10",
       "path": "docs/ideation/2026-05-10-open-ideation.md",
       "type": "ideation",
@@ -1067,6 +1076,13 @@
       "type": "requirements",
       "status": "active",
       "canonical_for": "Requirements for a narrow setup-screen polish pass: Focus must read as optional tuning, the default build-ready path must stay quiet, the no-net wall/fence follow-up must remain subordinate and practical, and existing setup behavior must be preserved."
+    },
+    {
+      "id": "drill-first-time-runnability-requirements-2026-05-10",
+      "path": "docs/brainstorms/2026-05-10-drill-first-time-runnability-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Extends the 2026-05-02 exercise-copy-contract-requirements with a first-time-runnability rubric grounded in today's D130 session confusion (pair-drill role coordination, scoring vocabulary, termination, cadence, movement vocabulary) and synthesized from BAB / FIVB / Volleyball Canada Person Pillar Guidebook plus motor-learning literature. Adds R9 either-reader role-tagged sentences, R10 cue→action coupling microformat, R11 five-question logistics checklist for pair drills, R12 spatial point-of-view anchor, R13 triple-only readability, R14 courtsideInstructions aloud-read ceiling, R15 cue ordering rule for coachingCues[] (one-cue default + external focus + gaze target first + doer-POV), and R16 observe/reinforce/question template for DrillCheck and Review. Drives docs/plans/2026-05-10-004-feat-drill-first-time-runnability-assessment-plan.md."
     },
     {
       "id": "setup-screen-default-path-polish-plan-2026-05-04",
@@ -1123,8 +1139,9 @@
       "id": "generated-plan-diagnostics-next-steps-requirements-2026-05-01",
       "path": "docs/brainstorms/2026-05-01-generated-plan-diagnostics-next-steps-requirements.md",
       "type": "requirements",
-      "status": "active",
-      "canonical_for": "Requirements for taking generated-plan diagnostic findings one by one through routeable observation triage, finding graduation policy, dynamic surface/new-focus gates, catalog impact previews, workload envelope metadata guidance, and diagnostic-only generator redistribution comparisons. First slice recommendation: R1/R2 observation triage workbench plus finding graduation ladder before adding drills or changing generator policy."
+      "status": "superseded",
+      "canonical_successor": "docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md",
+      "canonical_for": "Original R1-R6 requirements set for the generated-plan diagnostics workflow program. Superseded 2026-05-10 — R1 (Observation Triage Workbench), R2 (Finding Graduation Ladder), R3 (Dynamic Surface / New Focus Sentinel), R5 (Workload Envelope Authoring Guide), and R6 (Redistribution-Free Builder Comparison) are all implemented as units U1-U5/U7/U8 of the active triage workflow plan plus the D140 D49 generator-policy proposal packet. R4 (Catalog Change Impact Preview) remains intentionally deferred until a concrete catalog/cap proposal exists. Downstream cascade authored as follow-on requirements docs (decision-debt compression, dynamic-surface sentinel, redistribution causality receipt, D47 admission, D47 gap-closure ledger, D01 comparator chain)."
     },
     {
       "id": "generated-diagnostics-decision-debt-compression-requirements-2026-05-01",
@@ -1357,6 +1374,20 @@
       "canonical_for": "Implementation plan for the exercise-copy contract pass. Extends the courtside-copy rule, adds focused mechanical copy tests, audits active drill explainers/instructions/success rules/cues/scaling copy, and preserves copy-only boundaries around workload, participants, equipment, source-backed catalog changes, and generated diagnostics."
     },
     {
+      "id": "drill-first-time-runnability-assessment-plan-2026-05-10",
+      "path": "docs/plans/2026-05-10-004-feat-drill-first-time-runnability-assessment-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Implementation plan extending the courtside-copy contract with rules 8-12 grounded in the 2026-05-10 D130 'peak and flash / number drill' confusion class and BAB/FIVB/Volleyball Canada synthesis. Adopts the READ-DO vs DO-CONFIRM consumption-mode lens (Gawande) as the unifying frame. Seven implementation units: U1 strengthens .cursor/rules/courtside-copy.mdc with rules 8-12 plus rule-2/3/5/7 extensions, U2 lands mechanical regression tests for R9 role-tagged sentences and R14 aloud-read ceiling and rule-2 jargon extensions, U3 updates RunScreen to render coachingCues[0] by default with a Show more cues affordance per R15(a), U4 produces a per-drill assessment artifact at docs/reviews/2026-05-10-drill-first-time-runnability-assessment.md classifying all 26 M001-candidate drills as pass/repair/rewrite, U5 sweeps drill copy in app/src/data/drills.ts in priority order (today's drills first), U6 updates DrillCheck + Review prompts per R16 observe/reinforce/question template, U7 registers docs and writes a docs/solutions/ learning so future authors land on the rubric. Theme G schema additions (expectedMisreading, crux, stopRule, pacing[], vocabPreflight[]) are explicitly deferred to a follow-up decision."
+    },
+    {
+      "id": "cue-cadence-registry-foundation-plan-2026-05-10",
+      "path": "docs/plans/2026-05-10-006-feat-cue-cadence-registry-foundation-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Foundational typed primitive for the state-aware cue registry called out in docs/ideation/2026-05-10-open-ideation.md #2 (A3 ⊕ B2). Adds CueCadenceContext, CueCadenceRule (discriminated union: fadeOnRepeat / partnerReadVariant / timeIntoBlockEscalation), and CueCadenceEntry types under app/src/model/cueCadence.ts, plus a seed-of-one CUE_CADENCE_REGISTRY for d33-pair (today's peak-and-flash specimen) under app/src/data/cueCadenceRegistry.ts, plus R5/R6 shape-validator regression tests. Zero runtime UI changes; state-aware rendering, iconography (B2), swipe gestures, full incident register, and Aviation-CRM-style pair callout vocabulary are deferred to follow-up plans. Wave 1 of A3 (rule substrate + lints + copy sweep) shipped under docs/plans/2026-05-10-004-feat-drill-first-time-runnability-assessment-plan.md."
+    },
+    {
       "id": "tier-1b-slot-expiry-contract-plan-2026-05-10",
       "path": "docs/plans/2026-05-10-005-feat-tier-1b-slot-expiry-contract-plan.md",
       "type": "plan",
@@ -1468,6 +1499,20 @@
       "type": "solution",
       "status": "active",
       "canonical_for": "Canonical end-to-end workflow learning for moving a generated-plan diagnostic group from pressure_remains_without_redistribution evidence to a shipped catalog drill addition, using the in-repo FIVB/BAB/VC source archives as load-bearing intermediates. Validated three times: D47 closed-by-D49 (2026-05-02 advanced setting), D46 closed-by-D50 (2026-05-04 advanced passing), D31 closed-by-D51 (2026-05-04 beginner serving). Names the implementation skeleton, required boundaries (no teaching-surface duplication, rollback criterion, D101 boundary, selection-path change paired with drill add, algorithm version bump on snapshot break), verification sequence, documentation trail, and remaining pre-mined Tier 2 polish candidates. Recipe proven level-agnostic (works at beginner + advanced)."
+    },
+    {
+      "id": "drill-first-time-runnability-assessment-2026-05-10",
+      "path": "docs/reviews/2026-05-10-drill-first-time-runnability-assessment.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "Per-drill audit of every M001-candidate drill (26 drills, ~48 variants) against the strengthened first-time-runnability rubric (rules 8-14 in .cursor/rules/courtside-copy.mdc + rule-2/3/5/7 extensions). Mechanical lint results from drillCopyRegressions.test.ts plus reviewer-checklist assessment (R10 cue->action coupling, R11 5-question logistics, R12 spatial POV anchor, R13 triple-only readability, R15 cue ordering). Classification: pass / repair / rewrite with priority P0-P3. 5 P0 drills (d07, d10, d22, d28, d33 — today's session-affected). 46 mechanical-lint failures captured pre-sweep as the empirical input to the U5 drill-copy sweep."
+    },
+    {
+      "id": "drill-first-time-runnability-system-2026-05-10",
+      "path": "docs/solutions/2026-05-10-drill-first-time-runnability-system.md",
+      "type": "solution",
+      "status": "active",
+      "canonical_for": "Principles, rubric, system, and approach for writing drills a first-time courtside reader can execute correctly without a coach. Synthesizes BAB practice grammar + FIVB Coaches Manual (Fitts & Posner motor stages, cue-density rule, feedback cadence, whole-practice bias) + Volleyball Canada Person Pillar Guidebook (observe / reinforce / question) + motor-learning literature (Wulf external focus, Vickers Quiet Eye, Bandura modeling, Mayer multimedia principles, Gawande READ-DO vs DO-CONFIRM) + 2026-04-21 partner-walkthrough origin + 2026-05-10 D130 founder-session evidence. Anchors future drill authoring and routes back to .cursor/rules/courtside-copy.mdc as the canonical 14-invariant ruleset."
     },
     {
       "id": "d137-canonical-pre-run-spine-setup-safety-2026-05-07",
@@ -1866,6 +1911,30 @@
     {
       "path": "docs/research/2026-05-10-pair-net-serving-duration-feedback.md",
       "focus": "latest founder + Seb Pair + Net 40-min profile export: app marked the session ended_early with wrap skipped, but the review note says it did not really end early; warmup timing is still wrong and the drills had too many minutes. Three captured drills (`d10-pair`, `d33-pair-open`, `d22-pair`) were all `still_learning`; no Good/Total counts and no streak metric capture. Use for D130 weekly count/cadence updates and warmup / duration-budget validation reads; does not fire D134 or new content scope by itself"
+    },
+    {
+      "path": "docs/ideation/2026-05-10-drill-first-time-runnability-ideation.md",
+      "focus": "principles, rubric criteria, copy invariants, schema fields, and assessment lenses for first-time courtside runnability — addresses 2026-05-10 'peak and flash / number drill' confusion class with BAB/FIVB/Volleyball Canada synthesis; 19 survivors organized into six themes plus a deferred Theme G of schema additions; routes to 2026-05-10 requirements doc and plan"
+    },
+    {
+      "path": "docs/ideation/2026-05-10-open-ideation.md",
+      "focus": "cross-pass synthesis of two same-day surprise-me open ideation runs; 14 candidates ranked against docs/vision.md P1-P13 with a ship-now 6-pack (A5 slot expiry contract, A3+B2 cue registry + co-driver iconography, A4 visual-first Rule 15, A1 derived ledger + gate-state, A6 CaptureRow + Pair entity + ambient timestamps, A7 plan-shape snapshot); A2 review card + FSRS queued for M002 boot; three Pass B survivors named vision-misaligned with explicit principle citations (B1 deferred for iOS PWA audio reality, B5 rejected P7 + D135, B6 rejected P11 + collapsed external-focus warrant)"
+    },
+    {
+      "path": "docs/brainstorms/2026-05-10-drill-first-time-runnability-requirements.md",
+      "focus": "extends the 2026-05-02 exercise-copy-contract baseline with R9-R16 covering pair-drill coordination clarity, structural sufficiency for re-glance reading, cue ordering for cognitive load, and capture/review surfaces; drives the 2026-05-10-004 plan"
+    },
+    {
+      "path": "docs/plans/2026-05-10-004-feat-drill-first-time-runnability-assessment-plan.md",
+      "focus": "seven-unit plan to extend .cursor/rules/courtside-copy.mdc with rules 8-12 plus rule-2/3/5/7 extensions, land mechanical regression tests for R9/R14/rule-2 extensions, update RunScreen for one-cue default, produce per-drill assessment artifact (26 M001 candidates), sweep priority drill copy, update DrillCheck/Review prompts per R16, and register docs + write docs/solutions/ learning"
+    },
+    {
+      "path": "docs/reviews/2026-05-10-drill-first-time-runnability-assessment.md",
+      "focus": "per-drill assessment of every M001-candidate drill against the strengthened first-time-runnability rubric (rules 8-14 + rule-2/3/5/7 extensions). 26 drills audited; 2 pass, 21 repair, 3 rewrite. P0: d07, d10, d22, d28, d33 (today's session-affected). 46 mechanical-lint failures captured as empirical input to U5 sweep. Drives the priority-ordered copy edits in app/src/data/drills.ts"
+    },
+    {
+      "path": "docs/solutions/2026-05-10-drill-first-time-runnability-system.md",
+      "focus": "principles, rubric, system, and approach for writing drills a first-time courtside reader can execute correctly without a coach. Synthesizes BAB practice grammar + FIVB Coaches Manual + Volleyball Canada Person Pillar Guidebook + motor-learning literature (Wulf, Vickers, Bandura, Mayer, Gawande). READ-DO vs DO-CONFIRM unifying lens. Anchors future drill authoring; routes back to .cursor/rules/courtside-copy.mdc for the canonical 14-invariant ruleset"
     }
   ],
   "status_vocabularies": {

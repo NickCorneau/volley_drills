@@ -1,21 +1,49 @@
 ---
 id: generated-plan-diagnostics-next-steps-ideation-2026-05-01
 title: "Ideation: generated-plan diagnostics next steps"
-status: active
+status: superseded
 stage: validation
 type: ideation
-summary: "Ranked ideation for turning generated-plan diagnostic observations into a sequenced catalog, generator, and test-gating workflow."
-authority: "Ideation only; identifies promising next-step directions after the generated-plan diagnostics report without authorizing catalog changes."
-last_updated: 2026-05-02
+summary: "Multi-continuation ideation that drove the generated-plan diagnostics workflow program. Superseded 2026-05-10 — every continuation-pass selection (Observation Triage Workbench, Finding Graduation Ladder, Decision-Debt Compression, Dynamic Surface Sentinel, Workload Envelope Authoring Guide, U8 Redistribution Causality Receipt, D47 Proposal Admission Ticket and downstream D47/D01/D49 cascade packets) has shipped. Only U6 catalog impact preview remains intentionally deferred until a concrete catalog/cap proposal exists, plus the D47-vs-D05 comparator evaluation payload remains the named next artifact for the current `hold_both_for_evidence` selection. For current state route to docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md and docs/status/current-state.md."
+authority: "Historical ideation record; identifies the directions that drove the diagnostics workflow program. Does not author current next-steps — those live in the triage workflow plan and the live D47/D01/D05 comparator chain."
+last_updated: 2026-05-10
+canonical_successor: docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md
 depends_on:
   - docs/reviews/2026-05-01-generated-plan-diagnostics-report.md
   - docs/reviews/2026-04-30-focus-coverage-gap-cards.md
   - docs/archive/plans/2026-05-01-001-feat-generated-plan-diagnostics-plan.md
   - docs/brainstorms/2026-04-30-focus-coverage-catalog-readiness-requirements.md
   - docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md
+  - docs/status/current-state.md
 ---
 
 # Ideation: Generated-Plan Diagnostics Next Steps
+
+## Closeout note (2026-05-10) — superseded
+
+Nine days after the original ideation pass and seven days after the last continuation, the diagnostics workflow program has shipped to the point where every continuation-pass selection in this doc is implemented. Per `docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md` (status: active, summary as of 2026-05-02): U1-U5, U7, U8, the D47 proposal-admission ticket, the comparator-first D47 gap closure ledger, the D01 comparator gap-fill proposal, the D01 workload/block-shape proposal, the D01 block-shape fill receipt, the D01 redistribution handoff admission, the D01 cap/catalog fork packet, the gap-closure selection workbench, and the D47-vs-D05 comparator decision packet are implemented and represented in the committed report/triage artifacts.
+
+Three downstream decision packets shipped after the most recent continuation pass below was authored (Recent Shipped History in `docs/status/current-state.md`):
+
+- **2026-05-07 — `D140` D49 generator-policy proposal packet.** `buildGeneratedPlanD49GeneratorPolicyProposalPacket` consumes the U8 proof packet and selects `cap_redistribution_at_carrier_max` when the upstream proof is `ready_for_generator_policy_proposal`; defers to `no_action_yet` otherwise. Three rejected alternatives, falsification threshold, and revisit trigger recorded. D49-only scope; analogous packets for non-D49 `likely_redistribution_caused` groups (D33, D40, D51, D22, D50) require their own U8 proofs first. Every change-authorization field stays `not_authorized`.
+- **2026-05-07 — `D138` diagnostic-spine canonicality.** `focusReadiness` retired except as shared dimensions still imported by `generatedPlanDiagnostics`; `focusCoverageAudit` is the single live detection diagnostic. Closes the second open follow-up from the 2026-05-05 merge plan.
+- **2026-05-07 — `D139` validator-script CI gating.** `architecture:check --strict`, `typography:guardrails:check`, and `diagnostics:report:check` are now CI gates in `.github/workflows/app-ci.yml`; `diagnostics:triage:check` aliases the same script. Total CI overhead ~1.1s.
+
+### What remains open
+
+- **U6 catalog impact preview.** Intentionally deferred per the plan: "U6 catalog impact preview remains intentionally active/deferred until there is a concrete source-backed catalog, workload-cap, or candidate activation proposal to preview." No current candidate is planning-ready; the cap/catalog fork packet currently selects `hold_both_for_evidence` for D47.
+- **D47-vs-D05 comparator evaluation payload.** The current comparator packet's named next artifact. D47 catalog work remains held behind that proof payload and the source-backed gap-card gate. See `docs/plans/2026-05-02-013-feat-d47-d05-comparator-evaluation-payload-plan.md` for the planning surface.
+- **Non-D49 U8 proofs and downstream generator-policy packets** (D33, D40, D51, D22, D50). Each requires its own U8 proof first per the `D140` packet's `scope: 'd49_only'` constraint; no current proof is `ready_for_generator_policy_proposal` for any non-D49 group.
+
+### What this ideation no longer governs
+
+- **Next-step selection in the diagnostics workflow.** Owned by `docs/plans/2026-05-01-002-feat-generated-diagnostics-triage-workflow-plan.md` plus the D47/D01/D05 comparator and admission-ticket plans cataloged there.
+- **Catalog activation for diagnostic-driven content.** Owned by the source-backed content-depth activation pattern (`docs/solutions/2026-05-04-source-backed-content-depth-activation-pattern.md`) and gated on source-backed gap cards. The four validated applications are `d49` setting, `d47/d48 -> d49` setting reroute, `d50` advanced passing, and `d51` beginner serving.
+- **Decision-spine cleanup against `D101` Bucket B questions.** Closed by `D142` / `D143` / `D144` (2026-05-08); see `docs/decisions.md` and `docs/plans/2026-05-08-002-feat-bucket-b-pre-d101-schema-decision-passes-plan.md`.
+
+The original ideation body and continuations below are preserved for historical decision-provenance; do not act on their recommended sequences.
+
+---
 
 ## Grounding Context
 
