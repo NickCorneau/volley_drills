@@ -3,7 +3,13 @@ import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { BlockTimer } from '../components/BlockTimer'
 import { RunControls } from '../components/RunControls'
 import { SegmentList } from '../components/run/SegmentList'
-import { ConfirmModal, RunFlowHeader, ScreenShell, StatusMessage } from '../components/ui'
+import {
+  ConfirmModal,
+  GlossedText,
+  RunFlowHeader,
+  ScreenShell,
+  StatusMessage,
+} from '../components/ui'
 import { getBlockSkillFocus } from '../domain/drillMetadata'
 import { blockEyebrowLabel } from '../lib/format'
 import { routes } from '../routes'
@@ -222,10 +228,19 @@ export function RunScreen() {
             </summary>
             <div className="mt-3 flex flex-col gap-3">
               {hasInstructionDetail && (
+                /*
+                 * 2026-05-11 inline-gloss tappable-term swap: the
+                 * overflow body inside the <details> READ-DO surface
+                 * renders through `<GlossedText>` so flagged terms
+                 * become tappable. The active-run body above (live
+                 * `courtsideInstructions` and the SegmentList) keeps
+                 * its plain `(= …)` literal rendering as a deliberate
+                 * exception — courtside-copy.mdc rule 13 (DO-CONFIRM
+                 * triple-only readability) forbids tappable
+                 * affordances mid-rep at glare distance.
+                 */
                 <section aria-label="Full drill instructions">
-                  <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
-                    {currentBlock.courtsideInstructions}
-                  </p>
+                  <GlossedText text={currentBlock.courtsideInstructions} />
                 </section>
               )}
               {hasCueDetail && (
@@ -350,7 +365,14 @@ export function RunScreen() {
 }
 
 function inlineDetailSummaryLabel(hasInstructionDetail: boolean, hasCueDetail: boolean) {
-  if (hasInstructionDetail && hasCueDetail) return 'Full instructions and cue'
-  if (hasCueDetail) return 'Full coaching cue'
-  return 'Full instructions'
+  // 2026-05-10 first-time-runnability sweep: label updated to align
+  // with .cursor/rules/courtside-copy.mdc rule 12(a) "one cue
+  // rendered by default; remaining cues sit behind a Show more cues
+  // affordance". The default RunScreen surface shows only the first
+  // clause of `coachingCue` (i.e., the joined `coachingCues[0]`)
+  // and routes the remaining cues + full instructions to this
+  // affordance.
+  if (hasInstructionDetail && hasCueDetail) return 'Show more cues and instructions'
+  if (hasCueDetail) return 'Show more cues'
+  return 'Show full instructions'
 }

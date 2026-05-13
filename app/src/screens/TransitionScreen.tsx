@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   Button,
+  GlossedText,
   JustFinishedPill,
   RunFlowHeader,
   ScreenShell,
@@ -167,11 +168,18 @@ export function TransitionScreen() {
           relaxed leading. Matches RunScreen exactly so the text reads
           the same across both surfaces. Long drills (stretch lists,
           warmup lists) scroll inside ScreenShell.Body; the bottom
-          fade gradient already signals "more below." */}
+          fade gradient already signals "more below."
+
+          2026-05-11 inline-gloss tappable-term swap: the body prose
+          renders through `<GlossedText>` so flagged terms (per
+          `.cursor/rules/courtside-copy.mdc` rule 2) become tappable
+          dotted-underlined buttons whose definitions reveal as a
+          quiet line below the paragraph. Single-paragraph
+          `courtsideInstructions` strings render as before; the
+          dotted-underline appears only on terms the parser resolves
+          against the `domain/flaggedTerms.ts` registry. */}
         {nextBlock.courtsideInstructions && (
-          <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
-            {nextBlock.courtsideInstructions}
-          </p>
+          <GlossedText text={nextBlock.courtsideInstructions} />
         )}
 
         {/* Coaching cue uses the exact same quiet left-rule treatment as

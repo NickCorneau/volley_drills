@@ -171,6 +171,15 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
           </Card>
         )}
 
+        {/*
+          2026-05-10 first-time-runnability sweep R16: short-note
+          placeholder updated to a Volleyball Canada Person Pillar
+          Guidebook reflection-question template ("observe / reinforce
+          / question, do not judge"). The prompt invites the user to
+          self-generate a next-action rather than report a vibe; the
+          neutral "Short note" label stays so users who don't want to
+          reflect deeply can still write whatever they want.
+        */}
         <section className="flex flex-col gap-2">
           <label htmlFor="review-note" className="text-base font-semibold text-text-primary">
             Short note <span className="font-normal text-text-secondary">(optional)</span>
@@ -180,7 +189,7 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
             rows={3}
             value={shortNote}
             onChange={(e) => setShortNote(e.target.value)}
-            placeholder="Anything else?"
+            placeholder="What's worth keeping for next time, or what would you change?"
             className="min-h-[88px] w-full resize-y rounded-[12px] border border-text-primary/10 bg-bg-primary px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           />
         </section>

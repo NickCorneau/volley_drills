@@ -98,7 +98,11 @@ describe('RunScreen Run Face v1', () => {
     expect(screen.getByText(/^Now$/)).toBeInTheDocument()
     expect(screen.getByText('Caller names short or deep')).toBeInTheDocument()
     expect(screen.queryByRole('alert')).toBeNull()
-    const summary = screen.getByText(/Full instructions and cue/i)
+    // 2026-05-10 first-time-runnability sweep: summary label updated
+    // to "Show more cues and instructions" per courtside-copy.mdc rule
+    // 12(a). Section aria-labels (Full coaching cue / Full drill
+    // instructions) preserved for screen-reader semantic clarity.
+    const summary = screen.getByText(/Show more cues and instructions/i)
     const details = summary.closest('details')
     expect(details).not.toHaveAttribute('open')
 
@@ -135,8 +139,10 @@ describe('RunScreen Run Face v1', () => {
 
     renderRun()
 
-    const summary = screen.getByText(/Full coaching cue/i)
-    expect(screen.queryByText(/Full instructions and cue/i)).toBeNull()
+    // 2026-05-10 first-time-runnability sweep: cue-only summary
+    // updated to "Show more cues" per courtside-copy.mdc rule 12(a).
+    const summary = screen.getByText(/Show more cues$/i)
+    expect(screen.queryByText(/Show more cues and instructions/i)).toBeNull()
 
     await user.click(summary)
 

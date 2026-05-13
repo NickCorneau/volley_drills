@@ -157,6 +157,11 @@ describe('getBlockSuccessRule', () => {
     delete (block as { variantId?: string }).variantId
 
     expect(getBlockMetricType(block, 1)).toBe('pass-rate-good')
-    expect(getBlockSuccessRule(block, 1)).toBe('Passes graded 2+ across 24 tosses.')
+    // 2026-05-10 first-time-runnability sweep added an inline
+    // operational gloss to "graded 2+" per rule 2 scoring-vocabulary
+    // table.
+    expect(getBlockSuccessRule(block, 1)).toBe(
+      'Passes graded 2+ (= ball lands within 1 m of the set window with enough arc to be settable) across 24 tosses.',
+    )
   })
 })

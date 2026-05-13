@@ -86,7 +86,10 @@ describe('RunScreen: Run Face cue detail', () => {
     expect(await screen.findByText(/^Now$/)).toBeInTheDocument()
     expect(screen.getByText(/Self-toss; forearm pass up and down/i)).toBeInTheDocument()
 
-    await user.click(screen.getByText(/full coaching cue/i))
+    // 2026-05-10 first-time-runnability sweep: affordance label
+    // updated to "Show more cues" / "Show more cues and instructions"
+    // per courtside-copy.mdc rule 12(a).
+    await user.click(screen.getByText(/show more cues/i))
     expect(screen.getByText(/CUEFULLMARKER_9f3a/)).toBeInTheDocument()
 
     expect(screen.queryByRole('button', { name: /show less/i })).not.toBeInTheDocument()

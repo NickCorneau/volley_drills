@@ -294,10 +294,16 @@ describe('RunScreen: body-typography invariants (P1-11 / cca2 dogfeed F1)', () =
     // TransitionScreen already renders this instruction role at
     // `text-base`; RunScreen matches it so interim and live play do
     // not change prose size for the same content role.
-    expect(instructions.className).toContain('text-base')
-    expect(instructions.className).not.toContain('text-lg')
-    expect(instructions.className).not.toContain('text-sm')
-    expect(instructions.className).not.toContain('text-xs')
+    //
+    // 2026-05-11: the inline-gloss tappable-term swap moved the prose
+    // text into `<span>` children inside `<GlossedText>`'s wrapping
+    // `<p>`. The `text-base` styling lives on the `<p>` ancestor; walk
+    // up to it so the size invariant is asserted at the right node.
+    const paragraph = instructions.closest('p')
+    expect(paragraph?.className ?? '').toContain('text-base')
+    expect(paragraph?.className ?? '').not.toContain('text-lg')
+    expect(paragraph?.className ?? '').not.toContain('text-sm')
+    expect(paragraph?.className ?? '').not.toContain('text-xs')
   })
 
   it('full coachingCue detail renders at shared run-flow body size', async () => {

@@ -9,15 +9,26 @@ alwaysApply: false
 
 # Courtside Copy
 
-Durable copy invariants for the drill catalog and any user-visible surface the courtside reader sees at arm's length. Rooted in partner-walkthrough evidence — every rule below traces to at least one logged finding so it can be falsified, not just held as taste.
+Durable copy invariants for the drill catalog and any user-visible surface the courtside reader sees at arm's length. Rooted in partner-walkthrough and founder-session evidence — every rule below traces to at least one logged finding so it can be falsified, not just held as taste.
 
 ## Origin evidence
 
 The first partner walkthrough (`docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md`) landed **9 P1 findings**, and 6 of the 9 were a single class of bug: an author's vocabulary leaking into courtside copy. Six authors (the founder + drill-library sources) all spoke fluent coach-speak; one rec-player reader did not. The reader is the source of truth.
 
+The 2026-05-10 D130 session (7th founder + Seb session, pair-net serving) extended this evidence: three drills (`d10-pair`, `d33-pair-open`, `d22-pair`) captured `still_learning` with zero streaks. The founder named the recurring class **"peak and flash / number drill"** — drills where a partner has a non-obvious cuing or scoring role and the first-time courtside reader cannot tell at first glance *who does what, when, what counts*. Rules 8–14 below address this class with synthesis from BAB, FIVB Coaches Manual (Fitts & Posner motor stages, cue-density rule, feedback cadence, whole-practice bias), Volleyball Canada Person Pillar Guidebook (observe / reinforce / question), and motor-learning literature (Wulf external focus, Vickers Quiet Eye, Bandura modeling, Mayer multimedia principles, Gawande READ-DO vs DO-CONFIRM). Origin synthesis: `docs/ideation/2026-05-10-drill-first-time-runnability-ideation.md` and `docs/brainstorms/2026-05-10-drill-first-time-runnability-requirements.md`.
+
+## Consumption-mode frame: READ-DO vs DO-CONFIRM
+
+Origin: Atul Gawande, *The Checklist Manifesto* (2009, Ch. 6). A drill card is consumed in two distinct phases. The rule set carries a tag on each rule indicating which surface it governs.
+
+- **[READ-DO]** — pre-run TransitionScreen consumption. The reader reads the drill once before starting; full prose, full glossing, full context disclosure are permitted. Rules 1–11 and most of 14 live here.
+- **[DO-CONFIRM]** — active-run RunScreen re-glance. The reader has already started; they glance to confirm they are doing the right thing, not to learn it. Structural-field shorthand (dense title, role prefixes, arrow cues, brackets, one cue, timer) is the right register. Rules 12 and 13 are DO-CONFIRM enforcers.
+
+A drill card that requires re-reading `courtsideInstructions` in DO-CONFIRM mode has under-spec'd structural fields; the fix lives in the triple (`skillFocus` + `successMetric.description` + `coachingCues[0]`), not in lengthening the prose. See rule 13.
+
 ## Invariants (in priority order)
 
-### 1. Headline-as-question, not surface-label
+### 1. Headline-as-question, not surface-label [READ-DO]
 
 Every primary screen headline must read as a question the reader would ask themselves, not a label for the surface. Subtitles must state what the app does with the answer, not reassure alone.
 
@@ -25,7 +36,7 @@ Every primary screen headline must read as a question the reader would ask thems
 - **Bad (before 2026-04-21)** — "Where are you today?" with subtitle "You can change this later." — reassurance without anchoring what "this" is; `SkillLevelScreen` P1-1.
 - **Test assertion** — partner-walkthrough Q2 ("first reaction on opening — did you know what to do?") is the verification channel. Any screen whose partner answer to Q2 is "took me a second" on two consecutive walkthroughs is a headline failure, not a reader failure.
 
-### 2. Jargon gate (the "one-season rec player" test)
+### 2. Jargon gate (the "one-season rec player" test) [READ-DO]
 
 Every drill record and every courtside string must pass the "one-season rec player" test: would a rec player who has played one beach season read this without stopping?
 
@@ -33,9 +44,11 @@ When in doubt, use the gloss pattern:
 
 - Plain-language term first, jargon in parentheses — "drop the shoulder nearer the ball (inside shoulder)."
 - Or gloss the jargon inline — "pass to the set window (where the setter would stand, ~3 m off the net)."
-- Never leave a coach-vocabulary term unglossed on its first appearance in a drill's `courtsideInstructions`, `coachingCues`, or `teachingPoints`.
+- Never leave a flagged-vocabulary term unglossed on its first appearance in a drill's `courtsideInstructions`, `coachingCues`, `teachingPoints`, `segments[].label`, or `successMetric.description`.
 
-Flagged vocabulary (non-exhaustive; extend as walkthroughs surface more):
+The flagged-vocabulary table covers three classes: **technique jargon** (existing), **movement vocabulary** (2026-05-10 extension, originating in `d28-solo Beach Prep Three` warmup pacing feedback and the 2026-04-26 `d26` cooldown-stretch finding), and **logistics jargon** (2026-05-10 extension, originating in the `d33-pair` and `d22-pair` "what does 'shag' / 'round' mean here?" gaps).
+
+Technique jargon (non-exhaustive; extend as walkthroughs surface more):
 
 | Term | Gloss or rename |
 | ---- | --------------- |
@@ -47,10 +60,36 @@ Flagged vocabulary (non-exhaustive; extend as walkthroughs surface more):
 | `brake-step` | "plant to stop before contact" |
 | `sideout` | define inline on first use per-drill |
 | `tomahawk`, `pokey`, `cut shot`, `high line` | BAB vocabulary — define inline on first use per-drill (Tier 1a Unit 3) |
+| `grade 2+`, `graded 2+`, `0-3 rubric`, `0-3 scale`, `grade 3 pass`, `good pass`, `good-pass`, `in-system`, `controlled set` | FIVB pass-grading scale (0/1/2/3) — autonomous-stage coaching vocabulary; require an inline operational definition every time it appears in any user-visible copy field (`successMetric.description`, `courtsideInstructions`, `coachingCues[]`, `teachingPoints`, `segments[].label`). Example: `Passes graded 2+ (= ball lands within 1 m of the set window with enough arc to be settable)` or, when surfacing the numeric scale inline at point of use, a compact gloss like `Grade each pass 0-3 (0 = unplayable, 3 = settable in the set window)`. Full rubric can live in `successMetric.description` while a short gloss appears inline at point of use in prose. |
 
-Walkthrough partner quotes on this class of finding are the first-line evidence for adding a term to this table. Remove a term only after two consecutive walkthroughs passed without flagging it.
+Movement vocabulary (named movements outside the one-season rec player's everyday English vocabulary — origin in Bandura modeling literature and ACSM exercise-prescription convention; static text cannot demonstrate, so spatial-referent gloss is the substitute):
 
-### 3. No combinatoric descriptions
+| Term | Spatial-referent gloss pattern |
+| ---- | ------------------------------ |
+| `A-skip` | "skip forward, lifting the front knee until the thigh is parallel to the sand" |
+| `ankle hops` | "small two-foot hops in place, springing off the balls of the feet" |
+| `lateral shuffles` | "quick sideways shuffle steps, feet never crossing, ~3 m each way" |
+| `pivot-back start` | "pivot the inside foot and step back" (rule 2's existing `drop-step` gloss, now also surfaced as a movement) |
+| `runner's lunge` | "long step forward into a deep lunge, back knee low to the sand" |
+| `half-kneel` | "one knee on the sand, the other foot flat in front" |
+| `hip flexor stretch` | "lean the hips forward in a half-kneel until the back-leg hip stretches" |
+| `RDL` | "stiff-legged hinge at the hips, hands sliding down the front of the thighs" |
+| `arm circles`, `trunk rotations` | usually self-explanatory; if used at higher cadence or with a stated arc, gloss the cadence |
+
+Logistics vocabulary (sport-specific or multi-meaning operational terms — origin in 2026-05-10 founder-session evidence on `d33-pair`/`d22-pair`/`d07-pair`):
+
+| Term | Gloss on first use per drill |
+| ---- | ---------------------------- |
+| `shag` | "collect the balls from the receiver's side and bring them back" |
+| `round` | name what defines a round explicitly (e.g., "one 6-zone serve cycle = one round") |
+| `attempt` / `miss` | name what counts as one attempt and what counts as a miss (e.g., "a serve out of the called zone is a miss") |
+| `reset` | name what resets ("reset your routine" vs "reset the count" vs "reset stance") |
+| `switch` / `swap` / `rotate` | name what switches and the trigger (per ball / per round / per win / per block) |
+| `turn` | name what defines one turn (typically equivalent to one rep or one round) |
+
+Walkthrough partner quotes and founder-session reports are the first-line evidence for adding a term. Remove a term only after two consecutive sessions or walkthroughs passed without flagging it.
+
+### 3. No combinatoric descriptions [READ-DO]
 
 Don't describe content as a product of axes. Enumerate.
 
@@ -59,7 +98,14 @@ Don't describe content as a product of axes. Enumerate.
 
 The combinatoric form assumes the reader's parser is loaded with algebra. The courtside reader's is loaded with sand, sun, and a ball about to be tossed.
 
-### 4. Plain punctuation, no em-dashes in prose
+**Permitted exception — bracket-repeat microformat for sequenced repetition.** When a drill is a cycle of N identical iterations through a named list, compress with a single bracket-repeat form rather than enumerating the cycle N times. The variable list still appears in full so the reader does not multiply or combine.
+
+- **Good** — `"(serve to called zone → partner shags) × 6 zones, in order: front-left, front-middle, front-right, back-left, back-middle, back-right."`
+- **Bad** — *"Serve to front-left, partner shags. Serve to front-middle, partner shags. Serve to front-right, partner shags. …"*
+
+The bracket-repeat form is `(action → action → action) × N <units>, in order: <unrolled list>`. It composes naturally with rule 8 (role-prefix) and rule 9 (cue→action arrow). Use it only when the cycle is identical and the variable list is fully unrolled; do not use it to hide a combinatoric product.
+
+### 4. Plain punctuation, no em-dashes in prose [READ-DO + DO-CONFIRM]
 
 User-visible courtside prose uses commas, periods, and colons. Em-dashes (`—`, `U+2014`) are aesthetically loaded (they signal essayist voice, not coach voice) and they read as visually heavy inside the narrow 390 px viewport. Partner-walkthrough polish round 2 (2026-04-22) — founder flagged them directly while looking at Run/Transition side by side.
 
@@ -72,14 +118,15 @@ Unicode guard: `U+2014` (em-dash) out of user-visible copy surfaces (`app/src/da
 
 Code comments can keep whichever dashes the author prefers — comments are author-facing, not courtside.
 
-### 5. Cool-down / wrap copy gets equal review weight as main-skill copy
+### 5. Cool-down / wrap copy gets equal review weight as main-skill copy [READ-DO]
 
 The lowest-engagement block is where jargon hides most. Authors spend attention on the main skill and leave wrap/cooldown blocks under-authored. P1-8 (cool-down stretches named without demonstration) is a direct consequence.
 
-- Every wrap/cooldown `courtsideInstructions` must pass the same jargon gate as main-skill blocks.
-- Stretches named by anatomical target must either (a) include a one-sentence execution cue inline, or (b) link to a tappable per-stretch description once that component ships (Tier 1b).
+- Every wrap/cooldown `courtsideInstructions` must pass the same jargon gate as main-skill blocks — including the movement-vocabulary and logistics columns added in rule 2's 2026-05-10 extension.
+- Stretches named by anatomical target must either (a) include a one-sentence execution cue inline (spatial-referent gloss per rule 2's movement column), or (b) link to a tappable per-stretch description once that component ships (Tier 1b).
+- **Operational-scoring and cadence rules apply to wrap copy too.** A wrap block's `successMetric.description` that uses graded vocabulary must be self-contained (rule 2 scoring-vocabulary table). A wrap segment with `durationSec` must name its cadence format (rule 7 extension).
 
-### 6. Lead with the skill verb in courtside instructions
+### 6. Lead with the skill verb in courtside instructions [READ-DO]
 
 Origin: 2026-04-27 cca2 dogfeed F8 (`docs/research/2026-04-27-cca2-dogfeed-findings.md`). Founder report on `d33-pair`: *"Take turns. Each partner works the full 6-zone order... Partner across the net calls the next zone before each serve and shags after the round."* — followed by *"is this a serving drill? It's really not that clear."* The skill word ("serve") was buried in a subordinate clause inside a logistics-led paragraph. The same pattern recurred across most M001 skill drills (paired sweep landed 2026-04-27).
 
@@ -107,7 +154,7 @@ Setup-led paragraphs that read as *"Stand 3 m apart. Partner tosses…"* or *"Ma
 
 **Why the rule exists structurally.** The eyebrow now composes `{slot} · {skill}` (e.g., `Main drill · Serve`) so the skill is visible before the body is read — see `app/src/lib/format.ts::blockEyebrowLabel`. The structural marker is the primary win; this rule aligns the body copy so the two reads stay in sync. A drill that violates this rule reads as "wait, why is the eyebrow saying Serve?" — the body copy must back the eyebrow's claim.
 
-### 7. Timed sub-blocks need audible structure (shipping gap)
+### 7. Timed sub-blocks need audible structure (shipping gap) [READ-DO + DO-CONFIRM]
 
 This is documented here because it recurs in drill copy (warm-up 4×45s sub-blocks, cool-down 6×20–30s stretches, pair role-swap) and because the copy cannot compensate for the missing capability. Partner ask in P2-2.
 
@@ -117,6 +164,142 @@ When authoring a drill with internal timed sub-segments:
 - Add a comment on the variant (`// Timed sub-blocks: depends on pacing-audio infra, not yet shipped`) so the spec-gap stays visible in code.
 
 When pacing-audio infra ships, its spec owns the cross-drill invariant and this rule points to it.
+
+**Cadence-format sub-rule (2026-05-10 extension).** Origin: 2026-05-10 founder-session "warmup pacing felt off" (`d28 Beach Prep Three`, 4 segments × 45s with no cadence format named). Whether the timer is gating continuous work, rep-paced work, work-rest cycles, or accumulated distance changes the cardiovascular and neurological load — and the same `durationSec: 45` can mean very different things. Name the cadence format for every timed segment.
+
+Permitted cadence formats:
+
+- **continuous** — sustained activity for the duration (e.g., "Jog continuously for 45s")
+- **rep-paced** — repeat the named rep until the duration elapses (e.g., "A-skip reps, ~1 rep per second, for 45s")
+- **work-rest** — alternating work and rest within the duration (e.g., "20s work / 25s rest, repeating until the duration ends")
+- **accumulator** — accumulate a quantity by the end of the duration (e.g., "accumulate 30 m of lateral shuffle in 45s")
+
+Pattern: `[movement] ([cadence format]) for [duration]s.` On the `segments[].label` field, name the cadence directly inside the label so the active-run UI can render it without re-reading the prose. Today's segments label the movement; the extension labels the cadence.
+
+### 8. Either-reader role-tagged sentences for pair drills [READ-DO]
+
+Origin: 2026-05-10 founder + Seb session. Three pair drills (`d10-pair`, `d33-pair-open`, `d22-pair`) captured `still_learning` with zero streaks; founder named the class "peak and flash / number drill" — drills where a partner has a non-obvious cuing or scoring role and the first-time reader cannot tell at first glance *who does what, when, what counts*. The skill-verb-first rule (rule 6, F8 origin) catches the doer's lead action; this rule catches the partner's silent role.
+
+**Rule.** For any drill whose `participants.roles[]` has length ≥ 2, `courtsideInstructions` must contain **at least one clause per role** where that role is the grammatical subject of an active verb. A clause is a sentence or a semicolon-separated independent clause (`"You pass; partner flashes..."` counts as two clauses). A partner appearing only as the object of another role's clause does not satisfy this rule.
+
+**Pattern.** Open with `"You [role A]; partner [role B]."` then lead with the skill verb (rule 6 compatible). Subsequent role-task descriptions may continue in either order.
+
+**Vocabulary alignment.** Use the role name from `participants.roles[]` verbatim. Accepted synonyms: `"you"` (for the first listed role, treated as the doer-by-default), or the role name capitalized or lowercased. Reserved synonyms outside this set are not accepted by the regression test.
+
+**Examples (today's specimens):**
+
+- **Bad** — `"Pass a served ball to the set window, then immediately look at partner/coach flashing 1-5 and call it before the next action."` (`d07-pair` pre-2026-05-10). The partner is referred to but never named as a grammatical subject performing an active verb; the first-time pair-reader cannot find themselves on the screen.
+- **Good** — `"You pass; partner flashes a number 1–5 with their fingers the moment your platform meets the ball. Pass to the set window, then call the number you saw before the next ball."` Both roles appear as grammatical subjects; partner's cuing channel (`fingers`) is named.
+
+- **Bad** — `"Serve through the same 6-zone order as Solo, taking turns. Partner across the net calls the next zone before each serve and shags after the round."` (`d33-pair` pre-2026-05-10).
+- **Good** — `"You serve; partner calls the next zone before each serve and shags after the round. Serve through the 6-zone ladder in order: front-left, front-middle, front-right, back-left, back-middle, back-right (from your side of the net)."`
+
+**Test verification.** Each rewritten pair drill is pinned by a regression test in `app/src/data/__tests__/drillCopyRegressions.test.ts` that checks for at least one sentence per role where the role name appears as the first content token of the sentence (heuristic; accepted synonyms enumerated above).
+
+**Out of scope.** Solo drills (`participants.roles.length === 1`) and warmup/recovery drills with no role asymmetry. Three-player drills are out of scope until D101 unblocks them.
+
+### 9. Cue→action coupling microformat [READ-DO]
+
+Origin: 2026-05-10 founder session; aviation crew resource management literature (Helmreich, Merritt & Wilhelm 1999) treats callout-action pairing as the canonical answer to two-pilot ambiguity. The same shape applies to two-partner drills.
+
+**Rule.** Where a partner cue triggers an action, `courtsideInstructions` must bind cue and action in **one syntactic unit**, not two sentences with implicit binding. Conjunction-and ("X and Y") for non-simultaneous actions must be split or rewritten with explicit sequence verbs (`first`, `then`, `while`, `between`, `on`, `before`, `after`).
+
+**Permitted microformat.** Either pattern is acceptable:
+
+- **Arrow form** — `"On [partner cue] → [your action]."` Example: `"On partner's call → serve to the named zone."`
+- **Conditional form** — `"[Partner cue], [your action]."` Example: `"When partner flashes a number, call it before the next ball."`
+
+**Examples (today's specimens):**
+
+- **Bad** — `"…calls the next zone before each serve and shags after the round."` (`d33-pair`). Two actions glued by conjunction-and; the cue→action binding is implicit and the temporal sequence ambiguous (does the partner call AND shag simultaneously?).
+- **Good** — `"Partner calls the next zone before each serve; partner shags after the 6-zone round."` Each role-action pair is its own sentence; sequence verbs (`before`, `after`) bind cue to action.
+
+- **Bad** — `"Pass a served ball to the set window, then immediately look at partner/coach flashing 1-5 and call it before the next action."` (`d07-pair`). Conjunction-and links the look and the call; the partner's flash is a participial phrase modifying the pass — its trigger is invisible.
+- **Good** — `"On partner's flash → pass to the set window, then call the number you saw before the next ball."` Or: `"Partner flashes a number 1–5 the moment your platform meets the ball. Pass to the set window, then call the number you saw."`
+
+**Composes with rule 8** (role prefix) and **rule 3's bracket-repeat exception** (sequenced cycles): `"(serve → partner shags) × 6 zones, in order: ..."`.
+
+### 10. Five-question logistics checklist for pair drills [READ-DO]
+
+Origin: 2026-05-10 founder report — *"first-time reader can't tell at first glance who does what, when, what counts"* — names three of five logistic questions in one sentence. Cross-source corroboration: Renshaw & Davids *Constraint-Led Approach* — when the coach is removed as a constraint, the *task* constraints must do the coordinating work the coach was doing.
+
+**Rule.** Each pair-drill `courtsideInstructions` must answer five logistic questions, in any order, in any number of sentences:
+
+1. **Who starts?** Name the first server / first caller / first doer explicitly. "Higher number on the dice" or "rock-paper-scissors" is acceptable; ambiguity is not.
+2. **What defines a round or a turn?** Name the unit (one rep / one 6-zone cycle / one game to N).
+3. **What counts as success this rep?** Name the observable; rules 2's scoring-vocabulary column requires it to be operationally defined.
+4. **What to do on a miss?** Name the miss-handling rule (repeat the zone / advance / dock a point / reset routine). Include an escape clause for unbounded miss-loops (e.g., "after 3 misses on the same zone, move on and revisit at the end").
+5. **When does the drill end?** Three conditions: (a) success stop, (b) time / rep / fatigue budget stop, (c) fallback when neither (a) nor (b) is reached cleanly (no winner at time-up, ball-count exhausted, partner disagreement).
+
+If a question cannot be answered by pointing at a specific sentence, the rule is not satisfied. The checklist is reviewer-applied; not all five questions need separate sentences but each must be answerable.
+
+**Examples (today's specimens):**
+
+- `d33-pair` pre-2026-05-10 answers (1) implicitly (you serve, partner shags — but who serves first?), (2) the 6-zone round, (3) the called zone, (4) miss repeats same zone (unbounded), (5) end of round. **Failures**: (1) and (4) — first server undefined, miss-loop unbounded.
+- `d22-pair` pre-2026-05-10 answers (3), (4) implicitly, (5)(a) "first to 10 wins". **Failures**: (1) first-server undefined, (2) round undefined, (5)(c) no fallback for the block-timer-up case.
+
+**Out of scope.** Solo drills with no partner coordination. Three-player drills until D101.
+
+### 11. Spatial point-of-view anchor [READ-DO]
+
+Origin: 2026-05-10 `d33-pair` evidence — the enumerated 6-zone list (`front-left, front-middle, front-right, back-left, back-middle, back-right`) has no stated point of view. From the server's side of the net these zones are on the receiver's half — but "front" of what? Server-relative front is the net; receiver-relative front is the back of the receiver's court. Pair drills compound this: the *partner is the caller*, so an unanchored direction means one thing to one reader and the mirror to the other.
+
+**Rule.** Every spatial directive (zone name, "front-left", "the same side", "across", "deep", "short") must be anchored to an explicit reference body.
+
+**Defaults.**
+
+- For serving drills (`skillFocus[0] === 'serve'`), the default is **from the server's POV** unless explicitly stated otherwise. The first sentence (or the first sentence that names a zone) carries the explicit anchor.
+- For passing / setting drills, the default is **from the doer's POV**.
+- For pair drills with a calling partner, the anchor sentence must name *both* readers' frame: the doer's POV is the reference, the caller is reading the same frame.
+
+**Pattern.** Either form is acceptable:
+
+- Anchor in prose — `"From your side of the net: front-left = the receiver's back-right corner."`
+- Anchor by listing — `"Serve through six zones in order, from your side of the net: short-left, short-middle, short-right, deep-left, deep-middle, deep-right."` (`short`/`deep` make POV unambiguous; `front`/`back` from the server's side maps to the receiver's `back`/`front` which is a common source of confusion).
+
+**Preferred vocabulary.** When possible, use `short` and `deep` (relative to the server) over `front` and `back`. Origin: the BAB serving-zone convention captured in `docs/research/bab-source-material.md` — Plan 1 Drill 6 names *"Short Poke Line · Mid Line Power · …"* — uses `short`/`deep` precisely because the POV is unambiguous from the doer's standpoint.
+
+### 12. Cue ordering rule for `coachingCues[]` [DO-CONFIRM]
+
+Origin: composite of four motor-learning findings (FIVB Coaches Manual Ch III.3 cue-density rule; Wulf 2013 external focus of attention; Vickers 2007 Quiet Eye; 2026-05-10 founder-as-doer evidence for doer-POV cues). `coachingCues[]` today is treated as 2–3 cues of equal weight; this rule makes `[0]` the load-bearing first cue.
+
+**Rule.** Four sub-rules apply to `coachingCues[0]`. Sub-rules (b), (c), (d) also extend across the rest of the list as coverage rules; sub-rule (a) is a render rule.
+
+- **(a) One cue rendered by default.** `RunScreen` shows only `coachingCues[0]` during active run. Remaining cues sit behind a `Show more cues` affordance that defaults closed. `[0]` must stand alone — it is not part of a multi-cue narrative. Origin: FIVB Level II Ch III.3 (p. 32) — *"The coach should give beginners one key cue at a time, intermediate and advanced athletes can hold two or three."* M001 reader is cognitive-stage (one-season rec player).
+- **(b) External focus on `[0]`.** `coachingCues[0]` names an outcome (ball flight, target, partner reach, landing mark, contact sound) or an environmental referent — not a body part, joint, muscle, or internal sensation. Cues that fail must be rewritten, or must carry an inline `// internal-focus exception: <reason>` comment explaining why an internal cue is load-bearing here (e.g., safety on a jump-float shoulder cue, beginner stance pre-load). Origin: Wulf *Attentional Focus and Motor Learning: A Review of 15 Years* (2013) — consistent retention/transfer advantage for external focus once a basic pattern exists. Self-coached setting amplifies the effect: there is no coach to remediate an internalized cue.
+- **(c) Gaze target first for perceptual-cognitive drills.** For drills whose `successMetric` references a perceptual decision (read drills, partner-cued drills, look-and-react drills), `coachingCues[0]` names the gaze target *and* the moment of gaze commit. Pattern: `"Look at [target] [the moment of contact / immediately after / before the pass leaves your platform]."` Origin: Vickers (2007) *Perception, Cognition, and Decision Training: The Quiet Eye in Action* — for perceptual-cognitive tasks, instructing *where to look and when* outperforms instructing *how to move*.
+- **(d) Doer-POV requirement (coverage).** At least one cue in `coachingCues[]` must pass the doer-POV test — phrased as a felt outcome or observable result the doer can self-check mid-rep without an observer present. Coverage rule, not replacement: observer-POV cues remain valid. Origin: 2026-05-10 D130 founder-use-mode evidence — the author IS the doer; observer-POV cues are unenforceable when no observer is present (partner is busy cuing/shagging, not watching technique).
+
+**Ordering implication.** `coachingCues[]` priority ordering becomes **contractually meaningful**. Author the cue list in priority order, not narrative order. Reorder existing drills where the load-bearing cue is not `[0]`.
+
+**Examples (today's specimens):**
+
+- `d07-pair` pre-2026-05-10: `coachingCues = ['Be stable during pass to buy time to look', 'Pass forward to keep vision', 'Do not drift under ball']`. **Failures**: `[0]` is internal-focus (*stable*) and observer-POV; the drill name says "Look" but no cue names a gaze target.
+- `d07-pair` rewritten: `coachingCues = ['Look at your partner's hand the moment your platform meets the ball', 'Hold platform first; look after contact', 'Say the read before you admire the pass']`. `[0]` is gaze-target + gaze-commit moment (sub-rule c) + external focus on the partner's hand (sub-rule b); `[2]` is doer-POV (felt outcome — *say the read before you admire*; sub-rule d).
+
+### 13. Active-run structural sufficiency / triple-only readability [DO-CONFIRM]
+
+Origin: composite of 2026-05-10 founder evidence (7th D130 session; rep-50 readability is the live case for `d33`/`d22`, not hypothetical) + `docs/research/outdoor-courtside-ui-brief.md` (active-run layout limited to 6 fields: block_title, one_primary_cue, timer_or_rep_target, phase_label, progress, primary controls). At 1–3 m viewing distance under glare, sentence-style explanatory text cannot survive at usable letter height.
+
+**Rule.** A drill must be re-runnable from its **load-bearing reading triple** — `skillFocus` (rendered as eyebrow) + `successMetric.description` + `coachingCues[0]` — alone, without re-reading `courtsideInstructions`.
+
+**Authoring test.** *"If `courtsideInstructions` were deleted, would the triple still get the reader through the drill correctly?"* If no, the triple is under-spec'd; the fix lives in the triple, not in lengthening the prose.
+
+This rule is reviewer-applied during authoring; the lint in rule 14 is the mechanical guardrail that enforces the implicit ceiling on `courtsideInstructions` length.
+
+**Implication for the cue list.** Rule 12(a) renders only `coachingCues[0]` by default. Therefore `[0]` must include or imply the action's primary outcome cue. Mechanical setup details (3 m apart, partner across the net) live in `courtsideInstructions` (READ-DO, pre-run) and do not need to survive the triple-only probe.
+
+### 14. `courtsideInstructions` aloud-read ceiling [READ-DO]
+
+Origin: external speech-comprehension and prospective-memory literature treats ~12–15 seconds as the upper bound for unstructured spoken-instruction recall without rehearsal (consistent with Sweller cognitive-load span; standard TTS UX heuristics). Practical analog: at courtside the ambient channel is wind / sand / sun; prose >15 s aloud is not read silently any faster than aloud — the working-memory ceiling is the same.
+
+**Rule.** `courtsideInstructions` must read aloud in **≤ 15 seconds** at conversational TTS pace, which corresponds to roughly **≤ 40 words** at 150 wpm. The mechanical lint enforces a **45-word hard ceiling** (with a 40-word soft warning where supported).
+
+When prose exceeds the ceiling, the overflow **must move into structured fields** — `segments`, `successMetric.description`, `coachingCues[]`, or `participants.roles` — that the active-run UI already renders. The overflow does not get to live as a longer paragraph; either the drill's structural fields are richer or the prose is shorter.
+
+**Exception comment.** When a drill legitimately needs longer prose (e.g., the first authored variant of a novel drill family where setup teaching is load-bearing), grant a per-variant exception via an inline comment that the lint respects: `// r14-exception: <reason>`. Exceptions should be rare; the lint surfaces them as a review queue.
+
+**Test verification.** Pinned by a word-count lint in `app/src/data/__tests__/drillCopyRegressions.test.ts` that counts words in `courtsideInstructions` per variant; excludes `segments[].label` strings (segments live in their own UI lane).
 
 ## Exercise copy contract
 
@@ -133,13 +316,29 @@ Envelope-honesty rule: if better copy requires changing participants, equipment,
 
 ## Authoring checklist (paste into drill PRs)
 
-- [ ] Every term on the flagged-vocabulary table above is either renamed or glossed inline on first use in this drill.
+Rules 1–7 (existing):
+
+- [ ] Every term on the flagged-vocabulary table is either renamed or glossed inline on first use in this drill — across all three classes (technique, movement vocabulary, logistics vocabulary).
 - [ ] The drill's `courtsideInstructions` passes the one-season rec player test (read aloud to yourself; if you stopped, fix it).
-- [ ] No combinatoric descriptions; enumerate.
+- [ ] No combinatoric descriptions; enumerate. Bracket-repeat microformat allowed only for sequenced cycles with the full variable list unrolled.
 - [ ] No em-dashes (`—`, `U+2014`) in user-visible prose. En-dashes (`–`, `U+2013`) allowed only inside numeric ranges (`2–3 m`, `1–4 wks`); in prose, convert to "to" or rewrite.
-- [ ] Wrap/cooldown text has been read with the same attention as main-skill text.
+- [ ] Wrap/cooldown text has been read with the same attention as main-skill text. Scoring-vocabulary and cadence-format sub-rules apply to wrap copy too.
 - [ ] If `skillFocus[0]` is `pass | serve | set`, the first sentence of `courtsideInstructions` contains the skill verb (rule 6). Pin with a `drillCopyRegressions.test.ts` case for any new authoring.
-- [ ] Any timed sub-blocks are described in firing order and the variant carries the audio-gap comment (until audio ships).
+- [ ] Any timed sub-blocks are described in firing order; each `segments[].label` names the cadence format (continuous / rep-paced / work-rest / accumulator); the variant carries the audio-gap comment (until audio ships).
+
+Rules 8–14 (2026-05-10 first-time-runnability extension):
+
+- [ ] If `participants.roles.length ≥ 2`, every role appears as the grammatical subject of at least one active-verb sentence in `courtsideInstructions` (rule 8). Pin with a `drillCopyRegressions.test.ts` case.
+- [ ] Partner cues are bound to the doer's action via arrow (`→`) or sequence verb (`first`, `then`, `while`, `before`, `after`, `on`); no conjunction-and for non-simultaneous actions (rule 9).
+- [ ] Pair-drill `courtsideInstructions` answers the five logistics questions: who starts, what is a round, what counts, what to do on a miss (with escape clause), when the drill ends (success / budget / fallback) (rule 10).
+- [ ] Every spatial directive is anchored to an explicit reference body (server's POV by default for serving drills; doer's POV otherwise) (rule 11).
+- [ ] `coachingCues[0]` passes the cue-ordering rule (rule 12): one cue rendered by default (a), external focus on `[0]` (b), gaze target first for perceptual-cognitive drills (c), and ≥ 1 cue in the list is doer-POV (d). Reorder `coachingCues[]` if the load-bearing cue is not currently `[0]`.
+- [ ] The drill passes the triple-only readability probe (rule 13): if `courtsideInstructions` were deleted, would `skillFocus` + `successMetric.description` + `coachingCues[0]` still get a returning reader through the drill?
+- [ ] `courtsideInstructions` reads aloud in ≤ 15s (≤ 40 words at 150 wpm; 45-word hard ceiling enforced by lint) (rule 14). Overflow routes to structured fields. Pin with a word-count lint in `drillCopyRegressions.test.ts`.
+- [ ] If a `successMetric.description` uses graded vocabulary (e.g., `"Passes graded 2+"`), the operational definition appears inline in the same description (rule 2 scoring-vocabulary table).
+
+Carry-forward from the exercise copy contract:
+
 - [ ] Active drill copy passes the exercise copy contract: why, setup, do, score/stop, cue, and scale are all clear in the existing fields.
 - [ ] Success and stop rules say what counts and when to reset, switch, repeat, or stop.
 - [ ] Variant copy matches its authored participant, equipment, workload, fatigue, segment, and source boundaries.

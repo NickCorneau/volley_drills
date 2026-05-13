@@ -132,6 +132,25 @@ export function PerDrillCapture(props: PerDrillCaptureProps) {
         <h2 id="per-drill-heading" className="text-base font-semibold text-text-primary">
           How was {drillName}?
         </h2>
+        {/*
+          2026-05-10 first-time-runnability sweep R16
+          (observe / reinforce / question template from Volleyball
+          Canada Person Pillar Guidebook). Lead with the observable
+          for the block — the measured behavior the drill aimed for —
+          before the difficulty chips so the reader grades against an
+          observable, not a vibe. The success rule description is
+          sourced from `variant.successMetric.description` via the
+          controller; absent for legacy drills, in which case the
+          observable line is omitted gracefully.
+        */}
+        {successRuleDescription && (
+          <p
+            className="text-sm text-text-secondary"
+            data-testid="per-drill-observable"
+          >
+            You aimed for: {successRuleDescription}
+          </p>
+        )}
       </div>
 
       <ChoiceRow<DifficultyTag>

@@ -29,6 +29,19 @@ ruleTester.run('no-inline-primitive-drift', rule, {
       filename: '/repo/app/src/screens/Home.tsx',
       code: `function Home() { return <div className="x">y</div>; }`,
     },
+    {
+      filename: '/repo/app/src/components/ui/GlossedText.tsx',
+      code: `function GlossedText() { return <button className="border-b border-dotted border-text-secondary/60 pb-[2px]">term</button>; }`,
+    },
+    {
+      filename: '/repo/app/src/components/ui/__tests__/GlossedText.test.tsx',
+      code: `function Fixture() { return <button className="border-b border-dotted border-text-secondary/60 pb-[2px]">term</button>; }`,
+    },
+    {
+      // Other dotted-border variants stay valid (false-positive guard).
+      filename: '/repo/app/src/screens/Other.tsx',
+      code: `function Other() { return <div className="border-dotted border-text-secondary/40">x</div>; }`,
+    },
   ],
   invalid: [
     {
@@ -50,6 +63,17 @@ ruleTester.run('no-inline-primitive-drift', rule, {
       filename: '/repo/app/src/components/ui/__tests__/ActionOverlay.test.tsx',
       code: `function F() { return <button data-action-overlay-initial-focus="true">go</button>; }`,
       errors: [{ messageId: 'forbiddenFocusAttr' }],
+    },
+    {
+      // Hand-rolled dotted-underline term outside GlossedText.tsx fails.
+      filename: '/repo/app/src/screens/SomeScreen.tsx',
+      code: `function S() { return <button className="border-b border-dotted border-text-secondary/60 pb-[2px]">term</button>; }`,
+      errors: [{ messageId: 'forbiddenInlineGlossedTerm' }],
+    },
+    {
+      filename: '/repo/app/src/components/Custom.tsx',
+      code: `function C() { return <span className="text-base border-dotted border-text-secondary/60">x</span>; }`,
+      errors: [{ messageId: 'forbiddenInlineGlossedTerm' }],
     },
   ],
 })

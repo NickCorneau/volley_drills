@@ -19,6 +19,15 @@
  * replaces it. Re-introducing the attribute means a contributor missed
  * the migration; the rule fails their PR.
  *
+ * ## `forbiddenInlineGlossedTerm`
+ * Reports any JSX `className` literal that contains the distinctive
+ * dotted-underline class string used by `<GlossedText>` term buttons
+ * (`border-dotted border-text-secondary/60`). The pattern is the high-
+ * signal tell that a contributor is hand-rolling the term-span +
+ * tap-reveal pattern instead of using `<GlossedText>` from
+ * `components/ui`. False-positive rate is effectively zero because the
+ * exact className combination is not used anywhere else in the app.
+ *
  * # Checks intentionally NOT enabled (yet)
  *
  * The plan also enumerated heuristic checks for the JustFinishedPill
@@ -56,6 +65,8 @@ const rule = {
         'Use `<ChoiceRow>` from `components/ui` (or `components/patterns` for app-shaped composites) instead of inlining `role="radiogroup"`. ChoiceRow owns the radiogroup wrapper, ToggleChip mapping, layout, and per-option tone.',
       forbiddenFocusAttr:
         'The `data-action-overlay-initial-focus` attribute was removed in plan U2 (2026-05-04). Pass `initialFocusRef` to `ActionOverlay` (or use `<ConfirmModal>` from `components/patterns` which threads the ref internally).',
+      forbiddenInlineGlossedTerm:
+        'Use `<GlossedText>` from `components/ui` instead of hand-rolling the dotted-underline term-span pattern. GlossedText owns the parser, registry, button affordance, fade-in reveal, and per-paragraph open scope.',
     },
   },
   create(context) {
@@ -63,6 +74,7 @@ const rule = {
     const normalizedFilename = filename.split(path.sep).join('/')
 
     const isChoiceRow = normalizedFilename.endsWith('/components/ui/ChoiceRow.tsx')
+    const isGlossedText = normalizedFilename.endsWith('/components/ui/GlossedText.tsx')
     const isTest = normalizedFilename.includes('/__tests__/')
 
     return {
@@ -82,6 +94,20 @@ const rule = {
 
         if (name === 'data-action-overlay-initial-focus') {
           context.report({ node, messageId: 'forbiddenFocusAttr' })
+          return
+        }
+
+        if (name === 'className') {
+          if (isGlossedText || isTest) return
+          const value =
+            node.value && node.value.type === 'Literal' ? node.value.value : undefined
+          if (
+            typeof value === 'string' &&
+            value.includes('border-dotted') &&
+            value.includes('border-text-secondary/60')
+          ) {
+            context.report({ node, messageId: 'forbiddenInlineGlossedTerm' })
+          }
         }
       },
     }
