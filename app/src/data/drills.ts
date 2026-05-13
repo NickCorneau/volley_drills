@@ -760,6 +760,12 @@ const d10: Drill = {
       // 2026-05-10 first-time-runnability sweep (rule 8 role-tagged;
       // rule 14 trim 53->44 words via bracket microformat; rule 2
       // scoring gloss; rule 15(d) doer-POV cue).
+      // 2026-05-13 cue0 second pass (rule 12b): rewrite [0] from body-
+      // part-led "Point shoulders to target" to outcome-led "Pass into
+      // the set window from every spot" — names where the ball lands
+      // (external focus) so the doer can self-check by watching the
+      // landing, not by introspecting shoulder orientation. Worked
+      // specimen for the rule 12(b) external-focus mechanical lint.
       successMetric: {
         type: 'pass-rate-good',
         description:
@@ -769,7 +775,7 @@ const d10: Drill = {
       courtsideInstructions:
         'You pass; tosser feeds six tosses from 2 to 3 m away. (toss → you pass back to the set window) × 6 spots, in order: front-left, side-left, behind-left, front-right, side-right, behind-right.',
       coachingCues: [
-        'Point shoulders to target.',
+        'Pass into the set window from every spot.',
         'Drop near shoulder, lift far shoulder on wide passes.',
         'Feel your platform face the target before contact.',
       ],
@@ -817,6 +823,9 @@ const d11: Drill = {
       },
       // 2026-05-10 first-time-runnability sweep (rule 8 role-tagged
       // via "you/partner" clauses; rule 2 scoring gloss).
+      // 2026-05-13 cue0 second pass (rule 12b): reorder [0]<->[1] so the
+      // external "Move through ball" cue leads; "Arm behind ball" body-
+      // mechanic refinement moves to [1].
       successMetric: {
         type: 'reps-successful',
         description: 'Controlled passes each side graded 2+ (= ball lands within 1 m of the set window with enough arc to be settable).',
@@ -825,8 +834,8 @@ const d11: Drill = {
       courtsideInstructions:
         'You pass with only your near arm (the one closer to the ball); partner (feeder) tosses wide to the sideline. Pass with the near arm, then with the far arm, then with both arms.',
       coachingCues: [
-        'Arm behind ball.',
         'Move through ball.',
+        'Arm behind ball.',
         'Thumb up on arm closest to ball, down on opposite.',
       ],
     },
@@ -846,6 +855,8 @@ const d11: Drill = {
         fatigueCap: { maxReps: 20, maxMinutes: 7 },
       },
       // 2026-05-10 first-time-runnability sweep (rule 2 scoring gloss).
+      // 2026-05-13 cue0 second pass (rule 12b): reorder [0]<->[1] so the
+      // external "Move through ball" cue leads (matches d11-pair).
       successMetric: {
         type: 'reps-successful',
         description: 'Controlled passes each side graded 2+ (= ball lands within 1 m of the set window with enough arc to be settable).',
@@ -854,8 +865,8 @@ const d11: Drill = {
       courtsideInstructions:
         'Pass with only your near arm (the one closer to the ball). Self-toss wide to the left, then to the right; pass with the near arm each time, then with the far arm, then with both arms.',
       coachingCues: [
-        'Arm behind ball.',
         'Move through ball.',
+        'Arm behind ball.',
         'Thumb up on arm closest to ball, down on opposite.',
       ],
     },
@@ -2294,7 +2305,7 @@ const d26: Drill = {
       //    because mirroring is built into the floor. Bonus is now
       //    purely accessory ("add glutes or adductors").
       courtsideInstructions:
-        'Short wrap (3 to 6 minutes on the timer): three moves to start. No bouncing; firm tension, never sharp pain.',
+        'Short wrap: three lower-body stretches, each side. No bouncing; firm tension, never sharp pain.',
       courtsideInstructionsBonus:
         'If time remains, add glutes (back of hips) or adductors (inner thighs).',
       segments: [
@@ -2385,6 +2396,13 @@ const d38: Drill = {
         rpeMax: 5,
         fatigueCap: { maxMinutes: 10 },
       },
+      // 2026-05-13 cue0 second pass (rule 12b): rewrite [0] from body-
+      // part-led "Platform square to target" to outcome-led "Land each
+      // set inside your circle" — names where the ball lands, the doer
+      // can self-check by watching the landing instead of introspecting
+      // platform orientation. Matches d38-pair's [0] external pattern
+      // ("Set to your partner, not past them") with the solo target
+      // (the 1 m circle around the player) replacing the partner.
       successMetric: {
         type: 'reps-successful',
         description:
@@ -2394,7 +2412,7 @@ const d38: Drill = {
       courtsideInstructions:
         'Bump-set off your own toss into a 1 m landing circle around you. Self-toss to yourself ~1.5 m up; bump-set the ball back up with platform angled at the sky; aim for a settable arc landing within the circle. Reset and repeat.',
       coachingCues: [
-        'Platform square to target.',
+        'Land each set inside your circle.',
         'Contact on forearms.',
         'Legs lift; arms aim.',
       ],

@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
 import { DRILLS } from '../drills'
@@ -247,25 +250,28 @@ describe('drill copy regressions', () => {
     })
   })
 
-  describe('d26-solo wrap copy (cca2 dogfeed F5, 2026-04-27)', () => {
+  describe('d26-solo wrap copy (cca2 dogfeed F5, 2026-04-27; segment-snap rewrite, 2026-05-13)', () => {
     /**
      * The cca2 dogfeed founder report flagged that `d26`'s
      * `courtsideInstructions` were calibrated to `~3 min on the timer`
      * while `workload` allowed 3-6 minutes — a 25-min pair pass session
      * landed a 4-min wrap and the prior copy left a ~1.5 min "what do
-     * I do?" gap. Fix: rewrite the courtside copy to honor the 3-6 min
-     * range honestly, with the three-move sequence as the floor and
-     * mirror / glutes / adductors as the ceiling. Same variant id;
-     * pure courtside-copy edit.
+     * I do?" gap. The 2026-04-27 fix surfaced the 3-6 min range
+     * honestly so the reader knew when to invoke the bonus.
      *
-     * The progressionDescription field already named the longer-wrap
-     * additions but it is not user-facing copy. The fix here surfaces
-     * that knowledge to the courtside reader. Per
-     * `.cursor/rules/courtside-copy.mdc` invariant 2 (one-season rec
-     * player test), `glutes` and `adductors` are glossed inline as
-     * `(back of hips)` and `(inner thighs)` respectively — both terms
-     * are common-enough but not first-language for a one-season rec
-     * player.
+     * 2026-05-13 (`docs/plans/2026-05-13-001-fix-wire-warmup-wrap-
+     * segment-snap-plan.md`): the warmup/wrap segment snap is now
+     * wired into `buildDraft` and `buildRecoveryDraft`, so d26's
+     * block timer is canonically 3 minutes (matching its segment
+     * sum) on every archetype × profile. The "3 to 6 minutes on the
+     * timer" framing was an honesty patch for the pre-snap drift
+     * and is now obsolete. The current copy drops the timer-range
+     * claim and names the each-side structure explicitly, mirroring
+     * what SegmentList renders. Bonus copy continues to surface
+     * glutes / adductors in the rare Shorten / non-snapped edge
+     * cases. Per `.cursor/rules/courtside-copy.mdc` invariant 2
+     * (one-season rec player test), `glutes` and `adductors` are
+     * glossed inline as `(back of hips)` and `(inner thighs)`.
      */
     const d26 = DRILLS.find((d) => d.id === 'd26')
     const solo = d26?.variants.find((v) => v.id === 'd26-solo')
@@ -278,14 +284,23 @@ describe('drill copy regressions', () => {
       expect(solo.workload.durationMaxMinutes).toBe(6)
     })
 
-    it('courtsideInstructions opens with the 3-6 min range, not a hard-coded ~3 min', () => {
+    it('courtsideInstructions names the short-wrap structure without claiming a timer range', () => {
       if (!solo) throw new Error('d26-solo variant missing')
       const text = solo.courtsideInstructions
-      expect(text).toMatch(/3 to 6 minutes on the timer/)
-      // Pre-fix copy hard-coded `~3 min on the timer`. Negative
-      // assertion guards against a regression that re-introduces the
-      // single-duration framing.
+      // Post-snap (2026-05-13) the block timer is canonically 3 min,
+      // so the copy names the structure (short wrap, three stretches,
+      // each side) without a numeric duration range. SegmentList
+      // already surfaces per-move timing on screen.
+      expect(text).toMatch(/Short wrap/)
+      expect(text).toMatch(/three lower-body stretches/)
+      expect(text).toMatch(/each side/)
+      // Negative assertions guard against regressing to either of the
+      // two prior copy generations: the original hard-coded `~3 min on
+      // the timer` framing OR the 2026-04-27 honesty patch's
+      // `3 to 6 minutes on the timer` range. Both are obsolete now
+      // that the snap canonicalizes the timer at the segment sum.
       expect(text).not.toMatch(/~3 min on the timer/)
+      expect(text).not.toMatch(/3 to 6 minutes on the timer/)
     })
 
     it('names the accessory bonus additions (glutes, adductors) in the bonus copy', () => {
@@ -770,6 +785,181 @@ describe('drill copy regressions', () => {
         }
       },
     )
+  })
+
+  describe('coachingCues[0] external-focus (rule 12b second pass, 2026-05-13)', () => {
+    /**
+     * Rule 12(b) origin: Wulf (2013) external focus + 2026-05-10 D130
+     * founder-use-mode. `coachingCues[0]` is the load-bearing first cue
+     * rendered by RunScreen on active run; it must name an outcome
+     * (ball flight, target, partner reach, landing mark, contact sound)
+     * — not a body part / joint / muscle / internal sensation that the
+     * doer must introspect.
+     *
+     * 2026-05-13 founder dogfeed on `d10-pair The 6-Legged Monster`
+     * named `coachingCues[0] = "Point shoulders to target."` as not
+     * load-bearing. Rule 12(b) was a reviewer-checklist item in the
+     * 2026-05-10 sweep; this test moves it onto the mechanical lint
+     * surface.
+     *
+     * Detection: two patterns flag the cue.
+     *   (a) Subject-pattern: first content word (after stripping
+     *       leading possessives "Your"/"Our"/"My" and modal verbs
+     *       "Keep"/"Make"/"Let") is a body-part token.
+     *   (b) Verb-object-pattern: first content word is a body-acting
+     *       verb AND second content word is a body-part token.
+     *
+     * Escape hatch: an inline comment `// cue0-exception: <reason>`
+     * placed within ~12 lines above the variant's `id:` line in
+     * `drills.ts` skips the lint for that variant.
+     *
+     * Out of scope: variants whose drill `skillFocus` is exclusively
+     * `recovery` or `warmup`.
+     */
+
+    const BODY_PART_TOKENS = new Set([
+      'shoulder', 'shoulders', 'arm', 'arms', 'leg', 'legs',
+      'hip', 'hips', 'knee', 'knees', 'elbow', 'elbows',
+      'wrist', 'wrists', 'platform', 'ribs', 'forehead',
+      'forearm', 'forearms', 'posture', 'body', 'head',
+      'chest', 'back', 'feet', 'foot', 'ankle', 'ankles',
+      'palm', 'palms', 'thumb', 'thumbs', 'finger', 'fingers',
+      'hand', 'hands', 'eye', 'eyes',
+    ])
+
+    const BODY_PART_VERB_FORMS = new Set(['hand', 'eye', 'back', 'head', 'palm'])
+
+    const BODY_ACTING_VERBS = new Set([
+      'point', 'square', 'aim', 'plant', 'tuck', 'lift',
+      'drop', 'bend', 'tilt', 'face', 'turn', 'open',
+      'close', 'rotate', 'extend', 'pull', 'press', 'lock',
+      'relax',
+    ])
+
+    const LEADING_STOPWORDS = new Set([
+      'your', 'our', 'my', 'keep', 'make', 'let', 'have', 'get',
+    ])
+
+    function contentWords(text: string, n: number): string[] {
+      const tokens = text
+        .toLowerCase()
+        .replace(/[.,;:!?'"]/g, '')
+        .split(/\s+/)
+        .filter((t) => t.length > 0)
+
+      const content: string[] = []
+      let i = 0
+      while (i < tokens.length && LEADING_STOPWORDS.has(tokens[i])) {
+        i += 1
+      }
+      while (i < tokens.length && content.length < n) {
+        content.push(tokens[i])
+        i += 1
+      }
+      return content
+    }
+
+    type Cue0Verdict = { fails: boolean; reason: string }
+
+    function evaluateCue0(cue: string): Cue0Verdict {
+      const [first, second] = contentWords(cue, 2)
+      if (!first) return { fails: false, reason: 'empty cue' }
+
+      if (BODY_ACTING_VERBS.has(first) && second && BODY_PART_TOKENS.has(second)) {
+        return {
+          fails: true,
+          reason: `verb-object pattern: '${first}' (body-acting verb) + '${second}' (body-part object)`,
+        }
+      }
+
+      if (BODY_PART_TOKENS.has(first)) {
+        if (BODY_PART_VERB_FORMS.has(first)) {
+          const verbFollowers = new Set([
+            'the', 'a', 'to', 'at', 'with', 'on', 'off', 'around', 'toward',
+          ])
+          if (second && verbFollowers.has(second)) {
+            return { fails: false, reason: 'body-part token used as verb' }
+          }
+        }
+        return {
+          fails: true,
+          reason: `subject pattern: '${first}' (body-part token at subject position)`,
+        }
+      }
+
+      return { fails: false, reason: 'first content word is neither body-part nor body-acting verb' }
+    }
+
+    function readDrillsSource(): string {
+      const sourcePath = path.resolve(process.cwd(), 'src/data/drills.ts')
+      return readFileSync(sourcePath, 'utf8')
+    }
+
+    function findCue0Exception(
+      drillId: string,
+      variantId: string,
+      source: string,
+    ): string | undefined {
+      const lines = source.split('\n')
+      const idLineRegex = new RegExp(`id:\\s*['"\`]${variantId}['"\`]`)
+      const exceptionRegex = /\/\/\s*cue0-exception:\s*(.+)$/
+      for (let i = 0; i < lines.length; i += 1) {
+        if (idLineRegex.test(lines[i])) {
+          const start = Math.max(0, i - 12)
+          for (let j = start; j < i; j += 1) {
+            const match = lines[j].match(exceptionRegex)
+            if (match) return match[1].trim()
+          }
+        }
+      }
+      const drillIdRegex = new RegExp(`id:\\s*['"\`]${drillId}['"\`]`)
+      for (let i = 0; i < lines.length; i += 1) {
+        if (drillIdRegex.test(lines[i])) {
+          const start = Math.max(0, i - 12)
+          for (let j = start; j < i; j += 1) {
+            const match = lines[j].match(exceptionRegex)
+            if (match) return match[1].trim()
+          }
+        }
+      }
+      return undefined
+    }
+
+    const cue0Cases = DRILLS.flatMap((drill) => {
+      if (!drill.m001Candidate) return []
+      const isSkillDrill = drill.skillFocus.some(
+        (focus) => focus !== 'recovery' && focus !== 'warmup',
+      )
+      if (!isSkillDrill) return []
+      return drill.variants.map((variant) => ({
+        drillId: drill.id,
+        drillName: drill.name,
+        variantId: variant.id,
+        cue0: variant.coachingCues[0] ?? '',
+      }))
+    })
+
+    const drillsSource = readDrillsSource()
+
+    it.each(cue0Cases)(
+      'rule 12b: $variantId coachingCues[0] uses external focus (no body-part subject or verb-object)',
+      ({ drillId, variantId, cue0 }) => {
+        const exception = findCue0Exception(drillId, variantId, drillsSource)
+        if (exception !== undefined) {
+          expect(exception.length).toBeGreaterThan(0)
+          return
+        }
+        const verdict = evaluateCue0(cue0)
+        expect(
+          verdict.fails,
+          `${variantId}: coachingCues[0] = "${cue0}" fails rule 12(b) external-focus — ${verdict.reason}. Reorder coachingCues[] so an external cue (outcome / target / ball flight / partner reach / landing / sound) sits at [0], or rewrite [0]. If the body-part lead is load-bearing (rare; safety / beginner-stage), add an inline comment '// cue0-exception: <reason>' adjacent to the variant id in drills.ts.`,
+        ).toBe(false)
+      },
+    )
+
+    it('coverage: at least one M001-candidate skill variant exists per major skill', () => {
+      expect(cue0Cases.length).toBeGreaterThan(20)
+    })
   })
 
   describe('d33-pair (red-team adversarial finding 2026-04-27)', () => {
