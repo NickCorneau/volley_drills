@@ -7,12 +7,13 @@ stage: validation
 authority: "Per-drill assessment of every M001-candidate drill against the strengthened first-time-runnability rubric (rules 8-14 in .cursor/rules/courtside-copy.mdc + the rule-2 / rule-3 / rule-5 / rule-7 extensions). Empirical input comes from the U2 mechanical lints in app/src/data/__tests__/drillCopyRegressions.test.ts; reviewer-checklist columns (R10, R11, R12, R13, R15) come from manual review against the courtsideInstructions, coachingCues, and successMetric.description copy. Classifies each drill as pass / repair / rewrite and assigns a priority (P0 = today's session drills; P1 = remaining pair drills; P2 = warmup/cooldown; P3 = remaining)."
 summary: "26 M001-candidate drills audited against rules 8-14. 5 pass mechanically with no reviewer-checklist concerns. 18 repair targets carry 1-3 lint failures plus checklist gaps; localized copy edits suffice. 3 rewrite targets (d33, d50, d51) carry >=4 lint failures or structural changes. P0 priority: d07, d10, d22, d28, d33 (today's session-affected drills). P1 priority: remaining pair drills with role coordination. P2: warmup/cooldown (d25, d26, d28 — d28 already at P0). P3: remaining."
 date: 2026-05-10
-last_updated: 2026-05-10
+last_updated: 2026-05-13
 depends_on:
   - .cursor/rules/courtside-copy.mdc
   - app/src/data/__tests__/drillCopyRegressions.test.ts
   - docs/brainstorms/2026-05-10-drill-first-time-runnability-requirements.md
   - docs/plans/2026-05-10-004-feat-drill-first-time-runnability-assessment-plan.md
+  - docs/plans/2026-05-13-003-feat-cue-zero-external-focus-second-pass-plan.md
 related:
   - docs/research/2026-05-10-pair-net-serving-duration-feedback.md
   - docs/research/founder-use-ledger.md

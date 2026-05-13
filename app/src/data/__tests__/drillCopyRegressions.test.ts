@@ -259,7 +259,7 @@ describe('drill copy regressions', () => {
      * I do?" gap. The 2026-04-27 fix surfaced the 3-6 min range
      * honestly so the reader knew when to invoke the bonus.
      *
-     * 2026-05-13 (`docs/plans/2026-05-13-001-fix-wire-warmup-wrap-
+     * 2026-05-13 (`docs/plans/2026-05-13-002-fix-wire-warmup-wrap-
      * segment-snap-plan.md`): the warmup/wrap segment snap is now
      * wired into `buildDraft` and `buildRecoveryDraft`, so d26's
      * block timer is canonically 3 minutes (matching its segment
@@ -817,7 +817,7 @@ describe('drill copy regressions', () => {
      * `recovery` or `warmup`.
      */
 
-    const BODY_PART_TOKENS = new Set([
+    const BODY_PART_TOKENS: ReadonlySet<string> = new Set([
       'shoulder', 'shoulders', 'arm', 'arms', 'leg', 'legs',
       'hip', 'hips', 'knee', 'knees', 'elbow', 'elbows',
       'wrist', 'wrists', 'platform', 'ribs', 'forehead',
@@ -827,18 +827,34 @@ describe('drill copy regressions', () => {
       'hand', 'hands', 'eye', 'eyes',
     ])
 
-    const BODY_PART_VERB_FORMS = new Set(['hand', 'eye', 'back', 'head', 'palm'])
+    const BODY_PART_VERB_FORMS: ReadonlySet<string> = new Set([
+      'hand', 'eye', 'back', 'head', 'palm',
+    ])
 
-    const BODY_ACTING_VERBS = new Set([
+    const BODY_ACTING_VERBS: ReadonlySet<string> = new Set([
       'point', 'square', 'aim', 'plant', 'tuck', 'lift',
       'drop', 'bend', 'tilt', 'face', 'turn', 'open',
       'close', 'rotate', 'extend', 'pull', 'press', 'lock',
       'relax',
     ])
 
-    const LEADING_STOPWORDS = new Set([
+    const LEADING_STOPWORDS: ReadonlySet<string> = new Set([
       'your', 'our', 'my', 'keep', 'make', 'let', 'have', 'get',
     ])
+
+    // When a body-part token can also be a verb (BODY_PART_VERB_FORMS), the
+    // word's role is verb-vs-noun. If the next content word is one of these
+    // articles/prepositions typical of verb constructions, treat the lead
+    // word as a verb and pass the cue. Example: "Hand the ball to partner"
+    // — "Hand" is the verb, "the" is the article that disambiguates.
+    const VERB_FOLLOWERS: ReadonlySet<string> = new Set([
+      'the', 'a', 'to', 'at', 'with', 'on', 'off', 'around', 'toward',
+    ])
+
+    // Look-back window (in lines of source) for the inline `// cue0-exception:`
+    // escape-hatch comment scan. Exception comments must sit within this many
+    // lines above the variant's `id:` line in `drills.ts` to take effect.
+    const EXCEPTION_LOOKBACK_LINES = 12
 
     function contentWords(text: string, n: number): string[] {
       const tokens = text
@@ -873,13 +889,8 @@ describe('drill copy regressions', () => {
       }
 
       if (BODY_PART_TOKENS.has(first)) {
-        if (BODY_PART_VERB_FORMS.has(first)) {
-          const verbFollowers = new Set([
-            'the', 'a', 'to', 'at', 'with', 'on', 'off', 'around', 'toward',
-          ])
-          if (second && verbFollowers.has(second)) {
-            return { fails: false, reason: 'body-part token used as verb' }
-          }
+        if (BODY_PART_VERB_FORMS.has(first) && second && VERB_FOLLOWERS.has(second)) {
+          return { fails: false, reason: 'body-part token used as verb' }
         }
         return {
           fails: true,
@@ -891,31 +902,36 @@ describe('drill copy regressions', () => {
     }
 
     function readDrillsSource(): string {
-      const sourcePath = path.resolve(process.cwd(), 'src/data/drills.ts')
+      // Resolve drills.ts path relative to this test file's directory using
+      // ESM-native `import.meta.dirname` (Node 20.11+). Avoids the
+      // `process.cwd()` coupling that broke when vitest is invoked from a
+      // non-`app/` working directory.
+      const sourcePath = path.resolve(import.meta.dirname, '..', 'drills.ts')
       return readFileSync(sourcePath, 'utf8')
     }
 
-    function findCue0Exception(
-      drillId: string,
-      variantId: string,
-      source: string,
-    ): string | undefined {
+    function escapeRegExp(text: string): string {
+      // Escape regex special chars so drill/variant ids that contain
+      // regex metacharacters (defensive — current ids are alphanumeric+`-`,
+      // but the catalog can grow) cannot mis-scan the source file.
+      return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    }
+
+    /**
+     * Find a `// cue0-exception: <reason>` comment within the
+     * EXCEPTION_LOOKBACK_LINES window above the variant's `id:` line.
+     * Variant-scoped only — this rule is per-variant by design (per the
+     * top-of-block docstring), so we deliberately do NOT fall back to the
+     * drill-level id. A drill-wide escape would silently exempt every
+     * variant under that drill, hiding real cue0 violations.
+     */
+    function findCue0Exception(variantId: string, source: string): string | undefined {
       const lines = source.split('\n')
-      const idLineRegex = new RegExp(`id:\\s*['"\`]${variantId}['"\`]`)
+      const idLineRegex = new RegExp(`id:\\s*['"\`]${escapeRegExp(variantId)}['"\`]`)
       const exceptionRegex = /\/\/\s*cue0-exception:\s*(.+)$/
       for (let i = 0; i < lines.length; i += 1) {
         if (idLineRegex.test(lines[i])) {
-          const start = Math.max(0, i - 12)
-          for (let j = start; j < i; j += 1) {
-            const match = lines[j].match(exceptionRegex)
-            if (match) return match[1].trim()
-          }
-        }
-      }
-      const drillIdRegex = new RegExp(`id:\\s*['"\`]${drillId}['"\`]`)
-      for (let i = 0; i < lines.length; i += 1) {
-        if (drillIdRegex.test(lines[i])) {
-          const start = Math.max(0, i - 12)
+          const start = Math.max(0, i - EXCEPTION_LOOKBACK_LINES)
           for (let j = start; j < i; j += 1) {
             const match = lines[j].match(exceptionRegex)
             if (match) return match[1].trim()
@@ -943,8 +959,8 @@ describe('drill copy regressions', () => {
 
     it.each(cue0Cases)(
       'rule 12b: $variantId coachingCues[0] uses external focus (no body-part subject or verb-object)',
-      ({ drillId, variantId, cue0 }) => {
-        const exception = findCue0Exception(drillId, variantId, drillsSource)
+      ({ variantId, cue0 }) => {
+        const exception = findCue0Exception(variantId, drillsSource)
         if (exception !== undefined) {
           expect(exception.length).toBeGreaterThan(0)
           return
@@ -957,8 +973,94 @@ describe('drill copy regressions', () => {
       },
     )
 
-    it('coverage: at least one M001-candidate skill variant exists per major skill', () => {
+    it('coverage: cue0 lint iterates over a non-trivial M001-candidate skill-drill set', () => {
+      // Soft floor: confirms the lint is actually running over a meaningful
+      // catalog slice, not silently no-op'ing because every variant got
+      // filtered. Today the M001-candidate skill-drill variant count is in
+      // the low 40s; this floor catches a regression that would silently
+      // halve scope (e.g. an accidental m001Candidate flip or a broken
+      // skillFocus filter). Bump if the catalog grows past the floor.
       expect(cue0Cases.length).toBeGreaterThan(20)
+    })
+
+    /**
+     * Direct unit tests for the body-part detector. Without these, the
+     * detector has no self-test — the catalog-only assertion above can
+     * silently rot if the catalog drifts to no-longer exercise certain
+     * patterns. These tests pin the detector's contract independently.
+     */
+    describe('evaluateCue0 detector contract', () => {
+      it('flags subject pattern (body-part as first content word)', () => {
+        expect(evaluateCue0('Shoulders square to target.').fails).toBe(true)
+        expect(evaluateCue0('Arm behind ball.').fails).toBe(true)
+        expect(evaluateCue0('Platform square to target.').fails).toBe(true)
+      })
+
+      it('flags subject pattern under leading possessive', () => {
+        expect(evaluateCue0('Your platform faces target.').fails).toBe(true)
+        expect(evaluateCue0('Keep your shoulders square.').fails).toBe(true)
+      })
+
+      it('flags verb-object pattern (body-acting verb + body-part)', () => {
+        expect(evaluateCue0('Point shoulders to target.').fails).toBe(true)
+        expect(evaluateCue0('Tuck ribs.').fails).toBe(true)
+        expect(evaluateCue0('Square hips to net.').fails).toBe(true)
+      })
+
+      it('passes external outcome cues', () => {
+        expect(evaluateCue0('Pass into the set window from every spot.').fails).toBe(false)
+        expect(evaluateCue0('Land each set inside your circle.').fails).toBe(false)
+        expect(evaluateCue0('Move through ball.').fails).toBe(false)
+      })
+
+      it('passes body-part verb forms used as verbs (disambiguation)', () => {
+        expect(evaluateCue0('Hand the ball to partner.').fails).toBe(false)
+        expect(evaluateCue0('Back off the ball.').fails).toBe(false)
+      })
+
+      it('passes when body-part appears as object inside an external cue', () => {
+        expect(evaluateCue0("Look at your partner's hand the moment you contact.").fails).toBe(
+          false,
+        )
+      })
+
+      it('handles empty cue gracefully', () => {
+        expect(evaluateCue0('').fails).toBe(false)
+      })
+    })
+
+    /**
+     * Direct unit test for the source-comment escape-hatch scan. Pins the
+     * variant-scoped contract: drill-level fallbacks (which would silently
+     * exempt every variant under a drill) are deliberately not supported.
+     */
+    describe('findCue0Exception escape-hatch contract', () => {
+      it('finds an exception comment within the lookback window above the variant id', () => {
+        const source = [
+          '    {',
+          '      // cue0-exception: load-bearing safety cue on jump-float shoulder',
+          "      id: 'd99-pair',",
+          '    },',
+        ].join('\n')
+        expect(findCue0Exception('d99-pair', source)).toBe(
+          'load-bearing safety cue on jump-float shoulder',
+        )
+      })
+
+      it('returns undefined when no exception comment is in the window', () => {
+        const source = ["    {", "      id: 'd99-pair',", '    },'].join('\n')
+        expect(findCue0Exception('d99-pair', source)).toBeUndefined()
+      })
+
+      it('does NOT match comments further than EXCEPTION_LOOKBACK_LINES above', () => {
+        const padding = Array(EXCEPTION_LOOKBACK_LINES + 2).fill('').join('\n')
+        const source = [
+          '      // cue0-exception: too far above',
+          padding,
+          "      id: 'd99-pair',",
+        ].join('\n')
+        expect(findCue0Exception('d99-pair', source)).toBeUndefined()
+      })
     })
   })
 
