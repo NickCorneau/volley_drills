@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { PerDrillCapture } from '../PerDrillCapture'
 
@@ -500,5 +501,140 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
     fireEvent.click(screen.getByTestId('per-drill-add-streak'))
     const input = screen.getByTestId('per-drill-streak-input') as HTMLInputElement
     expect(input.value).toBe('5')
+  })
+})
+
+/**
+ * 2026-05-13 universalization: the GlossedText affordance now applies
+ * to PerDrillCapture's "You aimed for: …" observable line and to the
+ * count + streak drawers' "Success rule: …" lines. Flagged terms
+ * inside `successRuleDescription` render as dotted-underline tappable
+ * buttons; tapping reveals a quiet `↳ definition` line beneath the
+ * parent `<p>` (the reveal is a sibling element, NOT a `<p>` nested
+ * inside the parent `<p>` — the existing testid hosts are now `<div>`
+ * wrappers so the HTML invariant holds).
+ *
+ * Per-site open scope: opening a term on the observable line does
+ * not open or close anything inside a drawer's success-rule line,
+ * and vice versa.
+ */
+describe('PerDrillCapture inline gloss behavior (2026-05-13 universalization)', () => {
+  const GLOSSED_RULE =
+    'Passes graded 2+ (= ball lands within 1 m of the set window with enough arc to be settable) across 24 tosses.'
+
+  it('renders flagged terms in the observable line as dotted-underline buttons', () => {
+    render(
+      <PerDrillCapture
+        drillName="The 6-Legged Monster"
+        difficulty="still_learning"
+        onDifficultyChange={noop}
+        captureShape={{ kind: 'none' }}
+        successRuleDescription={GLOSSED_RULE}
+      />,
+    )
+
+    const observable = screen.getByTestId('per-drill-observable')
+    const term = within(observable).getByRole('button', { name: 'graded 2+' })
+    expect(term).toBeInTheDocument()
+    expect(term.className).toContain('border-dotted')
+    expect(term.className).toContain('border-text-secondary/60')
+    expect(term).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('reveals the definition under the observable line when the term is tapped', async () => {
+    const user = userEvent.setup()
+    render(
+      <PerDrillCapture
+        drillName="The 6-Legged Monster"
+        difficulty="still_learning"
+        onDifficultyChange={noop}
+        captureShape={{ kind: 'none' }}
+        successRuleDescription={GLOSSED_RULE}
+      />,
+    )
+
+    const observable = screen.getByTestId('per-drill-observable')
+    expect(
+      within(observable).queryByText(/ball lands within 1 m of the set window/),
+    ).not.toBeInTheDocument()
+
+    await user.click(within(observable).getByRole('button', { name: 'graded 2+' }))
+
+    const reveal = within(observable).getByText(
+      /ball lands within 1 m of the set window/,
+    )
+    expect(reveal).toBeInTheDocument()
+    expect(reveal.textContent).toContain('↳')
+  })
+
+  it('renders flagged terms in the count-drawer success rule and keeps the anti-generosity nudge', async () => {
+    const user = userEvent.setup()
+    render(
+      <PerDrillCapture
+        drillName="The 6-Legged Monster"
+        difficulty="still_learning"
+        onDifficultyChange={noop}
+        captureShape={{ kind: 'count' }}
+        successRuleDescription={GLOSSED_RULE}
+        goodPasses={0}
+        attemptCount={0}
+        notCaptured={false}
+        onGoodChange={noop}
+        onAttemptChange={noop}
+        onToggleNotCaptured={noop}
+      />,
+    )
+
+    fireEvent.click(screen.getByTestId('per-drill-add-counts'))
+    const rule = screen.getByTestId('per-drill-success-rule')
+    expect(rule).toHaveTextContent(/^Success rule:/)
+    expect(rule).toHaveTextContent(/If unsure, don.t count it as Good\./)
+
+    const term = within(rule).getByRole('button', { name: 'graded 2+' })
+    await user.click(term)
+    expect(
+      within(rule).getByText(/ball lands within 1 m of the set window/),
+    ).toBeInTheDocument()
+  })
+
+  it('renders flagged terms in the streak-drawer success rule WITHOUT the anti-generosity nudge', async () => {
+    const user = userEvent.setup()
+    render(
+      <PerDrillCapture
+        drillName="The 6-Legged Monster"
+        difficulty="still_learning"
+        onDifficultyChange={noop}
+        captureShape={{ kind: 'streak' }}
+        successRuleDescription={GLOSSED_RULE}
+        streakLongest={null}
+        onStreakLongestChange={noop}
+      />,
+    )
+
+    fireEvent.click(screen.getByTestId('per-drill-add-streak'))
+    const rule = screen.getByTestId('per-drill-success-rule')
+    expect(rule).toHaveTextContent(/^Success rule:/)
+    expect(rule).not.toHaveTextContent(/If unsure, don.t count it as Good/)
+
+    await user.click(within(rule).getByRole('button', { name: 'graded 2+' }))
+    expect(
+      within(rule).getByText(/ball lands within 1 m of the set window/),
+    ).toBeInTheDocument()
+  })
+
+  it('does not render gloss buttons or reveal slots when the description has no `(= …)`', () => {
+    render(
+      <PerDrillCapture
+        drillName="Plain Drill"
+        difficulty="still_learning"
+        onDifficultyChange={noop}
+        captureShape={{ kind: 'none' }}
+        successRuleDescription="Clean contacts in a row before a mishit."
+      />,
+    )
+
+    const observable = screen.getByTestId('per-drill-observable')
+    expect(within(observable).queryByRole('button')).not.toBeInTheDocument()
+    expect(observable.textContent).toContain('Clean contacts in a row before a mishit.')
   })
 })

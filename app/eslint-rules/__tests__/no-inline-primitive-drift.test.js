@@ -34,7 +34,19 @@ ruleTester.run('no-inline-primitive-drift', rule, {
       code: `function GlossedText() { return <button className="border-b border-dotted border-text-secondary/60 pb-[2px]">term</button>; }`,
     },
     {
+      filename: '/repo/app/src/components/ui/GlossInline.tsx',
+      code: `function GlossInline() { return <button className="border-b border-dotted border-text-secondary/60 pb-[2px]">term</button>; }`,
+    },
+    {
+      filename: '/repo/app/src/components/ui/GlossReveal.tsx',
+      code: `function GlossReveal() { return <p className="border-dotted border-text-secondary/60">x</p>; }`,
+    },
+    {
       filename: '/repo/app/src/components/ui/__tests__/GlossedText.test.tsx',
+      code: `function Fixture() { return <button className="border-b border-dotted border-text-secondary/60 pb-[2px]">term</button>; }`,
+    },
+    {
+      filename: '/repo/app/src/components/ui/__tests__/GlossInline.test.tsx',
       code: `function Fixture() { return <button className="border-b border-dotted border-text-secondary/60 pb-[2px]">term</button>; }`,
     },
     {

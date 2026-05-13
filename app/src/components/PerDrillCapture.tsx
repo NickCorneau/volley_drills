@@ -1,7 +1,16 @@
+import type { ReactNode } from 'react'
 import type { DifficultyTag } from '../model'
 import { validateStreakLongest } from '../domain/capture'
 import { PassMetricInput } from './PassMetricInput'
-import { ChoiceRow, type ChoiceRowOption, Disclosure, NumberCell } from './ui'
+import {
+  ChoiceRow,
+  type ChoiceRowOption,
+  Disclosure,
+  GlossInline,
+  GlossReveal,
+  NumberCell,
+  useGloss,
+} from './ui'
 
 /**
  * Tier 1b D133 (2026-04-26): per-drill capture surface that lives on
@@ -144,12 +153,7 @@ export function PerDrillCapture(props: PerDrillCaptureProps) {
           observable line is omitted gracefully.
         */}
         {successRuleDescription && (
-          <p
-            className="text-sm text-text-secondary"
-            data-testid="per-drill-observable"
-          >
-            You aimed for: {successRuleDescription}
-          </p>
+          <ObservableLine successRuleDescription={successRuleDescription} />
         )}
       </div>
 
@@ -257,13 +261,17 @@ function CountDrawer({
         and the `D134` row in `docs/decisions.md`.
       */}
       {successRuleDescription && (
-        <p className="text-sm text-text-secondary" data-testid="per-drill-success-rule">
-          <span className="font-medium text-text-primary">Success rule:</span>{' '}
-          {successRuleDescription}{' '}
-          <span className="font-medium text-text-primary">
-            If unsure, don&rsquo;t count it as Good.
-          </span>
-        </p>
+        <SuccessRuleLine
+          successRuleDescription={successRuleDescription}
+          tail={
+            <>
+              {' '}
+              <span className="font-medium text-text-primary">
+                If unsure, don&rsquo;t count it as Good.
+              </span>
+            </>
+          }
+        />
       )}
         <PassMetricInput
           good={goodPasses}
@@ -311,10 +319,7 @@ function StreakDrawer({
           import nuance the input does not actually need.
         */}
         {successRuleDescription && (
-          <p className="text-sm text-text-secondary" data-testid="per-drill-success-rule">
-            <span className="font-medium text-text-primary">Success rule:</span>{' '}
-            {successRuleDescription}
-          </p>
+          <SuccessRuleLine successRuleDescription={successRuleDescription} />
         )}
         <StreakInput streakLongest={streakLongest} onStreakLongestChange={onStreakLongestChange} />
       </div>
@@ -367,5 +372,68 @@ function StreakInput({
       // helper text below the input renders centered which reads fine
       // courtside. Drop the items-start divergence on extraction.
     />
+  )
+}
+
+/**
+ * 2026-05-13 universalization: the "You aimed for: …" line uses
+ * `<GlossInline>` so flagged terms in the success-rule description
+ * (e.g. `Passes graded 2+ (= ball lands within 1 m …) across 24
+ * tosses`) render as tappable dotted-underline buttons. The reveal
+ * is rendered as a sibling `<div>` after the parent `<p>` (HTML
+ * invariant — no `<p>` inside `<p>`), wrapped together inside the
+ * existing `data-testid="per-drill-observable"` host so existing
+ * test selectors keep resolving.
+ *
+ * Each instance of this component holds its own gloss open-scope —
+ * opening a term here is independent of opens inside the count or
+ * streak drawer's `<SuccessRuleLine>`.
+ */
+function ObservableLine({
+  successRuleDescription,
+}: {
+  successRuleDescription: string
+}) {
+  const { parts, openDefinition, isOpen, toggle } = useGloss(successRuleDescription)
+  return (
+    <div data-testid="per-drill-observable">
+      <p className="text-sm text-text-secondary">
+        You aimed for: <GlossInline parts={parts} isOpen={isOpen} onToggle={toggle} />
+      </p>
+      {openDefinition != null && <GlossReveal definition={openDefinition} />}
+    </div>
+  )
+}
+
+/**
+ * 2026-05-13 universalization: the count and streak drawers' "Success
+ * rule: …" line uses `<GlossInline>` for the description body. The
+ * count drawer passes a `tail` for the anti-generosity nudge ("If
+ * unsure, don't count it as Good.") so it stays inside the same `<p>`
+ * register as before. The streak drawer omits `tail` per the D134
+ * contract (anti-generosity nudge belongs only to the count branch).
+ *
+ * Reveal renders as a sibling `<div>` after the parent `<p>` (HTML
+ * invariant — no `<p>` inside `<p>`), wrapped together inside the
+ * existing `data-testid="per-drill-success-rule"` host so existing
+ * test selectors keep resolving.
+ */
+function SuccessRuleLine({
+  successRuleDescription,
+  tail,
+}: {
+  successRuleDescription: string
+  tail?: ReactNode
+}) {
+  const { parts, openDefinition, isOpen, toggle } = useGloss(successRuleDescription)
+  return (
+    <div data-testid="per-drill-success-rule">
+      <p className="text-sm text-text-secondary">
+        <span className="font-medium text-text-primary">Success rule:</span>{' '}
+        <GlossInline parts={parts} isOpen={isOpen} onToggle={toggle} />
+        {tail}
+      </p>
+      {openDefinition != null && <GlossReveal definition={openDefinition} />}
+    </div>
   )
 }

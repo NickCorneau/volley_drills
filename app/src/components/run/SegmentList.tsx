@@ -1,5 +1,6 @@
 import type { DrillSegment } from '../../types/drill'
 import { SEGMENT_INDEX_BONUS } from '../../domain/runFlow'
+import { GlossInline, GlossReveal, useGloss } from '../ui'
 
 /**
  * Per-move pacing indicator rendered on RunScreen for warmup /
@@ -90,56 +91,7 @@ export function SegmentList({ segments, currentIndex, bonus }: SegmentListProps)
       <ul aria-label="Segments" className="flex flex-col gap-2">
         {segments.map((segment, i) => {
           const status = statusForIndex(i, currentIndex)
-          const isNow = status === 'now'
-          // Reserve the 2 px left rule space on every row so the
-          // active row never causes layout shift when the highlight
-          // moves.
-          const containerClass = isNow
-            ? 'border-l-2 border-accent/70 pl-3'
-            : 'border-l-2 border-transparent pl-3'
-
-          return (
-            <li
-              key={segment.id}
-              aria-current={isNow ? 'step' : undefined}
-              className={`grid grid-cols-[1rem_1fr_auto] gap-x-3 ${containerClass}`}
-            >
-              {/*
-               * Marker column: fixed 1rem (16 px) wide so labels
-               * align across rows regardless of marker shape. Marker
-               * itself sits inline with the first text line via
-               * `pt-[7px]` (half of (line-height − marker-height) for
-               * 16 px text with `leading-relaxed` ≈ 28 px line height
-               * and 14 px marker = 7 px top offset).
-               */}
-              <span className="pt-[7px]">
-                <SegmentMarker status={status} />
-              </span>
-              <span className={labelClassForStatus(status)}>
-                {segment.label}
-                {segment.eachSide && (
-                  <span className="text-text-secondary"> (each side)</span>
-                )}
-              </span>
-              {/*
-               * Duration cell uses `self-end` so on multi-line label
-               * wraps it sits at the bottom of the row (level with the
-               * last text line), not the first. Single-line labels
-               * still see it on the only line. `pb-[1px]` nudges it
-               * onto the actual text baseline of the last line.
-               *
-               * Display rounds to whole seconds — a Shorten-scaled
-               * segment may have a fractional float duration (e.g.,
-               * 22.5 s) that's correct for the pacing math but reads
-               * weird to a courtside user. The pacing helper still
-               * uses the unrounded float so cumulative ends sum
-               * exactly to the active block duration.
-               */}
-              <span className="self-end pb-[2px] text-sm tabular-nums text-text-secondary">
-                {Math.round(segment.durationSec)}s
-              </span>
-            </li>
-          )
+          return <SegmentRow key={segment.id} segment={segment} status={status} />
         })}
       </ul>
 
@@ -157,6 +109,79 @@ export function SegmentList({ segments, currentIndex, bonus }: SegmentListProps)
         <p className="mt-3 text-sm leading-relaxed text-text-secondary">{bonus}</p>
       )}
     </div>
+  )
+}
+
+/**
+ * One segment row owns its own gloss open-scope. Opening a term in
+ * row 1 does not close a term in row 2 (per-row scope, mirroring
+ * the per-paragraph contract on `<GlossedText>`). The reveal
+ * renders as a 4th grid item with `col-start-2 col-span-2` so it
+ * sits beneath the row's marker / label / duration line, anchored
+ * under the label column. The 3-column layout stays put regardless
+ * of whether a definition is open.
+ */
+function SegmentRow({
+  segment,
+  status,
+}: {
+  segment: DrillSegment
+  status: SegmentRowStatus
+}) {
+  const { parts, openDefinition, isOpen, toggle } = useGloss(segment.label)
+  const isNow = status === 'now'
+  // Reserve the 2 px left rule space on every row so the active
+  // row never causes layout shift when the highlight moves.
+  const containerClass = isNow
+    ? 'border-l-2 border-accent/70 pl-3'
+    : 'border-l-2 border-transparent pl-3'
+
+  return (
+    <li
+      aria-current={isNow ? 'step' : undefined}
+      className={`grid grid-cols-[1rem_1fr_auto] gap-x-3 ${containerClass}`}
+    >
+      {/*
+       * Marker column: fixed 1rem (16 px) wide so labels align
+       * across rows regardless of marker shape. Marker itself sits
+       * inline with the first text line via `pt-[7px]` (half of
+       * (line-height − marker-height) for 16 px text with
+       * `leading-relaxed` ≈ 28 px line height and 14 px marker =
+       * 7 px top offset).
+       */}
+      <span className="pt-[7px]">
+        <SegmentMarker status={status} />
+      </span>
+      <span className={labelClassForStatus(status)}>
+        <GlossInline parts={parts} isOpen={isOpen} onToggle={toggle} />
+        {segment.eachSide && (
+          <span className="text-text-secondary"> (each side)</span>
+        )}
+      </span>
+      {/*
+       * Duration cell uses `self-end` so on multi-line label wraps
+       * it sits at the bottom of the row (level with the last
+       * text line), not the first. Single-line labels still see
+       * it on the only line. `pb-[1px]` nudges it onto the actual
+       * text baseline of the last line.
+       *
+       * Display rounds to whole seconds — a Shorten-scaled
+       * segment may have a fractional float duration (e.g., 22.5 s)
+       * that's correct for the pacing math but reads weird to a
+       * courtside user. The pacing helper still uses the
+       * unrounded float so cumulative ends sum exactly to the
+       * active block duration.
+       */}
+      <span className="self-end pb-[2px] text-sm tabular-nums text-text-secondary">
+        {Math.round(segment.durationSec)}s
+      </span>
+      {openDefinition != null && (
+        <GlossReveal
+          definition={openDefinition}
+          className="col-start-2 col-span-2"
+        />
+      )}
+    </li>
   )
 }
 

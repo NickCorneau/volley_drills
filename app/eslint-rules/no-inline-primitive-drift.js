@@ -21,12 +21,21 @@
  *
  * ## `forbiddenInlineGlossedTerm`
  * Reports any JSX `className` literal that contains the distinctive
- * dotted-underline class string used by `<GlossedText>` term buttons
+ * dotted-underline class string used by gloss term buttons
  * (`border-dotted border-text-secondary/60`). The pattern is the high-
  * signal tell that a contributor is hand-rolling the term-span +
- * tap-reveal pattern instead of using `<GlossedText>` from
- * `components/ui`. False-positive rate is effectively zero because the
- * exact className combination is not used anywhere else in the app.
+ * tap-reveal pattern instead of using `<GlossedText>` (paragraph
+ * prose) or composing `useGloss` + `<GlossInline>` + `<GlossReveal>`
+ * (non-paragraph layouts) from `components/ui`. False-positive rate
+ * is effectively zero because the exact className combination is not
+ * used anywhere else in the app.
+ *
+ * Allow-listed canonical homes:
+ * - `components/ui/GlossedText.tsx` (paragraph-prose wrapper)
+ * - `components/ui/GlossInline.tsx` (inline term-button atom)
+ * - `components/ui/GlossReveal.tsx` (definition-line atom)
+ * Plus `__tests__/` files (synthetic violations are how RuleTester
+ * verifies the rule fires).
  *
  * # Checks intentionally NOT enabled (yet)
  *
@@ -75,6 +84,9 @@ const rule = {
 
     const isChoiceRow = normalizedFilename.endsWith('/components/ui/ChoiceRow.tsx')
     const isGlossedText = normalizedFilename.endsWith('/components/ui/GlossedText.tsx')
+    const isGlossInline = normalizedFilename.endsWith('/components/ui/GlossInline.tsx')
+    const isGlossReveal = normalizedFilename.endsWith('/components/ui/GlossReveal.tsx')
+    const isGlossPrimitive = isGlossedText || isGlossInline || isGlossReveal
     const isTest = normalizedFilename.includes('/__tests__/')
 
     return {
@@ -98,7 +110,7 @@ const rule = {
         }
 
         if (name === 'className') {
-          if (isGlossedText || isTest) return
+          if (isGlossPrimitive || isTest) return
           const value =
             node.value && node.value.type === 'Literal' ? node.value.value : undefined
           if (
