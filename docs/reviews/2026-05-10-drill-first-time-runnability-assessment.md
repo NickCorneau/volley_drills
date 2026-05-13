@@ -230,3 +230,79 @@ After each priority tier, rerun the U2 lint suite + existing `catalogValidation.
 ## Update history
 
 - 2026-05-10 — Initial assessment landed; 46 mechanical-lint failures + reviewer-checklist gaps captured across 26 drills. Drives U5 sweep.
+- 2026-05-13 — Cue[0] external-focus second pass landed (`docs/plans/2026-05-13-003-feat-cue-zero-external-focus-second-pass-plan.md`). Body-part token mechanical lint added in `drillCopyRegressions.test.ts` under `coachingCues[0] external-focus (rule 12b second pass, 2026-05-13)`; surfaces 4 failures on the post-2026-05-10-sweep catalog: `d10-pair`, `d11-pair`, `d11-solo`, `d38-solo`. All 4 fixed in the same commit; `d10-pair` carries the worked specimen.
+
+## Cue[0] second pass (2026-05-13)
+
+### Method
+
+Lint added in `drillCopyRegressions.test.ts > drill copy regressions > coachingCues[0] external-focus (rule 12b second pass, 2026-05-13)`. Detects two patterns:
+
+- **Subject-pattern**: first content word (after stripping leading `Your`/`Our`/`My` and `Keep`/`Make`/`Let`) is a body-part token from a 38-token table (`shoulder`, `arm`, `platform`, `ribs`, `forehead`, etc.).
+- **Verb-object-pattern**: first content word is a body-acting verb (`point`, `tuck`, `square`, `aim`, `plant`, `lift`, etc.) AND second content word is a body-part token.
+
+Per-variant escape via inline comment `// cue0-exception: <reason>` placed within ~12 lines above the variant's `id:` line in `drills.ts`. Recovery / warmup drills are out of scope (rule 12 governs skill drills).
+
+### Findings (post-2026-05-10-sweep baseline)
+
+| Drill | Variant | Current `coachingCues[0]` | Failing pattern | Classification | Action |
+|---|---|---|---|---|---|
+| d10 | d10-pair | `'Point shoulders to target.'` | verb-object: `point` (body-acting verb) + `shoulders` (body-part) | **rewrite** | `'Pass into the set window from every spot.'` (worked specimen) |
+| d11 | d11-pair | `'Arm behind ball.'` | subject: `arm` (body-part) | **reorder** | swap [0]<->[1] so `'Move through ball.'` leads |
+| d11 | d11-solo | `'Arm behind ball.'` | subject: `arm` (body-part) | **reorder** | swap [0]<->[1] so `'Move through ball.'` leads (matches d11-pair) |
+| d38 | d38-solo | `'Platform square to target.'` | subject: `platform` (body-part) | **rewrite** | `'Land each set inside your circle.'` (matches d38-pair pattern with solo target) |
+
+### Tally
+
+| Classification | Count | Drills |
+|---|---|---|
+| reorder | 2 | d11-pair, d11-solo |
+| rewrite | 2 | d10-pair, d38-solo |
+| exception | 0 | (none) |
+| **TOTAL** | **4** | |
+
+The narrow failure surface (4 of 43 in-scope variants) confirms the 2026-05-10 sweep already covered most of rule 12(b) by intent — the four remaining specimens slipped past reviewer-checklist enforcement because `coachingCues[]` was treated as 2-3 cues of equal weight rather than priority-ordered. The mechanical lint locks the priority-ordered convention going forward.
+
+### Worked specimen — d10-pair "The 6-Legged Monster"
+
+Origin: 2026-05-13 founder dogfeed. Founder sees `coachingCues[0] = "Point shoulders to target."` on the active-run screen and reports *"that's not really a good cue."* The cue mentions a target (external) but leads with a body-part orientation (`shoulders`) — the doer is asked to introspect their shoulder alignment rather than self-check the outcome (where the ball lands).
+
+**Before** (post-2026-05-10-sweep, pre-2026-05-13):
+
+```
+coachingCues: [
+  'Point shoulders to target.',
+  'Drop near shoulder, lift far shoulder on wide passes.',
+  'Feel your platform face the target before contact.',
+]
+```
+
+**After** (post-2026-05-13):
+
+```
+coachingCues: [
+  'Pass into the set window from every spot.',
+  'Drop near shoulder, lift far shoulder on wide passes.',
+  'Feel your platform face the target before contact.',
+]
+```
+
+Why the new `[0]` works:
+
+- **External focus**: names the outcome (the ball lands in the set window), not a body part.
+- **Self-checkable mid-rep**: the doer watches the landing, not their shoulders.
+- **Outcome scope**: "from every spot" carries the drill's load-bearing constraint (6 toss locations, the wide ones being hardest) without restating the geometry — the courtside instructions already enumerate the 6 spots.
+- **Doer-POV**: phrased as a felt outcome the doer can self-check without an observer (rule 12d coverage).
+- **Triple-only readability** (rule 13): a returning reader can re-run d10 from `Movement · Pass` (eyebrow) + `Passes graded 2+ across 24 tosses` (success metric) + `Pass into the set window from every spot` (cue[0]) without re-reading `courtsideInstructions`.
+
+Falsification: the next D130 founder session is the test surface for whether the rewrite holds. If the body-part-introspection class re-surfaces, the rule failed and gets revised, not the reader.
+
+### Triple-only spot-check (rule 13) — 3 drills
+
+| Drill | Eyebrow | `successMetric.description` | `coachingCues[0]` | Re-runnable? |
+|---|---|---|---|---|
+| d10-pair | Movement · Pass | Passes graded 2+ (= ball lands within 1 m of the set window with enough arc to be settable) across 24 tosses. | Pass into the set window from every spot. | ✓ — reader knows to pass into the set window from each spot, with the success rule defining "good" pass. |
+| d22-pair | Main drill · Serve | First to 10 wins. | Develop a serving routine. | ✓ (existing) — reader knows to serve, score a point per good serve, race to 10. |
+| d33-pair-open | Main drill · Serve | 4 / 6 zones cleared per round (one round = one 6-zone cycle). | Caller names the target first. | ✓ (existing) — reader knows the structure (6 zones, caller leads, 4-of-6 to clear) from the triple. |
+
+Triple-only readability holds on all three. The d10-pair rewrite preserves the structural-sufficiency contract.
