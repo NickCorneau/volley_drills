@@ -31,7 +31,11 @@ describe('sessionBuilder', () => {
       { assemblySeed: 'batch3-golden-pair-open-25' },
     )
 
-    expect(draft?.assemblyAlgorithmVersion).toBe(6)
+    expect(draft?.assemblyAlgorithmVersion).toBe(7)
+    // 2026-05-13: segment snap now wired into `buildDraft`, so the
+    // pair-open-25 wrap (d26-solo, natural 3 min) snaps from 4 → 3
+    // and the freed minute redistributes into technique (6 → 7)
+    // under the default priority. Total stays at 25.
     expect(
       draft?.blocks.map((block) => ({
         type: block.type,
@@ -48,7 +52,7 @@ describe('sessionBuilder', () => {
       },
       {
         type: 'technique',
-        durationMinutes: 6,
+        durationMinutes: 7,
         drillId: 'd05',
         variantId: 'd05-pair',
       },
@@ -66,7 +70,7 @@ describe('sessionBuilder', () => {
       },
       {
         type: 'wrap',
-        durationMinutes: 4,
+        durationMinutes: 3,
         drillId: 'd26',
         variantId: 'd26-solo',
       },
@@ -703,7 +707,13 @@ describe('sessionBuilder', () => {
     expect(['d25', 'd26']).toContain(draft?.blocks.at(-1)?.drillId)
 
     const totalMinutes = draft!.blocks.reduce((sum, block) => sum + block.durationMinutes, 0)
-    expect(totalMinutes).toBe(context.timeProfile)
+    // 2026-05-13 segment-snap wiring: snap may legitimately shorten
+    // the session below `timeProfile` when every redistribution
+    // target is at its archetype or variant cap (parent plan R5).
+    // Floor pinned at 80 % of timeProfile so a future regression that
+    // shortens too aggressively still fails CI.
+    expect(totalMinutes).toBeLessThanOrEqual(context.timeProfile)
+    expect(totalMinutes).toBeGreaterThanOrEqual(Math.floor(context.timeProfile * 0.8))
 
     for (const block of draft!.blocks) {
       const variant = variantById.get(block.variantId)
@@ -764,7 +774,20 @@ describe('sessionBuilder', () => {
     const draft = buildDraft(context)
 
     expect(draft).not.toBeNull()
-    expect(draft!.blocks.reduce((sum, block) => sum + block.durationMinutes, 0)).toBe(40)
+    // 2026-05-13 segment-snap wiring: warmup/wrap snap to their
+    // authored segment sums (d28 → 3 min, d26 → 3 min, d25 → 4 min).
+    // On 40-min sessions the 4-6 min warmup/wrap slots can free up
+    // to 6 min total (e.g., warmup 6→3 + wrap 6→3 = 6 freed) which
+    // redistribute into work slots within their authored caps. When
+    // every redistribution target is already at cap, the surplus
+    // drops and the session legitimately shortens below `timeProfile`
+    // per the parent plan's R5 (snap is canonical; warmup/wrap are
+    // never re-inflated to absorb leftover). Floor pinned at 30 min
+    // so a future archetype regression that shortens too aggressively
+    // still fails CI.
+    const total = draft!.blocks.reduce((sum, block) => sum + block.durationMinutes, 0)
+    expect(total).toBeLessThanOrEqual(40)
+    expect(total).toBeGreaterThanOrEqual(30)
     expect(draft!.blocks.some((block) => block.type === 'pressure')).toBe(true)
   })
 
@@ -1623,7 +1646,7 @@ describe('sessionBuilder', () => {
     expect(first).not.toBeNull()
     expect(second).not.toBeNull()
     expect(first?.assemblySeed).toBe('seed-replay')
-    expect(first?.assemblyAlgorithmVersion).toBe(6)
+    expect(first?.assemblyAlgorithmVersion).toBe(7)
     expect(second?.blocks.map((block) => [block.drillId, block.variantId])).toEqual(
       first?.blocks.map((block) => [block.drillId, block.variantId]),
     )

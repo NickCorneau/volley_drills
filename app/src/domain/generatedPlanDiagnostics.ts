@@ -902,10 +902,19 @@ function generationHardFailures(
   const failures: GeneratedPlanHardFailure[] = []
   const expectedContext = contextForDiagnosticCell(cell, configuration)
 
-  if (totalDraftMinutes(draft) !== cell.duration) {
+  // 2026-05-13: the warmup/wrap segment snap is now wired into
+  // `buildDraft` (see `docs/plans/2026-05-13-002-fix-wire-warmup-wrap-
+  // segment-snap-plan.md`). Per the parent plan's R5, snap may
+  // legitimately shorten a session below `timeProfile` when every
+  // redistribution target is already at its archetype or variant cap.
+  // Treat session totals at or below cell.duration as valid; over-
+  // long sessions remain hard failures because nothing in the snap or
+  // legacy redistribution can inflate a session past its time budget.
+  const total = totalDraftMinutes(draft)
+  if (total > cell.duration) {
     failures.push({
       code: 'wrong_total_duration',
-      message: `Expected ${cell.duration} minutes, got ${totalDraftMinutes(draft)}.`,
+      message: `Expected at most ${cell.duration} minutes, got ${total}.`,
     })
   }
 

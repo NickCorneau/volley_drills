@@ -631,15 +631,27 @@ describe('seeded generated plan diagnostics', () => {
       // 220 -> 200 (d31 cluster cells that were redistribution-driven now
       // route to d51 cleanly), over_authored_max and over_fatigue_cap each
       // dropped 246 -> 225 (d31 cluster over-stretch absorbed by d51).
-      clean: 124,
-      observation_only: 416,
+      // 2026-05-13: warmup/wrap segment snap wired into `buildDraft`
+      // (`docs/plans/2026-05-13-002-fix-wire-warmup-wrap-segment-snap-plan.md`).
+      // Clean rose 124 -> 136 because some cells that previously
+      // tripped an under-min observation on the wrap/warmup block now
+      // snap to the exact authored floor. Observation_only dropped
+      // 416 -> 404 for the same reason. Under-min observations dropped
+      // 307 -> 290. Over_authored_max and over_fatigue_cap each rose
+      // 225 -> 229 because the snap's redistribution can push 1 minute
+      // into work slots that were at the variant max under the legacy
+      // allocator (the snap respects slot AND variant caps under
+      // `!allowSlotMaxOverflow`, but the legacy `redistributedMinutes`
+      // patch riding on top can still target the same slot).
+      clean: 136,
+      observation_only: 404,
       hard_failure: 0,
     })
     expect(summary.observationCounts).toEqual({
-      under_authored_min: 307,
+      under_authored_min: 290,
       optional_slot_redistribution: 200,
-      over_authored_max: 225,
-      over_fatigue_cap: 225,
+      over_authored_max: 229,
+      over_fatigue_cap: 229,
     })
     expect(results.filter((result) => result.status === 'hard_failure')).toEqual([])
   })

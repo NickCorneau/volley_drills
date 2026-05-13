@@ -16,6 +16,10 @@ import {
 import { allocateDurations, allocateRecoveryDurations } from './sessionAssembly/durations'
 import { createAssemblySeed, createSeededRandom } from './sessionAssembly/random'
 import { deriveBlockRationale } from './sessionAssembly/rationale'
+import {
+  RECOVERY_REDISTRIBUTION_PRIORITY,
+  snapWarmupWrapDurations,
+} from './sessionAssembly/snapDurations'
 import { shouldRerouteForSourceBackedSibling } from './sessionAssembly/sourceBackedReroutes'
 import { pickMainSkillSubstitute } from './sessionAssembly/substitution'
 export {
@@ -25,7 +29,7 @@ export {
 } from './sessionAssembly/swapAlternatives'
 export { deriveBlockRationale } from './sessionAssembly/rationale'
 
-export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 6
+export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 7
 
 /**
  * Optional inputs that scope build-time drill substitution.
@@ -268,6 +272,30 @@ function buildDraftResult(
     }
   }
 
+  // Snap warmup/wrap blocks down to the chosen variant's natural
+  // segment sum (per `docs/plans/2026-05-04-002-feat-warmup-wrap-segment-snap-plan.md`
+  // and the 2026-05-13 wiring fix). Freed minutes redistribute into
+  // focus-priority work slots within their authored caps; uplift never
+  // re-inflates the snapped warmup/wrap. Runs AFTER source-backed
+  // reroute so the reroute decision sees the legacy redistribution
+  // semantics it has always seen; runs BEFORE block-write so the
+  // runner's per-block timer matches the authored segment timing.
+  //
+  // The legacy `redistributedMinutes` patch below (skipped-optional-slot
+  // surplus → `redistributionIndex` block) is preserved on top of the
+  // snap: both mechanisms compose, and the assembly-trace continues to
+  // report pre-snap `allocatedMinutes` and the legacy redistribution
+  // shape so `generatedPlanDiagnostics` keeps its existing read paths.
+  const picks: (CandidateVariant | undefined)[] = layout.map(
+    (_slot, index) => selectedByLayoutIndex.get(index)?.pick,
+  )
+  const snappedDurations = snapWarmupWrapDurations(
+    layout,
+    durations,
+    picks,
+    effectiveContext.sessionFocus,
+  )
+
   for (let i = 0; i < layout.length; i++) {
     const selected = selectedByLayoutIndex.get(i)
     if (!selected) continue
@@ -284,7 +312,7 @@ function buildDraftResult(
       variantId: pick.variant.id,
       drillName: pick.drill.name,
       shortName: pick.drill.shortName,
-      durationMinutes: durations[i] + (i === redistributionIndex ? redistributedMinutes : 0),
+      durationMinutes: snappedDurations[i] + (i === redistributionIndex ? redistributedMinutes : 0),
       coachingCue:
         pick.variant.coachingCues.length > 0
           ? pick.variant.coachingCues.join(' · ')
@@ -495,15 +523,40 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
   if (!durations) return null
 
   const usedDrillIds = new Set<string>()
+  const picks: (CandidateVariant | undefined)[] = []
+
+  for (let i = 0; i < recoveryLayout.length; i++) {
+    const slot = recoveryLayout[i]
+    const pick = pickForSlot(slot, recoveryContext, usedDrillIds, random)
+    picks.push(pick ?? undefined)
+    if (pick) {
+      usedDrillIds.add(pick.drill.id)
+    }
+  }
+
+  // Apply the same warmup/wrap segment snap as `buildDraft`, scoped to
+  // technique/movement_proxy redistribution (recovery layout excludes
+  // main_skill and pressure). `allowSlotMaxOverflow` mirrors how
+  // `allocateRecoveryDurations` already overshoots slot maxes by design
+  // — recovery folds reclaimed main/pressure minutes into technique
+  // even past its archetype cap (see `allocateRecoveryDurations` JSDoc).
+  // Without overflow, freed warmup/wrap minutes would silently vanish
+  // when the recovery target slot is already above its max.
+  const snappedDurations = snapWarmupWrapDurations(
+    recoveryLayout,
+    durations,
+    picks,
+    undefined,
+    { priority: RECOVERY_REDISTRIBUTION_PRIORITY, allowSlotMaxOverflow: true },
+  )
+
   const blocks: DraftBlock[] = []
   let blockIndex = 0
 
   for (let i = 0; i < recoveryLayout.length; i++) {
     const slot = recoveryLayout[i]
-    const pick = pickForSlot(slot, recoveryContext, usedDrillIds, random)
+    const pick = picks[i]
     if (!pick) continue
-
-    usedDrillIds.add(pick.drill.id)
 
     blocks.push({
       id: `block-${blockIndex++}`,
@@ -512,7 +565,7 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
       variantId: pick.variant.id,
       drillName: pick.drill.name,
       shortName: pick.drill.shortName,
-      durationMinutes: durations[i],
+      durationMinutes: snappedDurations[i],
       coachingCue:
         pick.variant.coachingCues.length > 0
           ? pick.variant.coachingCues.join(' · ')

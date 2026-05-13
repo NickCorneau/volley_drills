@@ -149,7 +149,17 @@ describe('generated plan diagnostic triage identity', () => {
   it('adds stable group keys and diagnostic fingerprints to routeable groups', () => {
     const groups = currentGroups()
 
-    expect(groups).toHaveLength(75)
+    // 2026-05-13 segment-snap wiring (`docs/plans/2026-05-13-001-
+    // fix-wire-warmup-wrap-segment-snap-plan.md`): group count
+    // dropped 75 -> 74 because one cell that previously produced an
+    // under-min observation on a warmup/wrap block no longer
+    // observes after the snap pins the block duration to the
+    // variant's authored floor. The d25 wrap under_authored_min
+    // group's own affectedCellCount stays at 65 — d25's natural
+    // floor (4 min) matches the wrap slot allocation on every
+    // archetype × profile that picks d25, so the snap is a no-op
+    // for that group's cells.
+    expect(groups).toHaveLength(74)
     // 2026-05-04: d25 wrap under_authored_min cell count dropped 79 -> 71
     // after d50 ship; further dropped 71 -> 65 after d51 ship as another
     // round of beginner-serving carrier cells reroute to d51 with a different
@@ -362,7 +372,7 @@ describe('generated plan diagnostic triage registry', () => {
     const markdown = buildGeneratedPlanTriageWorkbenchMarkdown(groups, registry)
 
     expect(markdown).toContain('## Triage Summary')
-    expect(markdown).toContain('- Current routeable groups: 75')
+    expect(markdown).toContain('- Current routeable groups: 74')
     expect(markdown).toContain('## New / Untriaged Blockers')
     expect(markdown).toContain('## Stale Fingerprint Review')
     expect(markdown).toContain('## Generator Policy Investigation')
@@ -473,7 +483,15 @@ describe('generated plan diagnostic triage registry', () => {
     // totalAffectedCellCount 231 -> 223 (d50) -> 203 (d51): d31 cluster
     // (14 + 6 + 2 = 22 cells) absorbed; d51 added 25 + 9 + 2 = 36 cells.
     // Net change vs d50 baseline: -22 + 36 - some absorbed-elsewhere = -20.
-    expect(receipt.groupCount).toBe(29)
+    // 2026-05-13 segment-snap wiring: groupCount dropped 29 -> 28 as
+    // one optional_slot_redistribution group's cells now route to a
+    // different state under the snap. The cell-level counts
+    // (totalAffectedCellCount, redistributionAffectedCellCount,
+    // nonRedistributionOverCapCellCount) stay at their d51 values
+    // because the snap respects slot AND variant caps and so does
+    // not generate new redistribution evidence; it just removes a
+    // single group from the redistribution-causality lane.
+    expect(receipt.groupCount).toBe(28)
     expect(receipt.counts.totalAffectedCellCount).toBe(203)
     expect(receipt.counts.redistributionAffectedCellCount).toBe(200)
     expect(receipt.counts.nonRedistributionOverCapCellCount).toBe(3)
@@ -1592,7 +1610,13 @@ describe('generated plan diagnostic triage registry', () => {
     expect(packet.workloadLane).toEqual(
       expect.objectContaining({
         disposition: 'workload_review_needed',
-        totalAffectedCellCount: 16,
+        // 2026-05-13 segment-snap wiring shifted D49 under-min cell
+        // count from 16 to 12: some D49 main-skill cells that
+        // previously observed under_authored_min on the main_skill
+        // block now also under-min on warmup/wrap (which the snap
+        // collapses), changing the row attribution counts. See the
+        // segment-snap wiring plan for context.
+        totalAffectedCellCount: 12,
       }),
     )
     expect(packet.workloadLane.groupKeys).toEqual(

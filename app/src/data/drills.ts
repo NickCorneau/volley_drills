@@ -2256,6 +2256,19 @@ const d26: Drill = {
       // as the ceiling, matching `progressionDescription`). Three-
       // staple structure and 30 s sub-block tick unchanged. No
       // variant-id change; pure courtside-copy edit.
+      //
+      // 2026-05-13 segment-snap wiring (`docs/plans/2026-05-13-002-
+      // fix-wire-warmup-wrap-segment-snap-plan.md`): with the snap
+      // now wired into `buildDraft` / `buildRecoveryDraft`, d26's
+      // block timer is canonically pinned to its segment sum (3 min)
+      // on every archetype × profile — the "3 to 6 minutes on the
+      // timer" framing from the 2026-04-27 dogfeed edit was an
+      // honesty-patch for the pre-snap drift and is now obsolete.
+      // The new copy drops the timer-range claim and names the
+      // each-side structure explicitly, which matches what the
+      // SegmentList renders ("(each side)" suffix per
+      // `eachSide: true`). Three-staple structure and the no-pain
+      // safety clause unchanged.
       id: 'd26-solo',
       drillId: 'd26',
       label: 'Any',

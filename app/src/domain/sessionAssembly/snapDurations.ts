@@ -164,8 +164,28 @@ export function snapWarmupWrapDurations(
         const slot = layout[i]
         if (!slot) continue
         if (slot.type !== slotType) continue
-        if (!picks[i]) continue
-        if (!allowSlotMaxOverflow && result[i] >= slot.durationMaxMinutes) continue
+        const pick = picks[i]
+        if (!pick) continue
+        if (!allowSlotMaxOverflow) {
+          // Standard `buildDraft` path: redistribution respects BOTH the
+          // archetype slot's authored max AND the chosen variant's
+          // authored max. The variant cap honors the drill author's
+          // stated upper bound so the snap doesn't silently push a block
+          // above the drill's own ceiling (which would surface as an
+          // unclassified over-cap finding in `generatedPlanDiagnostics`
+          // — that diagnostic only classifies allocator-driven or
+          // legacy-redistribution-driven over-cap, not snap-driven).
+          if (result[i] >= slot.durationMaxMinutes) continue
+          const variantMax = pick.variant.workload.durationMaxMinutes
+          if (result[i] >= variantMax) continue
+        }
+        // Recovery path (`allowSlotMaxOverflow: true`): skip both caps.
+        // `allocateRecoveryDurations` already promotes technique above
+        // its archetype slot max by design (folds main_skill + pressure
+        // minutes into technique); preserving that contract requires
+        // the snap to bypass both the slot AND variant caps so the
+        // session's `timeProfile` total is preserved. The diagnostic
+        // pipeline does not run against recovery drafts.
         result[i] += 1
         remaining -= 1
         progressed = true
