@@ -1395,6 +1395,13 @@
       "canonical_for": "Implementation plan for the Tier 1b slot expiry contract — sourced from docs/ideation/2026-05-10-open-ideation.md A5 survivor. Five implementation units: U1 promotes the post-m001-content-backlog Tier 1b residual section to structured slot records (4 named + 2 unallocated, each with slot_id / expiry 2026-07-20 / status reserved / required_trigger / trigger_source / last_checked) plus a machine-readable cap-status-data JSON block, U2 adds cap_status_must_be_consistent to scripts/validate-agent-docs.sh with 13 fixture-driven test cases (closed-vocabulary statuses, cap-sum consistency, expired-reserved hard failure post-2026-07-20, authored-record evidence citation, killed-record kill_reason requirement), U3 cross-references the contract from docs/status/m001-validation-overhang.md Calendar-Dated Reads 2026-07-20 row and adds a 2026-05-10 amendment-log entry to docs/plans/2026-04-20-m001-adversarial-memo.md, U4 updates this catalog entry, U5 runs end-to-end validation. Plan does not author or kill any slot — those decisions remain owned by partner-walkthrough / founder-ledger triggers under D135 source-validity gating. Cap value (10), anti-displacement enforcement, D135 framing, and per-slot trigger conditions are unchanged."
     },
     {
+      "id": "weekly-validation-pulse-automation-plan-2026-05-22",
+      "path": "docs/plans/2026-05-22-001-feat-weekly-validation-pulse-automation-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Implementation plan for the minimal Cursor Automations pass requested 2026-05-22: create one weekly Volleycraft validation pulse automation, or produce a backend-generated prefill/manual-confirmation draft if direct backend creation is blocked by the undocumented workflow schema. The draft is scoped to NickCorneau/volley_drills on main, mirrors docs/pulse-reports/2026-05-13_12-00.md, reads current validation posture, ledger/gate state, diagnostics freshness, CI/deploy config, and recent git activity, then writes a pulse report only when concrete write criteria are met. Repo flow is explicitly commit/push/tag on main with no PR creation; tags use weekly-validation-pulse-YYYY-MM-DD and are pushed only for report commits. Ledger derivation, live deploy smoke, pre-push freshness, copy-auditor, and plan-shape snapshot automations are deferred until the first confirmed scheduled pulse proves the report shape."
+    },
+    {
       "id": "d49-residual-follow-up-plan-2026-05-02",
       "path": "docs/plans/2026-05-02-018-feat-d49-residual-follow-up-plan.md",
       "type": "plan",
