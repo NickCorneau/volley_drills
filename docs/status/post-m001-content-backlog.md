@@ -6,7 +6,7 @@ stage: trigger-gated
 type: status
 summary: "Trigger-gated content additions parked outside the M001 milestone doc body. Each entry names its trigger and authoritative source. Picked up when triggers fire; otherwise dormant."
 authority: backlog of trigger-gated content adds (Tier 1b residual cap, externally gated drills, conditional Phase 2B capture shapes); cites authoritative triggers, does not redefine them
-last_updated: 2026-05-10
+last_updated: 2026-05-23
 depends_on:
   - docs/decisions.md
   - docs/plans/2026-04-20-m001-adversarial-memo.md
@@ -188,15 +188,13 @@ These do **not** consume Tier 1b cap slots when they re-enter; they ship under t
 
 ## Conditional Phase 2B Capture Shapes
 
-`D133` (2026-04-27) shipped per-drill Difficulty + Good/Total capture on `/run/check`. `D134` (2026-04-28) added optional streak capture as a bounded exception. Phase 2B extends per-drill capture to additional shapes — `points-to-target`, `pass-grade-avg`, `composite` — but is **frozen** until the 2026-05-12 `D134` Phase 2A falsification gate is read cleanly.
+`D133` (2026-04-27) shipped per-drill Difficulty + Good/Total capture on `/run/check`. `D134` (2026-04-28) added optional streak capture as a bounded exception. Phase 2B extends per-drill capture to additional shapes — `points-to-target`, `pass-grade-avg`, `composite` — and was frozen until the 2026-05-12 `D134` Phase 2A falsification gate was read.
 
-> **Imminent read-out (2026-05-10).** The 2026-05-12 `D134` Phase 2A read-out is **2 days away**. Current evidence-pending state (per `docs/status/m001-validation-overhang.md` `D134` section): the 2026-05-10 partner export included no streak drill and no `metricCapture`, so it does not move the gate; no founder/partner sessions over the 14-day window have produced ≥2 negative-evidence or ≥2 contamination hits. If 2026-05-12 reads cleanly (no falsification firing), Phase 2B becomes pickable per the items below. If either gate fires, every item below stays frozen until the standard founder-trigger conditions are met cleanly per `docs/plans/2026-04-27-per-drill-capture-coverage.md`.
+> **2026-05-23 read-out: CLEAN.** Performed in the week-5 catch-up entry (`docs/plans/2026-04-20-m001-adversarial-memo.md` `## 2026-05-18 (week 5 of 13)` D134 read). Zero sessions in the 2026-04-28 → 2026-05-12 window ran a streak drill; both falsification gates' floors are 0; neither could fire. **Phase 2B items below become pickable.** Each pick still requires its own `feat:` plan + the standard founder-trigger conditions in `docs/plans/2026-04-27-per-drill-capture-coverage.md`; the gate read is permission to author a plan when a triggering session lands, not assignment to author one now.
 
-- **`points-to-target` per-drill capture shape** — for drills with a target-rep success metric. Trigger: 2026-05-12 `D134` Phase 2A read-out passes (no negative-evidence and no contamination evidence per `docs/research/founder-use-ledger.md` Bounded D130 exceptions section). Status (2026-05-10): frozen pending 2026-05-12 read-out (2 days).
-- **`pass-grade-avg` per-drill capture shape** — averaged pass-quality grade per drill. Same trigger and source as above. Status (2026-05-10): frozen pending 2026-05-12 read-out (2 days).
-- **`composite` per-drill capture shape** — multi-axis per-drill capture (difficulty + grade + streak). Same trigger and source. Status (2026-05-10): frozen pending 2026-05-12 read-out (2 days).
-
-If the 2026-05-12 read-out fires either falsification gate (negative-evidence or contamination), Phase 2B is paused and the items above remain frozen until the standard founder-trigger conditions are met cleanly per `docs/plans/2026-04-27-per-drill-capture-coverage.md`.
+- **`points-to-target` per-drill capture shape** — for drills with a target-rep success metric. Trigger: 2026-05-12 `D134` Phase 2A read-out passes (no negative-evidence and no contamination evidence per `docs/research/founder-use-ledger.md` Bounded D130 exceptions section). Status (2026-05-23): **pickable** — gate clean, awaiting per-drill founder-trigger conditions per the per-drill capture coverage plan.
+- **`pass-grade-avg` per-drill capture shape** — averaged pass-quality grade per drill. Same trigger and source as above. Status (2026-05-23): **pickable** — gate clean, awaiting per-drill founder-trigger conditions.
+- **`composite` per-drill capture shape** — multi-axis per-drill capture (difficulty + grade + streak). Same trigger and source. Status (2026-05-23): **pickable** — gate clean, awaiting per-drill founder-trigger conditions.
 
 ## How To Pick Items Up
 

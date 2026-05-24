@@ -694,6 +694,13 @@
       "canonical_for": "Curated field feedback from the 2026-05-10 founder + Seb Pair + Net 40-min profile export. Plan `5210a07e-...` / execution `9529becd-...`, `actualDurationMinutes: 38`, app status `ended_early` with wrap skipped, RPE 5, main_skill swapped from `d11-pair` to `d33-pair-open` Around the World Serving. Review note: 'We did not end early - warmup timing still wrong. Too many minutes for drills.' Captures: `d10-pair`, `d33-pair-open`, and `d22-pair`, all `still_learning`; no Good/Total counts and no `metricCapture`. Updates D130 weekly counts to 7 logged founder/joint sessions, keeps Condition 1 fail-trending under the standard read (solo 1/7, set floor 0/3), adds one serve-focused pair session, strengthens warmup / duration-budget validation reads, and does not fire D134, new content scope, or a 40-minute-profile decision by itself."
     },
     {
+      "id": "2026-05-22-mid-session-extend-and-content-asks-feedback",
+      "path": "docs/research/2026-05-22-mid-session-extend-and-content-asks-feedback.md",
+      "type": "research",
+      "status": "active",
+      "canonical_for": "Curated founder + Seb chat / voice-memo capture delivered 2026-05-22 covering five items: F1 Seb's 2026-05-16 mid-session extend ask (structurally novel — wanted an end-of-last-drill 'extend with different focus' CTA instead of ending session + restarting + re-running warmup/cool-down; courtside workaround was shortening the session and answering the 'why did you shorten?' prompt with 'because we wanted to practice serving now'); F2 attack drill section ask (content-gap-leaning second-class signal; Tier 3+ post-M001 attack chain); F3 custom session time ask (D135 feature-wish, second hit on the 2026-05-09 90-min wish); F4 3+ player / 3s training content-gap (second hit on 2026-05-09 reflection item 1, adds 'we dont know how to train 3s' content-quality dimension; D101 post-M001 sequencing input); F5 team play / tactics / blocking / positioning (first signal toward D144 pair_game archetype activation triggers; BAB Plans 12-20 captured). Classifies each under D135 source-validity rules and routes to existing canonical paths without authorizing implementation, D101 early activation, or fresh Tier 1b slot consumption. F1 is the load-bearing new evidence on a watch-for-second-hit posture; F2-F5 layer onto existing canonical paths."
+    },
+    {
       "id": "skill-level-mutability-requirements-2026-05-04",
       "path": "docs/brainstorms/2026-05-04-skill-level-mutability-requirements.md",
       "type": "requirements",
@@ -1918,6 +1925,10 @@
     {
       "path": "docs/research/2026-05-10-pair-net-serving-duration-feedback.md",
       "focus": "latest founder + Seb Pair + Net 40-min profile export: app marked the session ended_early with wrap skipped, but the review note says it did not really end early; warmup timing is still wrong and the drills had too many minutes. Three captured drills (`d10-pair`, `d33-pair-open`, `d22-pair`) were all `still_learning`; no Good/Total counts and no streak metric capture. Use for D130 weekly count/cadence updates and warmup / duration-budget validation reads; does not fire D134 or new content scope by itself"
+    },
+    {
+      "path": "docs/research/2026-05-22-mid-session-extend-and-content-asks-feedback.md",
+      "focus": "2026-05-22 founder chat dump curating Seb's 2026-05-16 mid-session voice memo plus four content / configuration asks since the 2026-05-10 export. Load-bearing new finding is F1 — Seb's mid-session extend-with-different-focus ask, a structurally novel surface not covered by any existing trigger (not Tier 1c focus toggle, not pair_long_warmup, not 90-min custom time, not pair_game variant D144); single-source first-class content-gap-evidence under D135 on a watch-for-second-hit posture. F2 attack drill section is a content-gap-leaning second-class signal routed to Tier 3+ post-M001 attack chain (BAB Plans 7-11 captured, D143 zone convention settled). F3 custom session time is the second hit on the 2026-05-09 90-min feature-wish, still D135 feature-wish class. F4 3+ player / 3s training is the second hit on the 2026-05-09 content-gap reflection (post-M001 D101 sequencing input, no early activation). F5 team play / tactics / blocking / positioning is one signal toward D144 pair_game archetype activation triggers (BAB Plans 12-20 captured). Use when reading the 2026-07-20 D130 re-eval, deciding post-M001 sequencing (D101 earlier vs M002 first), or interpreting any future second-hit on mid-session extend that would unlock the natural Tier 1c-class layered surface discussion"
     },
     {
       "path": "docs/ideation/2026-05-10-drill-first-time-runnability-ideation.md",
