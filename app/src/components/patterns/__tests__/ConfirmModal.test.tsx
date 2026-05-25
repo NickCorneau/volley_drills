@@ -110,7 +110,7 @@ describe('ConfirmModal', () => {
 
     const panel = overlay.firstElementChild as HTMLElement
     expect(panel.className).toContain('max-w-[390px]')
-    expect(panel.className).toContain('rounded-[16px]')
+    expect(panel.className).toContain('rounded-focal')
   })
 
   it('disables both buttons when their `disabled` flag is set', () => {

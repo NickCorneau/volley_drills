@@ -37,7 +37,7 @@ export function ResumePrompt({
       refocusKey={confirmingDiscard}
       initialFocusRef={confirmingDiscard ? keepRef : reopenRef}
     >
-      <div className="mt-5 rounded-[12px] bg-bg-warm p-4">
+      <div className="mt-5 rounded-base bg-bg-warm p-4">
         {/* Phase F8 (2026-04-19): was `text-xs font-semibold uppercase
               tracking-wider`. Dropped the dashboard-eyebrow voice to
               sentence-case `font-medium` supporting copy so the block

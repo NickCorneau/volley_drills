@@ -133,11 +133,17 @@ export function PerDrillCapture(props: PerDrillCaptureProps) {
   return (
     <section
       aria-labelledby="per-drill-heading"
-      className="flex flex-col gap-3 rounded-[12px] border border-text-secondary/15 bg-bg-primary p-4"
+      className="flex flex-col gap-3 rounded-base border border-text-secondary/15 bg-bg-primary p-4"
       data-testid="per-drill-capture"
     >
       <div className="flex flex-col gap-1">
-        <p className="text-xs font-medium text-text-secondary">Drill check</p>
+        {/*
+          The "Drill check" eyebrow that previously sat here duplicated
+          the eyebrow already rendered in `RunFlowHeader` at the top of
+          `DrillCheckScreen` (two identical labels stacked a few rows
+          apart). The screen header owns the section label; this card
+          leads straight with its question heading.
+        */}
         <h2 id="per-drill-heading" className="text-base font-semibold text-text-primary">
           How was {drillName}?
         </h2>

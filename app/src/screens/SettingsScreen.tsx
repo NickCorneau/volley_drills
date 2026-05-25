@@ -165,7 +165,7 @@ export function SettingsScreen() {
           <section
             aria-labelledby="settings-skill-level-heading"
             data-testid="settings-skill-level"
-            className="flex flex-col gap-2 rounded-[12px] border border-text-secondary/15 bg-bg-warm/40 p-4"
+            className="flex flex-col gap-2 rounded-base border border-text-secondary/15 bg-bg-warm/40 p-4"
           >
             <h2
               id="settings-skill-level-heading"
@@ -212,7 +212,7 @@ export function SettingsScreen() {
           aria-labelledby="settings-storage-heading"
           data-testid="settings-storage-info"
           data-posture={posture}
-          className="flex flex-col gap-2 rounded-[12px] border border-text-secondary/15 bg-bg-warm/40 p-4"
+          className="flex flex-col gap-2 rounded-base border border-text-secondary/15 bg-bg-warm/40 p-4"
         >
           <h2 id="settings-storage-heading" className="text-base font-semibold text-text-primary">
             About local storage

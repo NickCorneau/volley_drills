@@ -58,7 +58,7 @@ const STATUS_LABEL: Record<JustFinishedStatus, string> = {
  */
 export function JustFinishedPill({ drillName, status }: JustFinishedPillProps) {
   return (
-    <div className="flex items-start gap-2.5 rounded-[12px] bg-bg-warm p-3">
+    <div className="flex items-start gap-2.5 rounded-base bg-bg-warm p-3">
       <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success text-white">
         {status === 'completed' ? <CheckGlyph /> : <DashGlyph />}
       </div>

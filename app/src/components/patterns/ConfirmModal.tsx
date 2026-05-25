@@ -49,7 +49,7 @@ const PLACEMENT_OVERLAY_CLASS: Record<ConfirmModalPlacement, string | undefined>
 
 const PLACEMENT_PANEL_CLASS: Record<ConfirmModalPlacement, string | undefined> = {
   centered: undefined,
-  'bottom-sheet': 'max-w-[390px] rounded-[16px]',
+  'bottom-sheet': 'max-w-[390px] rounded-focal',
 }
 
 /**

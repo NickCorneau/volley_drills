@@ -48,11 +48,14 @@ export function Expander({
   const [open, setOpen] = useState(false)
 
   const handleToggle = () => {
-    setOpen((prev) => {
-      const next = !prev
-      onOpenChange?.(next)
-      return next
-    })
+    // Compute the next state and fire the side effect OUTSIDE the
+    // `setOpen` updater. Calling `onOpenChange` inside the updater ran a
+    // parent `setState` (SafetyCheckScreen's heatCta) during render,
+    // which React flags as "Cannot update a component while rendering a
+    // different component." The updater must stay pure.
+    const next = !open
+    setOpen(next)
+    onOpenChange?.(next)
   }
 
   return (

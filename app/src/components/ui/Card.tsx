@@ -29,7 +29,7 @@ type CardProps = {
 }
 
 const VARIANT_CLASS: Record<CardVariant, string> = {
-  soft: 'rounded-[12px] bg-bg-warm p-4',
+  soft: 'rounded-base bg-bg-warm p-4',
   // Phase F2: focal variant layers the shared surface class with
   // F1-matched internal rhythm (p-6 padding + gap-4). Kept inline so
   // the single-source-of-truth surface class stays padding-agnostic

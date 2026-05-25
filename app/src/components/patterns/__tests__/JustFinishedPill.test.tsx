@@ -20,12 +20,12 @@ describe('JustFinishedPill', () => {
       <JustFinishedPill drillName="x" status="completed" />,
     )
     let outer = container.firstChild as HTMLElement
-    expect(outer.className).toContain('rounded-[12px]')
+    expect(outer.className).toContain('rounded-base')
     expect(outer.className).toContain('bg-bg-warm')
 
     rerender(<JustFinishedPill drillName="x" status="skipped" />)
     outer = container.firstChild as HTMLElement
-    expect(outer.className).toContain('rounded-[12px]')
+    expect(outer.className).toContain('rounded-base')
     expect(outer.className).toContain('bg-bg-warm')
   })
 

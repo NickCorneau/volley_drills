@@ -150,6 +150,24 @@ export function SafetyCheckScreen() {
 
   const canContinue = painFlag === false && recencyChosen
 
+  // Fail-quiet gating hint above the disabled Start session button so a
+  // grey CTA is never silent at courtside (brand-ux-guidelines §6.4:
+  // disabled primary buttons must carry a visible "why"). Mirrors the
+  // Review / Drill Check `missingHint` voice and `aria-live="polite"`
+  // wiring. The `2+` branch is distinct because tapping it reveals a
+  // required "how long off?" sub-row — without this, a user who taps
+  // "2+ days ago" and then the still-grey CTA gets no feedback.
+  const missingHint: string | null =
+    canContinue || isCreating
+      ? null
+      : recency === null
+        ? 'Tell us when you last trained to start.'
+        : !recencyChosen
+          ? 'Pick how long off to start.'
+          : painFlag === null
+            ? 'Answer the pain question to start.'
+            : null
+
   async function handleCreateSession(useRecovery: boolean, painOverridden: boolean) {
     if (creating.current) return
     if (painFlag === null || !recencyChosen) return
@@ -381,7 +399,10 @@ export function SafetyCheckScreen() {
               prevent it, not tucked at the bottom of a single bag
               of tips. */}
             <Callout tone="warning" emphasis="hairline">
-              <h3 className="text-sm font-semibold text-warning">
+              {/* Audit 2026-05-24 (M1 / A6): explicit text-warning overrode
+                  the Callout default; at text-sm semibold on warning-surface
+                  it cleared only ~3.95:1. Use text-warning-strong (~5.3:1). */}
+              <h3 className="text-sm font-semibold text-warning-strong">
                 Stop immediately if you notice:
               </h3>
               <ul className="mt-2 flex flex-col gap-1.5">
@@ -425,6 +446,11 @@ export function SafetyCheckScreen() {
 
       {painFlag !== true && (
         <ScreenShell.Footer className="flex flex-col gap-3 pt-4">
+          {missingHint && (
+            <p className="text-center text-sm text-text-secondary" aria-live="polite">
+              {missingHint}
+            </p>
+          )}
           <Button
             variant="primary"
             fullWidth

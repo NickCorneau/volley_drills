@@ -3,7 +3,7 @@ import { ELEVATED_PANEL_SURFACE, FOCAL_SURFACE_CLASS } from '../surfaces'
 describe('surfaces', () => {
   it('FOCAL_SURFACE_CLASS encodes the canonical calm-pass focal card chrome', () => {
     expect(FOCAL_SURFACE_CLASS).toBe(
-      'rounded-[16px] bg-bg-primary border border-text-primary/10 shadow-sm',
+      'rounded-focal bg-bg-primary border border-text-primary/10 shadow-sm',
     )
   })
 

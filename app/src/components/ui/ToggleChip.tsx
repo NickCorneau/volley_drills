@@ -28,8 +28,8 @@ const SIZE_CLASSES: Record<ToggleChipSize, string> = {
 
 const SHAPE_CLASSES: Record<ToggleChipShape, Record<ToggleChipSize, string>> = {
   rounded: {
-    lg: 'rounded-[16px]',
-    sm: 'rounded-[12px]',
+    lg: 'rounded-focal',
+    sm: 'rounded-base',
   },
   pill: {
     lg: 'rounded-full',
@@ -38,8 +38,20 @@ const SHAPE_CLASSES: Record<ToggleChipShape, Record<ToggleChipSize, string>> = {
 }
 
 const SELECTED_TONE: Record<ToggleChipTone, string> = {
-  accent: 'border-2 border-accent bg-info-surface text-accent focus-visible:ring-accent',
-  warning: 'border-2 border-warning bg-warning-surface text-warning focus-visible:ring-warning',
+  // Audit 2026-05-25 (M1 / A7): a selected `accent`-tone chip rendered
+  // `text-accent` (#b45309) on `bg-info-surface` (#fef3e8) clears only
+  // ~4.59:1 at 14 px — the lowest-contrast element on Setup/Safety and,
+  // critically, the *selected* state reads weaker than the unselected
+  // chip (#4b5563 on white, ~7.56:1), which is backwards for an
+  // outdoor-glance app. Darkening to `text-accent-pressed` (#92400e,
+  // accent-700 equivalent) lifts it well clear of AA while keeping the
+  // calm tinted fill — the same fix shape as the 2026-05-24 warning-chip
+  // audit (text-warning → text-warning-strong). The 2px accent border
+  // remains the primary selection signal (a UI boundary, 1.4.11 needs
+  // only 3:1).
+  accent: 'border-2 border-accent bg-info-surface text-accent-pressed focus-visible:ring-accent',
+  warning:
+    'border-2 border-warning bg-warning-surface text-warning-strong focus-visible:ring-warning',
   success: 'border-2 border-success bg-bg-warm text-success focus-visible:ring-success',
 }
 

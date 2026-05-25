@@ -118,7 +118,14 @@ export function PainOverrideCard({
           <Button
             variant="outline"
             fullWidth
-            className="border-warning/40 text-sm text-warning"
+            // Audit 2026-05-24 (M1 / A6): the outline variant has no
+            // background, so `text-warning` (#dc2626) sat on the
+            // Callout's `bg-warning-surface` (#fee2e2) at ~3.95:1 -
+            // below the WCAG 2.1 AA 4.5:1 floor. Same root cause as the
+            // selected-warning ToggleChip; reuse `--color-warning-strong`
+            // (~5.3:1) for the text while the border stays `--color-warning`
+            // (a 2px component boundary needs only 3:1 per 1.4.11).
+            className="border-warning/40 text-sm text-warning-strong"
             onClick={onOverride}
             disabled={actionsDisabled}
           >
@@ -138,7 +145,11 @@ export function PainOverrideCard({
               language ("turn a small issue into a long layoff") plus a
               specific time cue ("more than a few days") does the
               actual friction work a hard block couldn't. */}
-          <p className="text-center text-xs font-medium text-warning">
+          {/* Audit 2026-05-24 (M1 / A6): text-xs (12 px) consequence copy
+              on the Callout's warning-surface. `text-warning` cleared only
+              ~3.95:1; `text-warning-strong` clears ~5.3:1 (AA needs 4.5:1
+              for normal text). */}
+          <p className="text-center text-xs font-medium text-warning-strong">
             Training through pain that&apos;s sharp, getting worse, or lasting more than a few days
             can turn a small issue into a long layoff. If unsure, stop and see a clinician.
           </p>

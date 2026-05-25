@@ -190,7 +190,7 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
             value={shortNote}
             onChange={(e) => setShortNote(e.target.value)}
             placeholder="What's worth keeping for next time, or what would you change?"
-            className="min-h-[88px] w-full resize-y rounded-[12px] border border-text-primary/10 bg-bg-primary px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="min-h-[88px] w-full resize-y rounded-base border border-text-primary/10 bg-bg-primary px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           />
         </section>
       </ScreenShell.Body>

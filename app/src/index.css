@@ -49,6 +49,18 @@
    */
   --color-success: #047857;
   --color-warning: #dc2626;
+  /*
+   * Audit 2026-05-24 (M1 / A6): a selected `warning`-tone ToggleChip
+   * renders `text-warning` (#dc2626) on `bg-warning-surface` (#fee2e2),
+   * which clears only ~3.95:1 at 14 px - below the WCAG 2.1 AA 4.5:1
+   * floor for normal text. axe never caught it because the spec scans
+   * the unselected default. This deeper red (red-700 equivalent) clears
+   * ~5.3:1 on `warning-surface` while staying unmistakably "danger" red.
+   * Used only for the selected-warning chip text; the base
+   * `--color-warning` still drives the 2px border (a UI component
+   * boundary, 1.4.11 needs only 3:1) and icon/affordance fills.
+   */
+  --color-warning-strong: #b91c1c;
   --color-warning-surface: #fee2e2;
   --color-info-surface: #fef3e8;
 
@@ -100,6 +112,16 @@
   --text-body-secondary: 0.875rem;
   --text-body-secondary--line-height: 1.25rem;
 
+  /*
+   * Audit 2026-05-24: semantic radius tokens replace literal `rounded-[12px]`
+   * / `rounded-[16px]` arbitrary values across components. `base` is the
+   * default card / chip / soft-panel radius (12px); `focal` is the elevated
+   * focal-card / button / bottom-sheet radius (16px). Legacy `--radius-card`
+   * / `--radius-button` are kept as aliases for any code that imports them
+   * via CSS variables (no current consumer at this commit; reserved).
+   */
+  --radius-base: 12px;
+  --radius-focal: 16px;
   --radius-card: 12px;
   --radius-button: 16px;
 }

@@ -374,7 +374,7 @@ export function HomeScreen() {
           <ul
             role="list"
             aria-label="Other active actions"
-            className="divide-y divide-text-primary/5 overflow-hidden rounded-[16px] border border-text-primary/10 bg-bg-primary"
+            className="divide-y divide-text-primary/5 overflow-hidden rounded-focal border border-text-primary/10 bg-bg-primary"
           >
             {secondary.map((row) =>
               renderSecondary(row, flags, {

@@ -364,7 +364,7 @@ describe('ReviewScreen per-drill aggregate (D133)', () => {
 
     const done = await screen.findByRole('button', { name: /^done$/i })
     expect(done).toBeDisabled()
-    expect(screen.getByText('Rate your effort above to submit.')).toBeInTheDocument()
+    expect(screen.getByText('Rate your effort above to finish.')).toBeInTheDocument()
   })
 
   it('explains that Done is disabled until an ended-early reason is selected', async () => {
@@ -380,6 +380,6 @@ describe('ReviewScreen per-drill aggregate (D133)', () => {
 
     const done = screen.getByRole('button', { name: /^done$/i })
     expect(done).toBeDisabled()
-    expect(screen.getByText('Pick a reason you ended early to submit.')).toBeInTheDocument()
+    expect(screen.getByText('Pick a reason you ended early to finish.')).toBeInTheDocument()
   })
 })

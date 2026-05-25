@@ -63,7 +63,13 @@ export function SkillLevelPicker({ onPick, currentLevel, unsureSubtext }: SkillL
           isCurrent && 'outline outline-1 outline-accent',
         )}
       >
-        <span className="flex w-full items-center justify-between gap-3 text-sm font-semibold text-text-primary">
+        {/*
+          Title at `text-base` (16px) so it reads a step above the
+          `text-sm` descriptor below — within-card hierarchy was carried
+          by weight alone when both lines sat at 14px. The "Current"
+          badge keeps its own `text-xs`.
+        */}
+        <span className="flex w-full items-center justify-between gap-3 text-base font-semibold text-text-primary">
           <span>{SKILL_LEVEL_LABEL[level]}</span>
           {isCurrent ? (
             <span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent">

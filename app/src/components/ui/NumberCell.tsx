@@ -62,7 +62,7 @@ export type NumberCellProps = {
 }
 
 const DEFAULT_INPUT_CLASS =
-  'h-16 w-28 rounded-[12px] border-2 border-text-primary/20 bg-bg-primary text-center text-3xl font-bold tabular-nums text-text-primary placeholder:text-text-primary/30 focus-visible:border-accent focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40'
+  'h-16 w-28 rounded-base border-2 border-text-primary/20 bg-bg-primary text-center text-3xl font-bold tabular-nums text-text-primary placeholder:text-text-primary/30 focus-visible:border-accent focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40'
 
 /**
  * Plan U10 (2026-05-04): the canonical large-numeric tap-to-type input.

@@ -55,6 +55,103 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
     await checkA11y(page, 'safety check')
   })
 
+  // Audit 2026-05-24 (M1 / A6): the scans above only exercise the
+  // *unselected* default, so they never caught that a selected
+  // `warning`-tone ToggleChip rendered `text-warning` (#dc2626) on
+  // `bg-warning-surface` (#fee2e2) at ~3.95:1 — below the WCAG 2.1 AA
+  // 4.5:1 floor. These two tests pin the *selected* and *conditional*
+  // warning states so the regression class fails loudly if the
+  // `--color-warning-strong` wiring is ever reverted.
+  async function goToSafety(page: import('@playwright/test').Page) {
+    await seedOnboardingAndOpenHome(page)
+    await page.getByRole('button', { name: /start.*session/i }).click()
+    await page.getByRole('radio', { name: 'Solo' }).click()
+    await page.getByLabel('Net available').getByRole('radio', { name: 'No' }).click()
+    await page
+      .getByRole('radiogroup', { name: /wall or fence nearby/i })
+      .getByRole('radio', { name: 'No' })
+      .click()
+    await page.getByRole('radio', { name: '15 min' }).click()
+    await page.getByRole('button', { name: /build session/i }).click()
+    await expect(page.getByText('Before we start')).toBeVisible()
+  }
+
+  test('safety – selected warning-tone chip', async ({ page }) => {
+    await goToSafety(page)
+    // "Today" is the `0 days` recency chip — the one chip rendered with
+    // `tone="warning"`. Selecting it puts a selected-warning chip on
+    // screen for axe to scan.
+    const today = page
+      .getByRole('radiogroup', { name: /When did you last train/i })
+      .getByRole('radio', { name: 'Today' })
+    await today.click()
+    await expect(today).toHaveAttribute('aria-checked', 'true')
+    await checkA11y(page, 'safety – selected warning chip')
+  })
+
+  test('safety – pain override confirm state', async ({ page }) => {
+    await goToSafety(page)
+    // Recency must be answered first, otherwise `canAct` is false and the
+    // override-confirm UI (the danger button + consequence copy) never
+    // renders (`isConfirming = confirming && canAct`).
+    await page
+      .getByRole('radiogroup', { name: /When did you last train/i })
+      .getByRole('radio', { name: 'Yesterday' })
+      .click()
+    await page
+      .getByRole('radiogroup', { name: /Sharp pain or guarding/i })
+      .getByRole('radio', { name: 'Yes' })
+      .click()
+    await page.getByRole('button', { name: /Override: use my original session/i }).click()
+    // Reveals the `text-warning`-class danger button + consequence copy
+    // on the warning-surface Callout.
+    await expect(page.getByRole('button', { name: /Yes, use original session/i })).toBeVisible()
+    await checkA11y(page, 'safety – pain override confirm')
+  })
+
+  test('safety – heat & safety tips expanded', async ({ page }) => {
+    await goToSafety(page)
+    // The expanded panel is a warning-tone Callout (bg-warning-surface)
+    // whose "Stop immediately if you notice:" heading is text-warning(-strong).
+    await page.getByRole('button', { name: /heat & safety tips/i }).click()
+    await expect(page.getByText(/stop immediately if you notice/i)).toBeVisible()
+    await checkA11y(page, 'safety – heat tips expanded')
+  })
+
+  // Drives a real run to the paused state, where the destructive
+  // "End session" control + its confirm modal use the Button `danger`
+  // variant (bg-warning-surface + warning text) — another state the
+  // default scans never reached.
+  async function goToRunPaused(page: import('@playwright/test').Page) {
+    await goToSafety(page)
+    await page
+      .getByRole('radiogroup', { name: /Sharp pain or guarding/i })
+      .getByRole('radio', { name: 'No' })
+      .click()
+    await page
+      .getByRole('radiogroup', { name: /When did you last train/i })
+      .getByRole('radio', { name: 'Yesterday' })
+      .click()
+    await page.getByRole('button', { name: /^Start session$/i }).click()
+
+    const pause = page.getByRole('button', { name: /pause/i })
+    const startNext = page.getByRole('button', { name: /start next block/i })
+    await expect(pause.or(startNext)).toBeVisible({ timeout: 15_000 })
+    if (await startNext.isVisible()) {
+      await startNext.click()
+      await expect(pause).toBeVisible({ timeout: 10_000 })
+    }
+    await pause.click()
+    await expect(page.getByText('Paused', { exact: true })).toBeVisible()
+  }
+
+  test('run – end session confirm modal', async ({ page }) => {
+    await goToRunPaused(page)
+    await page.getByRole('button', { name: /end session/i }).click()
+    await expect(page.getByRole('heading', { name: /end session early/i })).toBeVisible()
+    await checkA11y(page, 'run – end session confirm')
+  })
+
   test('run screen', async ({ page }) => {
     await seedOnboardingAndOpenHome(page)
     await page.getByRole('button', { name: /start.*session/i }).click()

@@ -91,7 +91,7 @@ export function PassMetricInput({
           onClick={onToggleNotCaptured}
           aria-pressed={notCaptured}
           className={[
-            'mx-auto min-h-[44px] rounded-[12px] px-4 py-2 text-sm font-medium transition-colors',
+            'mx-auto min-h-[44px] rounded-base px-4 py-2 text-sm font-medium transition-colors',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
             notCaptured
               ? 'border border-accent bg-info-surface text-accent'

@@ -189,9 +189,9 @@ export function useReviewController(executionLogId: string) {
   const missingHint: string | null = isSubmitting
     ? null
     : sessionRpe == null
-      ? 'Rate your effort above to submit.'
+      ? 'Rate your effort above to finish.'
       : needsIncompleteReason && incompleteReason == null
-        ? 'Pick a reason you ended early to submit.'
+        ? 'Pick a reason you ended early to finish.'
         : null
 
   const handleSubmit = async () => {

@@ -154,10 +154,16 @@ export function SkillLevelScreen() {
           leaving the reader to guess. The taxonomy enum is unchanged
           (still writes `skillLevel: 'unsure'` atomically via
           `setStorageMetaMany`). */}
-        <SkillLevelPicker
-          onPick={handlePick}
-          unsureSubtext="We'll size a light starter - you can change this after."
-        />
+        {/*
+          No `unsureSubtext` override: `SkillLevelPicker`'s
+          DEFAULT_UNSURE_SUBTEXT is already the onboarding-flavored copy
+          ("We'll size a light starter. You can change this after."). The
+          prior override duplicated that string but with an ASCII hyphen
+          as a sentence dash, which violates courtside-copy.mdc rule 4
+          (no dashes in prose). Falling back to the default removes the
+          duplication and the punctuation bug in one move.
+        */}
+        <SkillLevelPicker onPick={handlePick} />
       </ScreenShell.Body>
     </ScreenShell>
   )

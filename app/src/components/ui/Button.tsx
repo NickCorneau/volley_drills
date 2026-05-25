@@ -24,7 +24,7 @@ type ButtonProps = {
 
 const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2'
 const primaryBase = cx(
-  'min-h-[56px] rounded-[16px] px-4 py-3 text-sm font-semibold',
+  'min-h-[56px] rounded-focal px-4 py-3 text-sm font-semibold',
   focusRing,
   'focus-visible:ring-accent',
 )
@@ -46,14 +46,14 @@ const variantStyles: Record<ButtonVariant, string> = {
     'bg-accent text-white hover:bg-accent-pressed active:bg-accent-pressed',
   ),
   outline: cx(
-    'min-h-[54px] rounded-[16px] px-4 py-3 text-sm font-semibold',
+    'min-h-[54px] rounded-focal px-4 py-3 text-sm font-semibold',
     'border-2 border-text-secondary/30 text-text-primary',
     'hover:bg-bg-warm active:bg-bg-warm',
     focusRing,
     'focus-visible:ring-accent',
   ),
   secondary: cx(
-    'min-h-[54px] rounded-[12px] px-3 py-2 text-sm font-medium',
+    'min-h-[54px] rounded-base px-3 py-2 text-sm font-medium',
     'border border-text-secondary/20 text-text-primary',
     // Phase F7 (2026-04-19): press feedback to match `primary`,
     // `outline`, and `danger` - secondary + ghost were the two
@@ -66,8 +66,14 @@ const variantStyles: Record<ButtonVariant, string> = {
     'focus-visible:ring-accent',
   ),
   danger: cx(
-    'min-h-[54px] rounded-[16px] px-4 py-3 text-sm font-semibold',
-    'border-2 border-warning/30 bg-warning-surface text-warning',
+    'min-h-[54px] rounded-focal px-4 py-3 text-sm font-semibold',
+    // Audit 2026-05-24 (M1 / A6): the danger variant paints its own
+    // `bg-warning-surface`, so `text-warning` (#dc2626) on it cleared
+    // only ~3.95:1 — below the WCAG 2.1 AA 4.5:1 floor. `text-warning-strong`
+    // (~5.3:1) keeps the danger-red read while passing AA. Covers every
+    // destructive confirm (ConfirmModal `destructiveAction`, ResumePrompt
+    // discard). Border stays `--color-warning` (component boundary, 3:1).
+    'border-2 border-warning/30 bg-warning-surface text-warning-strong',
     'hover:bg-warning/10 active:bg-warning/10',
     focusRing,
     'focus-visible:ring-warning',
@@ -85,7 +91,7 @@ const variantStyles: Record<ButtonVariant, string> = {
     'focus-visible:ring-accent',
   ),
   soft: cx(
-    'min-h-[54px] rounded-[16px] px-4 py-3 text-sm font-semibold',
+    'min-h-[54px] rounded-focal px-4 py-3 text-sm font-semibold',
     'bg-bg-warm text-text-primary',
     // Phase F11 (2026-04-19): `soft` was the only Button variant with
     // no hover or press feedback. Using the filter-based

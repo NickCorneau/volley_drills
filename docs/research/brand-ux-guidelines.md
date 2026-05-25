@@ -6,7 +6,7 @@ stage: planning
 type: research
 authority: canonical UX behaviour reference — typography, color, copy voice, layout, iconography, states, and per-screen posture for the Volleycraft prototype and M001 build
 summary: "How Volleycraft should look and behave: a concrete, screen-by-screen reference for amateur athletes who take their sport seriously."
-last_updated: 2026-05-03
+last_updated: 2026-05-24
 depends_on:
   - docs/vision.md
   - docs/research/outdoor-courtside-ui-brief.md
@@ -211,8 +211,9 @@ Tokens live in `app/src/index.css` `@theme`. Do not hardcode hex values in compo
 | `--color-text-primary` | `#1a1a1a` | Primary body and display text |
 | `--color-text-secondary` | `#4b5563` | Labels, meta, support copy |
 | `--color-success` | `#059669` | Completion markers, save confirmations |
-| `--color-warning` | `#dc2626` | Destructive/serious actions, pain flow, incomplete chips |
-| `--color-warning-surface` | `#fee2e2` | Pain-override card surface |
+| `--color-warning` | `#dc2626` | Warning **borders, icons, and glyphs** (component-boundary 3:1), and warning text on light/white surfaces |
+| `--color-warning-strong` | `#b91c1c` | AA-safe warning **text on `warning-surface`** (selected warning chips, `Button` danger variant, warning `Callout`/`StatusMessage` bodies) — see §2.2 |
+| `--color-warning-surface` | `#fee2e2` | Pain-override card surface, warning Callout fill, selected-warning chip fill |
 | `--color-info-surface` | `#fef3e8` | Heat & safety tips panel |
 
 ### 2.2 Color rules
@@ -220,6 +221,7 @@ Tokens live in `app/src/index.css` `@theme`. Do not hardcode hex values in compo
 - **One accent.** `accent` (`#b45309`, warm amber) is the single action/progress/phase color. Do not introduce a second accent, gradient, or "accent-blue secondary." One color, used deliberately.
 - **Near-black on warm off-white is the baseline.** Page field is `surface-calm` (`#fcfaf5`); focal cards are `bg-primary` (pure white). Text is `text-primary` (#1a1a1a). This satisfies the outdoor brief's light-only, high-contrast freeze.
 - **Semantic colors are not decorative.** `success` means "this action saved/completed." `warning` means "this is destructive or is protecting you from harm." Do not use `warning-surface` as a generic highlight; do not use `success` as a generic positive tone.
+- **Warning text on `warning-surface` uses `warning-strong` (`#b91c1c`).** Base `warning` (`#dc2626`) clears only ~3.95:1 on `warning-surface` — below the WCAG 2.1 AA 4.5:1 floor for normal text. `warning-strong` (~5.3:1) is the text color wherever warning copy sits on `warning-surface` (selected warning chips, `Button` danger variant, warning `Callout` / `StatusMessage` error bodies, `PainOverrideCard`). Base `warning` stays for borders, icons, and glyphs — a component boundary needs only 3:1 (WCAG 1.4.11). Audit 2026-05-24; regression-guarded by `e2e/accessibility.spec.ts` scans of the *selected* and *conditional* warning states.
 - **No gradients.** Flat color fills only.
 - **No shadows as decoration.** Surface cards use a `shadow-sm` plus a hairline `ring-1 ring-text-primary/5` (Phase F1). That is the one shadow allowed, used once, to lift focal cards from the warm page field.
 
@@ -232,10 +234,10 @@ If you are about to paint a new UI element, pick from this table. If the element
 | Primary CTA | `bg-accent text-white` | — | `bg-accent-pressed` |
 | Outline button | `border text-text-primary` | — | `bg-bg-warm` |
 | Ghost button (tertiary) | `text-accent` | — | `text-accent-pressed` |
-| Danger outline | `border-warning text-warning` | — | `bg-warning-surface` |
+| Danger outline | `border-warning text-warning-strong` | — | `bg-warning-surface` |
 | Selected chip | `bg-accent text-white` | — | — |
 | Unselected chip | `border text-text-primary bg-bg-primary` | `bg-accent text-white` | — |
-| Destructive chip (Pain "Yes", Incomplete reason) | `border text-text-primary` | `border-warning text-warning bg-warning-surface/50` | — |
+| Destructive chip (Pain "Yes", Incomplete reason) | `border text-text-secondary bg-bg-primary` | `border-warning text-warning-strong bg-warning-surface` | — |
 | Progress fill | `bg-accent` on `bg-bg-warm` track | — | — |
 | Phase label (Run) | `text-accent font-semibold` | — | — |
 | Completion mark | `bg-success text-white` | — | — |

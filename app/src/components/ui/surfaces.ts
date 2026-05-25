@@ -36,7 +36,7 @@
  * settings / onboarding surfaces but wrong for glare-readable run mode.
  */
 export const FOCAL_SURFACE_CLASS =
-  'rounded-[16px] bg-bg-primary border border-text-primary/10 shadow-sm'
+  'rounded-focal bg-bg-primary border border-text-primary/10 shadow-sm'
 
 /**
  * Elevated white panel for modals, bottom sheets, and blocking overlays.

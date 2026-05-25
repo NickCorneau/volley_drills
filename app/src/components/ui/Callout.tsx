@@ -32,14 +32,21 @@ export type CalloutProps = {
   children: ReactNode
 }
 
+// Audit 2026-05-24 (M1 / A6): the warning tone sets the container's
+// default text color on `bg-warning-surface`. `text-warning` (#dc2626)
+// there cleared only ~3.95:1 — below the WCAG 2.1 AA 4.5:1 floor — so any
+// inherited text (StatusMessage error body, heat tips, override copy)
+// failed. `text-warning-strong` (~5.3:1) fixes it for all warning Callouts
+// at once; children that need the brighter red for a graphical glyph set
+// `text-warning` explicitly (icons follow the 3:1 component rule).
 const TONE_FLAT: Record<CalloutTone, string> = {
-  warning: 'bg-warning-surface text-warning',
+  warning: 'bg-warning-surface text-warning-strong',
   info: 'bg-info-surface text-text-secondary',
   success: 'bg-success/10 text-success',
 }
 
 const TONE_HAIRLINE: Record<CalloutTone, string> = {
-  warning: 'border border-warning/30 bg-warning-surface text-warning',
+  warning: 'border border-warning/30 bg-warning-surface text-warning-strong',
   info: 'border border-info/30 bg-info-surface text-text-secondary',
   success: 'border border-success/30 bg-success/10 text-success',
 }
@@ -77,7 +84,7 @@ export function Callout({
 }: CalloutProps) {
   const toneClass = emphasis === 'hairline' ? TONE_HAIRLINE[tone] : TONE_FLAT[tone]
   return (
-    <div role={role} className={cx('rounded-[12px]', toneClass, SIZE_CLASS[size], className)}>
+    <div role={role} className={cx('rounded-base', toneClass, SIZE_CLASS[size], className)}>
       {children}
     </div>
   )

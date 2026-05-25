@@ -173,7 +173,7 @@ export function ActionOverlay({
         ref={panelRef}
         tabIndex={-1}
         className={cx(
-          'relative w-full max-w-[340px] rounded-[12px] p-6',
+          'relative w-full max-w-[340px] rounded-base p-6',
           ELEVATED_PANEL_SURFACE,
           panelClassName,
         )}
