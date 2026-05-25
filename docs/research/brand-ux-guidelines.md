@@ -6,7 +6,7 @@ stage: planning
 type: research
 authority: canonical UX behaviour reference — typography, color, copy voice, layout, iconography, states, and per-screen posture for the Volleycraft prototype and M001 build
 summary: "How Volleycraft should look and behave: a concrete, screen-by-screen reference for amateur athletes who take their sport seriously."
-last_updated: 2026-05-24
+last_updated: 2026-05-25
 depends_on:
   - docs/vision.md
   - docs/research/outdoor-courtside-ui-brief.md
@@ -84,16 +84,18 @@ The production scale. Match one of these tokens at each call-site; introduce a n
 | Role | Tailwind | Size | Weight | Tracking | Where |
 |------|----------|------|--------|----------|-------|
 | Display — verdict | `text-4xl` | 36 px | 700 | `tracking-tight` | `CompleteScreen` verdict only |
-| Display — prep title | `text-2xl` | 24 px | 700 | `tracking-tight` | `RunScreen` / `TransitionScreen` / `ReviewScreen` drill-or-screen h1 |
+| Display — run / transition / review h1 | `text-xl` | 20 px | 600 | `tracking-tight` | `RunScreen` drill-name h1, `TransitionScreen` next-block h1, `ReviewScreen` `Quick review` h1 |
 | Display — prep screen h1 | `text-xl` | 20 px | 700 | `tracking-tight` | `SetupScreen`, `SafetyCheckScreen`, `SettingsScreen`, `SkillLevelScreen` |
-| Wordmark | `text-lg` | 18 px | 700 | `tracking-tight` | `HomeScreen` app-bar only |
+| Wordmark | `text-xl` | 20 px | 600 | `tracking-tight` | `HomeScreen` app-bar only |
 | Modal/card h2 | `text-lg` | 18 px | 700 | — | `ResumePrompt`, `SoftBlockModal`, `SafetyIcon` sheet, `SchemaBlockedOverlay` |
 | Section h2 | `text-base` | 16 px | 600 | — | Review cards, Safety sections, Settings cards, Setup sections |
 | Body default | `text-base` | 16 px | 400 | — | Primary paragraph copy, textarea input |
 | UI label / body small | `text-sm` | 14 px | 400–500 | — | Labels, meta lines, chip text, help copy |
 | Support / footnote | `text-xs` | 12 px | 400 | — | Footers, fine-print explainers, RPE scale anchors |
-| Timer — live | `text-[56px]` | 56 px | 700 | — | `BlockTimer` countdown digits (mono, tabular, slashed zero) |
+| Timer — live | `text-[72px]` | 72 px | 700 | — | `BlockTimer` countdown digits (mono, tabular, slashed zero). **2026-05-25 H1 experiment**: bumped from 56 px arm's-length to 72 px bench-distance (outdoor brief design center). Durable keep / revert gated on `D91` field run; viewport-bound assessment in `docs/design/reviews/2026-05-25-h1-h2-experiment-revaluation.md` |
 | Timer — preroll | `text-[72px]` | 72 px | 700 | — | `RunScreen` preroll countdown (mono, tabular, slashed zero, accent color) |
+
+**Canon-vs-code reconciliation (2026-05-25, audit follow-up plan U8).** This table previously claimed run / transition / review h1 was `text-2xl` / 700 and the wordmark was `text-lg` / 700. Shipped code uses `text-xl` / `font-semibold` for both, which is the calmer / less display-heavy register the 2026-04-23 walkthrough closeout settled on. The shipped values are now canon; the historical `text-2xl` / `text-lg` claims are retired. See `docs/design/reviews/2026-05-24-agent-e2e-design-critique.md` Canon-vs-code drift table.
 
 **Forbidden sizes**: anything below `text-xs` (12 px) in body copy. The outdoor brief's 16 px body floor applies to all primary copy; `text-xs` is reserved for truly decorative captions inside large tap targets or explicit footnotes.
 
@@ -235,12 +237,13 @@ If you are about to paint a new UI element, pick from this table. If the element
 | Outline button | `border text-text-primary` | — | `bg-bg-warm` |
 | Ghost button (tertiary) | `text-accent` | — | `text-accent-pressed` |
 | Danger outline | `border-warning text-warning-strong` | — | `bg-warning-surface` |
-| Selected chip | `bg-accent text-white` | — | — |
-| Unselected chip | `border text-text-primary bg-bg-primary` | `bg-accent text-white` | — |
+| Unselected chip | `border text-text-primary bg-bg-primary` | `bg-info-surface text-accent` (soft-selected) | — |
 | Destructive chip (Pain "Yes", Incomplete reason) | `border text-text-secondary bg-bg-primary` | `border-warning text-warning-strong bg-warning-surface` | — |
 | Progress fill | `bg-accent` on `bg-bg-warm` track | — | — |
 | Phase label (Run) | `text-accent font-semibold` | — | — |
 | Completion mark | `bg-success text-white` | — | — |
+
+**Selected-chip reconciliation (2026-05-25, audit follow-up plan U8 row 9).** This table previously listed a separate `Selected chip` row at `bg-accent text-white` (solid-accent). Shipped code uses a soft-selected treatment — `bg-info-surface` (peach) fill with `text-accent` (amber) glyph — which clears AA at ~4.6:1 and reads as "claimed, not announced," consistent with the `shibui` direction in `docs/research/japanese-inspired-visual-direction.md`. The 2026-05-04 setup-screen-polish ideation (`docs/ideation/2026-05-04-setup-screen-default-path-polish-ideation.md`) explicitly rejected reverting to solid-accent on stronger-selected-state grounds. Canon now records the shipped soft-selected treatment as the single chip-selected row; the standalone `Selected chip` line is retired. See `docs/design/reviews/2026-05-24-agent-e2e-design-critique.md` M3.
 
 ---
 
@@ -401,7 +404,8 @@ If a new UI element needs a glyph, draw an inline SVG with:
 ### 6.4 Disabled
 
 - Full-width primary button when disabled: `opacity-50 cursor-not-allowed` on the same accent color. The disabled state visibly is-the-same-button, just muted.
-- Always include a visible helper line above disabled primary buttons explaining why it is disabled: "Rate your effort above to submit.", "Pick a reason you ended early to submit."
+- Always include a visible helper line above disabled primary buttons explaining why it is disabled: "Rate your effort above to submit.", "Pick a reason you ended early to submit.", "Tag how that drill went to keep going.", "Tell us when you last trained to start." The helper sits in an `aria-live="polite"` region so screen readers announce it on state change.
+- **Disabled-primary may legitimately read low-emphasis at glance distance** (notably on `DrillCheckScreen` and `SafetyCheckScreen` while their gating chips are unselected). This is correct — the variant is `primary`, the disabled state is the muted form, the helper line carries the "why" voice. Do not "fix" a disabled-primary by promoting it visually or by demoting a matching sibling primary (e.g., `TransitionScreen.Start next block`) to "match the low-emphasis." The asymmetry is the load-bearing signal that the user has gating input to give. Added 2026-05-25 (audit follow-up plan U5).
 
 ### 6.5 Success
 
@@ -423,7 +427,7 @@ Each screen has an intended posture. These are the reference treatments; when ad
 
 ### 7.1 Home
 
-- App-bar band: inline `Brandmark` (28 px) + `Volleycraft` wordmark (`text-lg font-bold tracking-tight`). Subtle but owned (F11).
+- App-bar band: inline `Brandmark` (28 px) + `Volleycraft` wordmark (`text-xl font-semibold tracking-tight`). Subtle but owned (F11). Pre-2026-05-25 canon claimed `text-lg font-bold`; shipped is `text-xl font-semibold` (calmer, more weight-restrained register — audit follow-up plan U8).
 - One primary card, exactly, chosen by the 5-variant precedence (`resume > review_pending > draft > last_complete > new_user`).
 - Optional secondary-rows cluster below the primary, as a single soft-container list (F1). Secondary rows flatten their surface; only the list container holds the shadow/ring.
 - Footer: `Settings` link + `Your data stays on this device.` in `text-xs text-text-secondary`.
@@ -433,7 +437,7 @@ Each screen has an intended posture. These are the reference treatments; when ad
 - **Left-aligned**, softer posture than prep screens.
 - Intro line + left-aligned h1 + supporting line ("You can change this later.").
 - First-time content cards with title + descriptor.
-- Tertiary "Not sure yet" underline link as escape hatch.
+- **"Not sure yet" is a full focal card**, rendered AFTER the four primary bands so it doesn't compete with the primary typology but carries the same ink weight (`FOCAL_SURFACE_CLASS` + same `min-h-[64px]` rhythm). Pre-2026-05-25 canon described this as a tertiary `variant="link"` underline button; the 2026-04-21 partner walkthrough flagged the link as easily missed on first scan, and the promotion to a focal card was field-validated. Audit follow-up plan U8 (see `docs/design/reviews/2026-05-24-agent-e2e-design-critique.md` Canon-vs-code drift table).
 
 ### 7.3 Prep (Setup, Safety, Settings)
 
@@ -446,30 +450,40 @@ Each screen has an intended posture. These are the reference treatments; when ad
 ### 7.4 Run (active drill)
 
 - Minimal app-bar: `SafetyIcon`, phase label (accent sentence-case: `Warm up` / `Work` / `Downshift`), `{index}/{total}`.
-- Drill h1 (`text-2xl font-bold tracking-tight`) + single instruction paragraph + coaching cues + `Hide cues` toggle.
-- Timer in JetBrains Mono at 56 px with slashed zero.
+- Drill h1 (`text-xl font-semibold tracking-tight`). Pre-2026-05-25 canon claimed `text-2xl font-bold`; shipped is `text-xl font-semibold` (calmer register, audit follow-up plan U8).
+- Single `Now` cue surface OR (for segmented drills) `courtsideInstructions` paragraph + `SegmentList`. As of 2026-05-25 H2 experiment (audit follow-up plan U7), the segmented-drill `courtsideInstructions` paragraph routes into the `<details>` `Show more cues and instructions` affordance once `currentSegmentIndex > 0` — the SegmentList carries the load-bearing read; the full READ-DO paragraph stays reachable behind the summary. Durable keep / revert gated on `D91`.
+- Timer in JetBrains Mono at **72 px** with slashed zero (2026-05-25 H1 experiment — bumped from 56 px arm's-length to 72 px bench-distance; audit follow-up plan U6). Durable keep / revert gated on `D91`.
 - Controls: Pause + Next as a pair; Pause becomes Resume + reveals Shorten / End session when paused.
 
 ### 7.5 Transition (between blocks)
 
 - App-bar: `SafetyIcon`, `Transition` label (sentence case, `text-sm font-medium text-text-secondary`), `Next: {index}/{total}`.
 - Prev-block summary card: green check + drill name + `Complete` (or `Skipped`) in success green.
-- `Up next` eyebrow (sentence case) + next-block h1 (`text-2xl font-bold tracking-tight`) + duration + instructions.
+- `Up next` eyebrow (sentence case) + next-block h1 (`text-xl font-semibold tracking-tight`) + duration + instructions. Pre-2026-05-25 canon claimed `text-2xl font-bold`; shipped is `text-xl font-semibold` (audit follow-up plan U8).
 - Primary `Start next block` CTA + tertiary `Shorten block`.
 
 ### 7.6 Review
 
-- Centered h1 `Quick review` (`text-2xl font-bold tracking-tight`) + meta line.
+- Centered h1 `Quick review` (`text-xl font-semibold tracking-tight`) + meta line. Pre-2026-05-25 canon claimed `text-2xl font-bold`; shipped is `text-xl font-semibold` (audit follow-up plan U8).
 - Four cards, each a section: RPE scale, Good passes (conditional), Ended-early reason (conditional), Quick tags.
+- **RPE input: 3-way `Easy / Right / Hard` chip row** (better for courtside than the original 0-10 grid — fewer touch targets, faster glance read). Pre-2026-05-25 canon described a 0-10 chip grid; shipped is the 3-way variant (audit follow-up plan U8). See `docs/design/reviews/2026-04-26-agent-ux-review.md` for the original simplification reason.
 - Textarea card: `Short note (optional)` label with `font-normal` qualifier.
-- Primary `Submit review`; tertiary `Finish later`; footnote about the 2-hour deferral window.
+- Primary `Done`; tertiary `Finish later`; footnote about the 2-hour deferral window. Pre-2026-05-25 canon claimed `Submit review`; shipped is `Done` (single-imperative button voice; audit follow-up plan U8).
 
 ### 7.7 Complete
 
 - Minimal app-bar: `SafetyIcon` only.
-- Centered column: `Today's verdict` h1 (`text-sm font-medium text-text-secondary`) + `VerdictGlyph` + verdict h2 (`text-4xl font-bold tracking-tight`, F11) + reason paragraph.
+- Centered column: verdict word (`text-4xl font-bold tracking-tight`, `aria-live="polite"`) + reason paragraph. The solo path **deliberately omits** the `Today's verdict` eyebrow (intentional `Ma`); the pair path keeps the eyebrow because the verdict-without-eyebrow read more abrupt with two-person context. Pre-2026-05-25 canon described the eyebrow as always present; shipped is the solo-omits-eyebrow shape (audit follow-up plan U8).
 - Session-recap card: `Session recap` label + 4-row definition list (`Session`, `Drills completed`, `Good passes`, `Effort`).
-- Primary `Done`; quiet green-check save confirmation; storage-posture footnote.
+- Primary `Back to home` (names the destination per the 2026-04-21 walkthrough P1-2 finding); quiet green-check save confirmation; storage-posture footnote. Pre-2026-05-25 canon claimed the primary was `Done`; shipped is `Back to home` (audit follow-up plan U8).
+
+### 7.x Post-block screens (`DrillCheckScreen`)
+
+Added 2026-05-25 (audit follow-up plan U5).
+
+- `DrillCheckScreen` is the single-purpose per-drill capture surface. One primary `Continue` CTA in the footer, gated on a capture-chip selection.
+- The `Continue` button is `variant="primary"` (solid-accent when enabled); when the gating chip is unselected, it reads disabled — the muted form per §6.4. The `drill-check-gating-hint` aria-live region above carries the "why" copy (`Tag how that drill went to keep going.`).
+- Do **not** promote this button (no disabled-state restyle to enabled-look-alike), and do **not** demote the matching `TransitionScreen.Start next block` to match. The asymmetry between the two adjacent between-block CTAs is the load-bearing signal that tagging is required input. See `docs/design/reviews/2026-05-24-agent-e2e-design-critique.md` L1 + the inline code comment at `app/src/screens/DrillCheckScreen.tsx` near the `Continue` button.
 
 ### 7.8 Modals (Resume, Soft-block, Schema-blocked)
 
