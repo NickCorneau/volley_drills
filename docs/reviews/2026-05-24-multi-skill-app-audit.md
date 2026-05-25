@@ -38,18 +38,18 @@ decision_refs:
 
 ## Top findings — ranked by leverage
 
-Ordered by **leverage = value × fix clarity** (cleanest, highest-impact first), not by raw severity. A high-severity finding with a sprawling or decision-blocked fix ranks below a medium-severity one with a clean, confident fix. Status: ✅ shipped this pass · ⬜ open · 🔭 strategic (separate track, not a quick fix). IDs are stable: A1–A7 for net-new audit findings; `n1`/`n2` for accessibility findings that complement the e2e critique. All match the per-skill sections below.
+Ordered by **leverage = value × fix clarity** (cleanest, highest-impact first), not by raw severity. A high-severity finding with a sprawling or decision-blocked fix ranks below a medium-severity one with a clean, confident fix. Status: ✅ shipped this pass · ⬜ open · 🔭 strategic (separate track, not a quick fix). The **Trigger** column anchors each open recommendation to a milestone, gate, or condition under D124/D127/D130 founder-use mode — `n/a (shipped)` for closed rows, an explicit "post-M001" or condition string otherwise. IDs are stable: A1–A7 for net-new audit findings; `n1`/`n2` for accessibility findings that complement the e2e critique. All match the per-skill sections below.
 
-| # | ID | Finding | Value × Fix → leverage | Status | Pointer |
-| --- | --- | --- | --- | --- | --- |
-| 1 | A1 | **`Expander` setState-in-render** — `onOpenChange` ran inside the `setOpen` updater, mutating `SafetyCheckScreen` during render; spammed a React console error on every Safety open. | High value · trivial fix (one function) → **top** | ✅ Done | `app/src/components/ui/Expander.tsx:50-56` |
-| 2 | A6 | **Selected `warning` chips failed AA** (#dc2626 on #fee2e2 ≈ 3.95:1) — pain **Yes**, **Today**, incomplete-reason chips when selected. | High value (AA) · trivial fix (1 token + 1 line) | ✅ Done | `app/src/components/ui/ToggleChip.tsx:42` |
-| 3 | n1 | **axe scans only the *unselected* chip state**, so the A6 contrast class is never exercised in CI — add a "select-then-scan" assertion to lock the fix. | Med-high value (regression guard) · trivial fix (1 test) → **top remaining** | ⬜ Open | `app/e2e/accessibility.spec.ts` |
-| 4 | A2 | **Radius tokens are dead.** `--radius-card` / `--radius-button` are referenced **zero** times; ~25 source call-sites hardcode 5 distinct radius arbitraries (`[12px]`, `[16px]`, `[14px]`, `[8px]`, `[2px]`). | Med value · clean mechanical sweep + 1 decision (wire or delete) | ⬜ Open | `app/src/index.css:103-104` |
-| 5 | A3 | **Brand color untokenized and ≠ accent.** Brandmark fills `#E8732A`; the accent token is `#b45309`. Two oranges, one hardcoded in an SVG. | Med value · needs 1 design decision (which orange), then trivial | ⬜ Open | `Brandmark.tsx:37` vs `index.css:1` |
-| 6 | A5 | **ASCII hyphen as a sentence dash** in onboarding copy; the e2e critique's em-dash fix would itself violate `courtside-copy.mdc` rule 4. Correct fix is a period (the override also duplicated the already-correct default). | Low value · trivial fix | ✅ Done | `app/src/screens/SkillLevelScreen.tsx:159` |
-| 7 | A4 | **Touch-target sizes sprawl** across 44 / 48 / 54 / 56 / 64 px as arbitrary `min-h-[Npx]`, no scale — and the README claims a "54–60 px" standard. | Low-med value · medium sweep (add scale + migrate) | ⬜ Open | `Button.tsx`, `ToggleChip.tsx`, `BackButton.tsx`, `SkillLevelPicker.tsx` |
-| 8 | A7 | **2 of 3 M001 validation conditions have near-zero direct evidence** (solo 1/7, set focus 0/3); the dominant product signal is the **3+ player content gap** (3 hits + observed displacement-of-use). | Very high value · **not a quick fix** — content track, gated by `D124`, post-M001 | 🔭 Strategic | `docs/research/founder-use-ledger.md` |
+| # | ID | Finding | Value × Fix → leverage | Status | Trigger | Pointer |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | A1 | **`Expander` setState-in-render** — `onOpenChange` ran inside the `setOpen` updater, mutating `SafetyCheckScreen` during render; spammed a React console error on every Safety open. | High value · trivial fix (one function) → **top** | ✅ Done | n/a (shipped) | `app/src/components/ui/Expander.tsx:50-56` |
+| 2 | A6 | **Selected `warning` chips failed AA** (#dc2626 on #fee2e2 ≈ 3.95:1) — pain **Yes**, **Today**, incomplete-reason chips when selected. | High value (AA) · trivial fix (1 token + 1 line) | ✅ Done | n/a (shipped) | `app/src/components/ui/ToggleChip.tsx:42` |
+| 3 | n1 | **axe scans only the *unselected* chip state**, so the A6 contrast class is never exercised in CI — add a "select-then-scan" assertion to lock the fix. | Med-high value (regression guard) · trivial fix (1 test) → **top remaining** | ⬜ Open | M001 in-flight (CI guard for A6) | `app/e2e/accessibility.spec.ts` |
+| 4 | A2 | **Radius tokens are dead.** `--radius-card` / `--radius-button` are referenced **zero** times; ~25 source call-sites hardcode 5 distinct radius arbitraries (`[12px]`, `[16px]`, `[14px]`, `[8px]`, `[2px]`). | Med value · clean mechanical sweep + 1 decision (wire or delete) | ⬜ Open | Post-M001; folds into design-system polish track if D101 fires earlier | `app/src/index.css:103-104` |
+| 5 | A3 | **Brand color untokenized and ≠ accent.** Brandmark fills `#E8732A`; the accent token is `#b45309`. Two oranges, one hardcoded in an SVG. | Med value · needs 1 design decision (which orange), then trivial | ⬜ Open | Post-M001; bundle with A2 if both fire | `Brandmark.tsx:37` vs `index.css:1` |
+| 6 | A5 | **ASCII hyphen as a sentence dash** in onboarding copy; the e2e critique's em-dash fix would itself violate `courtside-copy.mdc` rule 4. Correct fix is a period (the override also duplicated the already-correct default). | Low value · trivial fix | ✅ Done | n/a (shipped) | `app/src/screens/SkillLevelScreen.tsx:159` |
+| 7 | A4 | **Touch-target sizes sprawl** across 44 / 48 / 54 / 56 / 64 px as arbitrary `min-h-[Npx]`, no scale — and the README claims a "54–60 px" standard. | Low-med value · medium sweep (add scale + migrate) | ⬜ Open | Post-M001; gated on README 54–60 px standard arbitration | `Button.tsx`, `ToggleChip.tsx`, `BackButton.tsx`, `SkillLevelPicker.tsx` |
+| 8 | A7 | **2 of 3 M001 validation conditions have near-zero direct evidence** (solo 1/7, set focus 0/3); the dominant product signal is the **3+ player content gap** (3 hits + observed displacement-of-use). | Very high value · **not a quick fix** — content track, gated by `D124`, post-M001 | 🔭 Strategic | Post-M001 re-eval (2026-07-20); D101 sequencing input | `docs/research/founder-use-ledger.md` |
 
 ### Fixes applied in this pass (2026-05-24)
 
@@ -84,9 +84,9 @@ Left as recommendations (need design/founder judgment or a broader sweep): **A2*
 | Large quiet-button family | `Button` has 7 variants; `outline` / `secondary` / `soft` are all "quiet" | Not a bug. Worth a one-line "when to use which" note in the Button doc (see §5). |
 
 ### Priority actions
-1. **Either use the radius tokens or delete them.** Wire `--radius-card`/`--radius-button` into a Tailwind `rounded-card`/`rounded-button` utility and sweep the `rounded-[12px]`/`rounded-[16px]` sites, or remove the dead tokens. Dead tokens are worse than none — they imply a system that isn't enforced. Decide on the one-offs (`[14px]` RunScreen, `[8px]` PainOverrideCard) at the same time.
-2. **Tokenize the brand color** and reconcile it with the accent. Pick one orange (or formally accept "logo orange ≠ UI accent" and comment why).
-3. **Introduce a touch-target size scale** (e.g. `--tap-min`, `--tap-primary`) and reconcile against the README's "54–60 px" claim — today the floor is 44 px (still WCAG-OK; see §2).
+1. **Either use the radius tokens or delete them.** Wire `--radius-card`/`--radius-button` into a Tailwind `rounded-card`/`rounded-button` utility and sweep the `rounded-[12px]`/`rounded-[16px]` sites, or remove the dead tokens. Dead tokens are worse than none — they imply a system that isn't enforced. Decide on the one-offs (`[14px]` RunScreen, `[8px]` PainOverrideCard) at the same time. *(Trigger: post-M001; same condition as A2 in §0.)*
+2. **Tokenize the brand color** and reconcile it with the accent. Pick one orange (or formally accept "logo orange ≠ UI accent" and comment why). *(Trigger: post-M001; bundle with #1 if both fire.)*
+3. **Introduce a touch-target size scale** (e.g. `--tap-min`, `--tap-primary`) and reconcile against the README's "54–60 px" claim — today the floor is 44 px (still WCAG-OK; see §2). *(Trigger: post-M001; gated on README 54–60 px arbitration — A4 in §0.)*
 
 ---
 
@@ -123,8 +123,8 @@ Copy is a genuine strength and **evidence-rooted** (`courtside-copy.mdc` traces 
 
 **Findings:**
 - **A5 (the important one):** `SkillLevelScreen.tsx:159` — `"We'll size a light starter - you can change this after."` uses an ASCII hyphen as a sentence dash. The e2e critique (L2) recommends an **em-dash**, but that **violates `courtside-copy.mdc` rule 4** ("no em-dashes in prose; use commas, periods, colons"). **Correct fix: a period** → `"We'll size a light starter. You can change this after."` Worth reconciling `brand-ux-guidelines.md` §3.2 (which the e2e critique cited for the em-dash) against the higher-confidence `courtside-copy.mdc`.
-- **Guard gap:** `app/src/lib/copyGuard.ts` enforces D86 regulatory vocabulary only — not punctuation. The em-dash "Unicode guard" in rule 4 is documented but not wired as a lint, which is why an ASCII hyphen slips both. A tiny lint over `screens/**` + `components/**` would close this class.
-- **Confirmed minor (e2e L4):** "Export training records" is both heading and button label in Settings (redundant) — rename the button `Export` / `Download JSON`.
+- **Guard gap:** `app/src/lib/copyGuard.ts` enforces D86 regulatory vocabulary only — not punctuation. The em-dash "Unicode guard" in rule 4 is documented but not wired as a lint, which is why an ASCII hyphen slips both. A tiny lint over `screens/**` + `components/**` would close this class. *(Trigger: deferred — single observed violation, no trigger named yet; revisit on a second instance.)*
+- **Confirmed minor (e2e L4):** "Export training records" is both heading and button label in Settings (redundant) — rename the button `Export` / `Download JSON`. *(Trigger: queue with next Settings copy sweep; no standalone trigger.)*
 
 ---
 
@@ -177,10 +177,10 @@ The validation design (`D130` founder-use mode; the `D91` stranger-cohort gate d
 3. **No structured instrument.** Evidence is chat dumps + voice memos (the lowest evidential weight, by the ledger's own framing). There's no interview guide, task list, or rating scale — so "we feel like we're getting better" can't be separated from novelty.
 
 **Recommended next research moves (cheap, in-window):**
-- **One scripted solo usability session** (founder or a recruited solo player), 5 tasks, against the production build — directly attacks the solo/set evidence hole without unlocking scope.
-- **A 5-task usability test of the existing flow with 2–3 of the "couple people" already shown the app** — even at n=3 this is the first non-founder/non-Seb signal, and `usability test` needs only 5–8 participants.
-- **Pre-write the `D91` interview guide now** (warm-up → context → deep dive → reaction → wrap) so that if the stranger cohort triggers early, the instrument exists.
-- Keep the ledger, but **add a weekly summary row** for routine pair sessions so cadence stops being invisible (the ledger itself proposes this).
+- **One scripted solo usability session** (founder or a recruited solo player), 5 tasks, against the production build — directly attacks the solo/set evidence hole without unlocking scope. *(Trigger: deferred — no trigger named; depends on founder/recruit availability and instrument authoring.)*
+- **A 5-task usability test of the existing flow with 2–3 of the "couple people" already shown the app** — even at n=3 this is the first non-founder/non-Seb signal, and `usability test` needs only 5–8 participants. *(Trigger: deferred — cohort-vs-decision question open; would compete with D91 stranger-cohort gate if run unscoped. Decide which decision the test informs before scheduling.)*
+- **Pre-write the `D91` interview guide now** (warm-up → context → deep dive → reaction → wrap) so that if the stranger cohort triggers early, the instrument exists. *(Trigger: deferred until D91 stranger-cohort gate fires; explicitly scoped as instrument-authoring, not pre-work that would itself fire the gate.)*
+- Keep the ledger, but **add a weekly summary row** for routine pair sessions so cadence stops being invisible (the ledger itself proposes this). *(Trigger: in-flight — append to `docs/research/founder-use-ledger.md` opportunistically; no gate.)*
 
 ---
 
