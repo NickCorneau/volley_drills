@@ -44,10 +44,15 @@ type LayoffBucket = '2-7 days' | '1-4 weeks' | '1-3 months' | '3+ months'
 type TrainingRecency = PrimaryRecency | LayoffBucket
 
 const RECENCY_OPTIONS: PrimaryRecency[] = ['0 days', '1 day', '2+', 'First time']
+// 2026-05-25 audit follow-up (L4b): `2+ days ago` wrapped to two
+// lines at 390 px on the empty Safety screen, breaking the row's
+// visual rhythm. Shortened to `2+ days` — same semantic clarity
+// because tapping this option reveals the layoff-bucket follow-up
+// row ("how long off?"), so "ago" is implied by the disclosure.
 const PRIMARY_RECENCY_LABEL: Record<PrimaryRecency, string> = {
   '0 days': 'Today',
   '1 day': 'Yesterday',
-  '2+': '2+ days ago',
+  '2+': '2+ days',
   'First time': 'First time',
 }
 const LAYOFF_BUCKETS: LayoffBucket[] = ['2-7 days', '1-4 weeks', '1-3 months', '3+ months']

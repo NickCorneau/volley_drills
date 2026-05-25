@@ -191,7 +191,7 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     expect(screen.queryByRole('radio', { name: /first time/i })).not.toBeInTheDocument()
     expect(screen.getByRole('radio', { name: /^today$/i })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: /^yesterday$/i })).toBeInTheDocument()
-    expect(screen.getByRole('radio', { name: /^2\+ days ago$/i })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /^2\+ days$/i })).toBeInTheDocument()
     // Description drops the "or First time" clause so it matches the
     // rendered chip set. Copy-polish pass (2026-04-19) replaced the
     // `->` arrow with natural prose (`means a ... start.`); regex
