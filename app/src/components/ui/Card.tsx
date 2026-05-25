@@ -16,7 +16,9 @@ type CardProps = {
    * - `soft` (default, back-compat): warm supporting surface
    *   (`bg-bg-warm p-4`) used inside broader white-page screens for
    *   nested groupings (e.g., Review's RPE / pass-metric / quick-tag
-   *   cards, Complete's session recap).
+   *   cards, Complete's session recap). Naming note (audit U2,
+   *   2026-05-25): distinct from Button's `soft` variant, which is a
+   *   warm *filled button*; here `soft` is a warm *surface*.
    * - `focal`: the Phase F1 / F2 calm-pass focal card (`bg-bg-primary`
    *   + soft shadow + hairline ring + `p-6 gap-4`). Use for the ONE
    *   primary content block on a screen that should read as the focal

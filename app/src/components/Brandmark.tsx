@@ -34,8 +34,23 @@ export function Brandmark({ size = 32, className }: BrandmarkProps) {
       aria-label="Volleycraft"
       className={className}
     >
-      <rect width="512" height="512" rx="108" fill="#E8732A" />
-      <g fill="none" stroke="#FFF8F0" strokeWidth="32" strokeLinecap="round" strokeLinejoin="round">
+      {/*
+        Colors come from the --color-brand / --color-brand-ink tokens via
+        Tailwind fill-/stroke- utilities (CSS wins over the presentation
+        attribute). The hex attributes stay as a no-CSS fallback and to
+        mirror public/icon.svg verbatim. See the brand-palette note in
+        src/index.css (A3): the mark orange is intentionally brighter than
+        the AA-tuned --color-accent.
+      */}
+      <rect width="512" height="512" rx="108" fill="#E8732A" className="fill-brand" />
+      <g
+        fill="none"
+        stroke="#FFF8F0"
+        className="stroke-brand-ink"
+        strokeWidth="32"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <path d="M256 92c82 0 148 74 148 164s-66 164-148 164S108 346 108 256s66-164 148-164z" />
         <path d="M108 220c92 36 204 36 296 0" />
         <path d="M108 292c92-36 204-36 296 0" />

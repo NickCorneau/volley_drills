@@ -118,7 +118,7 @@ export function SettingsScreen() {
       console.error('Export failed:', err)
       setState({
         kind: 'error',
-        message: 'Export failed. If this keeps happening let the founder know.',
+        message: 'Export failed. Try again, or reload the app if it keeps happening.',
       })
       return
     }
@@ -220,8 +220,7 @@ export function SettingsScreen() {
           <p className="text-sm font-medium text-text-primary">{storageCopy.primary}</p>
           <p className="text-sm leading-relaxed text-text-secondary">{storageCopy.secondary}</p>
           <p className="text-sm leading-relaxed text-text-secondary">
-            Use Export training records above to move your history between devices or keep a copy
-            off-device.
+            Use Export above to move your history between devices or keep a copy off-device.
           </p>
         </section>
       </ScreenShell.Body>

@@ -1,6 +1,10 @@
 import type { ButtonHTMLAttributes, Ref } from 'react'
 import { cx } from '../../lib/cn'
 
+// Naming note (audit U2, 2026-05-25): `soft` here is a warm FILLED
+// BUTTON (`bg-bg-warm`). It is NOT the same as Card's `soft` variant,
+// which is a warm SURFACE. The two `soft`s are deliberate but distinct;
+// see the matching note in `Card.tsx`.
 export type ButtonVariant =
   | 'primary'
   | 'outline'
