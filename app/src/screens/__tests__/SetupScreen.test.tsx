@@ -326,6 +326,136 @@ describe('SetupScreen (C-3)', () => {
     expect(row?.updatedAt).toBe(existingCompletedAt)
   })
 
+  /**
+   * 2026-05-24 duration-honesty plan, Stage 2 — U5 (R7+R8+R10 / PD-2 (A)
+   * build-on-completable). The preview build fires when Setup is
+   * completable; the resulting assembled total appears above the Build
+   * button. On Build commit the preview draft is persisted byte-for-
+   * byte (no rebuild), so Run executes the duration the user saw at
+   * commit.
+   */
+  describe('R7+R8+R10 assembled-duration preview (U5)', () => {
+    it('surfaces the assembled total above the Build button once Setup is completable', async () => {
+      const existingCompletedAt = 1_700_000_000_000
+      await db.storageMeta.put({
+        key: 'onboarding.completedAt',
+        value: existingCompletedAt,
+        updatedAt: existingCompletedAt,
+      })
+
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      // Default Solo + Net + 15 + Recommended is completable on mount;
+      // the duration appears once the preview build settles.
+      const durationNode = await screen.findByTestId('setup-assembled-duration')
+      expect(durationNode.textContent).toMatch(/This session will run about \d+ min\./)
+    })
+
+    it('hides the duration preview when Setup is not yet completable (incompleteHint owns the surface)', async () => {
+      const existingCompletedAt = 1_700_000_000_000
+      await db.storageMeta.put({
+        key: 'onboarding.completedAt',
+        value: existingCompletedAt,
+        updatedAt: existingCompletedAt,
+      })
+
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      // Switch to Solo + No net so the Wall question must be answered
+      // before Setup is completable.
+      await user.click(await screen.findByRole('radio', { name: 'Solo' }))
+      await user.click(
+        within(screen.getByRole('radiogroup', { name: 'Net available' })).getByRole('radio', {
+          name: 'No',
+        }),
+      )
+
+      // Build is disabled and the incomplete hint shows the wall ask.
+      expect(screen.getByRole('button', { name: /build session/i })).toBeDisabled()
+      expect(screen.getByText(/wall or fence availability/i)).toBeInTheDocument()
+      // Duration preview is not rendered while Setup is incomplete.
+      expect(screen.queryByTestId('setup-assembled-duration')).not.toBeInTheDocument()
+    })
+
+    it('updates the assembled total when the user changes focus mid-Setup', async () => {
+      const existingCompletedAt = 1_700_000_000_000
+      await db.storageMeta.put({
+        key: 'onboarding.completedAt',
+        value: existingCompletedAt,
+        updatedAt: existingCompletedAt,
+      })
+
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      // Default 15-min profile produces one duration.
+      const initial = (await screen.findByTestId('setup-assembled-duration')).textContent
+      const initialMatch = initial?.match(/about (\d+) min/)
+      expect(initialMatch).not.toBeNull()
+      const initialMinutes = Number.parseInt(initialMatch![1], 10)
+
+      // Bump to 40 min — the preview rebuilds to the longer profile and
+      // displays a larger total.
+      await user.click(screen.getByRole('radio', { name: '40 min' }))
+      const next = await screen.findByTestId('setup-assembled-duration')
+      const nextMatch = next.textContent?.match(/about (\d+) min/)
+      expect(nextMatch).not.toBeNull()
+      const nextMinutes = Number.parseInt(nextMatch![1], 10)
+      expect(nextMinutes).toBeGreaterThan(initialMinutes)
+    })
+
+    it('persists the preview-built draft on Build commit; assembled total equals persisted block sum (R7+R8)', async () => {
+      const existingCompletedAt = 1_700_000_000_000
+      await db.storageMeta.put({
+        key: 'onboarding.completedAt',
+        value: existingCompletedAt,
+        updatedAt: existingCompletedAt,
+      })
+
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+            <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      const durationNode = await screen.findByTestId('setup-assembled-duration')
+      const displayedMatch = durationNode.textContent?.match(/about (\d+) min/)
+      expect(displayedMatch).not.toBeNull()
+      const displayedMinutes = Number.parseInt(displayedMatch![1], 10)
+
+      await user.click(screen.getByRole('button', { name: /build session/i }))
+      expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
+
+      const draft = await db.sessionDrafts.get('current')
+      expect(draft).toBeDefined()
+      const persistedTotal = draft!.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
+      expect(persistedTotal).toBe(displayedMinutes)
+    })
+  })
+
   it('builds the selected focus on the setup page instead of requiring a Tune today stop', async () => {
     const existingCompletedAt = 1_700_000_000_000
     await db.storageMeta.put({

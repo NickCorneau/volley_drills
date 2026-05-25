@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Button,
+  Callout,
   ChoiceRow,
   type ChoiceRowOption,
   ChoiceSection,
@@ -11,7 +12,7 @@ import {
   StatusMessage,
 } from '../components/ui'
 import type { PlayerMode, TimeProfile } from '../types/session'
-import type { SetupContext } from '../model'
+import type { SessionDraft, SetupContext } from '../model'
 import { buildDraft } from '../domain/sessionBuilder'
 import { isOnboardingStep } from '../lib/onboarding'
 import { isSchemaBlocked } from '../lib/schema-blocked'
@@ -77,6 +78,17 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
+  // U5 (2026-05-24 duration-honesty plan, R7+R8+R10 via PD-2 (A)
+  // build-on-completable): cache the build-time inputs (last-completed
+  // map + saved player level) once on mount so the preview build that
+  // surfaces the assembled total stays consistent with the Build-commit
+  // build. Read shape mirrors `handleConfirm`'s legacy reads.
+  const [previewInputs, setPreviewInputs] = useState<{
+    readonly lastCompletedByType: Partial<Record<BlockSlotType, string>>
+    readonly playerLevel: PlayerLevel | undefined
+  } | null>(null)
+  const [previewDraft, setPreviewDraft] = useState<SessionDraft | null>(null)
+
   useEffect(() => {
     if (isOnboarding) {
       setPrefilled(true)
@@ -137,6 +149,74 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           ? 'Choose wall or fence availability to build.'
           : null
 
+  // U5 (2026-05-24 duration-honesty plan, PD-2 (A)): load preview-build
+  // inputs (lastCompletedByType + skill level) once on mount, after the
+  // initial prefill, so the preview build does not race the prefill or
+  // re-read storage on every Setup state change. Best-effort, mirrors
+  // `handleConfirm`'s legacy reads.
+  useEffect(() => {
+    if (!prefilled) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const [completedResult, skillResult] = await Promise.allSettled([
+          findLastCompletedDrillIdsByType(),
+          getStorageMeta('onboarding.skillLevel', isSkillLevel),
+        ])
+        if (cancelled) return
+        const lastCompletedByType =
+          completedResult.status === 'fulfilled' ? completedResult.value : {}
+        const skillLevel = skillResult.status === 'fulfilled' ? skillResult.value : undefined
+        const playerLevel =
+          skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
+        setPreviewInputs({ lastCompletedByType, playerLevel })
+      } catch {
+        if (!cancelled) setPreviewInputs({ lastCompletedByType: {}, playerLevel: undefined })
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [prefilled])
+
+  // U5 (PD-2 (A)): rebuild the preview draft whenever Setup is
+  // completable and the build-time context changes. Surfaces the real
+  // assembled total in the Setup chrome above the Build button (R7);
+  // on Build commit the same draft is persisted as-stored (no rebuild
+  // — R8). Builds only fire when `isComplete` is true so we never
+  // build on incomplete state (PD-2 (A): no eager-on-every-toggle on
+  // the incomplete path).
+  const previewContext = useMemo<SetupContext | null>(() => {
+    if (!isComplete) return null
+    const ctx: SetupContext = {
+      playerMode: playerMode!,
+      timeProfile,
+      netAvailable: netAvailable!,
+      wallAvailable: showWall ? wallAvailable! : false,
+    }
+    if (sessionFocus !== 'recommended') {
+      ctx.sessionFocus = sessionFocus
+    }
+    return ctx
+  }, [isComplete, playerMode, timeProfile, netAvailable, wallAvailable, showWall, sessionFocus])
+
+  useEffect(() => {
+    if (!previewContext || !previewInputs) {
+      setPreviewDraft(null)
+      return
+    }
+    const draft = buildDraft(previewContext, {
+      lastCompletedByType: previewInputs.lastCompletedByType,
+      playerLevel: previewInputs.playerLevel,
+    })
+    setPreviewDraft(draft)
+  }, [previewContext, previewInputs])
+
+  const previewTotalMinutes = useMemo(() => {
+    if (!previewDraft) return null
+    return previewDraft.blocks.reduce((sum, block) => sum + block.durationMinutes, 0)
+  }, [previewDraft])
+
   const submitting = useRef(false)
 
   const handleConfirm = useCallback(async () => {
@@ -146,44 +226,39 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     setError(null)
 
     try {
-      const context: SetupContext = {
-        playerMode: playerMode!,
-        timeProfile,
-        netAvailable: netAvailable!,
-        wallAvailable: showWall ? wallAvailable! : false,
+      // U5 (2026-05-24 duration-honesty plan, R7+R8+R10 via PD-2 (A)
+      // build-on-completable): persist the preview draft (built when
+      // Setup became completable) without rebuilding. Safety / Run
+      // consume the persisted draft as-stored, so the duration shown
+      // above the Build button is the duration the session actually
+      // runs. If preview inputs / draft are not ready yet (race with
+      // prefill — Dexie blocked, etc.), fall back to a fresh build at
+      // commit time, mirroring the legacy reads.
+      let draft = previewDraft
+      if (!draft) {
+        const context: SetupContext = {
+          playerMode: playerMode!,
+          timeProfile,
+          netAvailable: netAvailable!,
+          wallAvailable: showWall ? wallAvailable! : false,
+        }
+        if (sessionFocus !== 'recommended') {
+          context.sessionFocus = sessionFocus
+        }
+        let lastCompletedByType: Partial<Record<BlockSlotType, string>> =
+          previewInputs?.lastCompletedByType ?? {}
+        let playerLevel: PlayerLevel | undefined = previewInputs?.playerLevel
+        if (!previewInputs) {
+          try {
+            lastCompletedByType = await findLastCompletedDrillIdsByType()
+            const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
+            playerLevel = skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
+          } catch {
+            if (isSchemaBlocked()) return
+          }
+        }
+        draft = buildDraft(context, { lastCompletedByType, playerLevel })
       }
-      if (sessionFocus !== 'recommended') {
-        context.sessionFocus = sessionFocus
-      }
-
-      // Phase 2.2 / 3.2 build-time substitution input. A fresh Setup
-      // means the user is moving forward from their last main_skill
-      // rep, so pass the recent completion map (per-slot drill ids)
-      // to enable substitution when today's context blocks the
-      // preferred progression (e.g., d03 done last time, no net today
-      // blocks d04 -> substitute d10). Best-effort: if the lookup
-      // fails (Dexie schema-blocked, etc.) we fall back to the legacy
-      // default selection path - substitution is an enhancement, not
-      // a requirement for build to proceed.
-      //
-      // Onboarding skill level read in parallel so the engine can
-      // honor the user's saved level via `effectiveLevel` (2026-05-04
-      // skill-level-mutability ship). Reads are independent
-      // (`Promise.allSettled`) so a non-schema-blocked failure of one
-      // does not drop the other — the engine's documented
-      // fallthroughs (empty `lastCompletedByType` map, 'beginner'
-      // effective level) absorb each independently.
-      let lastCompletedByType: Partial<Record<BlockSlotType, string>> = {}
-      let playerLevel: PlayerLevel | undefined
-      try {
-        lastCompletedByType = await findLastCompletedDrillIdsByType()
-        const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
-        playerLevel = skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
-      } catch {
-        if (isSchemaBlocked()) return
-      }
-
-      const draft = buildDraft(context, { lastCompletedByType, playerLevel })
       if (!draft) {
         setError("Can't build a session for these constraints. Try different options.")
         return
@@ -210,6 +285,8 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     showWall,
     isOnboarding,
     navigate,
+    previewDraft,
+    previewInputs,
   ])
 
   if (!prefilled) {
@@ -307,6 +384,18 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="flex flex-col gap-2 pt-3">
+        {/* U5 (2026-05-24 duration-honesty plan, R7+R10): once Setup is
+            completable, surface the actually-assembled session duration
+            above the Build button. Calm `Callout tone="info"` chrome
+            matches the courtside register — the number is informative,
+            not an alert. */}
+        {isComplete && previewTotalMinutes !== null && !isSaving && (
+          <Callout tone="info" size="sm" role="status">
+            <span data-testid="setup-assembled-duration">
+              This session will run about {previewTotalMinutes} min.
+            </span>
+          </Callout>
+        )}
         {incompleteHint && !isSaving && (
           <p className="text-center text-xs text-text-secondary">{incompleteHint}</p>
         )}
