@@ -1,7 +1,7 @@
 ---
 title: "retire(triage): apply CC1 retire-and-compound bundle (S1 stubs + S2 D140 retirement + S3 Cat A/B/C test grading + S4 three pattern docs)"
 type: retire
-status: active
+status: completed
 date: 2026-05-25
 origin: docs/brainstorms/2026-05-25-triage-retire-and-compound-bundle-requirements.md
 ---

@@ -28,7 +28,7 @@ tags:
 
 ## Context
 
-The May 4 founder + Seb pair/net serving session produced a dense mix of signals: positive validation of the post-Tune-today build, repeated warmup/cooldown timing friction, a partner-side read-aloud inconvenience, and wishlist asks for glossary, video links, history, and trends.
+The May 4 founder + Seb pair/net serving session produced a dense mix of signals: positive validation of the then-live post-Tune-today build, repeated warmup/cooldown timing friction, a partner-side read-aloud inconvenience, and wishlist asks for glossary, video links, history, and trends. D137 later retired the standalone Tune today route; this doc preserves the historical field-evidence routing pattern, not current app routing guidance.
 
 The solved workflow was not to turn the strongest quotes into immediate implementation scope. The session was routed into durable documentation while preserving the repo's source-of-truth hierarchy and D135's boundary between observed content gaps and founder feature wishes.
 
@@ -60,7 +60,7 @@ The classification step is the load-bearing part:
 
 For the May 4 session, that meant:
 
-- F1-F5 validated Tune today, main-skill duration hierarchy, per-move pacing clarity, and simpler drill copy.
+- F1-F5 validated the then-live Tune today focus picker, main-skill duration hierarchy, per-move pacing clarity, and simpler drill copy. D137 later moved the surviving focus-default lesson into the Setup -> Safety spine.
 - F6 strengthened the existing audio-pacing and segment-timing track, but stayed unresolved because the session did not disambiguate planned-duration overflow, audio reliability, or bonus-copy discoverability.
 - F7 was captured as single-instance soft partner-side friction.
 - F8 and F9 were routed to ideation/backlog under D135 founder-feature-wish framing.
@@ -127,3 +127,4 @@ After:
 - `docs/status/current-state.md`
 - `docs/catalog.json`
 - `docs/plans/2026-04-30-001-feat-pre-run-simplification-plan.md`
+- `docs/solutions/architecture-patterns/d137-canonical-pre-run-spine-setup-safety-2026-05-07.md`

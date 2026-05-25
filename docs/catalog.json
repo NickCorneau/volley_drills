@@ -1,7 +1,7 @@
 {
   "schema_version": 5,
   "repo_id": "volley_drills",
-  "last_updated": "2026-05-10",
+  "last_updated": "2026-05-25",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -1562,6 +1562,27 @@
       "type": "solution",
       "status": "active",
       "canonical_for": "Architecture-pattern learning for D137: retired /tune-today pre-run route; live routePaths use Setup \u2192 Safety only; stale tune-today deep links handled via FirstOpenGate (onboarding) and App shell (completed users to Home); remove dead Tune today modules and tune-only session helpers; pointers to D137 in docs/decisions.md and related plans/brainstorms."
+    },
+    {
+      "id": "markdown-as-api-choice-2026-05-25",
+      "path": "docs/solutions/architecture-patterns/2026-05-25-markdown-as-api-choice.md",
+      "type": "solution",
+      "status": "active",
+      "canonical_for": "Architecture-pattern learning for choosing between TypeScript markdown builders and direct markdown emission when diagnostic report surfaces have a single human reader. Uses the CC1 generated-plan triage retirement as the worked example."
+    },
+    {
+      "id": "test-skip-discipline-2026-05-25",
+      "path": "docs/solutions/workflow-issues/2026-05-25-test-skip-discipline.md",
+      "type": "solution",
+      "status": "active",
+      "canonical_for": "Workflow learning for handling clusters of skipped tests after a contract shift: classify each as Cat A smoke, Cat B primitive migration, or Cat C deletion. Uses the CC1 44-skipped-test generated-plan triage cleanup as the worked example."
+    },
+    {
+      "id": "decision-debt-sweep-pattern-2026-05-25",
+      "path": "docs/solutions/architecture-patterns/2026-05-25-decision-debt-sweep-pattern.md",
+      "type": "solution",
+      "status": "active",
+      "canonical_for": "Architecture/documentation pattern for retiring decisions when a code slice removes the mechanism they authorize. Generalizes the D137 template through the D140 supersession and D138 drift-check in the CC1 bundle."
     },
     {
       "id": "d51-beginner-serving-tactical-zone-depth-requirements-2026-05-04",

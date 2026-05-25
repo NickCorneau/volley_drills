@@ -111,5 +111,5 @@ const FIRST_OPEN_ENTRY_PATHS = new Set(['/', '/tune-today', '/settings', '/setti
 
 - Decision row **D137** in `docs/decisions.md`.
 - Requirements and flows: `docs/brainstorms/2026-05-06-001-d137-tune-today-routing-resolution-requirements.md`.
-- Plan: `docs/plans/2026-05-06-001-refactor-d137-tune-today-routing-cleanup-plan.md` (when present in repo).
-- Tangential workflow doc (founder-use **documentation** routing, not app routing): `docs/solutions/workflow-issues/route-founder-use-feedback-without-overfiring-scope-2026-05-04.md` — mentions “Tune today” only as historical field-evidence context; optional narrow refresh if that doc should explicitly note D137 retirement.
+- Plan: `docs/plans/2026-05-06-001-refactor-d137-tune-today-routing-cleanup-plan.md`.
+- Tangential workflow doc (founder-use **documentation** routing, not app routing): `docs/solutions/workflow-issues/route-founder-use-feedback-without-overfiring-scope-2026-05-04.md` — mentions “Tune today” only as historical field-evidence context and now explicitly notes D137 retirement.

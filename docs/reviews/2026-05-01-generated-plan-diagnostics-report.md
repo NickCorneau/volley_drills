@@ -439,11 +439,11 @@ The committed report intentionally keeps top routeable groups plus examples only
   ],
   "redistribution_causality_receipt": {
     "comparison_mode": "allocated_duration_counterfactual",
-    "runtime_boundary": "Diagnostic-only counterfactual receipt; shipped buildDraft() behavior may include separately authorized fills such as the D01 block-shape fill.",
-    "group_count": 2,
+    "runtime_boundary": "retired_by_duration_honesty_v8: redistributedMinutes is no longer a runtime mechanism; see docs/plans/2026-05-24-001-feat-session-duration-honesty-plan.md",
+    "group_count": 0,
     "counts": {
-      "total_affected_cell_count": 255,
-      "redistribution_affected_cell_count": 48,
+      "total_affected_cell_count": 0,
+      "redistribution_affected_cell_count": 0,
       "current_over_authored_max_cell_count": 0,
       "current_over_fatigue_cap_cell_count": 0,
       "current_under_authored_min_cell_count": 0,
@@ -454,79 +454,11 @@ The committed report intentionally keeps top routeable groups plus examples only
       "non_redistribution_under_min_cell_count": 0,
       "pressure_disappears_cell_count": 0,
       "pressure_remains_cell_count": 0,
-      "comparison_inconclusive_cell_count": 255,
+      "comparison_inconclusive_cell_count": 0,
       "redistribution_without_pressure_cell_count": 0,
       "counterfactual_unfilled_minutes": 0
     },
-    "groups": [
-      {
-        "group_key": "gpdg:v1:none:none:none:none:under_named_profile_duration",
-        "diagnostic_fingerprint": "gpdf|v1|none|none|none|207|coverage_gap_review+source_backed_content_depth|pass/pair_net/advanced/25/matrix-b/none/20/none/under_named_profile_duration|pass/pair_net/advanced/25/matrix-c/none/20/none/under_named_profile_duration|pass/pair_net/advanced/25/matrix-d/none/20/none/under_named_profile_duration",
-        "triage_status": "observed",
-        "triage_route": "defer",
-        "reviewed_report_id": "generated-plan-diagnostics-report-2026-05-01",
-        "observation_codes": [
-          "under_named_profile_duration"
-        ],
-        "action_state": "comparison_inconclusive",
-        "dominant_cell_state": "comparison_inconclusive",
-        "has_incomplete_evidence": true,
-        "follow_up_routes": [
-          "comparison_support_needed"
-        ],
-        "counts": {
-          "total_affected_cell_count": 207,
-          "redistribution_affected_cell_count": 0,
-          "current_over_authored_max_cell_count": 0,
-          "current_over_fatigue_cap_cell_count": 0,
-          "current_under_authored_min_cell_count": 0,
-          "allocated_over_authored_max_cell_count": 0,
-          "allocated_over_fatigue_cap_cell_count": 0,
-          "allocated_under_authored_min_cell_count": 0,
-          "non_redistribution_over_cap_cell_count": 0,
-          "non_redistribution_under_min_cell_count": 0,
-          "pressure_disappears_cell_count": 0,
-          "pressure_remains_cell_count": 0,
-          "comparison_inconclusive_cell_count": 207,
-          "redistribution_without_pressure_cell_count": 0,
-          "counterfactual_unfilled_minutes": 0
-        }
-      },
-      {
-        "group_key": "gpdg:v1:none:none:movement_proxy:false:slot_dropped",
-        "diagnostic_fingerprint": "gpdf|v1|none|none|none|48|coverage_gap_review+source_backed_content_depth|pass/pair_net/advanced/25/matrix-b/none/none/5/slot_dropped|pass/pair_net/advanced/25/matrix-c/none/none/5/slot_dropped|pass/pair_net/advanced/25/matrix-d/none/none/5/slot_dropped",
-        "triage_status": "routed",
-        "triage_route": "generator_policy_investigation",
-        "reviewed_report_id": "generated-plan-diagnostics-report-2026-05-01",
-        "block_type": "movement_proxy",
-        "observation_codes": [
-          "slot_dropped"
-        ],
-        "action_state": "comparison_inconclusive",
-        "dominant_cell_state": "comparison_inconclusive",
-        "has_incomplete_evidence": true,
-        "follow_up_routes": [
-          "comparison_support_needed"
-        ],
-        "counts": {
-          "total_affected_cell_count": 48,
-          "redistribution_affected_cell_count": 48,
-          "current_over_authored_max_cell_count": 0,
-          "current_over_fatigue_cap_cell_count": 0,
-          "current_under_authored_min_cell_count": 0,
-          "allocated_over_authored_max_cell_count": 0,
-          "allocated_over_fatigue_cap_cell_count": 0,
-          "allocated_under_authored_min_cell_count": 0,
-          "non_redistribution_over_cap_cell_count": 0,
-          "non_redistribution_under_min_cell_count": 0,
-          "pressure_disappears_cell_count": 0,
-          "pressure_remains_cell_count": 0,
-          "comparison_inconclusive_cell_count": 48,
-          "redistribution_without_pressure_cell_count": 0,
-          "counterfactual_unfilled_minutes": 0
-        }
-      }
-    ]
+    "groups": []
   },
   "policy": {
     "hard_failures_block_readiness": true,

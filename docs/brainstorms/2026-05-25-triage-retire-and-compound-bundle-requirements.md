@@ -10,7 +10,7 @@ last_updated: 2026-05-25
 depends_on:
  - docs/ideation/2026-05-25-triage-workflow-rebuild-or-retire-ideation.md
  - docs/plans/2026-05-24-001-feat-session-duration-honesty-plan.md
- - docs/solutions/d137-canonical-pre-run-spine-setup-safety-2026-05-07.md
+ - docs/solutions/architecture-patterns/d137-canonical-pre-run-spine-setup-safety-2026-05-07.md
  - docs/solutions/2026-05-04-source-backed-content-depth-activation-pattern.md
  - app/src/domain/generatedPlanDiagnosticTriage.ts
  - app/src/domain/__tests__/generatedPlanDiagnosticTriage.test.ts
@@ -55,7 +55,7 @@ The 2026-05-25 ideation pass (`docs/ideation/2026-05-25-triage-workflow-rebuild-
 
 **Stage 2: D140 Retirement + D138 Audit (S2)**
 
-- R5. D140 in `docs/decisions.md` (line 164 at writing) gets retired via the D137 supersession template (`docs/solutions/d137-canonical-pre-run-spine-setup-safety-2026-05-07.md`): immutable original preserved, supersession entry added pointing at `docs/plans/2026-05-24-001-feat-session-duration-honesty-plan.md` as the slice that retired the underlying mechanism.
+- R5. D140 in `docs/decisions.md` (line 164 at writing) gets retired via the D137 supersession template (`docs/solutions/architecture-patterns/d137-canonical-pre-run-spine-setup-safety-2026-05-07.md`): immutable original preserved, supersession entry added pointing at `docs/plans/2026-05-24-001-feat-session-duration-honesty-plan.md` as the slice that retired the underlying mechanism.
 - R6. Supersession entry includes a one-paragraph eulogy: birth date, death date, cause-of-death (`runtimeRedistribution` removed by R1 of duration-honesty plan), what survives (the source-backed-reroute registry; the diagnostic emitter for `slot_dropped` / `under_named_profile_duration`), what is buried (the `cap_redistribution_at_carrier_max` proposal direction; the authorization invariants for `runtimeRedistribution`, `cap`, `sourceDepth`, `d47Reopen`).
 - R7. D138 (`docs/decisions.md`) is audited for R1 drift: read-through of its body checking whether any claims about `focusReadiness`, `focusCoverageAudit`, or diagnostic-spine canonicality referenced the retired redistribution paths. If drift is found, annotate inline rather than retire D138 in this slice. If no drift, record "audited 2026-05-25; no R1 drift found" as a one-line note.
 - R8. No new D-ID is created in this slice; supersession points directly at the duration-honesty plan path. (If a second similar retirement happens later, that future slice can create the anchor.)
@@ -137,7 +137,7 @@ The 2026-05-25 ideation pass (`docs/ideation/2026-05-25-triage-workflow-rebuild-
 - The 2026-05-24 duration-honesty slice is fully shipped (commits `1944e48` → `8adefbd`, plus the 2026-05-25 ideation commit `7a51375`). Verified.
 - `docs/decisions.md` contains D140 at approximately line 164 (verified 2026-05-25 via grep).
 - The 50 `.skip`'d tests in `generatedPlanDiagnosticTriage.test.ts` are stable post-2026-05-25 shipment of the duration-honesty slice. ce-work re-counts during execution to catch any drift.
-- The D137 template's supersession pattern is documented in `docs/solutions/d137-canonical-pre-run-spine-setup-safety-2026-05-07.md`; ce-plan reads it.
+- The D137 template's supersession pattern is documented in `docs/solutions/architecture-patterns/d137-canonical-pre-run-spine-setup-safety-2026-05-07.md`; ce-plan reads it.
 - `coverage_gap_review` routing is in place in the triage layer's `compressionLaneForGeneratedPlanTriageItem` function and related routing maps; ce-plan verifies.
 - The just-shipped slice generates lived evidence for the three pattern-doc gaps. If ce-work finds that evidence is too thin for any of the three docs, the doc can be deferred and noted as a follow-up.
 
