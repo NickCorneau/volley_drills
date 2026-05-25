@@ -10,6 +10,7 @@ import type { BlockSlotType } from '../../types/session'
 import { FINISH_LATER_CAP_MS } from '../../domain/policies'
 import { buildEndedSession } from '../../domain/executionState'
 import { applyBlockOverrides } from '../../domain/sessionProjection'
+import { sessionDurationMinutes } from '../../lib/format'
 import { clearTimerState, readTimerState } from '../timer'
 import { getResumableExecutionLogs, getTerminalExecutionLogs } from './logSelectors'
 
@@ -183,10 +184,13 @@ export async function hasEverStartedSession(): Promise<boolean> {
  * `SettingsScreen`. The footer hides when `count === 0`, so first-week
  * testers see no row at all.
  *
- * Per-session minute math mirrors `formatDurationLine()` exactly
- * (`Math.max(1, Math.round((endedAt(log) - log.startedAt) / 60_000))`)
- * so the footer total matches the sum of the per-row durations the user
- * sees on Complete / Recent Sessions surfaces.
+ * Per-session minute math goes through the shared `sessionDurationMinutes()`
+ * helper (the same one `formatDurationLine()` uses), so the footer total
+ * matches the per-row durations the user sees on Review. That helper
+ * prefers the active-time `actualDurationMinutes` value and only falls
+ * back to the start→end span for legacy records — so an interrupted /
+ * resumed-later session contributes the time actually trained, not the
+ * inflated wall-clock span.
  */
 export interface SessionTallySummary {
   count: number
@@ -198,8 +202,7 @@ export async function getSessionTallySummary(): Promise<SessionTallySummary> {
   const terminal = logs.filter(isTerminalSession)
   let totalMinutes = 0
   for (const log of terminal) {
-    const end = endedAt(log)
-    totalMinutes += Math.max(1, Math.round((end - log.startedAt) / 60_000))
+    totalMinutes += sessionDurationMinutes(log) ?? 0
   }
   return { count: terminal.length, totalMinutes }
 }

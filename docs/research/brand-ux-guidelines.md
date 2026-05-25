@@ -212,7 +212,7 @@ Tokens live in `app/src/index.css` `@theme`. Do not hardcode hex values in compo
 | `--color-bg-warm` | `#f5f5f0` | Secondary/soft card surface |
 | `--color-text-primary` | `#1a1a1a` | Primary body and display text |
 | `--color-text-secondary` | `#4b5563` | Labels, meta, support copy |
-| `--color-success` | `#059669` | Completion markers, save confirmations |
+| `--color-success` | `#047857` | Completion markers, save confirmations (emerald-700; lifted from `#059669` on 2026-04-21 so it clears WCAG AA on the warm surfaces — source of truth is `app/src/index.css`) |
 | `--color-warning` | `#dc2626` | Warning **borders, icons, and glyphs** (component-boundary 3:1), and warning text on light/white surfaces |
 | `--color-warning-strong` | `#b91c1c` | AA-safe warning **text on `warning-surface`** (selected warning chips, `Button` danger variant, warning `Callout`/`StatusMessage` bodies) — see §2.2 |
 | `--color-warning-surface` | `#fee2e2` | Pain-override card surface, warning Callout fill, selected-warning chip fill |
@@ -237,13 +237,13 @@ If you are about to paint a new UI element, pick from this table. If the element
 | Outline button | `border text-text-primary` | — | `bg-bg-warm` |
 | Ghost button (tertiary) | `text-accent` | — | `text-accent-pressed` |
 | Danger outline | `border-warning text-warning-strong` | — | `bg-warning-surface` |
-| Unselected chip | `border text-text-primary bg-bg-primary` | `bg-info-surface text-accent` (soft-selected) | — |
+| Unselected chip | `border text-text-primary bg-bg-primary` | `bg-info-surface text-accent-pressed` (soft-selected) | — |
 | Destructive chip (Pain "Yes", Incomplete reason) | `border text-text-secondary bg-bg-primary` | `border-warning text-warning-strong bg-warning-surface` | — |
 | Progress fill | `bg-accent` on `bg-bg-warm` track | — | — |
 | Phase label (Run) | `text-accent font-semibold` | — | — |
 | Completion mark | `bg-success text-white` | — | — |
 
-**Selected-chip reconciliation (2026-05-25, audit follow-up plan U8 row 9).** This table previously listed a separate `Selected chip` row at `bg-accent text-white` (solid-accent). Shipped code uses a soft-selected treatment — `bg-info-surface` (peach) fill with `text-accent` (amber) glyph — which clears AA at ~4.6:1 and reads as "claimed, not announced," consistent with the `shibui` direction in `docs/research/japanese-inspired-visual-direction.md`. The 2026-05-04 setup-screen-polish ideation (`docs/ideation/2026-05-04-setup-screen-default-path-polish-ideation.md`) explicitly rejected reverting to solid-accent on stronger-selected-state grounds. Canon now records the shipped soft-selected treatment as the single chip-selected row; the standalone `Selected chip` line is retired. See `docs/design/reviews/2026-05-24-agent-e2e-design-critique.md` M3.
+**Selected-chip reconciliation (2026-05-25, audit follow-up plan U8 row 9).** This table previously listed a separate `Selected chip` row at `bg-accent text-white` (solid-accent). Shipped code uses a soft-selected treatment — `bg-info-surface` (peach) fill with a `text-accent-pressed` (deep-amber) glyph — which reads as "claimed, not announced," consistent with the `shibui` direction in `docs/research/japanese-inspired-visual-direction.md`. The 2026-05-04 setup-screen-polish ideation (`docs/ideation/2026-05-04-setup-screen-default-path-polish-ideation.md`) explicitly rejected reverting to solid-accent on stronger-selected-state grounds. **2026-05-25 contrast follow-up:** the selected glyph was darkened from `text-accent` (#b45309, ~4.6:1 on `bg-info-surface` — the lowest-contrast element on Setup/Safety and, perversely, weaker than the unselected chip) to `text-accent-pressed` (#92400e, ~6.5:1), mirroring the 2026-05-24 warning-chip audit (`text-warning` → `text-warning-strong`); the 2px accent border remains the primary selection signal. Canon now records the shipped soft-selected treatment as the single chip-selected row; the standalone `Selected chip` line is retired. See `docs/design/reviews/2026-05-24-agent-e2e-design-critique.md` M3.
 
 ---
 
@@ -442,7 +442,8 @@ Each screen has an intended posture. These are the reference treatments; when ad
 ### 7.3 Prep (Setup, Safety, Settings)
 
 - **Centered** `← Back` button (left) + centered h1 (`text-xl font-bold tracking-tight`).
-- On Safety: an amber `text-sm font-medium` meta line just below the h1 (session-summary orientation device).
+- On Safety: **no** session-summary meta line under the h1. Pre-2026-05-25 canon described an amber `text-sm font-medium` orientation line here, but Safety deliberately does **not** echo the draft or focus — pinned by the `does not echo the draft or focus in the default safety header` test in `SafetyCheckScreen.test.tsx` (the only time focus is mentioned is when pain-recovery overrides an explicit focus). Safety stays a pure readiness gate; the draft summary already lives on the Home Draft card. Audit follow-up plan U8 (see `docs/design/reviews/2026-05-24-agent-e2e-design-critique.md`).
+- On Safety: a fail-quiet gating hint (`text-sm text-text-secondary`, `aria-live="polite"`) renders above the disabled `Start session` button explaining what's still unanswered (§6.4), mirroring the Review / Drill Check `missingHint` voice. The `2+ days` branch gets its own message because tapping it reveals a required "how long off?" sub-row.
 - Section h2s: `text-base font-semibold`.
 - Binary/trinary chip rows for inputs.
 - One primary CTA; one tertiary "Back"-ish escape.

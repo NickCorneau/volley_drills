@@ -36,10 +36,33 @@ export function formatTotalDurationLine(totalMinutes: number): string {
  *  pausedAt). A plain hyphen over the em-dash per 2026-04-17 copy pass. */
 const NO_VALUE = '-'
 
-export function formatDurationLine(log: ExecutionLog): string {
+/**
+ * Whole-minute training duration for a session, with a 1-min floor.
+ *
+ * Prefers `actualDurationMinutes` — the *active* time the runner already
+ * computed via `computeActualDurationMinutes` (sum of completed block
+ * durations + capped active-block elapsed). That value is immune to
+ * wall-clock gaps, so a session that was paused or interrupted and
+ * resumed hours later reports the time actually trained, not the
+ * start→end span (which previously inflated to, e.g., "721 min" when a
+ * 15-min session was reopened 12 h later).
+ *
+ * Falls back to the `start → completedAt/pausedAt` span only for legacy
+ * records written before `actualDurationMinutes` existed. Returns `null`
+ * when neither a stored duration nor an end timestamp is available.
+ */
+export function sessionDurationMinutes(log: ExecutionLog): number | null {
+  if (log.actualDurationMinutes != null && Number.isFinite(log.actualDurationMinutes)) {
+    return Math.max(1, Math.round(log.actualDurationMinutes))
+  }
   const end = log.completedAt ?? log.pausedAt
-  if (!end) return NO_VALUE
-  const mins = Math.max(1, Math.round((end - log.startedAt) / 60000))
+  if (!end) return null
+  return Math.max(1, Math.round((end - log.startedAt) / 60000))
+}
+
+export function formatDurationLine(log: ExecutionLog): string {
+  const mins = sessionDurationMinutes(log)
+  if (mins == null) return NO_VALUE
   return `${mins} min`
 }
 

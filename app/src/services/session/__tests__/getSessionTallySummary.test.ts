@@ -8,13 +8,14 @@ import { getSessionTallySummary } from '../queries'
  * pin the count + summed-minutes contract for the
  * `Logged: N sessions · H:MM total` row on SettingsScreen.
  *
- * Per-session minute math must match `formatDurationLine()` exactly
- * (Math.max(1, Math.round((endedAt(log) - log.startedAt) / 60_000)))
- * so the footer total agrees with the per-row durations the user
- * sees on Complete / Recent Sessions surfaces. Discarded-resume
- * stubs are excluded via `isTerminalSession` (`A8`); paused /
- * in-progress sessions are excluded by the upstream
- * `getTerminalExecutionLogs` selector.
+ * Per-session minute math goes through the shared `sessionDurationMinutes()`
+ * helper (the same one `formatDurationLine()` uses), so the footer total
+ * agrees with the per-row duration the user sees on Review. That helper
+ * prefers the active-time `actualDurationMinutes` value and only falls
+ * back to `Math.max(1, Math.round((endedAt(log) - log.startedAt) / 60_000))`
+ * for legacy records that predate the field. Discarded-resume stubs are
+ * excluded via `isTerminalSession` (`A8`); paused / in-progress sessions
+ * are excluded by the upstream `getTerminalExecutionLogs` selector.
  */
 
 async function clearDb() {
@@ -98,6 +99,24 @@ describe('getSessionTallySummary (R13)', () => {
 
     const summary = await getSessionTallySummary()
     expect(summary).toEqual({ count: 3, totalMinutes: 1 + 2 + 2 })
+  })
+
+  it('prefers actualDurationMinutes over the wall-clock span (interrupted / resumed-later sessions)', async () => {
+    const now = Date.now()
+    await db.sessionPlans.bulkPut([fakePlan('a'), fakePlan('b')])
+    await db.executionLogs.bulkPut([
+      // Started 12 h ago and "completed" now (interrupted then resumed
+      // later) — wall-clock would be ~720 min, but the runner recorded
+      // 15 min of actual active time. The tally must use the active time.
+      { ...completedLog('a', now - 12 * 60 * 60_000, now), actualDurationMinutes: 15 },
+      // A normal single-sitting session with a float active value rounds
+      // to the nearest whole minute with the 1-min floor.
+      { ...completedLog('b', now - 9 * 60_000, now), actualDurationMinutes: 8.4 },
+    ])
+
+    const summary = await getSessionTallySummary()
+    expect(summary.count).toBe(2)
+    expect(summary.totalMinutes).toBe(15 + 8)
   })
 
   it('excludes discarded_resume stubs (A8)', async () => {
