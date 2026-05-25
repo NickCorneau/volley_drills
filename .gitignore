@@ -14,3 +14,13 @@ ops/agent/runs/*
 app/.env
 app/.env.*
 !app/.env.example
+
+# Claude Code local tooling: machine-specific absolute paths (launch.json)
+# and local permission grants (settings.local.json). Not portable; never commit.
+.claude/settings.local.json
+.claude/launch.json
+
+# Local debug screenshots captured at the repo ROOT by preview / Playwright
+# runs (home.png, safety-*.png, run-segment-*.png, setup*.png, settings.png...).
+# App icons live under app/public/ and stay tracked; this only ignores root.
+/*.png
