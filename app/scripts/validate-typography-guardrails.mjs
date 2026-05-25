@@ -16,12 +16,13 @@ const ignoredFileFragments = ['.test.', '.spec.']
 const arbitraryTextSizeAllowlist = [
   {
     path: 'components/BlockTimer.tsx',
-    token: 'text-[56px]',
+    token: 'text-[72px]',
     requiredUtilities: ['font-mono', 'tabular-nums'],
     role: 'timer/instrument',
     surface: 'Run active timer',
     activeRunEligible: true,
-    rationale: 'Live countdown digits keep the documented 56px arm-length timer scale.',
+    rationale:
+      'Live countdown digits use the 72px bench-distance scale (2026-05-25 H1 experiment, plan U6) — the outdoor brief design center for D42/D57 courtside posture. Replaces the prior 56px arm-length value. Durable keep/revert gated on D91 field run.',
   },
   {
     path: 'screens/RunScreen.tsx',

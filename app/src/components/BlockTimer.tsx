@@ -42,6 +42,27 @@ import { formatTime } from '../lib/format'
  * fresh courtside evidence that the bar alone fails. See
  * `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Post-ship
  * amendment §"Item 7".
+ *
+ * 2026-05-25 audit follow-up (H1 experiment): the digit size moves
+ * from 56 px (arm's-length floor per the outdoor brief) to 72 px
+ * (bench-distance floor — the brief's stated design center for
+ * `D42 / D57` courtside posture). 56 px was sized for the sub-mode
+ * (solo arm's-length) rather than the design center; this
+ * experiment closes that gap without re-litigating the broader
+ * `D127` body-token retune. Every other invariant is preserved:
+ * Phase F10 `font-mono` (JetBrains Mono Variable) + slashed-zero,
+ * `font-bold`, `leading-none`, `tabular-nums`, the 3.5 s
+ * accent-flip threshold, the `data-testid` / `data-countdown`
+ * hooks, the `h-3` progress bar, and the paused-state subtitle.
+ * The preroll count-in digit (`RunScreen.tsx` line ~289) already
+ * renders at 72 px, so this experiment closes a 72 → 56 → ... jump
+ * the user saw between preroll and live timer. Viewport-bound
+ * assessment lives in
+ * `docs/design/reviews/2026-05-25-h1-h2-experiment-revaluation.md`
+ * (per plan U9). Durable keep / revert / further-tune decision
+ * still gated on the `D91` field run. See
+ * `docs/plans/2026-05-25-002-feat-2026-05-24-design-critique-followups-plan.md`
+ * U6.
  */
 type BlockTimerProps = {
   remainingSeconds: number
@@ -64,7 +85,7 @@ export function BlockTimer({ remainingSeconds, totalSeconds, isPaused }: BlockTi
         {isPaused ? 'Timer paused. Tap Resume to continue.' : ''}
       </span>
       <div
-        className={`font-mono text-[56px] font-bold leading-none tabular-nums transition-colors ${
+        className={`font-mono text-[72px] font-bold leading-none tabular-nums transition-colors ${
           isCountingDown ? 'text-accent' : 'text-text-primary'
         }`}
         style={{ fontFeatureSettings: '"zero" 1' }}
