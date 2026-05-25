@@ -34,7 +34,7 @@ export type GeneratedPlanDecisionDebtCompressionLane =
   | 'short_session_cooldown_minimum'
   | 'technique_under_min_review'
   | 'workload_envelope_review'
-  | 'generator_redistribution_investigation'
+  | 'coverage_gap_review'
   | 'source_backed_content_depth_candidate'
   | 'low_volume_watchlist'
   | 'unknown_unclassified'
@@ -989,15 +989,15 @@ const REDISTRIBUTION_CAUSALITY_COMPARISON_MODE: GeneratedPlanRedistributionCausa
 const REDISTRIBUTION_CAUSALITY_RUNTIME_BOUNDARY =
   'Diagnostic-only counterfactual receipt; shipped buildDraft() behavior may include separately authorized fills such as the D01 block-shape fill.'
 const D47_PROPOSAL_ADMISSION_GROUP_KEY =
-  'gpdg:v1:d47:d47-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap'
+  'gpdg:v1:d47:d47-solo-open:main_skill:true:slot_dropped+over_authored_max+over_fatigue_cap'
 const D05_COMPARATOR_GROUP_KEY =
-  'gpdg:v1:d05:d05-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap'
+  'gpdg:v1:d05:d05-solo:main_skill:true:slot_dropped+over_authored_max+over_fatigue_cap'
 const D47_SOURCE_BACKED_GAP_CARD_PATH =
   'docs/reviews/2026-05-02-d47-source-backed-gap-card.md'
 const D47_D05_COMPARATOR_EVALUATION_PAYLOAD_PATH =
   'docs/reviews/2026-05-02-d47-d05-comparator-evaluation-payload.md'
 const D01_GAP_FILL_PROPOSAL_GROUP_KEY =
-  'gpdg:v1:d01:d01-solo:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap'
+  'gpdg:v1:d01:d01-solo:main_skill:true:slot_dropped+over_authored_max+over_fatigue_cap'
 const AUTHORIZED_D49_RESIDUAL_VARIANT_IDS = new Set(['d49-solo-open', 'd49-pair-open'])
 const D49_RESIDUAL_FOLLOW_UP_PACKET_SOURCE =
   'D47 closed-by-D49 gap closure ledger plus current D49 generated diagnostics.'
@@ -1047,7 +1047,7 @@ const COMPRESSION_LANE_ORDER: readonly GeneratedPlanDecisionDebtCompressionLane[
   'short_session_cooldown_minimum',
   'technique_under_min_review',
   'workload_envelope_review',
-  'generator_redistribution_investigation',
+  'coverage_gap_review',
   'source_backed_content_depth_candidate',
   'low_volume_watchlist',
   'unknown_unclassified',
@@ -1118,16 +1118,22 @@ const COMPRESSION_LANE_DETAILS: Record<
       'no_implementation_action_yet',
     ],
   },
-  generator_redistribution_investigation: {
-    label: 'Generator redistribution investigation',
-    question: 'Would these over-cap groups still exist without optional-slot redistribution?',
+  coverage_gap_review: {
+    // U4 (2026-05-24 duration-honesty plan, R13): replaces the
+    // former "Generator redistribution investigation" lane. R1
+    // retired the redistribution path; the new `slot_dropped` and
+    // `under_named_profile_duration` findings route here instead,
+    // surfacing honest-duration coverage gaps for content authoring.
+    label: 'Coverage gap review',
+    question:
+      'Are the dropped optional slots / sub-profile session totals a coverage gap or an acceptable honest-duration outcome?',
     explanation:
-      'Redistribution evidence means generator policy should be investigated before catalog changes.',
+      'Optional slots that drop past the U2 fallback and sessions that run shorter than their named profile signal a catalog-depth question — not a generator-policy fix anymore.',
     disposition: 'needs_human_decision',
     nextEvidenceNeeded:
-      'Compare redistribution-affected cells against non-redistribution over-cap cells.',
-    recommendedFollowUpUnit: 'U8 redistribution comparison',
-    candidateDispositions: ['route_to_U8'],
+      'Decide per dropped slot or under-profile session whether to author new focus-aligned content (coverage gap) or accept the shorter session (honest-duration outcome).',
+    recommendedFollowUpUnit: 'Coverage brainstorm',
+    candidateDispositions: ['source_depth_candidate', 'accepted_policy_allowance'],
   },
   source_backed_content_depth_candidate: {
     label: 'Source-backed content-depth candidate',
@@ -1243,8 +1249,11 @@ export function compressionLaneForGeneratedPlanTriageItem(
     return 'short_session_cooldown_minimum'
   }
 
-  if (groupHasObservationCode(group, 'optional_slot_redistribution')) {
-    return 'generator_redistribution_investigation'
+  if (
+    groupHasObservationCode(group, 'slot_dropped') ||
+    groupHasObservationCode(group, 'under_named_profile_duration')
+  ) {
+    return 'coverage_gap_review'
   }
 
   if (entry.route === 'source_backed_content_depth') {
@@ -1287,7 +1296,7 @@ function redistributionAffectedCellCount(group: GeneratedPlanObservationGroup): 
   return group.affectedCells.filter(
     (cell) =>
       cell.redistribution !== undefined ||
-      affectedCellHasObservationCode(cell, 'optional_slot_redistribution'),
+      affectedCellHasObservationCode(cell, 'slot_dropped'),
   ).length
 }
 
@@ -1295,7 +1304,7 @@ function nonRedistributionOverCapCellCount(group: GeneratedPlanObservationGroup)
   return group.affectedCells.filter(
     (cell) =>
       cell.redistribution === undefined &&
-      !affectedCellHasObservationCode(cell, 'optional_slot_redistribution') &&
+      !affectedCellHasObservationCode(cell, 'slot_dropped') &&
       (affectedCellHasObservationCode(cell, 'over_authored_max') ||
         affectedCellHasObservationCode(cell, 'over_fatigue_cap')),
   ).length
@@ -1447,7 +1456,7 @@ function classifyRedistributionCausalityCell(
 ): GeneratedPlanRedistributionCausalityCellReceipt {
   const hasRedistributionEvidence =
     cell.redistribution !== undefined ||
-    affectedCellHasObservationCode(cell, 'optional_slot_redistribution')
+    affectedCellHasObservationCode(cell, 'slot_dropped')
   const baseCounts: GeneratedPlanRedistributionCausalityCounts = {
     ...emptyRedistributionCausalityCounts(),
     totalAffectedCellCount: 1,
@@ -1596,7 +1605,7 @@ export function buildGeneratedPlanRedistributionCausalityReceipt(
         return (
           entry !== undefined &&
           compressionLaneForGeneratedPlanTriageItem(item.group, entry) ===
-            'generator_redistribution_investigation' &&
+            'coverage_gap_review' &&
           entry.triageStatus !== 'resolved' &&
           entry.triageStatus !== 'superseded'
         )
@@ -3100,7 +3109,7 @@ function rejectedAlternativeFromGroup(
 function groupHasMainSkillRedistributionPressure(group: GeneratedPlanObservationGroup): boolean {
   return (
     group.blockType === 'main_skill' &&
-    group.observationCodes.includes('optional_slot_redistribution') &&
+    group.observationCodes.includes('slot_dropped') &&
     (group.observationCodes.includes('over_authored_max') ||
       group.observationCodes.includes('over_fatigue_cap'))
   )
@@ -3129,9 +3138,9 @@ function buildGapClosureRejectedAlternatives(
       groupHasMainSkillRedistributionPressure(group),
   )
   const adjacentAdvancedGroup = [
-    'gpdg:v1:d46:d46-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
-    'gpdg:v1:d33:d33-solo-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
-    'gpdg:v1:d47:d47-pair-open:main_skill:true:optional_slot_redistribution+over_authored_max+over_fatigue_cap',
+    'gpdg:v1:d46:d46-solo-open:main_skill:true:slot_dropped+over_authored_max+over_fatigue_cap',
+    'gpdg:v1:d33:d33-solo-open:main_skill:true:slot_dropped+over_authored_max+over_fatigue_cap',
+    'gpdg:v1:d47:d47-pair-open:main_skill:true:slot_dropped+over_authored_max+over_fatigue_cap',
   ]
     .map((groupKey) => findGroupByKey(groups, groupKey))
     .find((group): group is GeneratedPlanObservationGroup =>
@@ -3288,7 +3297,7 @@ function d49WorkloadResidualGroups(
       isAuthorizedD49ResidualGroupShape(group) &&
       currentEvidenceGroupKeys.has(group.groupKey) &&
       group.observationCodes.includes('under_authored_min') &&
-      !group.observationCodes.includes('optional_slot_redistribution'),
+      !group.observationCodes.includes('slot_dropped'),
   )
 }
 
@@ -3323,7 +3332,7 @@ function d49U8PressureBearingGroups(
 ): GeneratedPlanRedistributionCausalityGroupReceipt[] {
   return groups.filter(
     (group) =>
-      group.observationCodes.includes('optional_slot_redistribution') &&
+      group.observationCodes.includes('slot_dropped') &&
       (group.counts.currentOverAuthoredMaxCellCount > 0 ||
         group.counts.currentOverFatigueCapCellCount > 0),
   )
@@ -4099,7 +4108,7 @@ export function buildGeneratedPlanDecisionDebtPrompts(
 export function conservativeRouteForGeneratedPlanGroup(
   group: GeneratedPlanObservationGroup,
 ): GeneratedPlanTriageRoute {
-  if (group.observationCodes.includes('optional_slot_redistribution')) {
+  if (group.observationCodes.includes('slot_dropped')) {
     return 'generator_policy_investigation'
   }
   return 'defer'

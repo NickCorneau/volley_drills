@@ -34,7 +34,8 @@ export type GeneratedPlanObservationCode =
   | 'under_authored_min'
   | 'over_authored_max'
   | 'over_fatigue_cap'
-  | 'optional_slot_redistribution'
+  | 'slot_dropped'
+  | 'under_named_profile_duration'
   | 'repeated_focus_controlled_family'
 
 export interface GeneratedPlanNotApplicableCell {
@@ -193,6 +194,14 @@ export interface GeneratedPlanObservation {
   readonly skippedOptionalLayoutIndexes?: readonly number[]
   readonly redistribution?: GeneratedPlanRedistributionEvidence
   readonly classificationSource?: 'observed_redistribution' | 'allocated_duration'
+  /**
+   * U4 (2026-05-24 duration-honesty plan): `under_named_profile_duration`
+   * carries the named profile (`context.timeProfile`) so the triage
+   * surface can compute the gap directly from the finding without
+   * re-deriving session context. Other observation codes leave this
+   * undefined.
+   */
+  readonly namedProfileMinutes?: number
 }
 
 export interface SelectedDraftStretchAnalysis {
@@ -731,30 +740,42 @@ export function analyzeSelectedDraftStretch(
   const hardFailures: GeneratedPlanHardFailure[] = []
   const observations: GeneratedPlanObservation[] = []
 
-  if (trace && trace.redistributedMinutes > 0 && trace.skippedOptionalLayoutIndexes.length > 0) {
-    const targetSlot = trace.slots.find(
-      (slot) => slot.layoutIndex === trace.redistributionLayoutIndex,
-    )
-    const targetBlock = targetSlot?.blockId
-      ? draft.blocks.find((block) => block.id === targetSlot.blockId)
-      : undefined
-    observations.push({
-      code: 'optional_slot_redistribution',
-      blockId: targetSlot?.blockId,
-      blockType: targetSlot?.type,
-      required: targetSlot?.required,
-      layoutIndex: targetSlot?.layoutIndex,
-      allocatedMinutes: targetSlot?.allocatedMinutes,
-      drillId: targetSlot?.drillId,
-      variantId: targetSlot?.variantId,
-      plannedMinutes: targetBlock?.durationMinutes,
-      skippedOptionalLayoutIndexes: trace.skippedOptionalLayoutIndexes,
-      redistribution: {
-        source: 'observed',
-        redistributedMinutes: trace.redistributedMinutes,
+  // U4 (2026-05-24 duration-honesty plan, R13): replace the retired
+  // `optional_slot_redistribution` finding with two new findings:
+  //
+  //   - `slot_dropped`: per-slot evidence. Fires for every optional
+  //     slot that ended up in `skippedOptionalLayoutIndexes` after
+  //     U2's fallback retry. Surfaces the agent-readable "which
+  //     focused selection failed" signal for the coverage workbench.
+  //   - `under_named_profile_duration`: per-session evidence. Fires
+  //     when the assembled total falls short of the named profile by
+  //     at least 1 min (the diagnostic-grade threshold; distinct from
+  //     the user-facing 5-min UI threshold in U6).
+  //
+  // Both findings route to the `coverage_gap_review` triage lane.
+  if (trace) {
+    for (const layoutIndex of trace.skippedOptionalLayoutIndexes) {
+      const slot = trace.slots.find((candidate) => candidate.layoutIndex === layoutIndex)
+      if (!slot) continue
+      observations.push({
+        code: 'slot_dropped',
+        blockType: slot.type,
+        required: slot.required,
+        layoutIndex,
+        allocatedMinutes: slot.allocatedMinutes,
         skippedOptionalLayoutIndexes: trace.skippedOptionalLayoutIndexes,
-        redistributionLayoutIndex: trace.redistributionLayoutIndex,
-      },
+      })
+    }
+  }
+
+  const totalMinutes = draft.blocks.reduce((sum, block) => sum + block.durationMinutes, 0)
+  const underProfileBy = draft.context.timeProfile - totalMinutes
+  if (underProfileBy >= 1) {
+    observations.push({
+      code: 'under_named_profile_duration',
+      plannedMinutes: totalMinutes,
+      namedProfileMinutes: draft.context.timeProfile,
+      skippedOptionalLayoutIndexes: trace?.skippedOptionalLayoutIndexes,
     })
   }
 
@@ -874,9 +895,24 @@ function findSlotForTrace(
 function hasSelectedCandidate(
   slot: BlockSlot,
   context: SetupContext,
-  block: { readonly drillId: string; readonly variantId: string },
+  block: { readonly drillId: string; readonly variantId: string; readonly required: boolean },
 ): boolean {
-  return findCandidates(slot, context, { playerLevel: context.playerLevel }).some(
+  const focusedHit = findCandidates(slot, context, { playerLevel: context.playerLevel }).some(
+    (candidate) => candidate.drill.id === block.drillId && candidate.variant.id === block.variantId,
+  )
+  if (focusedHit) return true
+
+  // R5 (2026-05-24 duration-honesty plan, U2): optional slots may
+  // legitimately fill from the slot's authored `skillTags` fallback
+  // when the focused candidate pool can't fill them. Recognize that
+  // fallback path here so the diagnostic surface doesn't hard-fail on
+  // pass-fallback selections under named focus. Required slots keep
+  // the strict focused check (R6: no required-slot fallback).
+  if (block.required) return false
+  return findCandidates(slot, context, {
+    playerLevel: context.playerLevel,
+    overrideSkillTags: slot.skillTags,
+  }).some(
     (candidate) => candidate.drill.id === block.drillId && candidate.variant.id === block.variantId,
   )
 }
@@ -1011,12 +1047,22 @@ function generationHardFailures(
       drill &&
       !drill.skillFocus.includes(draft.context.sessionFocus)
     ) {
-      failures.push({
-        code: 'off_focus_controlled_work',
-        blockId: block.id,
-        drillId: block.drillId,
-        variantId: block.variantId,
-      })
+      // R5 / R6 (2026-05-24 duration-honesty plan, U2): tolerate
+      // optional-slot fallback selections that resolve via the slot's
+      // authored `skillTags` fallback (legitimate under U2). A
+      // required slot off-focus still hard-fails — R6 keeps required
+      // slots focus-strict.
+      const offFocusTolerable =
+        !block.required &&
+        slot.skillTags?.some((tag) => drill.skillFocus.includes(tag))
+      if (!offFocusTolerable) {
+        failures.push({
+          code: 'off_focus_controlled_work',
+          blockId: block.id,
+          drillId: block.drillId,
+          variantId: block.variantId,
+        })
+      }
     }
   }
 
@@ -1298,20 +1344,19 @@ function withObservationGroupIdentity(
 function likelyFixPathsForObservationCodes(
   codes: readonly GeneratedPlanObservationCode[],
 ): readonly string[] {
-  if (codes.includes('optional_slot_redistribution')) {
-    return [
-      'generator_policy_investigation',
-      'policy_allowance',
-      'block_split',
-      'variant_cap_review',
-      'source_backed_content_depth',
-    ]
+  if (codes.includes('slot_dropped') || codes.includes('under_named_profile_duration')) {
+    // U4 (2026-05-24 duration-honesty plan, R13): both new findings
+    // route to coverage authoring rather than the legacy redistribution
+    // policy fixes. `source_backed_content_depth` and
+    // `coverage_gap_review` are the named next steps; the legacy
+    // `block_split` / `variant_cap_review` paths only apply when an
+    // over-cap event surfaces (which R1 + R2 retired).
+    return ['coverage_gap_review', 'source_backed_content_depth']
   }
   if (
     codes.includes('under_authored_min') ||
     codes.includes('over_authored_max') ||
-    codes.includes('over_fatigue_cap') ||
-    codes.includes('optional_slot_redistribution')
+    codes.includes('over_fatigue_cap')
   ) {
     return ['policy_allowance', 'block_split', 'variant_cap_review', 'source_backed_content_depth']
   }

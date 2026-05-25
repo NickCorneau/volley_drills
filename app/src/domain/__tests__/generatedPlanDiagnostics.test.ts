@@ -481,15 +481,32 @@ describe('generated plan diagnostic matrix', () => {
 })
 
 describe('selected draft stretch analyzer', () => {
-  it('treats a block equal to authored caps as clean', () => {
+  it('treats a per-block-at-cap session under its named profile as observation_only (R13)', () => {
+    // U4 (2026-05-24 duration-honesty plan, R13): a sparse fixture
+    // (single 8-min block, named profile 40) is no longer "clean" —
+    // the new `under_named_profile_duration` finding fires whenever
+    // total < profile by >= 1 min. Per-block over/under remain clean.
     const result = analyzeSelectedDraftStretch(servingDraft(8), cleanServingTrace)
 
-    expect(result.status).toBe('clean')
+    expect(result.status).toBe('observation_only')
     expect(result.hardFailures).toEqual([])
-    expect(result.observations).toEqual([])
+    expect(result.observations).toEqual([
+      expect.objectContaining({
+        code: 'under_named_profile_duration',
+        plannedMinutes: 8,
+        namedProfileMinutes: 40,
+      }),
+    ])
   })
 
-  it('classifies authored max and fatigue cap overage with redistribution evidence', () => {
+  it('classifies authored max and fatigue cap overage and emits slot_dropped + under_named_profile_duration (R13)', () => {
+    // U4 (2026-05-24 duration-honesty plan, R13): replaces the
+    // retired `optional_slot_redistribution` finding with `slot_dropped`
+    // (per-dropped-slot) + `under_named_profile_duration` (per-session).
+    // The redistribution trace metadata is preserved on the fixture so
+    // `classificationSource: 'observed_redistribution'` still attaches
+    // to over_authored_max / over_fatigue_cap when redistribution
+    // evidence is present (legacy trace shape under-test).
     const result = analyzeSelectedDraftStretch(servingDraft(9), servingTrace)
 
     expect(result.status).toBe('observation_only')
@@ -517,12 +534,25 @@ describe('selected draft stretch analyzer', () => {
           plannedMinutes: 9,
           fatigueMaxMinutes: 8,
         }),
+        // U4: `slot_dropped` is per-dropped-slot. The trace lists
+        // layoutIndex 1 (pressure, required=false) as dropped, so the
+        // finding carries the dropped slot's identity — not the
+        // rerouted-to main_skill block.
         expect.objectContaining({
-          code: 'optional_slot_redistribution',
-          blockId: 'block-0',
-          blockType: 'main_skill',
-          required: true,
+          code: 'slot_dropped',
+          blockType: 'pressure',
+          required: false,
+          layoutIndex: 1,
+          allocatedMinutes: 1,
           skippedOptionalLayoutIndexes: [1],
+        }),
+        // U4: `under_named_profile_duration` fires when total < named
+        // profile by >= 1 min. The fixture's single 9-min block sums
+        // to 9; the timeProfile is 40, so the gap is 31.
+        expect.objectContaining({
+          code: 'under_named_profile_duration',
+          plannedMinutes: 9,
+          namedProfileMinutes: 40,
         }),
       ]),
     )
@@ -624,34 +654,47 @@ describe('seeded generated plan diagnostics', () => {
     )
     expect(summary.hardFailureCount).toBe(0)
     expect(summary.statusCounts).toEqual({
-      // 2026-05-04: clean count rose 119 -> 124 (d50) and stayed 124 (d51).
-      // Observation_only stayed 416. Observation-code counts shifted again
-      // after d51 ship: under_authored_min 273 -> 307 (more cells assigned
-      // to a longer-floor d51 in short blocks), optional_slot_redistribution
-      // 220 -> 200 (d31 cluster cells that were redistribution-driven now
-      // route to d51 cleanly), over_authored_max and over_fatigue_cap each
-      // dropped 246 -> 225 (d31 cluster over-stretch absorbed by d51).
-      // 2026-05-13: warmup/wrap segment snap wired into `buildDraft`
-      // (`docs/plans/2026-05-13-002-fix-wire-warmup-wrap-segment-snap-plan.md`).
-      // Clean rose 124 -> 136 because some cells that previously
-      // tripped an under-min observation on the wrap/warmup block now
-      // snap to the exact authored floor. Observation_only dropped
-      // 416 -> 404 for the same reason. Under-min observations dropped
-      // 307 -> 290. Over_authored_max and over_fatigue_cap each rose
-      // 225 -> 229 because the snap's redistribution can push 1 minute
-      // into work slots that were at the variant max under the legacy
-      // allocator (the snap respects slot AND variant caps under
-      // `!allowSlotMaxOverflow`, but the legacy `redistributedMinutes`
-      // patch riding on top can still target the same slot).
-      clean: 136,
-      observation_only: 404,
+      // 2026-05-24 duration-honesty Stage 1 (U1+U2+U3+U4):
+      //   - R1 retired the `redistributedMinutes`-onto-main_skill
+      //     uplift. Many cells that previously tripped
+      //     over_authored_max / over_fatigue_cap on a redistributed
+      //     main_skill block now sit cleanly within the slot's
+      //     authored cap.
+      //   - U2's pass-fallback retry fills more optional slots, so
+      //     fewer cells trip `slot_dropped`.
+      //   - U4 introduced `under_named_profile_duration` (fires when
+      //     total < timeProfile by >= 1 min). Many sparse-catalog
+      //     cells now carry this new finding instead of (or in
+      //     addition to) the retired `optional_slot_redistribution`.
+      //
+      // Net: clean rose 136 -> 165 as the over-cap stretch population
+      // collapsed. Observation_only fell 404 -> 375 — the
+      // honest-duration cells stop carrying the redistribution-on-
+      // main_skill observation and many cleanly hit the cap floor.
+      clean: 165,
+      observation_only: 375,
       hard_failure: 0,
     })
     expect(summary.observationCounts).toEqual({
+      // R1 + R5 + U4 finding shifts:
+      //   - under_authored_min: unchanged at 290 (warmup/wrap snap
+      //     behavior preserved per R16).
+      //   - slot_dropped: 200 -> 48. The U2 pass-fallback now fills
+      //     most previously-dropping optional slots, so the per-slot
+      //     drop signal collapses.
+      //   - over_authored_max + over_fatigue_cap: 229 -> 109 each.
+      //     Without the `+ redistributedMinutes` uplift, the
+      //     remaining over-cap cells come from the trace's allocated-
+      //     duration counterfactual (legacy fixtures consumed via
+      //     `analyzeSelectedDraftStretch`), not from real builds.
+      //   - under_named_profile_duration: NEW. Fires on cells where
+      //     total < named profile by >= 1 min (the honest-duration
+      //     gap U4's diagnostic-grade threshold surfaces).
       under_authored_min: 290,
-      optional_slot_redistribution: 200,
-      over_authored_max: 229,
-      over_fatigue_cap: 229,
+      slot_dropped: 48,
+      under_named_profile_duration: 207,
+      over_authored_max: 109,
+      over_fatigue_cap: 109,
     })
     expect(results.filter((result) => result.status === 'hard_failure')).toEqual([])
   })
@@ -981,12 +1024,12 @@ describe('seeded generated plan diagnostics', () => {
     expect(
       overCapGroups
         .flatMap((group) => group.affectedCells)
-        .filter((cell) => cell.observationCodes.includes('optional_slot_redistribution'))
+        .filter((cell) => cell.observationCodes.includes('slot_dropped'))
         .every((cell) => cell.plannedMinutes !== undefined),
     ).toBe(true)
     expect(
       overCapGroups
-        .filter((group) => group.observationCodes.includes('optional_slot_redistribution'))
+        .filter((group) => group.observationCodes.includes('slot_dropped'))
         .every((group) => group.likelyFixPaths.includes('generator_policy_investigation')),
     ).toBe(true)
 
