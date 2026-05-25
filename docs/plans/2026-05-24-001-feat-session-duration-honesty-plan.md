@@ -14,17 +14,19 @@ Two-stage implementation of the duration-honesty slice: Stage 1 lands engine tru
 
 ---
 
-## Pending User Decisions
+## Resolved User Decisions
 
-These two findings from the 2026-05-25 `ce-doc-review` pass require user direction before ce-work executes the affected units. Both materially shape the slice outcome — they are *not* planning-detail questions. Apply the chosen direction inline before Stage 1 ships.
+Both ce-doc-review decisions from 2026-05-25 are now resolved (locked in 2026-05-25 by the founder). ce-work executes against the chosen direction below; the original three-option / two-option menus are preserved here for traceability.
 
-### PD-1: Source-backed reroute disposition (U3, P0)
+### PD-1 (RESOLVED 2026-05-25): Source-backed reroute disposition → (A) Re-wire reroute on base allocation
 
 **Background:** R1 removes the `redistributedMinutes` path. The `shouldRerouteForSourceBackedSibling` call site in `sessionBuilder.ts` is gated by `redistributionIndex !== undefined`, which under R1 is permanently undefined. Consequence: all 4 `SOURCE_BACKED_REROUTES` entries (`d01-duration-fit`, `d47-d48-to-d49`, `d46-to-d50`, `d31-to-d51`) become dormant code paths. U3's "characterize the post-slice trigger condition" approach is impossible-by-construction because the trigger no longer fires.
 
 A real consequence under R1 alone: a drill like `d01` (5-min envelope) selected for a 10-min `main_skill` slot would run the slot's authored 10 min without being rerouted to a longer-envelope sibling. R1 removed both the surplus AND the over-envelope protection mechanism.
 
-**Decision needed — pick one disposition:**
+**Resolved direction:** (A) Re-wire reroute to fire on base-allocation-over-envelope. The trigger is decoupled from the dead `redistributionIndex !== undefined` gate and instead evaluated for each main_skill slot post-selection: if `!candidateCanCarryTargetDuration(selected, durations[i])` AND `shouldRerouteForSourceBackedSibling` returns true for the registry entry, re-pick using `preferTargetDurationFit: true`. Honors R11/R12 literal intent and prevents the new short-envelope-on-long-slot dishonesty R1 alone would introduce. Below: original three-option menu retained for traceability.
+
+**Original decision menu (now resolved):**
 
 - **(A) Re-wire reroute to fire on base allocation over envelope.** Detangle the reroute trigger from the redistribution code path. New trigger: if `!candidateCanCarryTargetDuration(selected, durations[i])` for a main_skill slot, evaluate `shouldRerouteForSourceBackedSibling` and re-pick if the registry matches. Preserves R11/R12's literal intent ("re-validate intent under honest durations"). Adds code change to U3 beyond characterization. **Recommended** — honors the brainstorm's stated R11/R12 intent and prevents the new short-envelope-on-long-slot dishonesty R1 alone would introduce.
 - **(B) Accept reroute retirement.** Remove the dead code path entirely; document that source-backed reroutes are no longer dynamic; d49/d50/d51 remain in the catalog as content reachable via normal candidate selection but not preferentially routed-to. The new short-envelope-on-long-slot dishonesty becomes a known residual owned by the coverage brainstorm.
@@ -32,11 +34,13 @@ A real consequence under R1 alone: a drill like `d01` (5-min envelope) selected 
 
 **Affected units:** U3 (entire approach changes); U1 (Approach line about the reroute call site depends on the choice).
 
-### PD-2: U5 eager-build vs build-on-completable (P1)
+### PD-2 (RESOLVED 2026-05-25): U5 approach → (A) Build-on-completable
 
 **Background:** Four reviewers (coherence, scope-guardian, design-lens, adversarial) converged on the U5 eager-build approach as carrying unaddressed scope drift, an implicit seed-stability requirement (two `buildDraft` calls in the same Setup session must produce byte-identical drafts), missing UX rationale for live-updating duration in a calm-by-default courtside register, and a Dexie-read-cost concern (N reads per Setup toggle).
 
-**Decision needed — pick one approach:**
+**Resolved direction:** (A) Build-on-completable. Build the draft once Setup is completable (all required choices made — Players, Net, Time, Focus, optional Wall), display the assembled duration in the existing Setup chrome at that moment, persist on Build commit. Removes the seed-stability, ARIA live-region, and N-Dexie-reads-per-toggle concerns in one move; aligns with the founder calm-by-default preference; satisfies R7 and R10 literally. Below: original two-option menu retained for traceability.
+
+**Original decision menu (now resolved):**
 
 - **(A) Build-on-completable.** Build the draft once Setup is completable (all required choices made — Players, Net, Time, Focus, optional Wall), display the assembled duration in the existing Setup chrome at that moment, persist on Build commit. **Recommended** — removes the seed-stability concern (one build per commit), removes the ARIA live-region concern (number is static once shown), removes the N-Dexie-reads-per-toggle concern, aligns with the founder's calm-by-default preference. Satisfies R7 ("displays the real assembled total duration before commit") and R10 ("visible at the existing Setup commit moment") literally. Trade-off: loses the live-updating-as-you-toggle UX.
 - **(B) Eager-build, fully specified.** Keep eager-build on every setup-state change but specify the previously-implicit contracts: seed is derived deterministically from `(focus, level, profile, archetype, session-day-key)` — not per-call random; debounce window pinned to a named threshold (e.g. 200ms); duration container carries `aria-live="polite"`; Dexie reads from `findLastCompletedDrillIdsByType` are cached per Setup mount; named UX justification ("the duration is the composed consequence of multiple inputs; seeing it shift on each toggle prevents the assemble-then-be-surprised loop the slice motivates"). Higher implementation surface; richer UX.
@@ -301,7 +305,7 @@ For each entry, U3 produces a one-line intent confirmation or named follow-up; "
 
 - U3. **Source-backed reroute intent re-validation**
 
-**Goal:** Confirm each of the 4 `SOURCE_BACKED_REROUTES` entries (`d01-duration-fit`, `d47-d48-to-d49`, `d46-to-d50`, `d31-to-d51`) still fires for the right product reason under honest durations, or surface a named follow-up.
+**Goal:** Per PD-1 (A): re-wire the source-backed reroute trigger to fire on base-allocation-over-envelope (decoupled from the dead `redistributionIndex !== undefined` gate that R1 removes), and produce a per-entry intent-confirmation log for each of the 4 `SOURCE_BACKED_REROUTES` entries (`d01-duration-fit`, `d47-d48-to-d49`, `d46-to-d50`, `d31-to-d51`) under the new trigger.
 
 **Requirements:** R11, R12
 
@@ -311,11 +315,12 @@ For each entry, U3 produces a one-line intent confirmation or named follow-up; "
 - Modify: `app/src/domain/sessionAssembly/__tests__/sourceBackedReroutes.test.ts` (characterize each entry's post-slice firing condition; new assertions that mirror the per-reroute matrix in High-Level Technical Design)
 - No production code edits expected; if intent shifts materially for one entry, document and either bump that entry's metadata (in `sourceBackedReroutes.ts`) or open a follow-up.
 
-**Approach:**
-- For each of the 4 registry entries, read the existing test(s) and identify what scenario triggers the reroute today (typically: `<from-drill>` selected for a slot whose `plannedDuration = base + redistributedMinutes` exceeds the from-drill's envelope).
-- Construct a post-slice equivalent scenario where `redistributedMinutes = 0` and `plannedDuration = base` already exceeds the from-drill's envelope — the legitimate "base allocation needs a longer-envelope sibling" case.
+**Approach (per PD-1 (A)):**
+- **Code change in `sessionBuilder.ts`:** after the optional-slot loop completes (U1+U2 already removed the `redistributionIndex` block), evaluate each selected main_skill block: if `!candidateCanCarryTargetDuration(selected, durations[i])` AND `shouldRerouteForSourceBackedSibling(slot, effectiveContext, selected.pick, durations[i])` returns true, re-pick the slot via `pickForSlot` with `preferTargetDurationFit: true` and `targetDurationMinutes: durations[i]`, then replace the selection. The `plannedDurationMinutes` signal now equals the base allocation — no more inflated trigger.
+- For each of the 4 registry entries, read the existing test(s) and identify what scenario triggers the reroute today (typically: `<from-drill>` selected for a slot whose `plannedDuration = base + redistributedMinutes` exceeds the from-drill envelope).
+- Construct a post-slice equivalent scenario where `plannedDuration = base` already exceeds the from-drill envelope — the legitimate "base allocation needs a longer-envelope sibling" case.
 - Assert each reroute fires in the post-slice scenario for the same product reason; assert it does NOT fire on a base allocation that fits.
-- Produce the per-entry intent log (matrix above filled in) in the plan's verification record before Stage 1 ships.
+- Produce the per-entry intent log (matrix above filled in) in the verification record before Stage 1 ships.
 
 **Execution note:** Characterization-first — read the existing test assertions and capture their intent in a new test that survives R1 + R2 + R5 before changing anything.
 
@@ -392,13 +397,13 @@ For each entry, U3 produces a one-line intent confirmation or named follow-up; "
 - Modify: `app/src/screens/__tests__/SetupScreen.test.tsx` (test that the duration display appears for completable contexts, matches the built draft's block-sum)
 - Read-only: `app/src/screens/RunScreen.tsx` (or wherever Run reads the persisted draft) — verify Run does NOT call `buildDraft` itself
 
-**Approach:**
-- Today's `handleConfirm` at `SetupScreen.tsx:142-213` builds the draft, persists it, then navigates. R7's duration display needs to be visible BEFORE the user taps Build — which means either (a) build the draft on every focus/level/profile change so the duration is always live, or (b) build on a separate "preview" affordance, or (c) display only after Build but before navigation (less useful).
-- Recommended shape: build the draft eagerly on every setup-state change (debounced if needed), display the assembled duration in the existing Setup chrome (next to the "Time" section or above the Build button). This keeps the displayed number live and tied to the persisted draft on commit (same `(context, ...)` inputs → same draft per determinism, R4).
-- Verify Run consumes the persisted draft only: read the controller calling `getCurrentDraft` or the equivalent service, confirm no re-`buildDraft` call exists on the Run side.
-- If Run is found to re-build (regression risk), escalate: add a U7 unit to pin the build-once contract. **Default U7 path: pass the persisted draft's seed forward** via the existing draft persistence (cheaper, no Run refactor, minimal scope expansion — Run's existing `getCurrentDraft()` read can return the seed alongside the draft, and any rebuild that occurs reuses that seed for byte-identical output). Refactoring Run to read the draft directly (skipping any rebuild path entirely) is the fallback only if the seed-forward path proves incompatible with an existing call site.
+**Approach (per PD-2 (A) build-on-completable):**
+- Today's `handleConfirm` at `SetupScreen.tsx:142-213` builds the draft, persists it, then navigates. PD-2 (A) does NOT introduce eager-build; instead, build the draft once Setup is **completable** (all required choices made — the existing `isComplete` predicate at `SetupScreen.tsx:129-130` already names this state) and display the assembled total in the existing Setup chrome immediately. On Build commit, persist that already-built draft (no rebuild). Setup navigates to `routes.safety()` as today.
+- One build per completable state per Setup mount — no eager-on-every-toggle, no debounce, no seed-stability-across-rebuilds contract, no ARIA live-region (the number is static once shown). Removes the four U5 concerns the doc-review surfaced in one move.
+- Display the assembled total via a `Callout tone="info"` or compact static text in the existing layout above the Build button, NOT next to the "Time" section (the assembled duration is the composed consequence of Focus + Time + Players, so placement near commit beats placement near Time).
+- Verify Run consumes the persisted draft only: read the controller calling `getCurrentDraft` or the equivalent service, confirm no re-`buildDraft` call exists on the Run side. If Run is found to re-build (regression risk), escalate: add a U7 unit to pin the build-once contract. **Default U7 path: pass the persisted draft seed forward** via the existing draft persistence (cheaper, no Run refactor, minimal scope expansion — `getCurrentDraft()` can return the seed alongside the draft, and any rebuild that occurs reuses that seed for byte-identical output). Refactoring Run to read the draft directly is the fallback if the seed-forward path proves incompatible.
 
-**Execution note:** Verification-first — start by reading the Run side to confirm R8 is already satisfied. The behavior is read-only verification; if it holds, U5 is a UI-only change. If it doesn't hold, U5 expands or U7 is added.
+**Execution note:** Verification-first — start by reading the Run side to confirm R8 is already satisfied (build-on-completable still depends on Run consuming the persisted draft as-stored). Then test-first for the new UI surface: write the `SetupScreen.test.tsx` cases for build-once-on-completable + display-matches-persisted + correct-update-on-state-change before adding the production code.
 
 **Patterns to follow:**
 - Existing `incompleteHint` rendering pattern at `SetupScreen.tsx:131-138` and footer at `:309-321` is the model for the inline duration display (existing chrome, visible at commit, no extra disclosure step).
