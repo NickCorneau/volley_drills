@@ -340,6 +340,13 @@
       "canonical_for": "point-in-time UX baseline of the v0b Starter Loop after the 2026-04-22 partner-walkthrough polish and the 2026-04-23 walkthrough-closeout polish; classifies findings as editorial-class, founder-session-trigger-gated Tier 1b, D91-field, or decision-blocked; does not unlock Tier 1b and does not modify D86, D91, D119, D125, D129, D130, or D132"
     },
     {
+      "id": "2026-05-24-agent-e2e-design-critique",
+      "path": "docs/design/reviews/2026-05-24-agent-e2e-design-critique.md",
+      "type": "design-review",
+      "status": "active",
+      "canonical_for": "point-in-time full e2e design + WCAG 2.1 AA critique of the v0b Starter Loop run against the production build (vite preview, 390x844); confirms loop is calm, accessible (axe 8/8), and on-voice; surfaces one AA contrast defect (selected warning-tone chips ~3.95:1), two deferred outdoor-readability gaps (timer size, active-run density, held by D127/D91), and canon-vs-code drift where brand-ux-guidelines.md is stale vs shipped type scale, selected-chip treatment, 3-way RPE, and verdict/CTA copy; does not unlock Tier 1b, does not edit canonical design docs, and does not modify D86, D91, D125, D127, D129, D130, or D132"
+    },
+    {
       "id": "m001-candidate-false-audit-2026-04-28",
       "path": "docs/reviews/2026-04-28-m001-candidate-false-audit.md",
       "type": "review",
@@ -1522,6 +1529,13 @@
       "canonical_for": "Per-drill audit of every M001-candidate drill (26 drills, ~48 variants) against the strengthened first-time-runnability rubric (rules 8-14 in .cursor/rules/courtside-copy.mdc + rule-2/3/5/7 extensions). Mechanical lint results from drillCopyRegressions.test.ts plus reviewer-checklist assessment (R10 cue->action coupling, R11 5-question logistics, R12 spatial POV anchor, R13 triple-only readability, R15 cue ordering). Classification: pass / repair / rewrite with priority P0-P3. 5 P0 drills (d07, d10, d22, d28, d33 — today's session-affected). 46 mechanical-lint failures captured pre-sweep as the empirical input to the U5 drill-copy sweep."
     },
     {
+      "id": "2026-05-24-multi-skill-app-audit",
+      "path": "docs/reviews/2026-05-24-multi-skill-app-audit.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "point-in-time multi-skill audit of the running v0b Starter Loop (design-system, accessibility-review, design-critique, ux-copy, design-handoff, user-research, research-synthesis); complements 2026-05-24-agent-e2e-design-critique.md with net-new findings: a real React setState-in-render bug in Expander (fixed), design-system token drift (dead radius tokens, brand color not tokenized, touch-target sprawl), a copy-fix reconciliation against courtside-copy.mdc rule 4, an as-built primitive handoff spec, and a research-method + synthesis read of the founder-use validation; A1/A5/A6 shipped + verified, design-system token work left as recommendations; does not unlock Tier 1b or modify D86, D91, D101, D124, D127, D130, D132, or D135"
+    },
+    {
       "id": "drill-first-time-runnability-system-2026-05-10",
       "path": "docs/solutions/2026-05-10-drill-first-time-runnability-system.md",
       "type": "solution",
@@ -1949,6 +1963,10 @@
     {
       "path": "docs/reviews/2026-05-10-drill-first-time-runnability-assessment.md",
       "focus": "per-drill assessment of every M001-candidate drill against the strengthened first-time-runnability rubric (rules 8-14 + rule-2/3/5/7 extensions). 26 drills audited; 2 pass, 21 repair, 3 rewrite. P0: d07, d10, d22, d28, d33 (today's session-affected). 46 mechanical-lint failures captured as empirical input to U5 sweep. Drives the priority-ordered copy edits in app/src/data/drills.ts"
+    },
+    {
+      "path": "docs/reviews/2026-05-24-multi-skill-app-audit.md",
+      "focus": "consolidated audit applying 7 design+research skills to the running v0b app, code, docs, and design. Net-new over the same-day e2e critique: Expander setState-in-render bug (fixed), design-system token drift (unused --radius-* tokens, untokenized brand orange #E8732A vs accent #b45309, 44/48/54/56/64px touch-target sprawl), copy fix at SkillLevelScreen.tsx:159 reconciled against courtside-copy.mdc rule 4 (period not em-dash), as-built Button/ToggleChip/ScreenShell handoff spec + token table, and a research-method + ledger-synthesis read (solo 1/7, set 0/3, 3+ player content gap as dominant signal). Shipped fixes: A1 Expander, A5 copy, A6 selected-warning-chip AA contrast via new --color-warning-strong token"
     },
     {
       "path": "docs/solutions/2026-05-10-drill-first-time-runnability-system.md",
