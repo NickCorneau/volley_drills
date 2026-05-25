@@ -6,7 +6,7 @@ stage: validation
 type: review
 summary: "Consolidated, agent-driven audit of the running v0b Starter Loop and its code/docs/design, applying seven design + research skills (design-system, accessibility-review, design-critique, ux-copy, design-handoff, user-research, research-synthesis). Net-new findings over the same-day 2026-05-24-agent-e2e-design-critique: one real React correctness bug (Expander setState-in-render), design-system token drift (dead radius tokens, brand color not tokenized, touch-target sprawl), a copy-fix conflict with canon, an as-built primitive handoff spec, and a research-method + synthesis read of the founder-use validation."
 authority: "Point-in-time review. Not source of truth on its own. Cites docs/design/reviews/2026-05-24-agent-e2e-design-critique.md (design + WCAG), .cursor/rules/courtside-copy.mdc (copy), docs/research/founder-use-ledger.md (validation), and the app/src primitives as governing references."
-last_updated: 2026-05-24
+last_updated: 2026-05-25
 depends_on:
   - docs/design/reviews/2026-05-24-agent-e2e-design-critique.md
   - .cursor/rules/courtside-copy.mdc
@@ -38,14 +38,14 @@ decision_refs:
 
 ## Top findings — ranked by leverage
 
-Ordered by **leverage = value × fix clarity** (cleanest, highest-impact first), not by raw severity. A high-severity finding with a sprawling or decision-blocked fix ranks below a medium-severity one with a clean, confident fix. Status: ✅ shipped this pass · ⬜ open · 🔭 strategic (separate track, not a quick fix). IDs are stable (A1–A7) and match the per-skill sections below.
+Ordered by **leverage = value × fix clarity** (cleanest, highest-impact first), not by raw severity. A high-severity finding with a sprawling or decision-blocked fix ranks below a medium-severity one with a clean, confident fix. Status: ✅ shipped this pass · ⬜ open · 🔭 strategic (separate track, not a quick fix). IDs are stable: A1–A7 for net-new audit findings; `n1`/`n2` for accessibility findings that complement the e2e critique. All match the per-skill sections below.
 
 | # | ID | Finding | Value × Fix → leverage | Status | Pointer |
 | --- | --- | --- | --- | --- | --- |
 | 1 | A1 | **`Expander` setState-in-render** — `onOpenChange` ran inside the `setOpen` updater, mutating `SafetyCheckScreen` during render; spammed a React console error on every Safety open. | High value · trivial fix (one function) → **top** | ✅ Done | `app/src/components/ui/Expander.tsx:50-56` |
 | 2 | A6 | **Selected `warning` chips failed AA** (#dc2626 on #fee2e2 ≈ 3.95:1) — pain **Yes**, **Today**, incomplete-reason chips when selected. | High value (AA) · trivial fix (1 token + 1 line) | ✅ Done | `app/src/components/ui/ToggleChip.tsx:42` |
 | 3 | n1 | **axe scans only the *unselected* chip state**, so the A6 contrast class is never exercised in CI — add a "select-then-scan" assertion to lock the fix. | Med-high value (regression guard) · trivial fix (1 test) → **top remaining** | ⬜ Open | `app/e2e/accessibility.spec.ts` |
-| 4 | A2 | **Radius tokens are dead.** `--radius-card` / `--radius-button` are referenced **zero** times; ~20 source call-sites hardcode `rounded-[12px]`/`[16px]` plus one-offs `[14px]` `[8px]` `[2px]`. | Med value · clean mechanical sweep + 1 decision (wire or delete) | ⬜ Open | `app/src/index.css:103-104` |
+| 4 | A2 | **Radius tokens are dead.** `--radius-card` / `--radius-button` are referenced **zero** times; ~25 source call-sites hardcode 5 distinct radius arbitraries (`[12px]`, `[16px]`, `[14px]`, `[8px]`, `[2px]`). | Med value · clean mechanical sweep + 1 decision (wire or delete) | ⬜ Open | `app/src/index.css:103-104` |
 | 5 | A3 | **Brand color untokenized and ≠ accent.** Brandmark fills `#E8732A`; the accent token is `#b45309`. Two oranges, one hardcoded in an SVG. | Med value · needs 1 design decision (which orange), then trivial | ⬜ Open | `Brandmark.tsx:37` vs `index.css:1` |
 | 6 | A5 | **ASCII hyphen as a sentence dash** in onboarding copy; the e2e critique's em-dash fix would itself violate `courtside-copy.mdc` rule 4. Correct fix is a period (the override also duplicated the already-correct default). | Low value · trivial fix | ✅ Done | `app/src/screens/SkillLevelScreen.tsx:159` |
 | 7 | A4 | **Touch-target sizes sprawl** across 44 / 48 / 54 / 56 / 64 px as arbitrary `min-h-[Npx]`, no scale — and the README claims a "54–60 px" standard. | Low-med value · medium sweep (add scale + migrate) | ⬜ Open | `Button.tsx`, `ToggleChip.tsx`, `BackButton.tsx`, `SkillLevelPicker.tsx` |
@@ -59,7 +59,7 @@ The three lowest-risk, highest-confidence defects were fixed and verified the sa
 - **A5** — `SkillLevelScreen.tsx`: the redundant hyphenated `unsureSubtext` override removed; it now falls back to the period-correct `DEFAULT_UNSURE_SUBTEXT`.
 - **A6** — new `--color-warning-strong` (#b91c1c, ≈5.3:1 on `warning-surface`) token; selected `warning` ToggleChip text uses it, clearing WCAG AA.
 
-Left as recommendations (need design/founder judgment or a broader sweep): **A2** radius-token decision, **A3** brand-color tokenization, **A4** touch-target scale, and the **A6 axe "select-then-scan" test** to guard the contrast regression class.
+Left as recommendations (need design/founder judgment or a broader sweep): **A2** radius-token decision, **A3** brand-color tokenization, **A4** touch-target scale, and **`n1`** (the A6 axe "select-then-scan" test) to guard the contrast regression class.
 
 ---
 
@@ -73,7 +73,7 @@ Left as recommendations (need design/founder judgment or a broader sweep): **A2*
 | --- | --- | --- |
 | Color | 11 semantic tokens (accent, bg, text, success, warning, surfaces) | 1 hardcoded brand pair in `Brandmark.tsx` (`#E8732A`, `#FFF8F0`), not tokenized and not equal to `--color-accent` (A3) |
 | Typography | `--font-sans`, `--font-mono`, reserved `--text-body*` | `--text-body*` deliberately unused (D127 scaffolding — **intentional**, leave it) |
-| Radius | `--radius-card: 12px`, `--radius-button: 16px` | **0 references**; ~25 hardcoded `rounded-[…]` arbitraries across 4 distinct values (A2) |
+| Radius | `--radius-card: 12px`, `--radius-button: 16px` | **0 references**; ~25 hardcoded `rounded-[…]` arbitraries across 5 distinct values (A2) |
 | Spacing / size | Tailwind scale (gap/p/px) | Touch targets are arbitrary `min-h-[…]`, 5 distinct values, no scale (A4) |
 
 ### Naming consistency
