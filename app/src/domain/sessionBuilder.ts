@@ -10,6 +10,7 @@ import type {
   SetupContext,
 } from '../model'
 import {
+  candidateCanCarryTargetDuration,
   pickForSlot,
   type CandidateVariant,
 } from './sessionAssembly/candidates'
@@ -29,7 +30,7 @@ export {
 } from './sessionAssembly/swapAlternatives'
 export { deriveBlockRationale } from './sessionAssembly/rationale'
 
-export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 7
+export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 8
 
 /**
  * Optional inputs that scope build-time drill substitution.
@@ -228,47 +229,40 @@ function buildDraftResult(
     usedDrillIds.add(selected.pick.drill.id)
   }
 
-  const blocks: DraftBlock[] = []
-  const blockIdByLayoutIndex = new Map<number, string>()
-  let blockIndex = 0
-  const selectedDurationTotal = [...selectedByLayoutIndex.keys()].reduce(
-    (sum, index) => sum + durations[index],
-    0,
-  )
-  const redistributedMinutes = effectiveContext.timeProfile - selectedDurationTotal
-  const redistributionIndex =
-    redistributedMinutes > 0
-      ? ([...selectedByLayoutIndex.keys()].find((index) => layout[index].type === 'main_skill') ??
-        [...selectedByLayoutIndex.keys()].at(-1))
-      : undefined
-
-  if (redistributionIndex !== undefined) {
-    const slot = layout[redistributionIndex]
-    const selected = selectedByLayoutIndex.get(redistributionIndex)
-    if (slot.type === 'main_skill' && selected) {
-      const plannedDurationMinutes = durations[redistributionIndex] + redistributedMinutes
-      // Source-backed reroute triggers (D01 default-leaf duration-fit, plus the
-      // D47/D48 -> D49, D46 -> D50, D31 -> D51 source-backed activations) are
-      // declared as data in `sessionAssembly/sourceBackedReroutes.ts`. Adding
-      // a fifth source-backed activation is one entry in that registry.
-      if (
-        shouldRerouteForSourceBackedSibling(
-          slot,
-          effectiveContext,
-          selected.pick,
-          plannedDurationMinutes,
-        )
-      ) {
-        const rerouted = pickForSlot(slot, effectiveContext, usedDrillIds, random, {
-          playerLevel: options?.playerLevel,
-          allowUsedFallback: false,
-          targetDurationMinutes: plannedDurationMinutes,
-          preferTargetDurationFit: true,
-        })
-        if (rerouted) {
-          selectedByLayoutIndex.set(redistributionIndex, { pick: rerouted })
-        }
-      }
+  // Source-backed reroute on base allocation (per PD-1 (A) of the
+  // 2026-05-24 session-duration-honesty plan): for each main_skill
+  // slot, if the picked variant cannot honestly carry the base
+  // allocation, consult the source-backed reroute registry and re-pick
+  // with `preferTargetDurationFit: true`. The legacy redistribution-
+  // driven trigger (`plannedDuration = base + redistributedMinutes`)
+  // was retired together with the redistribution path itself; the new
+  // trigger fires when the base allocation alone exceeds the picked
+  // variant's envelope, preserving R11/R12 intent under honest
+  // durations.
+  for (const index of selectedByLayoutIndex.keys()) {
+    const slot = layout[index]
+    if (slot.type !== 'main_skill') continue
+    const selected = selectedByLayoutIndex.get(index)
+    if (!selected) continue
+    if (candidateCanCarryTargetDuration(selected.pick, durations[index])) continue
+    if (
+      !shouldRerouteForSourceBackedSibling(
+        slot,
+        effectiveContext,
+        selected.pick,
+        durations[index],
+      )
+    ) {
+      continue
+    }
+    const rerouted = pickForSlot(slot, effectiveContext, usedDrillIds, random, {
+      playerLevel: options?.playerLevel,
+      allowUsedFallback: false,
+      targetDurationMinutes: durations[index],
+      preferTargetDurationFit: true,
+    })
+    if (rerouted) {
+      selectedByLayoutIndex.set(index, { pick: rerouted })
     }
   }
 
@@ -276,16 +270,18 @@ function buildDraftResult(
   // segment sum (per `docs/plans/2026-05-04-002-feat-warmup-wrap-segment-snap-plan.md`
   // and the 2026-05-13 wiring fix). Freed minutes redistribute into
   // focus-priority work slots within their authored caps; uplift never
-  // re-inflates the snapped warmup/wrap. Runs AFTER source-backed
-  // reroute so the reroute decision sees the legacy redistribution
-  // semantics it has always seen; runs BEFORE block-write so the
-  // runner's per-block timer matches the authored segment timing.
+  // re-inflates the snapped warmup/wrap. Runs AFTER the base-allocation
+  // source-backed reroute so the reroute decision sees the planned
+  // (pre-snap) durations, then snap composes on the final selection.
   //
-  // The legacy `redistributedMinutes` patch below (skipped-optional-slot
-  // surplus → `redistributionIndex` block) is preserved on top of the
-  // snap: both mechanisms compose, and the assembly-trace continues to
-  // report pre-snap `allocatedMinutes` and the legacy redistribution
-  // shape so `generatedPlanDiagnostics` keeps its existing read paths.
+  // The R1 (2026-05-24) duration-honesty fix retired the legacy
+  // `redistributedMinutes`-onto-main_skill uplift: dropped optional-slot
+  // minutes are no longer redistributed onto main_skill. Block durations
+  // come straight from `snapWarmupWrapDurations` and never exceed the
+  // authored slot/variant caps.
+  const blocks: DraftBlock[] = []
+  const blockIdByLayoutIndex = new Map<number, string>()
+  let blockIndex = 0
   const picks: (CandidateVariant | undefined)[] = layout.map(
     (_slot, index) => selectedByLayoutIndex.get(index)?.pick,
   )
@@ -312,7 +308,7 @@ function buildDraftResult(
       variantId: pick.variant.id,
       drillName: pick.drill.name,
       shortName: pick.drill.shortName,
-      durationMinutes: snappedDurations[i] + (i === redistributionIndex ? redistributedMinutes : 0),
+      durationMinutes: snappedDurations[i],
       coachingCue:
         pick.variant.coachingCues.length > 0
           ? pick.variant.coachingCues.join(' · ')
@@ -356,8 +352,13 @@ function buildDraftResult(
         .map((slot, index) => ({ slot, index }))
         .filter(({ slot, index }) => !slot.required && !selectedByLayoutIndex.has(index))
         .map(({ index }) => index),
-      redistributedMinutes,
-      redistributionLayoutIndex: redistributionIndex,
+      // R1 (2026-05-24): redistribution path retired. The trace fields
+      // are preserved at their post-removal values (0 / undefined) so
+      // `generatedPlanDiagnostics` keeps its existing read paths until
+      // U4 replaces `optional_slot_redistribution` with the new
+      // `slot_dropped` + `under_named_profile_duration` findings.
+      redistributedMinutes: 0,
+      redistributionLayoutIndex: undefined,
     },
   }
 }

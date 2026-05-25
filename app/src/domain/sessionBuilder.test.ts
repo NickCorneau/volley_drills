@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { selectArchetype } from '../data/archetypes'
 import { DRILLS } from '../data/drills'
 import {
   buildDraft,
@@ -20,6 +21,125 @@ const variantById = new Map(
 )
 
 describe('sessionBuilder', () => {
+  /**
+   * 2026-05-24 duration-honesty Stage 1 — U1 (R1, R2, R3, R15).
+   *
+   * R1 retires the legacy `redistributedMinutes`-onto-main_skill path.
+   * Block durations come straight from `snapWarmupWrapDurations` and
+   * never exceed the authored slot/variant caps; total assembled
+   * duration equals the sum of selected blocks at their snapped
+   * durations. Algorithm version bumps `v7 → v8`.
+   */
+  describe('R1+R2+R3 duration-honesty invariants', () => {
+    const harnessContexts: Array<[string, SetupContext]> = [
+      [
+        'pair_open 25 Recommended',
+        {
+          playerMode: 'pair',
+          timeProfile: 25,
+          netAvailable: false,
+          wallAvailable: false,
+        },
+      ],
+      [
+        'pair_net 40 serve beginner (the 24-min-block reproducer scenario)',
+        {
+          playerMode: 'pair',
+          timeProfile: 40,
+          netAvailable: true,
+          wallAvailable: false,
+          sessionFocus: 'serve',
+          playerLevel: 'beginner',
+        },
+      ],
+      [
+        'solo_open 40 advanced setting',
+        {
+          playerMode: 'solo',
+          timeProfile: 40,
+          netAvailable: false,
+          wallAvailable: false,
+          sessionFocus: 'set',
+          playerLevel: 'advanced',
+        },
+      ],
+    ]
+
+    it.each(harnessContexts)(
+      '%s: no main_skill block exceeds its authored slot max under any seed',
+      (label, context) => {
+        const archetype = selectArchetype(context)
+        expect(archetype, `${label}: archetype missing`).not.toBeNull()
+        const layout = archetype!.layouts[context.timeProfile]!
+        const mainSkillSlot = layout.find((slot) => slot.type === 'main_skill')
+        expect(mainSkillSlot, `${label}: layout missing main_skill slot`).toBeDefined()
+        const mainSkillSlotMax = mainSkillSlot!.durationMaxMinutes
+
+        for (let i = 0; i < 40; i++) {
+          const draft = buildDraft(context, { assemblySeed: `${label}-r1r2-cap-${i}` })
+          if (!draft) continue
+          const main = draft.blocks.find((b) => b.type === 'main_skill')
+          if (!main) continue
+          expect(
+            main.durationMinutes,
+            `${label} seed-${i}: main_skill at ${main.durationMinutes} min exceeds slot max ${mainSkillSlotMax}`,
+          ).toBeLessThanOrEqual(mainSkillSlotMax)
+        }
+      },
+    )
+
+    it.each(harnessContexts)(
+      '%s: total session duration equals the sum of selected blocks at their snapped durations',
+      (label, context) => {
+        for (let i = 0; i < 16; i++) {
+          const draft = buildDraft(context, { assemblySeed: `${label}-r3-sum-${i}` })
+          if (!draft) continue
+          const total = draft.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
+          // R3: per-block durations are explicit and the total is just
+          // their sum. No silent inflation past `timeProfile` either —
+          // R1 keeps the total at or below the named profile.
+          expect(total, `${label} seed-${i}: total over named profile`).toBeLessThanOrEqual(
+            context.timeProfile,
+          )
+          // R1's removal of the redistribution dump means the total can
+          // legitimately fall short of the named profile when optional
+          // slots drop and the fallback in U2 can't recover. Pin a
+          // sane floor so a future regression that produces empty
+          // sessions still fails CI.
+          expect(total, `${label} seed-${i}: total fell below 50% of profile`).toBeGreaterThanOrEqual(
+            Math.floor(context.timeProfile * 0.5),
+          )
+        }
+      },
+    )
+
+    it('algorithm version is 8 (R15: post-2026-05-24 duration-honesty bump)', () => {
+      const draft = buildDraft({
+        playerMode: 'pair',
+        timeProfile: 25,
+        netAvailable: false,
+        wallAvailable: false,
+      })
+      expect(draft?.assemblyAlgorithmVersion).toBe(8)
+    })
+
+    it('build is deterministic per seed under R1 (R4)', () => {
+      const context: SetupContext = {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: true,
+        wallAvailable: false,
+        sessionFocus: 'serve',
+        playerLevel: 'beginner',
+      }
+      const first = buildDraft(context, { assemblySeed: 'r4-determinism-after-r1' })
+      const second = buildDraft(context, { assemblySeed: 'r4-determinism-after-r1' })
+      expect(first?.blocks.map((b) => [b.drillId, b.variantId, b.durationMinutes])).toEqual(
+        second?.blocks.map((b) => [b.drillId, b.variantId, b.durationMinutes]),
+      )
+    })
+  })
+
   it('pins fixed-seed session assembly output while algorithm version stays stable', () => {
     const draft = buildDraft(
       {
@@ -31,8 +151,14 @@ describe('sessionBuilder', () => {
       { assemblySeed: 'batch3-golden-pair-open-25' },
     )
 
-    expect(draft?.assemblyAlgorithmVersion).toBe(7)
-    // 2026-05-13: segment snap now wired into `buildDraft`, so the
+    // 2026-05-24 (R15): algorithm version bumped 7 → 8 alongside the
+    // removal of the legacy `redistributedMinutes`-onto-main_skill path
+    // (R1). Block shape is otherwise unchanged for this Recommended
+    // (focus-untouched) pair-open-25 fixture — every optional slot
+    // fills, so there is no surplus to redistribute and the post-R1
+    // engine produces byte-identical durations.
+    expect(draft?.assemblyAlgorithmVersion).toBe(8)
+    // 2026-05-13: segment snap is wired into `buildDraft`, so the
     // pair-open-25 wrap (d26-solo, natural 3 min) snaps from 4 → 3
     // and the freed minute redistributes into technique (6 → 7)
     // under the default priority. Total stays at 25.
@@ -249,10 +375,15 @@ describe('sessionBuilder', () => {
     expect(targeted?.variant.courtsideInstructions).toContain('rounds')
   })
 
-  it('reroutes redistributed advanced setting sessions to D49 when D47 cannot carry the duration', () => {
+  it('reroutes advanced setting main_skill to D49 when the base allocation exceeds D47/D48 envelope', () => {
+    // 2026-05-24 (R1+R11+PD-1(A)): legacy `redistributedMinutes` path
+    // retired. The reroute now fires on base-allocation-over-envelope.
+    // `timeProfile: 40` raises main_skill base allocation to 8-10 min,
+    // which exceeds D47/D48's 7-min cap and triggers the registry
+    // entry `d47-d48-to-d49` under the rewired trigger.
     const context: SetupContext = {
       playerMode: 'solo',
-      timeProfile: 25,
+      timeProfile: 40,
       netAvailable: false,
       wallAvailable: false,
       sessionFocus: 'set',
@@ -262,11 +393,11 @@ describe('sessionBuilder', () => {
     let d49Result: ReturnType<typeof buildDraftWithAssemblyTrace> | undefined
     for (let i = 0; i < 500 && d49Result === undefined; i++) {
       const result = buildDraftWithAssemblyTrace(context, {
-        assemblySeed: `d49-redistribution-${i}`,
+        assemblySeed: `d49-base-allocation-${i}`,
         playerLevel: 'advanced',
       })
       const mainSkill = result?.draft.blocks.find((block) => block.type === 'main_skill')
-      if (mainSkill?.drillId === 'd49' && mainSkill.durationMinutes > 9) {
+      if (mainSkill?.drillId === 'd49') {
         d49Result = result
       }
     }
@@ -274,9 +405,11 @@ describe('sessionBuilder', () => {
     expect(d49Result).toBeDefined()
     const mainSkill = d49Result!.draft.blocks.find((block) => block.type === 'main_skill')
     expect(mainSkill?.variantId).toBe('d49-solo-open')
+    // Block duration never exceeds the authored slot/variant caps now
+    // that R1 removed redistribution. Allocations land within the
+    // archetype's main_skill slot range (8-10 min on the 40-profile).
     expect(mainSkill?.durationMinutes).toBeLessThanOrEqual(14)
     expect(mainSkill?.courtsideInstructions).toContain('rounds')
-    expect(d49Result!.assemblyTrace.redistributionLayoutIndex).toBeDefined()
   })
 
   it('prefers D50 for over-cap advanced pair-open passing main-skill allocations', () => {
@@ -360,10 +493,14 @@ describe('sessionBuilder', () => {
     expect(targeted?.variant.workload.durationMaxMinutes).toBeGreaterThanOrEqual(12)
   })
 
-  it('reroutes redistributed advanced pair-open passing sessions to D50 when D46 cannot carry the duration', () => {
+  it('reroutes advanced pair-open passing main_skill to D50 when the base allocation exceeds D46 envelope', () => {
+    // 2026-05-24 (R1+R11+PD-1(A)): same rewire as the D49 test above —
+    // `timeProfile: 40` lifts main_skill base allocation past D46's
+    // 8-min cap so the `d46-to-d50` registry entry fires under the
+    // base-allocation trigger.
     const context: SetupContext = {
       playerMode: 'pair',
-      timeProfile: 25,
+      timeProfile: 40,
       netAvailable: false,
       wallAvailable: false,
       sessionFocus: 'pass',
@@ -373,11 +510,11 @@ describe('sessionBuilder', () => {
     let d50Result: ReturnType<typeof buildDraftWithAssemblyTrace> | undefined
     for (let i = 0; i < 500 && d50Result === undefined; i++) {
       const result = buildDraftWithAssemblyTrace(context, {
-        assemblySeed: `d50-redistribution-pair-${i}`,
+        assemblySeed: `d50-base-allocation-pair-${i}`,
         playerLevel: 'advanced',
       })
       const mainSkill = result?.draft.blocks.find((block) => block.type === 'main_skill')
-      if (mainSkill?.drillId === 'd50' && mainSkill.durationMinutes > 9) {
+      if (mainSkill?.drillId === 'd50') {
         d50Result = result
       }
     }
@@ -387,7 +524,6 @@ describe('sessionBuilder', () => {
     expect(mainSkill?.variantId).toBe('d50-pair-open')
     expect(mainSkill?.durationMinutes).toBeLessThanOrEqual(14)
     expect(mainSkill?.courtsideInstructions).toContain('rounds')
-    expect(d50Result!.assemblyTrace.redistributionLayoutIndex).toBeDefined()
   })
 
   it('does not reroute advanced setting sessions to D50 (focus gate)', () => {
@@ -519,10 +655,14 @@ describe('sessionBuilder', () => {
     expect(targeted?.variant.workload.durationMaxMinutes).toBeGreaterThanOrEqual(12)
   })
 
-  it('reroutes redistributed beginner solo-open serving sessions to D51 when D31 cannot carry the duration', () => {
+  it('reroutes beginner solo-open serving main_skill to D51 when the base allocation exceeds D31 envelope', () => {
+    // 2026-05-24 (R1+R11+PD-1(A)): same rewire as the D49/D50 tests
+    // above — `timeProfile: 40` lifts main_skill base allocation past
+    // D31's 8-min cap so the `d31-to-d51` registry entry fires under
+    // the base-allocation trigger.
     const context: SetupContext = {
       playerMode: 'solo',
-      timeProfile: 25,
+      timeProfile: 40,
       netAvailable: false,
       wallAvailable: false,
       sessionFocus: 'serve',
@@ -532,11 +672,11 @@ describe('sessionBuilder', () => {
     let d51Result: ReturnType<typeof buildDraftWithAssemblyTrace> | undefined
     for (let i = 0; i < 500 && d51Result === undefined; i++) {
       const result = buildDraftWithAssemblyTrace(context, {
-        assemblySeed: `d51-redistribution-solo-${i}`,
+        assemblySeed: `d51-base-allocation-solo-${i}`,
         playerLevel: 'beginner',
       })
       const mainSkill = result?.draft.blocks.find((block) => block.type === 'main_skill')
-      if (mainSkill?.drillId === 'd51' && mainSkill.durationMinutes > 9) {
+      if (mainSkill?.drillId === 'd51') {
         d51Result = result
       }
     }
@@ -545,7 +685,6 @@ describe('sessionBuilder', () => {
     const mainSkill = d51Result!.draft.blocks.find((block) => block.type === 'main_skill')
     expect(mainSkill?.variantId).toBe('d51-solo-open')
     expect(mainSkill?.durationMinutes).toBeLessThanOrEqual(14)
-    expect(d51Result!.assemblyTrace.redistributionLayoutIndex).toBeDefined()
   })
 
   it('does not reroute beginner passing sessions to D51 (focus gate)', () => {
@@ -1646,7 +1785,7 @@ describe('sessionBuilder', () => {
     expect(first).not.toBeNull()
     expect(second).not.toBeNull()
     expect(first?.assemblySeed).toBe('seed-replay')
-    expect(first?.assemblyAlgorithmVersion).toBe(7)
+    expect(first?.assemblyAlgorithmVersion).toBe(8)
     expect(second?.blocks.map((block) => [block.drillId, block.variantId])).toEqual(
       first?.blocks.map((block) => [block.drillId, block.variantId]),
     )
