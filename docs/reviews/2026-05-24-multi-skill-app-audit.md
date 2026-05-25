@@ -142,7 +142,9 @@ Documenting the shipped primitives so the design system is captured for engineer
 | `--color-success` / `-warning` | `#047857` / `#dc2626` | saved-state / danger + warning chip |
 | `--color-info-surface` / `-warning-surface` | `#fef3e8` / `#fee2e2` | selected-accent chip fill / danger + selected-warning fill |
 | `--font-sans` / `-mono` | Inter Variable / JetBrains Mono Variable | body / timer + counters |
-| `--radius-card` / `-button` | `12px` / `16px` | **defined but unused — see A2** |
+| `--radius-card` / `-button` | `12px` / `16px` | **Defined but unwired — pending A2 decision; not part of the active system** |
+
+> Rows marked *defined but unwired* are not part of the active as-built system; they reflect tokens authored ahead of consumers and are pending the A2 decision (see leverage table).
 
 ### Button (`components/ui/Button.tsx`)
 
