@@ -347,6 +347,13 @@
       "canonical_for": "point-in-time full e2e design + WCAG 2.1 AA critique of the v0b Starter Loop run against the production build (vite preview, 390x844); confirms loop is calm, accessible (axe 8/8), and on-voice; surfaces one AA contrast defect (selected warning-tone chips ~3.95:1), two deferred outdoor-readability gaps (timer size, active-run density, held by D127/D91), and canon-vs-code drift where brand-ux-guidelines.md is stale vs shipped type scale, selected-chip treatment, 3-way RPE, and verdict/CTA copy; does not unlock Tier 1b, does not edit canonical design docs, and does not modify D86, D91, D125, D127, D129, D130, or D132"
     },
     {
+      "id": "2026-05-25-h1-h2-experiment-revaluation",
+      "path": "docs/design/reviews/2026-05-25-h1-h2-experiment-revaluation.md",
+      "type": "design-review",
+      "status": "active",
+      "canonical_for": "viewport-bound re-evaluation of the H1 (BlockTimer 56 -> 72 px) and H2 (segmented-drill active-run body density) experiments shipped on 2026-05-25 as plan U6 / U7 follow-ups to the 2026-05-24 e2e design critique; concludes keep both experiments through the D91 field run; D91 retention gate remains the durable keep / tune-further / revert authority; does not unlock Tier 1b and does not modify D86, D91, D125, D127, D129, D130, or D132"
+    },
+    {
       "id": "m001-candidate-false-audit-2026-04-28",
       "path": "docs/reviews/2026-04-28-m001-candidate-false-audit.md",
       "type": "review",

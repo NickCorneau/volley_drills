@@ -6,7 +6,7 @@ stage: validation
 type: index
 summary: "Pointer-oriented index for Volleycraft design and UX work: brand guidelines, visual direction, outdoor UI defaults, and dated UI/UX review passes."
 authority: discovery surface for design and UX guidelines and review history
-last_updated: 2026-05-24
+last_updated: 2026-05-25
 depends_on:
   - docs/catalog.json
   - docs/research/brand-ux-guidelines.md
@@ -71,6 +71,7 @@ Dated design / UX review passes. Each is a point-in-time capture, not a source o
 | 2026-04-22 | `docs/research/partner-walkthrough-results/2026-04-22-manual-ui-design-review.md` | Full cold-start → review → home loop | Browser at iPhone dimensions, before walkthrough-closeout polish |
 | 2026-04-26 | `docs/design/reviews/2026-04-26-agent-ux-review.md` | Deep UX pass after walkthrough-closeout polish | Browser at iPhone dimensions, post-2026-04-23 polish |
 | 2026-05-24 | `docs/design/reviews/2026-05-24-agent-e2e-design-critique.md` | Full e2e design + WCAG 2.1 AA critique | Production build (`vite preview`) at 390×844, Playwright capture + axe-core |
+| 2026-05-25 | `docs/design/reviews/2026-05-25-h1-h2-experiment-revaluation.md` | H1 / H2 experiment re-evaluation | Viewport-bound code-review assessment of the 2026-05-25 plan U6 / U7 follow-ups; D91 field run remains the durable keep/revert authority |
 
 ## Related Surfaces
 
