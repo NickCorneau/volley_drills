@@ -70,3 +70,35 @@ function readDate(): string {
 
 export const BUILD_VERSION: string = readVersion()
 export const BUILD_DATE: string = readDate()
+
+/**
+ * 2026-05-25 audit follow-up (L3): the raw `git describe` slug can grow
+ * verbose for inter-tag commits — e.g.
+ * `m001-validation-week5-catchup-2026-05-23-1-gbc6831d` — which reads
+ * as an internal leak to a stranger cohort while still being useful in
+ * founder-use / D91 triage. `formatBuildVersion(raw, mode)` returns the
+ * raw value for dev (preserves triage telemetry-by-hand) and a short
+ * form for prod. The short form prefers the trailing `g<7-char-sha>`
+ * segment when present (the universal disambiguator for inter-tag
+ * commits); when the slug is a clean tag (no `-N-g<sha>` suffix) it
+ * passes through unchanged so semver-like tags like `v0b-alpha.16`
+ * stay legible. A `-dirty` suffix is preserved across the truncation
+ * because it's load-bearing for tester triage ("you're on a dirty
+ * build, that explains the inconsistency").
+ *
+ * Pure helper; unit-tested in `__tests__/buildInfo.test.ts`.
+ */
+export function formatBuildVersion(raw: string, mode: 'dev' | 'prod'): string {
+  if (mode === 'dev') return raw
+
+  const dirtySuffix = raw.endsWith('-dirty') ? '-dirty' : ''
+  const base = dirtySuffix ? raw.slice(0, -dirtySuffix.length) : raw
+
+  const interTagMatch = base.match(/-(\d+)-g([0-9a-f]{7,})$/i)
+  if (interTagMatch) {
+    const sha = interTagMatch[2]
+    return `${sha}${dirtySuffix}`
+  }
+
+  return raw
+}

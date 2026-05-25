@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Callout, Card, ScreenHeader, ScreenShell, StatusMessage } from '../components/ui'
 import { useInstallPosture } from '../hooks/useInstallPosture'
-import { BUILD_DATE, BUILD_VERSION } from '../lib/buildInfo'
+import { BUILD_DATE, BUILD_VERSION, formatBuildVersion } from '../lib/buildInfo'
 import { formatTotalDurationLine } from '../lib/format'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import {
@@ -260,17 +260,27 @@ export function SettingsScreen() {
             2026-04-27 source change: build identifier is now
             `git describe --tags --always --dirty` output instead of
             a bare short SHA. On a clean build at a tagged commit this
-            renders as e.g. `Build v0b-alpha.16 · 2026-04-27` —
-            more memorable for triage than `Build 47745e2 · 2026-04-27`
-            and same character budget. Inter-tag commits render as
-            `v0b-alpha.16-3-g1234567`; uncommitted-tree builds append
-            `-dirty`. See `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md`
-            Item 6. */}
+            renders as e.g. `Build v0b-alpha.16 · 2026-04-27`. Inter-tag
+            commits render verbose (e.g.
+            `m001-validation-week5-catchup-2026-05-23-1-gbc6831d`).
+            See `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md`
+            Item 6.
+
+            2026-05-25 audit follow-up (L3): the verbose inter-tag slug
+            is useful in founder-use / D91 triage but reads as an
+            internal leak to a stranger cohort. `formatBuildVersion`
+            preserves the verbose form in dev (`import.meta.env.DEV`)
+            and truncates inter-tag slugs to their `g<sha>` segment in
+            prod, preserving any `-dirty` suffix. Clean tags pass
+            through unchanged in both modes. See
+            `docs/plans/2026-05-25-002-feat-2026-05-24-design-critique-followups-plan.md`
+            U2. */}
         <p
           className="pb-3 text-center text-xs font-medium text-text-secondary/80"
           data-testid="settings-build-id"
         >
-          Build {BUILD_VERSION} · {BUILD_DATE}
+          Build {formatBuildVersion(BUILD_VERSION, import.meta.env.DEV ? 'dev' : 'prod')} ·{' '}
+          {BUILD_DATE}
         </p>
       </ScreenShell.Footer>
     </ScreenShell>
