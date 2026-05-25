@@ -274,7 +274,7 @@ describe('V0B-18 D86 per-surface regression scan', () => {
         </Routes>
       </MemoryRouter>,
     )
-    await screen.findByRole('button', { name: /export training records/i })
+    await screen.findByRole('button', { name: /^export$/i })
     assertClean(container, 'SettingsScreen')
   })
 

@@ -49,7 +49,7 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
       </MemoryRouter>,
     )
 
-    const btn = screen.getByRole('button', { name: /export training records/i })
+    const btn = screen.getByRole('button', { name: /^export$/i })
     await user.click(btn)
     await waitFor(() => expect(downloadSpy).toHaveBeenCalledTimes(1))
 
@@ -68,7 +68,7 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
       </MemoryRouter>,
     )
 
-    await user.click(screen.getByRole('button', { name: /export training records/i }))
+    await user.click(screen.getByRole('button', { name: /^export$/i }))
 
     expect(await screen.findByText(/export saved.*check your downloads/i)).toBeInTheDocument()
 
@@ -90,7 +90,7 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
       </MemoryRouter>,
     )
 
-    await user.click(screen.getByRole('button', { name: /export training records/i }))
+    await user.click(screen.getByRole('button', { name: /^export$/i }))
 
     expect(await screen.findByText(/export failed/i)).toBeInTheDocument()
 
@@ -138,7 +138,7 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
       </MemoryRouter>,
     )
 
-    const btn = screen.getByRole('button', { name: /export training records/i })
+    const btn = screen.getByRole('button', { name: /^export$/i })
     await user.click(btn)
     // Button should flip to "Exporting…" (state.kind === 'exporting' -> disabled)
     expect(screen.getByRole('button', { name: /exporting/i })).toBeDisabled()

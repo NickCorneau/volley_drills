@@ -78,7 +78,7 @@ test.describe('phase-e settings + export', () => {
     // SettingsScreen.
     await expect(page).toHaveURL(/\/settings$/)
     const exportBtn = page.getByRole('button', {
-      name: /export training records/i,
+      name: /^export$/i,
     })
     await expect(exportBtn).toBeVisible()
 

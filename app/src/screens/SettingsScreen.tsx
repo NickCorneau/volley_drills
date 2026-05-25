@@ -151,7 +151,7 @@ export function SettingsScreen() {
             onClick={handleExport}
             disabled={state.kind === 'exporting'}
           >
-            {state.kind === 'exporting' ? 'Exporting\u2026' : 'Export training records'}
+            {state.kind === 'exporting' ? 'Exporting\u2026' : 'Export'}
           </Button>
           {state.kind === 'success' && (
             <Callout tone="success" size="sm" role="status">
