@@ -147,7 +147,7 @@ describe('RunScreen segments rendering (U7)', () => {
     expect(activeRows).toHaveLength(1)
     expect(activeRows[0].textContent).toContain('Jog or A-skip')
 
-    // Intro paragraph still renders above the list.
+    // Intro paragraph still renders above the list at segment 0.
     expect(screen.getByText(/Four quick blocks/i)).toBeInTheDocument()
     // Cockpit footer is still there.
     expect(screen.getByRole('button', { name: /pause/i })).toBeInTheDocument()
