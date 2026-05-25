@@ -1,8 +1,10 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../db'
+import * as sessionBuilder from '../../domain/sessionBuilder'
+import type { SessionDraft, SetupContext } from '../../model'
 import { SetupScreen } from '../SetupScreen'
 
 async function clearDb() {
@@ -453,6 +455,210 @@ describe('SetupScreen (C-3)', () => {
       expect(draft).toBeDefined()
       const persistedTotal = draft!.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
       expect(persistedTotal).toBe(displayedMinutes)
+    })
+  })
+
+  /**
+   * 2026-05-24 duration-honesty plan, Stage 2 — U6 (R9 large-gap
+   * guard). When the gap between the named profile and the assembled
+   * total crosses the 5-min threshold, surface an inline `Callout
+   * tone="warning"` above the Build button. The warning does NOT
+   * block commit (R9: tell the truth, keep agency).
+   *
+   * The natural-build path rarely exceeds the 5-min threshold under
+   * U2's pass-fallback recovery, so these tests stub `buildDraft` to
+   * produce a sparse draft and verify the warning surface in
+   * isolation. Boundary, no-fire, and commit cases all use this stub
+   * pattern so the U6 surface is pinned without depending on real
+   * catalog depth.
+   */
+  describe('R9 large-gap warning (U6)', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    function stubBuildDraftWithTotal(totalMinutes: number, context: SetupContext): void {
+      const fakeDraft: SessionDraft = {
+        id: 'current',
+        context,
+        archetypeId: 'pair_net',
+        archetypeName: 'Pair + Net',
+        assemblyAlgorithmVersion: 8,
+        blocks: [
+          {
+            id: 'block-0',
+            type: 'main_skill',
+            drillId: 'd03',
+            variantId: 'd03-pair',
+            drillName: 'fixture drill',
+            shortName: 'fixture',
+            durationMinutes: totalMinutes,
+            coachingCue: 'fixture',
+            courtsideInstructions: 'fixture',
+            required: true,
+            rationale: 'fixture',
+          },
+        ],
+        updatedAt: 1,
+      }
+      vi.spyOn(sessionBuilder, 'buildDraft').mockReturnValue(fakeDraft)
+    }
+
+    it('fires the warning when the assembled gap is >= 5 min (10-min gap fixture)', async () => {
+      const existingCompletedAt = 1_700_000_000_000
+      await db.storageMeta.put({
+        key: 'onboarding.completedAt',
+        value: existingCompletedAt,
+        updatedAt: existingCompletedAt,
+      })
+
+      // Stub buildDraft to produce a 30-min total under a 40-min
+      // profile — gap = 10, well over the 5-min threshold.
+      stubBuildDraftWithTotal(30, {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: true,
+        wallAvailable: false,
+      })
+
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      // Switch to the 40-min profile so the stubbed 30-min total
+      // produces a 10-min gap.
+      await user.click(await screen.findByRole('radio', { name: '40 min' }))
+      const warning = await screen.findByTestId('setup-large-gap-warning')
+      expect(warning.textContent).toMatch(/about 30 min instead of 40/i)
+      // Info callout is NOT rendered when warning fires (never both).
+      expect(screen.queryByTestId('setup-assembled-duration')).not.toBeInTheDocument()
+    })
+
+    it('fires the warning at exactly the 5-min boundary (>=, not >)', async () => {
+      const existingCompletedAt = 1_700_000_000_000
+      await db.storageMeta.put({
+        key: 'onboarding.completedAt',
+        value: existingCompletedAt,
+        updatedAt: existingCompletedAt,
+      })
+
+      stubBuildDraftWithTotal(35, {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: true,
+        wallAvailable: false,
+      })
+
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      await user.click(await screen.findByRole('radio', { name: '40 min' }))
+      expect(await screen.findByTestId('setup-large-gap-warning')).toBeInTheDocument()
+    })
+
+    it('does NOT fire the warning at gap = 4 (under threshold)', async () => {
+      const existingCompletedAt = 1_700_000_000_000
+      await db.storageMeta.put({
+        key: 'onboarding.completedAt',
+        value: existingCompletedAt,
+        updatedAt: existingCompletedAt,
+      })
+
+      stubBuildDraftWithTotal(36, {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: true,
+        wallAvailable: false,
+      })
+
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      await user.click(await screen.findByRole('radio', { name: '40 min' }))
+      // Info callout shows the duration; warning is hidden.
+      const info = await screen.findByTestId('setup-assembled-duration')
+      expect(info.textContent).toMatch(/about 36 min/)
+      expect(screen.queryByTestId('setup-large-gap-warning')).not.toBeInTheDocument()
+    })
+
+    it('does NOT fire the warning when the assembled total equals or exceeds the named profile (defensive)', async () => {
+      const existingCompletedAt = 1_700_000_000_000
+      await db.storageMeta.put({
+        key: 'onboarding.completedAt',
+        value: existingCompletedAt,
+        updatedAt: existingCompletedAt,
+      })
+
+      // Defensive fixture: under R1+R2+R3 the total never exceeds the
+      // named profile, but we pin the boundary behavior anyway.
+      stubBuildDraftWithTotal(40, {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: true,
+        wallAvailable: false,
+      })
+
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      await user.click(await screen.findByRole('radio', { name: '40 min' }))
+      expect(screen.queryByTestId('setup-large-gap-warning')).not.toBeInTheDocument()
+      expect(await screen.findByTestId('setup-assembled-duration')).toBeInTheDocument()
+    })
+
+    it('does NOT block commit when the warning is visible', async () => {
+      const existingCompletedAt = 1_700_000_000_000
+      await db.storageMeta.put({
+        key: 'onboarding.completedAt',
+        value: existingCompletedAt,
+        updatedAt: existingCompletedAt,
+      })
+
+      stubBuildDraftWithTotal(30, {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: true,
+        wallAvailable: false,
+      })
+
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+            <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      await user.click(await screen.findByRole('radio', { name: '40 min' }))
+      expect(await screen.findByTestId('setup-large-gap-warning')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /build session/i })).toBeEnabled()
+      await user.click(screen.getByRole('button', { name: /build session/i }))
+      expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
     })
   })
 

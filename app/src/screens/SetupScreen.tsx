@@ -217,6 +217,19 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     return previewDraft.blocks.reduce((sum, block) => sum + block.durationMinutes, 0)
   }, [previewDraft])
 
+  // U6 (2026-05-24 duration-honesty plan, R9): large-gap guard.
+  // Surface a calm `Callout tone="warning"` when the gap between the
+  // named profile and the assembled total crosses 5 min. The 5-min
+  // threshold is a sensible default; copy is a sensible default too —
+  // a courtside-copy polish PR may refine both once field-use settles
+  // (per the plan's Deferred to Follow-Up Work).
+  const LARGE_GAP_THRESHOLD_MINUTES = 5
+  const previewLargeGap = useMemo(() => {
+    if (previewTotalMinutes === null) return null
+    const gap = timeProfile - previewTotalMinutes
+    return gap >= LARGE_GAP_THRESHOLD_MINUTES ? { assembled: previewTotalMinutes, named: timeProfile } : null
+  }, [previewTotalMinutes, timeProfile])
+
   const submitting = useRef(false)
 
   const handleConfirm = useCallback(async () => {
@@ -384,12 +397,24 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="flex flex-col gap-2 pt-3">
+        {/* U6 (2026-05-24 duration-honesty plan, R9): large-gap guard.
+            When the assembled total is short of the named profile by
+            5+ min, surface a calm warning inline above the Build
+            button. The warning does NOT block commit — the user
+            retains agency to build the shorter session as-is. */}
+        {isComplete && previewLargeGap !== null && !isSaving && (
+          <Callout tone="warning" size="sm" role="status">
+            <span data-testid="setup-large-gap-warning">
+              This session will run about {previewLargeGap.assembled} min instead of{' '}
+              {previewLargeGap.named}. Fewer drills available for this focus.
+            </span>
+          </Callout>
+        )}
         {/* U5 (2026-05-24 duration-honesty plan, R7+R10): once Setup is
-            completable, surface the actually-assembled session duration
-            above the Build button. Calm `Callout tone="info"` chrome
-            matches the courtside register — the number is informative,
-            not an alert. */}
-        {isComplete && previewTotalMinutes !== null && !isSaving && (
+            completable AND the gap is within the warning threshold,
+            surface the calm informative duration. When the gap is
+            large the warning above replaces this — never both. */}
+        {isComplete && previewTotalMinutes !== null && previewLargeGap === null && !isSaving && (
           <Callout tone="info" size="sm" role="status">
             <span data-testid="setup-assembled-duration">
               This session will run about {previewTotalMinutes} min.
