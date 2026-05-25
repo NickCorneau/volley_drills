@@ -116,6 +116,64 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
     expect(body, `forbidden word in: ${body}`).not.toMatch(FORBIDDEN_RE)
   })
 
+  /**
+   * 2026-05-25 audit follow-up (U1 / code-review T2): the disabled
+   * `Start session` CTA carries an aria-live="polite" `missingHint`
+   * above it that names what input is still missing. The hint cascade
+   * has four user-visible branches (clean state, recency picked but
+   * `2+` without a layoff bucket, recency complete but pain unanswered,
+   * and the all-clear null). Pin each branch and the aria-live wiring.
+   */
+  describe('disabled-CTA missingHint (audit follow-up U1 / T2)', () => {
+    async function findHint() {
+      return await screen.findByText(
+        (_, el) =>
+          el?.getAttribute('aria-live') === 'polite' && /to start\.$/.test(el.textContent ?? ''),
+      )
+    }
+
+    it('shows the recency hint at first render (nothing selected yet)', async () => {
+      renderScreen()
+      await screen.findByRole('heading', { level: 2, name: /when did you last train/i })
+      const hint = await findHint()
+      expect(hint.textContent).toMatch(/tell us when you last trained to start\.$/i)
+      expect(hint.getAttribute('aria-live')).toBe('polite')
+    })
+
+    it('shows the layoff-bucket hint when `2+ days` is tapped but no sub-bucket is chosen', async () => {
+      const user = userEvent.setup()
+      renderScreen()
+      await user.click(await screen.findByRole('radio', { name: /^2\+ days$/i }))
+
+      const hint = await findHint()
+      expect(hint.textContent).toMatch(/pick how long off to start\.$/i)
+    })
+
+    it('shows the pain hint when recency is complete but pain is unanswered', async () => {
+      const user = userEvent.setup()
+      renderScreen()
+      await user.click(await screen.findByRole('radio', { name: /^today$/i }))
+
+      const hint = await findHint()
+      expect(hint.textContent).toMatch(/answer the pain question to start\.$/i)
+    })
+
+    it('hides the hint once both inputs are answered (canContinue path)', async () => {
+      const user = userEvent.setup()
+      renderScreen()
+      await user.click(await screen.findByRole('radio', { name: /^today$/i }))
+      await user.click(await screen.findByRole('radio', { name: /^no$/i }))
+
+      // The hint is gone once the gating CTA can fire.
+      expect(
+        screen.queryByText(/tell us when you last trained to start\./i),
+      ).not.toBeInTheDocument()
+      expect(screen.queryByText(/pick how long off to start\./i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/answer the pain question to start\./i)).not.toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /^start session$/i })).toBeEnabled()
+    })
+  })
+
   it('renders a disabled Start session anchor before safety answers are complete', async () => {
     renderScreen()
     await screen.findByRole('heading', {
@@ -128,7 +186,12 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
 
   it('does not echo the draft or focus in the default safety header', async () => {
     await clearDb()
-    await seedDraft({ playerMode: 'pair', netAvailable: true, wallAvailable: false, sessionFocus: 'serve' })
+    await seedDraft({
+      playerMode: 'pair',
+      netAvailable: true,
+      wallAvailable: false,
+      sessionFocus: 'serve',
+    })
     renderScreen()
 
     await screen.findByRole('heading', { name: /before we start/i })
@@ -139,7 +202,12 @@ describe('SafetyCheckScreen V0B-16 answer-first copy (C-3 Unit 4)', () => {
   it('mentions focus only when pain recovery overrides an explicit focus', async () => {
     const user = userEvent.setup()
     await clearDb()
-    await seedDraft({ playerMode: 'pair', netAvailable: true, wallAvailable: false, sessionFocus: 'serve' })
+    await seedDraft({
+      playerMode: 'pair',
+      netAvailable: true,
+      wallAvailable: false,
+      sessionFocus: 'serve',
+    })
     renderScreen()
 
     await user.click(await screen.findByRole('radio', { name: /^yes$/i }))

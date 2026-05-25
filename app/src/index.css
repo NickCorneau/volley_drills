@@ -65,6 +65,18 @@
   --color-info-surface: #fef3e8;
 
   /*
+   * Brand mark palette (A3). The logo uses a brighter, more saturated
+   * orange than the AA-tuned UI accent (--color-accent #b45309). This
+   * divergence is intentional: the accent is tuned for white-on-accent
+   * button contrast; the mark is tuned for brand recognition. Tokenized
+   * so the value is named once and the divergence is documented rather
+   * than read as accidental drift. Keep in sync with public/icon.svg
+   * (the static PWA icon asset, which cannot read CSS variables).
+   */
+  --color-brand: #e8732a;
+  --color-brand-ink: #fff8f0;
+
+  /*
    * Phase F9 (2026-04-19): lead with 'Inter Variable' - the family
    * name registered by @fontsource-variable/inter - with 'Inter'
    * kept as a safety fallback for any legacy static-face install.
@@ -116,14 +128,10 @@
    * Audit 2026-05-24: semantic radius tokens replace literal `rounded-[12px]`
    * / `rounded-[16px]` arbitrary values across components. `base` is the
    * default card / chip / soft-panel radius (12px); `focal` is the elevated
-   * focal-card / button / bottom-sheet radius (16px). Legacy `--radius-card`
-   * / `--radius-button` are kept as aliases for any code that imports them
-   * via CSS variables (no current consumer at this commit; reserved).
+   * focal-card / button / bottom-sheet radius (16px).
    */
   --radius-base: 12px;
   --radius-focal: 16px;
-  --radius-card: 12px;
-  --radius-button: 16px;
 }
 
 body {

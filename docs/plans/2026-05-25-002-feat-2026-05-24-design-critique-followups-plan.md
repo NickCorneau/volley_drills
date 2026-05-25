@@ -1,8 +1,18 @@
 ---
+id: 2026-05-25-002-feat-2026-05-24-design-critique-followups-plan
 title: 2026-05-24 e2e design critique follow-ups
-type: feat
 status: active
+stage: validation
+type: feat
+summary: "Implementation plan for the 2026-05-24 e2e design critique follow-ups (U1-U9): open EC items (L1/L3/L4/M1/M2/L2), canon-vs-code reconciliation pass on brand-ux-guidelines.md, and experimental in-tier passes on H1 (BlockTimer 56 -> 72 px bench-distance scale) + H2 (segmented-drill active-run body density) with a same-PR viewport-bound re-evaluation (U9); durable H1/H2 keep/revert gated on the D91 field run."
+authority: plan-level implementation decisions for the 2026-05-24 design critique follow-ups
 date: 2026-05-25
+last_updated: 2026-05-25
+depends_on:
+  - docs/design/reviews/2026-05-24-agent-e2e-design-critique.md
+  - docs/research/brand-ux-guidelines.md
+  - docs/research/outdoor-courtside-ui-brief.md
+  - .cursor/rules/courtside-copy.mdc
 origin: docs/design/reviews/2026-05-24-agent-e2e-design-critique.md
 ---
 

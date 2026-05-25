@@ -110,10 +110,8 @@ export function RunScreen() {
   // D91 field run; viewport-bound assessment lives in
   // `docs/design/reviews/2026-05-25-h1-h2-experiment-revaluation.md`.
   // See plan U7.
-  const segmentInstructionsInline =
-    segmentInstructionsAvailable && currentSegmentIndex <= 0
-  const segmentInstructionsCollapsed =
-    segmentInstructionsAvailable && currentSegmentIndex > 0
+  const segmentInstructionsInline = segmentInstructionsAvailable && currentSegmentIndex === 0
+  const segmentInstructionsCollapsed = segmentInstructionsAvailable && currentSegmentIndex !== 0
   const hasInstructionDetail =
     (!segmentInstructionsAvailable &&
       currentBlock.courtsideInstructions.trim().length > 0 &&
@@ -218,7 +216,10 @@ export function RunScreen() {
         )}
 
         {segmentInstructionsInline && (
-          <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
+          <p
+            data-testid="run-instructions-inline"
+            className="whitespace-pre-line text-base leading-relaxed text-text-primary"
+          >
             {currentBlock.courtsideInstructions}
           </p>
         )}

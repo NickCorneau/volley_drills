@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { SEGMENT_INDEX_BONUS } from '../../hooks/useBlockPacingTicks'
 import { RunScreen } from '../RunScreen'
 import { useRunController } from '../run/useRunController'
 
@@ -10,7 +11,7 @@ vi.mock('../run/useRunController', () => ({
 const useRunControllerMock = vi.mocked(useRunController)
 
 /**
- * 2026-05-25 H2 experiment (plan U7).
+ * 2026-05-25 H2 experiment (plan U7 + code-review fix correctness-1/T1).
  *
  * The 2026-05-24 e2e design critique flagged the active-run body as
  * text-dense for a sun-readable screen on segmented drills: drill
@@ -22,13 +23,16 @@ const useRunControllerMock = vi.mocked(useRunController)
  * READ-DO context.
  *
  * The H2 experiment keeps the full READ-DO paragraph visible INLINE
- * only while the user is at segment 0 (or paused at segment 0,
- * including preroll). Once `currentSegmentIndex > 0`, the paragraph
- * routes into the existing `<details>` affordance — the SegmentList
- * continues to carry the load-bearing read; the full paragraph stays
- * reachable behind a "Show full instructions" / "Show more cues and
- * instructions" summary but no longer competes for above-the-fold
- * attention.
+ * only at `currentSegmentIndex === 0` (which covers running the first
+ * segment and paused-at-segment-0, including preroll). Every other
+ * position - running past segment 0, paused past segment 0, and bonus
+ * territory (`SEGMENT_INDEX_BONUS === -1`, emitted by
+ * `useBlockPacingTicks` when the block runs past
+ * `sum(segments[].durationSec)` on long wraps like d25-solo /
+ * d26-solo cooldowns) - routes the paragraph into the existing
+ * `<details>` affordance. The SegmentList continues to carry the
+ * load-bearing read; the full paragraph stays reachable behind a "Show
+ * full instructions" / "Show more cues and instructions" summary.
  *
  * Durable keep / revert gated on the D91 field run. Viewport-bound
  * assessment lives in
@@ -118,13 +122,13 @@ function renderRun() {
   )
 }
 
-describe('RunScreen H2 experiment — segmented-drill body density', () => {
+describe('RunScreen H2 experiment - segmented-drill body density', () => {
   it('renders the inline courtsideInstructions paragraph at segment 0 (READ-DO context)', () => {
     useRunControllerMock.mockReturnValue(controller(0))
     renderRun()
 
-    expect(screen.getByText(/Four quick blocks/i)).toBeInTheDocument()
-    expect(screen.queryByRole('group', { name: 'Drill details' })).toBeNull()
+    expect(screen.getByTestId('run-instructions-inline')).toBeInTheDocument()
+    expect(screen.getByTestId('run-instructions-inline').textContent).toMatch(/Four quick blocks/i)
     expect(screen.queryByText(/Show .*instructions/i)).toBeNull()
   })
 
@@ -132,30 +136,47 @@ describe('RunScreen H2 experiment — segmented-drill body density', () => {
     useRunControllerMock.mockReturnValue(controller(1))
     renderRun()
 
-    // The <details> summary is rendered as a button-like element with
-    // the "Show more cues and instructions" label (because the warmup
-    // drill has both an instructions overflow AND a coaching cue
-    // overflow that doesn't match `currentCue` — SegmentList owns the
-    // active cue, so coachingCue routes to detail too).
+    // The <details> summary is rendered with the "Show more cues and
+    // instructions" label (the warmup drill has both an instructions
+    // overflow AND a coaching cue overflow that does not match
+    // `currentCue` - SegmentList owns the active cue, so coachingCue
+    // routes to detail too).
     expect(screen.getByText(/Show .*instructions/i)).toBeInTheDocument()
 
-    // The inline paragraph is no longer in the open render tree (the
-    // <details> is closed by default, so its content is in the DOM but
-    // hidden — we assert against an element with the inline class
-    // signature, not text content).
-    const inlineParagraph = screen
-      .queryAllByText(/Four quick blocks/i)
-      .find((el) => el.tagName === 'P' && el.parentElement?.tagName === 'DIV')
-    expect(inlineParagraph).toBeUndefined()
+    // The inline paragraph is no longer rendered at all when past
+    // segment 0; assert directly against the data-testid.
+    expect(screen.queryByTestId('run-instructions-inline')).toBeNull()
   })
 
-  it('keeps the SegmentList visible in both states (load-bearing DO-CONFIRM read)', () => {
+  it('collapses the inline paragraph in bonus territory (SEGMENT_INDEX_BONUS === -1)', () => {
+    // 2026-05-25 code-review fix (correctness-1 / T1): when the
+    // block runs past sum(segments[].durationSec) into bonus territory
+    // (e.g., d25-solo / d26-solo cooldowns on long wraps),
+    // useBlockPacingTicks emits SEGMENT_INDEX_BONUS === -1. The
+    // initial H2 predicate (`currentSegmentIndex <= 0`) re-expanded
+    // the inline paragraph here, double-rendering body prose. The
+    // fixed `currentSegmentIndex === 0` keeps the paragraph in the
+    // <details> collapse in bonus territory. Regression coverage
+    // against a future flip back to `<= 0`.
+    useRunControllerMock.mockReturnValue(controller(SEGMENT_INDEX_BONUS))
+    renderRun()
+
+    expect(screen.queryByTestId('run-instructions-inline')).toBeNull()
+    expect(screen.getByText(/Show .*instructions/i)).toBeInTheDocument()
+  })
+
+  it('keeps the SegmentList visible across all states (load-bearing DO-CONFIRM read)', () => {
     useRunControllerMock.mockReturnValue(controller(0))
-    const { unmount } = renderRun()
+    const { unmount: unmount0 } = renderRun()
     expect(screen.getByRole('list', { name: 'Segments' })).toBeInTheDocument()
-    unmount()
+    unmount0()
 
     useRunControllerMock.mockReturnValue(controller(1))
+    const { unmount: unmount1 } = renderRun()
+    expect(screen.getByRole('list', { name: 'Segments' })).toBeInTheDocument()
+    unmount1()
+
+    useRunControllerMock.mockReturnValue(controller(SEGMENT_INDEX_BONUS))
     renderRun()
     expect(screen.getByRole('list', { name: 'Segments' })).toBeInTheDocument()
   })
