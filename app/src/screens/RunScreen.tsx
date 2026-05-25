@@ -95,12 +95,30 @@ export function RunScreen() {
   // keeps catalog scans out of the 4 Hz timer render path.
   const segmentListOwnsCue = segmentListOwnsCurrentCue(currentBlock)
   const currentCue = segmentListOwnsCue ? null : selectNonSegmentedCurrentCue(currentBlock)
-  const hasVisibleSegmentInstructions =
+  const segmentInstructionsAvailable =
     segmentListOwnsCue && currentBlock.courtsideInstructions.trim().length > 0
+  // 2026-05-25 audit follow-up (H2 experiment): for segmented drills,
+  // keep the full READ-DO `courtsideInstructions` paragraph visible
+  // INLINE only while the user is in the first segment (or paused at
+  // segment 0, including preroll). Once the user advances past segment
+  // 0, route the paragraph into the existing `<details>` affordance —
+  // the DO-CONFIRM density rule (`courtside-copy.mdc` rule 13) wants
+  // the active-run body lean once the rep is in motion, and the
+  // SegmentList plus `coachingCues[0]` carries the load-bearing read.
+  // Aligns with `docs/research/outdoor-courtside-ui-brief.md` active-
+  // run 6-field cockpit invariants. Durable keep/revert gated on the
+  // D91 field run; viewport-bound assessment lives in
+  // `docs/design/reviews/2026-05-25-h1-h2-experiment-revaluation.md`.
+  // See plan U7.
+  const segmentInstructionsInline =
+    segmentInstructionsAvailable && currentSegmentIndex <= 0
+  const segmentInstructionsCollapsed =
+    segmentInstructionsAvailable && currentSegmentIndex > 0
   const hasInstructionDetail =
-    !hasVisibleSegmentInstructions &&
-    currentBlock.courtsideInstructions.trim().length > 0 &&
-    currentBlock.courtsideInstructions.trim() !== currentCue?.text
+    (!segmentInstructionsAvailable &&
+      currentBlock.courtsideInstructions.trim().length > 0 &&
+      currentBlock.courtsideInstructions.trim() !== currentCue?.text) ||
+    segmentInstructionsCollapsed
   const hasCueDetail =
     currentBlock.coachingCue.trim().length > 0 &&
     currentBlock.coachingCue.trim() !== currentCue?.text
@@ -199,7 +217,7 @@ export function RunScreen() {
           </section>
         )}
 
-        {hasVisibleSegmentInstructions && (
+        {segmentInstructionsInline && (
           <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
             {currentBlock.courtsideInstructions}
           </p>
