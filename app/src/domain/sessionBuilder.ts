@@ -223,7 +223,25 @@ function buildDraftResult(
     const slot = layout[i]
     if (slot.required) continue
 
-    const selected = selectSlot(slot, false, durations[i])
+    let selected = selectSlot(slot, false, durations[i])
+    if (!selected) {
+      // R5 (2026-05-24 duration-honesty plan, U2): on a dropping-eligible
+      // optional slot, retry candidate selection using the slot's
+      // authored `skillTags` fallback before letting the slot drop.
+      // Under named focus, `effectiveSkillTags` suppresses the authored
+      // fallback so the focused-pick stays narrow; this retry path
+      // narrowly bypasses that suppression to lift sessions like
+      // `serve + pair_net + 40 + beginner` from ~23-29 min / 4 blocks
+      // to ~37 min / 6 blocks without authoring new content. Required
+      // slots (loop above) keep no fallback per R6.
+      const fallbackPick = pickForSlot(slot, effectiveContext, usedDrillIds, random, {
+        playerLevel: options?.playerLevel,
+        allowUsedFallback: false,
+        targetDurationMinutes: durations[i],
+        overrideSkillTags: slot.skillTags,
+      })
+      if (fallbackPick) selected = { pick: fallbackPick }
+    }
     if (!selected) continue
     selectedByLayoutIndex.set(i, selected)
     usedDrillIds.add(selected.pick.drill.id)

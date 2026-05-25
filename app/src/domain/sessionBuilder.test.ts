@@ -140,6 +140,138 @@ describe('sessionBuilder', () => {
     })
   })
 
+  /**
+   * 2026-05-24 duration-honesty Stage 1 — U2 (R5, R6).
+   *
+   * Under named focus, when a dropping-eligible optional slot finds no
+   * candidate from its focused `skillTags`, retry candidate selection
+   * using the slot's authored `skillTags` fallback before dropping.
+   * Required slots gain no fallback behavior (R6).
+   */
+  describe('R5 optional-slot pass-fallback retry', () => {
+    const serveBeginnerPairNet40: SetupContext = {
+      playerMode: 'pair',
+      timeProfile: 40,
+      netAvailable: true,
+      wallAvailable: false,
+      sessionFocus: 'serve',
+      playerLevel: 'beginner',
+    }
+
+    it('serve+pair_net+40+beginner: fallback recovers to 6 honest blocks (~37 min) — AE1', () => {
+      // Pre-U2: the focused `serve` catalog has too few entries to fill
+      // `movement_proxy` and `pressure`, both drop, and the session
+      // lands at ~23-29 min / 4 blocks (the live 2026-05-04/2026-05-10
+      // reproducer). Post-U2: both slots fill via the authored
+      // `['pass']` / `['pass', 'serve']` fallback and the session is
+      // 6 blocks summing to ~37 min.
+      let foundFullShape = 0
+      let foundUnderShape = 0
+      const totals: number[] = []
+      for (let i = 0; i < 16; i++) {
+        const draft = buildDraft(serveBeginnerPairNet40, { assemblySeed: `u2-ae1-${i}` })
+        expect(draft, `seed ${i}: build returned null`).not.toBeNull()
+        const types = draft!.blocks.map((b) => b.type)
+        const total = draft!.blocks.reduce((s, b) => s + b.durationMinutes, 0)
+        totals.push(total)
+        if (
+          types.includes('movement_proxy') &&
+          types.includes('pressure') &&
+          types.includes('main_skill') &&
+          draft!.blocks.length === 6
+        ) {
+          foundFullShape += 1
+        } else {
+          foundUnderShape += 1
+        }
+      }
+      expect(
+        foundFullShape,
+        `expected the majority of seeds to land 6-block shape; got ${foundFullShape} full / ${foundUnderShape} under`,
+      ).toBeGreaterThan(foundUnderShape)
+      const avgTotal = totals.reduce((s, v) => s + v, 0) / totals.length
+      expect(avgTotal, `average total ${avgTotal} below 35 min target`).toBeGreaterThanOrEqual(35)
+    })
+
+    it('serve+pair_net+40+beginner: main_skill never exceeds slot max under fallback', () => {
+      // Pin the fallback retry path against the R2 cap. Without
+      // U1's truncation this would have allowed a 24-min main_skill
+      // block; with U1+U2 it must stay <= 10 min.
+      for (let i = 0; i < 24; i++) {
+        const draft = buildDraft(serveBeginnerPairNet40, {
+          assemblySeed: `u2-r2-cap-${i}`,
+        })
+        if (!draft) continue
+        const main = draft.blocks.find((b) => b.type === 'main_skill')
+        if (!main) continue
+        expect(
+          main.durationMinutes,
+          `seed ${i}: main_skill at ${main.durationMinutes} min exceeds 10-min slot max`,
+        ).toBeLessThanOrEqual(10)
+      }
+    })
+
+    it('determinism (R4): two builds with the same seed produce byte-identical blocks under U2', () => {
+      const a = buildDraft(serveBeginnerPairNet40, { assemblySeed: 'u2-determinism' })
+      const b = buildDraft(serveBeginnerPairNet40, { assemblySeed: 'u2-determinism' })
+      expect(a?.blocks.map((bl) => [bl.drillId, bl.variantId, bl.durationMinutes])).toEqual(
+        b?.blocks.map((bl) => [bl.drillId, bl.variantId, bl.durationMinutes]),
+      )
+    })
+
+    it('pass+pair_net+40 focus matches the authored fallback: no fallback retry needed', () => {
+      // When sessionFocus is already `pass`, the slot's authored
+      // ['pass'] fallback is equivalent to `effectiveSkillTags`'s
+      // focused tag set, so the first pick succeeds and U2's retry
+      // path is a no-op. Pin determinism by comparing two builds at
+      // the same seed.
+      const passContext: SetupContext = {
+        playerMode: 'pair',
+        timeProfile: 40,
+        netAvailable: true,
+        wallAvailable: false,
+        sessionFocus: 'pass',
+        playerLevel: 'beginner',
+      }
+      const first = buildDraft(passContext, { assemblySeed: 'u2-noop-pass' })
+      const second = buildDraft(passContext, { assemblySeed: 'u2-noop-pass' })
+      expect(first?.blocks.map((b) => [b.drillId, b.variantId, b.durationMinutes])).toEqual(
+        second?.blocks.map((b) => [b.drillId, b.variantId, b.durationMinutes]),
+      )
+    })
+
+    it('does not relax required-slot suppression (R6 preserved)', () => {
+      // The plan explicitly preserves required-slot suppression: only
+      // optional slots gain fallback behavior. Verify by asserting
+      // that a required-slot fixture continues to be filled from the
+      // focused catalog (no relaxation triggered by R5 leakage into
+      // the required path). Indirect pin: required slots always
+      // resolve because of `allowUsedFallback: true`; we just verify
+      // R5 has no observable required-slot effect via the same
+      // determinism contract used above.
+      const context: SetupContext = {
+        playerMode: 'pair',
+        timeProfile: 25,
+        netAvailable: true,
+        wallAvailable: false,
+        sessionFocus: 'serve',
+        playerLevel: 'beginner',
+      }
+      const draft = buildDraft(context, { assemblySeed: 'u2-r6-required' })
+      expect(draft).not.toBeNull()
+      const required = draft!.blocks.filter((b) => b.required)
+      expect(required.length).toBeGreaterThan(0)
+      // Every required focus-controlled block must reach a serve drill
+      // (the focused catalog), demonstrating the required path was
+      // not relaxed away from the focused tag set.
+      for (const block of required) {
+        if (block.type !== 'main_skill' && block.type !== 'technique') continue
+        const drill = DRILLS.find((d) => d.id === block.drillId)
+        expect(drill?.skillFocus, `${block.type} required slot off-focus`).toContain('serve')
+      }
+    })
+  })
+
   it('pins fixed-seed session assembly output while algorithm version stays stable', () => {
     const draft = buildDraft(
       {

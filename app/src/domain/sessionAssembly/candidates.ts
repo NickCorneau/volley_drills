@@ -1,5 +1,5 @@
 import { DRILLS } from '../../data/drills'
-import type { BlockSlot, DrillVariant, PlayerLevel, SetupContext } from '../../model'
+import type { BlockSlot, DrillVariant, PlayerLevel, SetupContext, SkillFocus } from '../../model'
 import type { SelectionCandidate } from '../drillSelection'
 import { effectiveSkillTags, isFocusControlledSlotType } from './effectiveFocus'
 import { partitionByLevel } from './partitionByLevel'
@@ -10,6 +10,16 @@ export type CandidateVariant = SelectionCandidate
 
 export interface FindCandidatesOptions {
   readonly playerLevel?: PlayerLevel
+  /**
+   * R5 (2026-05-24 duration-honesty plan, U2): when set, use these
+   * tags in place of `effectiveSkillTags(slot.type, context, slot.skillTags)`
+   * for the candidate filter. The retry path in `sessionBuilder`'s
+   * optional-slot loop passes the slot's authored `slot.skillTags`
+   * here so the named-focus suppression in `effectiveSkillTags` can
+   * be bypassed on a dropping-eligible optional slot without changing
+   * the function's default behavior.
+   */
+  readonly overrideSkillTags?: readonly SkillFocus[]
 }
 
 export interface PickForSlotOptions extends FindCandidatesOptions {
@@ -52,7 +62,8 @@ export function findCandidates(
 ): CandidateVariant[] {
   const playerCount = context.playerMode === 'solo' ? 1 : 2
   const candidates: CandidateVariant[] = []
-  const skillTags = effectiveSkillTags(slot.type, context, slot.skillTags)
+  const skillTags =
+    options?.overrideSkillTags ?? effectiveSkillTags(slot.type, context, slot.skillTags)
   const effectivePlayerLevel = options?.playerLevel ?? context.playerLevel
   const playerLevel = isFocusControlledSlotType(slot.type) ? effectivePlayerLevel : undefined
 
@@ -155,7 +166,12 @@ export function pickForSlot(
     // dropping only the option would still leave the hard filter on.
     const widerContext: SetupContext = { ...context }
     delete widerContext.playerLevel
-    const wider = findCandidates(slot, widerContext)
+    // Propagate `overrideSkillTags` into the band-relax pool so the
+    // U2 (R5) optional-slot fallback retry sees the same authored-
+    // fallback tag set on the relaxed scan it sees on the in-band scan.
+    const wider = findCandidates(slot, widerContext, {
+      overrideSkillTags: options?.overrideSkillTags,
+    })
     const { outOfBand } = partitionByLevel(wider, options.playerLevel)
     const widerUnused = outOfBand.filter((candidate) => !usedDrillIds.has(candidate.drill.id))
     pool = shuffle(widerUnused.length > 0 ? widerUnused : candidates, random)
