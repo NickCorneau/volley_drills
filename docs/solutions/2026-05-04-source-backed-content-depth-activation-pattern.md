@@ -6,7 +6,7 @@ stage: validation
 type: solution
 summary: "Canonical end-to-end pattern for moving a generated-plan diagnostic group from `pressure_remains_without_redistribution` evidence to a shipped catalog drill addition, using the in-repo source archives (FIVB / BAB / VC) as load-bearing intermediates. Validated three times: D47 closed-by-D49 (2026-05-02, advanced setting), D46 closed-by-D50 (2026-05-04, advanced passing), D31 closed-by-D51 (2026-05-04, beginner serving — first beginner-level application)."
 authority: durable workflow learning for diagnostic-driven catalog additions; not a product decision
-last_updated: 2026-05-04
+last_updated: 2026-05-25
 depends_on:
   - docs/research/fivb-source-material.md
   - docs/research/bab-source-material.md
@@ -165,3 +165,25 @@ These were attempted in earlier sessions and rejected:
 - `levelMax: 'intermediate'` is safe when the new drill's envelope is wider than any incumbent intermediate drill in the same chain (d33 caps at 10 min; d51 at 14 min — d33 still wins for cells that fit its envelope at intermediate level).
 - **Algorithm version bumps cluster.** Each ship's shuffle propagation surfaces previously-hidden classification gaps in the diagnostic kit. The d51 ship surfaced `movement_proxy + under_authored_min` groups that needed a new compression lane match. Future applications should pre-grep for `unknown_compression_lane` after regenerating diagnostics.
 - **Three-variant families are fine.** The pattern accommodates any variant count that mirrors the displaced drill's surface coverage (d49 + d50 had 2 each because d47/d48/d46 had 2; d51 has 3 because d31 has 3).
+
+## Addendum 2026-05-25: Fifth Load-Bearing Application — Duration-Honesty Re-Validation
+
+The 2026-05-24 session-duration-honesty plan (`docs/plans/2026-05-24-001-feat-session-duration-honesty-plan.md`) retired the legacy `redistributedMinutes`-onto-`main_skill` uplift in `buildDraft` (R1). The reroute call site in `sessionBuilder.ts` had been gated by `redistributionIndex !== undefined`, which under R1 is permanently undefined — so all four `SOURCE_BACKED_REROUTES` entries would have become dormant code paths.
+
+Per PD-1 (A) the plan re-wired the reroute trigger to fire on **base-allocation-over-envelope**: after the optional-slot loop completes, each selected `main_skill` block is re-evaluated against `candidateCanCarryTargetDuration(selected, base_allocation)`; if it can't carry and the registry matches, `pickForSlot(..., preferTargetDurationFit: true)` re-picks. The legacy `+ redistributedMinutes` plannedDuration inflation is gone; the trigger now fires on the honest base allocation alone.
+
+**Per-entry intent log (U3 verification log, characterized in `app/src/domain/sessionAssembly/__tests__/sourceBackedReroutes.test.ts` `per-entry intent log (U3 / PD-1 (A))` describe block):**
+
+| Entry | Post-slice trigger (honest durations) | Intent preserved? |
+|-------|----------------------------------------|-------------------|
+| `d01-duration-fit` | D01 selected for any `main_skill` slot whose base allocation > D01 cap | ✓ preserved (re-validated 500-seed sweep on `pair_open 40` Recommended) |
+| `d47-d48-to-d49` | Advanced setting `main_skill`; base allocation > D47/D48 envelope | ✓ preserved (re-validated 500-seed sweep on `solo_open 40 set advanced`; reroute lands on `d49-solo-open` variant) |
+| `d46-to-d50` | Advanced passing `main_skill`; base allocation > D46 envelope | ✓ preserved (re-validated on `pair_open 40 pass advanced`; lands on `d50-pair-open` variant) |
+| `d31-to-d51` | Beginner serving `main_skill`; base allocation > D31 envelope | ✓ preserved (re-validated on `solo_open 40 serve beginner`; lands on `d51-solo-open` variant) |
+
+**What this means for the pattern going forward:** the registry abstraction `SOURCE_BACKED_REROUTES` survived a structural change to the call site without any registry-content edit. New source-backed activations can still ship as a one-line registry addition; the call-site rewire is the engine's concern, not the pattern's. Item 5 of the pattern (algorithm-version-bump alongside golden-snapshot regen) is now load-bearing for two additional reasons:
+
+1. Engine behavior changes that shift the trigger (like PD-1 (A)) need a version bump even when no new registry entry lands.
+2. The trigger is now base-allocation only, so future plans removing reasons for the inflated trigger don't need to revisit the registry.
+
+The R1+U4 finding replacement (`optional_slot_redistribution` → `slot_dropped` + `under_named_profile_duration`) is the diagnostic surface twin of this engine change. The D47/D05/D01/D49 gap-closure fork workflows in `generatedPlanDiagnosticTriage.ts` that depended on the legacy `slot_dropped+over_authored_max+over_fatigue_cap` group key shape are functionally inert under post-R1 (`v8`) data and are tracked as an explicit follow-up (44 tests marked `.skip` with a top-of-file marker in `app/src/domain/__tests__/generatedPlanDiagnosticTriage.test.ts`).
