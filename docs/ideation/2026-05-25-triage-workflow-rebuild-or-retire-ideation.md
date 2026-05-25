@@ -39,7 +39,7 @@ The new finding shape (`slot_dropped` + `under_named_profile_duration` → `cove
 
 **Complexity:** Low (one mechanical PR; ~1-2 hours to write the stubs)
 
-**Status:** Unexplored
+**Status:** Explored (CC1 brainstorm started 2026-05-25)
 
 ---
 
@@ -57,7 +57,7 @@ The new finding shape (`slot_dropped` + `under_named_profile_duration` → `cove
 
 **Complexity:** Low-Medium (mechanical application of D137 template; care required per-decision)
 
-**Status:** Unexplored
+**Status:** Explored (CC1 brainstorm started 2026-05-25)
 
 ---
 
@@ -75,7 +75,7 @@ The new finding shape (`slot_dropped` + `under_named_profile_duration` → `cove
 
 **Complexity:** Medium (per-test review with rationale)
 
-**Status:** Unexplored
+**Status:** Explored (CC1 brainstorm started 2026-05-25)
 
 ---
 
@@ -93,7 +93,7 @@ The new finding shape (`slot_dropped` + `under_named_profile_duration` → `cove
 
 **Complexity:** Low (writing + light review)
 
-**Status:** Unexplored
+**Status:** Explored (CC1 brainstorm started 2026-05-25)
 
 ---
 
