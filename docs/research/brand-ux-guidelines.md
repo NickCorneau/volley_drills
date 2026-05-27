@@ -238,6 +238,7 @@ If you are about to paint a new UI element, pick from this table. If the element
 | Primary CTA | `bg-accent text-white` | — | `bg-accent-pressed` |
 | Outline button | `border text-text-primary` | — | `bg-bg-warm` |
 | Ghost button (tertiary) | `text-accent` | — | `text-accent-pressed` |
+| Quiet tertiary | `text-text-secondary` on `bg-transparent`, `min-h-[44px]`, no border | — | `text-text-primary` |
 | Danger outline | `border-warning text-warning-strong` | — | `bg-warning-surface` |
 | Unselected chip | `border text-text-primary bg-bg-primary` | `bg-info-surface text-accent-pressed` (soft-selected) | — |
 | Destructive chip (Pain "Yes", Incomplete reason) | `border text-text-secondary bg-bg-primary` | `border-warning text-warning-strong bg-warning-surface` | — |
@@ -246,6 +247,8 @@ If you are about to paint a new UI element, pick from this table. If the element
 | Completion mark | `bg-success text-white` | — | — |
 
 **Selected-chip reconciliation (2026-05-25, audit follow-up plan U8 row 9).** This table previously listed a separate `Selected chip` row at `bg-accent text-white` (solid-accent). Shipped code uses a soft-selected treatment — `bg-info-surface` (peach) fill with a `text-accent-pressed` (deep-amber) glyph — which reads as "claimed, not announced," consistent with the `shibui` direction in `docs/research/japanese-inspired-visual-direction.md`. The 2026-05-04 setup-screen-polish ideation (`docs/ideation/2026-05-04-setup-screen-default-path-polish-ideation.md`) explicitly rejected reverting to solid-accent on stronger-selected-state grounds. **2026-05-25 contrast follow-up:** the selected glyph was darkened from `text-accent` (#b45309, ~4.6:1 on `bg-info-surface` — the lowest-contrast element on Setup/Safety and, perversely, weaker than the unselected chip) to `text-accent-pressed` (#92400e, ~6.5:1), mirroring the 2026-05-24 warning-chip audit (`text-warning` → `text-warning-strong`); the 2px accent border remains the primary selection signal. Canon now records the shipped soft-selected treatment as the single chip-selected row; the standalone `Selected chip` line is retired. See `docs/design/reviews/2026-05-24-agent-e2e-design-critique.md` M3.
+
+**Quiet-tertiary reconciliation (2026-05-25, residuals polish plan C4 / `D145`).** The app ships **two** distinct tertiary-action color conventions and this table previously only documented one (`Ghost button (tertiary)` at `text-accent`). The new `Quiet tertiary` row records the second: a gray-on-transparent secondary action with no border and a 44 px minimum tap height, used where the visible focal-zone hierarchy needs the secondary action to *recede* so the one accent CTA per screen dominates. Members today: `Finish later` (Review), `Start a different session` (Home returning), `Settings` link (Home footer), `Change` (Settings → skill level card), `Change setup` (Home draft card). The `Ghost button (tertiary)` row continues to govern accent-tinted tertiaries — most importantly the `BackButton` primitive (§8.1) plus any in-card link styled `variant="link"` that needs to read as a forward-progression affordance. Picking between the two: if the action is "go somewhere else" (Back, drill-down) → accent ghost; if the action is "alternative path the focal CTA is steering you away from" → quiet tertiary. Both pass AA on the page-field surface (`#4b5563` text-secondary ≈ 7.5:1 on `surface-calm`; `#b45309` accent ≈ 5.3:1 on `surface-calm`). See `D145` 0-c in `docs/decisions.md`.
 
 ---
 
@@ -436,8 +439,7 @@ Each screen has an intended posture. These are the reference treatments; when ad
 
 ### 7.2 Onboarding (Skill level, Today's setup)
 
-- **Left-aligned**, softer posture than prep screens.
-- Intro line + left-aligned h1 + supporting line ("You can change this later.").
+- **Onboarding posture is softer than prep**, but the two onboarding steps deliberately disagree on header alignment because Today's setup reuses the prep `<SetupBody>` verbatim. **Skill level (`/onboarding/skill-level`)** uses the soft onboarding header: intro line + **left-aligned** h1 (`text-xl font-semibold tracking-tight`, `text-align: start`) + supporting line ("You can change this later."). **Today's setup (`/onboarding/todays-setup`)** inherits the prep posture from §7.3: centered h1 + `← Skill level` back button — same `<SetupBody>` instance that Setup (`/setup`) renders standalone, so forking the header in onboarding context would add component branching for a cosmetic gain. Pre-2026-05-25 canon described both onboarding steps as left-aligned; the 2026-05-25 e2e pass surfaced the asymmetry as a consistency drift, and the resolution (residuals polish plan C2 / `D145` 0-a) is to record the shared prep posture for Today's setup, not to fork the header.
 - First-time content cards with title + descriptor.
 - **"Not sure yet" is a full focal card**, rendered AFTER the four primary bands so it doesn't compete with the primary typology but carries the same ink weight (`FOCAL_SURFACE_CLASS` + same `min-h-[64px]` rhythm). Pre-2026-05-25 canon described this as a tertiary `variant="link"` underline button; the 2026-04-21 partner walkthrough flagged the link as easily missed on first scan, and the promotion to a focal card was field-validated. Audit follow-up plan U8 (see `docs/design/reviews/2026-05-24-agent-e2e-design-critique.md` Canon-vs-code drift table).
 
@@ -467,7 +469,7 @@ Each screen has an intended posture. These are the reference treatments; when ad
 
 ### 7.6 Review
 
-- Centered h1 `Quick review` (`text-xl font-semibold tracking-tight`) + meta line. Pre-2026-05-25 canon claimed `text-2xl font-bold`; shipped is `text-xl font-semibold` (audit follow-up plan U8).
+- **Left-aligned** h1 `Quick review` (`text-xl font-semibold tracking-tight`, `text-align: start`) + meta line. Pre-2026-05-25 canon claimed `text-2xl font-bold` and **centered**; shipped is `text-xl font-semibold` (size reconciled by audit follow-up plan U8) and left-aligned (alignment reconciled by residuals polish plan C3 / `D145` 0-b). Left reads correctly with the four left-aligned section cards below; centering the h1 would orphan it above its card body.
 - Four cards, each a section: RPE scale, Good passes (conditional), Ended-early reason (conditional), Quick tags.
 - **RPE input: 3-way `Easy / Right / Hard` chip row** (better for courtside than the original 0-10 grid — fewer touch targets, faster glance read). Pre-2026-05-25 canon described a 0-10 chip grid; shipped is the 3-way variant (audit follow-up plan U8). See `docs/design/reviews/2026-04-26-agent-ux-review.md` for the original simplification reason.
 - Textarea card: `Short note (optional)` label with `font-normal` qualifier.
@@ -477,7 +479,7 @@ Each screen has an intended posture. These are the reference treatments; when ad
 
 - Minimal app-bar: `SafetyIcon` only.
 - Centered column: verdict word (`text-4xl font-bold tracking-tight`, `aria-live="polite"`) + reason paragraph. The solo path **deliberately omits** the `Today's verdict` eyebrow (intentional `Ma`); the pair path keeps the eyebrow because the verdict-without-eyebrow read more abrupt with two-person context. Pre-2026-05-25 canon described the eyebrow as always present; shipped is the solo-omits-eyebrow shape (audit follow-up plan U8).
-- Session-recap card: `Session recap` label + 4-row definition list (`Session`, `Drills completed`, `Good passes`, `Effort`).
+- Session-recap card: `Session recap` label + **5-row** definition list (`Session`, `Drills completed`, `Good passes`, `Difficulty`, `Effort`). Pre-2026-05-25 canon described a 4-row list; the `Difficulty` row was added when `D133` (per-drill difficulty tag) + `D134` (optional streak metric capture) shipped on `/run/check`, and the Complete recap aggregates the per-drill difficulty tags into a single row (e.g., `All still learning`, `Mixed`, etc.). Residuals polish plan C6 / `D145` reconciles the canon row count.
 - Primary `Back to home` (names the destination per the 2026-04-21 walkthrough P1-2 finding); quiet green-check save confirmation; storage-posture footnote. Pre-2026-05-25 canon claimed the primary was `Done`; shipped is `Back to home` (audit follow-up plan U8).
 
 ### 7.x Post-block screens (`DrillCheckScreen`)
@@ -508,7 +510,8 @@ Added 2026-05-25 (audit follow-up plan U5).
 ### 8.2 Confirmations
 
 - **Undo over confirm.** Prefer reversible actions that route the user to a recoverable surface over modal confirms.
-- When a confirm is required (Discard resume, Skip review), use the **two-tap reveal-and-confirm** pattern: first tap reveals a small confirm row with `Yes, ...` (danger variant) + `Never mind` (outline) side by side. Second tap commits.
+- When a confirm is required (Discard resume, Skip review), use the **two-tap reveal-and-confirm** pattern: first tap reveals a small confirm row with `Yes, ...` + `Never mind` (outline) side by side. Second tap commits. Default variant for the `Yes, ...` button is **danger** (`border-warning text-warning-strong bg-warning-surface` per §2.3), used wherever the action is destructive in the data-loss sense (Skip review, End session early).
+- **Discard-resume carve-out: neutral variant, not danger** (residuals polish plan C5 / `D145` 0-d). `ResumePrompt`'s `Yes, discard session` is styled with `text-text-primary` + a faint accent border — **not** the danger-outline treatment the default rule implies — because discarding a paused-resume session **preserves progress to history**; only the *resume capability* is lost, not the data itself. Painting this confirm red would mis-signal "your data will be lost," which is the opposite of what the action does. The confirm copy itself ("Ends this session. Progress is saved to history but can't be resumed.") carries the correct semantic load; the visual treatment matches. Do not "fix" this confirm to the danger variant on a future destructive-confirm pass without revisiting the carve-out.
 - Do not use native `confirm()` or `alert()`.
 
 ### 8.3 Interception
