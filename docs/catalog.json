@@ -1,7 +1,7 @@
 {
   "schema_version": 5,
   "repo_id": "volley_drills",
-  "last_updated": "2026-05-25",
+  "last_updated": "2026-05-27",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -20,7 +20,7 @@
       "python_requirement": "python3",
       "notes": "Editing from Windows Cursor is fine; repo automation assumes WSL/bash."
     },
-    "active_milestone": "M001",
+    "active_milestone": "M002",
     "stack": "Vite + React + TypeScript + PWA + Dexie (schema v6)",
     "blocking_gate": "D130 founder-use conditions tracked in docs/research/founder-use-ledger.md; D91 retention gate deferred. See docs/status/current-state.md for current reads.",
     "prototype_feedback": "docs/research/2026-04-12-v0a-runner-probe-feedback.md",
@@ -309,8 +309,9 @@
       "id": "m001-validation-overhang",
       "path": "docs/status/m001-validation-overhang.md",
       "type": "status",
-      "status": "active",
-      "canonical_for": "Single-page scoreboard of M001 validation gates: D130 falsification conditions, D130 early re-eval triggers, D134 Phase 2A streak gate, and the calendar-dated reads (2026-05-12 / 2026-05-21 / 2026-07-20). Build phase complete; this doc tracks what closes M001."
+      "status": "superseded",
+      "canonical_successor": "docs/status/current-state.md",
+      "canonical_for": "Superseded 2026-05-27 by M001 executive closure (D147). Originally tracked M001 validation gates (D130 falsification conditions, early re-eval triggers, D134 Phase 2A streak gate, calendar reads 2026-05-12 / 2026-05-21 / 2026-07-20). Now read-only historical record; live M001 posture lives in docs/status/current-state.md and closure narrative lives in docs/decisions.md D147."
     },
     {
       "id": "post-m001-content-backlog",
@@ -394,8 +395,8 @@
       "id": "M001",
       "path": "docs/milestones/m001-solo-session-loop.md",
       "type": "milestone",
-      "status": "active",
-      "canonical_for": "M001 Solo Session Loop milestone scope and current remaining-work routing. Refreshed 2026-05-09 to reflect build-complete-validating posture: stage flipped from 'validation' to 'build-complete-validating'; new Phase Posture section names build complete (2026-05-08), validation active (through 2026-07-20), polish (Tier 2) deferred. Validation gates routed to docs/status/m001-validation-overhang.md and trigger-gated content adds routed to docs/status/post-m001-content-backlog.md."
+      "status": "complete",
+      "canonical_for": "M001 Solo Session Loop milestone, closed 2026-05-27 by founder executive call (D147). Build phase complete 2026-05-08; validation ran 2026-04-20 → 2026-05-27 (Condition 2 PASS, Condition 3 PASS, Condition 1 fail-trending under standard read / pass-equivalent under D132 frame ratified by D146). Bypass disclosure, pre-registered reversal condition, and M002 carry-forward routing live in D147 (docs/decisions.md). For live posture queries, route to docs/status/current-state.md."
     },
     {
       "id": "M002",
@@ -960,8 +961,8 @@
       "path": "docs/ideation/2026-04-28-what-to-add-next-ideation.md",
       "type": "ideation",
       "status": "superseded",
-      "canonical_successor": "docs/status/m001-validation-overhang.md",
-      "canonical_for": "Historical post-Tier-1b-Layer-A 'what's next' ideation snapshot. Superseded 2026-05-10 \u2014 every survivor in the recommended sequence (catalog reserve audit, Tier 1c focus picker, skill-level override, evidence loop, S1 audio-pacing, S3 partner-walkthrough) has shipped or moved into routine ops between 2026-04-30 and 2026-05-10. Tier 1c focus picker shipped via Tune today (2026-04-30), then refactored to Setup -> Safety under D137 (2026-05-06). For current 'what to do next' orientation, route to docs/status/current-state.md, docs/status/m001-validation-overhang.md, docs/status/post-m001-content-backlog.md, and docs/ideation/2026-05-10-drill-first-time-runnability-ideation.md."
+      "canonical_successor": "docs/status/current-state.md",
+      "canonical_for": "Historical post-Tier-1b-Layer-A 'what's next' ideation snapshot. Superseded 2026-05-10 \u2014 every survivor in the recommended sequence (catalog reserve audit, Tier 1c focus picker, skill-level override, evidence loop, S1 audio-pacing, S3 partner-walkthrough) has shipped or moved into routine ops between 2026-04-30 and 2026-05-10. Tier 1c focus picker shipped via Tune today (2026-04-30), then refactored to Setup -> Safety under D137 (2026-05-06). Successor updated 2026-05-27 from docs/status/m001-validation-overhang.md (now itself superseded by M001 executive closure D147) to docs/status/current-state.md (terminal). For current 'what to do next' orientation, route to docs/status/current-state.md and docs/status/post-m001-content-backlog.md."
     },
     {
       "id": "tier-1c-prepay-and-catalog-audit-2026-04-28",

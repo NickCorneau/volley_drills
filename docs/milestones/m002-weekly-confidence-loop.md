@@ -23,6 +23,8 @@ decision_refs:
   - D124
   - D130
   - D137
+  - D146
+  - D147
 open_question_refs:
   - O2
   - O22
@@ -70,7 +72,7 @@ Define the smallest self-coached follow-on that lets a returning user:
 - Shallow next `2-6` session queue inside the existing flow, not a separate week planner or calendar surface
 - Minimal weekly receipt: planned-vs-completed sessions, one load proxy, one skill proxy
 - Lightweight accumulation surfaces that make "something is in the book" legible without becoming analytics-heavy
-- Reuse existing session and review records to power carry-forward and the weekly receipt, with no standalone history surface in this milestone (the standalone history list is owned by **M001 Tier 2** — see `docs/milestones/m001-solo-session-loop.md` Tier 2 — so M002 layers carry-forward and the next-`N` queue on top of an already-existing list rather than introducing one here)
+- Reuse existing session and review records to power carry-forward and the weekly receipt. **No standalone history surface in this milestone's core scope** — M002 layers carry-forward and the next-`N` queue directly on `ExecutionLog` records, with no prior-history-list precondition. (Note: the original M002 doc text claimed the standalone history list was owned by M001 Tier 2; M001 closed 2026-05-27 by founder executive call without Tier 2 having shipped — see `D147`. The full session history screen carries forward into M002 as a discretionary post-M002-core polish item per the M001 Carry-Forward section below, NOT as a prerequisite for M002's start.)
 - Recommendation-first posture preserved: no new profiling gate that delays a believable next session
 
 ## Minimal surface contract
@@ -80,7 +82,22 @@ Define the smallest self-coached follow-on that lets a returning user:
 - `Queue` owns the shallow next `2-6` sessions view. It is secondary to `Home`, not a new planning destination.
 - `Weekly receipt` owns the "something is in the book" readout: planned vs completed, one load proxy, one skill proxy.
 
-This milestone does **not** add a standalone history route, a calendar planner, or a generalized planning surface. The standalone history list is owned by **M001 Tier 2**, not M002.
+This milestone does **not** add a standalone history route, a calendar planner, or a generalized planning surface as part of its core scope. The full session history screen carries forward from M001 Tier 2 (unshipped at M001 closure) as a discretionary post-M002-core polish item per the M001 Carry-Forward section below; M002 plan does not begin work on it until at least one M002 core surface has shipped.
+
+## M001 Carry-Forward (post-2026-05-27 executive closure per D147)
+
+**Authority.** Cross-references `D147` in `docs/decisions.md`. M001 closed 2026-05-27 by founder executive call ahead of the pre-registered 2026-07-20 D130 re-eval. The closure absorbs M001's open obligations into M002's discretionary post-M002-core follow-on scope (Group A below) and preserves others under their existing routing (Group B below). **M002 core scope (weekly receipt + next-`N` queue + carry-forward + bounded explanation per `D124`) is unchanged.** M002 plan does NOT begin work on any Group A item until at least one M002 core surface has shipped — this discipline protects M002 from becoming "M001 leftovers + a weekly receipt."
+
+### Group A — Absorbed into M002 scope (discretionary post-M002-core follow-on)
+
+- **Tier 2 polish surfaces** — `See why this session was chosen` modal, richer summary copy on `Complete`, recommendation-first onboarding polish to the `D123` posture. Gate unlocked 2026-05-23 (Condition 3 PASS) but zero of 4 surfaces shipped before M001 closed. The full session history screen lives here too but **M002 does NOT depend on it as a prerequisite** — M002 layers carry-forward + next-`N` queue directly on `ExecutionLog` records per the In-scope section above.
+- **Friends-of-friends cohort question** — deferred from M001's 2026-07-20 re-eval. M002 may pick up the question if M002's own evidence supports cohort expansion. The 2026-07-20 D130 re-eval still fires per the adversarial memo's schedule with reframed scope (D130 founder-use window close + cohort decision on M002 evidence).
+- **Attack-content track shape question** — deferred from the 2026-05-27 attack-track action-stack requirements doc (Step 1 canonical-drill probe / FIVB 5.1 Stand and Spike) per Root B feasibility blockers. F1 first-class content-gap-evidence (per `docs/research/2026-05-27-attack-content-and-solo-friction-feedback.md`) carries forward as input to M002's content-priority decisions. M002 owns the decision *whether* to author a future attack-chain decision packet (D148-shape) — the schema work itself (adding `attack` to `SkillFocus`, `chain-attack` constant, `sessionFocus` extension) requires its own decision packet under D143's authorization boundary and is NOT inside M002's scope.
+
+### Group B — Preserved under existing routing (M002 does NOT absorb ownership)
+
+- **Conditional Phase 2B per-drill capture shapes** (`points-to-target`, `pass-grade-avg`, `composite`) — continues to be owned by `docs/status/post-m001-content-backlog.md` with original founder-trigger conditions. Phase 2A streak gate cleared 2026-05-23; M001 closure does not change Phase 2B routing.
+- **Tier 1b reserved-slot kill-or-author contract** — continues to be owned by `docs/status/post-m001-content-backlog.md` (6 reserved slots, hard expiry 2026-07-20). Cap discipline binds at 2026-07-20 **independent of M001 status** — M001 closure does NOT dissolve the contract. `cap_status_must_be_consistent` validator behavior in `scripts/validate-agent-docs.sh` is unchanged.
 
 ## Explicitly out of scope
 

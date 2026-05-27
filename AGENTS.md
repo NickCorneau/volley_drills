@@ -6,7 +6,7 @@ stage: validation
 type: agent-contract
 summary: "Canonical prose repo contract: current state, read order, source-of-truth order, and repo-wide working constraints."
 authority: repo-wide routing, working constraints, and agent-facing orientation
-last_updated: 2026-05-05
+last_updated: 2026-05-27
 depends_on:
  - docs/catalog.json
  - docs/vision.md
@@ -62,10 +62,10 @@ Give agents one durable, concise repo contract for current state, read order, so
 
 Live posture, recent shipped history, and dated detail are owned by `docs/status/current-state.md`. Read it for anything beyond the structural shape below.
 
-- **Phase**: 0 (validation)
-- **Active milestone**: `M001` Solo Session Loop, on top of the v0b Starter Loop under `app/`
-- **Next milestone in queue**: `M002` Weekly Confidence Loop (per `D124`)
-- **Mode and gate**: `D130` founder-use mode; the `D91` retention gate is deferred, not dropped — see `docs/status/current-state.md` for the active condition reads
+- **Phase**: 0 (validation, post-M001)
+- **Active milestone**: `M002` Weekly Confidence Loop (per `D124`), status `draft / stage: planning` — M001 closed 2026-05-27 by founder executive call (`D147`); M002 did not auto-activate (plan authoring is a separate next move)
+- **Closed milestone**: `M001` Solo Session Loop, closed 2026-05-27 by founder executive call (`D147`). M001 carry-forward (Tier 2 polish, cohort question, attack-content track shape) absorbed into M002 as discretionary post-M002-core follow-on. See `docs/status/current-state.md` Snapshot + Recent Shipped History for closure details.
+- **Mode and gate**: `D130` founder-use mode still active through 2026-07-20 (M001 closed inside the window via executive call; the re-eval still fires with reframed scope per `D147`: D130 window close + cohort decision on M002 evidence, does NOT re-read M001 closure). The `D91` retention gate is deferred, not dropped — see `docs/status/current-state.md` for the active posture.
 - **Key open questions**: tracked under `O*` in `docs/decisions.md`
 
 ## Cold-Start Protocol

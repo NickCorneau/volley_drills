@@ -1,12 +1,12 @@
 ---
 id: M001
 title: Solo Session Loop
-status: active
-stage: build-complete-validating
+status: complete
+stage: complete
 type: milestone
 authority: M001 thin-slice scope, acceptance evidence, validation gate
-summary: "Thinnest believable end-to-end solo session loop for pass / serve-receive. Build phase complete (2026-05-08); validation phase active through 2026-07-20 D130 re-eval."
-last_updated: 2026-05-10
+summary: "Thinnest believable end-to-end solo session loop for pass / serve-receive. Build phase complete (2026-05-08); milestone closed by founder executive call on 2026-05-27 (D147); see docs/status/current-state.md for live posture."
+last_updated: 2026-05-27
 depends_on:
   - docs/prd-foundation.md
   - docs/decisions.md
@@ -61,6 +61,8 @@ decision_refs:
   - D142
   - D143
   - D144
+  - D146
+  - D147
 open_question_refs:
   - O4
   - O5
@@ -72,11 +74,13 @@ open_question_refs:
 
 ## Phase Posture
 
-**Build:** complete as of 2026-05-08. All Tier 1a, Tier 1b Layer A, and Tier 1c work has shipped; all BAB-derived agent-actionable items closed (`A1` source-backed reroute registry refactor `fb631dd`; `D141` resolves `O24`; `D142`/`D143`/`D144` resolve T9/T6/slot-4). There are zero remaining agent-actionable code tasks for M001.
+**Closed: 2026-05-27 by founder executive call (D147).** M001 is complete; live posture lives in `docs/status/current-state.md`. The closure was an explicit founder-direct scope decision under `D130` founder-use mode, NOT a Path 1 / early-trigger firing. Bypass audit, reversal condition, and M002 carry-forward routing live in the `D147` decision row.
 
-**Validation:** active through 2026-07-20 (`D130` re-eval, or earlier if an early trigger fires). As of the 2026-05-10 founder + Seb export, the standard `D130` Condition 1 read is fail-trending (solo 1/7; set 0/3) while the `D132` pair-first / solo-accommodating re-read remains a dated-decision question, not an automatic amendment. Read `docs/status/m001-validation-overhang.md` for the calendar-dated reads (2026-05-12 / 2026-05-21 / 2026-07-20), the three `D130` falsification conditions, the five early-re-eval triggers, and the `D134` Phase 2A streak gate.
+**Build:** complete as of 2026-05-08. All Tier 1a, Tier 1b Layer A, and Tier 1c work shipped; all BAB-derived agent-actionable items closed (`A1` source-backed reroute registry refactor `fb631dd`; `D141` resolves `O24`; `D142`/`D143`/`D144` resolve T9/T6/slot-4).
 
-**Polish (Tier 2):** deferred. Tier 2 surfaces — "See why this session was chosen" modal, richer summary copy, full session history screen, recommendation-first onboarding polish — start only if the 2026-05-21 `D130` Condition 3 read-out passes.
+**Validation:** ran 2026-04-20 → 2026-05-27. Conditions read at closure: Condition 2 PASS (zero outside-app planning for 2-player scope); Condition 3 PASS (read 2026-05-21, partner unprompted-open demonstrated repeatedly across the 30-day window); Condition 1 fail-trending under standard read (solo 1/7 ~14%, set 0/3), pass-equivalent under D132 pair-first / solo-accommodating frame (D132 ratified via D146 on 2026-05-27). The 2026-07-20 D130 re-eval still fires per the memo's schedule, reframed scope: D130 founder-use window close + friends-of-friends cohort decision on M002 evidence. Does NOT re-read M001 closure (durable per D147).
+
+**Polish (Tier 2):** unlocked but unshipped at closure (gate cleared 2026-05-23; zero of 4 surfaces shipped). Carried forward into M002 milestone-doc scope as discretionary post-M002-core follow-on per D147. M002 plan does not begin work on any Tier 2 surface until at least one M002 core surface ships.
 
 **Trigger-gated content adds:** parked. The Tier 1b drill-cap residual (4/10 consumed; 6 slots reserved), `d36` (waiting on `O7`), `d43` (waiting on `D101`), and conditional Phase 2B capture shapes are routed to `docs/status/post-m001-content-backlog.md`.
 

@@ -1,12 +1,12 @@
 ---
 id: m001-validation-overhang
-title: M001 Validation Overhang
-status: active
-stage: build-complete-validating
+title: M001 Validation Overhang (superseded by M001 executive closure, 2026-05-27)
+status: superseded
+stage: complete
 type: status
-summary: "Single-page scoreboard of M001 validation gates: D130 falsification conditions, D130 early re-eval triggers, D134 Phase 2A streak gate, and the calendar-dated reads (2026-05-12 / 2026-05-21 / 2026-07-20). Build phase complete; this doc tracks what closes M001."
-authority: read-only scoreboard for M001 validation gates; cites authoritative sources, does not restate them
-last_updated: 2026-05-23
+summary: "Superseded 2026-05-27 by M001 executive closure (D147). Originally: single-page scoreboard of M001 validation gates (D130 falsification conditions, early re-eval triggers, D134 Phase 2A streak gate, calendar reads). Now read-only historical record; live posture lives in docs/status/current-state.md."
+authority: superseded; cite docs/status/current-state.md for live M001 posture and docs/decisions.md D147 for closure narrative
+last_updated: 2026-05-27
 depends_on:
   - docs/decisions.md
   - docs/plans/2026-04-20-m001-adversarial-memo.md
@@ -21,13 +21,17 @@ decision_refs:
   - D134
   - D135
   - D141
+  - D146
+  - D147
 ---
 
 # M001 Validation Overhang
 
+> **Superseded 2026-05-27 by M001 executive closure (D147).** This doc is read-only history. For live M001 posture, see `docs/status/current-state.md`. For closure narrative, bypass disclosure, reversal condition, and M002 carry-forward routing, see `D147` in `docs/decisions.md`. The 2026-07-20 D130 re-eval still fires per the adversarial memo's schedule but with reframed scope (does NOT re-read M001 closure).
+
 ## Agent Quick Scan
 
-- M001 build phase is **complete** (2026-05-08, see `docs/status/current-state.md` Recent Shipped History). Validation phase is **active** through the 2026-07-20 `D130` re-eval (or earlier if an early-re-eval trigger fires).
+- M001 **closed 2026-05-27** by founder executive call (D147). Build phase was complete (2026-05-08); validation phase ran 2026-04-20 → 2026-05-27. **This doc is superseded.** Read `docs/status/current-state.md` for live posture and `D147` in `docs/decisions.md` for closure narrative.
 - This doc enumerates what's left to close M001. It is a **read-only scoreboard** — it cites the source-of-truth doc and decision ID for every gate; it does not restate definitions, falsification criteria, or trigger conditions.
 - Read this doc to answer: "what am I waiting on for M001, and when do I check next?"
 - Read this doc **before** suggesting M001 work; the answer is almost always "wait for evidence on a gate already listed here, not new code."
