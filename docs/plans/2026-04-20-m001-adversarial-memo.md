@@ -125,6 +125,8 @@ The re-eval MUST produce a written decision memo. The decision rule below is asy
 
 ## Weekly trigger-review ritual (3 minutes, Mondays)
 
+> **Retired 2026-05-27 per `D148` in `docs/decisions.md`.** This section ran for 5 weeks during M001 validation (2026-04-20 → 2026-05-23) and was retired by founder direct call following M001 executive closure (`D147`). The section body below is preserved for archaeological reference; it is no longer an active discipline. A3 ligament (memo re-read within 7 days before any >50-line plan/research edit) is **preserved unchanged** under D148. The 2026-07-20 D130 re-eval still fires per the memo's calendar schedule with D147-reframed scope (D130 window close + cohort decision on M002 evidence) and does not depend on weekly catch-ups in the intervening window. See `docs/plans/2026-04-20-m001-adversarial-memo.md` `## Amendment log` 2026-05-27 entry for the formal retirement record.
+
 Every Monday during the 90-day window, the founder pastes into this memo's Weekly Log below:
 
 ```
@@ -222,6 +224,8 @@ Install the planning-layer ligament now:
 This ligament is three minutes and it is mandatory. Skipping it is visible because the Weekly Log will show the last read-through date. It is the only ritual whose skipping cannot be silently narrated around.
 
 ### A4 — Dream-pass cadence (`scripts/dream.sh`)
+
+> **Retired 2026-05-27 per `D148` in `docs/decisions.md`** alongside the Weekly trigger-review ritual above. `scripts/dream.sh` remains on disk but is not invoked under retirement. The section body below is preserved for archaeological reference.
 
 A one-off DDL pass produces a moment of insight; it does not produce the offline-consolidation function that makes dreaming *dreaming*. That function is a weekly rhythm that prunes at least as much as it generates. Install the cadence now:
 
@@ -577,9 +581,11 @@ The week-5 Monday (2026-05-18) was missed silently — no entry landed at that d
 
 Any edit that weakens a falsification condition, shifts a threshold, or changes the decision rule gets recorded here with date, what changed, the justification, and the co-signer.
 
+**2026-05-27 — Monday adversarial-memo ritual retired (`D148` in `docs/decisions.md`).** **What changed:** the Weekly trigger-review ritual (lines 126-164, 3-min Mondays cadence) and the A4 dream-pass cadence (`scripts/dream.sh` invocation; lines 224-231 before the retirement banner landed) are retired. Both section bodies are preserved for archaeological reference with retirement banners pointing at D148. **A3 ligament discipline (memo re-read within 7 days before any >50-line plan/research edit) is preserved unchanged** — A3 is independently useful and was not load-bearing only on the Monday cadence. **What does NOT change:** the three falsification conditions; the five early-re-eval triggers (a)–(e); the decision rule at the 2026-07-20 re-eval (D147-reframed scope: D130 window close + cohort decision on M002 evidence); the anti-displacement authoring-budget cap; the consecutive-miss clock dissolves (was structurally moot for M001 since D147 closure absorbed early-re-eval consequences). **Justification:** the ritual ran for 5 weeks during M001 validation (2026-04-20 → 2026-05-23) and did not produce decision-shifting value in the founder's direct experience; of 5 scheduled Mondays, only weeks 1 + 4 + 5 (catch-up) were performed, and even those did not change any downstream decision. Founder verbatim: *"i havent found them useful personally."* M001 closure (D147) absorbed the ritual's primary function (D130 falsification-condition reads were tied to M001 validation, now complete). The 2026-07-20 D130 re-eval still fires per the calendar schedule and does not depend on weekly catch-ups. **Co-signer:** waived with explicit reasoning recorded in D148 — the rule that changed was cadence-of-evidence-reading, not a condition / threshold / decision substance; the founder is the sole reader of behavioral evidence under D130 founder-use mode, so cadence is a founder-direct preference; the "haven't found them useful personally" feedback is the canonical founder-evidence the rule is designed to surface. Recorded transparently for future-audit; if the 2026-07-20 re-eval reader concludes co-signer was structurally required, this entry can be amended retroactively with a named co-signer.
+
 ## For agents
 
-- **Authoritative for**: the three falsification conditions, the default decision rule at the 2026-07-20 re-eval, the weekly trigger-review ritual, and the anti-displacement authoring-budget cap.
+- **Authoritative for**: the three falsification conditions, the default decision rule at the 2026-07-20 re-eval (per D147-reframed scope: D130 window close + cohort decision on M002 evidence), the A3 ligament discipline, and the anti-displacement authoring-budget cap. (The weekly trigger-review ritual + dream-pass cadence are retired 2026-05-27 per D148 — see Amendment log.)
 - **Edit when**: a weekly log entry is due (Monday), a falsification condition is observed as failed (record it in the Weekly Log and propagate the consequence into the relevant plan), or a properly co-signed amendment is proposed.
 - **Belongs elsewhere**: Tier 1a scope (`docs/plans/2026-04-20-m001-tier1-implementation.md`), D130 decision text (`docs/decisions.md`), the D91 numerical bar (`docs/research/d91-retention-gate-evidence.md`), partner walkthrough protocol (`docs/research/partner-walkthrough-script.md`), founder-use ledger schema (`docs/research/founder-use-ledger.md`).
 - **Outranked by**: `docs/decisions.md` (if D130 itself is amended), `docs/vision.md` (if the product vision is amended and this memo's premises fall out of sync).
