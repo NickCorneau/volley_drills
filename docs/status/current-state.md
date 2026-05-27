@@ -6,7 +6,7 @@ stage: validation
 type: status
 summary: "Canonical current-state snapshot and recent shipped-history log for Volleycraft."
 authority: current project posture, recent shipped history, and active validation gates
-last_updated: 2026-05-23
+last_updated: 2026-05-27
 depends_on:
   - AGENTS.md
   - docs/catalog.json
