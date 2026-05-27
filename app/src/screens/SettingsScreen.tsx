@@ -168,9 +168,18 @@ export function SettingsScreen() {
             data-testid="settings-skill-level"
             className="flex flex-col gap-2 rounded-base border border-text-secondary/15 bg-bg-warm/40 p-4"
           >
+            {/* 2026-05-25 (plan A1 of
+                `docs/plans/2026-05-25-005-polish-design-critique-residuals-plan.md`,
+                `D145`): card heading bumped from `text-sm` (14 px) to
+                `text-base` (16 px) so it matches its sibling card h2s
+                ("Export training records" and "About local storage")
+                — three stacked cards on one screen, all section h2s,
+                same hierarchy tier per `brand-ux-guidelines.md` §1.2
+                "Section h2" row. The pre-fix 14 px reading was the
+                one visible hierarchy wobble on Settings. */}
             <h2
               id="settings-skill-level-heading"
-              className="text-sm font-semibold text-text-primary"
+              className="text-base font-semibold text-text-primary"
             >
               Skill level
             </h2>
