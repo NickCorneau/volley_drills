@@ -85,7 +85,7 @@ The production scale. Match one of these tokens at each call-site; introduce a n
 |------|----------|------|--------|----------|-------|
 | Display — verdict | `text-4xl` | 36 px | 700 | `tracking-tight` | `CompleteScreen` verdict only |
 | Display — run / transition / review h1 | `text-xl` | 20 px | 600 | `tracking-tight` | `RunScreen` drill-name h1, `TransitionScreen` next-block h1, `ReviewScreen` `Quick review` h1 |
-| Display — prep screen h1 | `text-xl` | 20 px | 700 | `tracking-tight` | `SetupScreen`, `SafetyCheckScreen`, `SettingsScreen`, `SkillLevelScreen` |
+| Display — prep screen h1 | `text-xl` | 20 px | 600 | `tracking-tight` | `SetupScreen`, `SafetyCheckScreen`, `SettingsScreen`, `SkillLevelScreen` |
 | Wordmark | `text-xl` | 20 px | 600 | `tracking-tight` | `HomeScreen` app-bar only |
 | Modal/card h2 | `text-lg` | 18 px | 700 | — | `ResumePrompt`, `SoftBlockModal`, `SafetyIcon` sheet, `SchemaBlockedOverlay` |
 | Section h2 | `text-base` | 16 px | 600 | — | Review cards, Safety sections, Settings cards, Setup sections |
@@ -96,6 +96,8 @@ The production scale. Match one of these tokens at each call-site; introduce a n
 | Timer — preroll | `text-[72px]` | 72 px | 700 | — | `RunScreen` preroll countdown (mono, tabular, slashed zero, accent color) |
 
 **Canon-vs-code reconciliation (2026-05-25, audit follow-up plan U8).** This table previously claimed run / transition / review h1 was `text-2xl` / 700 and the wordmark was `text-lg` / 700. Shipped code uses `text-xl` / `font-semibold` for both, which is the calmer / less display-heavy register the 2026-04-23 walkthrough closeout settled on. The shipped values are now canon; the historical `text-2xl` / `text-lg` claims are retired. See `docs/design/reviews/2026-05-24-agent-e2e-design-critique.md` Canon-vs-code drift table.
+
+**Canon-vs-code reconciliation (2026-05-25, residuals polish plan C1 / `D145`).** The `Display — prep screen h1` row previously claimed weight `700`. Independent measurement during the 2026-05-25 e2e pass confirmed every shipped prep h1 (`SetupScreen`, `SafetyCheckScreen`, `SettingsScreen`, `SettingsSkillLevelScreen`, onboarding `SkillLevelScreen`) renders at `font-semibold` (600), matching the calmer register the U8 reconciliation already established for run / transition / review h1 and the wordmark. App is self-consistent at 600 across **every** measured h1; canon now reflects that. See `docs/plans/2026-05-25-005-polish-design-critique-residuals-plan.md` Phase C / C1 and `D145` in `docs/decisions.md`. (Adjacent drift not addressed in this row: §1.3 weight-distribution line still lists "wordmark" under `font-bold (700)`; the wordmark already renders at 600 per the §1.2 row above and the §7.1 entry below. Future cleanup pass.)
 
 **Forbidden sizes**: anything below `text-xs` (12 px) in body copy. The outdoor brief's 16 px body floor applies to all primary copy; `text-xs` is reserved for truly decorative captions inside large tap targets or explicit footnotes.
 
@@ -441,7 +443,7 @@ Each screen has an intended posture. These are the reference treatments; when ad
 
 ### 7.3 Prep (Setup, Safety, Settings)
 
-- **Centered** `← Back` button (left) + centered h1 (`text-xl font-bold tracking-tight`).
+- **Centered** `← Back` button (left) + centered h1 (`text-xl font-semibold tracking-tight`). Pre-2026-05-25 canon claimed `text-xl font-bold tracking-tight`; shipped is `text-xl font-semibold` across all prep screens (`SetupScreen`, `SafetyCheckScreen`, `SettingsScreen`, `SettingsSkillLevelScreen`) and the onboarding `SkillLevelScreen`, matching the calmer register the U8 reconciliation already established elsewhere (residuals polish plan C1 / `D145`).
 - On Safety: **no** session-summary meta line under the h1. Pre-2026-05-25 canon described an amber `text-sm font-medium` orientation line here, but Safety deliberately does **not** echo the draft or focus — pinned by the `does not echo the draft or focus in the default safety header` test in `SafetyCheckScreen.test.tsx` (the only time focus is mentioned is when pain-recovery overrides an explicit focus). Safety stays a pure readiness gate; the draft summary already lives on the Home Draft card. Audit follow-up plan U8 (see `docs/design/reviews/2026-05-24-agent-e2e-design-critique.md`).
 - On Safety: a fail-quiet gating hint (`text-sm text-text-secondary`, `aria-live="polite"`) renders above the disabled `Start session` button explaining what's still unanswered (§6.4), mirroring the Review / Drill Check `missingHint` voice. The `2+ days` branch gets its own message because tapping it reveals a required "how long off?" sub-row.
 - Section h2s: `text-base font-semibold`.
