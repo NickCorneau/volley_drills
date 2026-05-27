@@ -6,7 +6,7 @@
  * These used to live in `services/session.ts`; they're domain logic,
  * not persistence, so they belong here.
  */
-import type { ExecutionLog, SessionPlan } from '../model'
+import type { ExecutionLog, SessionPlan, TimerState } from '../model'
 
 export function buildStartedBlock(exec: ExecutionLog, plan: SessionPlan): ExecutionLog | null {
   const idx = exec.activeBlockIndex
@@ -115,4 +115,26 @@ export function computeActualDurationMinutes(
     totalSeconds += Math.min(currentBlockElapsedSeconds, activePlannedSeconds)
   }
   return Math.round((totalSeconds / 60) * 10) / 10
+}
+
+export function withActualDuration(
+  exec: ExecutionLog,
+  plan: SessionPlan,
+  timer: TimerState | null | undefined,
+  timerBlockIndex = exec.activeBlockIndex,
+): ExecutionLog {
+  const timerOwnsFinalizedBlock =
+    timer?.executionLogId === exec.id && timer.blockIndex === timerBlockIndex
+  const plannedSeconds =
+    timerOwnsFinalizedBlock && timer.blockIndex >= 0 && timer.blockIndex < plan.blocks.length
+      ? plan.blocks[timer.blockIndex].durationMinutes * 60
+      : undefined
+  const partialSeconds =
+    timerOwnsFinalizedBlock && plannedSeconds !== undefined
+      ? Math.min(timer.accumulatedElapsed, plannedSeconds)
+      : undefined
+  return {
+    ...exec,
+    actualDurationMinutes: computeActualDurationMinutes(exec, plan, partialSeconds),
+  }
 }

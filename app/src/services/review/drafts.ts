@@ -25,6 +25,26 @@ export interface DraftReviewData {
   shortNote?: string
 }
 
+export type ReviewFormPatch = Partial<{
+  sessionRpe: number | null
+  goodPasses: number
+  totalAttempts: number
+  borderlineCount: number | undefined
+  incompleteReason: IncompleteReason | undefined
+  quickTags: string[] | undefined
+  shortNote: string | undefined
+}>
+
+export type ReviewCapturePatch = Partial<{
+  perDrillCaptures: PerDrillCapture[] | undefined
+}>
+
+type ReviewDraftPatch = ReviewFormPatch &
+  ReviewCapturePatch &
+  Partial<{
+    drillScores: DrillVariantScore[] | undefined
+  }>
+
 /**
  * Field-merging patch for an in-progress review draft (U1 of the
  * architecture pass). Only keys present on `patch` are written; absent
@@ -40,19 +60,7 @@ export interface DraftReviewData {
  * `'skipped'` record is never overwritten, matching the H19 / A1
  * invariants the legacy writer enforced.
  */
-export type ReviewDraftPatch = Partial<{
-  sessionRpe: number | null
-  goodPasses: number
-  totalAttempts: number
-  drillScores: DrillVariantScore[] | undefined
-  perDrillCaptures: PerDrillCapture[] | undefined
-  borderlineCount: number | undefined
-  incompleteReason: IncompleteReason | undefined
-  quickTags: string[] | undefined
-  shortNote: string | undefined
-}>
-
-export async function patchReviewDraft(
+async function patchReviewDraftInternal(
   executionLogId: string,
   patch: ReviewDraftPatch,
 ): Promise<void> {
@@ -91,14 +99,42 @@ export async function patchReviewDraft(
   })
 }
 
+function pickReviewFormPatch(patch: ReviewFormPatch): ReviewFormPatch {
+  const owned: ReviewFormPatch = {}
+  if ('sessionRpe' in patch) owned.sessionRpe = patch.sessionRpe
+  if ('goodPasses' in patch) owned.goodPasses = patch.goodPasses
+  if ('totalAttempts' in patch) owned.totalAttempts = patch.totalAttempts
+  if ('borderlineCount' in patch) owned.borderlineCount = patch.borderlineCount
+  if ('incompleteReason' in patch) owned.incompleteReason = patch.incompleteReason
+  if ('quickTags' in patch) owned.quickTags = patch.quickTags
+  if ('shortNote' in patch) owned.shortNote = patch.shortNote
+  return owned
+}
+
+function pickReviewCapturePatch(patch: ReviewCapturePatch): ReviewCapturePatch {
+  const owned: ReviewCapturePatch = {}
+  if ('perDrillCaptures' in patch) owned.perDrillCaptures = patch.perDrillCaptures
+  return owned
+}
+
+export async function patchReviewForm(
+  executionLogId: string,
+  patch: ReviewFormPatch,
+): Promise<void> {
+  await patchReviewDraftInternal(executionLogId, pickReviewFormPatch(patch))
+}
+
+export async function patchReviewCaptures(
+  executionLogId: string,
+  patch: ReviewCapturePatch,
+): Promise<void> {
+  await patchReviewDraftInternal(executionLogId, pickReviewCapturePatch(patch))
+}
+
 /**
- * Legacy "save a full draft shape" entry point. Now a thin shim over
- * `patchReviewDraft` that preserves key-presence semantics: optional
- * fields the caller omitted from `data` stay absent from the patch and
- * therefore preserve any prior value on the row. Callers that pass
- * `field: undefined` explicitly still clear the field, matching the
- * pre-U1 behavior. New call sites should prefer `patchReviewDraft` for
- * partial writes.
+ * Legacy "save a full draft shape" entry point for compatibility and
+ * test/setup paths. Production autosave surfaces should use the owner-
+ * specific `patchReviewForm` or `patchReviewCaptures` APIs instead.
  */
 export async function saveReviewDraft(data: DraftReviewData): Promise<void> {
   const patch: ReviewDraftPatch = {
@@ -112,7 +148,7 @@ export async function saveReviewDraft(data: DraftReviewData): Promise<void> {
   if ('incompleteReason' in data) patch.incompleteReason = data.incompleteReason
   if ('quickTags' in data) patch.quickTags = data.quickTags
   if ('shortNote' in data) patch.shortNote = data.shortNote
-  await patchReviewDraft(data.executionLogId, patch)
+  await patchReviewDraftInternal(data.executionLogId, patch)
 }
 
 /**

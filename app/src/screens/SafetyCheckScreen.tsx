@@ -226,7 +226,7 @@ export function SafetyCheckScreen() {
     return (
       <StatusMessage
         variant="empty"
-        message={createError ?? 'Session not found'}
+        message={createError ?? 'Session not found.'}
         action={
           <Button variant="ghost" onClick={() => navigate(routes.setup())}>
             Back to setup

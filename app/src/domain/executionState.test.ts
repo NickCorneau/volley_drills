@@ -12,6 +12,7 @@ import {
   buildResumedExecution,
   buildStartedBlock,
   computeActualDurationMinutes,
+  withActualDuration,
 } from './executionState'
 
 const FIXED_NOW = 1_700_000_000_000
@@ -208,5 +209,127 @@ describe('computeActualDurationMinutes', () => {
     expect(computeActualDurationMinutes(exec, p, Number.NaN)).toBe(5)
     expect(computeActualDurationMinutes(exec, p, -1)).toBe(5)
     expect(computeActualDurationMinutes(exec, p, Number.POSITIVE_INFINITY)).toBe(5)
+  })
+})
+
+
+describe('withActualDuration', () => {
+  it('adds owned timer elapsed to the computed actual duration', () => {
+    const p = plan([block('b1', 3), block('b2', 5)])
+    const exec = log(
+      { id: 'exec-owned', activeBlockIndex: 1 },
+      [
+        { blockId: 'b1', status: 'completed' },
+        { blockId: 'b2', status: 'skipped' },
+      ],
+    )
+
+    const out = withActualDuration(exec, p, {
+      id: 'active',
+      executionLogId: 'exec-owned',
+      blockIndex: 1,
+      startedAt: FIXED_NOW,
+      accumulatedElapsed: 120,
+      status: 'running',
+      lastFlushedAt: FIXED_NOW,
+    })
+
+    expect(out.actualDurationMinutes).toBe(5)
+    expect(out).not.toBe(exec)
+  })
+
+  it('ignores a timer owned by another execution', () => {
+    const p = plan([block('b1', 3), block('b2', 5)])
+    const exec = log(
+      { id: 'exec-current', activeBlockIndex: 1 },
+      [
+        { blockId: 'b1', status: 'completed' },
+        { blockId: 'b2', status: 'skipped' },
+      ],
+    )
+
+    const out = withActualDuration(exec, p, {
+      id: 'active',
+      executionLogId: 'exec-other',
+      blockIndex: 1,
+      startedAt: FIXED_NOW,
+      accumulatedElapsed: 120,
+      status: 'running',
+      lastFlushedAt: FIXED_NOW,
+    })
+
+    expect(out.actualDurationMinutes).toBe(3)
+  })
+
+  it('handles a missing timer snapshot', () => {
+    const p = plan([block('b1', 3), block('b2', 5)])
+    const exec = log(
+      { id: 'exec-no-timer', activeBlockIndex: 1 },
+      [
+        { blockId: 'b1', status: 'completed' },
+        { blockId: 'b2', status: 'skipped' },
+      ],
+    )
+
+    expect(withActualDuration(exec, p, null).actualDurationMinutes).toBe(3)
+  })
+})
+
+
+describe('withActualDuration timer ownership edge cases', () => {
+  it('caps a post-advance final skipped block by the timer block duration', () => {
+    const p = plan([block('b1', 3), block('b2', 5)])
+    const exec = log(
+      { id: 'exec-owned', activeBlockIndex: 2 },
+      [
+        { blockId: 'b1', status: 'completed' },
+        { blockId: 'b2', status: 'skipped' },
+      ],
+    )
+
+    const out = withActualDuration(
+      exec,
+      p,
+      {
+        id: 'active',
+        executionLogId: 'exec-owned',
+        blockIndex: 1,
+        startedAt: FIXED_NOW,
+        accumulatedElapsed: 999_999,
+        status: 'running',
+        lastFlushedAt: FIXED_NOW,
+      },
+      1,
+    )
+
+    expect(out.actualDurationMinutes).toBe(8)
+  })
+
+  it('ignores a same-execution timer from a different block', () => {
+    const p = plan([block('b1', 3), block('b2', 5)])
+    const exec = log(
+      { id: 'exec-owned', activeBlockIndex: 1 },
+      [
+        { blockId: 'b1', status: 'completed' },
+        { blockId: 'b2', status: 'skipped' },
+      ],
+    )
+
+    const out = withActualDuration(
+      exec,
+      p,
+      {
+        id: 'active',
+        executionLogId: 'exec-owned',
+        blockIndex: 0,
+        startedAt: FIXED_NOW,
+        accumulatedElapsed: 120,
+        status: 'running',
+        lastFlushedAt: FIXED_NOW,
+      },
+      1,
+    )
+
+    expect(out.actualDurationMinutes).toBe(3)
   })
 })

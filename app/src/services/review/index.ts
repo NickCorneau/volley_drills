@@ -39,10 +39,8 @@ export { submitReview, type SubmitReviewData, type SubmitReviewResult } from './
 export { expireReview, type ExpireReviewData } from './expire'
 export {
   loadReviewDraft,
-  patchReviewDraft,
-  saveReviewDraft,
-  type DraftReviewData,
-  type ReviewDraftPatch,
+  patchReviewCaptures,
+  patchReviewForm,
 } from './drafts'
 export { countSubmittedReviews } from './cohort'
 export { loadSessionBundle, type SessionBundle } from './bundle'

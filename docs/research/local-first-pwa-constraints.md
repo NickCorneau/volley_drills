@@ -6,7 +6,7 @@ stage: validation
 type: research
 authority: iPhone/PWA platform constraints, storage durability, update safety, and degraded-capability defaults
 summary: "iPhone/PWA platform constraints, the 2026 three-layer storage-durability model, three-state save copy, update safety, and the real-device test protocol for M001."
-last_updated: 2026-05-02
+last_updated: 2026-05-27
 depends_on:
   - docs/vision.md
   - docs/decisions.md
@@ -176,7 +176,11 @@ Dexie documents `Dexie.QuotaExceededError`, but on some browsers it surfaces as 
 
 ### Multi-tab upgrade blocked
 
-When another tab holds an open Dexie connection during a schema version upgrade, the upgrade blocks. Dexie fires a `blocked` event. The app should handle this gracefully with a user-facing message ("Please close the other tab to continue").
+When another tab holds an open Dexie connection during a schema version upgrade, the upgrade blocks. Dexie fires a `blocked` event. The app should handle this gracefully with a user-facing message ("Please close the other tab to continue"). The current app models this upgrade-specific race in `app/src/db/schema.ts` through the `versionchange` / `blocked` handlers and `SchemaBlockedOverlay`.
+
+### Multi-tab everyday writes
+
+The current M001/founder-use posture does **not** model same-version multi-tab writes. Concurrent draft mutation, simultaneous run starts, two Drill Check tabs overwriting the same `perDrillCaptures` array, or two tabs racing `saveExecution` are accepted last-writer-wins limitations because realistic courtside use is single-tab. Re-evaluate this before stranger-cohort use, a shared-device cycle, or any UX that asks users to open Volleycraft in a second tab. A likely future path is a `BroadcastChannel('volleycraft')` notification layer for events such as `session_started` and `draft_mutated`, but that follow-up must include merge/version conflict handling rather than notifications alone.
 
 ### Safari IndexedDB instability
 

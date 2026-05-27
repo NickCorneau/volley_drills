@@ -405,8 +405,8 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         {isComplete && previewLargeGap !== null && !isSaving && (
           <Callout tone="warning" size="sm" role="status">
             <span data-testid="setup-large-gap-warning">
-              This session will run about {previewLargeGap.assembled} min instead of{' '}
-              {previewLargeGap.named}. Fewer drills available for this focus.
+              About {previewLargeGap.assembled} min instead of {previewLargeGap.named} min. This
+              focus has fewer drills available.
             </span>
           </Callout>
         )}

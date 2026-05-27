@@ -8,7 +8,7 @@ import {
   buildPausedExecution,
   buildResumedExecution,
   buildStartedBlock,
-  computeActualDurationMinutes,
+  withActualDuration,
   loadSession,
   saveExecution,
   swapActiveBlock,
@@ -156,12 +156,8 @@ export function useSessionRunner(executionLogId: string, options?: SessionRunner
         const onLastBlock = exec.activeBlockIndex >= p.blocks.length - 1
         const timer = onLastBlock && status === 'skipped' ? await readTimerState() : undefined
         const { execution: updated, isLast } = buildAdvancedBlock(exec, p, status)
-        if (isLast) {
-          const partialSeconds =
-            timer?.executionLogId === exec.id ? timer.accumulatedElapsed : undefined
-          updated.actualDurationMinutes = computeActualDurationMinutes(updated, p, partialSeconds)
-        }
-        await persist(updated)
+        const finalized = isLast ? withActualDuration(updated, p, timer, exec.activeBlockIndex) : updated
+        await persist(finalized)
         await clearTimerState()
         return isLast
       }),
@@ -179,10 +175,12 @@ export function useSessionRunner(executionLogId: string, options?: SessionRunner
         const p = planRef.current
         if (!exec || !p) return
         const timer = await readTimerState()
-        const ended = buildEndedSession(exec, reason)
-        const ownedElapsed =
-          timer?.executionLogId === exec.id ? timer.accumulatedElapsed : undefined
-        ended.actualDurationMinutes = computeActualDurationMinutes(ended, p, ownedElapsed)
+        const ended = withActualDuration(
+          buildEndedSession(exec, reason),
+          p,
+          timer,
+          exec.activeBlockIndex,
+        )
         await persist(ended)
         await clearTimerState()
       }),

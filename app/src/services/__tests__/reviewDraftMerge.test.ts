@@ -2,10 +2,11 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
 import {
   loadReviewDraft,
-  patchReviewDraft,
-  saveReviewDraft,
+  patchReviewCaptures,
+  patchReviewForm,
   submitReview,
 } from '../review'
+import { saveReviewDraft } from '../review/drafts'
 
 /**
  * U1 / Review-draft field merging (architecture pass).
@@ -16,8 +17,8 @@ import {
  * could silently clobber the RPE the tester had typed on Review (or
  * vice versa for captures + form fields).
  *
- * The fix is `patchReviewDraft(executionLogId, patch)`: an
- * explicit-keys-only merge whose `'key' in patch` check distinguishes
+ * The fix is owner-specific draft patch APIs over one internal merge:
+ * explicit keys distinguish
  * "absent" (preserve) from "explicitly undefined" (clear). This file
  * pins the merge contract end-to-end against `fake-indexeddb`.
  */
@@ -61,9 +62,9 @@ beforeEach(async () => {
   await seed()
 })
 
-describe('patchReviewDraft (cross-surface field merging)', () => {
+describe('owner-specific review draft patches (cross-surface field merging)', () => {
   it('preserves captures when a Review-only patch arrives later', async () => {
-    await patchReviewDraft(EXEC, {
+    await patchReviewCaptures(EXEC, {
       perDrillCaptures: [
         {
           drillId: 'd1',
@@ -75,7 +76,7 @@ describe('patchReviewDraft (cross-surface field merging)', () => {
       ],
     })
 
-    await patchReviewDraft(EXEC, {
+    await patchReviewForm(EXEC, {
       sessionRpe: 5,
       goodPasses: 0,
       totalAttempts: 0,
@@ -88,7 +89,7 @@ describe('patchReviewDraft (cross-surface field merging)', () => {
   })
 
   it('preserves RPE / note when a capture-only patch arrives later', async () => {
-    await patchReviewDraft(EXEC, {
+    await patchReviewForm(EXEC, {
       sessionRpe: 6,
       goodPasses: 12,
       totalAttempts: 20,
@@ -96,7 +97,7 @@ describe('patchReviewDraft (cross-surface field merging)', () => {
       quickTags: ['notCaptured'],
     })
 
-    await patchReviewDraft(EXEC, {
+    await patchReviewCaptures(EXEC, {
       perDrillCaptures: [
         {
           drillId: 'd1',
@@ -116,14 +117,14 @@ describe('patchReviewDraft (cross-surface field merging)', () => {
   })
 
   it('treats absent keys as preserve, not clear', async () => {
-    await patchReviewDraft(EXEC, {
+    await patchReviewForm(EXEC, {
       sessionRpe: 7,
       goodPasses: 3,
       totalAttempts: 6,
       shortNote: 'First write.',
     })
 
-    await patchReviewDraft(EXEC, { sessionRpe: 4 })
+    await patchReviewForm(EXEC, { sessionRpe: 4 })
 
     const draft = await loadReviewDraft(EXEC)
     expect(draft?.sessionRpe).toBe(4)
@@ -133,7 +134,7 @@ describe('patchReviewDraft (cross-surface field merging)', () => {
   })
 
   it('writes only listed defaults when no draft exists yet', async () => {
-    await patchReviewDraft(EXEC, {
+    await patchReviewCaptures(EXEC, {
       perDrillCaptures: [
         {
           drillId: 'd1',
@@ -161,7 +162,7 @@ describe('patchReviewDraft (cross-surface field merging)', () => {
       totalAttempts: 15,
     })
 
-    await patchReviewDraft(EXEC, { sessionRpe: 9 })
+    await patchReviewForm(EXEC, { sessionRpe: 9 })
 
     const stored = await db.sessionReviews.where('executionLogId').equals(EXEC).first()
     expect(stored?.status).toBe('submitted')
@@ -180,7 +181,7 @@ describe('patchReviewDraft (cross-surface field merging)', () => {
       status: 'skipped',
     })
 
-    await patchReviewDraft(EXEC, { sessionRpe: 4, perDrillCaptures: [] })
+    await patchReviewForm(EXEC, { sessionRpe: 4 })
 
     const stored = await db.sessionReviews.where('executionLogId').equals(EXEC).first()
     expect(stored?.status).toBe('skipped')
@@ -190,7 +191,7 @@ describe('patchReviewDraft (cross-surface field merging)', () => {
   it('serial patches from concurrent surfaces land both fields', async () => {
     // Simulate Drill Check and Review autosaves landing back-to-back.
     await Promise.all([
-      patchReviewDraft(EXEC, {
+      patchReviewCaptures(EXEC, {
         perDrillCaptures: [
           {
             drillId: 'd1',
@@ -201,7 +202,7 @@ describe('patchReviewDraft (cross-surface field merging)', () => {
           },
         ],
       }),
-      patchReviewDraft(EXEC, {
+      patchReviewForm(EXEC, {
         sessionRpe: 8,
         goodPasses: 14,
         totalAttempts: 18,
@@ -221,7 +222,7 @@ describe('patchReviewDraft (cross-surface field merging)', () => {
   })
 
   it('saveReviewDraft path stays compatible (preserves captures across full-shape writes)', async () => {
-    await patchReviewDraft(EXEC, {
+    await patchReviewCaptures(EXEC, {
       perDrillCaptures: [
         {
           drillId: 'd1',
@@ -246,4 +247,75 @@ describe('patchReviewDraft (cross-surface field merging)', () => {
     // capture survives a Review-shape save that doesn't carry it.
     expect(draft?.perDrillCaptures).toHaveLength(1)
   })
+
+  it('owner-specific patches clear only their own optional fields explicitly', async () => {
+    await patchReviewCaptures(EXEC, {
+      perDrillCaptures: [
+        {
+          drillId: 'd1',
+          variantId: 'd1-solo',
+          blockIndex: 0,
+          difficulty: 'too_easy',
+          capturedAt: 6_000,
+        },
+      ],
+    })
+    await patchReviewForm(EXEC, {
+      sessionRpe: 7,
+      goodPasses: 3,
+      totalAttempts: 5,
+      incompleteReason: 'fatigue',
+      quickTags: ['notCaptured'],
+      shortNote: 'Clear me.',
+    })
+
+    await patchReviewCaptures(EXEC, { perDrillCaptures: [] })
+    await patchReviewForm(EXEC, {
+      incompleteReason: undefined,
+      quickTags: undefined,
+      shortNote: undefined,
+    })
+
+    const draft = await loadReviewDraft(EXEC)
+    expect(draft?.sessionRpe).toBe(7)
+    expect(draft?.goodPasses).toBe(3)
+    expect(draft?.totalAttempts).toBe(5)
+    expect(draft?.perDrillCaptures).toBeUndefined()
+    expect(draft?.incompleteReason).toBeUndefined()
+    expect(draft?.quickTags).toBeUndefined()
+    expect(draft?.shortNote).toBeUndefined()
+  })
+
+  it('public wrappers ignore widened cross-owner payload keys at runtime', async () => {
+    await patchReviewForm(EXEC, { sessionRpe: 6, goodPasses: 2, totalAttempts: 4 })
+    const widenedCapturePatch = {
+      sessionRpe: 1,
+      perDrillCaptures: [
+        {
+          drillId: 'd1',
+          variantId: 'd1-solo',
+          blockIndex: 0,
+          difficulty: 'still_learning' as const,
+          capturedAt: 7_000,
+        },
+      ],
+    }
+
+    await patchReviewCaptures(EXEC, widenedCapturePatch)
+
+    let draft = await loadReviewDraft(EXEC)
+    expect(draft?.sessionRpe).toBe(6)
+    expect(draft?.perDrillCaptures).toHaveLength(1)
+
+    const widenedFormPatch = {
+      sessionRpe: 8,
+      perDrillCaptures: [] as const,
+    }
+    await patchReviewForm(EXEC, widenedFormPatch)
+
+    draft = await loadReviewDraft(EXEC)
+    expect(draft?.sessionRpe).toBe(8)
+    expect(draft?.perDrillCaptures).toHaveLength(1)
+  })
+
 })

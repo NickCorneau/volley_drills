@@ -3,7 +3,7 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../db'
 import { DRILLS } from '../../data/drills'
-import { loadReviewDraft, patchReviewDraft, saveReviewDraft } from '../../services/review'
+import { loadReviewDraft, patchReviewCaptures } from '../../services/review'
 import type { BlockSlotType } from '../../types/session'
 import { DrillCheckScreen } from '../DrillCheckScreen'
 
@@ -14,8 +14,7 @@ vi.mock('../../services/review', async () => {
   return {
     ...actual,
     loadReviewDraft: vi.fn(actual.loadReviewDraft),
-    saveReviewDraft: vi.fn(actual.saveReviewDraft),
-    patchReviewDraft: vi.fn(actual.patchReviewDraft),
+    patchReviewCaptures: vi.fn(actual.patchReviewCaptures),
   }
 })
 
@@ -40,7 +39,7 @@ vi.mock('../../services/review', async () => {
  *   - The "Continue" CTA stays disabled until a difficulty chip is
  *     tapped; the gating hint is visible while disabled.
  *   - A tap on a chip persists a `perDrillCaptures` row through
- *     `saveReviewDraft` so the tag survives a Finish-Later round trip.
+ *     `patchReviewCaptures` so the tag survives a Finish-Later round trip.
  *   - An existing draft with a capture for this block hydrates the
  *     chip and clears the gating hint on first render.
  */
@@ -235,8 +234,7 @@ beforeEach(async () => {
     '../../services/review',
   )
   vi.mocked(loadReviewDraft).mockImplementation(actualReview.loadReviewDraft)
-  vi.mocked(saveReviewDraft).mockImplementation(actualReview.saveReviewDraft)
-  vi.mocked(patchReviewDraft).mockImplementation(actualReview.patchReviewDraft)
+  vi.mocked(patchReviewCaptures).mockImplementation(actualReview.patchReviewCaptures)
   vi.clearAllMocks()
   await clearDb()
 })
@@ -416,7 +414,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     expect(await screen.findByTestId('per-drill-capture')).toBeInTheDocument()
   })
 
-  it('persists the tapped difficulty into the review draft via patchReviewDraft', async () => {
+  it('persists the tapped difficulty into the review draft via patchReviewCaptures', async () => {
     const execId = await seedTwoBlockSession({
       prevType: 'main_skill',
       prevCompleted: true,
@@ -426,8 +424,8 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     await screen.findByTestId('per-drill-capture')
     fireEvent.click(screen.getByRole('radio', { name: /too hard/i }))
 
-    await waitFor(() => expect(patchReviewDraft).toHaveBeenCalled())
-    const [calledExecId, patch] = vi.mocked(patchReviewDraft).mock.calls.at(-1) ?? []
+    await waitFor(() => expect(patchReviewCaptures).toHaveBeenCalled())
+    const [calledExecId, patch] = vi.mocked(patchReviewCaptures).mock.calls.at(-1) ?? []
     expect(calledExecId).toBe(execId)
     expect(patch?.perDrillCaptures).toHaveLength(1)
     const row = patch!.perDrillCaptures![0]
@@ -557,7 +555,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     const pendingSave = new Promise<void>((resolve) => {
       resolveSave = resolve
     })
-    vi.mocked(patchReviewDraft).mockReturnValueOnce(pendingSave)
+    vi.mocked(patchReviewCaptures).mockReturnValueOnce(pendingSave)
 
     const execId = await seedTwoBlockSession({
       prevType: 'main_skill',
@@ -567,7 +565,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
 
     await screen.findByTestId('per-drill-capture')
     fireEvent.click(screen.getByRole('radio', { name: /still learning/i }))
-    await waitFor(() => expect(patchReviewDraft).toHaveBeenCalled())
+    await waitFor(() => expect(patchReviewCaptures).toHaveBeenCalled())
 
     fireEvent.click(screen.getByRole('button', { name: /continue/i }))
 
@@ -588,7 +586,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     const pendingSave = new Promise<void>((_, reject) => {
       rejectSave = reject
     })
-    vi.mocked(patchReviewDraft).mockReturnValueOnce(pendingSave)
+    vi.mocked(patchReviewCaptures).mockReturnValueOnce(pendingSave)
 
     const execId = await seedTwoBlockSession({
       prevType: 'main_skill',
@@ -598,7 +596,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
 
     await screen.findByTestId('per-drill-capture')
     fireEvent.click(screen.getByRole('radio', { name: /still learning/i }))
-    await waitFor(() => expect(patchReviewDraft).toHaveBeenCalled())
+    await waitFor(() => expect(patchReviewCaptures).toHaveBeenCalled())
 
     fireEvent.click(screen.getByRole('button', { name: /continue/i }))
     expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/check')
@@ -613,7 +611,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
   })
 
   it('stays on Drill Check and shows an error when the Continue flush rejects', async () => {
-    vi.mocked(patchReviewDraft)
+    vi.mocked(patchReviewCaptures)
       .mockResolvedValueOnce(undefined)
       .mockRejectedValueOnce(new Error('flush failed'))
 
@@ -625,7 +623,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
 
     await screen.findByTestId('per-drill-capture')
     fireEvent.click(screen.getByRole('radio', { name: /still learning/i }))
-    await waitFor(() => expect(patchReviewDraft).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(patchReviewCaptures).toHaveBeenCalledTimes(1))
 
     fireEvent.click(screen.getByRole('button', { name: /continue/i }))
 

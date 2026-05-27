@@ -13,6 +13,7 @@ vi.mock('../services/session', async (importOriginal) => {
     buildEndedSession: vi.fn(),
     saveExecution: vi.fn(),
     computeActualDurationMinutes: actual.computeActualDurationMinutes,
+    withActualDuration: actual.withActualDuration,
   }
 })
 
@@ -263,10 +264,11 @@ describe('useSessionRunner', () => {
       await result.current.endSession('user_quit')
     })
 
+    const endedWithDuration = { ...ended, actualDurationMinutes: 0 }
     expect(sessionService.buildEndedSession).toHaveBeenCalledWith(exec, 'user_quit')
-    expect(sessionService.saveExecution).toHaveBeenCalledWith(ended)
+    expect(sessionService.saveExecution).toHaveBeenCalledWith(endedWithDuration)
     expect(timerService.clearTimerState).toHaveBeenCalled()
-    expect(result.current.execution).toEqual(ended)
+    expect(result.current.execution).toEqual(endedWithDuration)
   })
 
   it('isPaused reflects execution status', async () => {
@@ -499,7 +501,10 @@ describe('useSessionRunner', () => {
     // Two saves landed, in pause-then-end order, not in parallel.
     expect(sessionService.saveExecution).toHaveBeenCalledTimes(2)
     expect(sessionService.saveExecution).toHaveBeenNthCalledWith(1, paused)
-    expect(sessionService.saveExecution).toHaveBeenNthCalledWith(2, ended)
+    expect(sessionService.saveExecution).toHaveBeenNthCalledWith(2, {
+      ...ended,
+      actualDurationMinutes: 0,
+    })
   })
 
   // Red-team RT-4 corollary: a stale timer from a different execution must

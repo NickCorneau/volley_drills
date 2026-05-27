@@ -14,7 +14,7 @@ import { useSessionRunner } from '../../hooks/useSessionRunner'
 import { isSchemaBlocked } from '../../lib/schema-blocked'
 import { vibrate } from '../../platform'
 import { routes } from '../../routes'
-import { loadReviewDraft, patchReviewDraft } from '../../services/review'
+import { loadReviewDraft, patchReviewCaptures } from '../../services/review'
 
 const SHAPE_NONE: CaptureShape = { kind: 'none' }
 
@@ -218,7 +218,7 @@ export function useDrillCheckController(executionLogId: string) {
       // Drill Check only owns `perDrillCaptures`. Patching just that
       // key preserves any RPE / note / quickTags / incompleteReason
       // the user typed on Review (U1 of the architecture pass).
-      const pending = patchReviewDraft(executionLogId, {
+      const pending = patchReviewCaptures(executionLogId, {
         perDrillCaptures: merged,
       })
         .then(() => {

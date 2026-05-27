@@ -172,10 +172,13 @@ After every set of unit-level red-team gates, run a holistic gate across the ent
 **Sunset:** remove this queue when the boundary report is clean or has an explicit baseline/strict-mode contract and each deferred item has either shipped, moved to a successor plan, or been rejected.
 
 - Run `npm run architecture:check` from `app/` before architecture-heavy app changes. Default report mode is informational; use `npm run architecture:check:strict` when a hard-fail signal is needed. New findings in files touched by a change should be fixed or justified.
+- `architecture:check` now includes two advisory growth guards: `saveExecutionRunnerOnly` flags `saveExecution` imports outside `app/src/hooks/useSessionRunner.ts`, and `libNewTopLevelFile` flags top-level runtime files in `app/src/lib/` that are absent from `app/scripts/architecture-check-lib-allowlist.json`.
+- When a new top-level `app/src/lib/` file is intentionally accepted, update `app/scripts/architecture-check-lib-allowlist.json` in the same change and explain why the helper belongs in `lib/` instead of an existing domain/platform/service layer.
 - Treat remaining screen/component service imports as advisory P3 debt until a concrete screen change proves controller extraction is worth it.
 - Keep generated diagnostics splitting out of casual cleanup. Split `app/src/domain/generatedPlanDiagnosticTriage.ts` only in a separate characterization-heavy pass.
 - Consolidate repeated e2e IndexedDB seeding helpers separately from runtime cleanup.
 - Treat `app/src/lib/` as a legacy mixed helper area, not a new layer. Move helpers into existing layers only when ownership is clear from current use.
+- 2026-05-27 system-design pass surfaced and revalidated 6 follow-ups: F1, F2, F5, F6, and F7 shipped via `docs/plans/2026-05-27-002-refactor-system-design-followups-ship-plan.md`; F8 zero-PII local error log remains deferred until D91 reopens or a stranger-cohort/shared-device cycle begins. The registry remains `docs/plans/2026-05-27-001-refactor-system-design-followups-plan.md`; F3 and F4 were dropped during revalidation as speculative debt.
 
 ## Product Principle Reminders
 

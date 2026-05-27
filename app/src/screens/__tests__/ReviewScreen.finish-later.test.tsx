@@ -115,12 +115,12 @@ describe('ReviewScreen Finish Later (C-1 Unit 8)', () => {
     await seed('exec-save-fail')
 
     // Let the initial draft hydration + form render; then stub
-    // `patchReviewDraft` to reject. The auto-save effect also calls it,
+    // `patchReviewForm` to reject. The auto-save effect also calls it,
     // but the belt save inside `handleFinishLater` is the one that must
     // surface the failure - silently navigating home on save failure
     // violates the Finish-Later promise.
     const spy = vi
-      .spyOn(reviewService, 'patchReviewDraft')
+      .spyOn(reviewService, 'patchReviewForm')
       .mockRejectedValue(new Error('simulated quota-exceeded save failure'))
 
     try {

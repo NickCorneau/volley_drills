@@ -87,7 +87,7 @@ export function RunScreen() {
         />
       )
     }
-    return <StatusMessage variant="loading" message="Loading session\u2026" />
+    return <StatusMessage variant="loading" />
   }
 
   // Swap is only offered when the block has at least one curated
@@ -144,7 +144,8 @@ export function RunScreen() {
         2026-04-22 "too much text on drills"):
         - coaching-cue card chrome (accent border + `bg-info-surface`
           fill + `h2 "Coaching note"`) replaced with a quiet left-rule
-          treatment + short "Cue" label so the cue reads as a
+          treatment + short "Now" label (the Transition preview of the
+          same cue uses a "Cue" label) so the cue reads as a
           sidebar-voiced aside rather than a second focal card;
         - body inner gap shrunk from `gap-5` (20 px) to `gap-4` (16 px)
           for a calmer rhythm between what/how/cue.

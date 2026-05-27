@@ -1,0 +1,18 @@
+{
+  "top_level": [
+    "appHeight.ts",
+    "audio.ts",
+    "buildInfo.ts",
+    "cn.ts",
+    "copyGuard.ts",
+    "format.ts",
+    "onboarding.ts",
+    "pwa-register.ts",
+    "schema-blocked.ts",
+    "screenWakeLock.ts",
+    "shorten.ts",
+    "skillLevel.ts",
+    "storageCopy.ts",
+    "voiceFromContext.ts"
+  ]
+}

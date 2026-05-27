@@ -19,7 +19,7 @@ import {
   expireReview,
   FINISH_LATER_CAP_MS,
   loadReviewDraft,
-  patchReviewDraft,
+  patchReviewForm,
   submitReview,
 } from '../../services/review'
 import { loadSession } from '../../services/session'
@@ -128,10 +128,7 @@ export function useReviewController(executionLogId: string) {
     })
     if (!meaningful) return
 
-    // Review owns the form fields. Captures are owned by Drill Check
-    // and are intentionally omitted from the patch so a stale Review
-    // state never blanks captures persisted by Drill Check (U1).
-    void patchReviewDraft(executionLogId, {
+    void patchReviewForm(executionLogId, {
       sessionRpe,
       goodPasses: good,
       totalAttempts: total,
@@ -152,7 +149,6 @@ export function useReviewController(executionLogId: string) {
     incompleteReason,
     quickTags,
     debouncedShortNote,
-    perDrillCaptures,
   ])
 
   const handleToggleNotCaptured = () => {
@@ -254,11 +250,7 @@ export function useReviewController(executionLogId: string) {
     })
     if (meaningful) {
       try {
-        // Review's Finish Later path mirrors the autosave: only the
-        // form fields it owns are patched. Drill Check's captures
-        // already live on the row and must not be overwritten by a
-        // stale local snapshot (U1).
-        await patchReviewDraft(executionLogId, {
+        await patchReviewForm(executionLogId, {
           sessionRpe,
           goodPasses: good,
           totalAttempts: total,

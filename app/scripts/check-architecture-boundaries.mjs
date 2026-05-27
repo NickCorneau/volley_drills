@@ -51,6 +51,14 @@ const rules = {
     level: 'error',
     message: 'Vibration and wake-lock runtime calls should stay behind platform.',
   },
+  saveExecutionRunnerOnly: {
+    level: 'advisory',
+    message: '`saveExecution` should only be imported by hooks/useSessionRunner.ts.',
+  },
+  libNewTopLevelFile: {
+    level: 'advisory',
+    message: 'Net-new top-level files in app/src/lib/ should land in an existing layer; update the allowlist explicitly to override.',
+  },
 }
 
 function toPosix(path) {
@@ -120,6 +128,54 @@ function normalizeSourceImport(candidatePath, sourceRoot) {
   return { kind: 'unknown', value: relativePath }
 }
 
+function parseImportBindings(statement) {
+  const bindings = []
+  const clause = statement.importClause
+  if (!clause) return bindings
+
+  if (clause.name) {
+    bindings.push({ kind: 'default', imported: 'default', local: clause.name.text })
+  }
+
+  if (clause.namedBindings) {
+    if (ts.isNamespaceImport(clause.namedBindings)) {
+      bindings.push({ kind: 'namespace', imported: '*', local: clause.namedBindings.name.text })
+    }
+
+    if (ts.isNamedImports(clause.namedBindings)) {
+      for (const element of clause.namedBindings.elements) {
+        bindings.push({
+          kind: 'named',
+          imported: element.propertyName?.text ?? element.name.text,
+          local: element.name.text,
+        })
+      }
+    }
+  }
+
+  return bindings
+}
+
+function parseExportBindings(statement) {
+  if (!statement.exportClause) {
+    return [{ kind: 'namespace', imported: '*', local: '*' }]
+  }
+
+  if (ts.isNamespaceExport(statement.exportClause)) {
+    return [{ kind: 'namespace', imported: '*', local: statement.exportClause.name.text }]
+  }
+
+  if (ts.isNamedExports(statement.exportClause)) {
+    return statement.exportClause.elements.map((element) => ({
+      kind: 'named',
+      imported: element.propertyName?.text ?? element.name.text,
+      local: element.name.text,
+    }))
+  }
+
+  return []
+}
+
 function parseModuleSpecifiers(content) {
   const specifiers = []
   const sourceFile = ts.createSourceFile(
@@ -131,7 +187,11 @@ function parseModuleSpecifiers(content) {
 
   for (const statement of sourceFile.statements) {
     if (ts.isImportDeclaration(statement) && ts.isStringLiteral(statement.moduleSpecifier)) {
-      specifiers.push({ specifier: statement.moduleSpecifier.text, syntax: 'import' })
+      specifiers.push({
+        specifier: statement.moduleSpecifier.text,
+        syntax: 'import',
+        bindings: parseImportBindings(statement),
+      })
     }
 
     if (
@@ -139,7 +199,11 @@ function parseModuleSpecifiers(content) {
       statement.moduleSpecifier &&
       ts.isStringLiteral(statement.moduleSpecifier)
     ) {
-      specifiers.push({ specifier: statement.moduleSpecifier.text, syntax: 'export' })
+      specifiers.push({
+        specifier: statement.moduleSpecifier.text,
+        syntax: 'export',
+        bindings: parseExportBindings(statement),
+      })
     }
   }
 
@@ -167,6 +231,12 @@ function importTargets(importInfo, prefix) {
   return importInfo.kind === 'source' && isUnder(importInfo.value, prefix)
 }
 
+function referencesSaveExecution(bindings) {
+  return bindings.some(
+    (binding) => binding.imported === 'saveExecution' || binding.kind === 'namespace',
+  )
+}
+
 function packageIs(importInfo, ...packages) {
   return importInfo.kind === 'package' && packages.includes(importInfo.value)
 }
@@ -176,9 +246,12 @@ function analyzeFile({ absolutePath, sourceRoot }) {
   const content = readFileSync(absolutePath, 'utf8')
   const findings = []
 
-  for (const { specifier, syntax } of parseModuleSpecifiers(content)) {
+  for (const { specifier, syntax, bindings } of parseModuleSpecifiers(content)) {
     const importInfo = resolveImport(absolutePath, specifier, sourceRoot)
-    const evidence = `${syntax} "${specifier}"`
+    const bindingEvidence = bindings.length
+      ? ` {${bindings.map((binding) => binding.local).join(', ')}}`
+      : ''
+    const evidence = `${syntax} "${specifier}"${bindingEvidence}`
 
     if (
       isUnder(filePath, 'domain') &&
@@ -234,6 +307,15 @@ function analyzeFile({ absolutePath, sourceRoot }) {
     ) {
       addFinding(findings, 'screenComponentServiceImport', filePath, evidence)
     }
+
+    if (
+      filePath !== 'hooks/useSessionRunner.ts' &&
+      filePath !== 'services/session/index.ts' &&
+      importTargets(importInfo, 'services/session') &&
+      referencesSaveExecution(bindings)
+    ) {
+      addFinding(findings, 'saveExecutionRunnerOnly', filePath, evidence)
+    }
   }
 
   if (
@@ -258,10 +340,41 @@ function analyzeFile({ absolutePath, sourceRoot }) {
   return findings
 }
 
+function loadLibAllowlist(root) {
+  const allowlistPath = resolve(root, 'scripts/architecture-check-lib-allowlist.json')
+  if (!existsSync(allowlistPath)) return new Set()
+
+  const parsed = JSON.parse(readFileSync(allowlistPath, 'utf8'))
+  if (!Array.isArray(parsed.top_level)) {
+    throw new Error(`Invalid lib allowlist: ${allowlistPath}`)
+  }
+  return new Set(parsed.top_level)
+}
+
+function analyzeLibAllowlist({ root, files, sourceRoot }) {
+  const allowlist = loadLibAllowlist(root)
+  const findings = []
+
+  for (const absolutePath of files) {
+    const filePath = toPosix(relative(sourceRoot, absolutePath))
+    if (!isUnder(filePath, 'lib')) continue
+    const rest = filePath.slice('lib/'.length)
+    if (!rest || rest.includes('/')) continue
+    if (!allowlist.has(rest)) {
+      addFinding(findings, 'libNewTopLevelFile', filePath, `${rest} not in lib allowlist`)
+    }
+  }
+
+  return findings
+}
+
 async function analyzeProject(root = defaultRoot) {
   const sourceRoot = resolve(root, 'src')
   const files = await collectSourceFiles(sourceRoot)
-  return files.flatMap((absolutePath) => analyzeFile({ absolutePath, sourceRoot }))
+  return [
+    ...files.flatMap((absolutePath) => analyzeFile({ absolutePath, sourceRoot })),
+    ...analyzeLibAllowlist({ root, files, sourceRoot }),
+  ]
 }
 
 function formatReport(findings) {
@@ -403,6 +516,7 @@ async function runSelfTest() {
   const root = mkdtempSync(join(tmpdir(), 'volley-architecture-boundaries-'))
 
   try {
+    mkdirSync(join(root, 'scripts'), { recursive: true })
     mkdirSync(join(root, 'src/domain'), { recursive: true })
     mkdirSync(join(root, 'src/model'), { recursive: true })
     mkdirSync(join(root, 'src/components'), { recursive: true })
@@ -416,7 +530,12 @@ async function runSelfTest() {
     mkdirSync(join(root, 'src/db'), { recursive: true })
     mkdirSync(join(root, 'src/hooks'), { recursive: true })
     writeFileSync(join(root, 'src/model/index.ts'), 'export type ModelThing = { id: string }\n')
+    writeFileSync(
+      join(root, 'scripts/architecture-check-lib-allowlist.json'),
+      JSON.stringify({ top_level: ['allowed.ts', 'screenWakeLock.ts'] }),
+    )
     writeFileSync(join(root, 'src/services/index.ts'), 'export const serviceThing = true\n')
+    writeFileSync(join(root, 'src/services/session.ts'), 'export function saveExecution() {}\n')
     writeFileSync(join(root, 'src/db/index.ts'), 'export type DbThing = { id: string }\n')
     writeFileSync(join(root, 'src/domain/good.ts'), "import type { ModelThing } from '../model'\n")
     writeFileSync(join(root, 'src/domain/bad.ts'), "import { serviceThing } from '../services'\n")
@@ -453,6 +572,35 @@ async function runSelfTest() {
       'export function RuntimeBad() { navigator.vibrate?.(10); return null }\n',
     )
     writeFileSync(
+      join(root, 'src/components/BadSaveExecution.tsx'),
+      "import { saveExecution } from '../services/session'\n",
+    )
+    writeFileSync(
+      join(root, 'src/components/BadSaveExecutionAlias.tsx'),
+      "import { saveExecution as persistExecution } from '../services/session'\n",
+    )
+    writeFileSync(
+      join(root, 'src/components/BadSaveExecutionNamespace.tsx'),
+      "import * as session from '../services/session'\n",
+    )
+    writeFileSync(
+      join(root, 'src/components/BadSaveExecutionExport.tsx'),
+      "export { saveExecution } from '../services/session'\n",
+    )
+
+    writeFileSync(
+      join(root, 'src/components/BadSaveExecutionExportStar.tsx'),
+      "export * from '../services/session'\n",
+    )
+    writeFileSync(
+      join(root, 'src/components/BadSaveExecutionExportNamespace.tsx'),
+      "export * as session from '../services/session'\n",
+    )
+    writeFileSync(
+      join(root, 'src/hooks/useSessionRunner.ts'),
+      "import { saveExecution } from '../services/session'\n",
+    )
+    writeFileSync(
       join(root, 'src/components/StringOnly.tsx'),
       '// navigator.vibrate belongs in platform\nconst note = "navigator.wakeLock"\n',
     )
@@ -460,7 +608,9 @@ async function runSelfTest() {
       join(root, 'src/domain/CommentedImport.ts'),
       "/* import { serviceThing } from '../services' */\nconst note = \"import x from '../db'\"\n",
     )
+    writeFileSync(join(root, 'src/lib/allowed.ts'), 'export const allowed = true\n')
     writeFileSync(join(root, 'src/lib/screenWakeLock.ts'), 'navigator.wakeLock?.request?.()\n')
+    writeFileSync(join(root, 'src/lib/junk.ts'), 'export const junk = true\n')
     writeFileSync(join(root, 'src/platform/vibration.ts'), 'navigator.vibrate?.(10)\n')
     writeFileSync(
       join(root, 'src/components/__tests__/fixture.test.tsx'),
@@ -495,6 +645,48 @@ async function runSelfTest() {
     )
     assert.equal(hasFinding('browserRuntimeDirect', 'components/RuntimeBad.tsx', 'error'), true)
     assert.equal(
+      hasFinding('saveExecutionRunnerOnly', 'components/BadSaveExecution.tsx', 'advisory'),
+      true,
+      'named saveExecution import should be flagged',
+    )
+    assert.equal(
+      hasFinding('saveExecutionRunnerOnly', 'components/BadSaveExecutionAlias.tsx', 'advisory'),
+      true,
+      'aliased saveExecution import should be flagged',
+    )
+    assert.equal(
+      hasFinding('saveExecutionRunnerOnly', 'components/BadSaveExecutionNamespace.tsx', 'advisory'),
+      true,
+      'namespace session import should be flagged',
+    )
+    assert.equal(
+      hasFinding('saveExecutionRunnerOnly', 'components/BadSaveExecutionExport.tsx', 'advisory'),
+      true,
+      'named saveExecution re-export should be flagged',
+    )
+    assert.equal(
+      hasFinding('saveExecutionRunnerOnly', 'components/BadSaveExecutionExportStar.tsx', 'advisory'),
+      true,
+      'export-star session re-export should be flagged',
+    )
+    assert.equal(
+      hasFinding(
+        'saveExecutionRunnerOnly',
+        'components/BadSaveExecutionExportNamespace.tsx',
+        'advisory',
+      ),
+      true,
+      'namespace session re-export should be flagged',
+    )
+    assert.equal(
+      findings.some(
+        (finding) =>
+          finding.ruleId === 'saveExecutionRunnerOnly' &&
+          finding.filePath === 'hooks/useSessionRunner.ts',
+      ),
+      false,
+    )
+    assert.equal(
       findings.some((finding) => finding.filePath === 'domain/good.ts'),
       false,
     )
@@ -514,6 +706,11 @@ async function runSelfTest() {
       findings.some((finding) => finding.filePath === 'lib/screenWakeLock.ts'),
       false,
     )
+    assert.equal(
+      findings.some((finding) => finding.filePath === 'lib/allowed.ts'),
+      false,
+    )
+    assert.equal(hasFinding('libNewTopLevelFile', 'lib/junk.ts', 'advisory'), true)
   } finally {
     rmSync(root, { recursive: true, force: true })
   }

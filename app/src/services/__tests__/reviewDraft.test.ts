@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
-import { loadReviewDraft, saveReviewDraft, submitReview } from '../review'
+import { loadReviewDraft, submitReview } from '../review'
+import { saveReviewDraft } from '../review/drafts'
 
 /**
  * Review draft persistence (C-1 Unit 7 / R7 / R8).
