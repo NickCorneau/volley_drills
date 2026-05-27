@@ -66,7 +66,7 @@ The Tier 1b authoring cap is **10 new drill records**, anti-displacement enforce
 
 ### Reserved slot records
 
-Each record carries a stable `slot_id`, an explicit `expiry`, a closed-vocabulary `status` (`reserved` | `authored` | `killed`), and the required trigger citation. The machine-readable mirror lives in the `cap-status-data` JSON block below; the slot records here are the human-readable narrative source. Both must stay in sync (the validator enforces shape; humans maintain prose-JSON parity during the weekly Monday ritual).
+Each record carries a stable `slot_id`, an explicit `expiry`, a closed-vocabulary `status` (`reserved` | `authored` | `killed`), and the required trigger citation. The machine-readable mirror lives in the `cap-status-data` JSON block below; the slot records here are the human-readable narrative source. Both must stay in sync (the validator enforces shape; humans maintain prose-JSON parity at trigger-fire / kill-decision time, or at the 2026-07-20 hard expiry. The weekly Monday adversarial-memo ritual previously named here as the parity-maintenance moment was **retired 2026-05-27 per `D148`**; the cap-status validator and the hard 2026-07-20 expiry are the binding mechanisms regardless of ritual cadence).
 
 - **`t1b-pair-opening-block`** — Pair opening-block: `d30 Pair Pepper Progression` + `pair_long_warmup` archetype variant. When fired, the long warmup is a **new archetype variant** with its own layout, not dynamic compression of existing pair layouts.
   - Status: `reserved` | Expiry: 2026-07-20 | Last checked: 2026-05-10

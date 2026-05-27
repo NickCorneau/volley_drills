@@ -58,6 +58,6 @@ Suggested statuses:
 
 ## Planning-stage rule
 
-The v0b Starter Loop under `app/` is **feature-complete** as the D91 field-test artifact (`D119`); Phases A, B, C (C-0 → C-5), E, and F (F1 – F12) landed through 2026-04-19. M001 implementation work beyond v0b stays gated on D91 evidence. Milestone files should still behave like charters and thin-slice specs until their build phase is explicitly active (M001 full build and M002 Weekly Confidence Loop are both still charter-stage).
+The v0b Starter Loop under `app/` is **feature-complete** as the D91 field-test artifact (`D119`); Phases A, B, C (C-0 → C-5), E, and F (F1 – F12) landed through 2026-04-19. **M001 milestone closed 2026-05-27 by founder executive call (`D147`)** — build phase shipped under D130 in tiers (Tier 1a / Tier 1b Layer A / Tier 1c) between 2026-04-20 and 2026-05-08; validation phase ran 2026-04-20 → 2026-05-27. **M002 Weekly Confidence Loop** is the active milestone post-closure (`status: draft / stage: planning`); M002 absorbed M001 carry-forward as discretionary post-M002-core follow-on per D147 R13. Future milestone files should still behave like charters and thin-slice specs until their build phase is explicitly active.
 
 Use `docs/templates/milestone-charter.md` as the default starting point.
