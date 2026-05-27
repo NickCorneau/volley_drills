@@ -7,7 +7,7 @@ import { SettingsScreen } from '../SettingsScreen'
 
 /**
  * 2026-04-27 reconciled-list `R13`: SettingsScreen carries a quiet
- * `Logged: N sessions · H:MM total` footer just above the existing
+ * `Logged: N sessions · {duration} total` footer just above the existing
  * `Your data stays on this device.` line.
  *
  * Pin three behaviors:
@@ -18,6 +18,15 @@ import { SettingsScreen } from '../SettingsScreen'
  *
  * Singular vs plural is also pinned because the row is a single
  * sentence ("Logged: 1 session" reads wrong as "1 sessions").
+ *
+ * 2026-05-25 (plan A2 of `docs/plans/2026-05-25-005-polish-design-critique-
+ * residuals-plan.md`, `D145`): duration format updated from `H:MM` clock
+ * shape to `N min` / `K h` / `K h M min` per `brand-ux-guidelines.md` §3.5
+ * (the investment-footer total is a historical cumulative read, not a
+ * countdown). Sub-hour assertions now match `/N min total/`; multi-hour
+ * assertions match `/K h M min total/`. The format-specific contract is
+ * pinned in `app/src/lib/__tests__/format.totalDurationLine.test.ts`; this
+ * file pins the wiring (count + plural + which surfaces are excluded).
  */
 
 async function clearDb() {
@@ -80,7 +89,7 @@ describe('SettingsScreen investment footer (R13)', () => {
     expect(screen.queryByText(/^Logged:/)).not.toBeInTheDocument()
   })
 
-  it('renders count + H:MM total with the singular `session` for exactly one logged session', async () => {
+  it('renders count + duration total with the singular `session` for exactly one logged session', async () => {
     const now = Date.now()
     await db.sessionPlans.put(plan('a'))
     // 25 minutes
@@ -92,14 +101,15 @@ describe('SettingsScreen investment footer (R13)', () => {
     expect(row).toBeInTheDocument()
     expect(row.textContent).toMatch(/Logged: 1 session/)
     expect(row.textContent).not.toMatch(/sessions/)
-    expect(row.textContent).toMatch(/0:25 total/)
+    // 2026-05-25 (A2 / D145): sub-hour totals render as `N min`.
+    expect(row.textContent).toMatch(/25 min total/)
   })
 
-  it('renders the plural `sessions` and a multi-hour H:MM total for multiple logged sessions', async () => {
+  it('renders the plural `sessions` and a multi-hour duration total for multiple logged sessions', async () => {
     const now = Date.now()
     await db.sessionPlans.bulkPut([plan('a'), plan('b'), plan('c')])
     await db.executionLogs.bulkPut([
-      // 45 + 30 + 60 = 135 -> 2:15
+      // 45 + 30 + 60 = 135 -> 2 h 15 min
       completedLog('a', now - 60 * 60 * 1000, now - 15 * 60 * 1000),
       completedLog('b', now - 30 * 60_000, now),
       completedLog('c', now - 60 * 60_000, now),
@@ -109,7 +119,8 @@ describe('SettingsScreen investment footer (R13)', () => {
 
     const row = await screen.findByTestId('settings-investment-footer')
     expect(row.textContent).toMatch(/Logged: 3 sessions/)
-    expect(row.textContent).toMatch(/2:15 total/)
+    // 2026-05-25 (A2 / D145): past-the-hour totals render as `K h M min`.
+    expect(row.textContent).toMatch(/2 h 15 min total/)
   })
 
   it('excludes discarded_resume stubs (A8)', async () => {
@@ -137,6 +148,7 @@ describe('SettingsScreen investment footer (R13)', () => {
     )
     const row = screen.getByTestId('settings-investment-footer')
     expect(row.textContent).toMatch(/Logged: 1 session/)
-    expect(row.textContent).toMatch(/0:10 total/)
+    // 2026-05-25 (A2 / D145): sub-hour totals render as `N min`.
+    expect(row.textContent).toMatch(/10 min total/)
   })
 })

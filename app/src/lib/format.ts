@@ -13,12 +13,24 @@ export function formatDuration(minutes: number): string {
 }
 
 /**
- * 2026-04-27 reconciled-list `R13` (Settings investment footer): render
- * a non-negative minute count as `"H:MM"`, where minutes are zero-padded
- * and hours are not. Matches the `formatTime()` minutes:seconds shape so
- * the app's two `:`-separated time formats read consistently.
+ * 2026-04-27 reconciled-list `R13` (Settings investment footer): render a
+ * non-negative minute count as a human duration using `min` and `h` units.
+ * Under 60 min: `"N min"`. Exact hours: `"K h"`. Past the hour boundary:
+ * `"K h M min"`.
  *
- * Examples: 0 -> `"0:00"`, 11 -> `"0:11"`, 60 -> `"1:00"`, 750 -> `"12:30"`.
+ * 2026-05-25 (plan A2 of `docs/plans/2026-05-25-005-polish-design-critique-
+ * residuals-plan.md`, `D145`): reverted from the earlier `"H:MM"` clock
+ * shape. The original rationale was visual consistency with `formatTime()`,
+ * but the two formats serve different semantics: `formatTime()` is a *live
+ * block-timer countdown* (running, second-by-second precision) while this
+ * is a *historical investment total* (cumulative, minute-level precision).
+ * `brand-ux-guidelines.md` §3.5 establishes `min` (short form, single
+ * space) as the canonical minute unit; investment-total reads should use
+ * that voice, not the countdown voice. Hours use the same short-form
+ * convention (`h`).
+ *
+ * Examples: 0 -> `"0 min"`, 11 -> `"11 min"`, 60 -> `"1 h"`,
+ * 75 -> `"1 h 15 min"`, 750 -> `"12 h 30 min"`.
  *
  * Negative inputs clamp to 0 (defensive for any caller that subtracts
  * timestamps without a `Math.max` guard); non-integer inputs are rounded
@@ -29,7 +41,9 @@ export function formatTotalDurationLine(totalMinutes: number): string {
   const safe = Math.max(0, Math.floor(totalMinutes))
   const hours = Math.floor(safe / 60)
   const mins = safe % 60
-  return `${hours}:${mins.toString().padStart(2, '0')}`
+  if (hours === 0) return `${mins} min`
+  if (mins === 0) return `${hours} h`
+  return `${hours} h ${mins} min`
 }
 
 /** Sentinel rendered when a duration can't be computed (no completedAt /

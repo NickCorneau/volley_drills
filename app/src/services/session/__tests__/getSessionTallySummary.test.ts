@@ -6,7 +6,10 @@ import { getSessionTallySummary } from '../queries'
 /**
  * 2026-04-27 reconciled-list `R13` (Settings investment footer):
  * pin the count + summed-minutes contract for the
- * `Logged: N sessions · H:MM total` row on SettingsScreen.
+ * `Logged: N sessions · {duration} total` row on SettingsScreen
+ * (duration formatting changed from `H:MM` to `N min` / `K h` /
+ * `K h M min` on 2026-05-25 per plan A2 / `D145`; this test pins the
+ * raw count + minute sum, which is unaffected by the format change).
  *
  * Per-session minute math goes through the shared `sessionDurationMinutes()`
  * helper (the same one `formatDurationLine()` uses), so the footer total

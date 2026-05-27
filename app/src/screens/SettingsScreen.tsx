@@ -44,8 +44,9 @@ export function SettingsScreen() {
   const navigate = useNavigate()
   const acting = useRef(false)
   const [state, setState] = useState<ExportState>({ kind: 'idle' })
-  // 2026-04-27 reconciled-list `R13`: quiet `Logged: N sessions · H:MM
-  // total` investment footer. Single-shot read on mount — Settings is
+  // 2026-04-27 reconciled-list `R13`: quiet `Logged: N sessions · {duration}
+  // total` investment footer (duration formatted via `formatTotalDurationLine`,
+  // see 2026-05-25 A2 / `D145`). Single-shot read on mount — Settings is
   // a leaf screen with no live-update requirement, and the footer
   // hides entirely when `count === 0` so first-week testers see no
   // row. `null` until the read resolves so the row never flashes a
@@ -227,8 +228,10 @@ export function SettingsScreen() {
 
       <ScreenShell.Footer className="pt-3">
         {/* 2026-04-27 reconciled-list `R13` (Settings investment footer):
-            quiet `Logged: N sessions · H:MM total` row above the
-            existing privacy promise. Hidden entirely when no sessions
+            quiet `Logged: N sessions · {duration} total` row above the
+            existing privacy promise (duration via `formatTotalDurationLine`,
+            using `N min` / `K h` / `K h M min` per `brand-ux-guidelines.md`
+            §3.5 — see 2026-05-25 A2 / `D145`). Hidden entirely when no sessions
             have been logged so first-week testers see no row at all.
             Source-of-truth: `getSessionTallySummary()` read once on
             mount; per-session minute math mirrors `formatDurationLine`

@@ -180,9 +180,11 @@ export async function hasEverStartedSession(): Promise<boolean> {
  * total count + summed minutes across finalized terminal sessions,
  * excluding `discarded_resume` stubs (`A8`).
  *
- * Drives the quiet `Logged: N sessions · H:MM total` row on
- * `SettingsScreen`. The footer hides when `count === 0`, so first-week
- * testers see no row at all.
+ * Drives the quiet `Logged: N sessions · {duration} total` row on
+ * `SettingsScreen` (duration formatted via `formatTotalDurationLine`
+ * using the `N min` / `K h` / `K h M min` shape per
+ * `brand-ux-guidelines.md` §3.5 — see 2026-05-25 A2 / `D145`). The footer
+ * hides when `count === 0`, so first-week testers see no row at all.
  *
  * Per-session minute math goes through the shared `sessionDurationMinutes()`
  * helper (the same one `formatDurationLine()` uses), so the footer total
