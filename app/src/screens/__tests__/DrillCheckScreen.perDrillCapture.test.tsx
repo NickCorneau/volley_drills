@@ -362,6 +362,37 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     expect(screen.queryByTestId('drill-check-gating-hint')).not.toBeInTheDocument()
   })
 
+  it('renders a visually-hidden h1 so the heading outline is a11y-coherent (B1 / D145)', async () => {
+    // Pre-2026-05-25 the screen had no `<h1>` — the visible "Drill check"
+    // string in `RunFlowHeader` is a `<span>` eyebrow (intentional: keeps
+    // the visible focal element the capture question), and the only on-
+    // page heading was the `<h2>` "How was {drillName}?" inside
+    // `PerDrillCapture`. A screen-reader heading-nav jump landed on an
+    // orphan h2, while Run / Transition / Review all use `<h1>` for the
+    // drill name. The B1 fix added a `sr-only` `<h1>` anchoring the page
+    // as `Drill check · {drillName}`, mirroring the other run-loop
+    // screens' heading outline without changing the visual layout.
+    // See `docs/plans/2026-05-25-005-polish-design-critique-residuals-plan.md`
+    // and `D145` in `docs/decisions.md`.
+    const execId = await seedTwoBlockSession({
+      prevType: 'main_skill',
+      prevCompleted: true,
+    })
+    renderAt(execId)
+
+    // Wait for the capture surface so we know the screen has hydrated
+    // past the loading states (otherwise the h1 isn't in the DOM yet).
+    await screen.findByTestId('per-drill-capture')
+
+    const h1 = screen.getByRole('heading', { level: 1 })
+    expect(h1).toBeInTheDocument()
+    expect(h1.textContent).toMatch(/^Drill check ·/)
+    expect(h1.textContent).toContain(COUNT_DRILL.name)
+    // Must stay visually hidden — the visible focal element is the
+    // capture question, not this anchor.
+    expect(h1).toHaveClass('sr-only')
+  })
+
   it('does not render the capture card until draft hydration has completed', async () => {
     let resolveDraft!: (draft: Awaited<ReturnType<typeof loadReviewDraft>>) => void
     const pendingDraft = new Promise<Awaited<ReturnType<typeof loadReviewDraft>>>((resolve) => {

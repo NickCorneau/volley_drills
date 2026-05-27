@@ -222,6 +222,119 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
     await checkA11y(page, 'run – paused')
   })
 
+  // 2026-05-25 (plan B1 / D145): /run/check had zero axe coverage and
+  // no <h1> at all — the visible "Drill check" string in RunFlowHeader
+  // is a <span> eyebrow, and the only on-page heading was the <h2>
+  // "How was {drillName}?" inside PerDrillCapture, so a screen-reader
+  // heading-nav jump landed on an orphan h2. B1 added a `sr-only` <h1>
+  // anchoring the page as `Drill check · {drillName}` (mirrors how Run /
+  // Transition / Review use <h1> for the drill name). This test seeds a
+  // count-eligible main_skill block + completed prev-block status so we
+  // land on the drill-check capture surface (not bypassed to
+  // /run/transition), then pins both the heading-outline contract and
+  // the WCAG 2.1 AA scan on this previously-unscanned surface. Seeds
+  // via raw IndexedDB so the test isn't hostage to real timer playback
+  // through a multi-block session.
+  test('drill check – capture surface (B1 / D145)', async ({ page }) => {
+    await seedOnboardingAndOpenHome(page)
+    const execId = 'a11y-drillcheck-b1'
+    await page.evaluate(
+      async ({ dbName, execId }) => {
+        await new Promise<void>((resolve, reject) => {
+          const open = indexedDB.open(dbName)
+          open.onsuccess = () => {
+            const dbInst = open.result
+            const stores = ['sessionPlans', 'executionLogs'] as const
+            if (!stores.every((s) => dbInst.objectStoreNames.contains(s))) {
+              dbInst.close()
+              resolve()
+              return
+            }
+            const tx = dbInst.transaction([...stores], 'readwrite')
+            const now = Date.now()
+            const planId = `plan-${execId}`
+            // d10 / d10-pair is "The 6-Legged Monster", a count-eligible
+            // main_skill drill (pass-rate-good successMetric). Its
+            // drillId/variantId are the load-bearing fields: the drill-
+            // check controller looks up the catalog by these to decide
+            // the capture shape ("count"). Any other count-eligible
+            // drill ID in the catalog would work here.
+            tx.objectStore('sessionPlans').put({
+              id: planId,
+              presetId: 'solo_wall',
+              presetName: 'Solo + Wall',
+              playerCount: 1,
+              blocks: [
+                {
+                  id: 'block-prev',
+                  type: 'main_skill',
+                  drillId: 'd10',
+                  variantId: 'd10-pair',
+                  drillName: 'The 6-Legged Monster',
+                  shortName: '6-Leg Monster',
+                  durationMinutes: 5,
+                  coachingCue: '',
+                  courtsideInstructions: '',
+                  required: true,
+                },
+                {
+                  id: 'block-next',
+                  type: 'main_skill',
+                  drillId: 'd10',
+                  variantId: 'd10-pair',
+                  drillName: 'The 6-Legged Monster',
+                  shortName: '6-Leg Monster',
+                  durationMinutes: 8,
+                  coachingCue: '',
+                  courtsideInstructions: '',
+                  required: false,
+                },
+              ],
+              safetyCheck: {
+                painFlag: false,
+                heatCta: false,
+                painOverridden: false,
+              },
+              createdAt: now - 60_000,
+            })
+            tx.objectStore('executionLogs').put({
+              id: execId,
+              planId,
+              status: 'in_progress',
+              activeBlockIndex: 1,
+              blockStatuses: [
+                { blockId: 'block-prev', status: 'completed' },
+                { blockId: 'block-next', status: 'planned' },
+              ],
+              startedAt: now - 10 * 60_000,
+            })
+            tx.oncomplete = () => {
+              dbInst.close()
+              resolve()
+            }
+            tx.onerror = () => {
+              reject(tx.error)
+              dbInst.close()
+            }
+          }
+          open.onerror = () => reject(open.error)
+        })
+      },
+      { dbName: 'volley-drills', execId },
+    )
+
+    await page.goto(`/run/check?id=${execId}`)
+    // The <h1> is `sr-only` so it's NOT visible to sighted users, but
+    // it IS in the a11y tree (sr-only is a CSS visibility hack, not
+    // aria-hidden), so getByRole('heading', { level: 1 }) attaches.
+    await expect(
+      page.getByRole('heading', { level: 1, name: /drill check/i }),
+    ).toBeAttached()
+    // Capture surface rendered (proves we didn't bypass to /run/transition).
+    await expect(page.getByText(/how was/i)).toBeVisible()
+    await checkA11y(page, 'drill check – capture surface')
+  })
+
   test('error state – /run without session', async ({ page }) => {
     await page.goto('/run')
     await expect(page.getByText(/session not found/i)).toBeVisible()

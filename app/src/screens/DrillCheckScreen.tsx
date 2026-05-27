@@ -151,6 +151,24 @@ export function DrillCheckScreen() {
         — that lives on the next screen by design.
       */}
       <ScreenShell.Body className="items-stretch gap-6 pb-4 pt-2">
+        {/*
+          2026-05-25 a11y fix (plan B1 of
+          `docs/plans/2026-05-25-005-polish-design-critique-residuals-plan.md`,
+          `D145`): visually-hidden `h1` so the page has a proper heading
+          outline. Pre-fix the screen had no `h1` at all — the visible
+          "Drill check" string in `RunFlowHeader` is a `<span>` eyebrow
+          (it should stay that way to preserve the focal hierarchy: the
+          capture question is the visible focal element), and the only
+          on-page heading was the `<h2>` "How was {drillName}?" inside
+          `PerDrillCapture`. A screen-reader heading-nav jump on this
+          screen landed on an orphan `<h2>`, while Run / Transition /
+          Review all use `<h1>` for the drill name. This `sr-only` `<h1>`
+          mirrors that pattern (anchoring the page as `Drill check ·
+          {drillName}`) without changing the visual layout one pixel.
+          The visual focal element stays the capture question.
+        */}
+        <h1 className="sr-only">Drill check · {captureTarget.drillName}</h1>
+
         <JustFinishedPill drillName={captureTarget.drillName} status="completed" />
 
         {/*
