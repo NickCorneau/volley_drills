@@ -4,6 +4,7 @@ Volleyball training app for self-coached amateurs (beach-first in M001 scope).
 
 Start here:
 - `AGENTS.md` for the prose repo contract
+- `STRATEGY.md` for the top-level strategy anchor (target problem, approach, persona, metrics, tracks)
 - `docs/catalog.json` for machine-readable routing
 - `docs/status/current-state.md` for current posture and recent shipped history
 - `README.md` for the repo hub

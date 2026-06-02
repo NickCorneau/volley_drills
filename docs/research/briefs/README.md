@@ -6,7 +6,7 @@ status: active
 stage: validation
 authority: "Index of standalone research briefs formatted for external research vendors who have no prior context on the product. Each brief is self-contained, uses no internal jargon (no tier names, decision IDs, internal personas, or plan references), and specifies deliverables a vendor can execute against without follow-up clarification."
 summary: "Folder for vendor-ready research briefs and their returned responses. Each brief is a single self-contained document that can be copied directly into a vendor engagement. Returned vendor responses are filed verbatim under `./responses/` and distilled into curated research notes under `docs/research/`. Briefs are dated by authoring date and are not revised in place once sent — a revised scope ships as a new brief with a new date."
-last_updated: 2026-04-22-f
+last_updated: 2026-05-27
 ---
 
 # External research briefs
@@ -34,6 +34,12 @@ This folder holds research briefs written for external research vendors. Each br
 | 2026-04-22 | [Per-skill baseline skill assessments for amateur beach volleyball](./2026-04-22-brief-per-skill-baseline-tests.md) | Sent; vendor 1 + vendor 2 + vendor 3 returned 2026-04-22 | [vendor 1](./responses/2026-04-22-per-skill-baseline-tests-vendor-1.md), [vendor 2](./responses/2026-04-22-per-skill-baseline-tests-vendor-2.md), [vendor 3](./responses/2026-04-22-per-skill-baseline-tests-vendor-3.md) — reconciled in [`docs/research/baseline-skill-assessments-amateur-beach.md`](../baseline-skill-assessments-amateur-beach.md) |
 | 2026-04-22 | [Cross-skill correlation in amateur beach volleyball skill development](./2026-04-22-brief-skill-correlation.md) | Sent; vendor 1 + vendor 2 + vendor 3 returned 2026-04-22 | [vendor 1](./responses/2026-04-22-skill-correlation-vendor-1.md), [vendor 2](./responses/2026-04-22-skill-correlation-vendor-2.md), [vendor 3](./responses/2026-04-22-skill-correlation-vendor-3.md) — reconciled in [`docs/research/skill-correlation-amateur-beach.md`](../skill-correlation-amateur-beach.md) |
 | 2026-04-22 | [Jump-float serve biomechanics and amateur introduction protocols](./2026-04-22-brief-jump-float.md) | Sent; vendor 1 + vendor 2 + vendor 3 returned 2026-04-22 | [vendor 1](./responses/2026-04-22-jump-float-vendor-1.md), [vendor 2](./responses/2026-04-22-jump-float-vendor-2.md), [vendor 3](./responses/2026-04-22-jump-float-vendor-3.md) — reconciled in [`docs/research/jump-float-amateur-beach.md`](../jump-float-amateur-beach.md) |
+| 2026-05-27 | [Single self-tracked metric most predictive of adherence and improvement in amateur skill-sport athletes](./2026-05-27-brief-single-tracked-metric-amateur-skill-apps.md) | Draft (authored from `docs/ideation/2026-05-27-deep-research-questions-for-analyst-desks-ideation.md` survivor #1; not yet sent) | — |
+| 2026-05-27 | [Construct validity of weekly self-rated skill confidence for adult recreational amateurs](./2026-05-27-brief-subjective-skill-confidence-validity.md) | Draft (ideation survivor #2; not yet sent) | — |
+| 2026-05-27 | [Translation of coach-presence pedagogy techniques to self-administered training apps](./2026-05-27-brief-coach-pedagogy-translation-self-coached.md) | Draft (ideation survivor #3; not yet sent) | — |
+| 2026-05-27 | [Carry-forward UX patterns and main-tool-conversion mechanisms in self-coached training apps](./2026-05-27-brief-carry-forward-and-main-tool-conversion.md) | Draft (ideation survivor #4; not yet sent) | — |
+| 2026-05-27 | [Pair-coupling effects on adherence and retention in recreational adult skill-sport](./2026-05-27-brief-pair-coupling-adherence-recreational-skill-sport.md) | Draft (ideation survivor #5; not yet sent) | — |
+| 2026-05-27 | [Periodization signal at 1-3 sessions/week for amateur skill-sport (or below noise floor)](./2026-05-27-brief-periodization-low-volume-amateur-skill-sport.md) | Draft (ideation survivor #6; not yet sent) | — |
 
 ## For agents
 

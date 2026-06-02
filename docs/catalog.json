@@ -2,6 +2,7 @@
   "schema_version": 5,
   "repo_id": "volley_drills",
   "last_updated": "2026-05-27",
+  "_strategy_anchor": "STRATEGY.md is the repo-root strategy anchor (target problem, approach, persona, metrics, tracks). Authored via the ce-strategy skill; orients but does not outrank docs/vision.md, docs/decisions.md, or docs/prd-foundation.md.",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
     "notes": [
@@ -37,6 +38,16 @@
         "starting any session",
         "checking repo-wide constraints",
         "resolving source-of-truth conflicts"
+      ]
+    },
+    {
+      "path": "STRATEGY.md",
+      "kind": "strategy_anchor",
+      "always_read": false,
+      "use_when": [
+        "checking the top-level strategic kernel before reading docs/vision.md or docs/decisions.md",
+        "grounding ce-ideate, ce-brainstorm, or ce-plan workflows",
+        "writing or updating product strategy"
       ]
     },
     {
@@ -137,6 +148,7 @@
       "docs/catalog.json"
     ],
     "product_direction": [
+      "STRATEGY.md",
       "docs/vision.md",
       "docs/decisions.md",
       "docs/prd-foundation.md"
@@ -257,6 +269,13 @@
     }
   ],
   "docs": [
+    {
+      "id": "strategy",
+      "path": "STRATEGY.md",
+      "type": "strategy",
+      "status": "active",
+      "canonical_for": "Top-level strategy anchor at the repo root: target problem (no app-native RP Hypertrophy / ATG equivalent for volleyball; vetted local coaches scarce), approach (curated authoritative sources + team's own data \u2192 deterministic structured plan, not AI slop), primary persona (serious amateur 2s/beach players; founder + Seb under D130), 3 metrics (repeat usage / founder-willingness-to-recommend / review completion rate), 3 tracks (self-coached weekly loop, curated content engine, plan/progression engine). Authored via ce-strategy skill 2026-05-27. Orients docs/vision.md, docs/decisions.md, docs/prd-foundation.md but does not outrank them."
+    },
     {
       "id": "vision",
       "path": "docs/vision.md",

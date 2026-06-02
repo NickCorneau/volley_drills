@@ -51,6 +51,7 @@ Give agents one durable, concise repo contract for current state, read order, so
 ## Machine Contract
 
 - `AGENTS.md` is the canonical prose repo contract.
+- `STRATEGY.md` is the repo-root strategy anchor (target problem, approach, persona, metrics, tracks). Authored via the `ce-strategy` skill; orients but does not outrank `docs/vision.md`, `docs/decisions.md`, or `docs/prd-foundation.md`.
 - `docs/catalog.json` is the machine-readable doc map and routing table.
 - `README.md` is the human repo hub.
 - `docs/README.md` is the prose editorial index for `docs/`.
@@ -75,7 +76,7 @@ Read only as much as the task needs.
 1. `AGENTS.md`
 2. `docs/catalog.json`
 3. Load the smallest relevant pack:
-   - Product direction: `docs/vision.md` -> `docs/decisions.md` -> `docs/prd-foundation.md`
+   - Product direction: `STRATEGY.md` (tight anchor) -> `docs/vision.md` -> `docs/decisions.md` -> `docs/prd-foundation.md`
    - Milestone/spec work: `docs/milestones/m001-solo-session-loop.md` -> relevant `docs/specs/`
    - Prototype work: `docs/research/2026-04-12-v0a-runner-probe-feedback.md` -> `docs/research/2026-04-19-v0b-starter-loop-feedback.md` -> `app/README.md`
    - **App architecture / new feature work**: `app/README.md` -> `docs/ops/app-architecture-guidance.md` -> `.cursor/rules/data-access.mdc` / `component-patterns.mdc` / `routing.mdc` / `testing.mdc`
