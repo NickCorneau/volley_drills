@@ -3,7 +3,7 @@ import { IncompleteReasonChips } from '../components/IncompleteReasonChips'
 import { PassMetricInput } from '../components/PassMetricInput'
 import { RpeSelector } from '../components/RpeSelector'
 import { SafetyIcon } from '../components/SafetyIcon'
-import { Button, Card, ScreenShell, StatusMessage } from '../components/ui'
+import { Button, Card, ChoiceRow, ScreenShell, StatusMessage } from '../components/ui'
 import { formatPassRateLine } from '../lib/format'
 import { routes } from '../routes'
 import { useReviewController } from './review/useReviewController'
@@ -36,6 +36,10 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
     rpePrompt,
     canSubmit,
     missingHint,
+    showVerdict,
+    verdictLine,
+    verdictChoice,
+    setVerdictChoice,
     handleToggleNotCaptured,
     handleSubmit,
     handleFinishLater,
@@ -193,6 +197,32 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
             className="min-h-[88px] w-full resize-y rounded-base border border-text-primary/10 bg-bg-primary px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           />
         </section>
+
+        {/*
+          M002.1 (R5): offered next-time stress delta. Shown only when a
+          real (non-keep) delta exists for this session's focus.
+          Keep-the-same is the pre-selected default, so doing nothing
+          leaves the plan unchanged (never a silent reshuffle). Framed in
+          stress vocabulary, forward-compatible with M002.2 ladders.
+        */}
+        {showVerdict && verdictLine && (
+          <Card className="flex flex-col gap-3">
+            <h2 id="verdict-heading" className="text-base font-semibold text-text-primary">
+              Next time
+            </h2>
+            <p className="text-sm text-text-secondary">{verdictLine}</p>
+            <ChoiceRow
+              value={verdictChoice}
+              onChange={setVerdictChoice}
+              layout="grid-2"
+              ariaLabelledBy="verdict-heading"
+              options={[
+                { value: 'kept_original', label: 'Keep the same' },
+                { value: 'accepted', label: 'Try it' },
+              ]}
+            />
+          </Card>
+        )}
       </ScreenShell.Body>
 
       <ScreenShell.Footer className="flex flex-col gap-3 pt-4">

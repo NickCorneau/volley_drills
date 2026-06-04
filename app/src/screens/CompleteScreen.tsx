@@ -4,6 +4,7 @@ import { SafetyIcon } from '../components/SafetyIcon'
 import { UpdatePrompt } from '../components/UpdatePrompt'
 import { Button, Card, ScreenShell, StatusMessage } from '../components/ui'
 import { composeSummary, type SummaryOutput } from '../domain'
+import { composeCarryForwardLine } from '../domain/adaptation/replayAdaptation'
 import { useInstallPosture } from '../hooks/useInstallPosture'
 import { effortLabel, formatDifficultyBreakdownLine, formatPassRateLine } from '../lib/format'
 import { isSchemaBlocked } from '../lib/schema-blocked'
@@ -257,6 +258,15 @@ export function CompleteScreen() {
   // eyebrow. Future contributors: do NOT re-add the solo eyebrow.
   // See `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 5.
   const isPairSummary = summary.header === "Today's pair verdict"
+
+  // M002.1 (R5/D3): surface the carry-forward line ONLY when the user
+  // accepted the offered delta on this review — never a change they kept
+  // original, so Complete and the next Home read stay coherent.
+  const acceptedCarryForward =
+    review.verdictChoice === 'accepted' && review.offeredDelta
+      ? composeCarryForwardLine(review.offeredDelta)
+      : null
+
   return (
     <ScreenShell>
       {/*
@@ -324,6 +334,14 @@ export function CompleteScreen() {
           <p className="max-w-[320px] text-sm leading-relaxed text-text-secondary">
             {summary.reason}
           </p>
+          {acceptedCarryForward && (
+            <p
+              className="max-w-[320px] text-sm leading-relaxed text-text-secondary"
+              data-testid="complete-carry-forward"
+            >
+              {acceptedCarryForward}
+            </p>
+          )}
         </section>
 
         <Card className="w-full" aria-label="Session recap">

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type {
+  AdaptationDelta,
   ExecutionLog,
   IncompleteReason,
   PerDrillCapture as PerDrillCaptureRecord,
   SessionPlan,
+  VerdictChoice,
 } from '../../model'
 import {
   aggregateDrillCaptures,
@@ -12,6 +14,10 @@ import {
   inferPlanMainMetricType,
   metricShowsReviewCounts,
 } from '../../domain/capture'
+import { composeCarryForwardLine } from '../../domain/adaptation/replayAdaptation'
+import { isScopedFocus } from '../../domain/eligibleSessions'
+import { inferSessionFocus } from '../../domain/sessionFocus'
+import { loadVerdictOffer } from '../../services/verdictOffer'
 import { formatDurationLine, statusLabel } from '../../lib/format'
 import { isSchemaBlocked } from '../../lib/schema-blocked'
 import { routes } from '../../routes'
@@ -51,6 +57,11 @@ export function useReviewController(executionLogId: string) {
   const [perDrillCaptures, setPerDrillCaptures] = useState<PerDrillCaptureRecord[]>([])
   const [debouncedShortNote, setDebouncedShortNote] = useState('')
   const [hydrated, setHydrated] = useState(false)
+  // M002.1 visible adaptation (R5): the fresh next-time stress offer for
+  // this session's focus, and the user's accept/keep choice. Default is
+  // keep-original so doing nothing is the safe, no-reshuffle path.
+  const [offeredDelta, setOfferedDelta] = useState<AdaptationDelta | null>(null)
+  const [verdictChoice, setVerdictChoice] = useState<VerdictChoice>('kept_original')
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedShortNote(shortNote), 200)
@@ -102,6 +113,21 @@ export function useReviewController(executionLogId: string) {
           plan: result.plan,
         })
         setHydrated(true)
+
+        // M002.1 (R5): compute the fresh next-time offer for this
+        // session's focus from prior eligible sessions. Best-effort —
+        // a failure here must never block the review from loading.
+        const focus = result.plan ? inferSessionFocus(result.plan.blocks) : 'partial'
+        if (isScopedFocus(focus)) {
+          try {
+            const offer = await loadVerdictOffer(focus, executionLogId)
+            if (!cancelled && offer.direction !== 'keep') setOfferedDelta(offer)
+          } catch (offerErr) {
+            if (!isSchemaBlocked()) {
+              console.error('Verdict offer load failed; continuing without it', offerErr)
+            }
+          }
+        }
       } catch (err) {
         if (cancelled) return
         if (isSchemaBlocked()) return
@@ -182,6 +208,10 @@ export function useReviewController(executionLogId: string) {
   const isPairMode = plan?.playerCount === 2
   const rpePrompt = isPairMode ? 'How hard was this session for you?' : 'How hard was your session?'
   const canSubmit = sessionRpe != null && (!needsIncompleteReason || incompleteReason != null)
+  // M002.1 (R5): the verdict block shows only when a real (non-keep)
+  // delta was offered for this session's focus.
+  const verdictLine = offeredDelta ? composeCarryForwardLine(offeredDelta) : null
+  const showVerdict = verdictLine !== null
   const missingHint: string | null = isSubmitting
     ? null
     : sessionRpe == null
@@ -216,6 +246,8 @@ export function useReviewController(executionLogId: string) {
         quickTags: quickTags.length > 0 ? quickTags : undefined,
         shortNote: shortNote.trim() || undefined,
         perDrillCaptures: perDrillCaptures.length > 0 ? perDrillCaptures : undefined,
+        offeredDelta: offeredDelta ?? undefined,
+        verdictChoice: offeredDelta ? verdictChoice : undefined,
       })
       switch (result.status) {
         case 'ok':
@@ -300,6 +332,10 @@ export function useReviewController(executionLogId: string) {
     rpePrompt,
     canSubmit,
     missingHint,
+    showVerdict,
+    verdictLine,
+    verdictChoice,
+    setVerdictChoice,
     handleToggleNotCaptured,
     handleSubmit,
     handleFinishLater,
