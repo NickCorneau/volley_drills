@@ -1,9 +1,11 @@
 import { db } from '../../db/schema'
 import type {
+  AdaptationDelta,
   DrillVariantScore,
   IncompleteReason,
   PerDrillCapture,
   SessionReview,
+  VerdictChoice,
 } from '../../db/types'
 import { classifyCaptureWindow, isEligibleForAdaptation } from '../../domain/capture'
 import { endedAt } from '../../domain/executionPredicates'
@@ -28,6 +30,16 @@ export interface SubmitReviewData {
   incompleteReason?: IncompleteReason
   quickTags?: string[]
   shortNote?: string
+  /**
+   * M002.1 (D150/D151): the next-time stress delta offered at the end of
+   * this review, and the user's accept/keep response. Both optional —
+   * absent when no delta was offered (keep / cold start) or the review
+   * predates M002.1. `kept_original` and absence are equivalent to
+   * readers (no silent reshuffle). These are the only new persisted
+   * inputs the milestone adds.
+   */
+  offeredDelta?: AdaptationDelta
+  verdictChoice?: VerdictChoice
   /**
    * Override the capture timestamp. Defaults to `Date.now()`. Useful for
    * tests that need to assert on specific `captureWindow` bucketing; not
@@ -80,6 +92,8 @@ export async function submitReview(data: SubmitReviewData): Promise<SubmitReview
     captureWindow,
     eligibleForAdaptation: isEligibleForAdaptation(captureWindow),
     status: 'submitted',
+    offeredDelta: data.offeredDelta,
+    verdictChoice: data.verdictChoice,
   }
 
   // A3 + H17: intra-connection atomic read-decide-write. A7 cleanup

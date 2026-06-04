@@ -121,6 +121,29 @@ export class VolleycraftDB extends Dexie {
         storageMeta: 'key',
       })
       .upgrade(() => {})
+
+    // M002.1 (D150, D151): adds `SessionReview.offeredDelta` +
+    // `SessionReview.verdictChoice` — the offered next-time stress delta
+    // and the user's accept/keep response (the only new persisted state
+    // the milestone adds; plan/backlog/receipt/proxy are all recomputed
+    // on demand per derive-don't-persist). Purely additive, non-indexed,
+    // forward-only, no data transform — the fields are optional on the
+    // model so v6 rows ("no offeredDelta / no verdictChoice key") read
+    // cleanly as "no delta offered / no verdict recorded" under v7
+    // readers, and rollback to v6 is safe (v6 readers ignore the unknown
+    // keys). Following the v5/v6 convention, the bump exists purely as a
+    // labelled deployment/replay boundary, not because the field-add
+    // requires a migration. See the M002.1 plan + the `D150` row.
+    this.version(7)
+      .stores({
+        sessionPlans: 'id',
+        executionLogs: 'id, planId, status',
+        sessionReviews: 'id, executionLogId',
+        timerState: 'id',
+        sessionDrafts: 'id',
+        storageMeta: 'key',
+      })
+      .upgrade(() => {})
   }
 }
 

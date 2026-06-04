@@ -13,6 +13,7 @@
  * `app/src/domain/*` for `from '.*db'` should return zero hits.
  */
 export type {
+  AdaptationDelta,
   DifficultyTag,
   DraftBlock,
   DrillVariantScore,
@@ -32,6 +33,7 @@ export type {
   StorageMetaEntry,
   TimerRunStatus,
   TimerState,
+  VerdictChoice,
 } from '../model'
 
 // `SetupContext` is re-exported here for legacy import paths under

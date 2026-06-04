@@ -108,9 +108,9 @@ describe('writer contract: status emission (A5 / D-C7)', () => {
   })
 })
 
-describe('fresh v6 DB shape', () => {
-  it('opens the current Dexie schema at version 6', () => {
-    expect(db.verno).toBe(6)
+describe('fresh v7 DB shape', () => {
+  it('opens the current Dexie schema at version 7', () => {
+    expect(db.verno).toBe(7)
   })
 
   it('has an empty storageMeta table', async () => {
