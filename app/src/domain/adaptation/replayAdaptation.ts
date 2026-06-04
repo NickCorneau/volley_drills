@@ -119,8 +119,10 @@ const LESS_LINES: Record<ScopedFocus, string> = {
 }
 
 /**
- * The bounded, deterministic carry-forward / verdict line (R4). Returns
- * `null` for a `keep` (or suppressed) delta — no filler line. Copy is
+ * The bounded, deterministic verdict line offered at review end (R5).
+ * Returns `null` for a `keep` (or suppressed) delta — no filler line.
+ * Framed "...next time" because at review the user just trained this
+ * focus and the offer is for the next time they train it. Copy is
  * stress-vocabulary, ≤45 words, em-dash free (courtside copy contract).
  */
 export function composeCarryForwardLine(delta: AdaptationDelta): string | null {
@@ -132,4 +134,34 @@ export function composeCarryForwardLine(delta: AdaptationDelta): string | null {
     return `Adjust the stress on ${focusLabel(focus).toLowerCase()} next time.`
   }
   return delta.direction === 'more' ? MORE_LINES[focus] : LESS_LINES[focus]
+}
+
+const MORE_SUMMARY: Record<ScopedFocus, string> = {
+  pass: 'Carried forward: a bit more stress on passing.',
+  serve: 'Carried forward: a bit more stress on serving.',
+  set: 'Carried forward: a bit more stress on setting.',
+}
+
+const LESS_SUMMARY: Record<ScopedFocus, string> = {
+  pass: 'Carried forward: easing the stress on passing.',
+  serve: 'Carried forward: easing the stress on serving.',
+  set: 'Carried forward: easing the stress on setting.',
+}
+
+/**
+ * The Home carry-forward summary (R4). Same delta, but framed as a
+ * STANDING adjustment ("Carried forward: ...") rather than "...next
+ * time", because on Home it sits beside the plan's "Next up: [focus]" —
+ * and the accepted focus is rarely the next session's focus (staleness
+ * sinks a just-trained focus to the tail). The non-temporal framing
+ * keeps the two lines from claiming different "next" sessions. Returns
+ * `null` for a `keep` delta.
+ */
+export function composeCarryForwardSummary(delta: AdaptationDelta): string | null {
+  if (delta.direction === 'keep') return null
+  const focus = delta.focus
+  if (focus !== 'pass' && focus !== 'serve' && focus !== 'set') {
+    return `Carried forward: adjusting the stress on ${focusLabel(focus).toLowerCase()}.`
+  }
+  return delta.direction === 'more' ? MORE_SUMMARY[focus] : LESS_SUMMARY[focus]
 }

@@ -2,7 +2,9 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { resolveHomeSnapshot, useHomeScreenState } from '../useHomeScreenState'
 import * as sessionService from '../../../services/session'
+import * as planInputsService from '../../../services/planInputs'
 import type { ResumableSession } from '../../../services/session'
+import type { SessionReview } from '../../../model'
 
 vi.mock('../../../services/session', () => ({
   expireStaleReviews: vi.fn(),
@@ -13,6 +15,16 @@ vi.mock('../../../services/session', () => ({
   getRecentSessions: vi.fn(),
 }))
 
+vi.mock('../../../services/planInputs', () => ({
+  loadPlanInputs: vi.fn(),
+}))
+
+const EMPTY_PLAN_INPUTS = {
+  reviews: [] as SessionReview[],
+  attributedSessions: [],
+  lastAcceptedDelta: null,
+}
+
 describe('useHomeScreenState', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -22,6 +34,7 @@ describe('useHomeScreenState', () => {
     vi.mocked(sessionService.getCurrentDraft).mockResolvedValue(null)
     vi.mocked(sessionService.getLastComplete).mockResolvedValue(null)
     vi.mocked(sessionService.getRecentSessions).mockResolvedValue([])
+    vi.mocked(planInputsService.loadPlanInputs).mockResolvedValue(EMPTY_PLAN_INPUTS)
   })
 
   it('resolves loading to ready flags', async () => {
@@ -105,6 +118,61 @@ describe('useHomeScreenState', () => {
       expect(expireOrder).toBeLessThan(vi.mocked(reader).mock.invocationCallOrder[0]!)
     }
     expect(sessionService.getRecentSessions).toHaveBeenCalledWith(3)
+  })
+
+  describe('M002.1 thin-spine wiring', () => {
+    function submittedReview(overrides: Partial<SessionReview> = {}): SessionReview {
+      return {
+        id: overrides.id ?? 'r1',
+        executionLogId: 'e1',
+        sessionRpe: 5,
+        goodPasses: 0,
+        totalAttempts: 0,
+        submittedAt: 1000,
+        status: 'submitted',
+        eligibleForAdaptation: true,
+        ...overrides,
+      }
+    }
+
+    it('always derives a plan; suppresses the receipt for a user with no submitted history', async () => {
+      const flags = await resolveHomeSnapshot()
+      expect(flags.plan).not.toBeNull()
+      expect(flags.receipt).toBeNull()
+      expect(flags.carryForwardLine).toBeNull()
+    })
+
+    it('surfaces the receipt once submitted history exists', async () => {
+      vi.mocked(planInputsService.loadPlanInputs).mockResolvedValue({
+        reviews: [submittedReview()],
+        attributedSessions: [{ focus: 'pass', trainedAt: 1000 }],
+        lastAcceptedDelta: null,
+      })
+      const flags = await resolveHomeSnapshot()
+      expect(flags.receipt).not.toBeNull()
+    })
+
+    it('renders a non-temporal carry-forward summary from an accepted delta', async () => {
+      vi.mocked(planInputsService.loadPlanInputs).mockResolvedValue({
+        reviews: [submittedReview()],
+        attributedSessions: [{ focus: 'pass', trainedAt: 1000 }],
+        lastAcceptedDelta: { kind: 'stress', focus: 'serve', direction: 'more' },
+      })
+      const flags = await resolveHomeSnapshot()
+      expect(flags.carryForwardLine).toBe('Carried forward: a bit more stress on serving.')
+      // The plan render must not also claim a "next time" stress nudge.
+      expect(flags.plan?.render.toLowerCase()).not.toContain('stress')
+    })
+
+    it('no carry-forward line when there is no accepted delta', async () => {
+      vi.mocked(planInputsService.loadPlanInputs).mockResolvedValue({
+        reviews: [submittedReview()],
+        attributedSessions: [{ focus: 'pass', trainedAt: 1000 }],
+        lastAcceptedDelta: null,
+      })
+      const flags = await resolveHomeSnapshot()
+      expect(flags.carryForwardLine).toBeNull()
+    })
   })
 
   it('retry re-enters loading and resolves again', async () => {

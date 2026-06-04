@@ -1,4 +1,9 @@
-import { composeCarryForwardLine, replayAdaptation, type ReplayInput } from '../replayAdaptation'
+import {
+  composeCarryForwardLine,
+  composeCarryForwardSummary,
+  replayAdaptation,
+  type ReplayInput,
+} from '../replayAdaptation'
 import type { DifficultyTag } from '../../../model'
 
 function input(overrides: Partial<ReplayInput> = {}): ReplayInput {
@@ -111,6 +116,31 @@ describe('composeCarryForwardLine', () => {
         const line = composeCarryForwardLine({ kind: 'stress', focus, direction })
         expect(line).not.toBeNull()
         expect(line as string).not.toContain('\u2014')
+        expect((line as string).split(/\s+/).length).toBeLessThanOrEqual(45)
+      }
+    }
+  })
+})
+
+describe('composeCarryForwardSummary (Home, non-temporal)', () => {
+  it('returns null for a keep delta', () => {
+    expect(composeCarryForwardSummary({ kind: 'stress', focus: 'pass', direction: 'keep' })).toBeNull()
+  })
+
+  it('frames the adjustment as carried-forward, not "next time"', () => {
+    const line = composeCarryForwardSummary({ kind: 'stress', focus: 'serve', direction: 'more' })
+    expect(line).toBe('Carried forward: a bit more stress on serving.')
+    // Must NOT claim "next time" — it sits beside the plan's "Next up" line.
+    expect(line as string).not.toContain('next time')
+  })
+
+  it('renders bounded, em-dash-free copy for every scoped focus and direction', () => {
+    for (const direction of ['more', 'less'] as const) {
+      for (const focus of ['pass', 'serve', 'set'] as const) {
+        const line = composeCarryForwardSummary({ kind: 'stress', focus, direction })
+        expect(line).not.toBeNull()
+        expect(line as string).not.toContain('\u2014')
+        expect(line as string).not.toContain('next time')
         expect((line as string).split(/\s+/).length).toBeLessThanOrEqual(45)
       }
     }

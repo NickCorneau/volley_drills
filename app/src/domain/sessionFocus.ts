@@ -29,10 +29,17 @@ import type { SkillFocus } from '../model'
  *
  * See `docs/plans/2026-04-20-m001-tier1-implementation.md` Unit 5.
  */
+// Module-load lookup maps over the static DRILLS catalog. Replace the
+// prior per-call O(DRILLS) linear scans so the M002.1 folds
+// (feltDifficultyProxy / verdictOffer attribute every per-drill capture)
+// stay O(1) per lookup rather than O(captures x drills).
+const DRILL_BY_NAME = new Map(DRILLS.map((d) => [d.name, d]))
+const DRILL_BY_ID = new Map(DRILLS.map((d) => [d.id, d]))
+
 export function inferSessionFocus(blocks: readonly SessionPlanBlock[]): SkillFocus | 'partial' {
   const mainSkillBlock = blocks.find((b) => b.type === 'main_skill')
   if (!mainSkillBlock) return 'partial'
-  const drill = DRILLS.find((d) => d.name === mainSkillBlock.drillName)
+  const drill = DRILL_BY_NAME.get(mainSkillBlock.drillName)
   if (!drill) return 'partial'
   const firstFocus = drill.skillFocus[0]
   if (!firstFocus) return 'partial'
@@ -82,8 +89,7 @@ export function inferSessionFocus(blocks: readonly SessionPlanBlock[]): SkillFoc
  * `skillFocus[0]` approximation for multi-focus drills (F11).
  */
 export function focusForDrillId(drillId: string): SkillFocus | undefined {
-  const drill = DRILLS.find((d) => d.id === drillId)
-  return drill?.skillFocus[0]
+  return DRILL_BY_ID.get(drillId)?.skillFocus[0]
 }
 
 export function focusLabel(focus: SkillFocus | 'partial'): string {

@@ -15,7 +15,6 @@
  * focus intentions + backlog + next-session projection so the two
  * surfaces don't duplicate the cadence computation.
  */
-import type { AdaptationDelta } from '../model'
 import {
   SCOPED_FOCUSES,
   type AttributedTrainingSession,
@@ -26,8 +25,6 @@ import { sortByStaleness } from './staleness'
 export interface PlanInput {
   sessions: readonly AttributedTrainingSession[]
   now: number
-  /** An accepted next-time delta for the head focus, if the user accepted one. */
-  acceptedDelta?: AdaptationDelta
 }
 
 export interface PlanOutput {
@@ -57,7 +54,7 @@ function listPhrase(focuses: ScopedFocus[]): string {
 }
 
 export function composePlan(input: PlanInput): PlanOutput {
-  const { sessions, now, acceptedDelta } = input
+  const { sessions, now } = input
   const order = sortByStaleness(sessions, now)
   const nextFocus = order.head
 
@@ -68,21 +65,14 @@ export function composePlan(input: PlanInput): PlanOutput {
     ? [...SCOPED_FOCUSES]
     : SCOPED_FOCUSES.filter((focus) => trained.has(focus))
 
-  let render = order.freshStart
+  // The plan render states what is next; the accepted-adjustment framing
+  // is carried by the Home carry-forward summary (composeCarryForwardSummary)
+  // so the two surfaces don't both claim the "next" slot.
+  const render = order.freshStart
     ? `First up: ${FOCUS_PHRASE[nextFocus]} after a warm-up. ${capitalize(
         listPhrase(order.deferredTail),
       )} are queued.`
     : `Next up: ${FOCUS_PHRASE[nextFocus]} after a warm-up. Then ${listPhrase(order.deferredTail)}.`
-
-  // An accepted stress delta on the next focus nudges the framing
-  // (never reshuffles the backlog order).
-  if (
-    acceptedDelta &&
-    acceptedDelta.direction !== 'keep' &&
-    acceptedDelta.focus === nextFocus
-  ) {
-    render += acceptedDelta.direction === 'more' ? ' Plan to add a little stress.' : ' Plan to ease the stress.'
-  }
 
   return {
     nextFocus,

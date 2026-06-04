@@ -29,6 +29,19 @@ export type StressDirection = 'more' | 'less' | 'keep'
 /**
  * The next-time adaptation delta for a focus. v1 ships only the
  * `stress` arm; the discriminator is the permanent shape.
+ *
+ * **Persisted + exported shape — change with migration care.** This type
+ * is stored on `SessionReview.offeredDelta` (Dexie) and emitted in the
+ * founder export (`ExportPayload`, schemaVersion 5). Adding a new arm
+ * (e.g. `{ kind: 'score'; ... }` in M002.3) is non-breaking. But do NOT
+ * add a *required* field to the existing `stress` arm — every persisted
+ * v1 delta would become shape-invalid for new readers within a single
+ * schemaVersion. Add such fields as optional, or as a new arm.
+ *
+ * `focus` is deliberately the wider `SkillFocus` rather than the v1
+ * `ScopedFocus` (pass/serve/set): `model/` cannot import the domain-layer
+ * `ScopedFocus` under the inward layer rule. v1 only ever populates
+ * scoped focuses; consumers carry a defensive non-scoped fallback.
  */
 export type AdaptationDelta = { kind: 'stress'; focus: SkillFocus; direction: StressDirection }
 

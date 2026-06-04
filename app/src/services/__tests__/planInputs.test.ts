@@ -120,20 +120,37 @@ describe('loadPlanInputs', () => {
     expect(lastAcceptedDelta).toBeNull()
   })
 
-  it('surfaces the offered delta from the most recent accepted verdict', async () => {
+  it('surfaces the offered delta when the latest verdict was accepted', async () => {
+    await seedSession({ execId: 'old', drillName: 'Continuous Passing', submittedAt: 100 })
+    await seedSession({ execId: 'new', drillName: 'First to 10 Serving', submittedAt: 500 })
+    await db.sessionReviews.update('review-old', {
+      offeredDelta: { kind: 'stress', focus: 'pass', direction: 'less' },
+      verdictChoice: 'kept_original',
+    })
+    await db.sessionReviews.update('review-new', {
+      offeredDelta: { kind: 'stress', focus: 'serve', direction: 'more' },
+      verdictChoice: 'accepted',
+    })
+
+    const { lastAcceptedDelta } = await loadPlanInputs()
+    expect(lastAcceptedDelta).toEqual({ kind: 'stress', focus: 'serve', direction: 'more' })
+  })
+
+  it('a newer kept-original verdict supersedes an older accepted delta', async () => {
     await seedSession({ execId: 'old', drillName: 'Continuous Passing', submittedAt: 100 })
     await seedSession({ execId: 'new', drillName: 'First to 10 Serving', submittedAt: 500 })
     await db.sessionReviews.update('review-old', {
       offeredDelta: { kind: 'stress', focus: 'pass', direction: 'less' },
       verdictChoice: 'accepted',
     })
-    // newer review kept-original -> should NOT become the carry-forward
+    // The user's most recent decision was to keep the original — the
+    // earlier accepted delta must NOT keep showing on Home.
     await db.sessionReviews.update('review-new', {
       offeredDelta: { kind: 'stress', focus: 'serve', direction: 'more' },
       verdictChoice: 'kept_original',
     })
 
     const { lastAcceptedDelta } = await loadPlanInputs()
-    expect(lastAcceptedDelta).toEqual({ kind: 'stress', focus: 'pass', direction: 'less' })
+    expect(lastAcceptedDelta).toBeNull()
   })
 })

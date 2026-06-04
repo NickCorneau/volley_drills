@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { SessionDraft } from '../../model'
 import { isSchemaBlocked } from '../../lib/schema-blocked'
-import { composeCarryForwardLine } from '../../domain/adaptation/replayAdaptation'
+import { composeCarryForwardSummary } from '../../domain/adaptation/replayAdaptation'
 import { composePlan, type PlanOutput } from '../../domain/composePlan'
 import { composeReceipt, type ReceiptOutput } from '../../domain/composeReceipt'
 import { loadPlanInputs } from '../../services/planInputs'
@@ -85,7 +85,6 @@ export async function resolveHomeSnapshot(): Promise<HomeFlags> {
   const plan = composePlan({
     sessions: planInputs.attributedSessions,
     now,
-    acceptedDelta: planInputs.lastAcceptedDelta ?? undefined,
   })
   // Suppress the receipt for a brand-new user with no submitted history
   // — there is nothing to reflect on yet, and "0 sessions logged" reads
@@ -93,7 +92,7 @@ export async function resolveHomeSnapshot(): Promise<HomeFlags> {
   const hasHistory = planInputs.reviews.some((r) => r.status === 'submitted')
   const receipt = hasHistory ? composeReceipt(planInputs.reviews, now) : null
   const carryForwardLine = planInputs.lastAcceptedDelta
-    ? composeCarryForwardLine(planInputs.lastAcceptedDelta)
+    ? composeCarryForwardSummary(planInputs.lastAcceptedDelta)
     : null
 
   return {

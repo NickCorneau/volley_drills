@@ -47,23 +47,12 @@ describe('composePlan', () => {
     expect(out.intentions).toEqual(['pass', 'serve'])
   })
 
-  it('folds an accepted stress delta on the next focus into the framing', () => {
+  it('plan render states what is next without an inline stress nudge (carried by Home summary)', () => {
     const out = composePlan(
-      plan({
-        sessions: [session('pass', 1), session('serve', 5), session('set', 12)],
-        acceptedDelta: { kind: 'stress', focus: 'set', direction: 'more' },
-      }),
+      plan({ sessions: [session('pass', 1), session('serve', 5), session('set', 12)] }),
     )
-    expect(out.render.toLowerCase()).toContain('stress')
-  })
-
-  it('ignores an accepted delta whose focus is not the next session', () => {
-    const out = composePlan(
-      plan({
-        sessions: [session('pass', 1), session('serve', 5), session('set', 12)],
-        acceptedDelta: { kind: 'stress', focus: 'pass', direction: 'more' },
-      }),
-    )
+    // The accepted-adjustment framing lives in composeCarryForwardSummary,
+    // not the plan render, so the two surfaces don't both claim "next".
     expect(out.render.toLowerCase()).not.toContain('stress')
   })
 
@@ -71,10 +60,7 @@ describe('composePlan', () => {
     const cases = [
       plan(),
       plan({ sessions: [session('pass', 1), session('serve', 5), session('set', 12)] }),
-      plan({
-        sessions: [session('pass', 1), session('serve', 5), session('set', 12)],
-        acceptedDelta: { kind: 'stress', focus: 'set', direction: 'less' },
-      }),
+      plan({ sessions: [session('pass', 8), session('serve', 2)] }),
     ]
     for (const input of cases) {
       const { render } = composePlan(input)

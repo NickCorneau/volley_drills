@@ -31,6 +31,7 @@ export type {
   SessionReview,
   SessionReviewStatus,
   StorageMetaEntry,
+  StressDirection,
   TimerRunStatus,
   TimerState,
   VerdictChoice,
