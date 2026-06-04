@@ -829,6 +829,13 @@
       "canonical_for": "Resolves the M002.1 felt-readiness fork (R7/F5) left open by D150. RECOMMENDATION: defer the self-reported felt-readiness signal from v1; keep R8's free, honestly-labeled felt-difficulty proxy (derived from the per-drill difficulty-tag distribution); reserve a clean, fully-specced seam for research-correct readiness capture (skill-specific present-state 11-pt NRS, fixed WEEKLY cadence, administered OFF the post-session window, Home/receipt-side not review and not pre-run) in a later M002 milestone \u2014 mirroring how R10 reserves the drill-score seam for M002.3. REJECTS capture-at-review (the contaminated post-session window per docs/research/subjective-skill-confidence-validity.md; the cheapest capture is the least honest) and rejects deriving readiness from difficulty tags while CALLING it readiness (wrong construct; collapses R7 into R8). Rationale: felt-readiness is the demoted companion (the #1 'see it adapting' need is carried by carry-forward + verdict R4/R5), so a new recurring weekly capture surface is over-investment for v1. Consistent with D149 (felt-readiness reframe holds; v1 just doesn't surface a readiness number yet) and D150 (any future readiness field is a persisted user INPUT replayed through the formatter). Founder-ratify: accept deferral vs pull the seam into v1."
     },
     {
+      "id": "dogfood-m002-1-thin-spine-2026-06-04",
+      "path": "docs/dogfood-reports/2026-06-04-m002-1-thin-spine-dogfood.md",
+      "type": "dogfood-report",
+      "status": "complete",
+      "canonical_for": "Diff-scoped browser QA (agent-browser) of the M002.1 thin-spine + adaptation changeset: Home plan/carry-forward/weekly-receipt cluster, Review 'Next time' accept/keep verdict, Complete carry-forward. 7 flows (cold-start, history-no-delta, accepted-delta, verdict-trend, no-trend, complete accept/keep, quiet-week receipt) all PASS. ONE paper cut fixed (commit 096d1c1): the thin-spine plan line rendered on the empty new_user cold-start, competing with the focal 'Start first session' CTA \u2014 gated showPlanLayer on primary !== 'new_user', mirroring the history-gated receipt, plus two HomeScreen precedence regressions. Verifies the D150 derive-don't-persist model dogfoods cleanly (seed records + reload reproduces every state, no migrations) and the accept verdict persists verdictChoice=accepted end-to-end. One low-severity copy nuance deferred (receipt 'this week' label for lapsed users). No console errors; full gate green after the fix."
+    },
+    {
       "id": "skill-level-mutability-requirements-2026-05-04",
       "path": "docs/brainstorms/2026-05-04-skill-level-mutability-requirements.md",
       "type": "requirements",
