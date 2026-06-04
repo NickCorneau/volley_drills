@@ -259,9 +259,9 @@ export function CompleteScreen() {
   // See `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 5.
   const isPairSummary = summary.header === "Today's pair verdict"
 
-  // M002.1 (R5/D3): surface the carry-forward line ONLY when the user
-  // accepted the offered delta on this review — never a change they kept
-  // original, so Complete and the next Home read stay coherent.
+  // Surface the carry-forward line ONLY when the user accepted the offered
+  // delta — never a change they kept original, so Complete and the next
+  // Home read stay coherent.
   const acceptedCarryForward =
     review.verdictChoice === 'accepted' && review.offeredDelta
       ? composeCarryForwardLine(review.offeredDelta)

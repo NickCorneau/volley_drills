@@ -59,17 +59,20 @@ export async function buildExportPayload(): Promise<ExportPayload> {
     db.sessionReviews.toArray(),
     db.storageMeta.toArray(),
   ])
+  // Single instant so `exportedAt` and the receipt's week window describe
+  // the same snapshot (a founder replaying the export sees one timestamp).
+  const now = Date.now()
   // `structuredClone` isolates the returned payload from the backing
   // Dexie rows. Without it, mutating `payload.sessionPlans[0]` in
   // consumer code would silently leak into the next Dexie fetch.
   return structuredClone({
     schemaVersion: 5 as const,
-    exportedAt: Date.now(),
+    exportedAt: now,
     sessionPlans,
     executionLogs,
     sessionReviews,
     storageMeta,
-    receipt: composeReceipt(sessionReviews, Date.now()),
+    receipt: composeReceipt(sessionReviews, now),
   })
 }
 

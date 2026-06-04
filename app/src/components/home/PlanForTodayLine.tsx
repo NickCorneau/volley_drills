@@ -8,7 +8,7 @@ import type { PlanOutput } from '../../domain/composePlan'
  */
 export function PlanForTodayLine({ plan }: { plan: PlanOutput }) {
   return (
-    <section aria-label="Your plan" className="flex flex-col gap-1">
+    <section aria-label="Your plan">
       <p className="text-sm leading-5 text-text-secondary">{plan.render}</p>
     </section>
   )

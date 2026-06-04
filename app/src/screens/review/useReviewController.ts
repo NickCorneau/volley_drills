@@ -57,9 +57,7 @@ export function useReviewController(executionLogId: string) {
   const [perDrillCaptures, setPerDrillCaptures] = useState<PerDrillCaptureRecord[]>([])
   const [debouncedShortNote, setDebouncedShortNote] = useState('')
   const [hydrated, setHydrated] = useState(false)
-  // M002.1 visible adaptation (R5): the fresh next-time stress offer for
-  // this session's focus, and the user's accept/keep choice. Default is
-  // keep-original so doing nothing is the safe, no-reshuffle path.
+  // Default is keep-original so doing nothing is the safe, no-reshuffle path.
   const [offeredDelta, setOfferedDelta] = useState<AdaptationDelta | null>(null)
   const [verdictChoice, setVerdictChoice] = useState<VerdictChoice>('kept_original')
 
@@ -114,9 +112,7 @@ export function useReviewController(executionLogId: string) {
         })
         setHydrated(true)
 
-        // M002.1 (R5): compute the fresh next-time offer for this
-        // session's focus from prior eligible sessions. Best-effort —
-        // a failure here must never block the review from loading.
+        // Best-effort: a failure here must never block the review from loading.
         const focus = result.plan ? inferSessionFocus(result.plan.blocks) : 'partial'
         if (isScopedFocus(focus)) {
           try {
@@ -208,10 +204,9 @@ export function useReviewController(executionLogId: string) {
   const isPairMode = plan?.playerCount === 2
   const rpePrompt = isPairMode ? 'How hard was this session for you?' : 'How hard was your session?'
   const canSubmit = sessionRpe != null && (!needsIncompleteReason || incompleteReason != null)
-  // M002.1 (R5): the verdict block shows only when a real (non-keep)
-  // delta was offered for this session's focus.
+  // A 'keep' offer produces a null line (composeCarryForwardLine), so the
+  // verdict block is absent whenever there's nothing worth changing.
   const verdictLine = offeredDelta ? composeCarryForwardLine(offeredDelta) : null
-  const showVerdict = verdictLine !== null
   const missingHint: string | null = isSubmitting
     ? null
     : sessionRpe == null
@@ -332,7 +327,6 @@ export function useReviewController(executionLogId: string) {
     rpePrompt,
     canSubmit,
     missingHint,
-    showVerdict,
     verdictLine,
     verdictChoice,
     setVerdictChoice,

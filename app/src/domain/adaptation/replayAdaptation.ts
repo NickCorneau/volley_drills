@@ -28,7 +28,7 @@
  */
 import type { AdaptationDelta, DifficultyTag, StressDirection, VerdictChoice } from '../../model'
 import { focusLabel } from '../sessionFocus'
-import type { ScopedFocus } from '../eligibleSessions'
+import { isScopedFocus, type ScopedFocus } from '../eligibleSessions'
 
 /** Sessions of focus-attributed tags required to flip off `keep`. */
 const SUSTAINED_SESSIONS = 2
@@ -128,7 +128,7 @@ const LESS_LINES: Record<ScopedFocus, string> = {
 export function composeCarryForwardLine(delta: AdaptationDelta): string | null {
   if (delta.direction === 'keep') return null
   const focus = delta.focus
-  if (focus !== 'pass' && focus !== 'serve' && focus !== 'set') {
+  if (!isScopedFocus(focus)) {
     // Defensive: v1 only ranks scoped focuses; fall back to a neutral
     // label-based line rather than throwing.
     return `Adjust the stress on ${focusLabel(focus).toLowerCase()} next time.`
@@ -160,7 +160,7 @@ const LESS_SUMMARY: Record<ScopedFocus, string> = {
 export function composeCarryForwardSummary(delta: AdaptationDelta): string | null {
   if (delta.direction === 'keep') return null
   const focus = delta.focus
-  if (focus !== 'pass' && focus !== 'serve' && focus !== 'set') {
+  if (!isScopedFocus(focus)) {
     return `Carried forward: adjusting the stress on ${focusLabel(focus).toLowerCase()}.`
   }
   return delta.direction === 'more' ? MORE_SUMMARY[focus] : LESS_SUMMARY[focus]

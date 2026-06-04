@@ -335,7 +335,7 @@ export function HomeScreen() {
   const primary: PrimaryVariant = selectPrimaryCard(flagSummary)
   const secondary: SecondaryRow[] = selectSecondaryRows(flagSummary)
 
-  // M002.1 thin-spine layer. The plan line + carry-forward orient toward
+  // The plan line + carry-forward orient toward
   // "what's next"; they stay out of the way of the focused review_pending
   // state (and are already null on the exclusive resume branch). They are
   // also suppressed on the brand-new cold-start (new_user): with no history

@@ -79,8 +79,8 @@ export async function resolveHomeSnapshot(): Promise<HomeFlags> {
     loadPlanInputs(),
   ])
 
-  // M002.1 thin-spine layer: pure formatters over the captured records
-  // loadPlanInputs returned (D150 derive-don't-persist).
+  // Pure formatters over the captured records (D150 derive-don't-persist):
+  // nothing here is read from a stored plan/receipt artifact.
   const now = Date.now()
   const plan = composePlan({
     sessions: planInputs.attributedSessions,

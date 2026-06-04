@@ -36,7 +36,6 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
     rpePrompt,
     canSubmit,
     missingHint,
-    showVerdict,
     verdictLine,
     verdictChoice,
     setVerdictChoice,
@@ -199,13 +198,11 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
         </section>
 
         {/*
-          M002.1 (R5): offered next-time stress delta. Shown only when a
-          real (non-keep) delta exists for this session's focus.
           Keep-the-same is the pre-selected default, so doing nothing
           leaves the plan unchanged (never a silent reshuffle). Framed in
           stress vocabulary, forward-compatible with M002.2 ladders.
         */}
-        {showVerdict && verdictLine && (
+        {verdictLine && (
           <Card className="flex flex-col gap-3">
             <h2 id="verdict-heading" className="text-base font-semibold text-text-primary">
               Next time
