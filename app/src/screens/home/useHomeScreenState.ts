@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { SessionDraft } from '../../model'
 import { isSchemaBlocked } from '../../lib/schema-blocked'
+import { composeCarryForwardLine } from '../../domain/adaptation/replayAdaptation'
+import { composePlan, type PlanOutput } from '../../domain/composePlan'
+import { composeReceipt, type ReceiptOutput } from '../../domain/composeReceipt'
+import { loadPlanInputs } from '../../services/planInputs'
 import {
   expireStaleReviews,
   findPendingReview,
@@ -28,6 +32,16 @@ export interface HomeFlags {
    * the user never sees.
    */
   recentSessions: readonly RecentSessionEntry[]
+  /**
+   * M002.1 thin-spine longitudinal layer. All derived (composePlan /
+   * composeReceipt / composeCarryForwardLine) from captured records —
+   * nothing new persisted (D150). Null on the Resume branch, which is
+   * the only allowed surface when a resumable session exists.
+   */
+  plan: PlanOutput | null
+  /** Carry-forward line reflecting the last accepted verdict, or null. */
+  carryForwardLine: string | null
+  receipt: ReceiptOutput | null
 }
 
 export type HomeState =
@@ -44,6 +58,9 @@ export async function resolveHomeSnapshot(): Promise<HomeFlags> {
       draft: null,
       lastComplete: null,
       recentSessions: [],
+      plan: null,
+      carryForwardLine: null,
+      receipt: null,
     }
   }
 
@@ -54,12 +71,30 @@ export async function resolveHomeSnapshot(): Promise<HomeFlags> {
 
   // Tier 1a Unit 5 (2026-04-20): read these flags together so Home paints
   // once with a consistent precedence snapshot.
-  const [reviewPending, draft, lastComplete, recentSessions] = await Promise.all([
+  const [reviewPending, draft, lastComplete, recentSessions, planInputs] = await Promise.all([
     findPendingReview(),
     getCurrentDraft(),
     getLastComplete(),
     getRecentSessions(3),
+    loadPlanInputs(),
   ])
+
+  // M002.1 thin-spine layer: pure formatters over the captured records
+  // loadPlanInputs returned (D150 derive-don't-persist).
+  const now = Date.now()
+  const plan = composePlan({
+    sessions: planInputs.attributedSessions,
+    now,
+    acceptedDelta: planInputs.lastAcceptedDelta ?? undefined,
+  })
+  // Suppress the receipt for a brand-new user with no submitted history
+  // — there is nothing to reflect on yet, and "0 sessions logged" reads
+  // as pointless rather than calm.
+  const hasHistory = planInputs.reviews.some((r) => r.status === 'submitted')
+  const receipt = hasHistory ? composeReceipt(planInputs.reviews, now) : null
+  const carryForwardLine = planInputs.lastAcceptedDelta
+    ? composeCarryForwardLine(planInputs.lastAcceptedDelta)
+    : null
 
   return {
     resume: null,
@@ -67,6 +102,9 @@ export async function resolveHomeSnapshot(): Promise<HomeFlags> {
     draft,
     lastComplete,
     recentSessions,
+    plan,
+    carryForwardLine,
+    receipt,
   }
 }
 

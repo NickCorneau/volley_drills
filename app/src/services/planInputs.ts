@@ -17,7 +17,7 @@
  * calls this and passes the result into composePlan / composeReceipt.
  */
 import { db } from '../db'
-import type { SessionReview } from '../db/types'
+import type { AdaptationDelta, SessionReview } from '../db/types'
 import {
   attributeTrainingSessions,
   type AttributedTrainingSession,
@@ -27,6 +27,23 @@ import {
 export interface PlanInputsBundle {
   reviews: SessionReview[]
   attributedSessions: AttributedTrainingSession[]
+  /**
+   * The offered delta from the most recent submitted review the user
+   * ACCEPTED (verdictChoice === 'accepted'). This is the carry-forward
+   * Home reflects ("what you chose last time") and the nudge composePlan
+   * folds into the next recommendation. `null` when the latest verdict
+   * was kept-original or none exists. Reading the persisted choice keeps
+   * Home decoupled from the fresh-offer computation (which lives at
+   * review time).
+   */
+  lastAcceptedDelta: AdaptationDelta | null
+}
+
+function resolveLastAcceptedDelta(reviews: readonly SessionReview[]): AdaptationDelta | null {
+  const accepted = reviews
+    .filter((r) => r.status === 'submitted' && r.verdictChoice === 'accepted' && r.offeredDelta)
+    .sort((a, b) => b.submittedAt - a.submittedAt)
+  return accepted[0]?.offeredDelta ?? null
 }
 
 export async function loadPlanInputs(): Promise<PlanInputsBundle> {
@@ -48,5 +65,6 @@ export async function loadPlanInputs(): Promise<PlanInputsBundle> {
   return {
     reviews,
     attributedSessions: attributeTrainingSessions(withPlan),
+    lastAcceptedDelta: resolveLastAcceptedDelta(reviews),
   }
 }

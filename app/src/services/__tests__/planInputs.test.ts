@@ -114,8 +114,26 @@ describe('loadPlanInputs', () => {
   })
 
   it('returns empty attributed sessions on a fresh DB', async () => {
-    const { reviews, attributedSessions } = await loadPlanInputs()
+    const { reviews, attributedSessions, lastAcceptedDelta } = await loadPlanInputs()
     expect(reviews).toEqual([])
     expect(attributedSessions).toEqual([])
+    expect(lastAcceptedDelta).toBeNull()
+  })
+
+  it('surfaces the offered delta from the most recent accepted verdict', async () => {
+    await seedSession({ execId: 'old', drillName: 'Continuous Passing', submittedAt: 100 })
+    await seedSession({ execId: 'new', drillName: 'First to 10 Serving', submittedAt: 500 })
+    await db.sessionReviews.update('review-old', {
+      offeredDelta: { kind: 'stress', focus: 'pass', direction: 'less' },
+      verdictChoice: 'accepted',
+    })
+    // newer review kept-original -> should NOT become the carry-forward
+    await db.sessionReviews.update('review-new', {
+      offeredDelta: { kind: 'stress', focus: 'serve', direction: 'more' },
+      verdictChoice: 'kept_original',
+    })
+
+    const { lastAcceptedDelta } = await loadPlanInputs()
+    expect(lastAcceptedDelta).toEqual({ kind: 'stress', focus: 'pass', direction: 'less' })
   })
 })

@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Brandmark } from '../components/Brandmark'
 import { HomePrimaryCard } from '../components/HomePrimaryCard'
 import { HomeSecondaryRow } from '../components/HomeSecondaryRow'
+import { CarryForwardCell } from '../components/home/CarryForwardCell'
+import { PlanForTodayLine } from '../components/home/PlanForTodayLine'
+import { WeeklyReceiptSection } from '../components/home/WeeklyReceiptSection'
 import { RecentSessionsList } from '../components/RecentSessionsList'
 import { SkipReviewModal } from '../components/SkipReviewModal'
 import { SoftBlockModal } from '../components/SoftBlockModal'
@@ -332,6 +335,12 @@ export function HomeScreen() {
   const primary: PrimaryVariant = selectPrimaryCard(flagSummary)
   const secondary: SecondaryRow[] = selectSecondaryRows(flagSummary)
 
+  // M002.1 thin-spine layer. The plan line + carry-forward orient toward
+  // "what's next"; they stay out of the way of the focused review_pending
+  // state (and are already null on the exclusive resume branch). The
+  // frozen weekly receipt renders below the fold whenever history exists.
+  const showPlanLayer = flags.plan !== null && primary !== 'review_pending'
+
   return (
     <ScreenShell>
       {/* App-bar-scale brand row: inline icon + wordmark, subtle so the
@@ -351,6 +360,8 @@ export function HomeScreen() {
       <ScreenShell.Body className="gap-8 pb-6">
         <UpdatePrompt needRefresh={needRefresh} onUpdate={updateApp} />
 
+        {showPlanLayer && flags.plan && <PlanForTodayLine plan={flags.plan} />}
+
         {renderPrimary(primary, flags, {
           handleResume,
           handleDiscard,
@@ -359,6 +370,10 @@ export function HomeScreen() {
           ...interceptedHandlers,
           actionDisabled: nonReviewActionPending,
         })}
+
+        {showPlanLayer && flags.carryForwardLine && (
+          <CarryForwardCell line={flags.carryForwardLine} />
+        )}
 
         {/* Phase F1 (2026-04-19): secondary rows used to render as a
           flex-col of independent bordered cards, which competed with
@@ -405,6 +420,8 @@ export function HomeScreen() {
           memo Condition 2 (visible session history removes the
           founder's reason to keep a parallel notes app). */}
         {!flags.resume && <RecentSessionsList entries={flags.recentSessions} />}
+
+        {flags.receipt && <WeeklyReceiptSection receipt={flags.receipt} />}
 
         {softBlockTarget && (
           <SoftBlockModal
