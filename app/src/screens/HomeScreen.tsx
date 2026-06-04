@@ -360,20 +360,29 @@ export function HomeScreen() {
       <ScreenShell.Body className="gap-8 pb-6">
         <UpdatePrompt needRefresh={needRefresh} onUpdate={updateApp} />
 
-        {showPlanLayer && flags.plan && <PlanForTodayLine plan={flags.plan} />}
+        {/* M002.1 thin-spine cluster: the plan line orients the focal
+            card and the carry-forward footnotes it, so the three sit
+            tighter to each other (gap-4) than to the zones below (body
+            gap-8) and read as one "what's next" group rather than three
+            equally-spaced siblings. When the plan layer is suppressed
+            (review_pending / resume), the wrapper holds the lone primary
+            card and the gap is inert. */}
+        <div className="flex flex-col gap-4">
+          {showPlanLayer && flags.plan && <PlanForTodayLine plan={flags.plan} />}
 
-        {renderPrimary(primary, flags, {
-          handleResume,
-          handleDiscard,
-          handleFinishReview,
-          handleRequestSkip,
-          ...interceptedHandlers,
-          actionDisabled: nonReviewActionPending,
-        })}
+          {renderPrimary(primary, flags, {
+            handleResume,
+            handleDiscard,
+            handleFinishReview,
+            handleRequestSkip,
+            ...interceptedHandlers,
+            actionDisabled: nonReviewActionPending,
+          })}
 
-        {showPlanLayer && flags.carryForwardLine && (
-          <CarryForwardCell line={flags.carryForwardLine} />
-        )}
+          {showPlanLayer && flags.carryForwardLine && (
+            <CarryForwardCell line={flags.carryForwardLine} />
+          )}
+        </div>
 
         {/* Phase F1 (2026-04-19): secondary rows used to render as a
           flex-col of independent bordered cards, which competed with
