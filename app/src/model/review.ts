@@ -3,6 +3,7 @@
  * (or finishes later, or expires past the 2 h cap). Pure product type;
  * persistence-layer rows re-export this shape today.
  */
+import type { AdaptationDelta, VerdictChoice } from './adaptation'
 import type { PerDrillCapture, RpeCaptureWindow } from './capture'
 
 export type IncompleteReason = 'time' | 'fatigue' | 'pain' | 'other'
@@ -43,4 +44,16 @@ export interface SessionReview {
   captureWindow?: RpeCaptureWindow
   eligibleForAdaptation?: boolean
   status?: SessionReviewStatus
+  /**
+   * M002.1 visible adaptation (D150, D151). The next-time stress delta
+   * offered at the end of this session's review, and the user's
+   * accept/keep response to it. These are the only new persisted state
+   * the milestone adds — everything else (plan, backlog, receipt,
+   * skill proxy) is recomputed on demand. Both are absent on pre-M002.1
+   * rows; readers treat absence as "no delta offered / no verdict".
+   * The pair is a deliberate simplification below D150's "append-only
+   * ledger" — the choice is 1:1 with the review it rides on.
+   */
+  offeredDelta?: AdaptationDelta
+  verdictChoice?: VerdictChoice
 }

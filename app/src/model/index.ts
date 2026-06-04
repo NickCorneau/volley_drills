@@ -35,6 +35,7 @@ export type {
   SessionReview,
   SessionReviewStatus,
 } from './review'
+export type { AdaptationDelta, StressDirection, VerdictChoice } from './adaptation'
 export type { TimerRunStatus, TimerState } from './timer'
 export type { StorageMetaEntry } from './storage'
 export type { SessionParticipant, SessionParticipantRole } from './participant'
