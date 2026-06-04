@@ -1,5 +1,6 @@
 import type { ExecutionLog, SessionPlan, SessionReview, StorageMetaEntry } from '../db/types'
 import { db } from '../db'
+import { composeReceipt, type ReceiptOutput } from '../domain/composeReceipt'
 
 /**
  * V0B-15: raw training-record JSON export (Phase E Unit 2).
@@ -24,13 +25,26 @@ import { db } from '../db'
  *   export.
  */
 
+/**
+ * M002.1 (D150): the founder D130 dual-read of the weekly receipt. This
+ * is the SAME `composeReceipt` output the user sees on Home — one
+ * computation, two reads, so the founder evidence and the user copy can
+ * never diverge. The receipt is derived from `sessionReviews` already in
+ * this payload; nothing extra is persisted (derive-don't-persist).
+ *
+ * `schemaVersion` bumped 4 -> 5 because the payload shape changed: the
+ * `sessionReviews` rows now carry the additive `offeredDelta` /
+ * `verdictChoice` fields (U4) and this `receipt` key is new. Founder
+ * replay scripts branch on `schemaVersion`.
+ */
 export interface ExportPayload {
-  schemaVersion: 4
+  schemaVersion: 5
   exportedAt: number
   sessionPlans: SessionPlan[]
   executionLogs: ExecutionLog[]
   sessionReviews: SessionReview[]
   storageMeta: StorageMetaEntry[]
+  receipt: ReceiptOutput
 }
 
 /**
@@ -49,12 +63,13 @@ export async function buildExportPayload(): Promise<ExportPayload> {
   // Dexie rows. Without it, mutating `payload.sessionPlans[0]` in
   // consumer code would silently leak into the next Dexie fetch.
   return structuredClone({
-    schemaVersion: 4 as const,
+    schemaVersion: 5 as const,
     exportedAt: Date.now(),
     sessionPlans,
     executionLogs,
     sessionReviews,
     storageMeta,
+    receipt: composeReceipt(sessionReviews, Date.now()),
   })
 }
 

@@ -35,18 +35,23 @@ describe('buildExportPayload (V0B-15)', () => {
       [
         'exportedAt',
         'executionLogs',
+        'receipt',
         'schemaVersion',
         'sessionPlans',
         'sessionReviews',
         'storageMeta',
       ].sort(),
     )
-    expect(payload.schemaVersion).toBe(4)
+    expect(payload.schemaVersion).toBe(5)
     expect(typeof payload.exportedAt).toBe('number')
     expect(payload.sessionPlans).toEqual([])
     expect(payload.executionLogs).toEqual([])
     expect(payload.sessionReviews).toEqual([])
     expect(payload.storageMeta).toEqual([])
+    // M002.1 dual-read: the founder receipt is derived from the same
+    // composeReceipt the user sees; present even on an empty DB.
+    expect(payload.receipt).toBeDefined()
+    expect(payload.receipt.feltDifficulty).toHaveProperty('pass')
   })
 
   it('includes every row from each tracked table', async () => {
@@ -222,7 +227,7 @@ describe('downloadExport (V0B-15)', () => {
 
     const text = await blobs[0].text()
     const parsed = JSON.parse(text)
-    expect(parsed.schemaVersion).toBe(4)
+    expect(parsed.schemaVersion).toBe(5)
     expect(parsed.sessionPlans).toHaveLength(1)
     expect(parsed.sessionPlans[0].id).toBe('plan-dl')
 
