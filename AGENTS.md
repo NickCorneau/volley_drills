@@ -6,7 +6,7 @@ stage: validation
 type: agent-contract
 summary: "Canonical prose repo contract: current state, read order, source-of-truth order, and repo-wide working constraints."
 authority: repo-wide routing, working constraints, and agent-facing orientation
-last_updated: 2026-05-27
+last_updated: 2026-06-03
 depends_on:
  - docs/catalog.json
  - docs/vision.md
@@ -64,7 +64,7 @@ Give agents one durable, concise repo contract for current state, read order, so
 Live posture, recent shipped history, and dated detail are owned by `docs/status/current-state.md`. Read it for anything beyond the structural shape below.
 
 - **Phase**: 0 (validation, post-M001)
-- **Active milestone**: `M002` Weekly Confidence Loop (per `D124`), status `draft / stage: planning` — M001 closed 2026-05-27 by founder executive call (`D147`); M002 did not auto-activate (plan authoring is a separate next move)
+- **Active milestone**: `M002` Weekly Training Home (a milestone **series**, re-scoped + renamed from "Weekly Confidence Loop" 2026-06-03 per `D149`; per `D124`), status `draft / stage: planning` — M001 closed 2026-05-27 by founder executive call (`D147`); M002 did not auto-activate. The series (progression spine M002.1→M002.2→M002.3 + goals/roster/attack tracks + Phase 1.5 handoff) is scoped at milestone level in `docs/brainstorms/2026-06-03-m002-thin-spine-and-milestone-series-requirements.md`; each milestone is planned 1-by-1 after the roadmap is reconciled
 - **Closed milestone**: `M001` Solo Session Loop, closed 2026-05-27 by founder executive call (`D147`). M001 carry-forward (Tier 2 polish, cohort question, attack-content track shape) absorbed into M002 as discretionary post-M002-core follow-on. See `docs/status/current-state.md` Snapshot + Recent Shipped History for closure details.
 - **Mode and gate**: `D130` founder-use mode still active through 2026-07-20 (M001 closed inside the window via executive call; the re-eval still fires with reframed scope per `D147`: D130 window close + cohort decision on M002 evidence, does NOT re-read M001 closure). The `D91` retention gate is deferred, not dropped — see `docs/status/current-state.md` for the active posture.
 - **Key open questions**: tracked under `O*` in `docs/decisions.md`
@@ -143,6 +143,7 @@ Durable docs under `docs/` should keep YAML frontmatter and explicit ownership. 
 - Prefer deleting or demoting stale documentation rather than leaving misleading material at canonical tiers.
 - Treat Volleycraft as pair-native while still supporting solo training as a common mode.
 - Prefer calm, shibui interfaces that reduce information overload and decision fatigue.
+- Keep in-app term glosses/definitions secondary and unobtrusive (surfaced on demand, e.g., a subtle underline) rather than inline text that crowds the UI; a term needs explaining once, then should recede.
 - For UI/app changes, value manual mobile dogfood testing with screenshots and iterative polish before declaring done.
 - When a deliverable may be read on a phone, prefer concise, skimmable structure over dense prose.
 - Session focus is mandatory in the product: **Recommended** is the default and focus cannot be deselected—avoid implying optional focus or “skip choosing focus” semantics when describing behavior.

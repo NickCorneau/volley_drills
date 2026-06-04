@@ -6,7 +6,7 @@ stage: validation
 type: status
 summary: "Canonical current-state snapshot and recent shipped-history log for Volleycraft."
 authority: current project posture, recent shipped history, and active validation gates
-last_updated: 2026-05-27
+last_updated: 2026-06-03
 depends_on:
   - AGENTS.md
   - docs/catalog.json
@@ -63,7 +63,7 @@ Keep detailed project posture and recent shipped-history out of entry surfaces w
 
 - **Phase**: 0 validation (post-M001).
 - **Mode**: `D130` founder-use mode through 2026-07-20 (window still active; M001 closed inside the window via executive call). D91 retention gate is deferred, not dropped.
-- **Active milestone**: `M002` Weekly Confidence Loop (per `D124`). Status `draft / stage: planning` — M002 did not auto-activate on M001 closure; M002 plan authoring is a separate next move. M002 milestone doc absorbed M001 carry-forward as discretionary post-M002-core follow-on per `D147` R13: Tier 2 polish surfaces (See-Why modal, richer summary, recommendation-first onboarding polish), friends-of-friends cohort question, attack-content track shape question (Group A absorbed). Tier 1b kill-or-author contract and Phase 2B per-drill capture shapes remain owned by `docs/status/post-m001-content-backlog.md` (Group B preserved-elsewhere).
+- **Active milestone**: `M002` Weekly Training Home (per `D124`; re-scoped into a milestone **series** + renamed from "Weekly Confidence Loop" 2026-06-03 per `D149`). Status `draft / stage: planning` — M002 did not auto-activate on M001 closure; M002 plan authoring is a separate next move. The series is scoped at milestone level in `docs/brainstorms/2026-06-03-m002-thin-spine-and-milestone-series-requirements.md` (progression spine M002.1 thin-spine + visible adaptation → M002.2 stress ladders + technique-how depth → M002.3 objective "1% better" drill score, plus goals/roster/attack tracks + Phase 1.5 handoff); confidence reframed to a felt-readiness companion with a behavioral-primary receipt; each milestone is planned 1-by-1 after the roadmap is reconciled. M002 milestone doc absorbed M001 carry-forward as discretionary post-M002-core follow-on per `D147` R13: Tier 2 polish surfaces (See-Why modal, richer summary, recommendation-first onboarding polish), friends-of-friends cohort question, attack-content track shape question (Group A absorbed). Tier 1b kill-or-author contract and Phase 2B per-drill capture shapes remain owned by `docs/status/post-m001-content-backlog.md` (Group B preserved-elsewhere).
 - **Closed milestone**: `M001` Solo Session Loop. **Closed 2026-05-27 by founder executive call (`D147`).** NOT via the pre-registered Path 1 / early-trigger paths. Build phase complete 2026-05-08; validation ran 2026-04-20 → 2026-05-27. Conditions at closure: Condition 2 PASS, Condition 3 PASS, Condition 1 fail-trending under standard read / pass-equivalent under `D132` (ratified 2026-05-27 by `D146`). Pre-registered reversal condition in `D147`: if 2026-07-20 cohort question can't be decided cleanly under M002 evidence, M001 reopens.
 - **Runtime**: Cursor-first repo; automation expects WSL/Linux, bash, and python3.
 - **App**: v0b Starter Loop under `app/` is runnable and deployed at <https://volleydrills.nicholascorneau.workers.dev>.

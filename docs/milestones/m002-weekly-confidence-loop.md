@@ -1,12 +1,12 @@
 ---
 id: M002
-title: Weekly Confidence Loop
+title: Weekly Training Home (M002 series)
 status: draft
 stage: planning
 type: milestone
-authority: post-M001 self-coached follow-on scope, weekly confidence surfaces, and main-tool evidence bar
-summary: "First post-M001 self-coached layer: visible carry-forward, shallow weekly planning, and minimal accumulation that make the app feel worth returning to. Parks the 2026-05-27 design-critique-walk ideation as carry-forward backlog (most survivors are M001-tier; only survivor #1 is M002-direction)."
-last_updated: 2026-05-27
+authority: post-M001 self-coached deepening series scope, milestone-level breakdown, and main-tool evidence bar
+summary: "M002 is a SERIES of milestones (self-coached deepening arc), not a single surface — re-scoped and ratified 2026-06-03 (D149). A progression spine (M002.1 thin-spine + visible adaptation → M002.2 stress ladders + technique-how depth → M002.3 the objective '1% better' drill score) plus three attaching tracks (M002.4 goals/anchor, M002.5 bring others in, M002.6 attack + tactics content) plus a Phase 1.5 handoff. Confidence is reframed to a felt-readiness companion with a behavioral-primary receipt. Milestone-level breakdown lives in docs/brainstorms/2026-06-03-m002-thin-spine-and-milestone-series-requirements.md; each milestone is planned 1-by-1 after the roadmap is reconciled."
+last_updated: 2026-06-03
 depends_on:
   - docs/vision.md
   - docs/prd-foundation.md
@@ -14,10 +14,15 @@ depends_on:
   - docs/milestones/m001-solo-session-loop.md
   - docs/decisions.md
   - docs/ideation/2026-05-27-m001-app-wide-walk-critique-followup-ideation.md
+  - docs/ideation/2026-06-02-plan-and-adaptation-system-ideation.md
+  - docs/research/2026-06-02-m002-evidence-meta-synthesis.md
+  - docs/reviews/2026-06-02-m002-ideation-revalidation.md
+  - docs/brainstorms/2026-06-03-m002-thin-spine-and-milestone-series-requirements.md
 decision_refs:
   - D15
   - D22
   - D26
+  - D68
   - D74
   - D123
   - D124
@@ -25,21 +30,46 @@ decision_refs:
   - D137
   - D146
   - D147
+  - D149
 open_question_refs:
   - O2
+  - O21
   - O22
   - O23
-  - O24
 ---
 
-# M002: Weekly Confidence Loop
+# M002: Weekly Training Home (milestone series)
+
+> **Renamed 2026-06-03 (`D149`).** Formerly "Weekly Confidence Loop." The `M002` ID and the `m002-weekly-confidence-loop.md` filename are kept stable to avoid cross-reference churn; only the framing changed (confidence is no longer the skill-signal center of gravity — see `D149` and the series section below).
 
 ## Agent Quick Scan
 
-- Use this doc for the first post-M001 self-coached milestone: the smallest layer that makes the app feel like a weekly training home rather than a one-session helper.
-- This milestone comes **after** `M001` proves the runner loop and **before** any coach-connected build begins.
-- In scope: visible carry-forward, shallow next-N planning, minimal weekly receipt, and lightweight accumulation.
+- Use this doc as the **M002 series charter**: the post-M001 self-coached deepening arc that turns a believable single session into a training home that visibly makes you better.
+- The authoritative **milestone-level breakdown** is `docs/brainstorms/2026-06-03-m002-thin-spine-and-milestone-series-requirements.md`; this charter summarizes it and each sub-milestone is planned 1-by-1 (`ce-plan`) after the roadmap is reconciled.
+- The series comes **after** `M001` proves the runner loop and gates any coach-connected build (coach gate opens only after the spine M002.1–M002.3 proves main-tool pull).
 - Not for: coach clipboard, full calendar planning, team identity, or rich analytics.
+
+## M002 milestone series (ratified 2026-06-03 · D149)
+
+M002 is a **series of milestones**, not a single surface (`D149`). The framing reflects the 2026-06-02 four-topic research day (`docs/research/2026-06-02-m002-evidence-meta-synthesis.md`) and its adversarial revalidation (`docs/reviews/2026-06-02-m002-ideation-revalidation.md`): confidence is **reframed to a felt-readiness companion** (never skill proof), the weekly receipt is **behavioral-primary**, and the founder's #1 need — "see the plan building up / know I'm at least 1% better" — is carried by visible adaptation, not a confidence number.
+
+**Progression spine (sequential):**
+
+- **M002.1 — Thin-Spine + Visible Adaptation (v1).** Thin-spine plan (durable intentions + weekly cadence + staleness-ordered backlog, only next session concrete, markdown-first as a formatter over typed records) + minimal survivor-#5 visible adaptation (carry-forward + one offered "accept / keep original" verdict, framed in stress vocabulary) + behavioral-primary receipt (consistency headline; confidence as a felt-readiness companion; one difficulty-tag skill proxy) + a warmup content block. The objective drill score is a reserved seam. Defined precisely in the series brainstorm.
+- **M002.2 — Stress Ladders + Technique "How" Depth.** Per-skill ordered stress rungs (clean-toss technique → moving → re-set in new spot → game-like), each an external-focus cue + exploratory "see how it feels" criterion (never coach-graded pass/fail). Closes the loudest camp gap; the content the thin-spine backlog orders over.
+- **M002.3 — The "1% Better" Signal.** Repeated structured drill score on a focal skill, tied to clearing a stress rung; the objective advancement signal seamed in v1.
+
+**Attaching tracks (orderable):**
+
+- **M002.4 — Goals / North-Star Anchor** (individual or pair; eventless capability anchor; event-date + taper deferred to Phase 1.5).
+- **M002.5 — Bring Others In** (3+ player / rotation; reopens `D101`).
+- **M002.6 — Attack + Tactics Content** (authored as stress ladders; via the `D148`-shape attack-chain decision packet + `D143`/`D144`).
+
+**Phase 1.5 handoff (out of M002):** event-date anchor + taper, baseline tests, mixed-focus themes, PoST periodization, optional cloud peer.
+
+**Ratified roadmap-lock calls (`D149`):** umbrella name "Weekly Training Home" (ID + filename stable); **content-forward ordering** (M002.2 → M002.6 → M002.3 → M002.4 → M002.5); coach-gate after the spine; this charter's `open_question_refs` drop the resolved `O24` and add `O21` (input-only). The **hybrid stress-ladder spine** (the BAB-camp "Stress" framework = progressive contextual interference, `D68`) organizes the mid-series content/progression milestones; v1 speaks stress vocabulary without building ladder content.
+
+**Reading the legacy scope sections below.** The "In scope" / "Minimal surface contract" / "Planning defaults" sections that follow were written for the single "Weekly Confidence Loop" milestone and describe **M002.1 (v1)** specifically. Where they say "weekly confidence matters more than rich history," "a confidence and investment surface," or a receipt of "one load proxy + one skill proxy," they are **superseded by `D149`**: the receipt is behavioral-primary, confidence is a felt-readiness companion, and user-facing load is dropped to backend-only. The series brainstorm's M002.1 requirements (R1–R11) are authoritative for v1.
 
 ## Why this milestone exists
 
@@ -157,6 +187,8 @@ Whether those live as one spec or a small cluster depends on how much the surfac
 ## Carry-Forward Ideation Backlog
 
 Parked here so the 2026-05-27 design-critique-walk ideation pass is not lost. **Authority caveat:** this section is a parking lot, not an authoritative scope claim — most survivors are M001-tier (D130 founder-use window, polish, or design-system architecture) and should be re-triaged into M001 polish / `docs/status/m001-validation-overhang.md` or `docs/status/post-m001-content-backlog.md` when picked up. Only survivor #1 is genuinely M002-direction-level. The full ideation doc is the source of truth: `docs/ideation/2026-05-27-m001-app-wide-walk-critique-followup-ideation.md`.
+
+> **Seed reconciliation (2026-06-02).** The survivor #1 below ("Collapse the Between-Drill Region") is from the **2026-05-27 walk-critique** pass. It is a *different* list from the **current selected M002 brainstorm seed**, which is survivor #2 ("plan-as-thin-spine") of the separate `docs/ideation/2026-06-02-plan-and-adaptation-system-ideation.md` pass — distinct pass, distinct numbering. The two "#1/#2" labels are not the same list. The 2026-06-02 thin-spine is the current direction seed (revalidated in `docs/reviews/2026-06-02-m002-ideation-revalidation.md`); this 2026-05-27 backlog is retained as parked carry-forward.
 
 ### Upstream source
 
