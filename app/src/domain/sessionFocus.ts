@@ -73,6 +73,19 @@ export function inferSessionFocus(blocks: readonly SessionPlanBlock[]): SkillFoc
  * `'partial'` is unchanged so this is a render-only edit. See
  * `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 2.
  */
+/**
+ * Map a per-drill capture's `drillId` to the drill's primary focus
+ * (`skillFocus[0]`). Used by the M002.1 felt-difficulty proxy (U6) and
+ * adaptation fold (U2) to attribute difficulty tags to a focus. Returns
+ * `undefined` when the id is unknown (renamed / retired drill) or the
+ * drill carries no focus — callers drop those captures. v1 accepts the
+ * `skillFocus[0]` approximation for multi-focus drills (F11).
+ */
+export function focusForDrillId(drillId: string): SkillFocus | undefined {
+  const drill = DRILLS.find((d) => d.id === drillId)
+  return drill?.skillFocus[0]
+}
+
 export function focusLabel(focus: SkillFocus | 'partial'): string {
   switch (focus) {
     case 'pass':
