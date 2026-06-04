@@ -151,6 +151,23 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     expect(await screen.findByRole('button', { name: /start first session/i })).toBeInTheDocument()
   })
 
+  // M002.1 regression (dogfood F1): on the brand-new cold-start the thin-spine
+  // plan line must NOT render — with no history it is a generic fresh-start
+  // assertion that competes with the focal "Start first session" card. The
+  // line earns its place only once the user has trained (last_complete below).
+  it('new_user: suppresses the thin-spine plan-for-today line', async () => {
+    renderHome()
+    await screen.findByRole('button', { name: /start first session/i })
+    expect(screen.queryByRole('region', { name: /your plan/i })).not.toBeInTheDocument()
+  })
+
+  it('last_complete: renders the thin-spine plan-for-today line', async () => {
+    await seedLastComplete('exec-lc-plan')
+    renderHome()
+    await screen.findByRole('button', { name: /repeat last session/i })
+    expect(await screen.findByRole('region', { name: /your plan/i })).toBeInTheDocument()
+  })
+
   it('last_complete only: renders Repeat last session', async () => {
     await seedLastComplete('exec-lc')
     renderHome()

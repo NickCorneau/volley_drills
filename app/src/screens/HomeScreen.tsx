@@ -337,9 +337,13 @@ export function HomeScreen() {
 
   // M002.1 thin-spine layer. The plan line + carry-forward orient toward
   // "what's next"; they stay out of the way of the focused review_pending
-  // state (and are already null on the exclusive resume branch). The
-  // frozen weekly receipt renders below the fold whenever history exists.
-  const showPlanLayer = flags.plan !== null && primary !== 'review_pending'
+  // state (and are already null on the exclusive resume branch). They are
+  // also suppressed on the brand-new cold-start (new_user): with no history
+  // the plan line is a generic fresh-start assertion that competes with the
+  // focal "Start first session" card, so we let that card stand alone — the
+  // same way the frozen weekly receipt only renders once history exists.
+  const showPlanLayer =
+    flags.plan !== null && primary !== 'review_pending' && primary !== 'new_user'
 
   return (
     <ScreenShell>
