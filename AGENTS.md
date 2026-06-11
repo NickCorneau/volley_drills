@@ -152,7 +152,7 @@ Durable docs under `docs/` should keep YAML frontmatter and explicit ownership. 
 
 - The v0b Starter Loop under `app/` is real, runnable, and deployed; M001 work continues in tiers on top of it under `D130` founder-use mode. Use `docs/status/current-state.md` for the current snapshot and recent shipped-history log.
 - Treat `docs/plans/2026-04-16-003-rest-of-v0b-plan.md` as the v0b landed registry; use the dated Tier 1a / Tier 1b plans cataloged in `docs/catalog.json` for implementation history.
-- The current Dexie schema is **v6**; per-drill capture, including optional streak metric capture, lives on `/run/check` (`DrillCheckScreen`), not on Transition or Review.
+- The current Dexie schema is **v7** (v7 added the M002.1 `offeredDelta` / `verdictChoice` review fields per `D150`/`D151`); per-drill capture, including optional streak metric capture, lives on `/run/check` (`DrillCheckScreen`), not on Transition or Review.
 - The active automation environment is WSL/bash-friendly.
 - Historical control-plane scaffolding now lives in `archive/agent-control-plane/`.
 - The live v0b PWA deploys as a Cloudflare Worker at <https://volleydrills.nicholascorneau.workers.dev>; use `app/README.md` and `docs/ops/deploy-cloudflare-worker.md` for deploy runbooks.

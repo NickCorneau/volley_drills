@@ -65,7 +65,13 @@ export function RunControls({
         key: 'end',
         label: 'End session',
         onClick: onEndSession,
-        className: 'border-warning/20 text-warning',
+        // Red-team contrast finding (2026-06-11): `text-warning` (#dc2626)
+        // on the secondary-button surface clears only ~4.2:1, under the
+        // WCAG AA 4.5:1 floor for the 12px label the 4-action grid uses.
+        // `text-warning-strong` (~5.3:1+) is the app-wide treatment for
+        // warning text on light surfaces (Button danger variant, Callout,
+        // ToggleChip, PainOverrideCard all use it).
+        className: 'border-warning/20 text-warning-strong',
       },
     ].filter(Boolean) as Array<{
       key: string

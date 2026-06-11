@@ -147,9 +147,28 @@ export function useSessionRunner(executionLogId: string, options?: SessionRunner
     [persist, runSerial],
   )
 
+  /**
+   * Advance dedupe (red-team adversarial finding ADV-1, 2026-06-11).
+   *
+   * `runSerial` guarantees ORDERING, not idempotence. A Next tap racing
+   * the timer's block-end completion (or a plain double-tap; Run's
+   * Next / Skip taps have no in-flight disable) enqueues two advances.
+   * The first persist() schedules a render, and the ref-sync effect
+   * usually publishes the advanced state to `executionRef` before the
+   * first op's promise resolves - so the second op reads the FRESH ref
+   * and marks the next block completed without it ever running (or,
+   * past the last block, appends a malformed blockStatus row; see the
+   * matching guard in `buildAdvancedBlock`). While an advance is in
+   * flight, every additional advance request resolves to the in-flight
+   * result instead of enqueuing a second mutation. The ref clears on
+   * settle so a failed advance ("Try again" path) stays retryable.
+   */
+  const advanceInFlightRef = useRef<Promise<boolean> | null>(null)
   const advanceBlock = useCallback(
-    (status: 'completed' | 'skipped'): Promise<boolean> =>
-      runSerial(async () => {
+    (status: 'completed' | 'skipped'): Promise<boolean> => {
+      const inFlight = advanceInFlightRef.current
+      if (inFlight) return inFlight
+      const tracked: Promise<boolean> = runSerial(async () => {
         const exec = executionRef.current
         const p = planRef.current
         if (!exec || !p) return false
@@ -160,7 +179,14 @@ export function useSessionRunner(executionLogId: string, options?: SessionRunner
         await persist(finalized)
         await clearTimerState()
         return isLast
-      }),
+      }).finally(() => {
+        if (advanceInFlightRef.current === tracked) {
+          advanceInFlightRef.current = null
+        }
+      })
+      advanceInFlightRef.current = tracked
+      return tracked
+    },
     [persist, runSerial],
   )
 

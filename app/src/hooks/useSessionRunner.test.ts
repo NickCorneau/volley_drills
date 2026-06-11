@@ -507,6 +507,103 @@ describe('useSessionRunner', () => {
     })
   })
 
+  // Red-team adversarial finding ADV-1 (2026-06-11): the serial queue
+  // guarantees ordering, not idempotence. A Next tap racing the timer's
+  // block-end completion (or a plain double-tap) enqueues two advances;
+  // the second op runs after the ref-sync effect publishes the advanced
+  // state, so it would mark the NEXT block completed without it ever
+  // running. Concurrent advance requests must collapse into ONE advance.
+  it('dedupes concurrent advance requests so a Next tap racing block-end completion advances exactly one block', async () => {
+    const inProgressExec = makeExec({ status: 'in_progress' })
+    vi.mocked(sessionService.loadSession).mockResolvedValue({
+      execution: inProgressExec,
+      plan,
+    })
+    const advanced = makeExec({
+      status: 'in_progress',
+      activeBlockIndex: 1,
+      blockStatuses: [
+        { blockId: 'block-1', status: 'completed', completedAt: Date.now() },
+        { blockId: 'block-2', status: 'planned' },
+      ],
+    })
+    vi.mocked(sessionService.buildAdvancedBlock).mockReturnValue({
+      execution: advanced,
+      isLast: false,
+    })
+
+    // Hold the first saveExecution open so the second advance request
+    // arrives while the first is still in flight.
+    let releaseFirstSave: () => void = () => {}
+    const firstSave = new Promise<void>((resolve) => {
+      releaseFirstSave = resolve
+    })
+    vi.mocked(sessionService.saveExecution)
+      .mockImplementationOnce(() => firstSave)
+      .mockResolvedValue(undefined)
+
+    const { result } = renderHook(() => useSessionRunner('exec-1'))
+    await waitFor(() => expect(result.current.loaded).toBe(true))
+
+    let first: Promise<boolean> | undefined
+    let second: Promise<boolean> | undefined
+    act(() => {
+      first = result.current.completeBlock() // timer's block-end completion
+      second = result.current.completeBlock() // user's racing Next tap
+    })
+
+    await act(async () => {
+      releaseFirstSave()
+      const [isLastA, isLastB] = await Promise.all([first!, second!])
+      expect(isLastA).toBe(false)
+      expect(isLastB).toBe(false)
+    })
+
+    // Exactly ONE advance happened: one build, one save, block-2 untouched.
+    expect(sessionService.buildAdvancedBlock).toHaveBeenCalledTimes(1)
+    expect(sessionService.saveExecution).toHaveBeenCalledTimes(1)
+    expect(result.current.currentBlockIndex).toBe(1)
+  })
+
+  // ADV-1 corollary: the dedupe ref must clear on settle so the
+  // "Something went wrong. Try again" path stays retryable.
+  it('a failed advance clears the in-flight dedupe so retry works', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const inProgressExec = makeExec({ status: 'in_progress' })
+    vi.mocked(sessionService.loadSession).mockResolvedValue({
+      execution: inProgressExec,
+      plan,
+    })
+    const advanced = makeExec({
+      status: 'in_progress',
+      activeBlockIndex: 1,
+      blockStatuses: [
+        { blockId: 'block-1', status: 'completed', completedAt: Date.now() },
+        { blockId: 'block-2', status: 'planned' },
+      ],
+    })
+    vi.mocked(sessionService.buildAdvancedBlock).mockReturnValue({
+      execution: advanced,
+      isLast: false,
+    })
+    vi.mocked(sessionService.saveExecution)
+      .mockRejectedValueOnce(new Error('dexie write failed'))
+      .mockResolvedValue(undefined)
+
+    const { result } = renderHook(() => useSessionRunner('exec-1'))
+    await waitFor(() => expect(result.current.loaded).toBe(true))
+
+    await act(async () => {
+      await expect(result.current.completeBlock()).rejects.toThrow('dexie write failed')
+    })
+
+    await act(async () => {
+      await expect(result.current.completeBlock()).resolves.toBe(false)
+    })
+
+    expect(sessionService.buildAdvancedBlock).toHaveBeenCalledTimes(2)
+  })
+
   // Red-team RT-4 corollary: a stale timer from a different execution must
   // NOT contribute partial seconds to the current session's duration.
   it('skipping the last block ignores a timer owned by a different execution', async () => {

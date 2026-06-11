@@ -151,6 +151,23 @@ describe('buildAdvancedBlock', () => {
     const { execution } = buildAdvancedBlock(exec, p, 'skipped')
     expect(execution.status).toBe('in_progress')
   })
+
+  it('is a no-op past the end of the plan - no malformed blockStatus row (red-team adversarial finding ADV-1, 2026-06-11)', () => {
+    // Bug shape: a double advance on the final block left
+    // `activeBlockIndex === blocks.length`; the second call spread
+    // `blockStatuses[idx]` past the array end and appended a
+    // `{ status, completedAt }` row with NO blockId, which persisted
+    // into the ExecutionLog and flowed into exports.
+    const p = plan([block('b1')])
+    const completed = log({ status: 'completed', activeBlockIndex: 1 }, [
+      { blockId: 'b1', status: 'completed', completedAt: 50 },
+    ])
+    const { execution, isLast } = buildAdvancedBlock(completed, p, 'completed')
+    expect(isLast).toBe(true)
+    expect(execution).toBe(completed)
+    expect(execution.blockStatuses).toHaveLength(1)
+    expect(execution.blockStatuses.every((bs) => typeof bs.blockId === 'string')).toBe(true)
+  })
 })
 
 describe('buildEndedSession', () => {

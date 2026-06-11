@@ -125,6 +125,39 @@ describe('useTimer', () => {
     expect(elapsed).toBeLessThanOrEqual(2.05)
   })
 
+  it('pause() is idempotent - a second call while already paused does not double-count elapsed (red-team adversarial finding ADV-2, 2026-06-11)', () => {
+    // Bug shape: the previous `pause` always added
+    // `(performance.now() - startTsRef.current)` into `accumulatedRef`,
+    // even when the timer was already paused - `startTsRef` is never
+    // advanced between calls, so a double-tap of Pause (or a fumbled
+    // Swap-then-Pause inside the pauseBlock persist window, while the
+    // running layout is still rendered) counted the entire running
+    // segment twice. Near the end of a block the doubled elapsed clamps
+    // remaining to 0:00 and the next Resume tick auto-completes the
+    // block. The fixed `pause` mirrors resume()'s isRunningRef guard.
+    const onComplete = vi.fn()
+    const { result } = renderHook(() => useTimer(60, onComplete))
+
+    act(() => {
+      result.current.start()
+    })
+
+    let firstElapsed = 0
+    let secondElapsed = 0
+    act(() => {
+      vi.advanceTimersByTime(3000)
+      firstElapsed = result.current.pause()
+      secondElapsed = result.current.pause() // would have banked another ~3s before fix
+    })
+
+    expect(firstElapsed).toBeGreaterThanOrEqual(2.95)
+    expect(firstElapsed).toBeLessThanOrEqual(3.05)
+    expect(secondElapsed).toBe(firstElapsed)
+    // Remaining must reflect a single 3s deduction, not a doubled 6s.
+    expect(result.current.remainingSeconds).toBeGreaterThanOrEqual(56.95)
+    expect(result.current.remainingSeconds).toBeLessThanOrEqual(57.05)
+  })
+
   it('throttles visible countdown updates below animation-frame rate', () => {
     const observed: number[] = []
     const onComplete = vi.fn()

@@ -44,6 +44,14 @@ export function buildAdvancedBlock(
   status: 'completed' | 'skipped',
 ): { execution: ExecutionLog; isLast: boolean } {
   const idx = exec.activeBlockIndex
+  // ADV-1 guard (red-team, 2026-06-11): advancing past the end of the
+  // plan must be a no-op. Without this, `blockStatuses[idx]` spreads
+  // past the array end and writes a `{ status, completedAt }` row with
+  // no blockId, which persists into the ExecutionLog and flows into
+  // exports. Reachable via a double advance on the final block.
+  if (idx >= plan.blocks.length) {
+    return { execution: exec, isLast: true }
+  }
   const now = Date.now()
   const blockStatuses = [...exec.blockStatuses]
   blockStatuses[idx] = { ...blockStatuses[idx], status, completedAt: now }

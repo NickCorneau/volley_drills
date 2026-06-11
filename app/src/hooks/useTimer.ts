@@ -40,6 +40,11 @@ export function useTimer(durationSeconds: number, onComplete: () => void) {
       publishRemaining(remaining)
 
       if (remaining <= 0) {
+        // Bank the final running segment and drop the running flag
+        // synchronously so a pause() arriving after auto-complete is a
+        // clean no-op that still reports the true full elapsed.
+        accumulatedRef.current = elapsed
+        isRunningRef.current = false
         publishRemaining(0, true)
         setIsRunning(false)
         onCompleteRef.current()
@@ -58,6 +63,7 @@ export function useTimer(durationSeconds: number, onComplete: () => void) {
       }
       accumulatedRef.current = 0
       startTsRef.current = performance.now()
+      isRunningRef.current = true
       publishRemaining(durationRef.current, true)
       setIsRunning(true)
       rafRef.current = requestAnimationFrame(() => tickRef.current?.())
@@ -66,9 +72,22 @@ export function useTimer(durationSeconds: number, onComplete: () => void) {
   )
 
   const pause = useCallback((): number => {
+    // Idempotent (red-team adversarial finding ADV-2, 2026-06-11).
+    // resume() got this exact guard on 2026-04-27 but pause() did not:
+    // the paused-state layout only renders after the pauseBlock Dexie
+    // write + re-render, so a double-tap of Pause (or Swap-then-Pause,
+    // adjacent in the running layout) lands while the running controls
+    // are still visible. The second call re-added the entire running
+    // segment to `accumulatedRef` (startTsRef is never advanced between
+    // calls), double-counting elapsed; near the end of a block the
+    // doubled value clamps remaining to 0 and Resume's first tick
+    // auto-completes the block. Bail when not running, returning the
+    // already-banked elapsed so callers keep a truthful value.
+    if (!isRunningRef.current) return accumulatedRef.current
     cancelAnimationFrame(rafRef.current)
     const now = performance.now()
     accumulatedRef.current += (now - startTsRef.current) / 1000
+    isRunningRef.current = false
     publishRemaining(Math.max(0, durationRef.current - accumulatedRef.current), true)
     setIsRunning(false)
     return accumulatedRef.current
@@ -99,6 +118,7 @@ export function useTimer(durationSeconds: number, onComplete: () => void) {
         durationRef.current = newDuration
       }
       accumulatedRef.current = 0
+      isRunningRef.current = false
       setIsRunning(false)
       publishRemaining(durationRef.current, true)
     },
