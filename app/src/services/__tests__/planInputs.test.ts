@@ -3,11 +3,12 @@ import { loadPlanInputs } from '../planInputs'
 import type { SessionPlanBlock } from '../../db/types'
 
 /**
- * M002.1 KTD10: the review -> executionLog -> sessionPlan join that
- * feeds the thin-spine formatters. Pins that eligible sessions are
- * focus-attributed from their plan blocks, and that ineligible / skipped
- * rows are excluded from the attributed set (but still returned in raw
- * reviews for the receipt's own filtering).
+ * Home-coherence: the executionLog -> sessionPlan join that feeds the
+ * thin-spine formatters. Pins that the plan-ordering basis
+ * (`trainedSessions`) is focus-attributed from terminal execution logs —
+ * counting every session the user ran, review or not, while excluding
+ * discarded-resume stubs — and that raw reviews still flow through for
+ * the receipt's own eligibility filtering.
  */
 
 async function clearDb() {
@@ -42,6 +43,9 @@ async function seedSession(opts: {
   submittedAt: number
   status?: 'submitted' | 'skipped'
   eligible?: boolean
+  execStatus?: 'completed' | 'ended_early'
+  endedEarlyReason?: string
+  withReview?: boolean
 }) {
   const planId = `plan-${opts.execId}`
   await db.sessionPlans.put({
@@ -56,12 +60,14 @@ async function seedSession(opts: {
   await db.executionLogs.put({
     id: opts.execId,
     planId,
-    status: 'completed',
+    status: opts.execStatus ?? 'completed',
+    endedEarlyReason: opts.endedEarlyReason,
     activeBlockIndex: 0,
     blockStatuses: [],
-    startedAt: 0,
-    completedAt: 0,
+    startedAt: opts.submittedAt,
+    completedAt: opts.submittedAt,
   })
+  if (opts.withReview === false) return
   await db.sessionReviews.put({
     id: `review-${opts.execId}`,
     executionLogId: opts.execId,
@@ -79,13 +85,13 @@ beforeEach(async () => {
 })
 
 describe('loadPlanInputs', () => {
-  it('attributes eligible sessions to their plan focus via the join', async () => {
+  it('attributes terminal sessions to their plan focus via the join', async () => {
     await seedSession({ execId: 'e1', drillName: 'Continuous Passing', submittedAt: 100 })
     await seedSession({ execId: 'e2', drillName: 'First to 10 Serving', submittedAt: 200 })
 
-    const { reviews, attributedSessions } = await loadPlanInputs()
+    const { reviews, trainedSessions } = await loadPlanInputs()
     expect(reviews).toHaveLength(2)
-    expect(attributedSessions).toEqual(
+    expect(trainedSessions).toEqual(
       expect.arrayContaining([
         { focus: 'pass', trainedAt: 100 },
         { focus: 'serve', trainedAt: 200 },
@@ -93,30 +99,48 @@ describe('loadPlanInputs', () => {
     )
   })
 
-  it('excludes skipped / ineligible rows from the attributed set but keeps them in raw reviews', async () => {
+  it('counts terminal sessions regardless of review status, but excludes discarded-resume stubs', async () => {
+    // The plan-ordering basis is execution history: a skipped review or
+    // even no review still counts (the user trained that focus); only a
+    // discarded-resume stub is excluded (it was never a real session).
     await seedSession({ execId: 'ok', drillName: 'Continuous Passing', submittedAt: 100 })
     await seedSession({
       execId: 'skip',
-      drillName: 'Continuous Passing',
+      drillName: 'First to 10 Serving',
       submittedAt: 200,
       status: 'skipped',
     })
     await seedSession({
-      execId: 'late',
+      execId: 'no-review',
       drillName: 'Continuous Passing',
       submittedAt: 300,
-      eligible: false,
+      withReview: false,
+    })
+    await seedSession({
+      execId: 'discarded',
+      drillName: 'Continuous Passing',
+      submittedAt: 400,
+      execStatus: 'ended_early',
+      endedEarlyReason: 'discarded_resume',
+      withReview: false,
     })
 
-    const { reviews, attributedSessions } = await loadPlanInputs()
-    expect(reviews).toHaveLength(3)
-    expect(attributedSessions).toEqual([{ focus: 'pass', trainedAt: 100 }])
+    const { trainedSessions } = await loadPlanInputs()
+    expect(trainedSessions).toEqual(
+      expect.arrayContaining([
+        { focus: 'pass', trainedAt: 100 },
+        { focus: 'serve', trainedAt: 200 },
+        { focus: 'pass', trainedAt: 300 },
+      ]),
+    )
+    expect(trainedSessions).toHaveLength(3)
+    expect(trainedSessions.some((s) => s.trainedAt === 400)).toBe(false)
   })
 
-  it('returns empty attributed sessions on a fresh DB', async () => {
-    const { reviews, attributedSessions, lastAcceptedDelta } = await loadPlanInputs()
+  it('returns empty trained sessions on a fresh DB', async () => {
+    const { reviews, trainedSessions, lastAcceptedDelta } = await loadPlanInputs()
     expect(reviews).toEqual([])
-    expect(attributedSessions).toEqual([])
+    expect(trainedSessions).toEqual([])
     expect(lastAcceptedDelta).toBeNull()
   })
 

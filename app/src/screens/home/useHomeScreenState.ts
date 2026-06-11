@@ -83,7 +83,7 @@ export async function resolveHomeSnapshot(): Promise<HomeFlags> {
   // nothing here is read from a stored plan/receipt artifact.
   const now = Date.now()
   const plan = composePlan({
-    sessions: planInputs.attributedSessions,
+    sessions: planInputs.trainedSessions,
     now,
   })
   // Suppress the receipt for a brand-new user with no submitted history

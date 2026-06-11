@@ -1,8 +1,8 @@
 import {
-  attributeTrainingSessions,
+  attributeTrainedSessions,
   eligibleTrainingSessions,
   isScopedFocus,
-  type ReviewWithPlan,
+  type TerminalSessionWithPlan,
 } from '../eligibleSessions'
 import type { SessionPlanBlock, SessionReview } from '../../model'
 
@@ -66,33 +66,32 @@ describe('isScopedFocus', () => {
   })
 })
 
-describe('attributeTrainingSessions', () => {
-  it('drops a skipped stub so it never resets a focus clock', () => {
-    // A skipped session linked to a pass-focus plan must not count.
-    const input: ReviewWithPlan[] = [
-      {
-        review: review({ id: 'skipped', status: 'skipped' }),
-        planBlocks: mainSkillBlocks('Continuous Passing'),
-      },
+describe('attributeTrainedSessions', () => {
+  it('attributes a terminal session to its main_skill focus with endedAt as trainedAt', () => {
+    const input: TerminalSessionWithPlan[] = [
+      { endedAt: 4242, planBlocks: mainSkillBlocks('Continuous Passing') },
     ]
-    expect(attributeTrainingSessions(input)).toEqual([])
+    expect(attributeTrainedSessions(input)).toEqual([{ focus: 'pass', trainedAt: 4242 }])
+  })
+
+  it('counts a trained session regardless of review state (no review gate)', () => {
+    // The plan-ordering basis is execution history, not eligible reviews:
+    // a session the user ran but never reviewed still moves its clock.
+    const input: TerminalSessionWithPlan[] = [
+      { endedAt: 100, planBlocks: mainSkillBlocks('Continuous Passing') },
+      { endedAt: 200, planBlocks: mainSkillBlocks('First to 10 Serving') },
+    ]
+    expect(attributeTrainedSessions(input)).toEqual([
+      { focus: 'pass', trainedAt: 100 },
+      { focus: 'serve', trainedAt: 200 },
+    ])
   })
 
   it('drops sessions whose focus is partial (unmatched drill) or out of scope', () => {
-    const input: ReviewWithPlan[] = [
-      { review: review({ id: 'no-match' }), planBlocks: mainSkillBlocks('Not A Real Drill Name') },
-      { review: review({ id: 'no-main' }), planBlocks: [] },
+    const input: TerminalSessionWithPlan[] = [
+      { endedAt: 100, planBlocks: mainSkillBlocks('Not A Real Drill Name') },
+      { endedAt: 200, planBlocks: [] },
     ]
-    expect(attributeTrainingSessions(input)).toEqual([])
-  })
-
-  it('attributes an eligible session to its main_skill focus with submittedAt as trainedAt', () => {
-    const input: ReviewWithPlan[] = [
-      {
-        review: review({ id: 'pass-session', submittedAt: 4242 }),
-        planBlocks: mainSkillBlocks('Continuous Passing'),
-      },
-    ]
-    expect(attributeTrainingSessions(input)).toEqual([{ focus: 'pass', trainedAt: 4242 }])
+    expect(attributeTrainedSessions(input)).toEqual([])
   })
 })

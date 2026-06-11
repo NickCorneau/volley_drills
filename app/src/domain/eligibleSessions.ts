@@ -1,20 +1,29 @@
 /**
- * M002.1 KTD10 — one definition of "a training session" and one
- * focus-attribution join, shared by the staleness backlog (U1) and the
- * weekly receipt (U7) so the two surfaces can never drift on what
- * counts.
+ * M002.1 / Home-coherence — focus attribution over the two bases Home
+ * cares about. Pure domain module: imports only model + sibling domain,
+ * never `db/` / `services/` / React. The loader does the Dexie read and
+ * passes plain arrays in.
  *
- * Pure domain module: imports only model + sibling domain, never
- * `db/` / `services/` / React. The loader (a service or the Home hook)
- * does the Dexie read — review rows joined to their `SessionPlan`
- * blocks — and passes the result in.
+ * Two deliberately-separate bases:
  *
- * Eligibility mirrors the existing adaptation gate: a session counts
- * only when its review is `submitted` AND `eligibleForAdaptation`
- * (immediate / same-session / same-day capture window). Skipped,
- * expired, draft, and next-day-plus stubs are excluded so they never
- * reset the staleness clock, poison the adaptation fold, or inflate the
- * receipt count.
+ *  - `eligibleTrainingSessions` (the ADAPTATION basis): a review counts
+ *    only when it is `submitted` AND `eligibleForAdaptation` (immediate /
+ *    same-session / same-day capture window). It gates the weekly receipt
+ *    count (composeReceipt) and the adaptation fold so a skipped/expired/
+ *    next-day stub never poisons an offered verdict or inflates the count.
+ *
+ *  - `attributeTrainedSessions` (the PLAN-ORDERING basis): every terminal
+ *    session the user actually ran — `completed` or `ended_early`, minus
+ *    discarded-resume stubs — attributed to its `main_skill` focus. This
+ *    is the SAME basis the Home "Recent sessions" list reads, so the
+ *    plan's next-focus / fresh-start can never disagree with the history
+ *    the user sees. It intentionally does NOT require a finalized review:
+ *    a session you trained but never reviewed still moves its focus's
+ *    staleness clock.
+ *
+ * Keeping the two bases apart is the coherence fix — adaptation stays
+ * conservative (eligible reviews only) while the plan reflects what was
+ * trained.
  */
 import type { SessionPlanBlock, SessionReview, SkillFocus } from '../model'
 import { inferSessionFocus } from './sessionFocus'
@@ -34,21 +43,20 @@ export function isScopedFocus(focus: SkillFocus | 'partial'): focus is ScopedFoc
 }
 
 /**
- * A review paired with its plan's blocks — the raw join the loader
- * produces (review row + the `SessionPlan` it links to via
- * `executionLogId` → `ExecutionLog.planId`). Focus attribution needs
- * the plan because `SessionReview` carries no focus of its own.
+ * A terminal session paired with its (override-applied) plan blocks and
+ * the moment it ended — the raw join the loader produces from an
+ * `ExecutionLog` + its `SessionPlan`. Focus attribution needs the blocks
+ * because the log carries no focus of its own; `endedAt` is the log's
+ * `completedAt ?? startedAt`, matching the Recent-sessions clock.
  */
-export interface ReviewWithPlan {
-  review: SessionReview
+export interface TerminalSessionWithPlan {
+  endedAt: number
   planBlocks: readonly SessionPlanBlock[]
 }
 
 /**
- * An eligible, focus-attributed, in-scope training session reduced to
- * the two facts staleness and the receipt care about: which focus it
- * trained and when. `trainedAt` is the review's `submittedAt` (the
- * completion timestamp); v1 accepts that as the training time.
+ * A focus-attributed, in-scope training session reduced to the two facts
+ * staleness cares about: which focus it trained and when.
  */
 export interface AttributedTrainingSession {
   focus: ScopedFocus
@@ -56,8 +64,10 @@ export interface AttributedTrainingSession {
 }
 
 /**
- * The single "what counts as a training session" filter (KTD10 / F2).
- * Excludes anything that is not a submitted, adaptation-eligible review.
+ * The adaptation/receipt eligibility filter (F2): a review counts only
+ * when it is a submitted, adaptation-eligible row. Skipped, draft,
+ * expired, and next-day-plus stubs are excluded so they never poison the
+ * adaptation fold or inflate the weekly receipt count.
  */
 export function eligibleTrainingSessions(reviews: readonly SessionReview[]): SessionReview[] {
   return reviews.filter(
@@ -66,23 +76,23 @@ export function eligibleTrainingSessions(reviews: readonly SessionReview[]): Ses
 }
 
 /**
- * Reduce raw review+plan joins to eligible, focus-attributed, in-scope
- * sessions. Sessions whose `main_skill` focus is `partial` or outside
- * pass/serve/set (F11 accepts the `skillFocus[0]` approximation) are
- * dropped — they contribute to no focus's staleness clock, by design.
+ * Reduce terminal sessions to focus-attributed, in-scope training
+ * sessions for the staleness backlog / plan projection. This is the
+ * plan-ordering basis: it counts every session the user actually ran,
+ * review or not, so the plan's next-focus stays coherent with the
+ * Recent-sessions list. Sessions whose `main_skill` focus is `partial`
+ * or outside pass/serve/set (F11 accepts the `skillFocus[0]`
+ * approximation) are dropped — they contribute to no focus's staleness
+ * clock, by design.
  */
-export function attributeTrainingSessions(
-  input: readonly ReviewWithPlan[],
+export function attributeTrainedSessions(
+  input: readonly TerminalSessionWithPlan[],
 ): AttributedTrainingSession[] {
-  const eligibleIds = new Set(
-    eligibleTrainingSessions(input.map((entry) => entry.review)).map((review) => review.id),
-  )
   const attributed: AttributedTrainingSession[] = []
-  for (const { review, planBlocks } of input) {
-    if (!eligibleIds.has(review.id)) continue
+  for (const { endedAt, planBlocks } of input) {
     const focus = inferSessionFocus(planBlocks)
     if (!isScopedFocus(focus)) continue
-    attributed.push({ focus, trainedAt: review.submittedAt })
+    attributed.push({ focus, trainedAt: endedAt })
   }
   return attributed
 }

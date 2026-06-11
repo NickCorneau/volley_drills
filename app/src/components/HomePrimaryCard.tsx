@@ -1,4 +1,5 @@
 import type { SessionDraft } from '../model'
+import type { ScopedFocus } from '../domain/eligibleSessions'
 import { formatInterruptedAgo } from '../lib/format'
 import type { LastCompleteBundle, PendingReview, ResumableSession } from '../services/session'
 import { DraftCard, LastCompleteCard, NewUserCard, ReviewPendingCard } from './home'
@@ -43,6 +44,9 @@ type HomePrimaryCardProps =
   | {
       variant: 'last_complete'
       data: LastCompleteBundle
+      nextFocus: ScopedFocus
+      backlog: readonly ScopedFocus[]
+      onStartPlan: () => void
       onRepeat: () => void
       onStartDifferent: () => void
       onRepeatWhatYouDid?: () => void

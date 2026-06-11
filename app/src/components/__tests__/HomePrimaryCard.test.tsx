@@ -233,13 +233,16 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
       <HomePrimaryCard
         variant="last_complete"
         data={endedEarlyBundle}
+        nextFocus="pass"
+        backlog={['serve', 'set']}
+        onStartPlan={() => {}}
         onRepeat={onRepeat}
         onStartDifferent={() => {}}
         onRepeatWhatYouDid={onRepeatWhatYouDid}
       />,
     )
 
-    // Primary: "Repeat full plan" (3 + 11 + 11).
+    // Secondary: "Repeat full plan" (3 + 11 + 11).
     await user.click(screen.getByRole('button', { name: /repeat full plan/i }))
     expect(onRepeat).toHaveBeenCalledTimes(1)
 
@@ -296,19 +299,25 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
       <HomePrimaryCard
         variant="last_complete"
         data={zeroCompleted}
+        nextFocus="pass"
+        backlog={['serve', 'set']}
+        onStartPlan={() => {}}
         onRepeat={() => {}}
         onStartDifferent={() => {}}
         onRepeatWhatYouDid={() => {}}
       />,
     )
 
-    expect(screen.queryByRole('button', { name: /repeat shorter version/i })).not.toBeInTheDocument()
-    // Primary still renders.
+    expect(
+      screen.queryByRole('button', { name: /repeat shorter version/i }),
+    ).not.toBeInTheDocument()
+    // The Repeat full plan affordance still renders (now a secondary link).
     expect(screen.getByRole('button', { name: /repeat full plan/i })).toBeInTheDocument()
   })
 
-  it('last_complete (Phase F Unit 1): renders Repeat last session + Start a different session, no Edit or Same-as-last-time', async () => {
+  it('last_complete: focal CTA is Start [focus] session; Repeat + Start-different demote to secondary', async () => {
     const user = userEvent.setup()
+    const onStartPlan = vi.fn()
     const onRepeat = vi.fn()
     const onStartDifferent = vi.fn()
 
@@ -316,6 +325,9 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
       <HomePrimaryCard
         variant="last_complete"
         data={fakeLastComplete}
+        nextFocus="pass"
+        backlog={['serve', 'set']}
+        onStartPlan={onStartPlan}
         onRepeat={onRepeat}
         onStartDifferent={onStartDifferent}
       />,
@@ -326,6 +338,11 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
       expect.stringMatching(/train again/i),
     )
 
+    // Home-coherence: the plan is the focal action.
+    await user.click(screen.getByRole('button', { name: /start passing session/i }))
+    expect(onStartPlan).toHaveBeenCalledTimes(1)
+
+    // Repeat + Start-different are preserved as secondary actions.
     await user.click(screen.getByRole('button', { name: /repeat last session/i }))
     expect(onRepeat).toHaveBeenCalledTimes(1)
 
@@ -338,6 +355,25 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
     // StaleContextBanner. A future reintroduction should fail loudly.
     expect(screen.queryByRole('button', { name: /^edit$/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /same as last time/i })).not.toBeInTheDocument()
+  })
+
+  it('last_complete: renders the queue line and labels the header as the LAST session', () => {
+    render(
+      <HomePrimaryCard
+        variant="last_complete"
+        data={fakeLastComplete}
+        nextFocus="pass"
+        backlog={['serve', 'set']}
+        onStartPlan={() => {}}
+        onRepeat={() => {}}
+        onStartDifferent={() => {}}
+      />,
+    )
+    // The plan's deferred tail stays visible under the focal CTA (R3).
+    expect(screen.getByText('Then: serving and setting.')).toBeInTheDocument()
+    // Header metadata describes the LAST session explicitly — the focal
+    // CTA below describes the NEXT one, so the label disambiguates.
+    expect(screen.getByText(/^Last session: /)).toBeInTheDocument()
   })
 
   it('resume: delegates to the existing ResumePrompt modal (role=dialog)', async () => {

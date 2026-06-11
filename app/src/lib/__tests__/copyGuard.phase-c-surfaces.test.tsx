@@ -185,6 +185,9 @@ describe('V0B-18 D86 per-surface regression scan', () => {
         <HomePrimaryCard
           variant="last_complete"
           data={fakeLastComplete}
+          nextFocus="pass"
+          backlog={['serve', 'set']}
+          onStartPlan={() => {}}
           onRepeat={() => {}}
           onStartDifferent={() => {}}
         />,
@@ -202,6 +205,9 @@ describe('V0B-18 D86 per-surface regression scan', () => {
               blockStatuses: [{ blockId: 'b-1', status: 'completed' }],
             },
           }}
+          nextFocus="serve"
+          backlog={['pass', 'set']}
+          onStartPlan={() => {}}
           onRepeat={() => {}}
           onStartDifferent={() => {}}
           onRepeatWhatYouDid={() => {}}

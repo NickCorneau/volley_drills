@@ -161,11 +161,20 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     expect(screen.queryByRole('region', { name: /your plan/i })).not.toBeInTheDocument()
   })
 
-  it('last_complete: renders the thin-spine plan-for-today line', async () => {
+  // Home-coherence: the plan line is ABSORBED by the last_complete focal
+  // card — its primary CTA ("Start passing session") states and launches
+  // the next focus, so the separate descriptive "Your plan" region must
+  // NOT also render (no duplicate next-focus statement). Repeat demotes to
+  // a secondary action.
+  it('last_complete: focal CTA launches the plan and the separate plan line is absorbed', async () => {
     await seedLastComplete('exec-lc-plan')
     renderHome()
-    await screen.findByRole('button', { name: /repeat last session/i })
-    expect(await screen.findByRole('region', { name: /your plan/i })).toBeInTheDocument()
+    // Fresh-start head focus is pass -> "Start passing session" is focal.
+    expect(
+      await screen.findByRole('button', { name: /start passing session/i }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /repeat last session/i })).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: /your plan/i })).not.toBeInTheDocument()
   })
 
   it('last_complete only: renders Repeat last session', async () => {
@@ -174,6 +183,42 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     expect(await screen.findByRole('button', { name: /repeat last session/i })).toBeInTheDocument()
     // No Session ready card.
     expect(screen.queryByText(/session ready/i)).not.toBeInTheDocument()
+  })
+
+  // Home-coherence: the focus-steered "Start [focus] session" launch CTA is
+  // scoped to the last_complete focal card. It must never appear on the
+  // cold-start, draft, review_pending, or resume primaries — those carry
+  // their own focal action and the launch CTA there would be incoherent.
+  const LAUNCH_CTA = /start (passing|serving|setting) session/i
+
+  it('new_user: no plan-launch CTA', async () => {
+    renderHome()
+    await screen.findByRole('button', { name: /start first session/i })
+    expect(screen.queryByRole('button', { name: LAUNCH_CTA })).not.toBeInTheDocument()
+  })
+
+  it('draft only: no plan-launch CTA', async () => {
+    await seedDraft()
+    renderHome()
+    await screen.findByRole('button', { name: /^continue$/i })
+    expect(screen.queryByRole('button', { name: LAUNCH_CTA })).not.toBeInTheDocument()
+  })
+
+  it('review_pending: no plan-launch CTA', async () => {
+    await seedPendingReview('exec-pr')
+    renderHome()
+    await screen.findByRole('button', { name: 'Finish review' })
+    expect(screen.queryByRole('button', { name: LAUNCH_CTA })).not.toBeInTheDocument()
+  })
+
+  it('resume: no plan-launch CTA (only the resume dialog renders)', async () => {
+    await seedResumable('exec-resume')
+    await seedLastComplete('exec-lc')
+    renderHome()
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+    expect(screen.queryByRole('button', { name: LAUNCH_CTA })).not.toBeInTheDocument()
   })
 
   it('draft + last_complete: draft primary, last_complete as secondary row', async () => {

@@ -5,7 +5,6 @@ import { HomePrimaryCard } from '../components/HomePrimaryCard'
 import { HomeSecondaryRow } from '../components/HomeSecondaryRow'
 import { CarryForwardCell } from '../components/home/CarryForwardCell'
 import { PlanForTodayLine } from '../components/home/PlanForTodayLine'
-import { WeeklyReceiptSection } from '../components/home/WeeklyReceiptSection'
 import { RecentSessionsList } from '../components/RecentSessionsList'
 import { SkipReviewModal } from '../components/SkipReviewModal'
 import { SoftBlockModal } from '../components/SoftBlockModal'
@@ -15,12 +14,11 @@ import { selectPrimaryCard, selectSecondaryRows } from '../domain/homePriority'
 import type { PrimaryVariant, SecondaryRow } from '../domain/homePriority'
 import { useAppRegisterSW } from '../lib/pwa-register'
 import { isSchemaBlocked } from '../lib/schema-blocked'
-import { isSkillLevel, skillLevelToDrillBand } from '../lib/skillLevel'
 import { routes } from '../routes'
-import { buildDraft, buildDraftFromCompletedBlocks } from '../domain/sessionBuilder'
+import { buildDraftFromCompletedBlocks } from '../domain/sessionBuilder'
+import { repeatSession, startPlanSession } from '../services/planLaunch'
 import { discardSession, saveDraft, skipReview, type PendingReview } from '../services/session'
 import { markSoftBlockDismissed, readSoftBlockDismissed } from '../services/softBlock'
-import { getStorageMeta } from '../services/storageMeta'
 import { useHomeScreenState, type HomeFlags } from './home/useHomeScreenState'
 
 /**
@@ -140,15 +138,15 @@ export function HomeScreen() {
   // Setup, and matched no industry peer (Spotify / Peloton / Strava /
   // Amazon "Buy it again" all treat Repeat as one-tap-execute). Now
   // it rebuilds a fresh draft from the last plan's `SetupContext`
-  // via `buildDraft()` and routes straight to Safety. If
-  // rebuilding fails (archetype or drill catalog drift since the
-  // last session) the handler falls back to `/setup` so the tester
-  // can still proceed by hand. `Start a different session` is the
-  // explicit escape when today's conditions genuinely changed.
+  // via `repeatSession()` (services/planLaunch) and routes straight
+  // to Safety. If rebuilding fails (archetype or drill catalog drift
+  // since the last session) the handler falls back to `/setup` so the
+  // tester can still proceed by hand. `Start a different session` is
+  // the explicit escape when today's conditions genuinely changed.
   //
   // 2026-04-30 focus policy: full Repeat intentionally carries
   // `priorContext.sessionFocus` forward — "same conditions" includes
-  // yesterday's chosen focus. Partial repeat
+  // yesterday's chosen focus (see `repeatSession`). Partial repeat
   // (`buildDraftFromCompletedBlocks`) preserves the completed-block
   // context, focus included. Pain-recovery rebuilds strip focus by
   // design; do NOT add a strip here without re-checking that decision.
@@ -199,35 +197,46 @@ export function HomeScreen() {
         navigate(routes.setup(), { state: { editDraft: true } })
       }),
       // One-tap Repeat: rebuild a fresh full-plan draft from the last
-      // session's SetupContext and route straight to Safety. No
-      // Setup detour, no stale-context banner, no toggle review. The
-      // `Start a different session` CTA right below is the explicit
-      // escape hatch when today's conditions changed.
+      // session's SetupContext (focus included) and route straight to
+      // Safety. No Setup detour, no stale-context banner, no toggle
+      // review. The `Start a different session` CTA right below is the
+      // explicit escape hatch when today's conditions changed.
       handleRepeat: intercept(async () => {
         if (state.kind !== 'ready' || !state.flags.lastComplete) return
         if (!beginNonReviewAction()) return
-        const priorContext = state.flags.lastComplete.plan.context
-        if (!priorContext) {
-          navigate(routes.setup())
-          return
-        }
         try {
-          const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
-          const playerLevel =
-            skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
-          const draft = buildDraft(priorContext, { playerLevel })
-          if (!draft) {
-            navigate(routes.setup())
-            return
-          }
-          await saveDraft(draft)
-          navigate(routes.safety())
+          const repeated = await repeatSession(state.flags.lastComplete.plan.context ?? null)
+          navigate(repeated ? routes.safety() : routes.setup())
         } catch (err) {
           if (isSchemaBlocked()) {
             setNonReviewActionPending(false)
             return
           }
           console.error('Repeat session failed:', err)
+          navigate(routes.setup())
+        }
+      }),
+      // Home-coherence: the focal action on the LastComplete card. Starts
+      // a session steered to the plan's next focus (staleness head),
+      // reusing the last session's physical conditions, and routes
+      // through the Setup -> Safety spine. Falls back to a fresh Setup
+      // when there is no prior context to reuse or assembly fails. The
+      // intercept keeps review_pending firing the soft-block modal.
+      handleStartPlan: intercept(async () => {
+        if (state.kind !== 'ready' || !state.flags.lastComplete || !state.flags.plan) return
+        if (!beginNonReviewAction()) return
+        try {
+          const started = await startPlanSession({
+            priorContext: state.flags.lastComplete.plan.context ?? null,
+            nextFocus: state.flags.plan.nextFocus,
+          })
+          navigate(started ? routes.safety() : routes.setup())
+        } catch (err) {
+          if (isSchemaBlocked()) {
+            setNonReviewActionPending(false)
+            return
+          }
+          console.error('Start plan session failed:', err)
           navigate(routes.setup())
         }
       }),
@@ -335,15 +344,20 @@ export function HomeScreen() {
   const primary: PrimaryVariant = selectPrimaryCard(flagSummary)
   const secondary: SecondaryRow[] = selectSecondaryRows(flagSummary)
 
-  // The plan line + carry-forward orient toward
-  // "what's next"; they stay out of the way of the focused review_pending
-  // state (and are already null on the exclusive resume branch). They are
-  // also suppressed on the brand-new cold-start (new_user): with no history
-  // the plan line is a generic fresh-start assertion that competes with the
-  // focal "Start first session" card, so we let that card stand alone — the
-  // same way the frozen weekly receipt only renders once history exists.
+  // The plan line + carry-forward orient toward "what's next"; they stay
+  // out of the way of the focused review_pending state (and are already
+  // null on the exclusive resume branch). They are also suppressed on the
+  // brand-new cold-start (new_user): with no history the plan line is a
+  // generic fresh-start assertion that competes with the focal "Start
+  // first session" card.
   const showPlanLayer =
     flags.plan !== null && primary !== 'review_pending' && primary !== 'new_user'
+  // The descriptive plan line is additionally absorbed by the
+  // last_complete focal card, whose primary CTA ("Start passing session")
+  // now states the next focus and launches it — rendering the line above
+  // would duplicate that. The carry-forward cell still shows (a separate
+  // signal), so it stays on the broader showPlanLayer gate.
+  const showPlanLine = showPlanLayer && primary !== 'last_complete'
 
   return (
     <ScreenShell>
@@ -372,7 +386,7 @@ export function HomeScreen() {
             (review_pending / resume), the wrapper holds the lone primary
             card and the gap is inert. */}
         <div className="flex flex-col gap-4">
-          {showPlanLayer && flags.plan && <PlanForTodayLine plan={flags.plan} />}
+          {showPlanLine && flags.plan && <PlanForTodayLine plan={flags.plan} />}
 
           {renderPrimary(primary, flags, {
             handleResume,
@@ -432,9 +446,9 @@ export function HomeScreen() {
           a fresh install renders nothing here. Supports adversarial
           memo Condition 2 (visible session history removes the
           founder's reason to keep a parallel notes app). */}
-        {!flags.resume && <RecentSessionsList entries={flags.recentSessions} />}
-
-        {flags.receipt && <WeeklyReceiptSection receipt={flags.receipt} />}
+        {!flags.resume && (
+          <RecentSessionsList entries={flags.recentSessions} receipt={flags.receipt} />
+        )}
 
         {softBlockTarget && (
           <SoftBlockModal
@@ -496,6 +510,11 @@ interface PrimaryHandlers {
    * on the LastComplete card.
    */
   handleStartDifferentSession: () => void
+  /**
+   * Home-coherence: the focal action on the LastComplete card — starts a
+   * session steered to the plan's next focus (staleness head).
+   */
+  handleStartPlan: () => void
   handleNewUserStart: () => void
   actionDisabled: boolean
 }
@@ -534,10 +553,17 @@ function renderPrimary(primary: PrimaryVariant, flags: HomeFlags, h: PrimaryHand
       )
     case 'last_complete':
       if (!flags.lastComplete) return null
+      // flags.plan is null only on the exclusive resume branch, which
+      // never renders last_complete; composePlan otherwise always
+      // returns a plan (a fresh start still yields a deterministic head).
+      if (!flags.plan) return null
       return (
         <HomePrimaryCard
           variant="last_complete"
           data={flags.lastComplete}
+          nextFocus={flags.plan.nextFocus}
+          backlog={flags.plan.backlog}
+          onStartPlan={h.handleStartPlan}
           onRepeat={h.handleRepeat}
           onStartDifferent={h.handleStartDifferentSession}
           onRepeatWhatYouDid={

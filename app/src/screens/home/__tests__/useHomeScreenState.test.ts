@@ -21,7 +21,7 @@ vi.mock('../../../services/planInputs', () => ({
 
 const EMPTY_PLAN_INPUTS = {
   reviews: [] as SessionReview[],
-  attributedSessions: [],
+  trainedSessions: [],
   lastAcceptedDelta: null,
 }
 
@@ -145,7 +145,7 @@ describe('useHomeScreenState', () => {
     it('surfaces the receipt once submitted history exists', async () => {
       vi.mocked(planInputsService.loadPlanInputs).mockResolvedValue({
         reviews: [submittedReview()],
-        attributedSessions: [{ focus: 'pass', trainedAt: 1000 }],
+        trainedSessions: [{ focus: 'pass', trainedAt: 1000 }],
         lastAcceptedDelta: null,
       })
       const flags = await resolveHomeSnapshot()
@@ -155,7 +155,7 @@ describe('useHomeScreenState', () => {
     it('renders a non-temporal carry-forward summary from an accepted delta', async () => {
       vi.mocked(planInputsService.loadPlanInputs).mockResolvedValue({
         reviews: [submittedReview()],
-        attributedSessions: [{ focus: 'pass', trainedAt: 1000 }],
+        trainedSessions: [{ focus: 'pass', trainedAt: 1000 }],
         lastAcceptedDelta: { kind: 'stress', focus: 'serve', direction: 'more' },
       })
       const flags = await resolveHomeSnapshot()
@@ -167,7 +167,7 @@ describe('useHomeScreenState', () => {
     it('no carry-forward line when there is no accepted delta', async () => {
       vi.mocked(planInputsService.loadPlanInputs).mockResolvedValue({
         reviews: [submittedReview()],
-        attributedSessions: [{ focus: 'pass', trainedAt: 1000 }],
+        trainedSessions: [{ focus: 'pass', trainedAt: 1000 }],
         lastAcceptedDelta: null,
       })
       const flags = await resolveHomeSnapshot()

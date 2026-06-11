@@ -1,5 +1,8 @@
 import { formatDayName } from '../lib/format'
 import { focusLabel, inferSessionFocus } from '../domain/sessionFocus'
+import { SCOPED_FOCUSES, type ScopedFocus } from '../domain/eligibleSessions'
+import type { ConsistencyRead, ReceiptOutput } from '../domain/composeReceipt'
+import type { FeltDifficultyBand } from '../domain/feltDifficultyProxy'
 import type { RecentSessionEntry } from '../services/session'
 
 /**
@@ -57,18 +60,78 @@ import type { RecentSessionEntry } from '../services/session'
  *
  * See `docs/plans/2026-04-20-m001-tier1-implementation.md` Unit 5.
  */
+/**
+ * Home-coherence: the weekly read is MERGED into this one history block
+ * instead of a separate "Your week" receipt section. The consistency
+ * headline is rendered with an explicit temporal label — "Last week:
+ * N sessions" — because the receipt freezes on last week's close (F10)
+ * and an unlabeled count would contradict a session shown "Today" in
+ * the list just below. The labeled form keeps R6's behavioral-primary
+ * weekly read user-visible (steady AND strong weeks) without that
+ * contradiction. Anti-guilt (F5) still holds: a quiet closed week
+ * (count 0) and the low-history absolute read render nothing — never a
+ * deficit line. composeReceipt + the founder export are unchanged; this
+ * is presentation only.
+ */
+const BAND_PHRASE: Record<Exclude<FeltDifficultyBand, 'not_enough_yet'>, string> = {
+  often_stretched: 'stretching you',
+  mixed: 'a mix',
+  mostly_comfortable: 'feeling comfortable',
+}
+
+function feltLines(felt: Record<ScopedFocus, FeltDifficultyBand>): string[] {
+  const lines: string[] = []
+  for (const focus of SCOPED_FOCUSES) {
+    const band = felt[focus]
+    if (band === 'not_enough_yet') continue
+    lines.push(`${focusLabel(focus)}: ${BAND_PHRASE[band]}.`)
+  }
+  return lines
+}
+
+function consistencyCallout(consistency: ConsistencyRead): string | null {
+  // Low-history (absolute) reads stay quiet: with under two prior weeks
+  // of data the list below is the honest signal.
+  if (consistency.kind !== 'banded') return null
+  // Anti-guilt: a quiet closed week renders nothing, not "0 sessions".
+  if (consistency.count === 0) return null
+  const noun = consistency.count === 1 ? 'session' : 'sessions'
+  return consistency.band === 'strong'
+    ? `Last week: ${consistency.count} ${noun} — ahead of your usual rhythm.`
+    : `Last week: ${consistency.count} ${noun}.`
+}
+
 interface RecentSessionsListProps {
   entries: readonly RecentSessionEntry[]
+  /**
+   * The frozen weekly read, merged into this block's header. `null` for a
+   * brand-new user with no submitted history. Drives an optional positive
+   * consistency callout and the felt-difficulty lines.
+   */
+  receipt?: ReceiptOutput | null
   /** Explicit `now` for deterministic date-label tests. */
   now?: number
 }
 
-export function RecentSessionsList({ entries, now }: RecentSessionsListProps) {
+export function RecentSessionsList({ entries, receipt, now }: RecentSessionsListProps) {
   if (entries.length === 0) return null
+
+  const callout = receipt ? consistencyCallout(receipt.consistency) : null
+  const felt = receipt ? feltLines(receipt.feltDifficulty) : []
 
   return (
     <section aria-label="Recent sessions" className="flex flex-col gap-2 px-1 pt-2">
       <h2 className="text-base font-semibold text-text-primary">Recent sessions</h2>
+      {callout && <p className="text-sm leading-5 text-text-secondary">{callout}</p>}
+      {felt.length > 0 && (
+        <ul className="flex flex-col gap-1">
+          {felt.map((line) => (
+            <li key={line} className="text-sm leading-5 text-text-secondary">
+              {line}
+            </li>
+          ))}
+        </ul>
+      )}
       <ul role="list" className="divide-y divide-text-primary/5">
         {entries.map((entry) => {
           const focus = inferSessionFocus(entry.plan.blocks)

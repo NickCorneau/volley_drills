@@ -1,32 +1,37 @@
 /**
- * M002.1 — plan/receipt input loader (KTD10).
+ * M002.1 / Home-coherence — plan/receipt input loader.
  *
  * The single Dexie read that feeds the pure thin-spine formatters
- * (`composePlan`, `composeReceipt`, `replayAdaptation`). Focus
- * attribution needs the `SessionPlan` blocks, which a `SessionReview`
- * doesn't carry — so this loader does the review -> executionLog ->
- * sessionPlan join and hands the domain layer:
+ * (`composePlan`, `composeReceipt`, `replayAdaptation`). It hands the
+ * domain layer two deliberately-separate bases:
  *
- *   - `reviews`: every review row (composeReceipt applies its own
- *     eligibility filter via the shared helper);
- *   - `attributedSessions`: eligible, focus-attributed, in-scope
- *     sessions for the staleness backlog / plan projection.
+ *   - `reviews`: every review row (composeReceipt + carry-forward apply
+ *     their own eligibility filter via the shared helper);
+ *   - `trainedSessions`: every TERMINAL session the user ran (completed
+ *     or ended-early, minus discarded-resume stubs), focus-attributed
+ *     from its plan's `main_skill` block. This is the plan-ordering basis
+ *     and the SAME basis the Home "Recent sessions" list reads, so the
+ *     plan's next-focus can never disagree with the visible history.
  *
- * Services-layer (Dexie IO) per the layer rules; the domain formatters
- * stay pure and consume the returned model arrays. The Home hook (FE)
- * calls this and passes the result into composePlan / composeReceipt.
+ * Focus attribution needs the `SessionPlan` blocks (an `ExecutionLog`
+ * carries no focus), so this loader does the executionLog -> sessionPlan
+ * join with block overrides applied. Services-layer (Dexie IO) per the
+ * layer rules; the domain formatters stay pure and consume the returned
+ * model arrays.
  */
 import { db } from '../db'
 import type { AdaptationDelta, SessionReview } from '../db/types'
 import {
-  attributeTrainingSessions,
+  attributeTrainedSessions,
   type AttributedTrainingSession,
-  type ReviewWithPlan,
+  type TerminalSessionWithPlan,
 } from '../domain/eligibleSessions'
+import { endedAt, isTerminalSession } from '../domain/executionPredicates'
+import { applyBlockOverrides } from '../domain/sessionProjection'
 
 export interface PlanInputsBundle {
   reviews: SessionReview[]
-  attributedSessions: AttributedTrainingSession[]
+  trainedSessions: AttributedTrainingSession[]
   /**
    * The offered delta from the user's MOST RECENT verdict, returned only
    * when that latest verdict was `accepted`. This is the carry-forward
@@ -60,17 +65,26 @@ export async function loadPlanInputs(): Promise<PlanInputsBundle> {
   ])
 
   const planById = new Map(sessionPlans.map((plan) => [plan.id, plan]))
-  const planIdByExecutionId = new Map(executionLogs.map((log) => [log.id, log.planId]))
 
-  const withPlan: ReviewWithPlan[] = reviews.map((review) => {
-    const planId = planIdByExecutionId.get(review.executionLogId)
-    const plan = planId ? planById.get(planId) : undefined
-    return { review, planBlocks: plan?.blocks ?? [] }
-  })
+  // Plan-ordering basis: every terminal session the user ran, joined to
+  // its plan with block overrides applied (so a mid-session swap is
+  // attributed to the focus actually trained — the same projection the
+  // Recent-sessions list uses). Sessions whose plan row is missing are
+  // skipped; they can't be focus-attributed.
+  const terminalSessions: TerminalSessionWithPlan[] = []
+  for (const log of executionLogs) {
+    if (!isTerminalSession(log)) continue
+    const plan = planById.get(log.planId)
+    if (!plan) continue
+    terminalSessions.push({
+      endedAt: endedAt(log),
+      planBlocks: applyBlockOverrides(plan, log).blocks,
+    })
+  }
 
   return {
     reviews,
-    attributedSessions: attributeTrainingSessions(withPlan),
+    trainedSessions: attributeTrainedSessions(terminalSessions),
     lastAcceptedDelta: resolveLastAcceptedDelta(reviews),
   }
 }
