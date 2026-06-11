@@ -1,7 +1,7 @@
 {
   "schema_version": 5,
   "repo_id": "volley_drills",
-  "last_updated": "2026-06-03",
+  "last_updated": "2026-06-11",
   "_strategy_anchor": "STRATEGY.md is the repo-root strategy anchor (target problem, approach, persona, metrics, tracks). Authored via the ce-strategy skill; orients but does not outrank docs/vision.md, docs/decisions.md, or docs/prd-foundation.md.",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
@@ -374,6 +374,28 @@
       "canonical_for": "viewport-bound re-evaluation of the H1 (BlockTimer 56 -> 72 px) and H2 (segmented-drill active-run body density) experiments shipped on 2026-05-25 as plan U6 / U7 follow-ups to the 2026-05-24 e2e design critique; concludes keep both experiments through the D91 field run; D91 retention gate remains the durable keep / tune-further / revert authority; does not unlock Tier 1b and does not modify D86, D91, D125, D127, D129, D130, or D132"
     },
     {
+      "id": "2026-06-11-red-team-design-language-review",
+      "path": "docs/design/reviews/2026-06-11-red-team-design-language-review.md",
+      "type": "design-review",
+      "status": "active",
+      "canonical_for": "design track of the 2026-06-11 whole-app red team: code-level adherence audit against the four design contracts plus a live mobile pass at 390x844; grades brand/UX B+, Japanese direction B-, outdoor brief C, courtside copy A-, live feel B+; End-session resting-state contrast defect verified and fixed same-day (text-warning -> text-warning-strong); falsifies the live-pass Setup Recommended-chip P0 (Recommended is a real selectable focus option) so future passes do not re-surface it; confirms D145 0-b/0-d record states that never shipped (routed to founder; resolved same-day by D153 via the deep-pass doc) and the D127-held 14px body floor deadlock (D91 trigger indefinitely deferred); does not edit canonical design docs and does not modify D91, D127, D130, D137, or D145"
+    },
+    {
+      "id": "2026-06-11-design-language-deep-pass",
+      "path": "docs/design/reviews/2026-06-11-design-language-deep-pass.md",
+      "type": "design-review",
+      "status": "active",
+      "canonical_for": "founder-directed deep pass following the same-day red team: challenged the design language against shibui/ma first principles with a full live 390x844 walk; resolved the routed D145 phantom-state finding via D153 (0-b/0-d retracted as mis-measured; shipped centered Review h1 and danger discard confirm ratified under forfeit-of-live-session semantics); shipped two polish wins (splitCueLines stacked cue rendering on Transition Cue panel + Run Full-coaching-cue disclosure; quiet Review empty-aggregate voice); corrected seven stale brand-ux-guidelines.md passages (sections 1.3, 2.3, 4.4, 4.6, 6.4, 7.4, 7.5, 7.6, 8.2) to verified shipped code; records falsified challenge candidates (Tap-Resume helper, aimed-for/success-rule duplication, duration-honesty Callout, Right-to-Moderate Borg mapping, warning-tone breadth, active-face Swap) so future passes do not re-surface them; open proposals: warning-tone vocabulary split, 12px/14px outdoor floor re-ownership at the D130 window close, Home focal competition re-assessed after the D152 home-coherence WIP"
+    },
+    {
+      "id": "stress-substrate-plan-2026-06-11",
+      "path": "docs/plans/2026-06-11-001-feat-stress-substrate-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan + landed registry for the D154 stress substrate (shipped 2026-06-11): U1 taxonomy brief (docs/specs/stress-rung-taxonomy.md), U2 static ladder registry (app/src/data/stressLadders.ts + invariant tests), U3 pure derived position (app/src/domain/adaptation/stressPosition.ts), U4 assembly rung preference (pickForSlot stable-sort; SESSION_ASSEMBLY_ALGORITHM_VERSION 8 -> 9), U5 service seam + caller wiring (loadStressPositions; startPlanSession + Setup steered, repeatSession verbatim), U6 founder export schemaVersion 5 -> 6 + stressPositions, U7 docs trail. Named deferral: build-time main-skill substitution path bypasses rung preference."
+    },
+    {
       "id": "design-critique-followups-2026-05-25",
       "path": "docs/plans/2026-05-25-002-feat-2026-05-24-design-critique-followups-plan.md",
       "type": "plan",
@@ -415,7 +437,7 @@
       "path": "docs/milestones/m001-solo-session-loop.md",
       "type": "milestone",
       "status": "complete",
-      "canonical_for": "M001 Solo Session Loop milestone, closed 2026-05-27 by founder executive call (D147). Build phase complete 2026-05-08; validation ran 2026-04-20 → 2026-05-27 (Condition 2 PASS, Condition 3 PASS, Condition 1 fail-trending under standard read / pass-equivalent under D132 frame ratified by D146). Bypass disclosure, pre-registered reversal condition, and M002 carry-forward routing live in D147 (docs/decisions.md). For live posture queries, route to docs/status/current-state.md."
+      "canonical_for": "M001 Solo Session Loop milestone, closed 2026-05-27 by founder executive call (D147). Build phase complete 2026-05-08; validation ran 2026-04-20 \u2192 2026-05-27 (Condition 2 PASS, Condition 3 PASS, Condition 1 fail-trending under standard read / pass-equivalent under D132 frame ratified by D146). Bypass disclosure, pre-registered reversal condition, and M002 carry-forward routing live in D147 (docs/decisions.md). For live posture queries, route to docs/status/current-state.md."
     },
     {
       "id": "M002",
@@ -459,6 +481,13 @@
       "path": "docs/specs/m001-quality-and-testing.md",
       "type": "spec",
       "status": "draft"
+    },
+    {
+      "id": "spec-stress-rung-taxonomy",
+      "path": "docs/specs/stress-rung-taxonomy.md",
+      "type": "spec",
+      "status": "active",
+      "canonical_for": "Stress-rung semantics (D154): the 1-5 ordinal rung scale in progressive contextual-interference terms (D68; never physiological load), the authored per-focus ladders (pass/serve/set) over m001Candidate drills, the skill-band -> starting-rung mapping (beginner 1 / intermediate 2 / advanced 4), and the named exclusions + authoring backlog. Gates all rung annotation: app/src/data/stressLadders.ts must match this brief. The just-in-time taxonomy brief D149 queued ahead of stress-ladder work."
     },
     {
       "id": "v0-prototype-ladder-design",
@@ -815,6 +844,13 @@
       "canonical_for": "Adversarial revalidation of the 2026-06-02 plan-and-adaptation ideation (founder-selected thin-spine, survivor #2) + the M002 direction against the four 2026-06-02 syntheses + meta-synthesis. Five ce-doc-review personas (adversarial, product-lens, scope-guardian, feasibility, coherence). VERDICT: the thin-spine ARCHITECTURE is validated and right-sized (the evidence-backed ceiling), but three scope/framing calls were locked one step before the evidence and need founder re-ratification \u2014 (S1) the pure-spine defers survivor #5, the evidence-named honest carrier of the founder's #1 'see it adapting / 1% better' need; (S2) the 'Weekly Confidence Loop' name + confidence-centric planning defaults + 'one skill proxy' / 'one load proxy' receipt slots encode a confidence-as-skill-signal premise all four sets contradict (reframe to felt-readiness, behavioral-primary, two-metric receipt); (S3) deferring ALL content runs against the primary BAB-camp signal (the 'keep it thin' finding is about the planner, not content \u2014 pair the spine with warmup #7 and the exploratory cue-ladder #3). Plus feasibility realities: planned-vs-completed has no persisted 'planned' denominator in Dexie v6, and the repeated drill score is seam-only (Phase 2B shape + same-drill repeat cadence, captured on /run/check not RunScreen). Applied discoverability-only cross-reference fixes to the milestone + ideation; all rename/scope/decision calls left to the founder. Recommend-only; modifies no decision, scope, or schema."
     },
     {
+      "id": "2026-06-11-red-team-review",
+      "path": "docs/reviews/2026-06-11-red-team-review.md",
+      "type": "review",
+      "status": "active",
+      "canonical_for": "umbrella capture of the 2026-06-11 five-track whole-app red team (product value, architecture, code correctness, design language, live mobile pass) with verification dispositions and the same-day fix log: ADV-1 double-advance race (P0) and ADV-2 non-idempotent pause (P1) verified and fixed with regression tests; ADV-3 split-brain lock/background timer semantics verified and routed to a decision (pause vs count hidden time) rather than fixed; Dexie v6->v7 canon drift corrected in AGENTS.md, app/README.md, and current-state.md; strategic findings (validation-ratchet D132->D146->D147 pattern, D91 falsification unrunnable under 2-player scope, process-exoskeleton subtraction, D127 trigger ownership, D145 phantom states) routed to founder / M002 reconciliation; companion design capture at docs/design/reviews/2026-06-11-red-team-design-language-review.md"
+    },
+    {
       "id": "m002-thin-spine-and-milestone-series-requirements-2026-06-03",
       "path": "docs/brainstorms/2026-06-03-m002-thin-spine-and-milestone-series-requirements.md",
       "type": "requirements",
@@ -829,11 +865,25 @@
       "canonical_for": "Resolves the M002.1 felt-readiness fork (R7/F5) left open by D150. RECOMMENDATION: defer the self-reported felt-readiness signal from v1; keep R8's free, honestly-labeled felt-difficulty proxy (derived from the per-drill difficulty-tag distribution); reserve a clean, fully-specced seam for research-correct readiness capture (skill-specific present-state 11-pt NRS, fixed WEEKLY cadence, administered OFF the post-session window, Home/receipt-side not review and not pre-run) in a later M002 milestone \u2014 mirroring how R10 reserves the drill-score seam for M002.3. REJECTS capture-at-review (the contaminated post-session window per docs/research/subjective-skill-confidence-validity.md; the cheapest capture is the least honest) and rejects deriving readiness from difficulty tags while CALLING it readiness (wrong construct; collapses R7 into R8). Rationale: felt-readiness is the demoted companion (the #1 'see it adapting' need is carried by carry-forward + verdict R4/R5), so a new recurring weekly capture surface is over-investment for v1. Consistent with D149 (felt-readiness reframe holds; v1 just doesn't surface a readiness number yet) and D150 (any future readiness field is a persisted user INPUT replayed through the formatter). Founder-ratify: accept deferral vs pull the seam into v1."
     },
     {
+      "id": "stress-substrate-requirements-2026-06-11",
+      "path": "docs/brainstorms/2026-06-11-stress-substrate-requirements.md",
+      "type": "requirements",
+      "status": "complete",
+      "canonical_for": "Requirements input for the D154 stress substrate (consumed planning history; shipped 2026-06-11). Defines R1-R14: ordinal stress rungs as static catalog content (taxonomy brief first), per-focus ladder position derived by replaying ACCEPTED verdicts over existing SessionReview rows (D150 derive-don't-persist; movement user-accepted only), assembly main-skill selection preferring the nearest rung, repeat staying verbatim, founder-export dual-read, and internal-first exposure (no new stress UI in v1). Closes D152's named accepted-delta-does-nothing gap. Plan: docs/plans/2026-06-11-001-feat-stress-substrate-plan.md."
+    },
+    {
       "id": "dogfood-m002-1-thin-spine-2026-06-04",
       "path": "docs/dogfood-reports/2026-06-04-m002-1-thin-spine-dogfood.md",
       "type": "dogfood-report",
       "status": "complete",
       "canonical_for": "Diff-scoped browser QA (agent-browser) of the M002.1 thin-spine + adaptation changeset: Home plan/carry-forward/weekly-receipt cluster, Review 'Next time' accept/keep verdict, Complete carry-forward. 7 flows (cold-start, history-no-delta, accepted-delta, verdict-trend, no-trend, complete accept/keep, quiet-week receipt) all PASS. ONE paper cut fixed (commit 096d1c1): the thin-spine plan line rendered on the empty new_user cold-start, competing with the focal 'Start first session' CTA \u2014 gated showPlanLayer on primary !== 'new_user', mirroring the history-gated receipt, plus two HomeScreen precedence regressions. Verifies the D150 derive-don't-persist model dogfoods cleanly (seed records + reload reproduces every state, no migrations) and the accept verdict persists verdictChoice=accepted end-to-end. One low-severity copy nuance deferred (receipt 'this week' label for lapsed users). No console errors; full gate green after the fix."
+    },
+    {
+      "id": "dogfood-home-plan-coherence-2026-06-05",
+      "path": "docs/dogfood-reports/2026-06-05-main-home-plan-coherence-dogfood.md",
+      "type": "dogfood-report",
+      "status": "complete",
+      "canonical_for": "Diff-scoped browser QA (agent-browser) of the Home Plan Coherence working-tree change on the repo's single-branch main flow. Covers the new Start [focus] session focal CTA, focus-steered Safety launch, missing-context Setup fallback, Home precedence guards, trained-session plan ordering from skipped/non-adaptation history, merged Recent/receipt lines, and low-signal receipt quiet state. All 7 scenarios PASS, no console errors. A 2026-06-11 post-review fix pass (recorded in the report) refined the same tree: temporally-labeled 'Last week: N sessions' headline (steady + strong), 'Last session:' card metadata label, 'Then: ...' backlog queue line, dead nextFocus-null fallback removed, repeatSession service symmetry, and the accepted-delta-not-applied-to-assembly gap named in D152 for M002.2."
     },
     {
       "id": "skill-level-mutability-requirements-2026-05-04",
