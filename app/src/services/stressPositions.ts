@@ -9,13 +9,22 @@
  * the diagnostic read can never diverge (D150).
  */
 import { db } from '../db'
+import type { SessionReview } from '../model'
 import { deriveStressPositions, type StressPositions } from '../domain/adaptation/stressPosition'
 import { isSkillLevel, skillLevelToDrillBand } from '../lib/skillLevel'
 import { getStorageMeta } from './storageMeta'
 
-export async function loadStressPositions(): Promise<StressPositions> {
+/**
+ * `prefetchedReviews` lets a caller that already holds a
+ * `sessionReviews` snapshot (the founder export) derive positions from
+ * that exact row set instead of a second Dexie read, keeping the
+ * payload internally consistent. Assembly callers omit it.
+ */
+export async function loadStressPositions(
+  prefetchedReviews?: readonly SessionReview[],
+): Promise<StressPositions> {
   const [reviews, skillLevel] = await Promise.all([
-    db.sessionReviews.toArray(),
+    prefetchedReviews ?? db.sessionReviews.toArray(),
     getStorageMeta('onboarding.skillLevel', isSkillLevel),
   ])
   const band = skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)

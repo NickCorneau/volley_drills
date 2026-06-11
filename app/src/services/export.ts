@@ -75,7 +75,10 @@ export async function buildExportPayload(): Promise<ExportPayload> {
   // `structuredClone` isolates the returned payload from the backing
   // Dexie rows. Without it, mutating `payload.sessionPlans[0]` in
   // consumer code would silently leak into the next Dexie fetch.
-  const stressPositions = await loadStressPositions()
+  // Positions derive from the SAME `sessionReviews` snapshot exported
+  // below, so the payload can never carry positions a fold over its own
+  // rows wouldn't reproduce.
+  const stressPositions = await loadStressPositions(sessionReviews)
   return structuredClone({
     schemaVersion: 6 as const,
     exportedAt: now,

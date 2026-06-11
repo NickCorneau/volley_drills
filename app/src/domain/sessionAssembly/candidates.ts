@@ -140,6 +140,30 @@ function strongestDurationCapacityCandidate(
   }, undefined)
 }
 
+/**
+ * Stress-substrate (D154): stable-order a candidate pool by distance to
+ * the focus's current ladder rung. The sort is stable, so
+ * equal-distance candidates keep their incoming (seeded-shuffle) order
+ * — deterministic per seed. Off-ladder drills order last via a large
+ * FINITE sentinel: `Infinity - Infinity` is `NaN`, which would make the
+ * comparator inconsistent the moment two off-ladder candidates meet.
+ * Off-ladder is defensive only under the registry's completeness
+ * invariant (future drill activation).
+ */
+const OFF_LADDER_DISTANCE = Number.MAX_SAFE_INTEGER
+
+export function orderByStressDistance<T extends { readonly drill: { readonly id: string } }>(
+  pool: readonly T[],
+  focus: StressLadderFocus,
+  position: number,
+): T[] {
+  const distance = (candidate: T): number => {
+    const rung = stressRungForDrill(focus, candidate.drill.id)
+    return rung === undefined ? OFF_LADDER_DISTANCE : Math.abs(rung - position)
+  }
+  return [...pool].sort((a, b) => distance(a) - distance(b))
+}
+
 export function pickForSlot(
   slot: BlockSlot,
   context: SetupContext,
@@ -188,20 +212,13 @@ export function pickForSlot(
   // Stress-substrate (D154): order the pool by distance to the focus's
   // current ladder rung. Applied generically after pool construction so
   // all three branches above (unused, band-relax, used-fallback) get the
-  // ordering. The sort is stable, so equal-distance candidates keep
-  // their seeded-shuffle order (deterministic per seed) and the existing
-  // duration-fit logic below operates on the reordered pool unchanged.
-  // Off-ladder drills sort last — defensive only under the registry's
-  // completeness invariant (future drill activation).
+  // ordering, and the existing duration-fit logic below operates on the
+  // reordered pool unchanged.
   const stressFocus = slot.type === 'main_skill' ? context.sessionFocus : undefined
   const stressPosition =
     stressFocus === undefined ? undefined : options?.stressPositions?.[stressFocus]
   if (stressFocus !== undefined && stressPosition !== undefined) {
-    const distance = (candidate: CandidateVariant): number => {
-      const rung = stressRungForDrill(stressFocus, candidate.drill.id)
-      return rung === undefined ? Number.POSITIVE_INFINITY : Math.abs(rung - stressPosition)
-    }
-    pool = [...pool].sort((a, b) => distance(a) - distance(b))
+    pool = orderByStressDistance(pool, stressFocus, stressPosition)
   }
 
   if (pool.length === 0) return undefined

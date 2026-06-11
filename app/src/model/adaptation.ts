@@ -32,7 +32,7 @@ export type StressDirection = 'more' | 'less' | 'keep'
  *
  * **Persisted + exported shape — change with migration care.** This type
  * is stored on `SessionReview.offeredDelta` (Dexie) and emitted in the
- * founder export (`ExportPayload`, schemaVersion 5). Adding a new arm
+ * founder export (`ExportPayload`). Adding a new arm
  * (e.g. `{ kind: 'score'; ... }` in M002.3) is non-breaking. But do NOT
  * add a *required* field to the existing `stress` arm — every persisted
  * v1 delta would become shape-invalid for new readers within a single

@@ -1,7 +1,7 @@
 ---
 title: "feat: Stress substrate — rung ladders, derived position, delta-consuming assembly"
 type: feat
-status: active
+status: complete
 date: 2026-06-11
 origin: docs/brainstorms/2026-06-11-stress-substrate-requirements.md
 ---

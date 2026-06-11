@@ -11,6 +11,7 @@ import {
 import {
   candidateDurationCapacity,
   findCandidates,
+  orderByStressDistance,
   pickForSlot,
 } from './sessionAssembly/candidates'
 import { createSeededRandom } from './sessionAssembly/random'
@@ -2311,5 +2312,38 @@ describe('stress-rung preference (D154)', () => {
         expect(main!.drillId).toBe('d11')
       }
     }
+  })
+
+  // The off-ladder branch is unreachable through `pickForSlot` with
+  // production data (the registry completeness invariant puts every
+  // assembly-eligible drill on its focus ladder), so the U4 "drill
+  // absent from ladder" scenario pins the extracted ordering helper
+  // directly with synthetic fixtures.
+  describe('orderByStressDistance (off-ladder defensive branch)', () => {
+    const fixture = (id: string) => ({ drill: { id } })
+
+    it('off-ladder drill sorts last but remains selectable as the sole candidate', () => {
+      // d01 (rung 1) and d11 (rung 4) are on the pass ladder; 'dX-synthetic' is not.
+      const ordered = orderByStressDistance(
+        [fixture('dX-synthetic'), fixture('d01'), fixture('d11')],
+        'pass',
+        4,
+      )
+      expect(ordered.map((c) => c.drill.id)).toEqual(['d11', 'd01', 'dX-synthetic'])
+
+      const sole = orderByStressDistance([fixture('dX-synthetic')], 'pass', 4)
+      expect(sole.map((c) => c.drill.id)).toEqual(['dX-synthetic'])
+    })
+
+    it('two off-ladder candidates keep a consistent stable order (no NaN comparator)', () => {
+      const ordered = orderByStressDistance(
+        [fixture('dX-one'), fixture('dX-two'), fixture('d05')],
+        'pass',
+        2,
+      )
+      // d05 is rung 2 (distance 0); the two off-ladder drills keep
+      // their incoming relative order via the finite sentinel.
+      expect(ordered.map((c) => c.drill.id)).toEqual(['d05', 'dX-one', 'dX-two'])
+    })
   })
 })

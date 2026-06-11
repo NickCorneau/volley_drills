@@ -45,6 +45,10 @@ export function deriveStressPositions(
   for (const review of ordered) {
     const delta = review.offeredDelta
     if (!delta || review.verdictChoice !== 'accepted') continue
+    // Future-proofing: only the `stress` arm moves ladder positions.
+    // Statically always-true today (v1 ships one arm), but the planned
+    // M002.3 `score` arm must not silently step a stress ladder.
+    if (delta.kind !== 'stress') continue
     if (delta.direction === 'keep') continue
     if (!isScopedFocus(delta.focus)) continue
 

@@ -43,6 +43,11 @@ describe('loadStressPositions', () => {
     expect(await loadStressPositions()).toEqual({ pass: 4, serve: 4, set: 4 })
   })
 
+  it("maps the 'unsure' skill level to the beginner starting rungs", async () => {
+    await setStorageMeta('onboarding.skillLevel', 'unsure')
+    expect(await loadStressPositions()).toEqual({ pass: 1, serve: 1, set: 1 })
+  })
+
   it('folds accepted verdicts from the reviews table', async () => {
     await db.sessionReviews.add(acceptedMoreOnServe(1000))
     expect(await loadStressPositions()).toEqual({ pass: 1, serve: 2, set: 1 })
