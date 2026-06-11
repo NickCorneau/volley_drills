@@ -10,12 +10,17 @@ import type {
   SessionPlan,
   SetupContext,
 } from '../model'
+import type { SessionCalibration } from './calibration/sessionCalibration'
 import {
   candidateCanCarryTargetDuration,
   pickForSlot,
   type CandidateVariant,
 } from './sessionAssembly/candidates'
-import { allocateDurations, allocateRecoveryDurations } from './sessionAssembly/durations'
+import {
+  allocateDurations,
+  allocateRecoveryDurations,
+  calibratedBudgetMinutes,
+} from './sessionAssembly/durations'
 import { createAssemblySeed, createSeededRandom } from './sessionAssembly/random'
 import { deriveBlockRationale } from './sessionAssembly/rationale'
 import {
@@ -35,7 +40,12 @@ export { deriveBlockRationale } from './sessionAssembly/rationale'
 // main_skill selection toward the focus's current ladder rung.
 // Positionless builds are output-identical to v8; the bump marks the
 // semantics change, not churn.
-export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 9
+// v10: clock calibration (2026-06-11 session-truth, KTD6) — the
+// `calibration` option scales the time-profile budget before
+// allocation (effective budget = profile ÷ overhead ratio) so the
+// session's expected WALL time lands near the chosen profile.
+// Calibration-less builds are output-identical to v9.
+export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 10
 
 /**
  * Optional inputs that scope build-time drill substitution.
@@ -78,6 +88,14 @@ export interface BuildDraftOptions {
    * so rung preference does not apply to that pick.
    */
   readonly stressPositions?: Partial<Record<StressLadderFocus, number>>
+  /**
+   * Clock calibration (U5/KTD6): session-grain overhead ratio derived
+   * from clean completes (`deriveSessionCalibration`). Scales the
+   * time-profile budget before allocation so expected wall time tracks
+   * the chosen profile; absent or inert → budget unchanged. Repeat
+   * paths deliberately omit it — repeat means repeat.
+   */
+  readonly calibration?: SessionCalibration
 }
 
 interface DraftAssemblyTraceSlotBase {
@@ -168,7 +186,16 @@ function buildDraftResult(
 
   const layout = archetype.layouts[effectiveContext.timeProfile]
   if (!layout || layout.length === 0) return null
-  const durations = allocateDurations(layout, effectiveContext.timeProfile)
+  // KTD6: calibration moves the session-level promise itself — the
+  // drill-minute budget shrinks so expected wall time lands near the
+  // profile. The draft keeps the user's chosen `timeProfile` label;
+  // assembled drill minutes may legitimately read below it.
+  const budget = calibratedBudgetMinutes(
+    layout,
+    effectiveContext.timeProfile,
+    options?.calibration?.overheadRatio,
+  )
+  const durations = allocateDurations(layout, budget)
   if (!durations) return null
 
   const usedDrillIds = new Set<string>()

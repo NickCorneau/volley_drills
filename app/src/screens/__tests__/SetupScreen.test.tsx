@@ -5,6 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../db'
 import * as sessionBuilder from '../../domain/sessionBuilder'
 import type { SessionDraft, SetupContext } from '../../model'
+import {
+  currentPersistedExecutionLog,
+  currentPersistedPlan,
+} from '../../test-utils/persistedRecords'
 import { SetupScreen } from '../SetupScreen'
 
 async function clearDb() {
@@ -742,6 +746,62 @@ describe('SetupScreen (C-3)', () => {
       // No persisted skill level → beginner start (rung 1); the
       // accepted `more` on pass moves pass to 2.
       expect(lastOptions?.stressPositions).toEqual({ pass: 2, serve: 1, set: 1 })
+    } finally {
+      buildSpy.mockRestore()
+    }
+  })
+
+  /**
+   * U5/KTD6 clock calibration: the on-mount preview inputs also carry
+   * the derived session-grain calibration, so the preview build — and
+   * therefore the persisted draft — scales the drill-minute budget
+   * toward honest wall time. Same spy-through seam as the D154 test.
+   */
+  it('passes the derived clock calibration into the preview build (U5)', async () => {
+    const existingCompletedAt = 1_700_000_000_000
+    await db.storageMeta.put({
+      key: 'onboarding.completedAt',
+      value: existingCompletedAt,
+      updatedAt: existingCompletedAt,
+    })
+    // Three clean completes, each running 1.2x over a 20-minute plan.
+    for (let i = 0; i < 3; i++) {
+      const startedAt = existingCompletedAt + i * 86_400_000
+      await db.sessionPlans.put(
+        currentPersistedPlan({
+          id: `plan-cal-${i}`,
+          blocks: [{ durationMinutes: 20 }],
+          createdAt: startedAt,
+        }),
+      )
+      await db.executionLogs.put(
+        currentPersistedExecutionLog({
+          id: `exec-cal-${i}`,
+          planId: `plan-cal-${i}`,
+          status: 'completed',
+          blockStatuses: [{ status: 'completed' }],
+          startedAt,
+          completedAt: startedAt + 24 * 60_000,
+        }),
+      )
+    }
+
+    const buildSpy = vi.spyOn(sessionBuilder, 'buildDraft')
+    try {
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      await screen.findByTestId('setup-assembled-duration')
+
+      expect(buildSpy).toHaveBeenCalled()
+      const lastOptions = buildSpy.mock.calls[buildSpy.mock.calls.length - 1]?.[1]
+      expect(lastOptions?.calibration?.sampleCount).toBe(3)
+      expect(lastOptions?.calibration?.overheadRatio).toBeCloseTo(1.2, 5)
     } finally {
       buildSpy.mockRestore()
     }

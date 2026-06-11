@@ -1,5 +1,25 @@
 import type { BlockSlot, BlockSlotType } from '../../model'
 
+/**
+ * U5/KTD6 — clock calibration scales the time-profile budget BEFORE
+ * allocation: effective budget = profile ÷ overhead ratio, rounded to
+ * whole minutes and floored at the layout's per-slot minimum total so
+ * allocation stays feasible. Allocation, snapping, and variant
+ * envelopes bind unchanged after. A ratio at or below 1 (inert
+ * calibration) leaves the budget untouched.
+ */
+export function calibratedBudgetMinutes(
+  layout: readonly BlockSlot[],
+  totalMinutes: number,
+  overheadRatio: number | undefined,
+): number {
+  if (overheadRatio === undefined || !Number.isFinite(overheadRatio) || overheadRatio <= 1) {
+    return totalMinutes
+  }
+  const minTotal = layout.reduce((sum, slot) => sum + slot.durationMinMinutes, 0)
+  return Math.max(minTotal, Math.round(totalMinutes / overheadRatio))
+}
+
 const DURATION_PRIORITY: readonly BlockSlotType[] = [
   'main_skill',
   'technique',

@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../db'
+import {
+  currentPersistedExecutionLog,
+  currentPersistedPlan,
+} from '../../test-utils/persistedRecords'
 import { buildExportPayload, downloadExport } from '../export'
 
 /**
@@ -37,13 +41,14 @@ describe('buildExportPayload (V0B-15)', () => {
         'executionLogs',
         'receipt',
         'schemaVersion',
+        'sessionCalibration',
         'sessionPlans',
         'sessionReviews',
         'storageMeta',
         'stressPositions',
       ].sort(),
     )
-    expect(payload.schemaVersion).toBe(6)
+    expect(payload.schemaVersion).toBe(7)
     expect(typeof payload.exportedAt).toBe('number')
     expect(payload.sessionPlans).toEqual([])
     expect(payload.executionLogs).toEqual([])
@@ -56,6 +61,13 @@ describe('buildExportPayload (V0B-15)', () => {
     // D154 dual-read: positions come from the same service assembly
     // steers with; empty DB resolves the beginner starting rungs.
     expect(payload.stressPositions).toEqual({ pass: 1, serve: 1, set: 1 })
+    // U5/KTD9 dual-read: calibration comes from the same service seam
+    // assembly steers with; empty DB resolves the inert calibration.
+    expect(payload.sessionCalibration).toEqual({
+      overheadRatio: 1,
+      sampleCount: 0,
+      windowSize: 10,
+    })
   })
 
   it('derives stressPositions from accepted verdicts in the same payload (D154)', async () => {
@@ -73,6 +85,35 @@ describe('buildExportPayload (V0B-15)', () => {
 
     const payload = await buildExportPayload()
     expect(payload.stressPositions).toEqual({ pass: 1, serve: 1, set: 2 })
+  })
+
+  it('derives sessionCalibration from the same payload rows (U5/KTD9)', async () => {
+    const now = Date.now()
+    // Three clean completes, each running 1.2x over a 20-minute plan.
+    for (let i = 0; i < 3; i++) {
+      const startedAt = now - (i + 1) * 86_400_000
+      await db.sessionPlans.put(
+        currentPersistedPlan({
+          id: `plan-cal-${i}`,
+          blocks: [{ durationMinutes: 20 }],
+          createdAt: startedAt,
+        }),
+      )
+      await db.executionLogs.put(
+        currentPersistedExecutionLog({
+          id: `exec-cal-${i}`,
+          planId: `plan-cal-${i}`,
+          status: 'completed',
+          blockStatuses: [{ status: 'completed' }],
+          startedAt,
+          completedAt: startedAt + 24 * 60_000,
+        }),
+      )
+    }
+
+    const payload = await buildExportPayload()
+    expect(payload.sessionCalibration.sampleCount).toBe(3)
+    expect(payload.sessionCalibration.overheadRatio).toBeCloseTo(1.2, 5)
   })
 
   it('includes every row from each tracked table', async () => {
@@ -248,7 +289,7 @@ describe('downloadExport (V0B-15)', () => {
 
     const text = await blobs[0].text()
     const parsed = JSON.parse(text)
-    expect(parsed.schemaVersion).toBe(6)
+    expect(parsed.schemaVersion).toBe(7)
     expect(parsed.sessionPlans).toHaveLength(1)
     expect(parsed.sessionPlans[0].id).toBe('plan-dl')
 

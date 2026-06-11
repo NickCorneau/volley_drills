@@ -27,18 +27,23 @@ import { buildDraft } from '../domain/sessionBuilder'
 import type { ScopedFocus } from '../domain/eligibleSessions'
 import type { SetupContext } from '../model'
 import { isSkillLevel, skillLevelToDrillBand } from '../lib/skillLevel'
+import { loadSessionCalibration } from './calibration'
 import { saveDraft } from './session'
 import { getStorageMeta } from './storageMeta'
 import { loadStressPositions } from './stressPositions'
 
 async function buildAndSaveDraft(
   context: SetupContext,
-  options?: { readonly steerStress?: boolean },
+  options?: { readonly steer?: boolean },
 ): Promise<boolean> {
   const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
   const playerLevel = skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
-  const stressPositions = options?.steerStress ? await loadStressPositions() : undefined
-  const draft = buildDraft(context, { playerLevel, stressPositions })
+  // Steered launches load both derived inputs: stress positions (D154)
+  // and the clock calibration (U5/KTD6). Repeat omits both by design.
+  const [stressPositions, calibration] = options?.steer
+    ? await Promise.all([loadStressPositions(), loadSessionCalibration()])
+    : [undefined, undefined]
+  const draft = buildDraft(context, { playerLevel, stressPositions, calibration })
   if (!draft) return false
   await saveDraft(draft)
   return true
@@ -57,8 +62,9 @@ export async function startPlanSession(input: StartPlanSessionInput): Promise<bo
   // Reuse the prior physical conditions but steer the focus to the
   // plan's next focus. effectiveSkillTags applies it to the focus-
   // controlled assembly slots; stress steering applies the derived
-  // ladder position to the main_skill pick (D154).
-  return buildAndSaveDraft({ ...priorContext, sessionFocus: nextFocus }, { steerStress: true })
+  // ladder position to the main_skill pick (D154); clock calibration
+  // scales the drill-minute budget toward honest wall time (U5).
+  return buildAndSaveDraft({ ...priorContext, sessionFocus: nextFocus }, { steer: true })
 }
 
 /**

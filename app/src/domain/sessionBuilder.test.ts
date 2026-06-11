@@ -115,14 +115,14 @@ describe('sessionBuilder', () => {
       },
     )
 
-    it('algorithm version is 9 (D154 stress-substrate bump)', () => {
+    it('algorithm version is 10 (U5 clock-calibration bump)', () => {
       const draft = buildDraft({
         playerMode: 'pair',
         timeProfile: 25,
         netAvailable: false,
         wallAvailable: false,
       })
-      expect(draft?.assemblyAlgorithmVersion).toBe(9)
+      expect(draft?.assemblyAlgorithmVersion).toBe(10)
     })
 
     it('build is deterministic per seed under R1 (R4)', () => {
@@ -291,7 +291,7 @@ describe('sessionBuilder', () => {
     // (focus-untouched) pair-open-25 fixture — every optional slot
     // fills, so there is no surplus to redistribute and the post-R1
     // engine produces byte-identical durations.
-    expect(draft?.assemblyAlgorithmVersion).toBe(9)
+    expect(draft?.assemblyAlgorithmVersion).toBe(10)
     // 2026-05-13: segment snap is wired into `buildDraft`, so the
     // pair-open-25 wrap (d26-solo, natural 3 min) snaps from 4 → 3
     // and the freed minute redistributes into technique (6 → 7)
@@ -335,6 +335,112 @@ describe('sessionBuilder', () => {
         variantId: 'd26-solo',
       },
     ])
+  })
+
+  /**
+   * U5/KTD6 — clock calibration scales the time-profile budget before
+   * allocation. AE5 (re-pinned at session grain): a history of clean
+   * completes running ~1.3x over planned shrinks the next assembly's
+   * drill-minute budget to ≈ profile ÷ 1.3 so expected wall time lands
+   * near the chosen profile. Slot machinery binds unchanged after.
+   */
+  describe('clock-calibration budget threading (U5/KTD6)', () => {
+    const context: SetupContext = {
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+    }
+    const calibration = (overheadRatio: number, sampleCount = 3) => ({
+      overheadRatio,
+      sampleCount,
+      windowSize: 10,
+    })
+
+    it('shrinks the assembled total to ≈ profile ÷ ratio (AE5 re-pinned)', () => {
+      // 40-profile: enough headroom above the layout's per-slot minimum
+      // total for the scaled budget to bind (25 ÷ 1.3 would floor out).
+      const roomy: SetupContext = { ...context, timeProfile: 40 }
+      const draft = buildDraft(roomy, {
+        assemblySeed: 'u5-calibration-budget',
+        calibration: calibration(1.3),
+      })
+      expect(draft).not.toBeNull()
+      const total = draft!.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
+      const scaledBudget = Math.round(40 / 1.3)
+      // Snap may legitimately land below the scaled budget, never above.
+      expect(total).toBeLessThanOrEqual(scaledBudget)
+      expect(total).toBeGreaterThanOrEqual(Math.floor(scaledBudget * 0.5))
+      // The promise label stays the user's chosen profile.
+      expect(draft!.context.timeProfile).toBe(40)
+    })
+
+    it('floors the scaled budget at the layout minimum instead of failing the build', () => {
+      // pair-open 25's slot minimums total above 25 ÷ 1.3, so the floor
+      // binds: assembly still produces a session at the layout minimum.
+      const draft = buildDraft(context, {
+        assemblySeed: 'u5-calibration-min-floor',
+        calibration: calibration(1.3),
+      })
+      expect(draft).not.toBeNull()
+      const total = draft!.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
+      expect(total).toBeGreaterThan(Math.round(25 / 1.3))
+      expect(total).toBeLessThanOrEqual(25)
+    })
+
+    it('leaves assembly byte-identical to uncalibrated when calibration is inert', () => {
+      const seed = 'u5-calibration-inert'
+      const uncalibrated = buildDraft(context, { assemblySeed: seed })
+      const inert = buildDraft(context, {
+        assemblySeed: seed,
+        calibration: calibration(1, 1),
+      })
+      expect(uncalibrated).not.toBeNull()
+      expect({ ...inert!, updatedAt: 0 }).toEqual({ ...uncalibrated!, updatedAt: 0 })
+    })
+
+    it('builds deterministically under an active calibration (double-build)', () => {
+      const options = {
+        assemblySeed: 'u5-calibration-determinism',
+        calibration: calibration(1.3),
+      }
+      const first = buildDraft(context, options)
+      const second = buildDraft(context, options)
+      expect(first).not.toBeNull()
+      expect({ ...second!, updatedAt: 0 }).toEqual({ ...first!, updatedAt: 0 })
+    })
+
+    it('keeps allocation feasible at the ratio ceiling against the shortest profile', () => {
+      const short: SetupContext = { ...context, timeProfile: 15 }
+      const draft = buildDraft(short, {
+        assemblySeed: 'u5-calibration-floor',
+        calibration: calibration(1.5),
+      })
+      expect(draft).not.toBeNull()
+      const total = draft!.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
+      expect(total).toBeLessThanOrEqual(15)
+      for (const b of draft!.blocks) {
+        expect(b.durationMinutes, `${b.type} allocated zero minutes`).toBeGreaterThanOrEqual(1)
+      }
+    })
+
+    it('respects slot maxima under calibration across seeds', () => {
+      const archetype = selectArchetype(context)!
+      const layout = archetype.layouts[context.timeProfile]!
+      const maxByType = new Map(layout.map((slot) => [slot.type, slot.durationMaxMinutes]))
+      for (let i = 0; i < 12; i++) {
+        const draft = buildDraft(context, {
+          assemblySeed: `u5-calibration-envelope-${i}`,
+          calibration: calibration(1.3),
+        })
+        if (!draft) continue
+        for (const b of draft.blocks) {
+          const max = maxByType.get(b.type)
+          if (max === undefined) continue
+          expect(b.durationMinutes, `${b.type} exceeds slot max under calibration`).toBeLessThanOrEqual(max)
+        }
+      }
+    })
   })
 
   it('prefers a duration-fit main-skill candidate over D01 for longer allocations', () => {
@@ -1919,7 +2025,7 @@ describe('sessionBuilder', () => {
     expect(first).not.toBeNull()
     expect(second).not.toBeNull()
     expect(first?.assemblySeed).toBe('seed-replay')
-    expect(first?.assemblyAlgorithmVersion).toBe(9)
+    expect(first?.assemblyAlgorithmVersion).toBe(10)
     expect(second?.blocks.map((block) => [block.drillId, block.variantId])).toEqual(
       first?.blocks.map((block) => [block.drillId, block.variantId]),
     )

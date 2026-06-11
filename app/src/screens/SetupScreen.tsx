@@ -25,7 +25,9 @@ import {
 } from '../services/session'
 import type { BlockSlotType } from '../types/session'
 import { getStorageMeta, setStorageMeta } from '../services/storageMeta'
+import { loadSessionCalibration } from '../services/calibration'
 import { loadStressPositions } from '../services/stressPositions'
+import type { SessionCalibration } from '../domain/calibration/sessionCalibration'
 import type { StressPositions } from '../domain/adaptation/stressPosition'
 import { routes } from '../routes'
 import type { PlayerLevel } from '../types/drill'
@@ -90,6 +92,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     readonly lastCompletedByType: Partial<Record<BlockSlotType, string>>
     readonly playerLevel: PlayerLevel | undefined
     readonly stressPositions: StressPositions | undefined
+    readonly calibration: SessionCalibration | undefined
   } | null>(null)
   const [previewDraft, setPreviewDraft] = useState<SessionDraft | null>(null)
 
@@ -163,24 +166,29 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     let cancelled = false
     ;(async () => {
       try {
-        const [completedResult, skillResult, stressResult] = await Promise.allSettled([
-          findLastCompletedDrillIdsByType(),
-          getStorageMeta('onboarding.skillLevel', isSkillLevel),
-          loadStressPositions(),
-        ])
+        const [completedResult, skillResult, stressResult, calibrationResult] =
+          await Promise.allSettled([
+            findLastCompletedDrillIdsByType(),
+            getStorageMeta('onboarding.skillLevel', isSkillLevel),
+            loadStressPositions(),
+            loadSessionCalibration(),
+          ])
         if (cancelled) return
         const lastCompletedByType =
           completedResult.status === 'fulfilled' ? completedResult.value : {}
         const skillLevel = skillResult.status === 'fulfilled' ? skillResult.value : undefined
         const playerLevel = skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
         const stressPositions = stressResult.status === 'fulfilled' ? stressResult.value : undefined
-        setPreviewInputs({ lastCompletedByType, playerLevel, stressPositions })
+        const calibration =
+          calibrationResult.status === 'fulfilled' ? calibrationResult.value : undefined
+        setPreviewInputs({ lastCompletedByType, playerLevel, stressPositions, calibration })
       } catch {
         if (!cancelled)
           setPreviewInputs({
             lastCompletedByType: {},
             playerLevel: undefined,
             stressPositions: undefined,
+            calibration: undefined,
           })
       }
     })()
@@ -219,6 +227,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       lastCompletedByType: previewInputs.lastCompletedByType,
       playerLevel: previewInputs.playerLevel,
       stressPositions: previewInputs.stressPositions,
+      calibration: previewInputs.calibration,
     })
     setPreviewDraft(draft)
   }, [previewContext, previewInputs])
@@ -275,17 +284,19 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           previewInputs?.lastCompletedByType ?? {}
         let playerLevel: PlayerLevel | undefined = previewInputs?.playerLevel
         let stressPositions: StressPositions | undefined = previewInputs?.stressPositions
+        let calibration: SessionCalibration | undefined = previewInputs?.calibration
         if (!previewInputs) {
           try {
             lastCompletedByType = await findLastCompletedDrillIdsByType()
             const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
             playerLevel = skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
             stressPositions = await loadStressPositions()
+            calibration = await loadSessionCalibration()
           } catch {
             if (isSchemaBlocked()) return
           }
         }
-        draft = buildDraft(context, { lastCompletedByType, playerLevel, stressPositions })
+        draft = buildDraft(context, { lastCompletedByType, playerLevel, stressPositions, calibration })
       }
       if (!draft) {
         setError("Can't build a session for these constraints. Try different options.")

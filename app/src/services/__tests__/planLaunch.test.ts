@@ -2,6 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../db'
 import type { SessionReview, SetupContext } from '../../model'
 import { buildDraft } from '../../domain/sessionBuilder'
+import {
+  currentPersistedExecutionLog,
+  currentPersistedPlan,
+} from '../../test-utils/persistedRecords'
 import { getCurrentDraft } from '../session'
 import { repeatSession, startPlanSession } from '../planLaunch'
 
@@ -21,6 +25,10 @@ vi.mock('../../domain/sessionBuilder', { spy: true })
  * D154 stress steering: startPlanSession passes the derived ladder
  * positions to assembly (an accepted "more/less" verdict acts);
  * repeatSession stays verbatim (no positions, R10).
+ *
+ * U5/KTD6 clock calibration: startPlanSession also passes the derived
+ * session-grain calibration so the budget scales toward honest wall
+ * time; repeatSession stays verbatim (no calibration either).
  */
 
 const PRIOR_CONTEXT: SetupContext = {
@@ -70,6 +78,28 @@ function lastBuildDraftOptions() {
   return calls[calls.length - 1]?.[1]
 }
 
+/** Seed one clean complete (plan + terminal log) running `ratio`x over. */
+async function seedCleanComplete(i: number, plannedMinutes: number, ratio: number) {
+  const startedAt = 1_000_000 + i * 86_400_000
+  await db.sessionPlans.put(
+    currentPersistedPlan({
+      id: `plan-cal-${i}`,
+      blocks: [{ durationMinutes: plannedMinutes }],
+      createdAt: startedAt,
+    }),
+  )
+  await db.executionLogs.put(
+    currentPersistedExecutionLog({
+      id: `exec-cal-${i}`,
+      planId: `plan-cal-${i}`,
+      status: 'completed',
+      blockStatuses: [{ status: 'completed' }],
+      startedAt,
+      completedAt: startedAt + plannedMinutes * ratio * 60_000,
+    }),
+  )
+}
+
 describe('startPlanSession', () => {
   it('saves a draft steered to the plan next focus and returns true', async () => {
     const started = await startPlanSession({ priorContext: PRIOR_CONTEXT, nextFocus: 'pass' })
@@ -116,6 +146,28 @@ describe('startPlanSession', () => {
 
     expect(lastBuildDraftOptions()?.stressPositions).toEqual({ pass: 1, serve: 1, set: 1 })
   })
+
+  it('U5: passes the inert calibration to assembly when no clean completes exist', async () => {
+    await startPlanSession({ priorContext: PRIOR_CONTEXT, nextFocus: 'pass' })
+
+    expect(lastBuildDraftOptions()?.calibration).toEqual({
+      overheadRatio: 1,
+      sampleCount: 0,
+      windowSize: 10,
+    })
+  })
+
+  it('U5/AE5: with ≥3 clean completes running over, the derived ratio reaches assembly', async () => {
+    await seedCleanComplete(0, 20, 1.2)
+    await seedCleanComplete(1, 20, 1.2)
+    await seedCleanComplete(2, 20, 1.2)
+
+    await startPlanSession({ priorContext: PRIOR_CONTEXT, nextFocus: 'pass' })
+
+    const calibration = lastBuildDraftOptions()?.calibration
+    expect(calibration?.sampleCount).toBe(3)
+    expect(calibration?.overheadRatio).toBeCloseTo(1.2, 5)
+  })
 })
 
 describe('repeatSession', () => {
@@ -141,5 +193,15 @@ describe('repeatSession', () => {
     await repeatSession(PRIOR_CONTEXT)
 
     expect(lastBuildDraftOptions()?.stressPositions).toBeUndefined()
+  })
+
+  it('U5: Repeat never re-steers — no calibration reaches assembly even with clean completes', async () => {
+    await seedCleanComplete(0, 20, 1.2)
+    await seedCleanComplete(1, 20, 1.2)
+    await seedCleanComplete(2, 20, 1.2)
+
+    await repeatSession(PRIOR_CONTEXT)
+
+    expect(lastBuildDraftOptions()?.calibration).toBeUndefined()
   })
 })

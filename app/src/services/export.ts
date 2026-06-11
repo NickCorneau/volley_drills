@@ -1,7 +1,9 @@
 import type { ExecutionLog, SessionPlan, SessionReview, StorageMetaEntry } from '../db/types'
 import { db } from '../db'
 import { composeReceipt, type ReceiptOutput } from '../domain/composeReceipt'
+import type { SessionCalibration } from '../domain/calibration/sessionCalibration'
 import type { StressPositions } from '../domain/adaptation/stressPosition'
+import { loadSessionCalibration } from './calibration'
 import { loadStressPositions } from './stressPositions'
 
 /**
@@ -45,9 +47,15 @@ import { loadStressPositions } from './stressPositions'
  * computation, two reads). Positions only: the rung of each assembled
  * main drill is derivable offline from the static ladder registry plus
  * the `sessionPlans` rows already in this payload.
+ *
+ * `schemaVersion` bumped 6 -> 7 (U5/KTD9, session-truth plan): the
+ * payload gains `sessionCalibration` — the derived clock-calibration
+ * read (overhead ratio, sample count, window) resolved through the
+ * SAME service seam assembly steers with, derived from the
+ * `executionLogs` + `sessionPlans` snapshots exported below.
  */
 export interface ExportPayload {
-  schemaVersion: 6
+  schemaVersion: 7
   exportedAt: number
   sessionPlans: SessionPlan[]
   executionLogs: ExecutionLog[]
@@ -55,6 +63,7 @@ export interface ExportPayload {
   storageMeta: StorageMetaEntry[]
   receipt: ReceiptOutput
   stressPositions: StressPositions
+  sessionCalibration: SessionCalibration
 }
 
 /**
@@ -77,10 +86,14 @@ export async function buildExportPayload(): Promise<ExportPayload> {
   // consumer code would silently leak into the next Dexie fetch.
   // Positions derive from the SAME `sessionReviews` snapshot exported
   // below, so the payload can never carry positions a fold over its own
-  // rows wouldn't reproduce.
-  const stressPositions = await loadStressPositions(sessionReviews)
+  // rows wouldn't reproduce. The calibration read mirrors that: it
+  // derives from the exact `executionLogs`/`sessionPlans` rows exported.
+  const [stressPositions, sessionCalibration] = await Promise.all([
+    loadStressPositions(sessionReviews),
+    loadSessionCalibration({ executionLogs, sessionPlans }),
+  ])
   return structuredClone({
-    schemaVersion: 6 as const,
+    schemaVersion: 7 as const,
     exportedAt: now,
     sessionPlans,
     executionLogs,
@@ -88,6 +101,7 @@ export async function buildExportPayload(): Promise<ExportPayload> {
     storageMeta,
     receipt: composeReceipt(sessionReviews, now),
     stressPositions,
+    sessionCalibration,
   })
 }
 
