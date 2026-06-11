@@ -106,9 +106,10 @@ describe('sessionBuilder', () => {
           // slots drop and the fallback in U2 can't recover. Pin a
           // sane floor so a future regression that produces empty
           // sessions still fails CI.
-          expect(total, `${label} seed-${i}: total fell below 50% of profile`).toBeGreaterThanOrEqual(
-            Math.floor(context.timeProfile * 0.5),
-          )
+          expect(
+            total,
+            `${label} seed-${i}: total fell below 50% of profile`,
+          ).toBeGreaterThanOrEqual(Math.floor(context.timeProfile * 0.5))
         }
       },
     )

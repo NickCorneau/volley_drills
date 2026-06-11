@@ -62,10 +62,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
 }
 
 /** The authored rung for a drill within a focus; undefined off-ladder. */
-export function stressRungForDrill(
-  focus: StressLadderFocus,
-  drillId: string,
-): number | undefined {
+export function stressRungForDrill(focus: StressLadderFocus, drillId: string): number | undefined {
   for (const rung of STRESS_LADDERS[focus]) {
     if (rung.drillIds.includes(drillId)) return rung.rung
   }

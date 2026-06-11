@@ -11,9 +11,9 @@ import {
 const FOCUSES: readonly StressLadderFocus[] = ['pass', 'serve', 'set']
 
 function candidateDrillIdsForFocus(focus: StressLadderFocus): string[] {
-  return DRILLS.filter(
-    (drill) => drill.m001Candidate && drill.skillFocus.includes(focus),
-  ).map((drill) => drill.id)
+  return DRILLS.filter((drill) => drill.m001Candidate && drill.skillFocus.includes(focus)).map(
+    (drill) => drill.id,
+  )
 }
 
 function ladderDrillIds(focus: StressLadderFocus): string[] {
@@ -21,15 +21,12 @@ function ladderDrillIds(focus: StressLadderFocus): string[] {
 }
 
 describe('stress ladder registry invariants', () => {
-  it.each(FOCUSES)(
-    'every m001Candidate %s drill appears exactly once in its ladder',
-    (focus) => {
-      const expected = candidateDrillIdsForFocus(focus).sort()
-      const actual = ladderDrillIds(focus)
-      expect([...actual].sort()).toEqual(expected)
-      expect(new Set(actual).size).toBe(actual.length)
-    },
-  )
+  it.each(FOCUSES)('every m001Candidate %s drill appears exactly once in its ladder', (focus) => {
+    const expected = candidateDrillIdsForFocus(focus).sort()
+    const actual = ladderDrillIds(focus)
+    expect([...actual].sort()).toEqual(expected)
+    expect(new Set(actual).size).toBe(actual.length)
+  })
 
   it.each(FOCUSES)('%s ladder references only known catalog drills', (focus) => {
     const knownIds = new Set(DRILLS.map((drill) => drill.id))
@@ -90,7 +87,7 @@ describe('startingStressRung', () => {
   })
 
   it('maps advanced to 4, which lands on the serve ladder top rung', () => {
-    expect(startingStressRung(('serve' as const) satisfies StressLadderFocus, 'advanced')).toBe(
+    expect(startingStressRung('serve' as const satisfies StressLadderFocus, 'advanced')).toBe(
       stressLadderBounds('serve').max,
     )
     expect(startingStressRung('pass', 'advanced')).toBe(4)

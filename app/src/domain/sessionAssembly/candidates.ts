@@ -165,10 +165,7 @@ export function pickForSlot(
   let pool: readonly CandidateVariant[]
   if (unused.length > 0) {
     pool = shuffle(unused, random)
-  } else if (
-    options?.playerLevel !== undefined &&
-    isFocusControlledSlotType(slot.type)
-  ) {
+  } else if (options?.playerLevel !== undefined && isFocusControlledSlotType(slot.type)) {
     // Strip both `options.playerLevel` and `context.playerLevel` so the
     // wider pool ignores band membership entirely. Tests (and any
     // future caller) sometimes carry `playerLevel` on the context, so

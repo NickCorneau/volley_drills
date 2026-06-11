@@ -280,12 +280,7 @@ function buildDraftResult(
     if (!selected) continue
     if (candidateCanCarryTargetDuration(selected.pick, durations[index])) continue
     if (
-      !shouldRerouteForSourceBackedSibling(
-        slot,
-        effectiveContext,
-        selected.pick,
-        durations[index],
-      )
+      !shouldRerouteForSourceBackedSibling(slot, effectiveContext, selected.pick, durations[index])
     ) {
       continue
     }
@@ -578,13 +573,10 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
   // even past its archetype cap (see `allocateRecoveryDurations` JSDoc).
   // Without overflow, freed warmup/wrap minutes would silently vanish
   // when the recovery target slot is already above its max.
-  const snappedDurations = snapWarmupWrapDurations(
-    recoveryLayout,
-    durations,
-    picks,
-    undefined,
-    { priority: RECOVERY_REDISTRIBUTION_PRIORITY, allowSlotMaxOverflow: true },
-  )
+  const snappedDurations = snapWarmupWrapDurations(recoveryLayout, durations, picks, undefined, {
+    priority: RECOVERY_REDISTRIBUTION_PRIORITY,
+    allowSlotMaxOverflow: true,
+  })
 
   const blocks: DraftBlock[] = []
   let blockIndex = 0

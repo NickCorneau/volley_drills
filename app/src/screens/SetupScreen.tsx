@@ -172,10 +172,8 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         const lastCompletedByType =
           completedResult.status === 'fulfilled' ? completedResult.value : {}
         const skillLevel = skillResult.status === 'fulfilled' ? skillResult.value : undefined
-        const playerLevel =
-          skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
-        const stressPositions =
-          stressResult.status === 'fulfilled' ? stressResult.value : undefined
+        const playerLevel = skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
+        const stressPositions = stressResult.status === 'fulfilled' ? stressResult.value : undefined
         setPreviewInputs({ lastCompletedByType, playerLevel, stressPositions })
       } catch {
         if (!cancelled)
@@ -240,7 +238,9 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   const previewLargeGap = useMemo(() => {
     if (previewTotalMinutes === null) return null
     const gap = timeProfile - previewTotalMinutes
-    return gap >= LARGE_GAP_THRESHOLD_MINUTES ? { assembled: previewTotalMinutes, named: timeProfile } : null
+    return gap >= LARGE_GAP_THRESHOLD_MINUTES
+      ? { assembled: previewTotalMinutes, named: timeProfile }
+      : null
   }, [previewTotalMinutes, timeProfile])
 
   const submitting = useRef(false)
