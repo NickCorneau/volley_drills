@@ -11,6 +11,7 @@ vi.mock('../services/session', async (importOriginal) => {
     buildResumedExecution: vi.fn(),
     buildAdvancedBlock: vi.fn(),
     buildEndedSession: vi.fn(),
+    buildWrappedSession: vi.fn(),
     saveExecution: vi.fn(),
     computeActualDurationMinutes: actual.computeActualDurationMinutes,
     withActualDuration: actual.withActualDuration,
@@ -269,6 +270,87 @@ describe('useSessionRunner', () => {
     expect(sessionService.saveExecution).toHaveBeenCalledWith(endedWithDuration)
     expect(timerService.clearTimerState).toHaveBeenCalled()
     expect(result.current.execution).toEqual(endedWithDuration)
+  })
+
+  // U2 (2026-06-11 session-truth plan): deliberate wrap routes through
+  // buildWrappedSession and persists like an end (duration + timer clear).
+  it('wrapSession builds wrapped state + clears timer', async () => {
+    const wrapped = makeExec({
+      status: 'completed',
+      blockStatuses: [
+        { blockId: 'block-1', status: 'completed', completedAt: Date.now() },
+        { blockId: 'block-2', status: 'skipped', completedAt: Date.now() },
+      ],
+      completedAt: Date.now(),
+    })
+    vi.mocked(sessionService.buildWrappedSession).mockReturnValue(wrapped)
+
+    const { result } = renderHook(() => useSessionRunner('exec-1'))
+    await waitFor(() => expect(result.current.loaded).toBe(true))
+
+    await act(async () => {
+      await result.current.wrapSession()
+    })
+
+    // block-1 (3 planned minutes) is completed in the wrapped fixture; the
+    // skipped tail contributes nothing under the current duration rule.
+    const wrappedWithDuration = { ...wrapped, actualDurationMinutes: 3 }
+    expect(sessionService.buildWrappedSession).toHaveBeenCalledWith(exec)
+    expect(sessionService.saveExecution).toHaveBeenCalledWith(wrappedWithDuration)
+    expect(timerService.clearTimerState).toHaveBeenCalled()
+    expect(result.current.execution).toEqual(wrappedWithDuration)
+  })
+
+  // KTD8: a second end/wrap request while a terminal transition is in
+  // flight resolves to the in-flight result - exactly one terminal write.
+  it('dedupes concurrent end/wrap requests into one terminal transition', async () => {
+    const ended = makeExec({
+      status: 'ended_early',
+      completedAt: Date.now(),
+      endedEarlyReason: 'user_quit',
+    })
+    vi.mocked(sessionService.buildEndedSession).mockReturnValue(ended)
+
+    const { result } = renderHook(() => useSessionRunner('exec-1'))
+    await waitFor(() => expect(result.current.loaded).toBe(true))
+
+    await act(async () => {
+      await Promise.all([
+        result.current.endSession('user_quit'),
+        result.current.endSession('user_quit'),
+        result.current.wrapSession(),
+      ])
+    })
+
+    expect(sessionService.saveExecution).toHaveBeenCalledTimes(1)
+    expect(sessionService.buildEndedSession).toHaveBeenCalledTimes(1)
+    expect(sessionService.buildWrappedSession).not.toHaveBeenCalled()
+  })
+
+  // KTD8 belt-and-braces: a terminal execution never gets a second
+  // terminal write even from a fresh (non-in-flight) end request.
+  it('ignores end/wrap requests on an already-terminal execution', async () => {
+    const terminalExec = makeExec({
+      status: 'ended_early',
+      completedAt: Date.now(),
+      endedEarlyReason: 'user_quit',
+    })
+    vi.mocked(sessionService.loadSession).mockResolvedValue({
+      execution: terminalExec,
+      plan,
+    })
+
+    const { result } = renderHook(() => useSessionRunner('exec-1'))
+    await waitFor(() => expect(result.current.loaded).toBe(true))
+
+    await act(async () => {
+      await result.current.endSession('user_quit')
+      await result.current.wrapSession()
+    })
+
+    expect(sessionService.saveExecution).not.toHaveBeenCalled()
+    expect(sessionService.buildEndedSession).not.toHaveBeenCalled()
+    expect(sessionService.buildWrappedSession).not.toHaveBeenCalled()
   })
 
   it('isPaused reflects execution status', async () => {

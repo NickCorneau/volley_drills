@@ -8,6 +8,7 @@ import {
   buildPausedExecution,
   buildResumedExecution,
   buildStartedBlock,
+  buildWrappedSession,
   withActualDuration,
   loadSession,
   saveExecution,
@@ -194,23 +195,49 @@ export function useSessionRunner(executionLogId: string, options?: SessionRunner
 
   const skipBlock = useCallback(() => advanceBlock('skipped'), [advanceBlock])
 
-  const endSession = useCallback(
-    (reason?: string) =>
-      runSerial(async () => {
+  /**
+   * End dedupe (KTD8, 2026-06-11 session-truth plan). The end sheet sits
+   * inside the pending-pause machinery the ADV-2 fix hardened, and the
+   * two-intent sheet doubles the ways an end can fire. Same shape as
+   * `advanceInFlightRef`: while a terminal transition is in flight, every
+   * additional end/wrap request resolves to the in-flight result instead
+   * of enqueuing a second terminal write. Clears on settle so a failed
+   * end ("Try again" path) stays retryable.
+   */
+  const endInFlightRef = useRef<Promise<void> | null>(null)
+  const finalizeSession = useCallback(
+    (build: (exec: ExecutionLog) => ExecutionLog): Promise<void> => {
+      const inFlight = endInFlightRef.current
+      if (inFlight) return inFlight
+      const tracked: Promise<void> = runSerial(async () => {
         const exec = executionRef.current
         const p = planRef.current
         if (!exec || !p) return
+        if (exec.status === 'completed' || exec.status === 'ended_early') return
         const timer = await readTimerState()
-        const ended = withActualDuration(
-          buildEndedSession(exec, reason),
-          p,
-          timer,
-          exec.activeBlockIndex,
-        )
-        await persist(ended)
+        const finalized = withActualDuration(build(exec), p, timer, exec.activeBlockIndex)
+        await persist(finalized)
         await clearTimerState()
-      }),
+      }).finally(() => {
+        if (endInFlightRef.current === tracked) {
+          endInFlightRef.current = null
+        }
+      })
+      endInFlightRef.current = tracked
+      return tracked
+    },
     [persist, runSerial],
+  )
+
+  const endSession = useCallback(
+    (reason?: string) => finalizeSession((exec) => buildEndedSession(exec, reason)),
+    [finalizeSession],
+  )
+
+  /** Deliberate wrap: records completed with the skipped tail visible (U1 builder). */
+  const wrapSession = useCallback(
+    () => finalizeSession((exec) => buildWrappedSession(exec)),
+    [finalizeSession],
   )
 
   /**
@@ -336,6 +363,7 @@ export function useSessionRunner(executionLogId: string, options?: SessionRunner
     skipBlock,
     swapBlock,
     endSession,
+    wrapSession,
     flushTimer,
     recoverTimerState,
   }

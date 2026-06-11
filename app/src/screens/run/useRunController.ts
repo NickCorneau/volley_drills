@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { hasCompletedBlock } from '../../domain/executionPredicates'
 import { postBlockRoute, scaleSegmentsForBlockDuration } from '../../domain/runFlow'
 import { findSwapAlternatives } from '../../domain/sessionBuilder'
 import { useBlockPacingTicks } from '../../hooks/useBlockPacingTicks'
@@ -49,6 +50,7 @@ export function useRunController(executionLogId: string, shortened: boolean) {
     skipBlock,
     swapBlock,
     endSession,
+    wrapSession,
     flushTimer,
     recoverTimerState,
   } = runner
@@ -361,19 +363,31 @@ export function useRunController(executionLogId: string, shortened: boolean) {
     setShowEndConfirm(true)
   }, [timer, pauseBlock, activeDuration, handleRunPersistenceError])
 
-  const handleEndSessionConfirm = useCallback(async () => {
-    try {
-      await pendingEndSessionPauseRef.current
-      await endSession()
-      navigate(routes.review(executionLogId), { replace: true })
-    } catch (err) {
-      console.error('End session failed:', err)
-      setRunError('Something went wrong ending the session. Try again.')
-    }
-  }, [endSession, navigate, executionLogId])
+  const handleEndSessionConfirm = useCallback(
+    async (intent: 'done' | 'cut_short' = 'cut_short') => {
+      try {
+        await pendingEndSessionPauseRef.current
+        if (intent === 'done') {
+          await wrapSession()
+        } else {
+          await endSession()
+        }
+        navigate(routes.review(executionLogId), { replace: true })
+      } catch (err) {
+        console.error('End session failed:', err)
+        setRunError('Something went wrong ending the session. Try again.')
+      }
+    },
+    [endSession, wrapSession, navigate, executionLogId],
+  )
 
   const handleEndSessionCancel = useCallback(async () => {
-    if (wasRunning) {
+    // KTD8: never resume a timer after a terminal transition. The sheet
+    // normally unmounts on the post-end navigate, but if a cancel races
+    // the end persist, resuming would restart a dead session's clock.
+    const status = execution?.status
+    const isTerminal = status === 'completed' || status === 'ended_early'
+    if (wasRunning && !isTerminal) {
       try {
         await pendingEndSessionPauseRef.current
       } finally {
@@ -387,7 +401,7 @@ export function useRunController(executionLogId: string, shortened: boolean) {
     } else {
       setShowEndConfirm(false)
     }
-  }, [wasRunning, timer, resumeBlock, handleRunPersistenceError])
+  }, [wasRunning, timer, resumeBlock, handleRunPersistenceError, execution?.status])
 
   useEffect(() => {
     if (!executionLogId) return
@@ -413,6 +427,12 @@ export function useRunController(executionLogId: string, shortened: boolean) {
     [currentBlock, planContext],
   )
 
+  // Two-intent end sheet (U2): "I'm done" is only an honest option once
+  // something was actually trained. Zero-work sessions keep the single
+  // cut-short shape — the zero-work rule (U1) records them ended_early
+  // whatever path they take.
+  const canWrapSession = execution ? hasCompletedBlock(execution) : false
+
   return {
     plan,
     execution,
@@ -427,6 +447,7 @@ export function useRunController(executionLogId: string, shortened: boolean) {
     prerollCount,
     prerollHintDismissed,
     showEndConfirm,
+    canWrapSession,
     isWakeLocked,
     hasAlternates,
     currentSegmentIndex,

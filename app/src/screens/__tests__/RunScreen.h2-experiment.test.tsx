@@ -96,6 +96,7 @@ function controller(currentSegmentIndex: number): ReturnType<typeof useRunContro
     prerollCount: null,
     prerollHintDismissed: true,
     showEndConfirm: false,
+    canWrapSession: false,
     isWakeLocked: true,
     hasAlternates: false,
     currentSegmentIndex,

@@ -69,6 +69,9 @@ function controller(overrides: Partial<ReturnType<typeof useRunController>> = {}
     prerollCount: null,
     prerollHintDismissed: true,
     showEndConfirm: false,
+    // Default-false (runnerFixture convention): tests opt in to the
+    // two-intent sheet explicitly. See RunScreen.end-intent.test.tsx.
+    canWrapSession: false,
     isWakeLocked: true,
     hasAlternates: false,
     currentSegmentIndex: 0,
@@ -339,16 +342,19 @@ describe('RunScreen Run Face v1', () => {
       required: true,
     } satisfies SessionPlanBlock
 
+    // Reaching the wrap block means earlier blocks completed, so the
+    // two-intent sheet (U2) is the realistic shape here.
     useRunControllerMock.mockReturnValue(
       controller({
         showEndConfirm: true,
+        canWrapSession: true,
         currentBlock: wrapBlock,
       }),
     )
 
     renderRun()
 
-    expect(screen.getByRole('dialog', { name: /end session early/i })).toHaveAccessibleDescription(
+    expect(screen.getByRole('dialog', { name: /end session here/i })).toHaveAccessibleDescription(
       /downshift/i,
     )
   })

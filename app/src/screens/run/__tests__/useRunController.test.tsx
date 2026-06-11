@@ -234,6 +234,99 @@ describe('useRunController', () => {
     expect(fixture.mocks.resumeBlock).toHaveBeenCalled()
   })
 
+  // U2 (2026-06-11 session-truth plan): two-intent end routing + guards.
+  describe('two-intent end routing (U2)', () => {
+    it('routes done to wrapSession and navigates to Review', async () => {
+      const { result } = renderHook(() => useRunController('exec-run', false), {
+        wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+      })
+
+      await act(async () => {
+        await result.current.handleEndSessionConfirm('done')
+      })
+
+      expect(fixture.mocks.wrapSession).toHaveBeenCalledTimes(1)
+      expect(fixture.mocks.endSession).not.toHaveBeenCalled()
+      expect(navigateMock).toHaveBeenCalledWith(routes.review('exec-run'), { replace: true })
+    })
+
+    it('routes cut_short to endSession and navigates to Review', async () => {
+      const { result } = renderHook(() => useRunController('exec-run', false), {
+        wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+      })
+
+      await act(async () => {
+        await result.current.handleEndSessionConfirm('cut_short')
+      })
+
+      expect(fixture.mocks.endSession).toHaveBeenCalledTimes(1)
+      expect(fixture.mocks.wrapSession).not.toHaveBeenCalled()
+      expect(navigateMock).toHaveBeenCalledWith(routes.review('exec-run'), { replace: true })
+    })
+
+    it('defaults a bare confirm to the cut-short intent', async () => {
+      const { result } = renderHook(() => useRunController('exec-run', false), {
+        wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+      })
+
+      await act(async () => {
+        await result.current.handleEndSessionConfirm()
+      })
+
+      expect(fixture.mocks.endSession).toHaveBeenCalledTimes(1)
+      expect(fixture.mocks.wrapSession).not.toHaveBeenCalled()
+    })
+
+    it('exposes canWrapSession=false when no block is completed', () => {
+      // Default fixture starts at block 0 with nothing completed.
+      const { result } = renderHook(() => useRunController('exec-run', false), {
+        wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+      })
+
+      expect(result.current.canWrapSession).toBe(false)
+    })
+
+    it('exposes canWrapSession=true once a block is completed', () => {
+      const banked = buildRunnerFixture({
+        executionId: 'exec-run',
+        planId: 'plan-run',
+        activeBlockIndex: 1,
+      })
+      vi.mocked(useSessionRunner).mockReturnValue(banked.runner)
+
+      const { result } = renderHook(() => useRunController('exec-run', false), {
+        wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+      })
+
+      expect(result.current.canWrapSession).toBe(true)
+    })
+
+    it('does not resume the timer when cancel fires against a terminal execution (KTD8)', async () => {
+      const terminal = buildRunnerFixture({
+        executionId: 'exec-run',
+        planId: 'plan-run',
+        status: 'ended_early',
+      })
+      vi.mocked(useSessionRunner).mockReturnValue(terminal.runner)
+
+      const { result } = renderHook(() => useRunController('exec-run', false), {
+        wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+      })
+
+      act(() => {
+        result.current.handleEndSessionRequest()
+      })
+
+      await act(async () => {
+        await result.current.handleEndSessionCancel()
+      })
+
+      expect(result.current.showEndConfirm).toBe(false)
+      expect(timer.resume).not.toHaveBeenCalled()
+      expect(terminal.mocks.resumeBlock).not.toHaveBeenCalled()
+    })
+  })
+
   it('reports no alternates when mid-run swap returns false', async () => {
     fixture.mocks.swapBlock.mockResolvedValueOnce(false)
     const { result } = renderHook(() => useRunController('exec-run', false), {

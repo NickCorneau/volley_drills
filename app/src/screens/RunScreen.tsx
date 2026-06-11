@@ -38,6 +38,7 @@ export function RunScreen() {
     prerollCount,
     prerollHintDismissed,
     showEndConfirm,
+    canWrapSession,
     isWakeLocked,
     hasAlternates,
     currentSegmentIndex,
@@ -58,12 +59,12 @@ export function RunScreen() {
     void handleEndSessionCancel()
   }
 
-  const handleEndSessionConfirmOnce = async () => {
+  const handleEndSessionConfirmOnce = async (intent: 'done' | 'cut_short') => {
     if (endingSessionInFlightRef.current) return
     endingSessionInFlightRef.current = true
     setIsEndingSession(true)
     try {
-      await handleEndSessionConfirm()
+      await handleEndSessionConfirm(intent)
     } finally {
       endingSessionInFlightRef.current = false
       setIsEndingSession(false)
@@ -362,35 +363,60 @@ export function RunScreen() {
         )}
       </ScreenShell.Footer>
 
-      {showEndConfirm && (
-        // Safe-primary first, destructive below: keeps "Go back" as the
-        // default thumb-target after the pause, mirrors the iOS/Android
-        // action-sheet convention, and prevents an accidental end of
-        // session from the paused-timer state. Red-team UX #6. Plan U8
-        // (2026-05-04): the title + description + safe + danger
-        // bottom-sheet shape lives on `ConfirmModal` with
-        // `placement="bottom-sheet"`.
-        <ConfirmModal
-          title="End session early?"
-          description={
-            currentBlock.type === 'wrap'
-              ? 'You\u2019re in your downshift. Two or three minutes of easy walking before you leave is an honest finish. Your progress will be saved.'
-              : 'You still have blocks remaining. Your progress will be saved and you can review what you completed.'
-          }
-          placement="bottom-sheet"
-          safeAction={{
-            label: 'Go back',
-            onClick: handleEndSessionCancelOnce,
-            disabled: isEndingSession,
-          }}
-          destructiveAction={{
-            label: 'End session',
-            onClick: () => void handleEndSessionConfirmOnce(),
-            disabled: isEndingSession,
-          }}
-          onDismiss={handleEndSessionCancelOnce}
-        />
-      )}
+      {showEndConfirm &&
+        // Two-intent end sheet (2026-06-11 session-truth U2). With work
+        // banked, ending is not automatically abandonment: "I'm done"
+        // records a deliberate wrap (completed, skipped tail visible),
+        // "Cut session short" stays the danger path that feeds the
+        // Review reason gate. "Go back" keeps initial focus and the
+        // bottom slot (action-sheet convention; red-team UX #6). With
+        // zero completed blocks the sheet keeps its original
+        // single-action shape - there is no honest "done" yet.
+        (canWrapSession ? (
+          <ConfirmModal
+            title="End session here?"
+            description={
+              currentBlock.type === 'wrap'
+                ? 'You\u2019re in your downshift. Two or three minutes of easy walking before you leave is an honest finish.'
+                : 'Done saves this as a finished session and skips the rest of the plan. Cut it short if you had to stop.'
+            }
+            placement="bottom-sheet"
+            affirmativeAction={{
+              label: 'I\u2019m done',
+              onClick: () => void handleEndSessionConfirmOnce('done'),
+              disabled: isEndingSession,
+            }}
+            destructiveAction={{
+              label: 'Cut session short',
+              onClick: () => void handleEndSessionConfirmOnce('cut_short'),
+              disabled: isEndingSession,
+            }}
+            safeAction={{
+              label: 'Go back',
+              variant: 'outline',
+              onClick: handleEndSessionCancelOnce,
+              disabled: isEndingSession,
+            }}
+            onDismiss={handleEndSessionCancelOnce}
+          />
+        ) : (
+          <ConfirmModal
+            title="End session early?"
+            description="You still have blocks remaining. You can review what you completed."
+            placement="bottom-sheet"
+            safeAction={{
+              label: 'Go back',
+              onClick: handleEndSessionCancelOnce,
+              disabled: isEndingSession,
+            }}
+            destructiveAction={{
+              label: 'End session',
+              onClick: () => void handleEndSessionConfirmOnce('cut_short'),
+              disabled: isEndingSession,
+            }}
+            onDismiss={handleEndSessionCancelOnce}
+          />
+        ))}
     </ScreenShell>
   )
 }

@@ -27,6 +27,16 @@ export type ConfirmModalProps = {
    * review and continue") by passing `variant` explicitly.
    */
   destructiveAction?: ConfirmAction
+  /**
+   * Optional non-danger affirmative for two-intent confirms (2026-06-11
+   * session-truth U2: "I'm done" vs "Cut session short"). When present,
+   * render order becomes affirmative -> destructive -> safe (action-sheet
+   * convention: dismiss at the bottom), while `safeAction` keeps initial
+   * focus via the typed-focus seam regardless of DOM order. Default
+   * variant is `'primary'`; pair it with an `'outline'` safe action so
+   * the sheet has one focal CTA.
+   */
+  affirmativeAction?: ConfirmAction
   onDismiss: () => void
   /** Defaults to `'dialog'`; pass `'alertdialog'` for screen-reader-asserted blocks. */
   role?: 'dialog' | 'alertdialog'
@@ -72,6 +82,7 @@ export function ConfirmModal({
   description,
   safeAction,
   destructiveAction,
+  affirmativeAction,
   onDismiss,
   role,
   placement = 'centered',
@@ -79,6 +90,29 @@ export function ConfirmModal({
   closeLabel,
 }: ConfirmModalProps) {
   const safeRef = useRef<HTMLButtonElement>(null)
+
+  const safeButton = (
+    <Button
+      variant={safeAction.variant ?? 'primary'}
+      fullWidth
+      ref={safeRef}
+      disabled={safeAction.disabled}
+      onClick={safeAction.onClick}
+    >
+      {safeAction.label}
+    </Button>
+  )
+
+  const destructiveButton = destructiveAction && (
+    <Button
+      variant={destructiveAction.variant ?? 'danger'}
+      fullWidth
+      disabled={destructiveAction.disabled}
+      onClick={destructiveAction.onClick}
+    >
+      {destructiveAction.label}
+    </Button>
+  )
 
   return (
     <ActionOverlay
@@ -93,24 +127,24 @@ export function ConfirmModal({
       panelClassName={PLACEMENT_PANEL_CLASS[placement]}
     >
       <div className="mt-6 flex flex-col gap-3">
-        <Button
-          variant={safeAction.variant ?? 'primary'}
-          fullWidth
-          ref={safeRef}
-          disabled={safeAction.disabled}
-          onClick={safeAction.onClick}
-        >
-          {safeAction.label}
-        </Button>
-        {destructiveAction && (
-          <Button
-            variant={destructiveAction.variant ?? 'danger'}
-            fullWidth
-            disabled={destructiveAction.disabled}
-            onClick={destructiveAction.onClick}
-          >
-            {destructiveAction.label}
-          </Button>
+        {affirmativeAction ? (
+          <>
+            <Button
+              variant={affirmativeAction.variant ?? 'primary'}
+              fullWidth
+              disabled={affirmativeAction.disabled}
+              onClick={affirmativeAction.onClick}
+            >
+              {affirmativeAction.label}
+            </Button>
+            {destructiveButton}
+            {safeButton}
+          </>
+        ) : (
+          <>
+            {safeButton}
+            {destructiveButton}
+          </>
         )}
       </div>
     </ActionOverlay>

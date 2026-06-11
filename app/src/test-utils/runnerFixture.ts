@@ -100,6 +100,7 @@ export interface RunnerFixture {
     skipBlock: Mock<RunnerReturn['skipBlock']>
     swapBlock: Mock<RunnerReturn['swapBlock']>
     endSession: Mock<RunnerReturn['endSession']>
+    wrapSession: Mock<RunnerReturn['wrapSession']>
     flushTimer: Mock<RunnerReturn['flushTimer']>
     recoverTimerState: Mock<RunnerReturn['recoverTimerState']>
   }
@@ -196,6 +197,7 @@ export function buildRunnerFixture(options: RunnerFixtureOptions = {}): RunnerFi
   const skipBlock = vi.fn(async () => false)
   const swapBlock = vi.fn(async () => false)
   const endSession = vi.fn(async () => undefined)
+  const wrapSession = vi.fn(async () => undefined)
   const flushTimer = vi.fn(async () => undefined)
   const recoverTimerState = vi.fn(async () => null)
 
@@ -214,6 +216,7 @@ export function buildRunnerFixture(options: RunnerFixtureOptions = {}): RunnerFi
     skipBlock,
     swapBlock,
     endSession,
+    wrapSession,
     flushTimer,
     recoverTimerState,
   }
@@ -228,6 +231,7 @@ export function buildRunnerFixture(options: RunnerFixtureOptions = {}): RunnerFi
       skipBlock,
       swapBlock,
       endSession,
+      wrapSession,
       flushTimer,
       recoverTimerState,
     },
