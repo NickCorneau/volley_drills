@@ -214,6 +214,32 @@ describe('V0B-18 D86 per-surface regression scan', () => {
         />,
       )
       assertClean(endedEarly.container, 'HomePrimaryCard.last_complete ended_early')
+
+      // U3 (2026-06-11 session-truth): deliberate wrap — completed
+      // status with a skipped tail — exercises the subset-repeat copy.
+      const wrapped = render(
+        <HomePrimaryCard
+          variant="last_complete"
+          data={{
+            ...fakeLastComplete,
+            log: {
+              ...fakeLastComplete.log,
+              status: 'completed',
+              blockStatuses: [
+                { blockId: 'b-1', status: 'completed' },
+                { blockId: 'b-2', status: 'skipped' },
+              ],
+            },
+          }}
+          nextFocus="set"
+          backlog={['pass', 'serve']}
+          onStartPlan={() => {}}
+          onRepeat={() => {}}
+          onStartDifferent={() => {}}
+          onRepeatWhatYouDid={() => {}}
+        />,
+      )
+      assertClean(wrapped.container, 'HomePrimaryCard.last_complete wrapped')
     })
 
     it('resume (ResumePrompt delegated)', () => {

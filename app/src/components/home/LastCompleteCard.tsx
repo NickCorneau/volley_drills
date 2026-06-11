@@ -1,4 +1,5 @@
 import type { ScopedFocus } from '../../domain/eligibleSessions'
+import { hasSkippedBlocks } from '../../domain/executionPredicates'
 import { REPEAT_SUBSET_MIN_MINUTES } from '../../domain/policies'
 import { focusLabel } from '../../domain/sessionFocus'
 import { sessionDurationMinutes } from '../../lib/format'
@@ -31,9 +32,10 @@ export interface LastCompleteCardProps {
    */
   onStartDifferent: () => void
   /**
-   * Only passed when `data.log.status === 'ended_early'` AND at least
-   * one block completed. Caller hides the button via `undefined` for
-   * the normal-case last_complete.
+   * Only passed when the log has a skipped tail (U3: keyed on the
+   * skipped-blocks predicate, not status — deliberate wraps are
+   * `completed` but still trained a subset worth repeating). Caller
+   * hides the button via `undefined` for the clean-complete case.
    */
   onRepeatWhatYouDid?: () => void
   actionDisabled?: boolean
@@ -51,10 +53,16 @@ export function LastCompleteCard({
 }: LastCompleteCardProps) {
   const plannedTotalMinutes = data.plan.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
   const daysAgo = formatDaysAgo(data.log.completedAt ?? data.log.startedAt)
+  // U3 (2026-06-11 session-truth plan): this card keys PER ELEMENT.
+  // Status copy ("ended early") keys on `status` and must never render
+  // for a deliberate wrap (which is `completed`). The metadata line and
+  // the subset-repeat affordance key on the skipped-tail predicate so a
+  // wrap keeps the honest "N of M min" and the shorter-version repeat.
   const isEndedEarly = data.log.status === 'ended_early'
+  const hasSkippedTail = hasSkippedBlocks(data.log)
   // The shorter-repeat label shows actually-completed minutes so
   // the label and the rebuilt draft always agree (C-5 Unit 3 risk row).
-  const completedMinutes = isEndedEarly
+  const completedMinutes = hasSkippedTail
     ? data.plan.blocks.reduce((sum, block, idx) => {
         const status = data.log.blockStatuses[idx]
         return status?.status === 'completed' ? sum + block.durationMinutes : sum
@@ -64,13 +72,16 @@ export function LastCompleteCard({
   // link — "Repeat shorter version (3 min)" reads as menu noise. Below
   // the floor the card keeps its normal two-link set.
   const canRepeatSubset =
-    isEndedEarly && completedMinutes >= REPEAT_SUBSET_MIN_MINUTES && onRepeatWhatYouDid !== undefined
-  const repeatLabel = isEndedEarly ? 'Repeat full plan' : 'Repeat last session'
-  // Data honesty (§9.2): an ended-early session reports the time actually
-  // trained, not the planned total — "6 of 38 min", same duration basis as
-  // Review's meta line. Falls back to the planned total when no honest
-  // duration is available (legacy logs) or rounding makes trained ≥ planned.
-  const trainedMinutes = isEndedEarly ? sessionDurationMinutes(data.log) : null
+    hasSkippedTail &&
+    completedMinutes >= REPEAT_SUBSET_MIN_MINUTES &&
+    onRepeatWhatYouDid !== undefined
+  const repeatLabel = hasSkippedTail ? 'Repeat full plan' : 'Repeat last session'
+  // Data honesty (§9.2): a session with a skipped tail reports the time
+  // actually trained, not the planned total — "6 of 38 min", same duration
+  // basis as Review's meta line. Falls back to the planned total when no
+  // honest duration is available (legacy logs) or rounding makes trained
+  // ≥ planned.
+  const trainedMinutes = hasSkippedTail ? sessionDurationMinutes(data.log) : null
   const durationPart =
     plannedTotalMinutes <= 0
       ? ''

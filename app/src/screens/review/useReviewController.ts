@@ -35,6 +35,16 @@ type LoadedSession =
   | { status: 'ready'; log: ExecutionLog; plan: SessionPlan | null }
   | { status: 'missing' }
 
+/**
+ * U3 (2026-06-11 session-truth plan): ends the SYSTEM recorded, not a
+ * choice the user made. `discarded_resume` (A8 stubs), `missing_plan`
+ * (orphaned log repair), and `resume_out_of_bounds` (clamped resume)
+ * must not face the "why did you end early?" reason gate - there is no
+ * honest answer. User abandonments (`user_quit` etc.) keep the gate;
+ * deliberate wraps are `completed`, so the gate self-resolves there.
+ */
+const SYSTEM_ENDED_REASONS = new Set(['discarded_resume', 'missing_plan', 'resume_out_of_bounds'])
+
 function isPastDeferralCap(log: ExecutionLog, now: number): boolean {
   const endAt = log.completedAt ?? log.startedAt
   return now - endAt >= FINISH_LATER_CAP_MS
@@ -194,7 +204,8 @@ export function useReviewController(executionLogId: string) {
   const statusPart = log ? statusLabel(log.status) : ''
   const isEndedEarly = log?.status === 'ended_early'
   const wasDiscarded = isEndedEarly && log?.endedEarlyReason === 'discarded_resume'
-  const needsIncompleteReason = isEndedEarly && !wasDiscarded
+  const isSystemEnded = isEndedEarly && SYSTEM_ENDED_REASONS.has(log?.endedEarlyReason ?? '')
+  const needsIncompleteReason = isEndedEarly && !isSystemEnded
   const metricType = inferPlanMainMetricType(plan)
   const showMetrics = !wasDiscarded && hasSkillBlocks && metricShowsReviewCounts(metricType)
   const captureAggregate =
@@ -217,8 +228,8 @@ export function useReviewController(executionLogId: string) {
 
   const handleSubmit = async () => {
     if (!log || sessionRpe == null || isSubmitting) return
-    const submitWasDiscarded = isEndedEarly && log.endedEarlyReason === 'discarded_resume'
-    const submitNeedsReason = isEndedEarly && !submitWasDiscarded
+    const submitNeedsReason =
+      isEndedEarly && !SYSTEM_ENDED_REASONS.has(log.endedEarlyReason ?? '')
     if (submitNeedsReason && incompleteReason == null) return
 
     setSubmitError(null)

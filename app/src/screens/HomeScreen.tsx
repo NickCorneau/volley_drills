@@ -15,6 +15,7 @@ import type { PrimaryVariant, SecondaryRow } from '../domain/homePriority'
 import { useAppRegisterSW } from '../lib/pwa-register'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { routes } from '../routes'
+import { hasSkippedBlocks } from '../domain/executionPredicates'
 import { buildDraftFromCompletedBlocks } from '../domain/sessionBuilder'
 import { repeatSession, startPlanSession } from '../services/planLaunch'
 import { discardSession, saveDraft, skipReview, type PendingReview } from '../services/session'
@@ -567,7 +568,10 @@ function renderPrimary(primary: PrimaryVariant, flags: HomeFlags, h: PrimaryHand
           onRepeat={h.handleRepeat}
           onStartDifferent={h.handleStartDifferentSession}
           onRepeatWhatYouDid={
-            flags.lastComplete.log.status === 'ended_early' ? h.handleRepeatWhatYouDid : undefined
+            // U3: keyed on the skipped-tail predicate, not status, so a
+            // deliberate wrap (completed + skipped tail) keeps the
+            // shorter-version repeat. The card applies the minutes floor.
+            hasSkippedBlocks(flags.lastComplete.log) ? h.handleRepeatWhatYouDid : undefined
           }
           actionDisabled={h.actionDisabled}
         />

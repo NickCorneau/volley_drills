@@ -344,14 +344,16 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
   })
 
   it('last_complete ended-early with zero completed blocks omits the secondary button', () => {
+    // Post-U1 shape (2026-06-11 session-truth): every end path skips the
+    // unfinished tail, so a zero-work end records all blocks as skipped.
     const zeroCompleted: LastCompleteBundle = {
       ...fakeLastComplete,
       log: {
         ...fakeLastComplete.log,
         status: 'ended_early',
         blockStatuses: [
-          { blockId: 'b-1', status: 'in_progress' },
-          { blockId: 'b-2', status: 'planned' },
+          { blockId: 'b-1', status: 'skipped' },
+          { blockId: 'b-2', status: 'skipped' },
         ],
       },
       plan: {
