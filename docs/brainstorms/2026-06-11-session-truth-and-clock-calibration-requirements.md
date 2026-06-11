@@ -1,12 +1,12 @@
 ---
 id: brainstorm-session-truth-clock
 title: Session Truth and Clock Calibration — Honest-Recording Slice
-status: active
-stage: planning
+status: complete
+stage: implemented
 type: requirements
 date: 2026-06-11
 topic: session-truth-and-clock-calibration
-summary: "Stop recording deliberately wrapped sessions as abandonment and calibrate plan durations against observed block time. The honest-recording remainder of the Close the Loop ideation after D154 shipped verdict-steered assembly. No new exposure surfaces; derived reads per D150."
+summary: "Stop recording deliberately wrapped sessions as abandonment and calibrate plan durations against observed time. The honest-recording remainder of the Close the Loop ideation after D154 shipped verdict-steered assembly. No new exposure surfaces; derived reads per D150. Consumed planning history: shipped 2026-06-11 as D155 via docs/plans/2026-06-11-002-feat-session-truth-and-clock-calibration-plan.md (AE5 re-pinned at session grain; calibration is session-grain, not per-block)."
 authority: requirements input for planning; subordinate to docs/decisions.md and the M002 series requirements
 last_updated: 2026-06-11
 depends_on:

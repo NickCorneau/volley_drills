@@ -1,7 +1,7 @@
 ---
 title: "feat: Session truth and clock calibration — honest end semantics, observed time, calibrated durations"
 type: feat
-status: active
+status: complete
 date: 2026-06-11
 origin: docs/brainstorms/2026-06-11-session-truth-and-clock-calibration-requirements.md
 ---
