@@ -6,7 +6,7 @@ stage: planning
 type: research
 authority: canonical UX behaviour reference — typography, color, copy voice, layout, iconography, states, and per-screen posture for the Volleycraft prototype and M001 build
 summary: "How Volleycraft should look and behave: a concrete, screen-by-screen reference for amateur athletes who take their sport seriously."
-last_updated: 2026-05-25
+last_updated: 2026-06-11
 depends_on:
   - docs/vision.md
   - docs/research/outdoor-courtside-ui-brief.md
@@ -97,7 +97,7 @@ The production scale. Match one of these tokens at each call-site; introduce a n
 
 **Canon-vs-code reconciliation (2026-05-25, audit follow-up plan U8).** This table previously claimed run / transition / review h1 was `text-2xl` / 700 and the wordmark was `text-lg` / 700. Shipped code uses `text-xl` / `font-semibold` for both, which is the calmer / less display-heavy register the 2026-04-23 walkthrough closeout settled on. The shipped values are now canon; the historical `text-2xl` / `text-lg` claims are retired. See `docs/design/reviews/2026-05-24-agent-e2e-design-critique.md` Canon-vs-code drift table.
 
-**Canon-vs-code reconciliation (2026-05-25, residuals polish plan C1 / `D145`).** The `Display — prep screen h1` row previously claimed weight `700`. Independent measurement during the 2026-05-25 e2e pass confirmed every shipped prep h1 (`SetupScreen`, `SafetyCheckScreen`, `SettingsScreen`, `SettingsSkillLevelScreen`, onboarding `SkillLevelScreen`) renders at `font-semibold` (600), matching the calmer register the U8 reconciliation already established for run / transition / review h1 and the wordmark. App is self-consistent at 600 across **every** measured h1; canon now reflects that. See `docs/plans/2026-05-25-005-polish-design-critique-residuals-plan.md` Phase C / C1 and `D145` in `docs/decisions.md`. (Adjacent drift not addressed in this row: §1.3 weight-distribution line still lists "wordmark" under `font-bold (700)`; the wordmark already renders at 600 per the §1.2 row above and the §7.1 entry below. Future cleanup pass.)
+**Canon-vs-code reconciliation (2026-05-25, residuals polish plan C1 / `D145`).** The `Display — prep screen h1` row previously claimed weight `700`. Independent measurement during the 2026-05-25 e2e pass confirmed every shipped prep h1 (`SetupScreen`, `SafetyCheckScreen`, `SettingsScreen`, `SettingsSkillLevelScreen`, onboarding `SkillLevelScreen`) renders at `font-semibold` (600), matching the calmer register the U8 reconciliation already established for run / transition / review h1 and the wordmark. App is self-consistent at 600 across **every** measured h1; canon now reflects that. See `docs/plans/2026-05-25-005-polish-design-critique-residuals-plan.md` Phase C / C1 and `D145` in `docs/decisions.md`. (Adjacent drift resolved 2026-06-11, `D153`: the §1.3 weight-distribution line no longer lists "wordmark" under `font-bold (700)`.)
 
 **Forbidden sizes**: anything below `text-xs` (12 px) in body copy. The outdoor brief's 16 px body floor applies to all primary copy; `text-xs` is reserved for truly decorative captions inside large tap targets or explicit footnotes.
 
@@ -108,7 +108,7 @@ The app should read as **weight-restrained**. Most text is 400 or 500; emphasis 
 - `font-normal` (400) — body copy, paragraph text, textarea input, meta copy.
 - `font-medium` (500) — UI labels, supporting eyebrow labels (e.g. "Your last session"), ghost-button text, footer links.
 - `font-semibold` (600) — section h2, chip labels, primary-CTA content, emphasis spans.
-- `font-bold` (700) — display headings, wordmark, verdict, timer digits.
+- `font-bold` (700) — verdict word, timer digits, modal h2s, `ErrorBoundary` heading. (Wordmark removed from this list 2026-06-11, `D153` — it renders `font-semibold` per §1.2 and §7.1; the §1.2 "future cleanup" note is resolved.)
 
 Do **not** default labels to semibold or bold because "they look more important." Restraint is how seriousness reads here.
 
@@ -238,7 +238,7 @@ If you are about to paint a new UI element, pick from this table. If the element
 | Primary CTA | `bg-accent text-white` | — | `bg-accent-pressed` |
 | Outline button | `border text-text-primary` | — | `bg-bg-warm` |
 | Ghost button (tertiary) | `text-accent` | — | `text-accent-pressed` |
-| Quiet tertiary | `text-text-secondary` on `bg-transparent`, `min-h-[44px]`, no border | — | `text-text-primary` |
+| Quiet tertiary | `text-sm font-medium text-text-secondary` on `bg-transparent`, permanent `underline underline-offset-2`, content-width (`mx-auto px-3`), `min-h-[44px]`, no border | — | `text-text-primary` |
 | Danger outline | `border-warning text-warning-strong` | — | `bg-warning-surface` |
 | Unselected chip | `border text-text-primary bg-bg-primary` | `bg-info-surface text-accent-pressed` (soft-selected) | — |
 | Destructive chip (Pain "Yes", Incomplete reason) | `border text-text-secondary bg-bg-primary` | `border-warning text-warning-strong bg-warning-surface` | — |
@@ -338,8 +338,10 @@ Three surface types. Use consistently.
 | Surface | Background | Border | Shadow | Use |
 |---------|-----------|--------|--------|-----|
 | Page field | `bg-surface-calm` | — | — | Outer page |
-| Focal card | `bg-bg-primary` (white) | `ring-1 ring-text-primary/5` | `shadow-sm` | Primary card, Export card, Quick Review cards, Complete recap card |
-| Soft card / warm surface | `bg-bg-warm` | — | — | Transition prev-block summary, ResumePrompt paused block, Complete session recap (alternative) |
+| Focal card | `bg-bg-primary` (white) | `ring-1 ring-text-primary/5` | `shadow-sm` | Home primary card, Settings export card — the ONE primary content block per screen (`Card variant="focal"`) |
+| Soft card / warm surface | `bg-bg-warm` | — | — | Quick Review section cards, Complete recap card, Transition prev-block summary, ResumePrompt paused block (`Card` default) |
+
+**Correction (2026-06-11, `D153`):** the Focal-card row previously listed Quick Review cards and the Complete recap card; shipped code renders both on the `Card` **soft** default (`bg-bg-warm`, no ring, no shadow). That is the right call — Review has four sibling cards and Complete's recap is subordinate to the verdict, so neither screen has a single white focal block; painting four cards focal would dilute the §4.2 one-focal-zone discipline. Canon now records the soft placement.
 
 `ResumePrompt` uses `shadow-lg` because it is a modal dialog (elevated above the page), not a page card — the only legitimate use of `shadow-lg`.
 
@@ -358,7 +360,7 @@ Do not go below these. Sand and sweat both degrade capacitive touch.
 - Primary commit actions: tap, not swipe.
 - Destructive confirms: two-tap reveal-and-tap pattern (`Skip review` → `Yes, skip` / `Never mind`). Not press-and-hold.
 - No double-tap anywhere.
-- Undo over confirm whenever possible (e.g. `End session` → navigation to a recoverable state rather than a modal).
+- Undo over confirm whenever possible. Where a confirm is warranted, it is a tap-stack, never a hold or swipe — e.g. `End session` opens the §8.2 bottom-sheet confirm with the safe `Go back` action first.
 
 ---
 
@@ -408,7 +410,7 @@ If a new UI element needs a glyph, draw an inline SVG with:
 
 ### 6.4 Disabled
 
-- Full-width primary button when disabled: `opacity-50 cursor-not-allowed` on the same accent color. The disabled state visibly is-the-same-button, just muted.
+- Full-width primary button when disabled: **neutral gray "not yet"** — `bg-text-secondary/10 text-text-primary cursor-not-allowed` (full opacity), not a washed-out accent. The disabled primary deliberately does *not* read as "the same button, muted": a half-transparent accent CTA invites the tap it can't honor, while the neutral form reads as "this becomes the button once you give the gating input." All other variants disable via `opacity-50`. **Correction (2026-06-11, `D153`):** this row previously claimed `opacity-50` on the same accent color; shipped code (`Button.tsx` `disabledStyles.primary`, with inline rationale) has used the neutral-gray treatment — canon now records it.
 - Always include a visible helper line above disabled primary buttons explaining why it is disabled: "Rate your effort above to submit.", "Pick a reason you ended early to submit.", "Tag how that drill went to keep going.", "Tell us when you last trained to start." The helper sits in an `aria-live="polite"` region so screen readers announce it on state change.
 - **Disabled-primary may legitimately read low-emphasis at glance distance** (notably on `DrillCheckScreen` and `SafetyCheckScreen` while their gating chips are unselected). This is correct — the variant is `primary`, the disabled state is the muted form, the helper line carries the "why" voice. Do not "fix" a disabled-primary by promoting it visually or by demoting a matching sibling primary (e.g., `TransitionScreen.Start next block`) to "match the low-emphasis." The asymmetry is the load-bearing signal that the user has gating input to give. Added 2026-05-25 (audit follow-up plan U5).
 
@@ -458,18 +460,19 @@ Each screen has an intended posture. These are the reference treatments; when ad
 - Drill h1 (`text-xl font-semibold tracking-tight`). Pre-2026-05-25 canon claimed `text-2xl font-bold`; shipped is `text-xl font-semibold` (calmer register, audit follow-up plan U8).
 - Single `Now` cue surface OR (for segmented drills) `courtsideInstructions` paragraph + `SegmentList`. As of 2026-05-25 H2 experiment (audit follow-up plan U7), the segmented-drill `courtsideInstructions` paragraph routes into the `<details>` `Show more cues and instructions` affordance once `currentSegmentIndex > 0` — the SegmentList carries the load-bearing read; the full READ-DO paragraph stays reachable behind the summary. Durable keep / revert gated on `D91`.
 - Timer in JetBrains Mono at **72 px** with slashed zero (2026-05-25 H1 experiment — bumped from 56 px arm's-length to 72 px bench-distance; audit follow-up plan U6). Durable keep / revert gated on `D91`.
-- Controls: Pause + Next as a pair; Pause becomes Resume + reveals Shorten / End session when paused.
+- Controls (active face): Pause + Next as an equal-width pair, plus a full-width `Swap drill` secondary below when an alternate exists (Phase F Unit 4 — Swap is a first-class mid-run action, not buried under Pause).
+- Controls (paused face): full-width `Resume` primary above a compact secondary grid of up to four actions — `Swap` / `Shorten` / `Skip block` / `End session` (`Skip block` hidden for required blocks; `End session` label in `text-warning-strong` for AA contrast at the 12 px grid size). `End session` opens the §8.2 bottom-sheet confirm. Recorded 2026-06-11 (`D153`) — the prior "Shorten / End session" listing predated Swap and the grid.
 
 ### 7.5 Transition (between blocks)
 
 - App-bar: `SafetyIcon`, `Transition` label (sentence case, `text-sm font-medium text-text-secondary`), `Next: {index}/{total}`.
 - Prev-block summary card: green check + drill name + `Complete` (or `Skipped`) in success green.
 - `Up next` eyebrow (sentence case) + next-block h1 (`text-xl font-semibold tracking-tight`) + duration + instructions. Pre-2026-05-25 canon claimed `text-2xl font-bold`; shipped is `text-xl font-semibold` (audit follow-up plan U8).
-- Primary `Start next block` CTA + tertiary `Shorten block`.
+- Primary `Start next block` CTA + a secondary row below: `Swap drill` + `Shorten` as equal-weight `secondary` pills when a swap candidate exists, full-width `outline` `Shorten block` otherwise (the pill-at-CTA-width visibility is deliberate — Shorten is the primary escape for a tired athlete, partner walkthrough 2026-04-22). Ghost `Skip block` below for non-required blocks. Pre-start Swap added 2026-04-22 so a drill can be swapped before its timer starts. Recorded 2026-06-11 (`D153`) — the prior "tertiary Shorten block" listing predated pre-start Swap.
 
 ### 7.6 Review
 
-- **Left-aligned** h1 `Quick review` (`text-xl font-semibold tracking-tight`, `text-align: start`) + meta line. Pre-2026-05-25 canon claimed `text-2xl font-bold` and **centered**; shipped is `text-xl font-semibold` (size reconciled by audit follow-up plan U8) and left-aligned (alignment reconciled by residuals polish plan C3 / `D145` 0-b). Left reads correctly with the four left-aligned section cards below; centering the h1 would orphan it above its card body.
+- **Centered** h1 `Quick review` (`text-xl font-semibold tracking-tight`) inside the run-family header row: `SafetyIcon` left + centered title + 56 px spacer right — the same header shape as Run / Transition / Drill check. Meta line centered below. **Correction (2026-06-11, `D153`):** `D145` 0-b recorded this h1 as left-aligned; shipped code has always rendered it centered — the 2026-05-25 critique mis-measured and the claim is retracted. Centered is ratified: Review is a run-flow surface (it carries the `SafetyIcon`, not a Back button), and left-aligning its h1 would fork it from the run-family header pattern for a speculative card-adjacency gain. Pre-2026-05-25 canon claimed `text-2xl font-bold`; shipped is `text-xl font-semibold` (size reconciled by audit follow-up plan U8 — that part of the reconciliation stands).
 - Four cards, each a section: RPE scale, Good passes (conditional), Ended-early reason (conditional), Quick tags.
 - **RPE input: 3-way `Easy / Right / Hard` chip row** (better for courtside than the original 0-10 grid — fewer touch targets, faster glance read). Pre-2026-05-25 canon described a 0-10 chip grid; shipped is the 3-way variant (audit follow-up plan U8). See `docs/design/reviews/2026-04-26-agent-ux-review.md` for the original simplification reason.
 - Textarea card: `Short note (optional)` label with `font-normal` qualifier.
@@ -510,8 +513,9 @@ Added 2026-05-25 (audit follow-up plan U5).
 ### 8.2 Confirmations
 
 - **Undo over confirm.** Prefer reversible actions that route the user to a recoverable surface over modal confirms.
-- When a confirm is required (Discard resume, Skip review), use the **two-tap reveal-and-confirm** pattern: first tap reveals a small confirm row with `Yes, ...` + `Never mind` (outline) side by side. Second tap commits. Default variant for the `Yes, ...` button is **danger** (`border-warning text-warning-strong bg-warning-surface` per §2.3), used wherever the action is destructive in the data-loss sense (Skip review, End session early).
-- **Discard-resume carve-out: neutral variant, not danger** (residuals polish plan C5 / `D145` 0-d). `ResumePrompt`'s `Yes, discard session` is styled with `text-text-primary` + a faint accent border — **not** the danger-outline treatment the default rule implies — because discarding a paused-resume session **preserves progress to history**; only the *resume capability* is lost, not the data itself. Painting this confirm red would mis-signal "your data will be lost," which is the opposite of what the action does. The confirm copy itself ("Ends this session. Progress is saved to history but can't be resumed.") carries the correct semantic load; the visual treatment matches. Do not "fix" this confirm to the danger variant on a future destructive-confirm pass without revisiting the carve-out.
+- When a confirm is required (Discard resume, Skip review), use the **two-tap reveal-and-confirm** pattern: first tap reveals a small confirm row with `Yes, ...` + `Never mind` (outline) side by side. Second tap commits. The `Yes, ...` button is **danger** (`border-warning text-warning-strong bg-warning-surface` per §2.3). The semantic the danger treatment marks is **irreversible forfeit of the live session-in-progress** — not data loss. Discard resume forfeits the resumable run, Skip review forfeits the review window, End session early forfeits the remaining blocks; all three preserve progress to history, and all three paint danger. The confirm *copy* carries the data-honesty load ("Progress is saved to history but can't be resumed.").
+- **Correction (2026-06-11, `D153`):** `D145` 0-d recorded `ResumePrompt`'s `Yes, discard session` as a neutral carve-out (`text-text-primary` + faint accent border); shipped code has always used `variant="danger"` — the claim is retracted and danger is ratified. The 0-d "red mis-signals data loss" logic was internally inconsistent applied alone: End-session-early *also* preserves progress to history and stays danger. Forfeit semantics (above) is the coherent reading.
+- **End session early is a two-step bottom sheet, not a same-row reveal:** the paused-grid `End session` action opens `ConfirmModal` with `placement="bottom-sheet"` — safe action `Go back` stacked **first** (default thumb target after a pause), destructive `End session` below, with downshift-aware description copy. Recorded 2026-06-11; supersedes the older §4.6 "navigation rather than a modal" example.
 - Do not use native `confirm()` or `alert()`.
 
 ### 8.3 Interception

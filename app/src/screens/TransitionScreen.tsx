@@ -8,7 +8,7 @@ import {
   StatusMessage,
 } from '../components/ui'
 import { getBlockSkillFocus } from '../domain/drillMetadata'
-import { blockEyebrowLabel, formatDuration } from '../lib/format'
+import { blockEyebrowLabel, formatDuration, splitCueLines } from '../lib/format'
 import { routes } from '../routes'
 import { useTransitionController } from './transition/useTransitionController'
 
@@ -184,7 +184,14 @@ export function TransitionScreen() {
 
         {/* Coaching cue uses the exact same quiet left-rule treatment as
           RunScreen so testers see the same visual voice across both
-          screens. Styled identically down to the classes. */}
+          screens. Styled identically down to the classes.
+
+          Design-language pass 2026-06-11: cues stack one per line
+          (matching RunScreen's `Full coaching cue` disclosure) instead
+          of rendering the stored `join(' · ')` string as a run-on
+          paragraph — the dot separator collided with sentence periods
+          (". ·") and read as a wall at exactly the moment the athlete
+          is prepping the next drill. */}
         {nextBlock.coachingCue && (
           <section
             aria-labelledby="transition-coaching-cue-title"
@@ -196,9 +203,13 @@ export function TransitionScreen() {
             >
               Cue
             </span>
-            <p className="mt-1 whitespace-pre-line text-base leading-relaxed text-text-primary">
-              {nextBlock.coachingCue}
-            </p>
+            <div className="mt-1 flex flex-col gap-1.5">
+              {splitCueLines(nextBlock.coachingCue).map((line) => (
+                <p key={line} className="text-base leading-relaxed text-text-primary">
+                  {line}
+                </p>
+              ))}
+            </div>
           </section>
         )}
       </ScreenShell.Body>

@@ -11,7 +11,7 @@ import {
   StatusMessage,
 } from '../components/ui'
 import { getBlockSkillFocus } from '../domain/drillMetadata'
-import { blockEyebrowLabel } from '../lib/format'
+import { blockEyebrowLabel, splitCueLines } from '../lib/format'
 import { routes } from '../routes'
 import { segmentListOwnsCurrentCue, selectNonSegmentedCurrentCue } from './run/currentCue'
 import { useRunController } from './run/useRunController'
@@ -264,10 +264,21 @@ export function RunScreen() {
                 </section>
               )}
               {hasCueDetail && (
-                <section aria-label="Full coaching cue">
-                  <p className="whitespace-pre-line text-base leading-relaxed text-text-primary">
-                    {currentBlock.coachingCue}
-                  </p>
+                /*
+                 * Design-language pass 2026-06-11: cues stack one per
+                 * line instead of rendering the stored `join(' · ')`
+                 * string as a run-on paragraph — the dot separator
+                 * collided with sentence periods (". ·") and buried
+                 * the READ-DO checklist rhythm. Per-line `text-base`
+                 * keeps the run-flow body-size invariant pinned by
+                 * `RunScreen.rationale-placement.test.tsx`.
+                 */
+                <section aria-label="Full coaching cue" className="flex flex-col gap-1.5">
+                  {splitCueLines(currentBlock.coachingCue).map((line) => (
+                    <p key={line} className="text-base leading-relaxed text-text-primary">
+                      {line}
+                    </p>
+                  ))}
                 </section>
               )}
             </div>

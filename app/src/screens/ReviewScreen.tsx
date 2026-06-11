@@ -129,8 +129,21 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
                     drill
                     {captureAggregate.drillsTagged === 1 ? '' : 's'}.
                   </p>
+                  {/*
+                    Design-language pass 2026-06-11: the no-counts case is
+                    an absence statement, not a result — rendering it in
+                    the pass-rate line's semibold primary voice gave a
+                    "nothing happened" sentence the heaviest ink on the
+                    card. Real aggregates keep the result voice; the
+                    empty case drops to the quiet secondary register
+                    (§6.2 empty-state voice in brand-ux-guidelines).
+                  */}
                   <p
-                    className="text-base font-semibold text-text-primary"
+                    className={
+                      captureAggregate.drillsWithCounts > 0
+                        ? 'text-base font-semibold text-text-primary'
+                        : 'text-sm text-text-secondary'
+                    }
                     data-testid="per-drill-aggregate"
                   >
                     {captureAggregate.drillsWithCounts > 0

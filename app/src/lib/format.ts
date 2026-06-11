@@ -13,6 +13,36 @@ export function formatDuration(minutes: number): string {
 }
 
 /**
+ * Separator used when `sessionBuilder` joins a drill's `coachingCues[]`
+ * into the single stored `coachingCue` string. Mirrored by
+ * `screens/run/currentCue.ts` when it extracts the first clause for the
+ * live `Now` surface.
+ */
+export const CUE_SEPARATOR = ' · '
+
+/**
+ * Design-language pass 2026-06-11: split a stored `coachingCue` string
+ * back into its individual cues for stacked-line rendering.
+ *
+ * The build-time `join(' · ')` produced a run-on paragraph on the
+ * Transition `Cue` panel and the Run `Full coaching cue` disclosure:
+ * cues that end in a period collided with the separator (`". · "`),
+ * and a 5-cue drill read as a wall of text instead of the READ-DO
+ * checklist the cue list actually is. Display sites stack one cue per
+ * line instead; the stored plan data is untouched (older saved plans
+ * keep their joined strings and split identically here).
+ *
+ * Also splits on embedded newlines so any future multi-line cue string
+ * degrades to the same stacked shape.
+ */
+export function splitCueLines(cue: string): string[] {
+  return cue
+    .split(/\r?\n| · /)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+}
+
+/**
  * 2026-04-27 reconciled-list `R13` (Settings investment footer): render a
  * non-negative minute count as a human duration using `min` and `h` units.
  * Under 60 min: `"N min"`. Exact hours: `"K h"`. Past the hour boundary:

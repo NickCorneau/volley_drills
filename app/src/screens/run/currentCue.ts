@@ -1,4 +1,5 @@
 import { CUE_COMPACT_MAX } from '../../domain/policies'
+import { CUE_SEPARATOR } from '../../lib/format'
 import type { SessionPlanBlock } from '../../model'
 
 export type CurrentCueSource = 'coaching-cue' | 'instructions' | 'drill-name'
@@ -9,8 +10,6 @@ export interface CurrentCueDisplay {
   fullCue?: string
   fullInstructions?: string
 }
-
-const CUE_SEPARATOR = ' · '
 
 export function segmentListOwnsCurrentCue(block: Pick<SessionPlanBlock, 'segments'>): boolean {
   return (block.segments?.length ?? 0) > 0
