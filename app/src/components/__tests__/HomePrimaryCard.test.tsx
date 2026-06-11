@@ -180,12 +180,17 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
     const onRepeatWhatYouDid = vi.fn()
 
     // Build an ended-early log with two completed blocks out of three.
+    // `actualDurationMinutes` (16) deliberately differs from the completed-
+    // blocks subset (14): the meta line reports time trained while the
+    // shorter-repeat label reports the rebuilt subset, and both bases
+    // must coexist.
     const endedEarlyBundle: LastCompleteBundle = {
       ...fakeLastComplete,
       log: {
         ...fakeLastComplete.log,
         status: 'ended_early',
         endedEarlyReason: 'time',
+        actualDurationMinutes: 16,
         blockStatuses: [
           { blockId: 'b-1', status: 'completed' },
           { blockId: 'b-2', status: 'completed' },
@@ -253,9 +258,89 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
     // "ended early" annotation in the body.
     expect(screen.getByText(/ended early/i)).toBeInTheDocument()
 
+    // §9.2 data honesty (2026-06-11): the meta line reports time trained
+    // against the planned total ("16 of 25 min"), not the planned total
+    // alone — Review's meta line uses the same duration basis.
+    expect(screen.getByText(/16 of 25 min/)).toBeInTheDocument()
+
     // Phase F Unit 1: tertiary "Start a different session" renders on
     // ended-early too (single CTA set across normal + ended-early).
     expect(screen.getByRole('button', { name: /start a different session/i })).toBeInTheDocument()
+  })
+
+  it('last_complete ended-early below the subset floor hides Repeat shorter version', () => {
+    // 2026-06-11 fresh-eyes pass: only the 3-min warm-up completed. A
+    // "Repeat shorter version (3 min)" link is menu noise, so the offer
+    // floors at REPEAT_SUBSET_MIN_MINUTES (10) completed minutes. The
+    // meta line still reports the honest trained time.
+    const belowFloor: LastCompleteBundle = {
+      ...fakeLastComplete,
+      log: {
+        ...fakeLastComplete.log,
+        status: 'ended_early',
+        endedEarlyReason: 'time',
+        actualDurationMinutes: 6,
+        blockStatuses: [
+          { blockId: 'b-1', status: 'completed' },
+          { blockId: 'b-2', status: 'skipped' },
+          { blockId: 'b-3', status: 'skipped' },
+        ],
+      },
+      plan: {
+        ...fakeLastComplete.plan,
+        blocks: [
+          {
+            id: 'b-1',
+            type: 'warmup',
+            drillName: 'Warm',
+            shortName: 'Warm',
+            durationMinutes: 3,
+            coachingCue: '',
+            courtsideInstructions: '',
+            required: true,
+          },
+          {
+            id: 'b-2',
+            type: 'main_skill',
+            drillName: 'Pass',
+            shortName: 'Pass',
+            durationMinutes: 11,
+            coachingCue: '',
+            courtsideInstructions: '',
+            required: true,
+          },
+          {
+            id: 'b-3',
+            type: 'main_skill',
+            drillName: 'Serve',
+            shortName: 'Serve',
+            durationMinutes: 24,
+            coachingCue: '',
+            courtsideInstructions: '',
+            required: true,
+          },
+        ],
+      },
+    }
+
+    render(
+      <HomePrimaryCard
+        variant="last_complete"
+        data={belowFloor}
+        nextFocus="pass"
+        backlog={['serve', 'set']}
+        onStartPlan={() => {}}
+        onRepeat={() => {}}
+        onStartDifferent={() => {}}
+        onRepeatWhatYouDid={() => {}}
+      />,
+    )
+
+    expect(
+      screen.queryByRole('button', { name: /repeat shorter version/i }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /repeat full plan/i })).toBeInTheDocument()
+    expect(screen.getByText(/6 of 38 min/)).toBeInTheDocument()
   })
 
   it('last_complete ended-early with zero completed blocks omits the secondary button', () => {

@@ -51,14 +51,24 @@ export function selectNonSegmentedCurrentCue(
 
 function primaryCueFromCoachingCue(fullCue: string | undefined): string | undefined {
   if (!fullCue) return undefined
-  if (fullCue.length <= CUE_COMPACT_MAX) return fullCue
 
-  const firstClause = fullCue
+  const clauses = fullCue
     .split(CUE_SEPARATOR)
     .map((part) => part.trim())
-    .find((part) => part.length > 0)
+    .filter((part) => part.length > 0)
 
-  if (firstClause && firstClause.length <= CUE_COMPACT_MAX) return firstClause
+  // 2026-06-11 design-language follow-up: a multi-cue join NEVER renders
+  // whole on the `Now` surface, regardless of length. CUE_COMPACT_MAX's
+  // "single breath" rule was written for single thoughts; a 3-cue join
+  // that happens to fit 100 chars still reads as a ". · " run-on (the
+  // same collision the stacked-line fix removed from the disclosure
+  // sites). Now carries the lead cue; the full list stays one tap away.
+  if (clauses.length > 1) {
+    const [firstClause] = clauses
+    return firstClause.length <= CUE_COMPACT_MAX ? firstClause : undefined
+  }
+
+  if (fullCue.length <= CUE_COMPACT_MAX) return fullCue
   return undefined
 }
 

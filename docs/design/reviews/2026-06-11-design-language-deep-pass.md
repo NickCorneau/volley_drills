@@ -4,7 +4,7 @@ title: "Design-Language Deep Pass: Challenge, Reconcile, Polish (2026-06-11)"
 status: active
 stage: validation
 type: design-review
-summary: "Founder-directed deep pass on the design language following the same-day red team: re-read the three design canon docs against shipped code and a full live 390×844 walk, challenged the language on shibui/ma first principles, resolved the routed D145 phantom-state finding (D153: retract 0-b/0-d, ratify shipped centered Review h1 + danger discard confirm under forfeit semantics), shipped two polish wins (stacked cue lines; quiet Review empty-aggregate voice), and corrected seven stale canon passages in brand-ux-guidelines.md. Most challenge candidates were falsified against deliberate-decision rationales and are recorded here so future passes do not re-surface them."
+summary: "Founder-directed deep pass on the design language following the same-day red team: re-read the three design canon docs against shipped code and a full live 390×844 walk, challenged the language on shibui/ma first principles, resolved the routed D145 phantom-state finding (D153: retract 0-b/0-d, ratify shipped centered Review h1 + danger discard confirm under forfeit semantics), shipped two polish wins (stacked cue lines; quiet Review empty-aggregate voice), and corrected seven stale canon passages in brand-ux-guidelines.md. Most challenge candidates were falsified against deliberate-decision rationales and are recorded here so future passes do not re-surface them. A same-day fresh-eyes follow-up after D152 landed fixed the Now-surface multi-cue run-on, floored the ended-early shorter-repeat offer, made the ended-early meta line report trained-vs-planned minutes, and folded D152's Home card internals into §7.1."
 authority: "Point-in-time design pass capture. Not source of truth on its own. D153 in docs/decisions.md owns the decisions; brand-ux-guidelines.md owns the corrected canon."
 last_updated: 2026-06-11
 depends_on:
@@ -33,6 +33,7 @@ decision_refs:
 - Two polish wins shipped: **stacked cue lines** (Transition `Cue` panel + Run `Full coaching cue` disclosure) and the **quiet Review empty-aggregate voice**.
 - Seven stale `brand-ux-guidelines.md` passages corrected to match verified shipped code (§1.3, §2.3, §4.4, §4.6, §6.4, §7.4, §7.5, §7.6, §8.2).
 - Most challenge candidates were **falsified against deliberate-decision rationales** — see the disposition table before re-proposing any of them.
+- A same-day fresh-eyes pass after `D152` landed shipped three follow-ups: the `Now` surface multi-cue fix, the ended-early shorter-repeat floor + honest trained-minutes meta, and the §7.1 canon fold-forward (see final section).
 
 ## Method
 
@@ -92,10 +93,20 @@ All verified against code in this session before writing:
 
 - **Warning-tone vocabulary split** — separate "caution" from "destructive" if the warning palette starts carrying too many meanings. Watch for confusion evidence in founder use first.
 - **12 px paused-grid labels and the 14 px body floor** — still the weakest outdoor-brief area; deadlocked on `D127`'s `D91` trigger. Natural re-owner: the 2026-07-20 `D130` window close (red-team routing stands).
-- **Home focal competition** — re-assess after the M002.1 home-coherence WIP (`D152`) lands; do not act on the pre-WIP capture.
+- **Home focal competition** — re-assessed same-day after `D152` landed (see follow-up below): the common completed-session card reads clean; the ended-early density finding was fixed with the shorter-repeat floor. The broader competition question stays open for founder-use evidence.
 
 ## Verification
 
 - Targeted unit tests for the touched screens pass (`RunScreen.run-face`, Review draft/aggregate suites).
 - Full `app/` suite + lint + typecheck run at the end of the pass (see repo terminal log, 2026-06-11).
 - `bash scripts/validate-agent-docs.sh` after the docs/catalog updates.
+
+## Same-day follow-up: fresh-eyes pass after D152 landed
+
+A second walk at 390×844 with fresh eyes, after the M002.1 home-coherence work (`D152`) and this pass's polish were both live, found and fixed three residuals:
+
+1. **`Now` surface multi-cue run-on.** A multi-cue join short enough to fit `CUE_COMPACT_MAX` rendered whole on the Run `Now` panel as a `". · "` run-on — the same collision the stacked-line fix removed from the disclosure sites. `currentCue.ts` now always extracts the lead cue from a multi-cue join regardless of total length; the full list stays one tap away. Regression test added.
+2. **Ended-early card was a menu.** Primary CTA + three identical underlined links, including a "Repeat shorter version (3 min)" offer. The shorter-repeat now floors at `REPEAT_SUBSET_MIN_MINUTES` (10) completed minutes (`domain/policies.ts`); below it the card keeps the normal two-link set.
+3. **Planned-vs-trained dishonesty (§9.2).** The ended-early meta line reported planned minutes ("38 min") when only 6 were trained. It now reports `{trained} of {planned} min` using `sessionDurationMinutes` — the same duration basis as Review's meta line — falling back to the planned total for legacy logs.
+
+Canon: §7.1 Home was folded forward in the same pass — `D152` card internals (labeled `Last session:` metadata, `Start {focus} session` focal CTA, `Then:` queue line, merged Recent header) plus the floor and honest-duration corrections are now recorded.

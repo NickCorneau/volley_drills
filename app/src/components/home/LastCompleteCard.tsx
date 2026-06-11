@@ -1,5 +1,7 @@
 import type { ScopedFocus } from '../../domain/eligibleSessions'
+import { REPEAT_SUBSET_MIN_MINUTES } from '../../domain/policies'
 import { focusLabel } from '../../domain/sessionFocus'
+import { sessionDurationMinutes } from '../../lib/format'
 import type { LastCompleteBundle } from '../../services/session'
 import { Button } from '../ui'
 import { LINK_BELOW_PRIMARY_CLASS, PRIMARY_CARD_CLASS } from './cardStyles'
@@ -58,8 +60,23 @@ export function LastCompleteCard({
         return status?.status === 'completed' ? sum + block.durationMinutes : sum
       }, 0)
     : 0
-  const canRepeatSubset = isEndedEarly && completedMinutes > 0 && onRepeatWhatYouDid !== undefined
+  // Floor (2026-06-11 fresh-eyes pass): a tiny subset isn't worth a third
+  // link — "Repeat shorter version (3 min)" reads as menu noise. Below
+  // the floor the card keeps its normal two-link set.
+  const canRepeatSubset =
+    isEndedEarly && completedMinutes >= REPEAT_SUBSET_MIN_MINUTES && onRepeatWhatYouDid !== undefined
   const repeatLabel = isEndedEarly ? 'Repeat full plan' : 'Repeat last session'
+  // Data honesty (§9.2): an ended-early session reports the time actually
+  // trained, not the planned total — "6 of 38 min", same duration basis as
+  // Review's meta line. Falls back to the planned total when no honest
+  // duration is available (legacy logs) or rounding makes trained ≥ planned.
+  const trainedMinutes = isEndedEarly ? sessionDurationMinutes(data.log) : null
+  const durationPart =
+    plannedTotalMinutes <= 0
+      ? ''
+      : trainedMinutes != null && trainedMinutes < plannedTotalMinutes
+        ? ` · ${trainedMinutes} of ${plannedTotalMinutes} min`
+        : ` · ${plannedTotalMinutes} min`
 
   return (
     <section role="region" aria-label="Train again" className={PRIMARY_CARD_CLASS}>
@@ -70,7 +87,7 @@ export function LastCompleteCard({
             as a description of what the button starts. */}
         <p className="mt-2 text-sm text-text-secondary">
           Last session: {data.plan.presetName}
-          {plannedTotalMinutes > 0 && ` · ${plannedTotalMinutes} min`}
+          {durationPart}
           {isEndedEarly && daysAgo && ` · ended early ${daysAgo}`}
         </p>
       </div>

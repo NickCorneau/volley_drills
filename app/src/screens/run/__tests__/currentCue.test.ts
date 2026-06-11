@@ -25,6 +25,20 @@ describe('current cue selection', () => {
     })
   })
 
+  it('uses the first clause even when the joined cue is short', () => {
+    // Regression (2026-06-11 design pass): a 3-cue join under
+    // CUE_COMPACT_MAX rendered whole on the Now surface as a ". · "
+    // run-on. Multi-cue joins always take the lead cue.
+    const fullCue = 'Contact above the forehead. · Both hands release together.'
+    expect(fullCue.length).toBeLessThanOrEqual(CUE_COMPACT_MAX)
+
+    const cue = selectNonSegmentedCurrentCue(block({ coachingCue: fullCue }))
+
+    expect(cue.text).toBe('Contact above the forehead.')
+    expect(cue.source).toBe('coaching-cue')
+    expect(cue.fullCue).toBe(fullCue)
+  })
+
   it('uses the first delimiter-separated cue clause when a cue is long', () => {
     const fullCue = [
       'Server calls short/deep before contact',
