@@ -58,13 +58,18 @@ export function buildAdvancedBlock(
 
   const nextIdx = idx + 1
   const isLast = nextIdx >= plan.blocks.length
+  // Zero-work rule: a terminal session with no completed block is a
+  // cut-short, whatever path produced it. Skipping every block one at a
+  // time must not record a "Done" session that steers focus staleness.
+  const anyCompleted = blockStatuses.some((bs) => bs.status === 'completed')
+  const terminalStatus = anyCompleted ? 'completed' : 'ended_early'
 
   return {
     execution: {
       ...exec,
       activeBlockIndex: nextIdx,
       blockStatuses,
-      status: isLast ? 'completed' : exec.status === 'paused' ? 'in_progress' : exec.status,
+      status: isLast ? terminalStatus : exec.status === 'paused' ? 'in_progress' : exec.status,
       completedAt: isLast ? now : undefined,
       pausedAt: isLast ? exec.pausedAt : undefined,
     },
@@ -72,9 +77,9 @@ export function buildAdvancedBlock(
   }
 }
 
-export function buildEndedSession(exec: ExecutionLog, reason?: string): ExecutionLog {
-  const now = Date.now()
-  const blockStatuses = exec.blockStatuses.map((bs, i) => {
+/** Skip the active in-progress block (stamping completedAt) and every remaining planned block. */
+function skipRemainingBlocks(exec: ExecutionLog, now: number) {
+  return exec.blockStatuses.map((bs, i) => {
     if (i === exec.activeBlockIndex && bs.status === 'in_progress') {
       return { ...bs, status: 'skipped' as const, completedAt: now }
     }
@@ -83,12 +88,36 @@ export function buildEndedSession(exec: ExecutionLog, reason?: string): Executio
     }
     return bs
   })
+}
+
+export function buildEndedSession(exec: ExecutionLog, reason?: string): ExecutionLog {
+  const now = Date.now()
   return {
     ...exec,
     status: 'ended_early',
-    blockStatuses,
+    blockStatuses: skipRemainingBlocks(exec, now),
     completedAt: now,
     endedEarlyReason: reason,
+  }
+}
+
+/**
+ * Deliberate wrap: the user is done, not abandoning. Remaining blocks are
+ * skipped (visible tail) and the session records `completed` — the
+ * courtside-equivalent of skip-wrapping the tail one block at a time, so
+ * both paths converge on the same record. With zero completed blocks
+ * there is nothing to be done WITH, so the wrap derives `ended_early`
+ * (cut-short) instead; the Review reason gate fires as usual.
+ */
+export function buildWrappedSession(exec: ExecutionLog): ExecutionLog {
+  const now = Date.now()
+  const blockStatuses = skipRemainingBlocks(exec, now)
+  const anyCompleted = blockStatuses.some((bs) => bs.status === 'completed')
+  return {
+    ...exec,
+    status: anyCompleted ? 'completed' : 'ended_early',
+    blockStatuses,
+    completedAt: now,
   }
 }
 

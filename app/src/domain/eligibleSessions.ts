@@ -52,6 +52,12 @@ export function isScopedFocus(focus: SkillFocus | 'partial'): focus is ScopedFoc
 export interface TerminalSessionWithPlan {
   endedAt: number
   planBlocks: readonly SessionPlanBlock[]
+  /**
+   * Whether the log contains at least one completed block. Zero-work
+   * terminal sessions (skip-everything, zero-work ends) must not move a
+   * focus's staleness clock — nothing was trained.
+   */
+  hasCompletedBlock: boolean
 }
 
 /**
@@ -89,7 +95,8 @@ export function attributeTrainedSessions(
   input: readonly TerminalSessionWithPlan[],
 ): AttributedTrainingSession[] {
   const attributed: AttributedTrainingSession[] = []
-  for (const { endedAt, planBlocks } of input) {
+  for (const { endedAt, planBlocks, hasCompletedBlock } of input) {
+    if (!hasCompletedBlock) continue
     const focus = inferSessionFocus(planBlocks)
     if (!isScopedFocus(focus)) continue
     attributed.push({ focus, trainedAt: endedAt })

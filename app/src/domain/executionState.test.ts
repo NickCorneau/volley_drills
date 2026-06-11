@@ -11,6 +11,7 @@ import {
   buildPausedExecution,
   buildResumedExecution,
   buildStartedBlock,
+  buildWrappedSession,
   computeActualDurationMinutes,
   withActualDuration,
 } from './executionState'
@@ -152,6 +153,38 @@ describe('buildAdvancedBlock', () => {
     expect(execution.status).toBe('in_progress')
   })
 
+  it('derives ended_early when every block was skipped (zero-work rule, KTD2)', () => {
+    // Skipping every block one-by-one used to record a "Done" session
+    // with zero work. Pinned: the last advance derives cut-short.
+    const p = plan([block('b1'), block('b2')])
+    const first = buildAdvancedBlock(
+      log({ status: 'in_progress', activeBlockIndex: 0 }, [
+        { blockId: 'b1', status: 'in_progress', startedAt: 1 },
+        { blockId: 'b2', status: 'planned' },
+      ]),
+      p,
+      'skipped',
+    )
+    const { execution, isLast } = buildAdvancedBlock(first.execution, p, 'skipped')
+    expect(isLast).toBe(true)
+    expect(execution.status).toBe('ended_early')
+    expect(execution.completedAt).toBe(FIXED_NOW)
+  })
+
+  it('keeps completed status when blocks were skipped mid-session but work was done', () => {
+    const p = plan([block('b1'), block('b2')])
+    const first = buildAdvancedBlock(
+      log({ status: 'in_progress', activeBlockIndex: 0 }, [
+        { blockId: 'b1', status: 'in_progress', startedAt: 1 },
+        { blockId: 'b2', status: 'planned' },
+      ]),
+      p,
+      'skipped',
+    )
+    const { execution } = buildAdvancedBlock(first.execution, p, 'completed')
+    expect(execution.status).toBe('completed')
+  })
+
   it('is a no-op past the end of the plan - no malformed blockStatus row (red-team adversarial finding ADV-1, 2026-06-11)', () => {
     // Bug shape: a double advance on the final block left
     // `activeBlockIndex === blocks.length`; the second call spread
@@ -167,6 +200,68 @@ describe('buildAdvancedBlock', () => {
     expect(execution).toBe(completed)
     expect(execution.blockStatuses).toHaveLength(1)
     expect(execution.blockStatuses.every((bs) => typeof bs.blockId === 'string')).toBe(true)
+  })
+})
+
+describe('buildWrappedSession', () => {
+  it('records completed with a visible skipped tail when work was done (AE1)', () => {
+    // 2 of 4 blocks completed, third in flight: deliberate wrap.
+    const exec = log({ status: 'in_progress', activeBlockIndex: 2 }, [
+      { blockId: 'b1', status: 'completed', completedAt: 10 },
+      { blockId: 'b2', status: 'completed', completedAt: 20 },
+      { blockId: 'b3', status: 'in_progress', startedAt: 30 },
+      { blockId: 'b4', status: 'planned' },
+    ])
+    const out = buildWrappedSession(exec)
+    expect(out.status).toBe('completed')
+    expect(out.completedAt).toBe(FIXED_NOW)
+    expect(out.endedEarlyReason).toBeUndefined()
+    expect(out.blockStatuses[2].status).toBe('skipped')
+    expect(out.blockStatuses[2].completedAt).toBe(FIXED_NOW)
+    expect(out.blockStatuses[3].status).toBe('skipped')
+  })
+
+  it('converges with skip-wrapping the same remaining blocks (AE3)', () => {
+    const p = plan([block('b1'), block('b2'), block('b3')])
+    const base: ExecutionLogBlockStatus[] = [
+      { blockId: 'b1', status: 'completed', completedAt: 10 },
+      { blockId: 'b2', status: 'in_progress', startedAt: 20 },
+      { blockId: 'b3', status: 'planned' },
+    ]
+    const wrapped = buildWrappedSession(log({ status: 'in_progress', activeBlockIndex: 1 }, base))
+
+    // Same session skip-wrapped one block at a time.
+    const skipOnce = buildAdvancedBlock(
+      log({ status: 'in_progress', activeBlockIndex: 1 }, base),
+      p,
+      'skipped',
+    )
+    const skipTwice = buildAdvancedBlock(skipOnce.execution, p, 'skipped')
+
+    expect(skipTwice.execution.status).toBe(wrapped.status)
+    expect(skipTwice.execution.blockStatuses.map((bs) => bs.status)).toEqual(
+      wrapped.blockStatuses.map((bs) => bs.status),
+    )
+  })
+
+  it('wraps the same way while paused', () => {
+    const exec = log({ status: 'paused', pausedAt: 50, activeBlockIndex: 1 }, [
+      { blockId: 'b1', status: 'completed', completedAt: 10 },
+      { blockId: 'b2', status: 'in_progress', startedAt: 20 },
+    ])
+    const out = buildWrappedSession(exec)
+    expect(out.status).toBe('completed')
+    expect(out.blockStatuses[1].status).toBe('skipped')
+  })
+
+  it('derives ended_early for a zero-work wrap (nothing completed)', () => {
+    const exec = log({ status: 'in_progress', activeBlockIndex: 0 }, [
+      { blockId: 'b1', status: 'in_progress', startedAt: 1 },
+      { blockId: 'b2', status: 'planned' },
+    ])
+    const out = buildWrappedSession(exec)
+    expect(out.status).toBe('ended_early')
+    expect(out.blockStatuses.every((bs) => bs.status === 'skipped')).toBe(true)
   })
 })
 
@@ -195,6 +290,14 @@ describe('buildEndedSession', () => {
     expect(out.blockStatuses[0].status).toBe('completed')
     expect(out.blockStatuses[1].status).toBe('completed')
     expect(out.blockStatuses[2].status).toBe('skipped')
+  })
+
+  it('records ended_early even with completed blocks — cut-short is explicit', () => {
+    const exec = log({ status: 'in_progress', activeBlockIndex: 1 }, [
+      { blockId: 'b1', status: 'completed', completedAt: 10 },
+      { blockId: 'b2', status: 'in_progress', startedAt: 20 },
+    ])
+    expect(buildEndedSession(exec, 'too_tired').status).toBe('ended_early')
   })
 })
 

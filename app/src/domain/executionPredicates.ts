@@ -21,6 +21,22 @@ export function isTerminalSession(log: ExecutionLog): boolean {
   return true
 }
 
+/** At least one block actually finished — the session contains real work. */
+export function hasCompletedBlock(log: ExecutionLog): boolean {
+  return log.blockStatuses.some((bs) => bs.status === 'completed')
+}
+
+/**
+ * The record carries skipped blocks — a wrap, a cut-short, or a
+ * completed session with mid-session skips. Partial-repeat and
+ * shorter-version affordances key on this, not on `ended_early` status,
+ * because deliberate wraps record `completed` while still having a
+ * skippable-tail shape worth offering back.
+ */
+export function hasSkippedBlocks(log: ExecutionLog): boolean {
+  return log.blockStatuses.some((bs) => bs.status === 'skipped')
+}
+
 /**
  * Sort comparator: most-recently-ended first.
  *

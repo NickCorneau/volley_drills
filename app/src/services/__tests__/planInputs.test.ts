@@ -46,6 +46,8 @@ async function seedSession(opts: {
   execStatus?: 'completed' | 'ended_early'
   endedEarlyReason?: string
   withReview?: boolean
+  /** Default true: real sessions completed their block. False seeds a zero-work record. */
+  blockCompleted?: boolean
 }) {
   const planId = `plan-${opts.execId}`
   await db.sessionPlans.put({
@@ -63,7 +65,10 @@ async function seedSession(opts: {
     status: opts.execStatus ?? 'completed',
     endedEarlyReason: opts.endedEarlyReason,
     activeBlockIndex: 0,
-    blockStatuses: [],
+    blockStatuses:
+      opts.blockCompleted === false
+        ? [{ blockId: 'b1', status: 'skipped' }]
+        : [{ blockId: 'b1', status: 'completed', completedAt: opts.submittedAt }],
     startedAt: opts.submittedAt,
     completedAt: opts.submittedAt,
   })
@@ -135,6 +140,21 @@ describe('loadPlanInputs', () => {
     )
     expect(trainedSessions).toHaveLength(3)
     expect(trainedSessions.some((s) => s.trainedAt === 400)).toBe(false)
+  })
+
+  it('excludes zero-completed-block sessions from the trained basis (KTD2)', async () => {
+    await seedSession({ execId: 'real', drillName: 'Continuous Passing', submittedAt: 100 })
+    await seedSession({
+      execId: 'zero-work',
+      drillName: 'First to 10 Serving',
+      submittedAt: 200,
+      execStatus: 'ended_early',
+      blockCompleted: false,
+      withReview: false,
+    })
+
+    const { trainedSessions } = await loadPlanInputs()
+    expect(trainedSessions).toEqual([{ focus: 'pass', trainedAt: 100 }])
   })
 
   it('returns empty trained sessions on a fresh DB', async () => {

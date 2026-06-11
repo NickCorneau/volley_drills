@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import type { ExecutionLog } from '../model'
-import { byRecentEndedAt, isTerminalSession } from './executionPredicates'
+import {
+  byRecentEndedAt,
+  hasCompletedBlock,
+  hasSkippedBlocks,
+  isTerminalSession,
+} from './executionPredicates'
 
 function log(overrides: Partial<ExecutionLog> = {}): ExecutionLog {
   return {
@@ -39,6 +44,55 @@ describe('isTerminalSession', () => {
     expect(
       isTerminalSession(log({ status: 'ended_early', endedEarlyReason: 'missing_plan' })),
     ).toBe(true)
+  })
+})
+
+describe('hasCompletedBlock / hasSkippedBlocks', () => {
+  it('hasCompletedBlock is true only when at least one block completed', () => {
+    expect(
+      hasCompletedBlock(
+        log({
+          blockStatuses: [
+            { blockId: 'b1', status: 'completed', completedAt: 10 },
+            { blockId: 'b2', status: 'skipped' },
+          ],
+        }),
+      ),
+    ).toBe(true)
+    expect(
+      hasCompletedBlock(
+        log({
+          blockStatuses: [
+            { blockId: 'b1', status: 'skipped' },
+            { blockId: 'b2', status: 'skipped' },
+          ],
+        }),
+      ),
+    ).toBe(false)
+    expect(hasCompletedBlock(log({ blockStatuses: [] }))).toBe(false)
+  })
+
+  it('hasSkippedBlocks is true for wraps and cut-shorts, false for clean completes', () => {
+    expect(
+      hasSkippedBlocks(
+        log({
+          blockStatuses: [
+            { blockId: 'b1', status: 'completed', completedAt: 10 },
+            { blockId: 'b2', status: 'skipped' },
+          ],
+        }),
+      ),
+    ).toBe(true)
+    expect(
+      hasSkippedBlocks(
+        log({
+          blockStatuses: [
+            { blockId: 'b1', status: 'completed', completedAt: 10 },
+            { blockId: 'b2', status: 'completed', completedAt: 20 },
+          ],
+        }),
+      ),
+    ).toBe(false)
   })
 })
 

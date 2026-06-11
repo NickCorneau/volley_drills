@@ -69,7 +69,7 @@ describe('isScopedFocus', () => {
 describe('attributeTrainedSessions', () => {
   it('attributes a terminal session to its main_skill focus with endedAt as trainedAt', () => {
     const input: TerminalSessionWithPlan[] = [
-      { endedAt: 4242, planBlocks: mainSkillBlocks('Continuous Passing') },
+      { endedAt: 4242, planBlocks: mainSkillBlocks('Continuous Passing'), hasCompletedBlock: true },
     ]
     expect(attributeTrainedSessions(input)).toEqual([{ focus: 'pass', trainedAt: 4242 }])
   })
@@ -78,8 +78,12 @@ describe('attributeTrainedSessions', () => {
     // The plan-ordering basis is execution history, not eligible reviews:
     // a session the user ran but never reviewed still moves its clock.
     const input: TerminalSessionWithPlan[] = [
-      { endedAt: 100, planBlocks: mainSkillBlocks('Continuous Passing') },
-      { endedAt: 200, planBlocks: mainSkillBlocks('First to 10 Serving') },
+      { endedAt: 100, planBlocks: mainSkillBlocks('Continuous Passing'), hasCompletedBlock: true },
+      {
+        endedAt: 200,
+        planBlocks: mainSkillBlocks('First to 10 Serving'),
+        hasCompletedBlock: true,
+      },
     ]
     expect(attributeTrainedSessions(input)).toEqual([
       { focus: 'pass', trainedAt: 100 },
@@ -89,9 +93,21 @@ describe('attributeTrainedSessions', () => {
 
   it('drops sessions whose focus is partial (unmatched drill) or out of scope', () => {
     const input: TerminalSessionWithPlan[] = [
-      { endedAt: 100, planBlocks: mainSkillBlocks('Not A Real Drill Name') },
-      { endedAt: 200, planBlocks: [] },
+      { endedAt: 100, planBlocks: mainSkillBlocks('Not A Real Drill Name'), hasCompletedBlock: true },
+      { endedAt: 200, planBlocks: [], hasCompletedBlock: true },
     ]
     expect(attributeTrainedSessions(input)).toEqual([])
+  })
+
+  it('excludes zero-completed-block sessions — zero work never moves the staleness clock', () => {
+    const input: TerminalSessionWithPlan[] = [
+      { endedAt: 100, planBlocks: mainSkillBlocks('Continuous Passing'), hasCompletedBlock: false },
+      {
+        endedAt: 200,
+        planBlocks: mainSkillBlocks('First to 10 Serving'),
+        hasCompletedBlock: true,
+      },
+    ]
+    expect(attributeTrainedSessions(input)).toEqual([{ focus: 'serve', trainedAt: 200 }])
   })
 })

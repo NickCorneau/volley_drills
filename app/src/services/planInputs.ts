@@ -26,7 +26,7 @@ import {
   type AttributedTrainingSession,
   type TerminalSessionWithPlan,
 } from '../domain/eligibleSessions'
-import { endedAt, isTerminalSession } from '../domain/executionPredicates'
+import { endedAt, hasCompletedBlock, isTerminalSession } from '../domain/executionPredicates'
 import { applyBlockOverrides } from '../domain/sessionProjection'
 
 export interface PlanInputsBundle {
@@ -79,6 +79,7 @@ export async function loadPlanInputs(): Promise<PlanInputsBundle> {
     terminalSessions.push({
       endedAt: endedAt(log),
       planBlocks: applyBlockOverrides(plan, log).blocks,
+      hasCompletedBlock: hasCompletedBlock(log),
     })
   }
 
