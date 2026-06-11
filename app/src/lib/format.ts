@@ -83,17 +83,17 @@ const NO_VALUE = '-'
 /**
  * Whole-minute training duration for a session, with a 1-min floor.
  *
- * Prefers `actualDurationMinutes` — the *active* time the runner already
- * computed via `computeActualDurationMinutes` (sum of completed block
- * durations + capped active-block elapsed). That value is immune to
- * wall-clock gaps, so a session that was paused or interrupted and
- * resumed hours later reports the time actually trained, not the
- * start→end span (which previously inflated to, e.g., "721 min" when a
- * 15-min session was reopened 12 h later).
+ * Prefers `actualDurationMinutes` — since U4 (2026-06-11 session-truth,
+ * KTD3) the runner persists the *clamped wall-clock span* computed via
+ * `computeActualDurationMinutes`: start → terminal end, pauses included,
+ * clamped to a multiple of the planned total so the app-kill/resume-
+ * hours class (the old "721 min" inflation) collapses to the ceiling
+ * while honest overrun stays visible.
  *
- * Falls back to the `start → completedAt/pausedAt` span only for legacy
- * records written before `actualDurationMinutes` existed. Returns `null`
- * when neither a stored duration nor an end timestamp is available.
+ * Falls back to the raw `start → completedAt/pausedAt` span only for
+ * legacy records written before `actualDurationMinutes` existed. Returns
+ * `null` when neither a stored duration nor an end timestamp is
+ * available.
  */
 export function sessionDurationMinutes(log: ExecutionLog): number | null {
   if (log.actualDurationMinutes != null && Number.isFinite(log.actualDurationMinutes)) {

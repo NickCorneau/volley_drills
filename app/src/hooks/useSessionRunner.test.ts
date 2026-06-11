@@ -281,6 +281,7 @@ describe('useSessionRunner', () => {
         { blockId: 'block-1', status: 'completed', completedAt: Date.now() },
         { blockId: 'block-2', status: 'skipped', completedAt: Date.now() },
       ],
+      startedAt: Date.now() - 7 * 60_000,
       completedAt: Date.now(),
     })
     vi.mocked(sessionService.buildWrappedSession).mockReturnValue(wrapped)
@@ -292,9 +293,9 @@ describe('useSessionRunner', () => {
       await result.current.wrapSession()
     })
 
-    // block-1 (3 planned minutes) is completed in the wrapped fixture; the
-    // skipped tail contributes nothing under the current duration rule.
-    const wrappedWithDuration = { ...wrapped, actualDurationMinutes: 3 }
+    // U4 wall-span rule: the wrap stamp closes a 7-minute span, which is
+    // what gets recorded - not the completed blocks' planned sum.
+    const wrappedWithDuration = { ...wrapped, actualDurationMinutes: 7 }
     expect(sessionService.buildWrappedSession).toHaveBeenCalledWith(exec)
     expect(sessionService.saveExecution).toHaveBeenCalledWith(wrappedWithDuration)
     expect(timerService.clearTimerState).toHaveBeenCalled()
@@ -402,6 +403,7 @@ describe('useSessionRunner', () => {
         { blockId: 'block-1', status: 'completed', completedAt: Date.now() },
         { blockId: 'block-2', status: 'completed', completedAt: Date.now() },
       ],
+      startedAt: Date.now() - 12 * 60_000,
       completedAt: Date.now(),
     })
     vi.mocked(sessionService.buildAdvancedBlock).mockReturnValue({
@@ -417,7 +419,9 @@ describe('useSessionRunner', () => {
     })
 
     const saved = vi.mocked(sessionService.saveExecution).mock.calls[0][0]
-    expect(saved.actualDurationMinutes).toBe(11)
+    // U4 wall-span rule: 12 wall minutes against 11 planned records 12 -
+    // honest overrun stays visible instead of snapping to the plan.
+    expect(saved.actualDurationMinutes).toBe(12)
   })
 
   it('sets actualDurationMinutes when ending session early with partial timer', async () => {
@@ -441,6 +445,7 @@ describe('useSessionRunner', () => {
         { blockId: 'block-1', status: 'completed', completedAt: Date.now() },
         { blockId: 'block-2', status: 'skipped', completedAt: Date.now() },
       ],
+      startedAt: Date.now() - 5 * 60_000,
       completedAt: Date.now(),
       endedEarlyReason: 'user_quit',
     })
@@ -463,12 +468,16 @@ describe('useSessionRunner', () => {
     })
 
     const saved = vi.mocked(sessionService.saveExecution).mock.calls[0][0]
+    // U4 wall-span rule: the cut-short record carries its honest 5-minute
+    // span (the partial timer no longer feeds terminal records).
     expect(saved.actualDurationMinutes).toBe(5)
   })
 
   // Red-team RT-4: advanceBlock('skipped') on last block with a non-zero
   // timer must include the partial time. Previous test mocked readTimerState
   // to undefined so the branch was never exercised.
+  // U4: the partial-timer fold now only fires on the fallback path, so the
+  // fixture deliberately omits the terminal stamp (malformed-record class).
   it('sets actualDurationMinutes when skipping the last block with a non-zero timer', async () => {
     const inProgressExec = makeExec({
       status: 'in_progress',
@@ -490,7 +499,6 @@ describe('useSessionRunner', () => {
         { blockId: 'block-1', status: 'completed', completedAt: Date.now() },
         { blockId: 'block-2', status: 'skipped', completedAt: Date.now() },
       ],
-      completedAt: Date.now(),
     })
     vi.mocked(sessionService.buildAdvancedBlock).mockReturnValue({
       execution: skipped,
@@ -688,6 +696,7 @@ describe('useSessionRunner', () => {
 
   // Red-team RT-4 corollary: a stale timer from a different execution must
   // NOT contribute partial seconds to the current session's duration.
+  // U4: pinned on the fallback path (fixture omits the terminal stamp).
   it('skipping the last block ignores a timer owned by a different execution', async () => {
     const inProgressExec = makeExec({
       status: 'in_progress',
@@ -709,7 +718,6 @@ describe('useSessionRunner', () => {
         { blockId: 'block-1', status: 'completed', completedAt: Date.now() },
         { blockId: 'block-2', status: 'skipped', completedAt: Date.now() },
       ],
-      completedAt: Date.now(),
     })
     vi.mocked(sessionService.buildAdvancedBlock).mockReturnValue({
       execution: skipped,

@@ -15,6 +15,10 @@ import {
   computeActualDurationMinutes,
   withActualDuration,
 } from './executionState'
+import {
+  currentPersistedExecutionLog,
+  currentPersistedPlan,
+} from '../test-utils/persistedRecords'
 
 const FIXED_NOW = 1_700_000_000_000
 
@@ -329,6 +333,142 @@ describe('computeActualDurationMinutes', () => {
     expect(computeActualDurationMinutes(exec, p, Number.NaN)).toBe(5)
     expect(computeActualDurationMinutes(exec, p, -1)).toBe(5)
     expect(computeActualDurationMinutes(exec, p, Number.POSITIVE_INFINITY)).toBe(5)
+  })
+})
+
+/**
+ * U4 (2026-06-11 session-truth plan, KTD3/KTD4): recorded duration is
+ * the clamped wall-clock session span (`startedAt` -> terminal
+ * `completedAt`) whenever both stamps exist. Pauses and post-beep play
+ * live inside the span deliberately; the clamp (a multiple of the
+ * planned total) bounds the app-kill/resume-hours inflation class.
+ * Records missing the terminal stamp keep the planned-minutes rule.
+ */
+describe('computeActualDurationMinutes - wall-clock span (U4)', () => {
+  const MIN = 60_000
+
+  it('records the wall span when the session overruns the planned total (AE4)', () => {
+    const p = plan([block('b1', 10), block('b2', 10)])
+    const exec = log(
+      {
+        status: 'completed',
+        startedAt: FIXED_NOW - 26 * MIN,
+        completedAt: FIXED_NOW,
+      },
+      [
+        { blockId: 'b1', status: 'completed' },
+        { blockId: 'b2', status: 'completed' },
+      ],
+    )
+    expect(computeActualDurationMinutes(exec, p)).toBe(26)
+  })
+
+  it('counts paused time inside the span (pinned semantic)', () => {
+    const p = plan([block('b1', 10), block('b2', 10)])
+    const exec = log(
+      {
+        status: 'completed',
+        startedAt: FIXED_NOW - 30 * MIN,
+        pausedAt: FIXED_NOW - 15 * MIN,
+        completedAt: FIXED_NOW,
+      },
+      [
+        { blockId: 'b1', status: 'completed' },
+        { blockId: 'b2', status: 'completed' },
+      ],
+    )
+    expect(computeActualDurationMinutes(exec, p)).toBe(30)
+  })
+
+  it('clamps the app-kill / resume-hours class to the ceiling, not 721 minutes', () => {
+    const p = plan([block('b1', 5), block('b2', 5), block('b3', 5)])
+    const exec = log(
+      {
+        status: 'completed',
+        startedAt: FIXED_NOW - 12 * 60 * MIN,
+        completedAt: FIXED_NOW,
+      },
+      [
+        { blockId: 'b1', status: 'completed' },
+        { blockId: 'b2', status: 'completed' },
+        { blockId: 'b3', status: 'completed' },
+      ],
+    )
+    // 15 planned -> ceiling 30, not the 720-min raw span.
+    expect(computeActualDurationMinutes(exec, p)).toBe(30)
+  })
+
+  it('uses the span for a cut-short session (honest partial duration)', () => {
+    const p = plan([block('b1', 10), block('b2', 10)])
+    const exec = log(
+      {
+        status: 'ended_early',
+        endedEarlyReason: 'user_quit',
+        startedAt: FIXED_NOW - 9 * MIN,
+        completedAt: FIXED_NOW,
+      },
+      [
+        { blockId: 'b1', status: 'completed' },
+        { blockId: 'b2', status: 'skipped' },
+      ],
+    )
+    expect(computeActualDurationMinutes(exec, p)).toBe(9)
+  })
+
+  it('ends the span at the wrap stamp for a mid-block wrap', () => {
+    const p = plan([block('b1', 5), block('b2', 10)])
+    const exec = log(
+      {
+        status: 'completed',
+        startedAt: FIXED_NOW - 7.5 * MIN,
+        completedAt: FIXED_NOW,
+      },
+      [
+        { blockId: 'b1', status: 'completed' },
+        { blockId: 'b2', status: 'skipped' },
+      ],
+    )
+    expect(computeActualDurationMinutes(exec, p)).toBe(7.5)
+  })
+
+  it('keeps the planned-minutes rule when the terminal stamp is missing', () => {
+    const p = plan([block('b1', 5), block('b2', 10)])
+    const exec = log({ startedAt: FIXED_NOW - 26 * MIN }, [
+      { blockId: 'b1', status: 'completed' },
+      { blockId: 'b2', status: 'completed' },
+    ])
+    expect(computeActualDurationMinutes(exec, p)).toBe(15)
+  })
+
+  it('falls back when the span is non-positive or the planned total is zero', () => {
+    const sameInstant = log(
+      { status: 'completed', startedAt: FIXED_NOW, completedAt: FIXED_NOW },
+      [{ blockId: 'b1', status: 'completed' }],
+    )
+    expect(computeActualDurationMinutes(sameInstant, plan([block('b1', 5)]))).toBe(5)
+
+    const emptyPlan = plan([])
+    const spanned = log(
+      { status: 'completed', startedAt: FIXED_NOW - 10 * MIN, completedAt: FIXED_NOW },
+      [{ blockId: 'b1', status: 'completed' }],
+    )
+    expect(computeActualDurationMinutes(spanned, emptyPlan)).toBe(0)
+  })
+
+  it('applies the wall-span rule to historical persisted records (read evolution, R5 untouched)', () => {
+    // Records untouched, reads evolve: a pre-U4 record re-read today gets
+    // the span interpretation - no special-casing by record age.
+    const histPlan = currentPersistedPlan({ blocks: [{ durationMinutes: 8 }] })
+    const histLog = currentPersistedExecutionLog({
+      status: 'completed',
+      startedAt: 1000,
+      completedAt: 1000 + 26 * MIN,
+      blockStatuses: [{ status: 'completed' }],
+    })
+    // 8 planned -> ceiling 16; the 26-min historical span clamps, and the
+    // record's own fields are never rewritten by the read.
+    expect(computeActualDurationMinutes(histLog, histPlan)).toBe(16)
+    expect(histLog.actualDurationMinutes).toBeUndefined()
   })
 })
 

@@ -47,6 +47,7 @@ export {
   buildResumedExecution,
   buildStartedBlock,
   buildWrappedSession,
+  clampedSessionSpanMinutes,
   computeActualDurationMinutes,
   withActualDuration,
 } from '../../domain/executionState'

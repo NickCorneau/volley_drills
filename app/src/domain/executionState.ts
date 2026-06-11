@@ -122,16 +122,53 @@ export function buildWrappedSession(exec: ExecutionLog): ExecutionLog {
 }
 
 /**
- * Derive the reported session length by summing completed blocks'
- * planned minutes and capping any partial active-block elapsed seconds
- * at that block's planned duration. Guards against non-finite or runaway
- * timer inputs.
+ * Ceiling for the wall-span duration read, as a multiple of the plan's
+ * total minutes. Bounds the app-kill/resume-hours inflation class (the
+ * "721 min" case the repo fixed once before) while leaving honest
+ * overrun visible. Plan-time default (U4/KTD3), tunable.
+ */
+export const SESSION_SPAN_CLAMP_MULTIPLE = 2
+
+/**
+ * Wall-clock session span in minutes (`startedAt` -> terminal
+ * `completedAt`), clamped to SESSION_SPAN_CLAMP_MULTIPLE x the planned
+ * total. Pauses and post-beep play deliberately live inside the span
+ * (KTD3): courtside rest is part of how long the session took. Returns
+ * null when the record lacks a usable span (missing/invalid stamps,
+ * non-positive span, zero planned total) so callers can fall back.
+ */
+export function clampedSessionSpanMinutes(exec: ExecutionLog, plan: SessionPlan): number | null {
+  const end = exec.completedAt
+  if (end == null || !Number.isFinite(end) || !Number.isFinite(exec.startedAt)) return null
+  const spanMinutes = (end - exec.startedAt) / 60_000
+  if (spanMinutes <= 0) return null
+  const plannedTotal = plan.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
+  if (plannedTotal <= 0) return null
+  const clamped = Math.min(spanMinutes, plannedTotal * SESSION_SPAN_CLAMP_MULTIPLE)
+  return Math.round(clamped * 10) / 10
+}
+
+/**
+ * Derive the reported session length (U4/KTD3-KTD4).
+ *
+ * Primary rule: the clamped wall-clock span between the session-level
+ * stamps - the only signal that contains real overrun (the countdown
+ * timer auto-advances at zero, so timer-derived elapsed is capped at
+ * planned duration by construction). Duration is a derived read, so
+ * this rule applies uniformly to historical records.
+ *
+ * Fallback (records missing a terminal stamp): sum completed blocks'
+ * planned minutes and cap any partial active-block elapsed seconds at
+ * that block's planned duration, guarding non-finite or runaway timer
+ * inputs.
  */
 export function computeActualDurationMinutes(
   exec: ExecutionLog,
   plan: SessionPlan,
   currentBlockElapsedSeconds?: number,
 ): number {
+  const span = clampedSessionSpanMinutes(exec, plan)
+  if (span != null) return span
   let totalSeconds = 0
   const len = Math.min(exec.blockStatuses.length, plan.blocks.length)
   for (let i = 0; i < len; i++) {
