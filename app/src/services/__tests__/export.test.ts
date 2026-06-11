@@ -40,9 +40,10 @@ describe('buildExportPayload (V0B-15)', () => {
         'sessionPlans',
         'sessionReviews',
         'storageMeta',
+        'stressPositions',
       ].sort(),
     )
-    expect(payload.schemaVersion).toBe(5)
+    expect(payload.schemaVersion).toBe(6)
     expect(typeof payload.exportedAt).toBe('number')
     expect(payload.sessionPlans).toEqual([])
     expect(payload.executionLogs).toEqual([])
@@ -52,6 +53,26 @@ describe('buildExportPayload (V0B-15)', () => {
     // composeReceipt the user sees; present even on an empty DB.
     expect(payload.receipt).toBeDefined()
     expect(payload.receipt.feltDifficulty).toHaveProperty('pass')
+    // D154 dual-read: positions come from the same service assembly
+    // steers with; empty DB resolves the beginner starting rungs.
+    expect(payload.stressPositions).toEqual({ pass: 1, serve: 1, set: 1 })
+  })
+
+  it('derives stressPositions from accepted verdicts in the same payload (D154)', async () => {
+    await db.sessionReviews.add({
+      id: 'review-stress',
+      executionLogId: 'log-stress',
+      sessionRpe: 5,
+      goodPasses: 0,
+      totalAttempts: 0,
+      submittedAt: Date.now(),
+      status: 'submitted',
+      offeredDelta: { kind: 'stress', focus: 'set', direction: 'more' },
+      verdictChoice: 'accepted',
+    })
+
+    const payload = await buildExportPayload()
+    expect(payload.stressPositions).toEqual({ pass: 1, serve: 1, set: 2 })
   })
 
   it('includes every row from each tracked table', async () => {
@@ -227,7 +248,7 @@ describe('downloadExport (V0B-15)', () => {
 
     const text = await blobs[0].text()
     const parsed = JSON.parse(text)
-    expect(parsed.schemaVersion).toBe(5)
+    expect(parsed.schemaVersion).toBe(6)
     expect(parsed.sessionPlans).toHaveLength(1)
     expect(parsed.sessionPlans[0].id).toBe('plan-dl')
 

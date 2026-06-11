@@ -1,6 +1,8 @@
 import type { ExecutionLog, SessionPlan, SessionReview, StorageMetaEntry } from '../db/types'
 import { db } from '../db'
 import { composeReceipt, type ReceiptOutput } from '../domain/composeReceipt'
+import type { StressPositions } from '../domain/adaptation/stressPosition'
+import { loadStressPositions } from './stressPositions'
 
 /**
  * V0B-15: raw training-record JSON export (Phase E Unit 2).
@@ -36,15 +38,23 @@ import { composeReceipt, type ReceiptOutput } from '../domain/composeReceipt'
  * `sessionReviews` rows now carry the additive `offeredDelta` /
  * `verdictChoice` fields (U4) and this `receipt` key is new. Founder
  * replay scripts branch on `schemaVersion`.
+ *
+ * `schemaVersion` bumped 5 -> 6 (D154): the payload gains
+ * `stressPositions` — the derived per-focus ladder positions resolved
+ * through the SAME service session assembly steers with (one
+ * computation, two reads). Positions only: the rung of each assembled
+ * main drill is derivable offline from the static ladder registry plus
+ * the `sessionPlans` rows already in this payload.
  */
 export interface ExportPayload {
-  schemaVersion: 5
+  schemaVersion: 6
   exportedAt: number
   sessionPlans: SessionPlan[]
   executionLogs: ExecutionLog[]
   sessionReviews: SessionReview[]
   storageMeta: StorageMetaEntry[]
   receipt: ReceiptOutput
+  stressPositions: StressPositions
 }
 
 /**
@@ -65,14 +75,16 @@ export async function buildExportPayload(): Promise<ExportPayload> {
   // `structuredClone` isolates the returned payload from the backing
   // Dexie rows. Without it, mutating `payload.sessionPlans[0]` in
   // consumer code would silently leak into the next Dexie fetch.
+  const stressPositions = await loadStressPositions()
   return structuredClone({
-    schemaVersion: 5 as const,
+    schemaVersion: 6 as const,
     exportedAt: now,
     sessionPlans,
     executionLogs,
     sessionReviews,
     storageMeta,
     receipt: composeReceipt(sessionReviews, now),
+    stressPositions,
   })
 }
 

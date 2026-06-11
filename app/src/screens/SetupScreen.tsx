@@ -25,6 +25,8 @@ import {
 } from '../services/session'
 import type { BlockSlotType } from '../types/session'
 import { getStorageMeta, setStorageMeta } from '../services/storageMeta'
+import { loadStressPositions } from '../services/stressPositions'
+import type { StressPositions } from '../domain/adaptation/stressPosition'
 import { routes } from '../routes'
 import type { PlayerLevel } from '../types/drill'
 
@@ -80,12 +82,14 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
 
   // U5 (2026-05-24 duration-honesty plan, R7+R8+R10 via PD-2 (A)
   // build-on-completable): cache the build-time inputs (last-completed
-  // map + saved player level) once on mount so the preview build that
-  // surfaces the assembled total stays consistent with the Build-commit
-  // build. Read shape mirrors `handleConfirm`'s legacy reads.
+  // map + saved player level + derived stress positions, D154) once on
+  // mount so the preview build that surfaces the assembled total stays
+  // consistent with the Build-commit build — handleConfirm persists the
+  // preview draft without rebuilding, so steering must live here.
   const [previewInputs, setPreviewInputs] = useState<{
     readonly lastCompletedByType: Partial<Record<BlockSlotType, string>>
     readonly playerLevel: PlayerLevel | undefined
+    readonly stressPositions: StressPositions | undefined
   } | null>(null)
   const [previewDraft, setPreviewDraft] = useState<SessionDraft | null>(null)
 
@@ -159,9 +163,10 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     let cancelled = false
     ;(async () => {
       try {
-        const [completedResult, skillResult] = await Promise.allSettled([
+        const [completedResult, skillResult, stressResult] = await Promise.allSettled([
           findLastCompletedDrillIdsByType(),
           getStorageMeta('onboarding.skillLevel', isSkillLevel),
+          loadStressPositions(),
         ])
         if (cancelled) return
         const lastCompletedByType =
@@ -169,9 +174,16 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         const skillLevel = skillResult.status === 'fulfilled' ? skillResult.value : undefined
         const playerLevel =
           skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
-        setPreviewInputs({ lastCompletedByType, playerLevel })
+        const stressPositions =
+          stressResult.status === 'fulfilled' ? stressResult.value : undefined
+        setPreviewInputs({ lastCompletedByType, playerLevel, stressPositions })
       } catch {
-        if (!cancelled) setPreviewInputs({ lastCompletedByType: {}, playerLevel: undefined })
+        if (!cancelled)
+          setPreviewInputs({
+            lastCompletedByType: {},
+            playerLevel: undefined,
+            stressPositions: undefined,
+          })
       }
     })()
     return () => {
@@ -208,6 +220,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     const draft = buildDraft(previewContext, {
       lastCompletedByType: previewInputs.lastCompletedByType,
       playerLevel: previewInputs.playerLevel,
+      stressPositions: previewInputs.stressPositions,
     })
     setPreviewDraft(draft)
   }, [previewContext, previewInputs])
@@ -261,16 +274,18 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         let lastCompletedByType: Partial<Record<BlockSlotType, string>> =
           previewInputs?.lastCompletedByType ?? {}
         let playerLevel: PlayerLevel | undefined = previewInputs?.playerLevel
+        let stressPositions: StressPositions | undefined = previewInputs?.stressPositions
         if (!previewInputs) {
           try {
             lastCompletedByType = await findLastCompletedDrillIdsByType()
             const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
             playerLevel = skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
+            stressPositions = await loadStressPositions()
           } catch {
             if (isSchemaBlocked()) return
           }
         }
-        draft = buildDraft(context, { lastCompletedByType, playerLevel })
+        draft = buildDraft(context, { lastCompletedByType, playerLevel, stressPositions })
       }
       if (!draft) {
         setError("Can't build a session for these constraints. Try different options.")

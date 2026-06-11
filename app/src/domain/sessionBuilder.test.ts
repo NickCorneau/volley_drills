@@ -113,14 +113,14 @@ describe('sessionBuilder', () => {
       },
     )
 
-    it('algorithm version is 8 (R15: post-2026-05-24 duration-honesty bump)', () => {
+    it('algorithm version is 9 (D154 stress-substrate bump)', () => {
       const draft = buildDraft({
         playerMode: 'pair',
         timeProfile: 25,
         netAvailable: false,
         wallAvailable: false,
       })
-      expect(draft?.assemblyAlgorithmVersion).toBe(8)
+      expect(draft?.assemblyAlgorithmVersion).toBe(9)
     })
 
     it('build is deterministic per seed under R1 (R4)', () => {
@@ -289,7 +289,7 @@ describe('sessionBuilder', () => {
     // (focus-untouched) pair-open-25 fixture — every optional slot
     // fills, so there is no surplus to redistribute and the post-R1
     // engine produces byte-identical durations.
-    expect(draft?.assemblyAlgorithmVersion).toBe(8)
+    expect(draft?.assemblyAlgorithmVersion).toBe(9)
     // 2026-05-13: segment snap is wired into `buildDraft`, so the
     // pair-open-25 wrap (d26-solo, natural 3 min) snaps from 4 → 3
     // and the freed minute redistributes into technique (6 → 7)
@@ -1917,7 +1917,7 @@ describe('sessionBuilder', () => {
     expect(first).not.toBeNull()
     expect(second).not.toBeNull()
     expect(first?.assemblySeed).toBe('seed-replay')
-    expect(first?.assemblyAlgorithmVersion).toBe(8)
+    expect(first?.assemblyAlgorithmVersion).toBe(9)
     expect(second?.blocks.map((block) => [block.drillId, block.variantId])).toEqual(
       first?.blocks.map((block) => [block.drillId, block.variantId]),
     )
@@ -2142,5 +2142,173 @@ describe('sessionBuilder', () => {
     // Current main_skill variants do not declare sub-block pacing;
     // the field rides as undefined so RunScreen's pacing loop no-ops.
     expect(mainSkill!.subBlockIntervalSeconds).toBeUndefined()
+  })
+})
+
+/**
+ * Stress-substrate (D154) — main_skill rung preference.
+ *
+ * `stressPositions` stable-sorts the candidate pool by distance to the
+ * focus's current ladder rung: exact-rung preference (R8) and
+ * nearest-rung fallback (R9) in one mechanism. Absent positions, a
+ * non-main_skill slot, or an unscoped session keep legacy selection.
+ */
+describe('stress-rung preference (D154)', () => {
+  const mainSkillSlot: BlockSlot = {
+    type: 'main_skill',
+    durationMinMinutes: 5,
+    durationMaxMinutes: 7,
+    intent: 'Fixture main-skill slot',
+    required: true,
+    skillTags: ['pass'],
+  }
+
+  const soloPassContext: SetupContext = {
+    playerMode: 'solo',
+    timeProfile: 25,
+    netAvailable: false,
+    wallAvailable: false,
+    sessionFocus: 'pass',
+    playerLevel: 'intermediate',
+  }
+
+  it('AE1: picks the exact-rung drill when one fits the context, across seeds', () => {
+    // Intermediate solo/open pass pool: d01 (rung 1), d05 (rung 2),
+    // d07 (rung 3), d11 (rung 4). Position 4 → d11 is the unique
+    // exact-rung pick regardless of shuffle order.
+    for (let i = 0; i < 25; i++) {
+      const pick = pickForSlot(
+        mainSkillSlot,
+        soloPassContext,
+        new Set(),
+        createSeededRandom(`ae1-${i}`),
+        { playerLevel: 'intermediate', stressPositions: { pass: 4 } },
+      )
+      expect(pick?.drill.id).toBe('d11')
+    }
+  })
+
+  it('AE3: falls back to the nearest-rung context-compatible drill, never undefined', () => {
+    // Beginner solo/open pass pool: d01 (rung 1), d05 (rung 2) — the
+    // rung-4 drills are out of band (d11 intermediate) or assembly-
+    // blocked (d15). Position 4 → nearest available is d05 (distance 2).
+    const beginnerContext: SetupContext = { ...soloPassContext, playerLevel: 'beginner' }
+    for (let i = 0; i < 25; i++) {
+      const pick = pickForSlot(
+        mainSkillSlot,
+        beginnerContext,
+        new Set(),
+        createSeededRandom(`ae3-${i}`),
+        { playerLevel: 'beginner', stressPositions: { pass: 4 } },
+      )
+      expect(pick).toBeDefined()
+      expect(pick?.drill.id).toBe('d05')
+    }
+  })
+
+  it('is deterministic: same seed + same positions replay the same draft (R7)', () => {
+    const context: SetupContext = { ...soloPassContext }
+    const options = {
+      assemblySeed: 'stress-determinism',
+      playerLevel: 'intermediate' as PlayerLevel,
+      stressPositions: { pass: 4 },
+    }
+    const first = buildDraft(context, options)
+    const second = buildDraft(context, options)
+    expect(first).not.toBeNull()
+    expect(second?.blocks.map((b) => [b.drillId, b.variantId])).toEqual(
+      first?.blocks.map((b) => [b.drillId, b.variantId]),
+    )
+  })
+
+  it('legacy guard: no positions and empty positions select identically for the same seed', () => {
+    const without = buildDraft(soloPassContext, {
+      assemblySeed: 'stress-legacy',
+      playerLevel: 'intermediate',
+    })
+    const withEmpty = buildDraft(soloPassContext, {
+      assemblySeed: 'stress-legacy',
+      playerLevel: 'intermediate',
+      stressPositions: {},
+    })
+    expect(without).not.toBeNull()
+    expect(withEmpty?.blocks.map((b) => [b.drillId, b.variantId])).toEqual(
+      without?.blocks.map((b) => [b.drillId, b.variantId]),
+    )
+  })
+
+  it('non-interference: positions are ignored on non-main_skill slots', () => {
+    const techniqueSlot: BlockSlot = {
+      ...mainSkillSlot,
+      type: 'technique',
+      intent: 'Fixture technique slot',
+    }
+    for (let i = 0; i < 25; i++) {
+      const seed = `non-interference-${i}`
+      const withPositions = pickForSlot(
+        techniqueSlot,
+        soloPassContext,
+        new Set(),
+        createSeededRandom(seed),
+        { playerLevel: 'intermediate', stressPositions: { pass: 4 } },
+      )
+      const withoutPositions = pickForSlot(
+        techniqueSlot,
+        soloPassContext,
+        new Set(),
+        createSeededRandom(seed),
+        { playerLevel: 'intermediate' },
+      )
+      expect(withPositions?.variant.id).toBe(withoutPositions?.variant.id)
+    }
+  })
+
+  it('non-interference: positions are ignored when the session has no scoped focus', () => {
+    const unscopedContext: SetupContext = { ...soloPassContext }
+    delete unscopedContext.sessionFocus
+    for (let i = 0; i < 25; i++) {
+      const seed = `unscoped-${i}`
+      const withPositions = pickForSlot(
+        mainSkillSlot,
+        unscopedContext,
+        new Set(),
+        createSeededRandom(seed),
+        { playerLevel: 'intermediate', stressPositions: { pass: 4, serve: 4, set: 4 } },
+      )
+      const withoutPositions = pickForSlot(
+        mainSkillSlot,
+        unscopedContext,
+        new Set(),
+        createSeededRandom(seed),
+        { playerLevel: 'intermediate' },
+      )
+      expect(withPositions?.variant.id).toBe(withoutPositions?.variant.id)
+    }
+  })
+
+  it('end-to-end: a steered full build lands the main_skill block at the position rung', () => {
+    // d11 (rung 4) is intermediate-band and solo-eligible; unless an
+    // earlier slot claimed it (it is pass-scoped, so technique could),
+    // the steered main_skill block is d11. When technique claimed it,
+    // the nearest remaining rung wins — assert the disjunction so the
+    // test pins steering without over-constraining the shuffle.
+    for (let i = 0; i < 25; i++) {
+      const draft = buildDraft(soloPassContext, {
+        assemblySeed: `steered-build-${i}`,
+        playerLevel: 'intermediate',
+        stressPositions: { pass: 4 },
+      })
+      expect(draft).not.toBeNull()
+      const main = draft!.blocks.find((b) => b.type === 'main_skill')
+      expect(main).toBeDefined()
+      const techniqueTookD11 = draft!.blocks.some(
+        (b) => b.type !== 'main_skill' && b.drillId === 'd11',
+      )
+      if (techniqueTookD11) {
+        expect(main!.drillId).toBe('d07')
+      } else {
+        expect(main!.drillId).toBe('d11')
+      }
+    }
   })
 })

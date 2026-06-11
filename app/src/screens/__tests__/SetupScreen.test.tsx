@@ -697,4 +697,53 @@ describe('SetupScreen (C-3)', () => {
     const draft = await db.sessionDrafts.get('current')
     expect(draft?.context.sessionFocus).toBe('pass')
   })
+
+  /**
+   * D154 stress steering: the on-mount preview inputs carry the derived
+   * ladder positions, so the preview build — the draft handleConfirm
+   * persists without rebuilding — is rung-steered. Spy-through (real
+   * assembly runs) so the assertion targets the seam, not the shuffle.
+   */
+  it('passes the derived stress positions into the preview build (D154)', async () => {
+    const existingCompletedAt = 1_700_000_000_000
+    await db.storageMeta.put({
+      key: 'onboarding.completedAt',
+      value: existingCompletedAt,
+      updatedAt: existingCompletedAt,
+    })
+    await db.sessionReviews.add({
+      id: 'review-stress',
+      executionLogId: 'log-stress',
+      sessionRpe: 5,
+      goodPasses: 0,
+      totalAttempts: 0,
+      submittedAt: existingCompletedAt,
+      status: 'submitted',
+      offeredDelta: { kind: 'stress', focus: 'pass', direction: 'more' },
+      verdictChoice: 'accepted',
+    })
+
+    const buildSpy = vi.spyOn(sessionBuilder, 'buildDraft')
+    try {
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      // The default Solo + Net setup is completable, so the preview
+      // build fires once the on-mount inputs resolve.
+      await screen.findByTestId('setup-assembled-duration')
+
+      expect(buildSpy).toHaveBeenCalled()
+      const lastOptions = buildSpy.mock.calls[buildSpy.mock.calls.length - 1]?.[1]
+      // No persisted skill level → beginner start (rung 1); the
+      // accepted `more` on pass moves pass to 2.
+      expect(lastOptions?.stressPositions).toEqual({ pass: 2, serve: 1, set: 1 })
+    } finally {
+      buildSpy.mockRestore()
+    }
+  })
 })

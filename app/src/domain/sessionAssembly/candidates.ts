@@ -1,4 +1,5 @@
 import { DRILLS } from '../../data/drills'
+import { stressRungForDrill, type StressLadderFocus } from '../../data/stressLadders'
 import type { BlockSlot, DrillVariant, PlayerLevel, SetupContext, SkillFocus } from '../../model'
 import type { SelectionCandidate } from '../drillSelection'
 import { effectiveSkillTags, isFocusControlledSlotType } from './effectiveFocus'
@@ -26,6 +27,14 @@ export interface PickForSlotOptions extends FindCandidatesOptions {
   readonly allowUsedFallback?: boolean
   readonly targetDurationMinutes?: number
   readonly preferTargetDurationFit?: boolean
+  /**
+   * Stress-substrate (D154): derived per-focus ladder positions. When
+   * the slot is `main_skill` and the session has a scoped focus with a
+   * position, the candidate pool is stable-sorted by rung distance so
+   * the nearest-rung drill leads (exact-rung preference + nearest-rung
+   * fallback in one mechanism). Absent → selection behaves as before.
+   */
+  readonly stressPositions?: Partial<Record<StressLadderFocus, number>>
 }
 
 const PLAYER_LEVEL_ORDER: Record<PlayerLevel, number> = {
@@ -177,6 +186,25 @@ export function pickForSlot(
     pool = shuffle(widerUnused.length > 0 ? widerUnused : candidates, random)
   } else {
     pool = shuffle(candidates, random)
+  }
+
+  // Stress-substrate (D154): order the pool by distance to the focus's
+  // current ladder rung. Applied generically after pool construction so
+  // all three branches above (unused, band-relax, used-fallback) get the
+  // ordering. The sort is stable, so equal-distance candidates keep
+  // their seeded-shuffle order (deterministic per seed) and the existing
+  // duration-fit logic below operates on the reordered pool unchanged.
+  // Off-ladder drills sort last — defensive only under the registry's
+  // completeness invariant (future drill activation).
+  const stressFocus = slot.type === 'main_skill' ? context.sessionFocus : undefined
+  const stressPosition =
+    stressFocus === undefined ? undefined : options?.stressPositions?.[stressFocus]
+  if (stressFocus !== undefined && stressPosition !== undefined) {
+    const distance = (candidate: CandidateVariant): number => {
+      const rung = stressRungForDrill(stressFocus, candidate.drill.id)
+      return rung === undefined ? Number.POSITIVE_INFINITY : Math.abs(rung - stressPosition)
+    }
+    pool = [...pool].sort((a, b) => distance(a) - distance(b))
   }
 
   if (pool.length === 0) return undefined

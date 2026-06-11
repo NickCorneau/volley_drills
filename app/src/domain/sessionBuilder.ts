@@ -1,4 +1,5 @@
 import { selectArchetype } from '../data/archetypes'
+import type { StressLadderFocus } from '../data/stressLadders'
 import type {
   BlockSlot,
   BlockSlotType,
@@ -30,7 +31,11 @@ export {
 } from './sessionAssembly/swapAlternatives'
 export { deriveBlockRationale } from './sessionAssembly/rationale'
 
-export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 8
+// v9: stress-substrate (D154) — `stressPositions` option steers
+// main_skill selection toward the focus's current ladder rung.
+// Positionless builds are output-identical to v8; the bump marks the
+// semantics change, not churn.
+export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 9
 
 /**
  * Optional inputs that scope build-time drill substitution.
@@ -64,6 +69,15 @@ export interface BuildDraftOptions {
   readonly lastCompletedByType?: Partial<Record<BlockSlotType, string>>
   readonly assemblySeed?: string
   readonly playerLevel?: PlayerLevel
+  /**
+   * Stress-substrate (D154): derived per-focus ladder positions
+   * (`deriveStressPositions`). Steers the main_skill pick toward the
+   * session focus's current rung; absent → legacy selection. Known v1
+   * bypass: when the `lastCompletedByType` substitution rule fires,
+   * `pickMainSkillSubstitute` decides the slot without `pickForSlot`,
+   * so rung preference does not apply to that pick.
+   */
+  readonly stressPositions?: Partial<Record<StressLadderFocus, number>>
 }
 
 interface DraftAssemblyTraceSlotBase {
@@ -205,6 +219,7 @@ function buildDraftResult(
       playerLevel: options?.playerLevel,
       allowUsedFallback,
       targetDurationMinutes,
+      stressPositions: options?.stressPositions,
     })
     return pick ? { pick } : undefined
   }
@@ -239,6 +254,7 @@ function buildDraftResult(
         allowUsedFallback: false,
         targetDurationMinutes: durations[i],
         overrideSkillTags: slot.skillTags,
+        stressPositions: options?.stressPositions,
       })
       if (fallbackPick) selected = { pick: fallbackPick }
     }
@@ -278,6 +294,7 @@ function buildDraftResult(
       allowUsedFallback: false,
       targetDurationMinutes: durations[index],
       preferTargetDurationFit: true,
+      stressPositions: options?.stressPositions,
     })
     if (rerouted) {
       selectedByLayoutIndex.set(index, { pick: rerouted })
