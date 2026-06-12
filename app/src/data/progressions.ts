@@ -67,7 +67,10 @@ const chain2: ProgressionChain = {
   id: 'chain-2-direction',
   name: 'Directional Control and Angle Management',
   focus: 'Passing to a beach set-window: accuracy, angle, and early decision-making.',
-  drillIds: ['d05', 'd06', 'd07', 'd08'],
+  // d24 declared this chainId from authoring day one but was missing
+  // here; membership is validation/authoring metadata (no link, so swap
+  // preference is unaffected). Caught by drill_chain_membership_missing.
+  drillIds: ['d05', 'd06', 'd07', 'd08', 'd24'],
   defaultGatingThreshold: 0.7,
   links: [
     {

@@ -1,4 +1,5 @@
 import type { Drill, DrillVariant, ProgressionChain } from '../types/drill'
+import type { StressLadderFocus, StressRung } from './stressLadders'
 
 export type DrillCatalogIssueCode =
   | 'duplicate_drill_id'
@@ -17,6 +18,10 @@ export type DrillCatalogIssueCode =
   | 'duplicate_segment_id'
   | 'invalid_segment_duration'
   | 'segment_duration_mismatch'
+  | 'drill_chain_membership_missing'
+  | 'ladder_unknown_drill'
+  | 'ladder_duplicate_drill'
+  | 'scoped_drill_off_ladder'
 
 export interface DrillCatalogIssue {
   code: DrillCatalogIssueCode
@@ -24,9 +29,18 @@ export interface DrillCatalogIssue {
   message: string
 }
 
+const SCOPED_FOCUSES: readonly StressLadderFocus[] = ['pass', 'serve', 'set']
+
 interface ValidateDrillCatalogInput {
   drills: readonly Drill[]
   progressionChains: readonly ProgressionChain[]
+  /**
+   * Per-focus stress ladders (D160). When provided, the ladder↔catalog
+   * cross-checks run: every ladder entry must name a known drill, no
+   * drill twice on one ladder, and every scoped-tag drill must hold a
+   * rung on each of its focus ladders (the D160 authoring invariant).
+   */
+  stressLadders?: Record<StressLadderFocus, readonly StressRung[]>
 }
 
 function issue(code: DrillCatalogIssueCode, path: string, message: string): DrillCatalogIssue {
@@ -42,6 +56,7 @@ function hasM001EligibleVariant(variants: readonly DrillVariant[]): boolean {
 export function validateDrillCatalog({
   drills,
   progressionChains,
+  stressLadders,
 }: ValidateDrillCatalogInput): DrillCatalogIssue[] {
   const issues: DrillCatalogIssue[] = []
   const drillIds = new Set<string>()
@@ -278,6 +293,65 @@ export function validateDrillCatalog({
             `${chain.id} link ${link.fromDrillId} -> ${link.toDrillId} is outside chain drillIds`,
           ),
         )
+      }
+    }
+  }
+
+  // Bidirectional chain membership (D160): a drill whose chainId names
+  // an existing chain object must appear in that chain's drillIds (the
+  // d24/chain-2 drift class). Declared chain ids with no chain object
+  // (e.g. d28's chain-warmup) stay legal as authoring groups.
+  const chainById = new Map(progressionChains.map((chain) => [chain.id, chain]))
+  for (const drill of drills) {
+    const declaredChain = chainById.get(drill.chainId)
+    if (declaredChain && !declaredChain.drillIds.includes(drill.id)) {
+      issues.push(
+        issue(
+          'drill_chain_membership_missing',
+          `drills.${drill.id}.chainId`,
+          `${drill.id} declares ${drill.chainId} but is missing from that chain's drillIds`,
+        ),
+      )
+    }
+  }
+
+  if (stressLadders) {
+    for (const focus of SCOPED_FOCUSES) {
+      const seenOnLadder = new Set<string>()
+      for (const rung of stressLadders[focus]) {
+        for (const drillId of rung.drillIds) {
+          if (!drillIds.has(drillId)) {
+            issues.push(
+              issue(
+                'ladder_unknown_drill',
+                `stressLadders.${focus}.${rung.rung}.${drillId}`,
+                `${focus} ladder rung ${rung.rung} references unknown drill ${drillId}`,
+              ),
+            )
+          }
+          if (seenOnLadder.has(drillId)) {
+            issues.push(
+              issue(
+                'ladder_duplicate_drill',
+                `stressLadders.${focus}.${rung.rung}.${drillId}`,
+                `${drillId} appears more than once on the ${focus} ladder`,
+              ),
+            )
+          }
+          seenOnLadder.add(drillId)
+        }
+      }
+
+      for (const drill of drills) {
+        if (drill.skillFocus.includes(focus) && !seenOnLadder.has(drill.id)) {
+          issues.push(
+            issue(
+              'scoped_drill_off_ladder',
+              `drills.${drill.id}.skillFocus.${focus}`,
+              `${drill.id} carries the ${focus} tag but holds no rung on the ${focus} ladder (D160: scoped-tag drills ship with a same-commit rung)`,
+            ),
+          )
+        }
       }
     }
   }

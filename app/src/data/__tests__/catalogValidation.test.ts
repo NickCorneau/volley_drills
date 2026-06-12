@@ -3,6 +3,7 @@ import type { Drill, ProgressionChain } from '../../types/drill'
 import { validateDrillCatalog } from '../catalogValidation'
 import { DRILLS } from '../drills'
 import { PROGRESSION_CHAINS } from '../progressions'
+import { STRESS_LADDERS } from '../stressLadders'
 
 const env = {
   needsNet: false,
@@ -65,10 +66,14 @@ function chain(overrides: Partial<ProgressionChain> = {}): ProgressionChain {
 }
 
 describe('validateDrillCatalog', () => {
-  it('accepts the current authored drill and progression catalogs', () => {
-    expect(validateDrillCatalog({ drills: DRILLS, progressionChains: PROGRESSION_CHAINS })).toEqual(
-      [],
-    )
+  it('accepts the current authored drill, progression, and ladder catalogs', () => {
+    expect(
+      validateDrillCatalog({
+        drills: DRILLS,
+        progressionChains: PROGRESSION_CHAINS,
+        stressLadders: STRESS_LADDERS,
+      }),
+    ).toEqual([])
   })
 
   it('keeps pair-eligible wall-only drills out of the M001 candidate set', () => {
@@ -661,6 +666,97 @@ describe('validateDrillCatalog', () => {
     })
 
     expect(issues.map((issue) => issue.code)).toContain('participants_label_mismatch')
+  })
+
+  /*
+   * D160 validation hardening: bidirectional chain membership plus
+   * ladder↔catalog cross-checks. The d24/chain-2 drift class (drill
+   * declares a chain, chain forgets the drill) and the audit's
+   * "catalogValidation never cross-checks ladders" gap both become
+   * test failures here.
+   */
+  describe('chain membership and stress-ladder cross-checks (D160)', () => {
+    const emptyLadders = { pass: [], serve: [], set: [] } as const
+
+    it('reports a drill whose declared chain exists but omits it from drillIds', () => {
+      const issues = validateDrillCatalog({
+        drills: [drill(), drill({ id: 'd-member' })],
+        progressionChains: [chain({ drillIds: ['d-test'] })],
+      })
+
+      const membership = issues.filter((i) => i.code === 'drill_chain_membership_missing')
+      expect(membership).toHaveLength(1)
+      expect(membership[0].path).toBe('drills.d-member.chainId')
+    })
+
+    it('keeps d28-style declared chain ids with no chain object legal', () => {
+      const issues = validateDrillCatalog({
+        drills: [drill({ id: 'd-orphan', chainId: 'chain-warmup-style-group' })],
+        progressionChains: [],
+      })
+
+      expect(issues.map((i) => i.code)).not.toContain('drill_chain_membership_missing')
+    })
+
+    it('reports ladder entries that reference unknown drills', () => {
+      const issues = validateDrillCatalog({
+        drills: [drill()],
+        progressionChains: [chain()],
+        stressLadders: {
+          ...emptyLadders,
+          pass: [{ rung: 1, drillIds: ['d-test', 'd-ghost'] }],
+        },
+      })
+
+      expect(issues.map((i) => i.code)).toContain('ladder_unknown_drill')
+    })
+
+    it('reports a drill that appears twice on one ladder', () => {
+      const issues = validateDrillCatalog({
+        drills: [drill()],
+        progressionChains: [chain()],
+        stressLadders: {
+          ...emptyLadders,
+          pass: [
+            { rung: 1, drillIds: ['d-test'] },
+            { rung: 2, drillIds: ['d-test'] },
+          ],
+        },
+      })
+
+      expect(issues.map((i) => i.code)).toContain('ladder_duplicate_drill')
+    })
+
+    it('reports a scoped-tag drill holding no rung on its focus ladder', () => {
+      const issues = validateDrillCatalog({
+        drills: [drill()],
+        progressionChains: [chain()],
+        stressLadders: emptyLadders,
+      })
+
+      const offLadder = issues.filter((i) => i.code === 'scoped_drill_off_ladder')
+      expect(offLadder).toHaveLength(1)
+      expect(offLadder[0].path).toBe('drills.d-test.skillFocus.pass')
+    })
+
+    it('keeps lifecycle-only drills off-ladder without error', () => {
+      const issues = validateDrillCatalog({
+        drills: [drill({ id: 'd-rec', skillFocus: ['recovery'], chainId: 'chain-recovery' })],
+        progressionChains: [],
+        stressLadders: emptyLadders,
+      })
+
+      expect(issues.map((i) => i.code)).not.toContain('scoped_drill_off_ladder')
+    })
+
+    it('skips ladder checks entirely when stressLadders is not provided', () => {
+      const issues = validateDrillCatalog({
+        drills: [drill()],
+        progressionChains: [chain()],
+      })
+
+      expect(issues.map((i) => i.code)).not.toContain('scoped_drill_off_ladder')
+    })
   })
 
   it('does not report participants_label_mismatch for non-Solo / non-Pair labels', () => {
