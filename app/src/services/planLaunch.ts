@@ -1,15 +1,10 @@
 /**
- * Home-coherence — Home one-tap session launches (plan + repeat).
+ * Home-coherence — the Home one-tap plan launch.
  *
- * Both Home launch paths share one build-and-save seam: resolve the
- * persisted skill level, assemble a draft from a `SetupContext`, persist
- * it. `startPlanSession` (the focal "Start [focus] session" action)
- * reuses the last session's physical conditions but overrides
- * `sessionFocus` to the plan's next focus (staleness head).
- * `repeatSession` reuses the prior context verbatim — "same conditions"
- * includes the prior session's chosen focus, and pain-recovery rebuilds
- * strip focus by design elsewhere; do NOT add a strip here without
- * re-checking that decision.
+ * `startPlanSession` (the focal "Start [focus] session" action) resolves
+ * the persisted skill level, reuses the last session's physical
+ * conditions, overrides `sessionFocus` to the plan's next focus
+ * (staleness head), assembles a draft, and persists it.
  *
  * Returns `true` when a draft was saved (the caller routes to Safety),
  * `false` when there is no prior context to reuse or assembly produced no
@@ -20,8 +15,11 @@
  * `startPlanSession` steers assembly with the derived stress positions
  * (`loadStressPositions`), so the session after an accepted
  * "more/less stress" verdict assembles one rung up or down on that
- * focus. `repeatSession` stays verbatim by design — Repeat means "same
- * conditions, same selection behavior", never a re-steer.
+ * focus.
+ *
+ * D158 (2026-06-12): `repeatSession` (the one-tap verbatim repeat) was
+ * retired with the Home Repeat affordances after seven unused weeks of
+ * founder-use mode.
  */
 import { buildDraft } from '../domain/sessionBuilder'
 import type { ScopedFocus } from '../domain/eligibleSessions'
@@ -39,7 +37,7 @@ async function buildAndSaveDraft(
   const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
   const playerLevel = skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
   // Steered launches load both derived inputs: stress positions (D154)
-  // and the clock calibration (U5/KTD6). Repeat omits both by design.
+  // and the clock calibration (U5/KTD6).
   const [stressPositions, calibration] = options?.steer
     ? await Promise.all([loadStressPositions(), loadSessionCalibration()])
     : [undefined, undefined]
@@ -65,14 +63,4 @@ export async function startPlanSession(input: StartPlanSessionInput): Promise<bo
   // ladder position to the main_skill pick (D154); clock calibration
   // scales the drill-minute budget toward honest wall time (U5).
   return buildAndSaveDraft({ ...priorContext, sessionFocus: nextFocus }, { steer: true })
-}
-
-/**
- * One-tap Repeat: rebuild a fresh full-plan draft from the prior context
- * verbatim (focus included). No Setup detour, no stale-context banner,
- * no stress steering (R10: Repeat is verbatim by design).
- */
-export async function repeatSession(priorContext: SetupContext | null): Promise<boolean> {
-  if (!priorContext) return false
-  return buildAndSaveDraft(priorContext)
 }

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react'
 import type { SessionDraft } from '../../model'
 import { isSchemaBlocked } from '../../lib/schema-blocked'
 import { composeCarryForwardSummary } from '../../domain/adaptation/replayAdaptation'
-import { REPEAT_DRIFT_NOTE, repeatPlanDrifted } from '../../domain/adaptation/steeringTrace'
 import { composePlan, type PlanOutput } from '../../domain/composePlan'
 import { composeReceipt, type ReceiptOutput } from '../../domain/composeReceipt'
 import { loadPlanInputs } from '../../services/planInputs'
@@ -43,14 +42,6 @@ export interface HomeFlags {
   /** Carry-forward line reflecting the last accepted verdict, or null. */
   carryForwardLine: string | null
   receipt: ReceiptOutput | null
-  /**
-   * Trust-loop U5 (R8/KTD7): one quiet line beside the Repeat
-   * affordances when the last-complete plan's focus position moved
-   * since that session was assembled. Derived (fold-compare at the
-   * plan's assembly time vs now); null when nothing moved, the focus
-   * is non-scoped, or there is no last-complete session.
-   */
-  repeatNote: string | null
 }
 
 export type HomeState =
@@ -70,7 +61,6 @@ export async function resolveHomeSnapshot(): Promise<HomeFlags> {
       plan: null,
       carryForwardLine: null,
       receipt: null,
-      repeatNote: null,
     }
   }
 
@@ -105,15 +95,6 @@ export async function resolveHomeSnapshot(): Promise<HomeFlags> {
     ? composeCarryForwardSummary(planInputs.lastAcceptedDelta)
     : null
 
-  // Trust-loop U5: the repeat-drift note keys on the same lastComplete
-  // bundle the Repeat affordances act on (block overrides applied), so
-  // the note and the repeated draft always describe the same plan.
-  const repeatNote =
-    lastComplete !== null &&
-    repeatPlanDrifted(planInputs.reviews, lastComplete.plan, planInputs.skillBand)
-      ? REPEAT_DRIFT_NOTE
-      : null
-
   return {
     resume: null,
     reviewPending,
@@ -123,7 +104,6 @@ export async function resolveHomeSnapshot(): Promise<HomeFlags> {
     plan,
     carryForwardLine,
     receipt,
-    repeatNote,
   }
 }
 

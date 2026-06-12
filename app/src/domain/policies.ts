@@ -62,13 +62,5 @@ export const TUNING_FLOOR_ATTEMPTS = 50
 /** Cues this length or under read as a single breath and render un-truncated. */
 export const CUE_COMPACT_MAX = 100
 
-// --- Home last_complete card ---
-
-/**
- * Minimum completed minutes before the ended-early card offers
- * "Repeat shorter version (N min)". Below this the rebuilt subset is
- * too small to be a real session — a "Repeat shorter version (3 min)"
- * link is menu noise, not value — so the card stays at its normal
- * two-link set (2026-06-11 fresh-eyes pass).
- */
-export const REPEAT_SUBSET_MIN_MINUTES = 10
+// D158 (2026-06-12): `REPEAT_SUBSET_MIN_MINUTES` (the ended-early
+// subset-repeat floor) was retired with the Home Repeat affordances.

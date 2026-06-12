@@ -17,10 +17,7 @@
 
 export type PrimaryVariant = 'resume' | 'review_pending' | 'draft' | 'last_complete' | 'new_user'
 
-export type SecondaryRow =
-  | { kind: 'review_pending_advisory' }
-  | { kind: 'draft' }
-  | { kind: 'last_complete' }
+export type SecondaryRow = { kind: 'review_pending_advisory' } | { kind: 'draft' }
 
 export interface FlagSummary {
   resume: boolean
@@ -45,18 +42,15 @@ export function selectSecondaryRows(flags: FlagSummary): SecondaryRow[] {
   const primary = selectPrimaryCard(flags)
   const rows: SecondaryRow[] = []
 
-  // When Review Pending is primary, surface any other active states so
-  // the tester can see the draft or last-complete context without
-  // finishing the review first.
-  if (primary === 'review_pending') {
-    if (flags.draft) rows.push({ kind: 'draft' })
-    if (flags.lastComplete) rows.push({ kind: 'last_complete' })
-  }
-
-  // When Draft is primary, last-complete provides useful context for the
-  // Repeat path (C-5).
-  if (primary === 'draft' && flags.lastComplete) {
-    rows.push({ kind: 'last_complete' })
+  // When Review Pending is primary, surface the draft so the tester can
+  // see/act on it without finishing the review first.
+  //
+  // D158 (2026-06-12): the `last_complete` secondary row was retired
+  // with the Repeat affordance it existed to carry (its C-5 rationale
+  // was "context for the Repeat path"). Last-session context lives in
+  // the Recent sessions list, which renders on every non-resume state.
+  if (primary === 'review_pending' && flags.draft) {
+    rows.push({ kind: 'draft' })
   }
 
   // `draft` or `last_complete` primary with `reviewPending` true is

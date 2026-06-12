@@ -1,5 +1,5 @@
 import type { SessionDraft } from '../model'
-import type { LastCompleteBundle, PendingReview } from '../services/session'
+import type { PendingReview } from '../services/session'
 import { Button } from './ui'
 
 // The parent list owns the surface; rows stay flat and only show press
@@ -17,14 +17,6 @@ type HomeSecondaryRowProps =
       variant: 'draft'
       data: SessionDraft
       onOpen: () => void
-    }
-  | {
-      variant: 'last_complete'
-      data: LastCompleteBundle
-      onRepeat: () => void
-      /** Trust-loop U5: repeat-drift note, or null when nothing moved. */
-      repeatNote?: string | null
-      actionDisabled?: boolean
     }
 
 export function HomeSecondaryRow(props: HomeSecondaryRowProps) {
@@ -46,27 +38,6 @@ export function HomeSecondaryRow(props: HomeSecondaryRowProps) {
           </span>
           <Button variant="ghost" onClick={props.onOpen}>
             Continue
-          </Button>
-        </li>
-      )
-    case 'last_complete':
-      return (
-        <li className={SECONDARY_ROW_CLASS}>
-          <span className="flex flex-col gap-0.5">
-            <span className="text-sm text-text-primary">
-              Last session &middot; {props.data.plan.presetName}
-            </span>
-            {/* Trust-loop U5 (R8): the drift note sits with the Repeat
-              affordance it qualifies, pre-tap, where the decision
-              happens. */}
-            {props.repeatNote && (
-              <span className="text-xs leading-relaxed text-text-secondary">
-                {props.repeatNote}
-              </span>
-            )}
-          </span>
-          <Button variant="ghost" disabled={props.actionDisabled} onClick={props.onRepeat}>
-            Repeat
           </Button>
         </li>
       )

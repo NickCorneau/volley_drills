@@ -44,6 +44,15 @@ const uppercaseTrackingAllowlist = [
     activeRunEligible: true,
     rationale: 'The transient PAUSED marker is the only approved uppercase tracked state indicator.',
   },
+  {
+    path: 'components/home/LastCompleteCard.tsx',
+    requiredUtilities: ['uppercase', 'tracking-wider', 'text-text-secondary', 'text-xs'],
+    role: 'micro-label eyebrow',
+    surface: 'Home focal-card Recommended eyebrow',
+    activeRunEligible: false,
+    rationale:
+      'D158 (2026-06-12 shibui v2-04 comp, founder-approved): quiet uppercase micro-labels are the sanctioned section/eyebrow vocabulary — secondary ink, text-xs, never a state indicator.',
+  },
 ]
 
 const fontMonoAllowlist = [
@@ -71,7 +80,7 @@ function usage() {
 Checks high-signal Volleycraft typography drift:
 - no body-like arbitrary text below 12px
 - no arbitrary text sizes outside timer/display allowlist entries
-- no uppercase tracked eyebrows outside the BlockTimer PAUSED state
+- no uppercase tracked eyebrows outside allowlisted surfaces (BlockTimer PAUSED, D158 micro-label eyebrows)
 - no decorative font-mono outside timer/instrument text
 `
 }
@@ -247,7 +256,8 @@ function validateLiteral(literal, relativePath, violations) {
   if (hasUtility(utilities, 'uppercase') && hasTrackingUtility(utilities) && !isAllowedUppercaseTracking(literal, relativePath)) {
     violations.push({
       relativePath,
-      message: 'Uppercase tracked eyebrow styling is only allowed for the BlockTimer PAUSED state.',
+      message:
+        'Uppercase tracked eyebrow styling is only allowed on allowlisted surfaces (BlockTimer PAUSED, D158 micro-label eyebrows).',
     })
   }
 

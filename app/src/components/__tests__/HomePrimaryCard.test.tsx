@@ -174,249 +174,16 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
     expect(screen.queryByRole('button', { name: /^edit$/i })).not.toBeInTheDocument()
   })
 
-  it('last_complete ended-early: renders TWO buttons (Repeat full plan + Repeat shorter version)', async () => {
-    const user = userEvent.setup()
-    const onRepeat = vi.fn()
-    const onRepeatWhatYouDid = vi.fn()
-
-    // Build an ended-early log with two completed blocks out of three.
-    // `actualDurationMinutes` (16) deliberately differs from the completed-
-    // blocks subset (14): the meta line reports time trained while the
-    // shorter-repeat label reports the rebuilt subset, and both bases
-    // must coexist.
-    const endedEarlyBundle: LastCompleteBundle = {
-      ...fakeLastComplete,
-      log: {
-        ...fakeLastComplete.log,
-        status: 'ended_early',
-        endedEarlyReason: 'time',
-        actualDurationMinutes: 16,
-        blockStatuses: [
-          { blockId: 'b-1', status: 'completed' },
-          { blockId: 'b-2', status: 'completed' },
-          { blockId: 'b-3', status: 'skipped' },
-        ],
-      },
-      plan: {
-        ...fakeLastComplete.plan,
-        blocks: [
-          {
-            id: 'b-1',
-            type: 'warmup',
-            drillName: 'Warm',
-            shortName: 'Warm',
-            durationMinutes: 3,
-            coachingCue: '',
-            courtsideInstructions: '',
-            required: true,
-          },
-          {
-            id: 'b-2',
-            type: 'main_skill',
-            drillName: 'Pass',
-            shortName: 'Pass',
-            durationMinutes: 11,
-            coachingCue: '',
-            courtsideInstructions: '',
-            required: true,
-          },
-          {
-            id: 'b-3',
-            type: 'main_skill',
-            drillName: 'Serve',
-            shortName: 'Serve',
-            durationMinutes: 11,
-            coachingCue: '',
-            courtsideInstructions: '',
-            required: true,
-          },
-        ],
-      },
-    }
-
-    render(
-      <HomePrimaryCard
-        variant="last_complete"
-        data={endedEarlyBundle}
-        nextFocus="pass"
-        backlog={['serve', 'set']}
-        onStartPlan={() => {}}
-        onRepeat={onRepeat}
-        onStartDifferent={() => {}}
-        onRepeatWhatYouDid={onRepeatWhatYouDid}
-      />,
-    )
-
-    // Secondary: "Repeat full plan" (3 + 11 + 11).
-    await user.click(screen.getByRole('button', { name: /repeat full plan/i }))
-    expect(onRepeat).toHaveBeenCalledTimes(1)
-
-    // Secondary: "Repeat shorter version (14 min)" (3 + 11).
-    await user.click(screen.getByRole('button', { name: /repeat shorter version \(14 min\)/i }))
-    expect(onRepeatWhatYouDid).toHaveBeenCalledTimes(1)
-
-    // "ended early" annotation in the body.
-    expect(screen.getByText(/ended early/i)).toBeInTheDocument()
-
-    // §9.2 data honesty (2026-06-11): the meta line reports time trained
-    // against the planned total ("16 of 25 min"), not the planned total
-    // alone — Review's meta line uses the same duration basis.
-    expect(screen.getByText(/16 of 25 min/)).toBeInTheDocument()
-
-    // Phase F Unit 1: tertiary "Start a different session" renders on
-    // ended-early too (single CTA set across normal + ended-early).
-    expect(screen.getByRole('button', { name: /start a different session/i })).toBeInTheDocument()
-  })
-
-  it('last_complete ended-early below the subset floor hides Repeat shorter version', () => {
-    // 2026-06-11 fresh-eyes pass: only the 3-min warm-up completed. A
-    // "Repeat shorter version (3 min)" link is menu noise, so the offer
-    // floors at REPEAT_SUBSET_MIN_MINUTES (10) completed minutes. The
-    // meta line still reports the honest trained time.
-    const belowFloor: LastCompleteBundle = {
-      ...fakeLastComplete,
-      log: {
-        ...fakeLastComplete.log,
-        status: 'ended_early',
-        endedEarlyReason: 'time',
-        actualDurationMinutes: 6,
-        blockStatuses: [
-          { blockId: 'b-1', status: 'completed' },
-          { blockId: 'b-2', status: 'skipped' },
-          { blockId: 'b-3', status: 'skipped' },
-        ],
-      },
-      plan: {
-        ...fakeLastComplete.plan,
-        blocks: [
-          {
-            id: 'b-1',
-            type: 'warmup',
-            drillName: 'Warm',
-            shortName: 'Warm',
-            durationMinutes: 3,
-            coachingCue: '',
-            courtsideInstructions: '',
-            required: true,
-          },
-          {
-            id: 'b-2',
-            type: 'main_skill',
-            drillName: 'Pass',
-            shortName: 'Pass',
-            durationMinutes: 11,
-            coachingCue: '',
-            courtsideInstructions: '',
-            required: true,
-          },
-          {
-            id: 'b-3',
-            type: 'main_skill',
-            drillName: 'Serve',
-            shortName: 'Serve',
-            durationMinutes: 24,
-            coachingCue: '',
-            courtsideInstructions: '',
-            required: true,
-          },
-        ],
-      },
-    }
-
-    render(
-      <HomePrimaryCard
-        variant="last_complete"
-        data={belowFloor}
-        nextFocus="pass"
-        backlog={['serve', 'set']}
-        onStartPlan={() => {}}
-        onRepeat={() => {}}
-        onStartDifferent={() => {}}
-        onRepeatWhatYouDid={() => {}}
-      />,
-    )
-
-    expect(
-      screen.queryByRole('button', { name: /repeat shorter version/i }),
-    ).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /repeat full plan/i })).toBeInTheDocument()
-    expect(screen.getByText(/6 of 38 min/)).toBeInTheDocument()
-  })
-
-  it('last_complete ended-early with zero completed blocks omits the secondary button', () => {
-    // Post-U1 shape (2026-06-11 session-truth): every end path skips the
-    // unfinished tail, so a zero-work end records all blocks as skipped.
-    const zeroCompleted: LastCompleteBundle = {
-      ...fakeLastComplete,
-      log: {
-        ...fakeLastComplete.log,
-        status: 'ended_early',
-        blockStatuses: [
-          { blockId: 'b-1', status: 'skipped' },
-          { blockId: 'b-2', status: 'skipped' },
-        ],
-      },
-      plan: {
-        ...fakeLastComplete.plan,
-        blocks: [
-          {
-            id: 'b-1',
-            type: 'warmup',
-            drillName: 'Warm',
-            shortName: 'Warm',
-            durationMinutes: 3,
-            coachingCue: '',
-            courtsideInstructions: '',
-            required: true,
-          },
-          {
-            id: 'b-2',
-            type: 'main_skill',
-            drillName: 'Pass',
-            shortName: 'Pass',
-            durationMinutes: 11,
-            coachingCue: '',
-            courtsideInstructions: '',
-            required: true,
-          },
-        ],
-      },
-    }
-    render(
-      <HomePrimaryCard
-        variant="last_complete"
-        data={zeroCompleted}
-        nextFocus="pass"
-        backlog={['serve', 'set']}
-        onStartPlan={() => {}}
-        onRepeat={() => {}}
-        onStartDifferent={() => {}}
-        onRepeatWhatYouDid={() => {}}
-      />,
-    )
-
-    expect(
-      screen.queryByRole('button', { name: /repeat shorter version/i }),
-    ).not.toBeInTheDocument()
-    // The Repeat full plan affordance still renders (now a secondary link).
-    expect(screen.getByRole('button', { name: /repeat full plan/i })).toBeInTheDocument()
-  })
-
-  it('last_complete: focal CTA is Start [focus] session; Repeat + Start-different demote to secondary', async () => {
+  it('last_complete: focal CTA is Start [focus] session under a Recommended eyebrow', async () => {
     const user = userEvent.setup()
     const onStartPlan = vi.fn()
-    const onRepeat = vi.fn()
-    const onStartDifferent = vi.fn()
 
     render(
       <HomePrimaryCard
         variant="last_complete"
-        data={fakeLastComplete}
         nextFocus="pass"
         backlog={['serve', 'set']}
         onStartPlan={onStartPlan}
-        onRepeat={onRepeat}
-        onStartDifferent={onStartDifferent}
       />,
     )
 
@@ -425,42 +192,40 @@ describe('HomePrimaryCard (C-4 Unit 3) - variants', () => {
       expect.stringMatching(/train again/i),
     )
 
+    // D158 (shibui v2-04): the eyebrow names the CTA as the plan's
+    // recommendation for today.
+    expect(screen.getByText('Recommended')).toBeInTheDocument()
+
     // Home-coherence: the plan is the focal action.
     await user.click(screen.getByRole('button', { name: /start passing session/i }))
     expect(onStartPlan).toHaveBeenCalledTimes(1)
-
-    // Repeat + Start-different are preserved as secondary actions.
-    await user.click(screen.getByRole('button', { name: /repeat last session/i }))
-    expect(onRepeat).toHaveBeenCalledTimes(1)
-
-    await user.click(screen.getByRole('button', { name: /start a different session/i }))
-    expect(onStartDifferent).toHaveBeenCalledTimes(1)
-
-    // Phase F Unit 1 regression guard: the pre-Phase-F affordances MUST
-    // be gone. `Edit` shared a URL with Repeat (same-URL duplication);
-    // `Same as last time` was a one-tap shortcut that bypassed the
-    // StaleContextBanner. A future reintroduction should fail loudly.
-    expect(screen.queryByRole('button', { name: /^edit$/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /same as last time/i })).not.toBeInTheDocument()
   })
 
-  it('last_complete: renders the queue line and labels the header as the LAST session', () => {
+  it('last_complete: the card carries ONLY the plan — no meta line, no repeat links, no in-card escape (D158)', () => {
     render(
       <HomePrimaryCard
         variant="last_complete"
-        data={fakeLastComplete}
         nextFocus="pass"
         backlog={['serve', 'set']}
         onStartPlan={() => {}}
-        onRepeat={() => {}}
-        onStartDifferent={() => {}}
       />,
     )
+
     // The plan's deferred tail stays visible under the focal CTA (R3).
     expect(screen.getByText('Then: serving and setting.')).toBeInTheDocument()
-    // Header metadata describes the LAST session explicitly — the focal
-    // CTA below describes the NEXT one, so the label disambiguates.
-    expect(screen.getByText(/^Last session: /)).toBeInTheDocument()
+
+    // D158 regression guards — the retired affordances and the meta
+    // line must never silently return to the card:
+    expect(screen.queryByText(/^Last session: /)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /repeat/i })).not.toBeInTheDocument()
+    // `Start a different session` is a page-level HomeScreen link now,
+    // never a card child.
+    expect(
+      screen.queryByRole('button', { name: /start a different session/i }),
+    ).not.toBeInTheDocument()
+    // Phase F Unit 1 regression guard, still in force post-D158.
+    expect(screen.queryByRole('button', { name: /^edit$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /same as last time/i })).not.toBeInTheDocument()
   })
 
   it('resume: delegates to the existing ResumePrompt modal (role=dialog)', async () => {

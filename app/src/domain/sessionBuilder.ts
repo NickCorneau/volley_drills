@@ -4,10 +4,8 @@ import type {
   BlockSlot,
   BlockSlotType,
   DraftBlock,
-  ExecutionLog,
   PlayerLevel,
   SessionDraft,
-  SessionPlan,
   SetupContext,
 } from '../model'
 import type { SessionCalibration } from './calibration/sessionCalibration'
@@ -465,87 +463,9 @@ export function buildDraft(
   return buildDraftResult(context, options)?.draft ?? null
 }
 
-/**
- * C-5 Unit 3: Rebuild a `SessionDraft` from the subset of plan blocks
- * the tester actually completed (per `ExecutionLog.blockStatuses`).
- * Powers the "Repeat what you did" secondary CTA on the ended-early
- * LastComplete card.
- *
- * Contract:
- * - Preserves the original plan's block order.
- * - Carries forward the plan's `context` onto the new draft (R6),
- *   including `sessionFocus` per the 2026-04-30 focus policy: a
- *   repeat means same conditions, focus included. If the plan has no
- *   persisted context (legacy v3 records), returns `null` so the
- *   caller can fall back to "Repeat full plan" / pre-filled Setup.
- * - Returns `null` when zero blocks are completed - the ended-early
- *   typical case has at least a warmup, but this is defensive; the
- *   caller should hide the secondary button in that case.
- * - Does NOT carry `SessionPlan.safetyCheck` values onto the draft -
- *   the draft doesn't encode safety (that happens on Safety screen
- *   mount), and D83 makes that a per-session decision anyway.
- * - `drillId` / `variantId` are preserved when the plan carries them;
- *   legacy plans fall back to empty strings so the draft shape remains
- *   valid without guessing catalog identity from display names.
- *
- * Note: pain-recovery rebuild (`buildRecoveryDraft` below) DOES strip
- * focus — recovery overrides today's focus. Don't reuse this function
- * for that path.
- */
-export function buildDraftFromCompletedBlocks(
-  log: ExecutionLog,
-  plan: SessionPlan,
-): SessionDraft | null {
-  if (!plan.context) return null
-  if (plan.blocks.length === 0) return null
-
-  const statusByIndex = new Map<number, ExecutionLog['blockStatuses'][number]>()
-  log.blockStatuses.forEach((entry, idx) => {
-    statusByIndex.set(idx, entry)
-  })
-
-  const completedBlocks: DraftBlock[] = []
-  plan.blocks.forEach((planBlock, idx) => {
-    const status = statusByIndex.get(idx)
-    if (status?.status !== 'completed') return
-    completedBlocks.push({
-      id: planBlock.id,
-      type: planBlock.type,
-      // Legacy plans may not carry drill identity; keep those identity-
-      // empty while preserving stable IDs on plans created after the
-      // drill-intent substitution work.
-      drillId: planBlock.drillId ?? '',
-      variantId: planBlock.variantId ?? '',
-      drillName: planBlock.drillName,
-      shortName: planBlock.shortName,
-      durationMinutes: planBlock.durationMinutes,
-      coachingCue: planBlock.coachingCue,
-      courtsideInstructions: planBlock.courtsideInstructions,
-      courtsideInstructionsBonus: planBlock.courtsideInstructionsBonus,
-      required: planBlock.required,
-      // Preserve the original rationale as data for future Swap / See-Why
-      // surfaces; the current run-flow no longer renders it inline.
-      rationale: planBlock.rationale,
-      subBlockIntervalSeconds: planBlock.subBlockIntervalSeconds,
-      segments: planBlock.segments,
-    })
-  })
-  if (completedBlocks.length === 0) return null
-
-  // Pick a reasonable archetype label for the rebuilt draft. Plan
-  // stores `presetId` as the archetype id (see `createSessionFromDraft`),
-  // so we carry that through verbatim.
-  return {
-    id: 'current',
-    context: plan.context,
-    archetypeId: plan.presetId as SessionDraft['archetypeId'],
-    archetypeName: plan.presetName,
-    assemblySeed: plan.assemblySeed ?? createAssemblySeed(),
-    assemblyAlgorithmVersion: plan.assemblyAlgorithmVersion ?? SESSION_ASSEMBLY_ALGORITHM_VERSION,
-    blocks: completedBlocks,
-    updatedAt: Date.now(),
-  }
-}
+// D158 (2026-06-12): `buildDraftFromCompletedBlocks` (C-5 Unit 3, the
+// ended-early "Repeat shorter version" rebuild) was retired with the
+// Home Repeat affordances after seven unused weeks of founder-use mode.
 
 /**
  * Slot types included when the user continues with a lighter (pain-flag)

@@ -6,14 +6,14 @@ import { HomeScreen } from '../HomeScreen'
 
 /**
  * U3 (2026-06-11 session-truth plan): a deliberate wrap (completed
- * status with a skipped tail) presents as FINISHED on Home, while the
- * metadata line and repeat affordances stay honest about the subset:
+ * status with a skipped tail) presents as FINISHED on Home:
  *
  * - status copy never reads "ended early" / "Partial" for a wrap
- * - the meta line reports trained-vs-planned minutes ("14 of 25 min")
- * - the shorter-version repeat survives (keyed on the skipped-tail
- *   predicate, not status)
  * - the Recent sessions row reads Done (status-keyed split pinned)
+ *
+ * D158 (2026-06-12): the card's meta line and repeat affordances were
+ * retired, so the wrap-honesty assertions narrowed to the status copy
+ * and Recent split.
  */
 
 async function clearDb() {
@@ -119,12 +119,11 @@ describe('HomeScreen: wrapped-session presentation (U3)', () => {
 
   // Covers AE1 (Home half) + AE3. Negative assertion pinned: wraps never
   // render ended-early/Partial copy anywhere on Home.
-  it('presents a wrap as Done with honest minutes and no ended-early copy', async () => {
+  it('presents a wrap as Done with no ended-early copy', async () => {
     await seedWrapped()
     renderHome()
 
     const card = await screen.findByRole('region', { name: /train again/i })
-    expect(card).toHaveTextContent(/14 of 25 min/)
     expect(card).not.toHaveTextContent(/ended early/i)
 
     // Recent sessions split stays status-keyed: the wrap reads Done.
@@ -134,13 +133,11 @@ describe('HomeScreen: wrapped-session presentation (U3)', () => {
     expect(screen.queryByText(/ended early/i)).toBeNull()
   })
 
-  it('keeps both repeat affordances for a wrap (skipped-tail keyed)', async () => {
+  it('renders no repeat affordances for a wrap (D158)', async () => {
     await seedWrapped()
     renderHome()
 
-    expect(await screen.findByRole('button', { name: /repeat full plan/i })).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /repeat shorter version \(14 min\)/i }),
-    ).toBeInTheDocument()
+    await screen.findByRole('region', { name: /train again/i })
+    expect(screen.queryByRole('button', { name: /repeat/i })).not.toBeInTheDocument()
   })
 })

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
@@ -126,23 +126,22 @@ describe('HomeScreen: Start a different session (Phase F Unit 1)', () => {
     await clearDb()
   })
 
-  it('tap on LastComplete tertiary link routes to fresh /setup (no ?from=repeat)', async () => {
+  it('tap on the page-level escape link routes to fresh /setup', async () => {
     const user = userEvent.setup()
     await seedLastComplete()
     renderHome()
 
-    // LastComplete primary renders and the tertiary "Start a different
-    // session" link is present.
-    await screen.findByRole('button', { name: /repeat last session/i })
+    // LastComplete primary renders; the "Start a different session"
+    // escape link renders below the cluster (D158: page-level, not a
+    // card child).
+    await screen.findByRole('region', { name: /train again/i })
     const startDifferent = screen.getByRole('button', {
       name: /start a different session/i,
     })
     await user.click(startDifferent)
 
-    // Lands on /setup, NOT /setup?from=repeat - the distinction between
-    // "continue from last" (Repeat) and "today is different"
-    // (Start a different session) is the whole point of the Phase F
-    // cleanup.
+    // Lands on /setup - the "today is different" path. Setup pre-fills
+    // the physical chips from getLastContext() once there.
     await screen.findByTestId('setup-route')
     const probe = screen.getByTestId('location-probe')
     expect(probe.textContent).toBe('/setup')
@@ -153,37 +152,27 @@ describe('HomeScreen: Start a different session (Phase F Unit 1)', () => {
     expect(await db.sessionDrafts.count()).toBe(0)
   })
 
-  it('regression guard: neither "Edit" nor "Same as last time" render on LastComplete anymore', async () => {
+  it('regression guard: "Edit", "Same as last time", and the Repeat links stay retired', async () => {
     await seedLastComplete()
     renderHome()
 
-    await screen.findByRole('button', { name: /repeat last session/i })
+    await screen.findByRole('region', { name: /train again/i })
 
     expect(screen.queryByRole('button', { name: /^edit$/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /same as last time/i })).not.toBeInTheDocument()
+    // D158: the one-tap Repeat affordances are gone too.
+    expect(screen.queryByRole('button', { name: /repeat/i })).not.toBeInTheDocument()
   })
 
-  it('review pending: Start a different session fires the soft-block modal', async () => {
-    const user = userEvent.setup()
+  it('review pending: the escape link is absent (scoped to the LastComplete primary)', async () => {
     await seedLastComplete()
-    // Add a pending review - LastComplete moves to the secondary list
-    // in the flat 4-row precedence. The Start-a-different-session
-    // tertiary ONLY renders on the LastComplete primary card, so with
-    // review pending it's absent AND the soft-block modal is the
-    // behavior the primary tap fires.
-    //
-    // This test seeds review pending + last_complete and proves the
-    // link is gone, then proves the underlying intercepted CTA still
-    // fires the modal by tapping the NewUser-style primary - which
-    // we can't seed here (new_user is mutually exclusive with
-    // review_pending). Instead: assert the modal contract indirectly
-    // by tapping the Finish Review CTA and confirming the modal does
-    // NOT fire for review-wise CTAs (the Finish Review button is a
-    // review CTA, not a non-review one).
-    //
-    // The direct Start-a-different-session + soft-block intercept is
-    // covered by the HomePrimaryCard.test.tsx unit-level test plus
-    // the Draft-open + review-pending case in precedence.test.tsx.
+    // Add a pending review - review_pending takes the primary slot in
+    // the flat 4-row precedence. The Start-a-different-session escape
+    // link ONLY renders on the LastComplete primary, so with review
+    // pending it's absent. (D158 also retired the last_complete
+    // secondary row, so no Repeat affordance renders here either; the
+    // non-review-CTA soft-block intercept is covered by the Draft-open
+    // + review-pending case in precedence.test.tsx.)
     const now = Date.now()
     await db.sessionPlans.put({
       id: 'plan-pr',
@@ -211,22 +200,13 @@ describe('HomeScreen: Start a different session (Phase F Unit 1)', () => {
     renderHome()
     await screen.findByRole('button', { name: 'Finish review' })
 
-    // LastComplete moved to the secondary list: the Start-a-different
-    // tertiary is a LastComplete-primary affordance only, so it's gone
-    // here.
+    // The escape link is a LastComplete-primary affordance only, so
+    // it's gone here.
     expect(
       screen.queryByRole('button', { name: /start a different session/i }),
     ).not.toBeInTheDocument()
 
-    // Tapping the secondary-row Repeat fires the soft-block modal
-    // (contract inherited from C-4 Unit 4 + precedence.test.tsx). This
-    // confirms the intercept wrapper is still in place for non-review
-    // CTAs even after the Phase F handler rename.
-    const repeat = screen.getByRole('button', { name: /^repeat$/i })
-    await user.click(repeat)
-
-    await waitFor(() =>
-      expect(screen.getByRole('dialog', { name: /finish.*review first/i })).toBeInTheDocument(),
-    )
+    // D158: no last_complete secondary row (and no Repeat) renders.
+    expect(screen.queryByRole('button', { name: /repeat/i })).not.toBeInTheDocument()
   })
 })

@@ -15,10 +15,8 @@ import type { PrimaryVariant, SecondaryRow } from '../domain/homePriority'
 import { useAppRegisterSW } from '../lib/pwa-register'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { routes } from '../routes'
-import { hasSkippedBlocks } from '../domain/executionPredicates'
-import { buildDraftFromCompletedBlocks } from '../domain/sessionBuilder'
-import { repeatSession, startPlanSession } from '../services/planLaunch'
-import { discardSession, saveDraft, skipReview, type PendingReview } from '../services/session'
+import { startPlanSession } from '../services/planLaunch'
+import { discardSession, skipReview, type PendingReview } from '../services/session'
 import { markSoftBlockDismissed, readSoftBlockDismissed } from '../services/softBlock'
 import { useHomeScreenState, type HomeFlags } from './home/useHomeScreenState'
 
@@ -123,34 +121,13 @@ export function HomeScreen() {
   // intercept factory closes over state, so calling it during render
   // inline triggers that rule).
   //
-  // Phase F Unit 1 (2026-04-19) simplified the LastComplete CTA set:
-  // - `Edit` + `Same as last time` cut; their wiring
-  //   (`handleLastCompleteEdit` / `handleSameAsLast`) is gone.
-  // - `Start a different session` is new: routes to fresh `/setup`
-  //   (no pre-fill cue, no banner). Same target URL as NewUser Start,
-  //   different user-facing label.
-  //
-  // 2026-04-22 one-tap Repeat: `handleRepeat` used to route to
-  // `/setup?from=repeat` where the tester saw every last-session
-  // toggle pre-filled + a stale-context banner + had to tap Build
-  // session. That ceremony fought the user's stated intent ("repeat
-  // this session" literally means "same conditions"), contradicted
-  // the adjacent `handleRepeatWhatYouDid` which already bypassed
-  // Setup, and matched no industry peer (Spotify / Peloton / Strava /
-  // Amazon "Buy it again" all treat Repeat as one-tap-execute). Now
-  // it rebuilds a fresh draft from the last plan's `SetupContext`
-  // via `repeatSession()` (services/planLaunch) and routes straight
-  // to Safety. If rebuilding fails (archetype or drill catalog drift
-  // since the last session) the handler falls back to `/setup` so the
-  // tester can still proceed by hand. `Start a different session` is
-  // the explicit escape when today's conditions genuinely changed.
-  //
-  // 2026-04-30 focus policy: full Repeat intentionally carries
-  // `priorContext.sessionFocus` forward — "same conditions" includes
-  // yesterday's chosen focus (see `repeatSession`). Partial repeat
-  // (`buildDraftFromCompletedBlocks`) preserves the completed-block
-  // context, focus included. Pain-recovery rebuilds strip focus by
-  // design; do NOT add a strip here without re-checking that decision.
+  // D158 (2026-06-12): the Repeat affordances (one-tap full repeat,
+  // ended-early subset repeat) were retired after seven unused weeks
+  // of founder-use mode — Setup's `getLastContext()` chip prefill plus
+  // the focal plan-launch CTA cover the same intents. `Start a
+  // different session` is the single remaining escape hatch: fresh
+  // `/setup` (pre-filled physical chips, no banner), rendered as a
+  // page-level link below the focal card rather than inside it.
   const interceptedHandlers = useMemo(() => {
     const beginNonReviewAction = () => {
       if (nonReviewActionPending) return false
@@ -197,26 +174,6 @@ export function HomeScreen() {
         if (!beginNonReviewAction()) return
         navigate(routes.setup(), { state: { editDraft: true } })
       }),
-      // One-tap Repeat: rebuild a fresh full-plan draft from the last
-      // session's SetupContext (focus included) and route straight to
-      // Safety. No Setup detour, no stale-context banner, no toggle
-      // review. The `Start a different session` CTA right below is the
-      // explicit escape hatch when today's conditions changed.
-      handleRepeat: intercept(async () => {
-        if (state.kind !== 'ready' || !state.flags.lastComplete) return
-        if (!beginNonReviewAction()) return
-        try {
-          const repeated = await repeatSession(state.flags.lastComplete.plan.context ?? null)
-          navigate(repeated ? routes.safety() : routes.setup())
-        } catch (err) {
-          if (isSchemaBlocked()) {
-            setNonReviewActionPending(false)
-            return
-          }
-          console.error('Repeat session failed:', err)
-          navigate(routes.setup())
-        }
-      }),
       // Home-coherence: the focal action on the LastComplete card. Starts
       // a session steered to the plan's next focus (staleness head),
       // reusing the last session's physical conditions, and routes
@@ -248,33 +205,6 @@ export function HomeScreen() {
       handleStartDifferentSession: intercept(() => {
         if (!beginNonReviewAction()) return
         navigate(routes.setup())
-      }),
-      // C-5 Unit 3: ended-early secondary CTA. Builds a partial draft
-      // from only the blocks that actually completed and routes to
-      // Safety. Uses the state-captured `lastComplete` bundle so we
-      // don't re-query Dexie for consistency with the render.
-      handleRepeatWhatYouDid: intercept(async () => {
-        if (state.kind !== 'ready' || !state.flags.lastComplete) return
-        if (!beginNonReviewAction()) return
-        try {
-          const draft = buildDraftFromCompletedBlocks(
-            state.flags.lastComplete.log,
-            state.flags.lastComplete.plan,
-          )
-          if (!draft) {
-            navigate(routes.setup())
-            return
-          }
-          await saveDraft(draft)
-          navigate(routes.safety())
-        } catch (err) {
-          if (isSchemaBlocked()) {
-            setNonReviewActionPending(false)
-            return
-          }
-          console.error('Repeat-what-you-did failed:', err)
-          navigate(routes.setup())
-        }
       }),
     }
   }, [navigate, nonReviewActionPending, state])
@@ -403,6 +333,20 @@ export function HomeScreen() {
           )}
         </div>
 
+        {/* D158: the single escape hatch when today's conditions changed
+            — a page-level quiet link below the focal cluster (shibui
+            v2-04 comp), not a card-interior stack. Fresh `/setup` with
+            the physical chips pre-filled from the last session. */}
+        {primary === 'last_complete' && (
+          <Button
+            variant="link"
+            disabled={nonReviewActionPending}
+            onClick={interceptedHandlers.handleStartDifferentSession}
+          >
+            Start a different session
+          </Button>
+        )}
+
         {/* Phase F1 (2026-04-19): secondary rows used to render as a
           flex-col of independent bordered cards, which competed with
           the primary card for visual weight. They now sit inside a
@@ -423,8 +367,6 @@ export function HomeScreen() {
               renderSecondary(row, flags, {
                 handleFinishReview,
                 handleDraftOpen: interceptedHandlers.handleDraftStart,
-                handleRepeat: interceptedHandlers.handleRepeat,
-                actionDisabled: nonReviewActionPending,
               }),
             )}
           </ul>
@@ -502,13 +444,12 @@ interface PrimaryHandlers {
   handleRequestSkip: () => void
   handleDraftStart: () => void
   handleDraftEdit: () => void
-  handleRepeat: () => void
-  handleRepeatWhatYouDid: () => void
   /**
    * Phase F Unit 1 (2026-04-19): replaces the pre-Phase-F
    * `handleSameAsLast` + `handleLastCompleteEdit` pair. Routes to fresh
-   * `/setup` (no pre-fill, no banner) - the "today is different" path
-   * on the LastComplete card.
+   * `/setup` (physical chips pre-filled, no banner) - the "today is
+   * different" path. D158: rendered by HomeScreen as a page-level link,
+   * no longer a card prop.
    */
   handleStartDifferentSession: () => void
   /**
@@ -561,19 +502,9 @@ function renderPrimary(primary: PrimaryVariant, flags: HomeFlags, h: PrimaryHand
       return (
         <HomePrimaryCard
           variant="last_complete"
-          data={flags.lastComplete}
           nextFocus={flags.plan.nextFocus}
           backlog={flags.plan.backlog}
           onStartPlan={h.handleStartPlan}
-          onRepeat={h.handleRepeat}
-          onStartDifferent={h.handleStartDifferentSession}
-          onRepeatWhatYouDid={
-            // U3: keyed on the skipped-tail predicate, not status, so a
-            // deliberate wrap (completed + skipped tail) keeps the
-            // shorter-version repeat. The card applies the minutes floor.
-            hasSkippedBlocks(flags.lastComplete.log) ? h.handleRepeatWhatYouDid : undefined
-          }
-          repeatNote={flags.repeatNote}
           actionDisabled={h.actionDisabled}
         />
       )
@@ -589,8 +520,6 @@ function renderPrimary(primary: PrimaryVariant, flags: HomeFlags, h: PrimaryHand
 interface SecondaryHandlers {
   handleFinishReview: () => void
   handleDraftOpen: () => void
-  handleRepeat: () => void
-  actionDisabled: boolean
 }
 
 function renderSecondary(row: SecondaryRow, flags: HomeFlags, h: SecondaryHandlers) {
@@ -613,18 +542,6 @@ function renderSecondary(row: SecondaryRow, flags: HomeFlags, h: SecondaryHandle
           variant="draft"
           data={flags.draft}
           onOpen={h.handleDraftOpen}
-        />
-      )
-    case 'last_complete':
-      if (!flags.lastComplete) return null
-      return (
-        <HomeSecondaryRow
-          key="last_complete"
-          variant="last_complete"
-          data={flags.lastComplete}
-          onRepeat={h.handleRepeat}
-          repeatNote={flags.repeatNote}
-          actionDisabled={h.actionDisabled}
         />
       )
     default: {

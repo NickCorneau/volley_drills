@@ -1,14 +1,18 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import type { LastCompleteBundle, PendingReview } from '../../services/session'
+import type { PendingReview } from '../../services/session'
 import type { SessionDraft } from '../../db'
 import { HomeSecondaryRow } from '../HomeSecondaryRow'
 
 /**
  * C-4 Unit 3: `HomeSecondaryRow` is a compact variant-driven `<li>`.
- * Three variants: review_pending_advisory, draft, last_complete.
- * Content is minimal (not a full card) - one CTA per row.
+ * Two variants: review_pending_advisory and draft. Content is minimal
+ * (not a full card) - one CTA per row.
+ *
+ * D158 (2026-06-12): the `last_complete` variant was retired with the
+ * Home Repeat affordance it carried; last-session context lives in the
+ * Recent sessions list.
  */
 
 const pr: PendingReview = {
@@ -30,36 +34,6 @@ const dr: SessionDraft = {
   archetypeName: 'Solo + Open',
   blocks: [],
   updatedAt: 1,
-}
-
-const lc: LastCompleteBundle = {
-  log: {
-    id: 'exec-lc',
-    planId: 'plan-lc',
-    status: 'completed',
-    activeBlockIndex: 0,
-    blockStatuses: [],
-    startedAt: 1,
-    completedAt: 1_700_000_000_000,
-  },
-  plan: {
-    id: 'plan-lc',
-    presetId: 'solo_wall',
-    presetName: 'Solo + Wall',
-    playerCount: 1,
-    blocks: [],
-    safetyCheck: { painFlag: false, heatCta: false, painOverridden: false },
-    createdAt: 1,
-  },
-  review: {
-    id: 'review-exec-lc',
-    executionLogId: 'exec-lc',
-    sessionRpe: 5,
-    goodPasses: 3,
-    totalAttempts: 5,
-    submittedAt: 1_700_000_000_000,
-    status: 'submitted',
-  },
 }
 
 describe('HomeSecondaryRow (C-4 Unit 3)', () => {
@@ -91,20 +65,5 @@ describe('HomeSecondaryRow (C-4 Unit 3)', () => {
     expect(screen.getByText(/solo \+ open/i)).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /^continue$/i }))
     expect(onOpen).toHaveBeenCalledTimes(1)
-  })
-
-  it('last_complete: Repeat CTA + preset label', async () => {
-    const user = userEvent.setup()
-    const onRepeat = vi.fn()
-
-    render(
-      <ul>
-        <HomeSecondaryRow variant="last_complete" data={lc} onRepeat={onRepeat} />
-      </ul>,
-    )
-
-    expect(screen.getByText(/solo \+ wall/i)).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /^repeat$/i }))
-    expect(onRepeat).toHaveBeenCalledTimes(1)
   })
 })

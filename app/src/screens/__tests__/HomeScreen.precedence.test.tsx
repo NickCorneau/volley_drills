@@ -164,8 +164,9 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
   // Home-coherence: the plan line is ABSORBED by the last_complete focal
   // card — its primary CTA ("Start passing session") states and launches
   // the next focus, so the separate descriptive "Your plan" region must
-  // NOT also render (no duplicate next-focus statement). Repeat demotes to
-  // a secondary action.
+  // NOT also render (no duplicate next-focus statement). D158: the
+  // Repeat affordances are retired; the page-level escape link is the
+  // only other action.
   it('last_complete: focal CTA launches the plan and the separate plan line is absorbed', async () => {
     await seedLastComplete('exec-lc-plan')
     renderHome()
@@ -173,14 +174,15 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     expect(
       await screen.findByRole('button', { name: /start passing session/i }),
     ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /repeat last session/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /start a different session/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /repeat/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('region', { name: /your plan/i })).not.toBeInTheDocument()
   })
 
-  it('last_complete only: renders Repeat last session', async () => {
+  it('last_complete only: renders the Train again card, not Session ready', async () => {
     await seedLastComplete('exec-lc')
     renderHome()
-    expect(await screen.findByRole('button', { name: /repeat last session/i })).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: /train again/i })).toBeInTheDocument()
     // No Session ready card.
     expect(screen.queryByText(/session ready/i)).not.toBeInTheDocument()
   })
@@ -221,7 +223,7 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     expect(screen.queryByRole('button', { name: LAUNCH_CTA })).not.toBeInTheDocument()
   })
 
-  it('draft + last_complete: draft primary, last_complete as secondary row', async () => {
+  it('draft + last_complete: draft primary, no secondary row (D158)', async () => {
     await seedDraft()
     await seedLastComplete('exec-lc')
     renderHome()
@@ -229,11 +231,9 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     expect(await screen.findByRole('button', { name: /^continue$/i })).toBeInTheDocument()
     expect(screen.getByText(/solo \+ open/i)).toBeInTheDocument()
 
-    // Secondary row references the last completed preset.
-    const secondary = screen.getByRole('list', {
-      name: /other active actions/i,
-    })
-    expect(secondary).toHaveTextContent(/solo \+ wall \(yesterday\)/i)
+    // D158: the last_complete secondary row was retired with its Repeat
+    // affordance; Recent sessions owns last-session context.
+    expect(screen.queryByRole('list', { name: /other active actions/i })).not.toBeInTheDocument()
   })
 
   it('draft primary Continue routes directly to Safety', async () => {
@@ -245,7 +245,7 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
   })
 
-  it('review_pending + draft + last_complete: review primary + both secondaries', async () => {
+  it('review_pending + draft + last_complete: review primary + draft secondary only (D158)', async () => {
     await seedPendingReview('exec-pr')
     await seedDraft()
     await seedLastComplete('exec-lc')
@@ -258,7 +258,8 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
       name: /other active actions/i,
     })
     expect(secondary).toHaveTextContent(/solo \+ open/i)
-    expect(secondary).toHaveTextContent(/solo \+ wall \(yesterday\)/i)
+    // D158: no last_complete secondary row.
+    expect(secondary).not.toHaveTextContent(/solo \+ wall/i)
   })
 
   it('resume: overrides all other flags, only the resume dialog renders', async () => {

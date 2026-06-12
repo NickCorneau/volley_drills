@@ -104,10 +104,10 @@ Founder follow-up question on the v2 frames: do the repeat links need to exist a
 
 What removal gives up (for the decision record): one-tap verbatim repeat with the same focus (the Setup path pre-fills conditions but resets focus to Recommended, so a true same-focus repeat costs one extra chip tap), and the ended-early subset rebuild (`Repeat shorter version` is the only path that rebuilds exactly the completed blocks). Removal would retire the 2026-04-22 one-tap-Repeat decision surface, the repeat-drift note (trust-loop U5/R8), the `REPEAT_SUBSET_MIN_MINUTES` floor, and the HomeSecondaryRow repeat action — a `docs/decisions.md` entry, not just a UI edit.
 
-## Founder Comp Decisions (recorded 2026-06-12)
+## Founder Comp Decisions (recorded 2026-06-12, ratified as `D158`)
 
 - **Setup: frame `setup-01-returning-quiet-labels.png` chosen** ("liked setup 1 the most") — heading option A (quiet uppercase micro-labels) at `gap-4` cluster spacing. Implicitly accepts the two-line focal-line wrap shown in that frame (open question 4). Callout copy stays unchanged (conservative default; frame 07's slim variant not chosen).
-- **Home: direction is the v2 family** (links out of the card, `Recommended` eyebrow, meta line removed); final variant pending the repeat-removal call (v2-01/02 vs. v2-04).
+- **Home: frame `home-v2-04-no-repeat.png` chosen** — the repeat links are removed outright (founder lean "I don't think I'd ever used repeat plan", agent recommendation accepted via skipped confirm). Card = greeting + `Recommended` eyebrow + focal CTA + `Then:` line; `Start a different session` is a page-level link. The repeat-removal scope (retired surfaces, named losses, covenant render-budget amendment) is recorded in `D158` in `docs/decisions.md` — that row is the canonical record; this README is the comp provenance.
 
 ## What Approval Unlocks
 

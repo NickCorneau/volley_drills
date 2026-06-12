@@ -8,7 +8,7 @@ import {
   currentPersistedPlan,
 } from '../../test-utils/persistedRecords'
 import { getCurrentDraft } from '../session'
-import { repeatSession, startPlanSession } from '../planLaunch'
+import { startPlanSession } from '../planLaunch'
 
 // Spy-through: real assembly still runs; the spy exposes the options
 // each launch passed so the stress-steering tests can assert the
@@ -16,20 +16,21 @@ import { repeatSession, startPlanSession } from '../planLaunch'
 vi.mock('../../domain/sessionBuilder', { spy: true })
 
 /**
- * Home-coherence: the two one-tap Home launches. Pins that
+ * Home-coherence: the one-tap Home plan launch. Pins that
  * startPlanSession builds + persists a draft steered to the plan's next
- * focus (reusing the prior physical conditions), that repeatSession
- * rebuilds from the prior context verbatim (focus included), that both
- * return true so the caller routes to Safety, and that both return
- * false without saving when there's no prior context.
+ * focus (reusing the prior physical conditions), that it returns true
+ * so the caller routes to Safety, and that it returns false without
+ * saving when there's no prior context.
  *
  * D154 stress steering: startPlanSession passes the derived ladder
- * positions to assembly (an accepted "more/less" verdict acts);
- * repeatSession stays verbatim (no positions, R10).
+ * positions to assembly (an accepted "more/less" verdict acts).
  *
  * U5/KTD6 clock calibration: startPlanSession also passes the derived
  * session-grain calibration so the budget scales toward honest wall
- * time; repeatSession stays verbatim (no calibration either).
+ * time.
+ *
+ * D158 (2026-06-12): the `repeatSession` suite was retired with the
+ * Home Repeat affordances.
  */
 
 const PRIOR_CONTEXT: SetupContext = {
@@ -186,51 +187,5 @@ describe('startPlanSession', () => {
     } else {
       expect(draft!.steeredFocus).toBeUndefined()
     }
-  })
-})
-
-describe('repeatSession', () => {
-  it('rebuilds from the prior context verbatim — focus included (2026-04-30 policy)', async () => {
-    const repeated = await repeatSession(PRIOR_CONTEXT)
-
-    expect(repeated).toBe(true)
-    const draft = await getCurrentDraft()
-    expect(draft).not.toBeNull()
-    expect(draft?.context.sessionFocus).toBe('serve')
-    expect(draft?.context.playerMode).toBe('solo')
-    expect(draft?.context.wallAvailable).toBe(true)
-  })
-
-  it('returns false and saves nothing when there is no prior context', async () => {
-    expect(await repeatSession(null)).toBe(false)
-    expect(await getCurrentDraft()).toBeNull()
-  })
-
-  it('R10: Repeat never steers — no positions reach assembly even with accepted verdicts', async () => {
-    await db.sessionReviews.add(verdictReview('more', 'accepted', 1000))
-
-    await repeatSession(PRIOR_CONTEXT)
-
-    expect(lastBuildDraftOptions()?.stressPositions).toBeUndefined()
-  })
-
-  it('U5: Repeat never re-steers — no calibration reaches assembly even with clean completes', async () => {
-    await seedCleanComplete(0, 20, 1.2)
-    await seedCleanComplete(1, 20, 1.2)
-    await seedCleanComplete(2, 20, 1.2)
-
-    await repeatSession(PRIOR_CONTEXT)
-
-    expect(lastBuildDraftOptions()?.calibration).toBeUndefined()
-  })
-
-  it('trust-loop U1: a Repeat draft never carries steering provenance', async () => {
-    await db.sessionReviews.add(verdictReview('more', 'accepted', 1000))
-
-    await repeatSession(PRIOR_CONTEXT)
-
-    const draft = await getCurrentDraft()
-    expect(draft).not.toBeNull()
-    expect(draft!.steeredFocus).toBeUndefined()
   })
 })

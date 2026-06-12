@@ -178,68 +178,19 @@ describe('V0B-18 D86 per-surface regression scan', () => {
       assertClean(container, 'HomePrimaryCard.draft')
     })
 
-    it('last_complete (normal + ended-early)', () => {
-      // Phase F refactor: old `onEdit` + `onSameAsLast` merged into
-      // a single `onStartDifferent` handler.
-      const normal = render(
+    it('last_complete', () => {
+      // D158 (shibui v2-04): one card shape for every last_complete
+      // state — plan-only interior (eyebrow + CTA + Then line). The
+      // ended-early / wrapped meta and repeat copy were retired.
+      const { container } = render(
         <HomePrimaryCard
           variant="last_complete"
-          data={fakeLastComplete}
           nextFocus="pass"
           backlog={['serve', 'set']}
           onStartPlan={() => {}}
-          onRepeat={() => {}}
-          onStartDifferent={() => {}}
         />,
       )
-      assertClean(normal.container, 'HomePrimaryCard.last_complete normal')
-
-      const endedEarly = render(
-        <HomePrimaryCard
-          variant="last_complete"
-          data={{
-            ...fakeLastComplete,
-            log: {
-              ...fakeLastComplete.log,
-              status: 'ended_early',
-              blockStatuses: [{ blockId: 'b-1', status: 'completed' }],
-            },
-          }}
-          nextFocus="serve"
-          backlog={['pass', 'set']}
-          onStartPlan={() => {}}
-          onRepeat={() => {}}
-          onStartDifferent={() => {}}
-          onRepeatWhatYouDid={() => {}}
-        />,
-      )
-      assertClean(endedEarly.container, 'HomePrimaryCard.last_complete ended_early')
-
-      // U3 (2026-06-11 session-truth): deliberate wrap — completed
-      // status with a skipped tail — exercises the subset-repeat copy.
-      const wrapped = render(
-        <HomePrimaryCard
-          variant="last_complete"
-          data={{
-            ...fakeLastComplete,
-            log: {
-              ...fakeLastComplete.log,
-              status: 'completed',
-              blockStatuses: [
-                { blockId: 'b-1', status: 'completed' },
-                { blockId: 'b-2', status: 'skipped' },
-              ],
-            },
-          }}
-          nextFocus="set"
-          backlog={['pass', 'serve']}
-          onStartPlan={() => {}}
-          onRepeat={() => {}}
-          onStartDifferent={() => {}}
-          onRepeatWhatYouDid={() => {}}
-        />,
-      )
-      assertClean(wrapped.container, 'HomePrimaryCard.last_complete wrapped')
+      assertClean(container, 'HomePrimaryCard.last_complete')
     })
 
     it('resume (ResumePrompt delegated)', () => {
@@ -278,14 +229,6 @@ describe('V0B-18 D86 per-surface regression scan', () => {
       assertClean(container, 'HomeSecondaryRow.draft')
     })
 
-    it('last_complete', () => {
-      const { container } = render(
-        <ul>
-          <HomeSecondaryRow variant="last_complete" data={fakeLastComplete} onRepeat={() => {}} />
-        </ul>,
-      )
-      assertClean(container, 'HomeSecondaryRow.last_complete')
-    })
   })
 
   it('HomeScreen (new_user empty state)', async () => {

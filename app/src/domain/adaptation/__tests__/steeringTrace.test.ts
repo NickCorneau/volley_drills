@@ -1,16 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type {
-  AdaptationDelta,
-  SessionPlanBlock,
-  SessionReview,
-  SetupContext,
-  VerdictChoice,
-} from '../../../model'
+import type { AdaptationDelta, SessionReview, VerdictChoice } from '../../../model'
 import {
-  REPEAT_DRIFT_NOTE,
   composeSteeringLine,
   deriveSteeringTrace,
-  repeatPlanDrifted,
   resolveArmedPromise,
   type SteeringTraceInput,
 } from '../steeringTrace'
@@ -236,90 +228,8 @@ describe('deriveSteeringTrace', () => {
   })
 })
 
-/** Trust-loop U5 (R8/KTD7): repeat-drift fold-compare. */
-describe('repeatPlanDrifted', () => {
-  const passContext: SetupContext = {
-    playerMode: 'solo',
-    timeProfile: 25,
-    netAvailable: false,
-    wallAvailable: true,
-    sessionFocus: 'pass',
-  }
-
-  function mainSkillBlock(drillName: string): SessionPlanBlock {
-    return {
-      id: 'b1',
-      type: 'main_skill',
-      drillName,
-      shortName: drillName,
-      durationMinutes: 10,
-      coachingCue: '',
-      courtsideInstructions: '',
-      required: true,
-    }
-  }
-
-  it('reports drift when an accept moved the focus position after assembly (AE4)', () => {
-    const reviews = [verdictReview('pass', 'more', 'accepted', 1000)]
-    const plan = { createdAt: 0, context: passContext, blocks: [] }
-    expect(repeatPlanDrifted(reviews, plan)).toBe(true)
-  })
-
-  it('reports no drift when the movement predates assembly (AE4)', () => {
-    const reviews = [verdictReview('pass', 'more', 'accepted', 1000)]
-    const plan = { createdAt: 2000, context: passContext, blocks: [] }
-    expect(repeatPlanDrifted(reviews, plan)).toBe(false)
-  })
-
-  it('anchors on assembledAt, not the Begin tap: an accept landing between assembly and start reads as drift', () => {
-    const reviews = [verdictReview('pass', 'more', 'accepted', 1000)]
-    // Assembled at 500 (pre-accept), started at 2000 (post-accept): the
-    // repeated blocks reflect the pre-accept position, so the plan HAS
-    // moved since assembly even though createdAt postdates the accept.
-    const plan = { createdAt: 2000, assembledAt: 500, context: passContext, blocks: [] }
-    expect(repeatPlanDrifted(reviews, plan)).toBe(true)
-  })
-
-  it('net-zero movement since assembly reports no drift (KTD7)', () => {
-    const reviews = [
-      verdictReview('pass', 'more', 'accepted', 1000),
-      verdictReview('pass', 'less', 'accepted', 2000),
-    ]
-    const plan = { createdAt: 0, context: passContext, blocks: [] }
-    expect(repeatPlanDrifted(reviews, plan)).toBe(false)
-  })
-
-  it('a clamped accept (no actual movement) reports no drift', () => {
-    // Beginner pass starts at rung 1; the accepted 'less' was clamped.
-    const reviews = [verdictReview('pass', 'less', 'accepted', 1000)]
-    const plan = { createdAt: 0, context: passContext, blocks: [] }
-    expect(repeatPlanDrifted(reviews, plan, 'beginner')).toBe(false)
-    // Band-dependence: intermediate starts at 2, so the same accept moved.
-    expect(repeatPlanDrifted(reviews, plan, 'intermediate')).toBe(true)
-  })
-
-  it('movement on another focus reports no drift', () => {
-    const reviews = [verdictReview('serve', 'more', 'accepted', 1000)]
-    const plan = { createdAt: 0, context: passContext, blocks: [] }
-    expect(repeatPlanDrifted(reviews, plan)).toBe(false)
-  })
-
-  it('legacy plan without context infers the focus from its blocks', () => {
-    const reviews = [verdictReview('pass', 'more', 'accepted', 1000)]
-    const plan = {
-      createdAt: 0,
-      context: undefined,
-      blocks: [mainSkillBlock('Continuous Passing')],
-    }
-    expect(repeatPlanDrifted(reviews, plan)).toBe(true)
-  })
-
-  it('non-scoped inference (no main_skill block) can never drift', () => {
-    const reviews = [verdictReview('pass', 'more', 'accepted', 1000)]
-    const plan = { createdAt: 0, context: undefined, blocks: [] }
-    expect(repeatPlanDrifted(reviews, plan)).toBe(false)
-  })
-})
+// D158 (2026-06-12): the `repeatPlanDrifted` / `REPEAT_DRIFT_NOTE`
+// suite was retired with the Home Repeat affordance (KTD7 surface).
 
 describe('steering line copy (KTD9 / AE6)', () => {
   it("renders the easing voice for the 'less' direction", () => {
@@ -339,9 +249,4 @@ describe('steering line copy (KTD9 / AE6)', () => {
     }
   })
 
-  it('the repeat note passes the same gate (AE6 Home slice)', () => {
-    expect(REPEAT_DRIFT_NOTE).not.toMatch(/rung|ladder|steer|position/i)
-    expect(REPEAT_DRIFT_NOTE).not.toMatch(/\d/)
-    expect(REPEAT_DRIFT_NOTE).not.toContain('\u2014')
-  })
 })

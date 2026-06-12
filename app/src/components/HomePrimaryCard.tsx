@@ -1,7 +1,7 @@
 import type { SessionDraft } from '../model'
 import type { ScopedFocus } from '../domain/eligibleSessions'
 import { formatInterruptedAgo } from '../lib/format'
-import type { LastCompleteBundle, PendingReview, ResumableSession } from '../services/session'
+import type { PendingReview, ResumableSession } from '../services/session'
 import { DraftCard, LastCompleteCard, NewUserCard, ReviewPendingCard } from './home'
 import { ResumePrompt } from './ResumePrompt'
 
@@ -42,16 +42,15 @@ type HomePrimaryCardProps =
       onEdit: () => void
     }
   | {
+      /**
+       * D158: the card carries only the plan (eyebrow + CTA + queue
+       * line). Repeat links retired; `Start a different session` is a
+       * page-level escape hatch owned by HomeScreen.
+       */
       variant: 'last_complete'
-      data: LastCompleteBundle
       nextFocus: ScopedFocus
       backlog: readonly ScopedFocus[]
       onStartPlan: () => void
-      onRepeat: () => void
-      onStartDifferent: () => void
-      onRepeatWhatYouDid?: () => void
-      /** Trust-loop U5: repeat-drift note, or null when nothing moved. */
-      repeatNote?: string | null
       actionDisabled?: boolean
     }
   | {

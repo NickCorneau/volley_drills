@@ -13,13 +13,15 @@ import {
  * Precedence (flat, 4-row per H11 / C5 - no age tiers):
  *   resume > review_pending > draft > last_complete > new_user
  *
- * Secondary row rules (per C-4 plan Unit 2):
+ * Secondary row rules (per C-4 plan Unit 2, amended by D158):
  *   - resume primary mutes everything (empty secondary list)
- *   - review_pending primary: draft + last_complete appear as secondary
- *     rows when active
- *   - draft primary: last_complete appears as secondary when active
- *   - last_complete or new_user primary: no secondary rows (review_pending
- *     being true always takes primary before them)
+ *   - review_pending primary: draft appears as a secondary row when active
+ *   - all other primaries: no secondary rows (review_pending being true
+ *     always takes primary before draft/last_complete)
+ *
+ * D158 (2026-06-12): the `last_complete` secondary row was retired with
+ * the Repeat affordance it carried (its C-5 rationale was "context for
+ * the Repeat path"); Recent sessions owns last-session context.
  */
 
 const ALL_COMBINATIONS: FlagSummary[] = []
@@ -50,12 +52,8 @@ function expectedSecondary(f: FlagSummary): SecondaryRow[] {
   if (f.resume) return []
   const primary = expectedPrimary(f)
   const rows: SecondaryRow[] = []
-  if (primary === 'review_pending') {
-    if (f.draft) rows.push({ kind: 'draft' })
-    if (f.lastComplete) rows.push({ kind: 'last_complete' })
-  }
-  if (primary === 'draft' && f.lastComplete) {
-    rows.push({ kind: 'last_complete' })
+  if (primary === 'review_pending' && f.draft) {
+    rows.push({ kind: 'draft' })
   }
   return rows
 }
@@ -143,7 +141,7 @@ describe('selectSecondaryRows - intent checks', () => {
     ).toEqual([])
   })
 
-  it('review_pending primary renders draft + last_complete as secondary rows', () => {
+  it('review_pending primary renders only the draft as a secondary row (D158)', () => {
     expect(
       selectSecondaryRows({
         resume: false,
@@ -151,10 +149,10 @@ describe('selectSecondaryRows - intent checks', () => {
         draft: true,
         lastComplete: true,
       }),
-    ).toEqual([{ kind: 'draft' }, { kind: 'last_complete' }])
+    ).toEqual([{ kind: 'draft' }])
   })
 
-  it('draft primary with last_complete renders last_complete as secondary', () => {
+  it('draft primary with last_complete renders no secondary rows (D158)', () => {
     expect(
       selectSecondaryRows({
         resume: false,
@@ -162,7 +160,7 @@ describe('selectSecondaryRows - intent checks', () => {
         draft: true,
         lastComplete: true,
       }),
-    ).toEqual([{ kind: 'last_complete' }])
+    ).toEqual([])
   })
 
   it('last_complete primary has no secondary rows', () => {

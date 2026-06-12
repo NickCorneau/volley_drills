@@ -33,19 +33,17 @@ import { HomeScreen } from '../HomeScreen'
  * budgeted elements.
  */
 
-// Steady state: 3 card actions (focal CTA + 2 tertiary links) + the
+// Steady state (amended by D158, the shibui v2-04 card): the focal CTA
+// + the page-level `Start a different session` escape link + the
 // Settings footer link; the Train again + Recent sessions regions; a
-// 6-line card interior (state line, metadata, CTA, Then-line, 2 links).
-// The body hosts exactly 2 top-level elements: the thin-spine cluster
-// and the Recent sessions section.
-const STEADY_TAP_TARGETS = 4
+// 4-line card interior (state line, Recommended eyebrow, CTA,
+// Then-line — no meta line, no in-card links). The body hosts exactly
+// 3 top-level elements: the thin-spine cluster, the escape link, and
+// the Recent sessions section.
+const STEADY_TAP_TARGETS = 3
 const STEADY_REGIONS = 2
-const STEADY_BODY_CHILDREN = 2
-const STEADY_CARD_LINE_CAP = 6
-
-// Skipped-tail variant adds exactly one element: the subset-repeat link.
-const SKIPPED_TAIL_TAP_TARGETS = 5
-const SKIPPED_TAIL_CARD_LINE_CAP = 7
+const STEADY_BODY_CHILDREN = 3
+const STEADY_CARD_LINE_CAP = 4
 
 // Coupled to the shipped SkillFocus set on purpose: extend the
 // alternation when a new focus ships (e.g. the queued M002 attack
@@ -104,9 +102,9 @@ async function seedSteadyState(execId: string) {
 
 /**
  * The skipped-tail variant: a deliberate wrap (`completed` status with
- * a skipped tail — the third link keys on the skipped-blocks predicate,
- * not on `ended_early`). Completed blocks total 12 min, above the
- * REPEAT_SUBSET_MIN_MINUTES floor, so the subset-repeat link renders.
+ * a skipped tail). Pre-D158 this was the densest card state (it added
+ * the subset-repeat link); post-D158 the card renders identically to
+ * steady state — the case stays to pin exactly that.
  */
 async function seedSkippedTail(execId: string) {
   const completedAt = Date.now() - 2 * 24 * 60 * 60 * 1000
@@ -252,28 +250,22 @@ describe('Home covenant render budget (D156)', () => {
     })
   })
 
-  describe('skipped-tail variant (densest card state)', () => {
-    it('renders exactly the budgeted tap targets and stays within the variant line cap', async () => {
+  describe('skipped-tail variant (renders identically to steady state post-D158)', () => {
+    it('stays at the steady-state budget — no repeat links, no meta line', async () => {
       await seedSkippedTail('exec-tail')
       renderHome()
       await screen.findByRole('button', { name: LAUNCH_CTA })
 
-      // The variant's one extra element is the subset-repeat link, and a
-      // deliberate wrap (`completed` + skipped tail) still renders it.
-      expect(
-        screen.getByRole('button', { name: /repeat shorter version \(12 min\)/i }),
-      ).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /repeat full plan/i })).toBeInTheDocument()
+      // D158 regression guard: the retired repeat affordances must not
+      // return on the wrap/skipped-tail state either.
+      expect(screen.queryByRole('button', { name: /repeat/i })).not.toBeInTheDocument()
 
-      expect(countEnabledTapTargets(), BUDGET_MSG).toBe(SKIPPED_TAIL_TAP_TARGETS)
-
-      // Region + top-level census stay at the steady-state pins — the
-      // variant's extra element lives inside the card, not the body.
+      expect(countEnabledTapTargets(), BUDGET_MSG).toBe(STEADY_TAP_TARGETS)
       expect(screen.getAllByRole('region')).toHaveLength(STEADY_REGIONS)
       expect(bodyChildCount(), BUDGET_MSG).toBe(STEADY_BODY_CHILDREN)
 
       const card = screen.getByRole('region', { name: /train again/i })
-      expect(cardLineCount(card), BUDGET_MSG).toBeLessThanOrEqual(SKIPPED_TAIL_CARD_LINE_CAP)
+      expect(cardLineCount(card), BUDGET_MSG).toBeLessThanOrEqual(STEADY_CARD_LINE_CAP)
     })
   })
 })
