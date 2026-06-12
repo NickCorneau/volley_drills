@@ -62,5 +62,11 @@ export async function startPlanSession(input: StartPlanSessionInput): Promise<bo
   // controlled assembly slots; stress steering applies the derived
   // ladder position to the main_skill pick (D154); clock calibration
   // scales the drill-minute budget toward honest wall time (U5).
-  return buildAndSaveDraft({ ...priorContext, sessionFocus: nextFocus }, { steer: true })
+  // `focusSource: 'resolved'` (D159) records that the focus was
+  // machine-derived, so editing this draft in Setup maps the pill back
+  // to Recommended instead of presenting the focus as a user pick.
+  return buildAndSaveDraft(
+    { ...priorContext, sessionFocus: nextFocus, focusSource: 'resolved' },
+    { steer: true },
+  )
 }

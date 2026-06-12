@@ -14,6 +14,8 @@ import {
 import type { PlayerMode, TimeProfile } from '../types/session'
 import type { SessionDraft, SetupContext } from '../model'
 import { buildDraft } from '../domain/sessionBuilder'
+import { composePlan } from '../domain/composePlan'
+import type { ScopedFocus } from '../domain/eligibleSessions'
 import { isOnboardingStep } from '../lib/onboarding'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import { isSkillLevel, skillLevelToDrillBand } from '../lib/skillLevel'
@@ -26,6 +28,7 @@ import {
 import type { BlockSlotType } from '../types/session'
 import { getStorageMeta, setStorageMeta } from '../services/storageMeta'
 import { loadSessionCalibration } from '../services/calibration'
+import { loadPlanInputs } from '../services/planInputs'
 import { loadStressPositions } from '../services/stressPositions'
 import type { SessionCalibration } from '../domain/calibration/sessionCalibration'
 import type { StressPositions } from '../domain/adaptation/stressPosition'
@@ -88,11 +91,19 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   // mount so the preview build that surfaces the assembled total stays
   // consistent with the Build-commit build — handleConfirm persists the
   // preview draft without rebuilding, so steering must live here.
+  // `resolvedFocus` (D159) is the plan's staleness head, resolved
+  // through the same composePlan-over-loadPlanInputs read Home uses:
+  // with the Recommended pill selected the build stamps it as
+  // `sessionFocus` + `focusSource: 'resolved'`, so the default path
+  // rotates focus and steers exactly like the Home plan launch.
+  // `undefined` (load failed) leaves Recommended unstamped — the
+  // legacy integrative build, never an error.
   const [previewInputs, setPreviewInputs] = useState<{
     readonly lastCompletedByType: Partial<Record<BlockSlotType, string>>
     readonly playerLevel: PlayerLevel | undefined
     readonly stressPositions: StressPositions | undefined
     readonly calibration: SessionCalibration | undefined
+    readonly resolvedFocus: ScopedFocus | undefined
   } | null>(null)
   const [previewDraft, setPreviewDraft] = useState<SessionDraft | null>(null)
 
@@ -131,7 +142,12 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           setNetAvailable(ctx.netAvailable)
           setWallAvailable(ctx.wallAvailable)
           setTimeProfile(ctx.timeProfile)
-          setSessionFocus(shouldHydrateDraft ? (ctx.sessionFocus ?? 'recommended') : 'recommended')
+          // D159 provenance: a resolved focus is the system's pick, not
+          // the user's — hydrate it back to the Recommended pill so the
+          // edit screen never presents a machine choice as a user choice.
+          const draftFocus =
+            ctx.focusSource === 'resolved' ? 'recommended' : (ctx.sessionFocus ?? 'recommended')
+          setSessionFocus(shouldHydrateDraft ? draftFocus : 'recommended')
         }
       } catch {
         // Prefill is best-effort; a failed read falls through to defaults.
@@ -166,12 +182,13 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     let cancelled = false
     ;(async () => {
       try {
-        const [completedResult, skillResult, stressResult, calibrationResult] =
+        const [completedResult, skillResult, stressResult, calibrationResult, planInputsResult] =
           await Promise.allSettled([
             findLastCompletedDrillIdsByType(),
             getStorageMeta('onboarding.skillLevel', isSkillLevel),
             loadStressPositions(),
             loadSessionCalibration(),
+            loadPlanInputs(),
           ])
         if (cancelled) return
         const lastCompletedByType =
@@ -181,7 +198,21 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         const stressPositions = stressResult.status === 'fulfilled' ? stressResult.value : undefined
         const calibration =
           calibrationResult.status === 'fulfilled' ? calibrationResult.value : undefined
-        setPreviewInputs({ lastCompletedByType, playerLevel, stressPositions, calibration })
+        // D159: same derivation Home uses (composePlan staleness head).
+        // A fresh user resolves deterministically to the tie-break head
+        // (pass) — matching Home's "First up: passing" promise.
+        const resolvedFocus =
+          planInputsResult.status === 'fulfilled'
+            ? composePlan({ sessions: planInputsResult.value.trainedSessions, now: Date.now() })
+                .nextFocus
+            : undefined
+        setPreviewInputs({
+          lastCompletedByType,
+          playerLevel,
+          stressPositions,
+          calibration,
+          resolvedFocus,
+        })
       } catch {
         if (!cancelled)
           setPreviewInputs({
@@ -189,6 +220,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
             playerLevel: undefined,
             stressPositions: undefined,
             calibration: undefined,
+            resolvedFocus: undefined,
           })
       }
     })()
@@ -214,21 +246,48 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     }
     if (sessionFocus !== 'recommended') {
       ctx.sessionFocus = sessionFocus
+    } else if (previewInputs?.resolvedFocus) {
+      // D159: Recommended resolves through the derived plan — stamp the
+      // staleness head with resolved provenance so the default path gets
+      // staleness rotation + stress steering (identical semantics to the
+      // Home plan launch). Resolution failure leaves the context
+      // unstamped: the legacy integrative build.
+      ctx.sessionFocus = previewInputs.resolvedFocus
+      ctx.focusSource = 'resolved'
     }
     return ctx
-  }, [isComplete, playerMode, timeProfile, netAvailable, wallAvailable, showWall, sessionFocus])
+  }, [
+    isComplete,
+    playerMode,
+    timeProfile,
+    netAvailable,
+    wallAvailable,
+    showWall,
+    sessionFocus,
+    previewInputs,
+  ])
 
   useEffect(() => {
     if (!previewContext || !previewInputs) {
       setPreviewDraft(null)
       return
     }
-    const draft = buildDraft(previewContext, {
+    const options = {
       lastCompletedByType: previewInputs.lastCompletedByType,
       playerLevel: previewInputs.playerLevel,
       stressPositions: previewInputs.stressPositions,
       calibration: previewInputs.calibration,
-    })
+    }
+    let draft = buildDraft(previewContext, options)
+    if (!draft && previewContext.focusSource === 'resolved') {
+      // D159 fallback guarantee: a null resolved-stamped build retries
+      // unstamped (both fields dropped) — Recommended never errors
+      // where the integrative build used to succeed.
+      const unstamped: SetupContext = { ...previewContext }
+      delete unstamped.sessionFocus
+      delete unstamped.focusSource
+      draft = buildDraft(unstamped, options)
+    }
     setPreviewDraft(draft)
   }, [previewContext, previewInputs])
 
@@ -264,14 +323,21 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   // `previewDraft.context`, not live chip state (which leads the
   // effect-rebuilt draft by one commit), so the line can never pair a
   // fresh focus label with the previous build's archetype/minutes.
-  // The context stamps `sessionFocus` only when explicit, hence the
-  // `'recommended'` fallback.
+  //
+  // D159: a resolved context renders the concrete focus with its
+  // provenance — `Solo + Net · 25 min · Passing (recommended)` — so the
+  // default path names what it will actually train. A named pick keeps
+  // `Passing focus`; the unstamped fallback keeps `Recommended focus`.
   const resolvedLine = useMemo(() => {
     if (!previewDraft || previewTotalMinutes === null) return null
     const draftFocus = previewDraft.context.sessionFocus ?? 'recommended'
     const focusLabel =
       FOCUS_OPTIONS.find((option) => option.value === draftFocus)?.label ?? 'Recommended'
-    return `${previewDraft.archetypeName} · ${previewTotalMinutes} min · ${focusLabel} focus`
+    const focusSegment =
+      previewDraft.context.focusSource === 'resolved'
+        ? `${focusLabel} (recommended)`
+        : `${focusLabel} focus`
+    return `${previewDraft.archetypeName} · ${previewTotalMinutes} min · ${focusSegment}`
   }, [previewDraft, previewTotalMinutes])
 
   const submitting = useRef(false)
@@ -299,14 +365,12 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           netAvailable: netAvailable!,
           wallAvailable: showWall ? wallAvailable! : false,
         }
-        if (sessionFocus !== 'recommended') {
-          context.sessionFocus = sessionFocus
-        }
         let lastCompletedByType: Partial<Record<BlockSlotType, string>> =
           previewInputs?.lastCompletedByType ?? {}
         let playerLevel: PlayerLevel | undefined = previewInputs?.playerLevel
         let stressPositions: StressPositions | undefined = previewInputs?.stressPositions
         let calibration: SessionCalibration | undefined = previewInputs?.calibration
+        let resolvedFocus: ScopedFocus | undefined = previewInputs?.resolvedFocus
         if (!previewInputs) {
           try {
             lastCompletedByType = await findLastCompletedDrillIdsByType()
@@ -314,11 +378,33 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
             playerLevel = skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
             stressPositions = await loadStressPositions()
             calibration = await loadSessionCalibration()
+            // D159: the confirm fallback mirrors the preview's focus
+            // resolution so a fast Build (before the mount inputs
+            // settle) still persists a stamped, steered draft.
+            resolvedFocus = composePlan({
+              sessions: (await loadPlanInputs()).trainedSessions,
+              now: Date.now(),
+            }).nextFocus
           } catch {
             if (isSchemaBlocked()) return
           }
         }
-        draft = buildDraft(context, { lastCompletedByType, playerLevel, stressPositions, calibration })
+        if (sessionFocus !== 'recommended') {
+          context.sessionFocus = sessionFocus
+        } else if (resolvedFocus) {
+          context.sessionFocus = resolvedFocus
+          context.focusSource = 'resolved'
+        }
+        const options = { lastCompletedByType, playerLevel, stressPositions, calibration }
+        draft = buildDraft(context, options)
+        if (!draft && context.focusSource === 'resolved') {
+          // D159 fallback guarantee (commit side): drop the stamp and
+          // retry the integrative build before reporting failure.
+          const unstamped: SetupContext = { ...context }
+          delete unstamped.sessionFocus
+          delete unstamped.focusSource
+          draft = buildDraft(unstamped, options)
+        }
       }
       if (!draft) {
         setError("Can't build a session for these constraints. Try different options.")

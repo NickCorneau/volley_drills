@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../db'
 import * as sessionBuilder from '../../domain/sessionBuilder'
+import * as planInputsService from '../../services/planInputs'
 import type { SessionDraft, SetupContext } from '../../model'
 import {
   currentPersistedExecutionLog,
@@ -704,6 +705,8 @@ describe('SetupScreen (C-3)', () => {
     expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
     const draft = await db.sessionDrafts.get('current')
     expect(draft?.context.sessionFocus).toBe('pass')
+    // D159: a named pick is the user's choice — no resolved provenance.
+    expect(draft?.context.focusSource).toBeUndefined()
   })
 
   /**
@@ -738,8 +741,11 @@ describe('SetupScreen (C-3)', () => {
         </MemoryRouter>,
       )
 
+      // D159: Recommended resolves through the plan — a fresh DB
+      // resolves deterministically to the staleness tie-break head
+      // (pass), rendered with its provenance.
       const line = await screen.findByTestId('setup-resolved-line')
-      expect(line.textContent).toMatch(/^Solo \+ Net · \d+ min · Recommended focus$/)
+      expect(line.textContent).toMatch(/^Solo \+ Net · \d+ min · Passing \(recommended\)$/)
 
       const lineMinutes = line.textContent?.match(/· (\d+) min ·/)?.[1]
       const callout = await screen.findByTestId('setup-assembled-duration')
@@ -866,6 +872,304 @@ describe('SetupScreen (C-3)', () => {
       expect(screen.getByTestId('setup-resolved-line-placeholder').textContent).toBe(
         'Choose wall or fence availability to build.',
       )
+    })
+  })
+
+  /**
+   * D159: with the Recommended pill selected, Setup resolves
+   * `nextFocus` through the same composePlan-over-loadPlanInputs read
+   * Home uses and stamps `sessionFocus` + `focusSource: 'resolved'`
+   * into the build context — staleness rotation and stress steering on
+   * the default path, with honest provenance and unstamped fallbacks.
+   */
+  describe('D159 Recommended resolves through the derived plan', () => {
+    beforeEach(async () => {
+      await db.storageMeta.put({
+        key: 'onboarding.completedAt',
+        value: 1_700_000_000_000,
+        updatedAt: 1_700_000_000_000,
+      })
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    async function seedTrainedSession(
+      suffix: string,
+      drillName: string,
+      endedAt: number,
+    ): Promise<void> {
+      await db.sessionPlans.put(
+        currentPersistedPlan({
+          id: `plan-${suffix}`,
+          blocks: [{ drillName }],
+          createdAt: endedAt - 30 * 60_000,
+        }),
+      )
+      await db.executionLogs.put(
+        currentPersistedExecutionLog({
+          id: `exec-${suffix}`,
+          planId: `plan-${suffix}`,
+          status: 'completed',
+          blockStatuses: [{ status: 'completed' }],
+          startedAt: endedAt - 25 * 60_000,
+          completedAt: endedAt,
+        }),
+      )
+    }
+
+    it('stamps the staleness head with resolved provenance and steering inputs (R1)', async () => {
+      // Pass and set were trained recently; serve never → serve is the
+      // staleness head the Recommended build must resolve to.
+      const now = Date.now()
+      await seedTrainedSession('pass', 'Continuous Passing', now - 2 * 86_400_000)
+      await seedTrainedSession('set', 'Bump Set Fundamentals', now - 1 * 86_400_000)
+
+      const buildSpy = vi.spyOn(sessionBuilder, 'buildDraft')
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      await screen.findByTestId('setup-assembled-duration')
+
+      const [context, options] = buildSpy.mock.calls[buildSpy.mock.calls.length - 1]!
+      expect(context.sessionFocus).toBe('serve')
+      expect(context.focusSource).toBe('resolved')
+      // The steering inputs ride the same build (D154 seam).
+      expect(options?.stressPositions).toBeDefined()
+
+      const line = screen.getByTestId('setup-resolved-line')
+      expect(line.textContent).toMatch(/Serving \(recommended\)$/)
+    })
+
+    it('fresh user: Build persists a pass-stamped resolved draft (deterministic head)', async () => {
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+            <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      await screen.findByTestId('setup-assembled-duration')
+      await user.click(screen.getByRole('button', { name: /build session/i }))
+      expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
+
+      const draft = await db.sessionDrafts.get('current')
+      expect(draft?.context.sessionFocus).toBe('pass')
+      expect(draft?.context.focusSource).toBe('resolved')
+    })
+
+    it('hydrates a resolved draft to the Recommended pill and re-resolves the summary line', async () => {
+      // Divergent fixture: the persisted draft was resolved to serve,
+      // but the current staleness head is pass (fresh DB). The pill
+      // maps to Recommended, the line shows the re-resolved focus, and
+      // the persisted draft stays untouched until Build.
+      await db.sessionDrafts.put({
+        id: 'current',
+        context: {
+          playerMode: 'pair',
+          timeProfile: 40,
+          netAvailable: true,
+          wallAvailable: false,
+          sessionFocus: 'serve',
+          focusSource: 'resolved',
+        },
+        archetypeId: 'pair_net',
+        archetypeName: 'Pair + Net',
+        blocks: [],
+        updatedAt: 1,
+      })
+
+      render(
+        <MemoryRouter initialEntries={[{ pathname: '/setup', state: { editDraft: true } }]}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      await screen.findByRole('radio', { name: 'Pair', checked: true })
+      expect(
+        within(screen.getByRole('radiogroup', { name: 'Focus' })).getByRole('radio', {
+          name: 'Recommended',
+          checked: true,
+        }),
+      ).toBeInTheDocument()
+
+      const line = await screen.findByTestId('setup-resolved-line')
+      expect(line.textContent).toMatch(/Passing \(recommended\)$/)
+
+      // The preview rebuild never writes — the draft is untouched until Build.
+      const persisted = await db.sessionDrafts.get('current')
+      expect(persisted?.context.sessionFocus).toBe('serve')
+      expect(persisted?.updatedAt).toBe(1)
+    })
+
+    it('hydrates a user-picked draft focus to its named pill (provenance-free)', async () => {
+      await db.sessionDrafts.put({
+        id: 'current',
+        context: {
+          playerMode: 'pair',
+          timeProfile: 40,
+          netAvailable: true,
+          wallAvailable: false,
+          sessionFocus: 'serve',
+        },
+        archetypeId: 'pair_net',
+        archetypeName: 'Pair + Net',
+        blocks: [],
+        updatedAt: 1,
+      })
+
+      render(
+        <MemoryRouter initialEntries={[{ pathname: '/setup', state: { editDraft: true } }]}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      await screen.findByRole('radio', { name: 'Pair', checked: true })
+      expect(
+        within(screen.getByRole('radiogroup', { name: 'Focus' })).getByRole('radio', {
+          name: 'Serving',
+          checked: true,
+        }),
+      ).toBeInTheDocument()
+      const line = await screen.findByTestId('setup-resolved-line')
+      expect(line.textContent).toMatch(/Serving focus$/)
+    })
+
+    it('falls back to the unstamped integrative build when the stamped build returns null', async () => {
+      const unstampedDraft: SessionDraft = {
+        id: 'current',
+        context: {
+          playerMode: 'solo',
+          timeProfile: 15,
+          netAvailable: true,
+          wallAvailable: false,
+        },
+        archetypeId: 'solo_net',
+        archetypeName: 'Solo + Net',
+        assemblyAlgorithmVersion: 8,
+        blocks: [
+          {
+            id: 'block-0',
+            type: 'main_skill',
+            drillId: 'd03',
+            variantId: 'd03-solo',
+            drillName: 'fixture drill',
+            shortName: 'fixture',
+            durationMinutes: 14,
+            coachingCue: 'fixture',
+            courtsideInstructions: 'fixture',
+            required: true,
+            rationale: 'fixture',
+          },
+        ],
+        updatedAt: 1,
+      }
+      const buildSpy = vi
+        .spyOn(sessionBuilder, 'buildDraft')
+        .mockImplementation((context) => (context.focusSource === 'resolved' ? null : unstampedDraft))
+
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+            <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      // The fallback build renders (no error), reading as unstamped
+      // Recommended.
+      const line = await screen.findByTestId('setup-resolved-line')
+      expect(line.textContent).toMatch(/Recommended focus$/)
+
+      // The stamped attempt happened, then the unstamped retry.
+      const stampedCalls = buildSpy.mock.calls.filter(
+        ([context]) => context.focusSource === 'resolved',
+      )
+      const unstampedCalls = buildSpy.mock.calls.filter(
+        ([context]) => context.focusSource === undefined && context.sessionFocus === undefined,
+      )
+      expect(stampedCalls.length).toBeGreaterThan(0)
+      expect(unstampedCalls.length).toBeGreaterThan(0)
+
+      // Build commits the fallback draft without surfacing an error.
+      await user.click(screen.getByRole('button', { name: /build session/i }))
+      expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
+      const draft = await db.sessionDrafts.get('current')
+      expect(draft?.context.sessionFocus).toBeUndefined()
+    })
+
+    it('keeps Recommended unstamped and usable when the plan-input load rejects', async () => {
+      vi.spyOn(planInputsService, 'loadPlanInputs').mockRejectedValue(new Error('boom'))
+
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+            <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      const line = await screen.findByTestId('setup-resolved-line')
+      expect(line.textContent).toMatch(/Recommended focus$/)
+
+      await user.click(screen.getByRole('button', { name: /build session/i }))
+      expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
+      const draft = await db.sessionDrafts.get('current')
+      expect(draft?.context.sessionFocus).toBeUndefined()
+      expect(draft?.context.focusSource).toBeUndefined()
+    })
+
+    it('stamps the draft when Build fires before the preview inputs settle (confirm fallback mirrors resolution)', async () => {
+      // Hold the plan-input read open so the mount inputs never settle
+      // before Build; the confirm fallback must resolve on its own.
+      let resolvePlanInputs: (bundle: planInputsService.PlanInputsBundle) => void = () => undefined
+      const pending = new Promise<planInputsService.PlanInputsBundle>((resolve) => {
+        resolvePlanInputs = resolve
+      })
+      vi.spyOn(planInputsService, 'loadPlanInputs').mockReturnValue(pending)
+
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+            <Route path="/safety" element={<div data-testid="safety-route">safety</div>} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      // Build immediately — the preview inputs are still pending.
+      await user.click(await screen.findByRole('button', { name: /build session/i }))
+      expect(screen.queryByTestId('setup-assembled-duration')).not.toBeInTheDocument()
+
+      resolvePlanInputs({
+        reviews: [],
+        trainedSessions: [],
+        skillBand: undefined,
+        lastAcceptedDelta: null,
+      })
+
+      expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
+      const draft = await db.sessionDrafts.get('current')
+      expect(draft?.context.sessionFocus).toBe('pass')
+      expect(draft?.context.focusSource).toBe('resolved')
     })
   })
 

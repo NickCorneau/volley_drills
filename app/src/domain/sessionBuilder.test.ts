@@ -1989,17 +1989,21 @@ describe('sessionBuilder', () => {
     expect(types.some((t) => t === 'main_skill' || t === 'pressure')).toBe(false)
   })
 
-  it('buildRecoveryDraft strips explicit session focus', () => {
+  it('buildRecoveryDraft strips explicit session focus and its provenance', () => {
+    // D159: a focus-less recovery rebuild must not claim resolved
+    // provenance — focusSource never outlives sessionFocus.
     const recovery = buildRecoveryDraft({
       playerMode: 'pair',
       timeProfile: 25,
       netAvailable: false,
       wallAvailable: false,
       sessionFocus: 'serve',
+      focusSource: 'resolved',
     })
 
     expect(recovery).not.toBeNull()
     expect(recovery!.context.sessionFocus).toBeUndefined()
+    expect(recovery!.context.focusSource).toBeUndefined()
   })
 
   it('buildRecoveryDraft for 15 min includes technique between warmup and wrap', () => {

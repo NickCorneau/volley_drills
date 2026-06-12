@@ -65,6 +65,16 @@ export interface SetupContext {
   wallAvailable: boolean
   sessionFocus?: Extract<SkillFocus, 'pass' | 'serve' | 'set'>
   /**
+   * D159 focus provenance: `'resolved'` marks a `sessionFocus` the
+   * system derived (Setup "Recommended" resolving through the plan's
+   * staleness head, or the Home plan launch) rather than the user
+   * picking a named focus. Setup maps a resolved draft back to the
+   * Recommended pill on hydration; absent means user-picked (or a
+   * legacy/unstamped context). Optional additive field — no Dexie
+   * migration; never set without `sessionFocus`.
+   */
+  focusSource?: 'resolved'
+  /**
    * Effective drill band used for focus-controlled assembly. Persisting
    * this on drafts/plans lets runtime Swap use the same catalog filter
    * as initial generation without re-reading onboarding state mid-run.

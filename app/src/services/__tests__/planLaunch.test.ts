@@ -111,6 +111,9 @@ describe('startPlanSession', () => {
     expect(draft).not.toBeNull()
     // The prior focus (serve) is overridden to the plan's next focus.
     expect(draft?.context.sessionFocus).toBe('pass')
+    // D159: the machine-derived focus carries resolved provenance, so
+    // editing this draft in Setup maps back to the Recommended pill.
+    expect(draft?.context.focusSource).toBe('resolved')
     // Physical conditions are reused from the prior context.
     expect(draft?.context.playerMode).toBe('solo')
     expect(draft?.context.wallAvailable).toBe(true)

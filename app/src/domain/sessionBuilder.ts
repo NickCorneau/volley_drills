@@ -172,6 +172,9 @@ function buildTraceSlot(
 function stripSessionFocus(context: SetupContext): SetupContext {
   const next: SetupContext = { ...context }
   delete next.sessionFocus
+  // D159: provenance never outlives the focus it describes — a
+  // focus-less recovery rebuild must not claim resolved provenance.
+  delete next.focusSource
   return next
 }
 
