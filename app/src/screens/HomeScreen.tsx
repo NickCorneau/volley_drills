@@ -573,6 +573,7 @@ function renderPrimary(primary: PrimaryVariant, flags: HomeFlags, h: PrimaryHand
             // shorter-version repeat. The card applies the minutes floor.
             hasSkippedBlocks(flags.lastComplete.log) ? h.handleRepeatWhatYouDid : undefined
           }
+          repeatNote={flags.repeatNote}
           actionDisabled={h.actionDisabled}
         />
       )
@@ -622,6 +623,7 @@ function renderSecondary(row: SecondaryRow, flags: HomeFlags, h: SecondaryHandle
           variant="last_complete"
           data={flags.lastComplete}
           onRepeat={h.handleRepeat}
+          repeatNote={flags.repeatNote}
           actionDisabled={h.actionDisabled}
         />
       )

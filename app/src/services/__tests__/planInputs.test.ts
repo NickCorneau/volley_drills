@@ -158,10 +158,23 @@ describe('loadPlanInputs', () => {
   })
 
   it('returns empty trained sessions on a fresh DB', async () => {
-    const { reviews, trainedSessions, lastAcceptedDelta } = await loadPlanInputs()
+    const { reviews, trainedSessions, lastAcceptedDelta, skillBand } = await loadPlanInputs()
     expect(reviews).toEqual([])
     expect(trainedSessions).toEqual([])
     expect(lastAcceptedDelta).toBeNull()
+    // Trust-loop U5: no persisted level resolves to undefined so the
+    // position folds fall back to their beginner default.
+    expect(skillBand).toBeUndefined()
+  })
+
+  it('maps the persisted skill level to its drill band (trust-loop U5)', async () => {
+    await db.storageMeta.put({
+      key: 'onboarding.skillLevel',
+      value: 'rally_builders',
+      updatedAt: Date.now(),
+    })
+    const { skillBand } = await loadPlanInputs()
+    expect(skillBand).toBe('intermediate')
   })
 
   it('surfaces the offered delta when the latest verdict was accepted', async () => {

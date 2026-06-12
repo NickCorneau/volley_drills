@@ -86,16 +86,24 @@ beforeEach(async () => {
 describe('HomeScreen Repeat race guard', () => {
   it('disables competing LastComplete actions while Repeat is rebuilding', async () => {
     const user = userEvent.setup()
+    await seedLastComplete()
+    renderHome()
+
+    const repeatButton = await screen.findByRole('button', { name: /repeat last session/i })
+
+    // Arm the hanging skill-level read only AFTER Home has painted:
+    // since trust-loop U5, the initial snapshot's `loadPlanInputs` also
+    // reads `onboarding.skillLevel` (repeat-drift band), and a pre-render
+    // pending mock would stall the whole screen at Loading. The race
+    // window under test is the read inside `repeatSession`'s rebuild.
     let resolveSkillLevel: (value: undefined) => void = () => undefined
     vi.mocked(getStorageMeta).mockReturnValue(
       new Promise((resolve) => {
         resolveSkillLevel = resolve
       }),
     )
-    await seedLastComplete()
-    renderHome()
 
-    await user.click(await screen.findByRole('button', { name: /repeat last session/i }))
+    await user.click(repeatButton)
     expect(await screen.findByRole('button', { name: /start a different session/i })).toBeDisabled()
 
     await act(async () => {

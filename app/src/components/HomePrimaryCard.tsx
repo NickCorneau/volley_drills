@@ -50,6 +50,8 @@ type HomePrimaryCardProps =
       onRepeat: () => void
       onStartDifferent: () => void
       onRepeatWhatYouDid?: () => void
+      /** Trust-loop U5: repeat-drift note, or null when nothing moved. */
+      repeatNote?: string | null
       actionDisabled?: boolean
     }
   | {

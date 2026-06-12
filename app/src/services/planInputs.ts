@@ -21,6 +21,7 @@
  */
 import { db } from '../db'
 import type { AdaptationDelta, SessionReview } from '../db/types'
+import type { PlayerLevel } from '../model'
 import {
   attributeTrainedSessions,
   type AttributedTrainingSession,
@@ -28,10 +29,19 @@ import {
 } from '../domain/eligibleSessions'
 import { endedAt, hasCompletedBlock, isTerminalSession } from '../domain/executionPredicates'
 import { applyBlockOverrides } from '../domain/sessionProjection'
+import { isSkillLevel, skillLevelToDrillBand } from '../lib/skillLevel'
+import { getStorageMeta } from './storageMeta'
 
 export interface PlanInputsBundle {
   reviews: SessionReview[]
   trainedSessions: AttributedTrainingSession[]
+  /**
+   * Trust-loop U5: the persisted skill level mapped to its drill band,
+   * for band-dependent position folds (the Home repeat-drift note).
+   * `undefined` when no level was persisted — the fold then uses its
+   * beginner default, matching assembly's behavior.
+   */
+  skillBand: PlayerLevel | undefined
   /**
    * The offered delta from the user's MOST RECENT verdict, returned only
    * when that latest verdict was `accepted`. This is the carry-forward
@@ -58,10 +68,11 @@ function resolveLastAcceptedDelta(reviews: readonly SessionReview[]): Adaptation
 }
 
 export async function loadPlanInputs(): Promise<PlanInputsBundle> {
-  const [reviews, executionLogs, sessionPlans] = await Promise.all([
+  const [reviews, executionLogs, sessionPlans, skillLevel] = await Promise.all([
     db.sessionReviews.toArray(),
     db.executionLogs.toArray(),
     db.sessionPlans.toArray(),
+    getStorageMeta('onboarding.skillLevel', isSkillLevel),
   ])
 
   const planById = new Map(sessionPlans.map((plan) => [plan.id, plan]))
@@ -87,5 +98,6 @@ export async function loadPlanInputs(): Promise<PlanInputsBundle> {
     reviews,
     trainedSessions: attributeTrainedSessions(terminalSessions),
     lastAcceptedDelta: resolveLastAcceptedDelta(reviews),
+    skillBand: skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel),
   }
 }

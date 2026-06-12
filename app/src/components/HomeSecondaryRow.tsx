@@ -22,6 +22,8 @@ type HomeSecondaryRowProps =
       variant: 'last_complete'
       data: LastCompleteBundle
       onRepeat: () => void
+      /** Trust-loop U5: repeat-drift note, or null when nothing moved. */
+      repeatNote?: string | null
       actionDisabled?: boolean
     }
 
@@ -50,8 +52,18 @@ export function HomeSecondaryRow(props: HomeSecondaryRowProps) {
     case 'last_complete':
       return (
         <li className={SECONDARY_ROW_CLASS}>
-          <span className="text-sm text-text-primary">
-            Last session &middot; {props.data.plan.presetName}
+          <span className="flex flex-col gap-0.5">
+            <span className="text-sm text-text-primary">
+              Last session &middot; {props.data.plan.presetName}
+            </span>
+            {/* Trust-loop U5 (R8): the drift note sits with the Repeat
+              affordance it qualifies, pre-tap, where the decision
+              happens. */}
+            {props.repeatNote && (
+              <span className="text-xs leading-relaxed text-text-secondary">
+                {props.repeatNote}
+              </span>
+            )}
           </span>
           <Button variant="ghost" disabled={props.actionDisabled} onClick={props.onRepeat}>
             Repeat

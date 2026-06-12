@@ -38,6 +38,12 @@ export interface LastCompleteCardProps {
    * hides the button via `undefined` for the clean-complete case.
    */
   onRepeatWhatYouDid?: () => void
+  /**
+   * Trust-loop U5 (R8): quiet repeat-drift line rendered under the
+   * Repeat affordance when the plan's focus position moved since this
+   * session was assembled. Null when nothing moved.
+   */
+  repeatNote?: string | null
   actionDisabled?: boolean
 }
 
@@ -49,6 +55,7 @@ export function LastCompleteCard({
   onRepeat,
   onStartDifferent,
   onRepeatWhatYouDid,
+  repeatNote = null,
   actionDisabled = false,
 }: LastCompleteCardProps) {
   const plannedTotalMinutes = data.plan.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
@@ -126,6 +133,9 @@ export function LastCompleteCard({
         >
           {repeatLabel}
         </Button>
+        {repeatNote && (
+          <p className="text-center text-xs leading-relaxed text-text-secondary">{repeatNote}</p>
+        )}
         {canRepeatSubset && (
           <Button variant="link" disabled={actionDisabled} onClick={onRepeatWhatYouDid}>
             Repeat shorter version ({completedMinutes} min)

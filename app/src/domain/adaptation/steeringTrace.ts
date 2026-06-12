@@ -29,7 +29,12 @@
  */
 import type { PlayerLevel, SessionDraft, SessionPlan, SessionReview } from '../../model'
 import { isScopedFocus, type ScopedFocus } from '../eligibleSessions'
-import { acceptedReviewMovedPosition } from './stressPosition'
+import { inferSessionFocus } from '../sessionFocus'
+import {
+  acceptedReviewMovedPosition,
+  deriveStressPositions,
+  deriveStressPositionsAt,
+} from './stressPosition'
 
 /** KTD9 voice: present-tense, today-scoped, no stress vocabulary beyond the shipped carry-forward register. */
 const MORE_TODAY: Record<ScopedFocus, string> = {
@@ -145,4 +150,30 @@ export function deriveSteeringTrace(input: SteeringTraceInput): SteeringTraceMod
     // session.
     showGloss: steered || input.everSteeredPlan,
   }
+}
+
+/**
+ * Trust-loop U5 (R8/KTD7) — Home repeat note copy. Plan-action voice,
+ * present tense, no stress vocabulary (KTD9).
+ */
+export const REPEAT_DRIFT_NOTE = 'Repeating with the same setup. Your plan has moved since.'
+
+/**
+ * KTD7 — has the repeated plan's focus position moved between its
+ * assembly time and now? Fold-compare at `plan.createdAt` vs the full
+ * fold; net-zero movement reports no drift. Focus comes from the
+ * plan's persisted context, falling back to inference over its blocks
+ * (block overrides already applied by the caller's lastComplete join);
+ * a non-scoped focus can never drift.
+ */
+export function repeatPlanDrifted(
+  reviews: readonly SessionReview[],
+  plan: Pick<SessionPlan, 'createdAt' | 'context' | 'blocks'>,
+  band?: PlayerLevel,
+): boolean {
+  const focus = plan.context?.sessionFocus ?? inferSessionFocus(plan.blocks)
+  if (!isScopedFocus(focus)) return false
+  const atAssembly = deriveStressPositionsAt(reviews, plan.createdAt, band)
+  const current = deriveStressPositions(reviews, band)
+  return atAssembly[focus] !== current[focus]
 }
