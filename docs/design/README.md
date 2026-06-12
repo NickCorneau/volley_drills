@@ -6,7 +6,7 @@ stage: validation
 type: index
 summary: "Pointer-oriented index for Volleycraft design and UX work: brand guidelines, visual direction, outdoor UI defaults, and dated UI/UX review passes."
 authority: discovery surface for design and UX guidelines and review history
-last_updated: 2026-06-11
+last_updated: 2026-06-12
 depends_on:
   - docs/catalog.json
   - docs/research/brand-ux-guidelines.md
@@ -16,7 +16,7 @@ depends_on:
 
 # Volleycraft Design Hub
 
-Single discovery surface for design and UX work. Existing design-canonical docs stay in place under `docs/research/` (they are referenced by 40+ files including plan docs, decision records, and source code, so a wholesale move would create avoidable churn). New dated design / UX review passes go under `docs/design/reviews/`.
+Single discovery surface for design and UX work. Existing design-canonical docs stay in place under `docs/research/` (they are referenced by 40+ files including plan docs, decision records, and source code, so a wholesale move would create avoidable churn). New dated design / UX review passes go under `docs/design/reviews/`. Founder-review comp sets (dated image frames + a frontmattered README) go under `docs/design/comps/`.
 
 ## Purpose
 
@@ -75,6 +75,14 @@ Dated design / UX review passes. Each is a point-in-time capture, not a source o
 | 2026-06-11 | `docs/design/reviews/2026-06-11-red-team-design-language-review.md` | Red-team design-language adherence + live mobile pass | Code-level audit against the four design contracts + dev server at 390×844; verification dispositions per finding (fixed / falsified / routed); umbrella capture in `docs/reviews/2026-06-11-red-team-review.md` |
 | 2026-06-11 | `docs/design/reviews/2026-06-11-design-language-deep-pass.md` | Founder-directed deep pass: challenge, reconcile, polish | Adversarial canon-vs-code re-read + full live walk at 390×844; resolves the red team's routed D145 finding via `D153`; ships stacked cue lines + quiet Review empty voice; corrects seven stale `brand-ux-guidelines.md` passages; records falsified challenge candidates |
 | 2026-06-11 | `docs/design/reviews/2026-06-11-shibui-empty-space-research-pass.md` | Shibui / `ma` research + empty-space design pass | External research synthesis (ma, kanso, calm tech, iA reduction, NN/g signifiers) + live walk at 390×844; defends the run flow's ma; five evidence-gated proposals (S1–S5, led by the recommendation-first Setup restructure) + one canon nit; suggestions only, no code shipped |
+
+## Comp Sets
+
+Founder-review comp frames awaiting or carrying an approval decision. Each set's README maps frames to origin requirement IDs and lists the decisions deferred to comp review.
+
+| Date | Set | Covers | Status |
+| --- | --- | --- | --- |
+| 2026-06-12 | `docs/design/comps/2026-06-12-shibui-polish/` | S1 Setup recommendation-first restructure (R4–R6, 7 frames) + S5 Home link-pile relocation (R1–R3, 3 frames) | Awaiting founder comp review; approval unlocks the S1/S5 follow-up implementation plans |
 
 ## Related Surfaces
 

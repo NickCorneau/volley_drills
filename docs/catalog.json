@@ -395,6 +395,13 @@
       "canonical_for": "founder-requested shibui / ma research-and-design pass (third 2026-06-11 design pass, distinct in kind from the same-day red team and deep pass): external research synthesis (ma active/passive whitespace, kanso, seijaku, calm technology, iA reduction sequence, NN/g signifier findings) folded against the Japanese-inspired direction plus a full live 390x844 walk; defends the run Now-surface, drill check, Complete, surface discipline, and working mid-screen voids as the app's strongest ma; proposes five evidence-gated experiments (S1 recommendation-first Setup restructure - the largest unrealized visual-direction canon item, S2 quiet Transition prev-block receipt, S3 collapse empty Good-passes card to a line, S4 active-segment-only gloss underlines mid-run, S5 relocate Start-a-different-session outside the Home focal card as a D130-window candidate) plus one canon nit (S6 brand-ux-guidelines section 3.4 separator rule contradicts its own examples); honors all same-day settled dispositions (falsified candidates, D153 ratifications, D127/D130 routing); ships no code and does not modify D91, D127, D130, D137, D152, or D153"
     },
     {
+      "id": "comps-2026-06-12-shibui-polish",
+      "path": "docs/design/comps/2026-06-12-shibui-polish/README.md",
+      "type": "design-comps",
+      "status": "active",
+      "canonical_for": "founder-review comp set for the two comp-gated items of the 2026-06-12 shibui polish plan (Tier 2 units U5/U6): seven 390x844 Setup frames for the S1 recommendation-first restructure (origin R4-R6 - returning resolved with heading options A/B, tight-cluster spacing variant, explicit-focus, first-run default, incomplete wall-follow-up placeholder, Callout slim-down variant) and three Home frames for the S5 link-pile relocation (origin R1-R3 - normal state with repeat-in-card vs repeat-moved options, maximal ended-early three-link state); frames are token-composed DOM/CSS overrides over the live dev build, map to origin R-IDs, restate the R6 guardrails, and enumerate the decisions deferred to comp review; artifact only - no S1/S5 application code ships with this set, and founder approval gates the follow-up implementation plans"
+    },
+    {
       "id": "stress-substrate-plan-2026-06-11",
       "path": "docs/plans/2026-06-11-001-feat-stress-substrate-plan.md",
       "type": "plan",
