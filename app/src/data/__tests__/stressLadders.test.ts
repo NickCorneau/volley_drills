@@ -10,10 +10,8 @@ import {
 
 const FOCUSES: readonly StressLadderFocus[] = ['pass', 'serve', 'set']
 
-function candidateDrillIdsForFocus(focus: StressLadderFocus): string[] {
-  return DRILLS.filter((drill) => drill.m001Candidate && drill.skillFocus.includes(focus)).map(
-    (drill) => drill.id,
-  )
+function scopedDrillIdsForFocus(focus: StressLadderFocus): string[] {
+  return DRILLS.filter((drill) => drill.skillFocus.includes(focus)).map((drill) => drill.id)
 }
 
 function ladderDrillIds(focus: StressLadderFocus): string[] {
@@ -21,8 +19,11 @@ function ladderDrillIds(focus: StressLadderFocus): string[] {
 }
 
 describe('stress ladder registry invariants', () => {
-  it.each(FOCUSES)('every m001Candidate %s drill appears exactly once in its ladder', (focus) => {
-    const expected = candidateDrillIdsForFocus(focus).sort()
+  // D160: membership is catalog-wide, not m001Candidate-only. Lifecycle
+  // drills (recovery/warmup) carry no scoped tag, so they fall out of
+  // the census naturally.
+  it.each(FOCUSES)('every scoped-tag %s drill appears exactly once in its ladder', (focus) => {
+    const expected = scopedDrillIdsForFocus(focus).sort()
     const actual = ladderDrillIds(focus)
     expect([...actual].sort()).toEqual(expected)
     expect(new Set(actual).size).toBe(actual.length)
@@ -51,6 +52,17 @@ describe('stress ladder registry invariants', () => {
       expect(rungValues[i]).toBe(rungValues[i - 1] + 1)
     }
   })
+
+  // D160 bounds pin: the catalog-wide expansion lands every placement on
+  // an existing rung index. Growing a ladder's bounds would silently
+  // shift startingStressRung, offer gating, and derived-position
+  // clamping for existing accept histories — it needs its own decision
+  // row, and this test is the tripwire.
+  it('per-focus bounds are pinned to the pre-expansion ladders', () => {
+    expect(stressLadderBounds('pass')).toEqual({ min: 1, max: 5 })
+    expect(stressLadderBounds('serve')).toEqual({ min: 1, max: 4 })
+    expect(stressLadderBounds('set')).toEqual({ min: 1, max: 5 })
+  })
 })
 
 describe('stressRungForDrill', () => {
@@ -61,9 +73,15 @@ describe('stressRungForDrill', () => {
     expect(stressRungForDrill('set', 'd40')).toBe(1)
   })
 
-  it('authors the dual-focus d18 independently per ladder', () => {
+  it('authors dual-focus drills independently per ladder', () => {
     expect(stressRungForDrill('pass', 'd18')).toBe(5)
     expect(stressRungForDrill('serve', 'd18')).toBe(4)
+    expect(stressRungForDrill('pass', 'd08')).toBe(5)
+    expect(stressRungForDrill('serve', 'd08')).toBe(4)
+    expect(stressRungForDrill('pass', 'd20')).toBe(4)
+    expect(stressRungForDrill('set', 'd20')).toBe(4)
+    expect(stressRungForDrill('pass', 'd21')).toBe(4)
+    expect(stressRungForDrill('set', 'd21')).toBe(4)
   })
 
   it('returns undefined for a drill not on the focus ladder', () => {

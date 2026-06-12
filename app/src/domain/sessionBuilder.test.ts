@@ -2421,6 +2421,37 @@ describe('stress-rung preference (D154)', () => {
     }
   })
 
+  it('D160 assembly-unchanged: catalog-wide rungs never pull non-candidate drills into a steered build', () => {
+    // The D160 expansion gave runtime-inert rungs to 14 m001Candidate:false
+    // drills (d02/d04 share pass rung 1 with d01, etc.). findCandidates
+    // still filters on m001Candidate, so a steered build must never
+    // select them — at rung 1 the seeded shuffle would surface a leak.
+    const nonCandidateIds = new Set(
+      DRILLS.filter((drill) => !drill.m001Candidate).map((drill) => drill.id),
+    )
+    const beginnerContext: SetupContext = { ...soloPassContext, playerLevel: 'beginner' }
+    for (let i = 0; i < 25; i++) {
+      const pick = pickForSlot(
+        mainSkillSlot,
+        beginnerContext,
+        new Set(),
+        createSeededRandom(`d160-inert-${i}`),
+        { playerLevel: 'beginner', stressPositions: { pass: 1 } },
+      )
+      expect(pick?.drill.id).toBe('d01')
+
+      const draft = buildDraft(beginnerContext, {
+        assemblySeed: `d160-inert-build-${i}`,
+        playerLevel: 'beginner',
+        stressPositions: { pass: 1 },
+      })
+      expect(draft).not.toBeNull()
+      for (const block of draft!.blocks) {
+        expect(nonCandidateIds.has(block.drillId)).toBe(false)
+      }
+    }
+  })
+
   // The off-ladder branch is unreachable through `pickForSlot` with
   // production data (the registry completeness invariant puts every
   // assembly-eligible drill on its focus ladder), so the U4 "drill
