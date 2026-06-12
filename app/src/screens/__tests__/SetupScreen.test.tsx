@@ -725,6 +725,10 @@ describe('SetupScreen (C-3)', () => {
       })
     })
 
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
     it('renders archetype + assembled minutes + focus, agreeing with the footer Callout', async () => {
       render(
         <MemoryRouter initialEntries={['/setup']}>
@@ -763,6 +767,81 @@ describe('SetupScreen (C-3)', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('setup-resolved-line').textContent).toMatch(/Passing focus$/)
+      })
+
+      // Post-change duration honesty: the rebuilt line's minutes still
+      // agree with the footer Callout. All three line segments read the
+      // same preview build (the focus label comes from
+      // `previewDraft.context`, not live chip state), so a focus change
+      // can never pair a fresh label with the previous build's minutes.
+      const lineMinutes = screen
+        .getByTestId('setup-resolved-line')
+        .textContent?.match(/· (\d+) min ·/)?.[1]
+      const calloutMinutes = screen
+        .getByTestId('setup-assembled-duration')
+        .textContent?.match(/about (\d+) min/)?.[1]
+      expect(lineMinutes).toBeDefined()
+      expect(lineMinutes).toBe(calloutMinutes)
+    })
+
+    it('derives the focus segment from the preview draft context, not live chip state', async () => {
+      // Discriminating pin for the atomic-segments fix: stub buildDraft
+      // to return a draft whose context stamps a focus that disagrees
+      // with the clicked chip. Under draft-context sourcing the line
+      // reads the draft's focus; under the old live-chip sourcing it
+      // would read the chip's. (The disagreement is synthetic — in
+      // production the rebuilt draft always reflects the chips one
+      // commit later; this isolates the sourcing, which act() flushing
+      // makes unobservable with the real builder.)
+      const fakeDraft: SessionDraft = {
+        id: 'current',
+        context: {
+          playerMode: 'solo',
+          timeProfile: 15,
+          netAvailable: true,
+          wallAvailable: false,
+          sessionFocus: 'serve',
+        },
+        archetypeId: 'solo_net',
+        archetypeName: 'Solo + Net',
+        assemblyAlgorithmVersion: 8,
+        blocks: [
+          {
+            id: 'block-0',
+            type: 'main_skill',
+            drillId: 'd03',
+            variantId: 'd03-solo',
+            drillName: 'fixture drill',
+            shortName: 'fixture',
+            durationMinutes: 14,
+            coachingCue: 'fixture',
+            courtsideInstructions: 'fixture',
+            required: true,
+            rationale: 'fixture',
+          },
+        ],
+        updatedAt: 1,
+      }
+      vi.spyOn(sessionBuilder, 'buildDraft').mockReturnValue(fakeDraft)
+
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      await screen.findByTestId('setup-resolved-line')
+      await user.click(
+        within(screen.getByRole('radiogroup', { name: 'Focus' })).getByRole('radio', {
+          name: 'Passing',
+        }),
+      )
+
+      await waitFor(() => {
+        expect(screen.getByTestId('setup-resolved-line').textContent).toMatch(/Serving focus$/)
       })
     })
 

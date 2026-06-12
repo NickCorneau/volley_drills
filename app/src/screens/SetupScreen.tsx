@@ -259,12 +259,20 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   // the named Time-chip profile, so the screen's two duration statements
   // cannot disagree (duration-honesty R4). Null until the preview draft
   // exists; the incomplete placeholder renders in its slot instead.
+  //
+  // All three segments read the *preview build* — the focus comes from
+  // `previewDraft.context`, not live chip state (which leads the
+  // effect-rebuilt draft by one commit), so the line can never pair a
+  // fresh focus label with the previous build's archetype/minutes.
+  // The context stamps `sessionFocus` only when explicit, hence the
+  // `'recommended'` fallback.
   const resolvedLine = useMemo(() => {
     if (!previewDraft || previewTotalMinutes === null) return null
+    const draftFocus = previewDraft.context.sessionFocus ?? 'recommended'
     const focusLabel =
-      FOCUS_OPTIONS.find((option) => option.value === sessionFocus)?.label ?? 'Recommended'
+      FOCUS_OPTIONS.find((option) => option.value === draftFocus)?.label ?? 'Recommended'
     return `${previewDraft.archetypeName} · ${previewTotalMinutes} min · ${focusLabel} focus`
-  }, [previewDraft, previewTotalMinutes, sessionFocus])
+  }, [previewDraft, previewTotalMinutes])
 
   const submitting = useRef(false)
 

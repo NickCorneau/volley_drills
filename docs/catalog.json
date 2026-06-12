@@ -1983,6 +1983,14 @@
       "canonical_for": "Implementation plan for the shibui/empty-space polish pass (origin: docs/brainstorms/2026-06-11-shibui-empty-space-polish-requirements.md), delivered in two tiers: Tier 1 code units U1 Transition quiet receipt (JustFinishedPill presentation variant), U2 Review empty Good-passes collapse keyed on drillsWithCounts === 0 with tag-acknowledging copy, U3 active-segment-only gloss underlines on the run face, U4 brand-ux-guidelines section 3.4 separator reconciliation; Tier 2 artifact units U5/U6 produce founder-reviewable 390x844 comp sets under docs/design/comps/ for the comp-gated S1 Setup recommendation-first restructure and S5 Home link-pile relocation, whose code (plus the R11 covenant amendment and D152 decision-row update) is deferred to follow-up plans behind founder comp approval. Zero semantic/route/data changes; each item independently revertible in the D130 window."
     },
     {
+      "id": "setup-resolved-line-atomic-focus-plan-2026-06-12",
+      "path": "docs/plans/2026-06-12-004-fix-setup-resolved-line-atomic-focus-plan.md",
+      "type": "plan",
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Micro-fix plan closing the one advisory left open by the D158 post-review sweep: the Setup focal resolved line derived its focus segment from live chip state while archetype/minutes came from the effect-rebuilt preview draft, allowing a one-frame torn read after a focus-chip tap. U1 sources all three segments from the preview build (previewDraft.context.sessionFocus ?? 'recommended', sessionFocus dropped from the memo deps); U2 extends the focus-change test with a post-change line-vs-Callout minutes-agreement assertion plus a stub-builder discriminating test (draft context disagrees with the clicked chip) that fails under live-chip sourcing — mutation-verified red on revert."
+    },
+    {
       "id": "per-drill-capture-coverage-phase-2a-streak-2026-04-28",
       "path": "docs/archive/plans/2026-04-28-per-drill-capture-coverage-phase-2a-streak.md",
       "type": "plan",
