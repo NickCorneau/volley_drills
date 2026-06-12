@@ -127,10 +127,7 @@ describe('validateDrillCatalog', () => {
       expect(d49?.m001Candidate).toBe(true)
       expect(d49?.levelMin).toBe('advanced')
       expect(d49?.levelMax).toBe('advanced')
-      expect(d49?.variants.map((variant) => variant.id)).toEqual([
-        'd49-solo-open',
-        'd49-pair-open',
-      ])
+      expect(d49?.variants.map((variant) => variant.id)).toEqual(['d49-solo-open', 'd49-pair-open'])
       for (const variant of d49?.variants ?? []) {
         expect(variant.equipment.balls).toBe(1)
         expect(variant.environmentFlags.needsWall).toBe(false)
@@ -146,16 +143,12 @@ describe('validateDrillCatalog', () => {
       const d49 = DRILLS.find((candidate) => candidate.id === 'd49')
 
       expect(d47?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([9, 9])
-      expect(
-        d47?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes),
-      ).toEqual([9, 9])
-      expect(d49?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([
-        14,
-        14,
+      expect(d47?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes)).toEqual([
+        9, 9,
       ])
+      expect(d49?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([14, 14])
       expect(d49?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes)).toEqual([
-        14,
-        14,
+        14, 14,
       ])
     })
   })
@@ -169,10 +162,7 @@ describe('validateDrillCatalog', () => {
       expect(d50?.levelMin).toBe('advanced')
       expect(d50?.levelMax).toBe('advanced')
       expect(d50?.chainId).toBe('chain-4-serve-receive')
-      expect(d50?.variants.map((variant) => variant.id)).toEqual([
-        'd50-pair-open',
-        'd50-solo-open',
-      ])
+      expect(d50?.variants.map((variant) => variant.id)).toEqual(['d50-pair-open', 'd50-solo-open'])
       for (const variant of d50?.variants ?? []) {
         expect(variant.equipment.balls).toBe(1)
         expect(variant.environmentFlags.needsWall).toBe(false)
@@ -190,16 +180,12 @@ describe('validateDrillCatalog', () => {
       const d50 = DRILLS.find((candidate) => candidate.id === 'd50')
 
       expect(d46?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([8, 8])
-      expect(
-        d46?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes),
-      ).toEqual([8, 8])
-      expect(d50?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([
-        14,
-        14,
+      expect(d46?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes)).toEqual([
+        8, 8,
       ])
+      expect(d50?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([14, 14])
       expect(d50?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes)).toEqual([
-        14,
-        14,
+        14, 14,
       ])
     })
 
@@ -254,12 +240,10 @@ describe('validateDrillCatalog', () => {
       const d31 = DRILLS.find((candidate) => candidate.id === 'd31')
       const d51 = DRILLS.find((candidate) => candidate.id === 'd51')
 
-      expect(d31?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([
+      expect(d31?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([8, 8, 8])
+      expect(d31?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes)).toEqual([
         8, 8, 8,
       ])
-      expect(
-        d31?.variants.map((variant) => variant.workload.fatigueCap?.maxMinutes),
-      ).toEqual([8, 8, 8])
       expect(d51?.variants.map((variant) => variant.workload.durationMaxMinutes)).toEqual([
         14, 14, 14,
       ])
@@ -396,7 +380,12 @@ describe('validateDrillCatalog', () => {
         ],
         progressionChains: [chain()],
       })
-      const segmentIssues = issues.filter((i) => i.code.startsWith('segment_') || i.code.startsWith('duplicate_segment') || i.code.startsWith('invalid_segment'))
+      const segmentIssues = issues.filter(
+        (i) =>
+          i.code.startsWith('segment_') ||
+          i.code.startsWith('duplicate_segment') ||
+          i.code.startsWith('invalid_segment'),
+      )
       expect(segmentIssues).toEqual([])
     })
 
@@ -414,10 +403,11 @@ describe('validateDrillCatalog', () => {
         ],
         progressionChains: [chain()],
       })
-      const segmentIssues = issues.filter((i) =>
-        i.code === 'segment_duration_mismatch' ||
-        i.code === 'duplicate_segment_id' ||
-        i.code === 'invalid_segment_duration',
+      const segmentIssues = issues.filter(
+        (i) =>
+          i.code === 'segment_duration_mismatch' ||
+          i.code === 'duplicate_segment_id' ||
+          i.code === 'invalid_segment_duration',
       )
       expect(segmentIssues).toEqual([])
     })

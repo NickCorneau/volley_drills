@@ -75,13 +75,9 @@ describe('pickMainSkillSubstitute (U6 rung-aware choice)', () => {
   })
 
   it('keeps pure authored order without positions', () => {
-    const result = pickMainSkillSubstitute(
-      mainSkillSlot,
-      pairOpenPass,
-      new Set(),
-      'd03',
-      [rule(['d05', 'd10', 'd11'])],
-    )
+    const result = pickMainSkillSubstitute(mainSkillSlot, pairOpenPass, new Set(), 'd03', [
+      rule(['d05', 'd10', 'd11']),
+    ])
     expect(result?.candidate.drill.id).toBe('d05')
   })
 

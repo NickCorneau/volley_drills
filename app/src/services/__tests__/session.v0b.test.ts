@@ -262,8 +262,22 @@ describe('v0b session services', () => {
       goodPasses: 12,
       totalAttempts: 18,
       perDrillCaptures: [
-        { drillId: 'd38', variantId: 'd38-pair', blockIndex: 0, difficulty: 'still_learning', capturedAt: now - 8 * 60_000 },
-        { drillId: 'd31', variantId: 'd31-pair', blockIndex: 1, difficulty: 'too_easy', goodPasses: 8, attemptCount: 10, capturedAt: now - 7 * 60_000 },
+        {
+          drillId: 'd38',
+          variantId: 'd38-pair',
+          blockIndex: 0,
+          difficulty: 'still_learning',
+          capturedAt: now - 8 * 60_000,
+        },
+        {
+          drillId: 'd31',
+          variantId: 'd31-pair',
+          blockIndex: 1,
+          difficulty: 'too_easy',
+          goodPasses: 8,
+          attemptCount: 10,
+          capturedAt: now - 7 * 60_000,
+        },
       ],
       incompleteReason: 'time',
       shortNote: 'good session, light wind',
@@ -273,7 +287,10 @@ describe('v0b session services', () => {
 
     await skipReview('exec-skip-preserve')
 
-    const stub = await db.sessionReviews.where('executionLogId').equals('exec-skip-preserve').first()
+    const stub = await db.sessionReviews
+      .where('executionLogId')
+      .equals('exec-skip-preserve')
+      .first()
     expect(stub).toBeDefined()
     expect(stub!.status).toBe('skipped')
     // Skip stays distinguishable from expire via the 'skipped' tag.

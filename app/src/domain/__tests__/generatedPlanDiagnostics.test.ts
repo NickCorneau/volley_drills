@@ -26,7 +26,11 @@ import {
   validateSteeredGeneratedPlanSurfaceContract,
   type SteeredGeneratedPlanMatrixCell,
 } from '../generatedPlanDiagnostics'
-import { startingStressRung, stressLadderBounds, stressRungForDrill } from '../../data/stressLadders'
+import {
+  startingStressRung,
+  stressLadderBounds,
+  stressRungForDrill,
+} from '../../data/stressLadders'
 import {
   PLAYER_LEVELS,
   READINESS_CONFIGURATIONS,
@@ -214,9 +218,12 @@ describe('generated plan diagnostic matrix', () => {
           state: 'pre_activation_deferred',
           dimension: 'duration',
           value: '40',
-          reason: '40-minute generated diagnostics are deferred while the surface contract fixture proves shrinkage review.',
-          authority: 'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
-          revisitTrigger: 'Restore before any product-supported 40-minute diagnostic surface ships.',
+          reason:
+            '40-minute generated diagnostics are deferred while the surface contract fixture proves shrinkage review.',
+          authority:
+            'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
+          revisitTrigger:
+            'Restore before any product-supported 40-minute diagnostic surface ships.',
         },
       ],
     })
@@ -247,7 +254,8 @@ describe('generated plan diagnostic matrix', () => {
           dimension: 'duration',
           value: '40',
           reason: 'unsupported',
-          authority: 'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
+          authority:
+            'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
           revisitTrigger: 'Replace with a specific product boundary.',
         },
       ],
@@ -277,7 +285,10 @@ describe('generated plan diagnostic matrix', () => {
       ...DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT,
       included: {
         ...DEFAULT_GENERATED_PLAN_SURFACE,
-        configurations: [...DEFAULT_GENERATED_PLAN_SURFACE.configurations, duplicatePairOpenConfiguration],
+        configurations: [
+          ...DEFAULT_GENERATED_PLAN_SURFACE.configurations,
+          duplicatePairOpenConfiguration,
+        ],
       },
     })
 
@@ -338,8 +349,16 @@ describe('generated plan diagnostic matrix', () => {
 
     expect(validation.blockingIssues).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ code: 'unknown_included_surface_value', dimension: 'duration', value: '99' }),
-        expect.objectContaining({ code: 'unknown_included_surface_value', dimension: 'seed', value: 'matrix-e' }),
+        expect.objectContaining({
+          code: 'unknown_included_surface_value',
+          dimension: 'duration',
+          value: '99',
+        }),
+        expect.objectContaining({
+          code: 'unknown_included_surface_value',
+          dimension: 'seed',
+          value: 'matrix-e',
+        }),
       ]),
     )
   })
@@ -354,7 +373,8 @@ describe('generated plan diagnostic matrix', () => {
           dimension: 'duration',
           value: '999',
           reason: 'Fixture value proves typoed deferred values cannot enter report evidence.',
-          authority: 'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
+          authority:
+            'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
           revisitTrigger: 'Replace with a real supported duration before use.',
         },
         {
@@ -362,7 +382,8 @@ describe('generated plan diagnostic matrix', () => {
           dimension: 'seed',
           value: 'matrix-a',
           reason: 'Fixture proves included values cannot also be deferred.',
-          authority: 'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
+          authority:
+            'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
           revisitTrigger: 'Remove the conflict before report generation.',
         },
       ],
@@ -370,9 +391,21 @@ describe('generated plan diagnostic matrix', () => {
 
     expect(validation.blockingIssues).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ code: 'unknown_excluded_surface_value', dimension: 'duration', value: '999' }),
-        expect.objectContaining({ code: 'conflicting_surface_contract_state', dimension: 'seed', value: 'matrix-a' }),
-        expect.objectContaining({ code: 'unsupported_user_visible_surface', dimension: 'seed', value: 'matrix-a' }),
+        expect.objectContaining({
+          code: 'unknown_excluded_surface_value',
+          dimension: 'duration',
+          value: '999',
+        }),
+        expect.objectContaining({
+          code: 'conflicting_surface_contract_state',
+          dimension: 'seed',
+          value: 'matrix-a',
+        }),
+        expect.objectContaining({
+          code: 'unsupported_user_visible_surface',
+          dimension: 'seed',
+          value: 'matrix-a',
+        }),
       ]),
     )
   })
@@ -390,7 +423,11 @@ describe('generated plan diagnostic matrix', () => {
     expect(validation.blockingIssues).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ code: 'empty_included_surface_dimension', dimension: 'focus' }),
-        expect.objectContaining({ code: 'duplicate_included_surface_value', dimension: 'seed', value: 'matrix-a' }),
+        expect.objectContaining({
+          code: 'duplicate_included_surface_value',
+          dimension: 'seed',
+          value: 'matrix-a',
+        }),
       ]),
     )
   })
@@ -416,7 +453,8 @@ describe('generated plan diagnostic matrix', () => {
           dimension: 'theme',
           value: 'future_curated_themes',
           reason: 'Fixture proves themes cannot be partially deferred as coverage.',
-          authority: 'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
+          authority:
+            'docs/brainstorms/2026-05-02-generated-diagnostics-dynamic-surface-sentinel-requirements.md',
           revisitTrigger: 'Replace only when a concrete theme contract exists.',
         },
       ],
@@ -898,17 +936,12 @@ describe('seeded generated plan diagnostics', () => {
   it('hard-fails selected trace slots that do not map back to draft blocks', () => {
     const { traced, cell, configuration } = traceMismatchFixture()
 
-    const result = analyzeGeneratedPlanDraft(
-      cell,
-      configuration,
-      traced.draft,
-      {
-        ...traced.assemblyTrace,
-        slots: traced.assemblyTrace.slots.map((slot) =>
-          slot.selected ? { ...slot, blockId: 'missing-block' } : slot,
-        ),
-      },
-    )
+    const result = analyzeGeneratedPlanDraft(cell, configuration, traced.draft, {
+      ...traced.assemblyTrace,
+      slots: traced.assemblyTrace.slots.map((slot) =>
+        slot.selected ? { ...slot, blockId: 'missing-block' } : slot,
+      ),
+    })
 
     expect(result.status).toBe('hard_failure')
     expect(result.hardFailures).toEqual(
@@ -1062,7 +1095,6 @@ describe('seeded generated plan diagnostics', () => {
       }),
     )
   })
-
 })
 
 /**
@@ -1089,10 +1121,7 @@ describe('steered generated plan diagnostics (U7)', () => {
     }
   }
 
-  function mainSkillBlock(
-    drillId: string,
-    variantId: string,
-  ): SessionDraft['blocks'][number] {
+  function mainSkillBlock(drillId: string, variantId: string): SessionDraft['blocks'][number] {
     return {
       id: 'block-main',
       type: 'main_skill',

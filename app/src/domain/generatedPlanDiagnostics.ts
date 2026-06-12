@@ -1,11 +1,14 @@
 import { DRILLS } from '../data/drills'
 import { selectArchetype } from '../data/archetypes'
-import {
-  startingStressRung,
-  stressLadderBounds,
-  stressRungForDrill,
-} from '../data/stressLadders'
-import type { BlockSlot, BlockSlotType, PlayerLevel, SessionDraft, SetupContext, TimeProfile } from '../model'
+import { startingStressRung, stressLadderBounds, stressRungForDrill } from '../data/stressLadders'
+import type {
+  BlockSlot,
+  BlockSlotType,
+  PlayerLevel,
+  SessionDraft,
+  SetupContext,
+  TimeProfile,
+} from '../model'
 import { buildDraftWithAssemblyTrace } from './sessionBuilder'
 import type { DraftAssemblyTrace, DraftAssemblyTraceSlot } from './sessionBuilder'
 import { findCandidates } from './sessionAssembly/candidates'
@@ -320,21 +323,18 @@ const PLACEHOLDER_SURFACE_REASONS = new Set(['unsupported', 'n/a', 'na', 'todo',
  */
 type DefaultSurfaceDimension = Exclude<GeneratedPlanSurfaceContractDimension, 'theme' | 'position'>
 
-const REQUIRED_GENERATED_PLAN_SURFACE_BASELINE: Record<
-  DefaultSurfaceDimension,
-  readonly string[]
-> = {
-  focus: ['pass', 'serve', 'set'],
-  configuration: ['solo_net', 'solo_wall', 'solo_open', 'pair_net', 'pair_open'],
-  level: ['beginner', 'intermediate', 'advanced'],
-  duration: ['15', '25', '40'],
-  seed: ['matrix-a', 'matrix-b', 'matrix-c', 'matrix-d'],
-} as const
+const REQUIRED_GENERATED_PLAN_SURFACE_BASELINE: Record<DefaultSurfaceDimension, readonly string[]> =
+  {
+    focus: ['pass', 'serve', 'set'],
+    configuration: ['solo_net', 'solo_wall', 'solo_open', 'pair_net', 'pair_open'],
+    level: ['beginner', 'intermediate', 'advanced'],
+    duration: ['15', '25', '40'],
+    seed: ['matrix-a', 'matrix-b', 'matrix-c', 'matrix-d'],
+  } as const
 
-function surfaceValues(surface: GeneratedPlanSupportedSurface): Record<
-  DefaultSurfaceDimension,
-  readonly string[]
-> {
+function surfaceValues(
+  surface: GeneratedPlanSupportedSurface,
+): Record<DefaultSurfaceDimension, readonly string[]> {
   return {
     focus: surface.focuses,
     configuration: surface.configurations.map((configuration) => configuration.id),
@@ -344,10 +344,7 @@ function surfaceValues(surface: GeneratedPlanSupportedSurface): Record<
   }
 }
 
-function canonicalSurfaceValues(): Record<
-  DefaultSurfaceDimension,
-  readonly string[]
-> {
+function canonicalSurfaceValues(): Record<DefaultSurfaceDimension, readonly string[]> {
   return {
     focus: VISIBLE_FOCUSES,
     configuration: READINESS_CONFIGURATIONS.map((configuration) => configuration.id),
@@ -576,7 +573,8 @@ export function validateGeneratedPlanSurfaceContract(
 
     const invalidDimensions: GeneratedPlanSurfaceContractDimension[] = []
     if (!includedValues.focus.includes(cell.focus)) invalidDimensions.push('focus')
-    if (!includedValues.configuration.includes(cell.configuration)) invalidDimensions.push('configuration')
+    if (!includedValues.configuration.includes(cell.configuration))
+      invalidDimensions.push('configuration')
     if (!includedValues.level.includes(cell.level)) invalidDimensions.push('level')
     if (!includedValues.duration.includes(String(cell.duration))) invalidDimensions.push('duration')
     if (!includedValues.seed.includes(cell.seed)) invalidDimensions.push('seed')
@@ -638,7 +636,8 @@ function notApplicableReason(
   cell: GeneratedPlanMatrixCell,
   surface: GeneratedPlanSupportedSurface,
 ): string | undefined {
-  return surface.notApplicable?.find((candidate) => matchesNotApplicableCell(cell, candidate))?.reason
+  return surface.notApplicable?.find((candidate) => matchesNotApplicableCell(cell, candidate))
+    ?.reason
 }
 
 export function isGeneratedPlanDiagnosticStatus(
@@ -668,7 +667,11 @@ export function buildGeneratedPlanMatrix(
               seed,
             }
             const reason = notApplicableReason(cell, surface)
-            entries.push(reason ? { ...cell, status: 'not_applicable', reason } : { ...cell, status: 'applicable' })
+            entries.push(
+              reason
+                ? { ...cell, status: 'not_applicable', reason }
+                : { ...cell, status: 'applicable' },
+            )
           }
         }
       }
@@ -717,10 +720,7 @@ function findVariant(drillId: string, variantId: string) {
   return { drill, variant }
 }
 
-function incrementCount<Key extends string>(
-  counts: Partial<Record<Key, number>>,
-  key: Key,
-): void {
+function incrementCount<Key extends string>(counts: Partial<Record<Key, number>>, key: Key): void {
   counts[key] = (counts[key] ?? 0) + 1
 }
 
@@ -834,10 +834,7 @@ export function analyzeSelectedDraftStretch(
       traceSlot !== undefined &&
       (redistribution !== undefined || traceSlot.allocatedMinutes > fatigueMaxMinutes)
 
-    if (
-      (overAuthoredMax && !authoredMaxClassified) ||
-      (overFatigueMax && !fatigueMaxClassified)
-    ) {
+    if ((overAuthoredMax && !authoredMaxClassified) || (overFatigueMax && !fatigueMaxClassified)) {
       hardFailures.push({
         code: 'unclassified_stretch_pressure',
         ...blockTraceContext(block, traceSlot),
@@ -945,7 +942,12 @@ function hasSelectedCandidate(
 
 function traceSlotMatchesBlock(
   traceSlot: DraftAssemblyTraceSlot,
-  block: { readonly drillId: string; readonly variantId: string; readonly type: BlockSlotType; readonly required: boolean },
+  block: {
+    readonly drillId: string
+    readonly variantId: string
+    readonly type: BlockSlotType
+    readonly required: boolean
+  },
 ): boolean {
   return (
     traceSlot.drillId === block.drillId &&
@@ -1079,8 +1081,7 @@ function generationHardFailures(
       // required slot off-focus still hard-fails — R6 keeps required
       // slots focus-strict.
       const offFocusTolerable =
-        !block.required &&
-        slot.skillTags?.some((tag) => drill.skillFocus.includes(tag))
+        !block.required && slot.skillTags?.some((tag) => drill.skillFocus.includes(tag))
       if (!offFocusTolerable) {
         failures.push({
           code: 'off_focus_controlled_work',
@@ -1116,7 +1117,8 @@ function generationHardFailures(
 function generatedShapeObservations(draft: SessionDraft): GeneratedPlanObservation[] {
   const focusedBlocks = draft.blocks.filter((block) => isFocusControlledSlotType(block.type))
   const repeated = focusedBlocks.filter(
-    (block, index) => focusedBlocks.findIndex((candidate) => candidate.drillId === block.drillId) !== index,
+    (block, index) =>
+      focusedBlocks.findIndex((candidate) => candidate.drillId === block.drillId) !== index,
   )
   return repeated.map((block) => ({
     code: 'repeated_focus_controlled_family',
@@ -1307,10 +1309,9 @@ const REQUIRED_STEERED_GENERATED_PLAN_SURFACE_BASELINE: Record<
   position: ['ladder_min', 'band_start', 'ladder_max'],
 } as const
 
-function steeredSurfaceValues(surface: SteeredGeneratedPlanSurface): Record<
-  SteeredSurfaceDimension,
-  readonly string[]
-> {
+function steeredSurfaceValues(
+  surface: SteeredGeneratedPlanSurface,
+): Record<SteeredSurfaceDimension, readonly string[]> {
   return {
     focus: surface.focuses,
     configuration: surface.configurations.map((configuration) => configuration.id),
@@ -1512,14 +1513,14 @@ export function steeredGenerationHardFailures(
       continue // hard_filter_violation owns out-of-pool picks
     }
     const otherBlockDrillIds = new Set(
-      draft.blocks
-        .filter((block) => block.id !== traceSlot.blockId)
-        .map((block) => block.drillId),
+      draft.blocks.filter((block) => block.id !== traceSlot.blockId).map((block) => block.drillId),
     )
     const eligible = pool.filter((candidate) => !otherBlockDrillIds.has(candidate.drill.id))
     const checkPool = eligible.length > 0 ? eligible : pool
     const nearestDistance = Math.min(
-      ...checkPool.map((candidate) => steeredRungDistance(cell.focus, candidate.drill.id, cell.position)),
+      ...checkPool.map((candidate) =>
+        steeredRungDistance(cell.focus, candidate.drill.id, cell.position),
+      ),
     )
     const selectedDistance = steeredRungDistance(cell.focus, traceSlot.drillId, cell.position)
     if (selectedDistance > nearestDistance) {
@@ -1723,14 +1724,16 @@ export function summarizeGeneratedPlanDiagnostics(
     }
   }
 
-  const summaryMatrix: readonly GeneratedPlanMatrixEntry[] = matrix ?? results.map((result) => ({
-    focus: result.focus,
-    configuration: result.configuration,
-    level: result.level,
-    duration: result.duration,
-    seed: result.seed,
-    status: 'applicable',
-  }))
+  const summaryMatrix: readonly GeneratedPlanMatrixEntry[] =
+    matrix ??
+    results.map((result) => ({
+      focus: result.focus,
+      configuration: result.configuration,
+      level: result.level,
+      duration: result.duration,
+      seed: result.seed,
+      status: 'applicable',
+    }))
 
   return {
     surface: buildGeneratedPlanSurfaceSummary(summaryMatrix),
@@ -1762,10 +1765,12 @@ function observationGroupKey(observations: readonly GeneratedPlanObservation[]):
   ].join('|')
 }
 
-function observationGroupPublicKey(group: Pick<
-  GeneratedPlanObservationGroup,
-  'drillId' | 'variantId' | 'blockType' | 'required' | 'observationCodes'
->): string {
+function observationGroupPublicKey(
+  group: Pick<
+    GeneratedPlanObservationGroup,
+    'drillId' | 'variantId' | 'blockType' | 'required' | 'observationCodes'
+  >,
+): string {
   return [
     'gpdg',
     'v1',
@@ -1789,15 +1794,16 @@ function observationGroupFingerprint(
   >,
 ): string {
   const exampleCells = [...group.affectedCells]
-    .sort((a, b) =>
-      [
-        a.focus.localeCompare(b.focus),
-        a.configuration.localeCompare(b.configuration),
-        a.level.localeCompare(b.level),
-        a.duration - b.duration,
-        a.seed.localeCompare(b.seed),
-        (a.blockId ?? '').localeCompare(b.blockId ?? ''),
-      ].find((comparison) => comparison !== 0) ?? 0,
+    .sort(
+      (a, b) =>
+        [
+          a.focus.localeCompare(b.focus),
+          a.configuration.localeCompare(b.configuration),
+          a.level.localeCompare(b.level),
+          a.duration - b.duration,
+          a.seed.localeCompare(b.seed),
+          (a.blockId ?? '').localeCompare(b.blockId ?? ''),
+        ].find((comparison) => comparison !== 0) ?? 0,
     )
     .slice(0, 3)
     .map((cell) =>
@@ -1898,17 +1904,18 @@ export function buildGeneratedPlanObservationGroups(
         allocatedMinutes: firstDefined(
           observations.map((observation) => observation.allocatedMinutes),
         ),
-        authoredMinMinutes: firstDefined(
-          observations.map((observation) => observation.authoredMinMinutes),
-        ) ?? selectedVariant?.workload.durationMinMinutes,
-        authoredMaxMinutes: firstDefined(
-          observations.map((observation) => observation.authoredMaxMinutes),
-        ) ?? selectedVariant?.workload.durationMaxMinutes,
-        fatigueMaxMinutes: firstDefined(
-          observations.map((observation) => observation.fatigueMaxMinutes),
-        ) ?? selectedVariant?.workload.fatigueCap?.maxMinutes,
+        authoredMinMinutes:
+          firstDefined(observations.map((observation) => observation.authoredMinMinutes)) ??
+          selectedVariant?.workload.durationMinMinutes,
+        authoredMaxMinutes:
+          firstDefined(observations.map((observation) => observation.authoredMaxMinutes)) ??
+          selectedVariant?.workload.durationMaxMinutes,
+        fatigueMaxMinutes:
+          firstDefined(observations.map((observation) => observation.fatigueMaxMinutes)) ??
+          selectedVariant?.workload.fatigueCap?.maxMinutes,
         observationCodes,
-        redistribution: observations.find((observation) => observation.redistribution)?.redistribution,
+        redistribution: observations.find((observation) => observation.redistribution)
+          ?.redistribution,
       }
 
       if (existing) {
@@ -1925,25 +1932,28 @@ export function buildGeneratedPlanObservationGroups(
         continue
       }
 
-      groups.set(key, withObservationGroupIdentity({
-        drillId: firstDefined(observations.map((observation) => observation.drillId)),
-        variantId: firstDefined(observations.map((observation) => observation.variantId)),
-        blockType: firstDefined(observations.map((observation) => observation.blockType)),
-        required: representative.required,
-        authoredMinMinutes: firstDefined(
-          observations.map((observation) => observation.authoredMinMinutes),
-        ),
-        authoredMaxMinutes: firstDefined(
-          observations.map((observation) => observation.authoredMaxMinutes),
-        ),
-        fatigueMaxMinutes: firstDefined(
-          observations.map((observation) => observation.fatigueMaxMinutes),
-        ),
-        affectedCellCount: 1,
-        observationCodes,
-        likelyFixPaths: likelyFixPathsForObservationCodes(observationCodes),
-        affectedCells: [affectedCell],
-      }))
+      groups.set(
+        key,
+        withObservationGroupIdentity({
+          drillId: firstDefined(observations.map((observation) => observation.drillId)),
+          variantId: firstDefined(observations.map((observation) => observation.variantId)),
+          blockType: firstDefined(observations.map((observation) => observation.blockType)),
+          required: representative.required,
+          authoredMinMinutes: firstDefined(
+            observations.map((observation) => observation.authoredMinMinutes),
+          ),
+          authoredMaxMinutes: firstDefined(
+            observations.map((observation) => observation.authoredMaxMinutes),
+          ),
+          fatigueMaxMinutes: firstDefined(
+            observations.map((observation) => observation.fatigueMaxMinutes),
+          ),
+          affectedCellCount: 1,
+          observationCodes,
+          likelyFixPaths: likelyFixPathsForObservationCodes(observationCodes),
+          affectedCells: [affectedCell],
+        }),
+      )
     }
   }
 

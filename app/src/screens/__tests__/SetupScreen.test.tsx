@@ -1079,7 +1079,9 @@ describe('SetupScreen (C-3)', () => {
       }
       const buildSpy = vi
         .spyOn(sessionBuilder, 'buildDraft')
-        .mockImplementation((context) => (context.focusSource === 'resolved' ? null : unstampedDraft))
+        .mockImplementation((context) =>
+          context.focusSource === 'resolved' ? null : unstampedDraft,
+        )
 
       const user = userEvent.setup()
       render(

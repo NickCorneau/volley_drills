@@ -440,7 +440,10 @@ describe('sessionBuilder', () => {
         for (const b of draft.blocks) {
           const max = maxByType.get(b.type)
           if (max === undefined) continue
-          expect(b.durationMinutes, `${b.type} exceeds slot max under calibration`).toBeLessThanOrEqual(max)
+          expect(
+            b.durationMinutes,
+            `${b.type} exceeds slot max under calibration`,
+          ).toBeLessThanOrEqual(max)
         }
       }
     })

@@ -1,7 +1,4 @@
-import {
-  SUBSTITUTION_RULES,
-  type SubstitutionRule,
-} from '../../data/substitutionRules'
+import { SUBSTITUTION_RULES, type SubstitutionRule } from '../../data/substitutionRules'
 import type { StressLadderFocus } from '../../data/stressLadders'
 import { findActiveSubstitutionRule } from '../drillSelection'
 import type { BlockSlot, PlayerLevel, SetupContext } from '../../model'
