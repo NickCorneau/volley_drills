@@ -26,7 +26,7 @@ import type { ScopedFocus } from '../domain/eligibleSessions'
 import type { SetupContext } from '../model'
 import { isSkillLevel, skillLevelToDrillBand } from '../lib/skillLevel'
 import { loadSessionCalibration } from './calibration'
-import { saveDraft } from './session'
+import { findLastCompletedDrillIdsByType, saveDraft } from './session'
 import { getStorageMeta } from './storageMeta'
 import { loadStressPositions } from './stressPositions'
 
@@ -36,12 +36,24 @@ async function buildAndSaveDraft(
 ): Promise<boolean> {
   const skillLevel = await getStorageMeta('onboarding.skillLevel', isSkillLevel)
   const playerLevel = skillLevel === undefined ? undefined : skillLevelToDrillBand(skillLevel)
-  // Steered launches load both derived inputs: stress positions (D154)
-  // and the clock calibration (U5/KTD6).
-  const [stressPositions, calibration] = options?.steer
-    ? await Promise.all([loadStressPositions(), loadSessionCalibration()])
-    : [undefined, undefined]
-  const draft = buildDraft(context, { playerLevel, stressPositions, calibration })
+  // Steered launches load the full derived-input set Setup passes:
+  // stress positions (D154), clock calibration (U5/KTD6), and — U6
+  // (D159) Home/Setup build parity — the last-completed main-skill
+  // history, so a blocked progression substitutes identically whether
+  // the build started from Home or Setup.
+  const [stressPositions, calibration, lastCompletedByType] = options?.steer
+    ? await Promise.all([
+        loadStressPositions(),
+        loadSessionCalibration(),
+        findLastCompletedDrillIdsByType(),
+      ])
+    : [undefined, undefined, undefined]
+  const draft = buildDraft(context, {
+    playerLevel,
+    stressPositions,
+    calibration,
+    lastCompletedByType,
+  })
   if (!draft) return false
   await saveDraft(draft)
   return true

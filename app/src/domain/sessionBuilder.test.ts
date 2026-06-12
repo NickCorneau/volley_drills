@@ -116,14 +116,14 @@ describe('sessionBuilder', () => {
       },
     )
 
-    it('algorithm version is 10 (U5 clock-calibration bump)', () => {
+    it('algorithm version is 11 (U6 rung-aware substitution bump)', () => {
       const draft = buildDraft({
         playerMode: 'pair',
         timeProfile: 25,
         netAvailable: false,
         wallAvailable: false,
       })
-      expect(draft?.assemblyAlgorithmVersion).toBe(10)
+      expect(draft?.assemblyAlgorithmVersion).toBe(11)
     })
 
     it('build is deterministic per seed under R1 (R4)', () => {
@@ -291,8 +291,10 @@ describe('sessionBuilder', () => {
     // (R1). Block shape is otherwise unchanged for this Recommended
     // (focus-untouched) pair-open-25 fixture — every optional slot
     // fills, so there is no surplus to redistribute and the post-R1
-    // engine produces byte-identical durations.
-    expect(draft?.assemblyAlgorithmVersion).toBe(10)
+    // engine produces byte-identical durations. (v11 — U6 rung-aware
+    // substitution — is also output-identical here: no substitution
+    // inputs, no positions.)
+    expect(draft?.assemblyAlgorithmVersion).toBe(11)
     // 2026-05-13: segment snap is wired into `buildDraft`, so the
     // pair-open-25 wrap (d26-solo, natural 3 min) snaps from 4 → 3
     // and the freed minute redistributes into technique (6 → 7)
@@ -2030,7 +2032,7 @@ describe('sessionBuilder', () => {
     expect(first).not.toBeNull()
     expect(second).not.toBeNull()
     expect(first?.assemblySeed).toBe('seed-replay')
-    expect(first?.assemblyAlgorithmVersion).toBe(10)
+    expect(first?.assemblyAlgorithmVersion).toBe(11)
     expect(second?.blocks.map((block) => [block.drillId, block.variantId])).toEqual(
       first?.blocks.map((block) => [block.drillId, block.variantId]),
     )
@@ -2579,11 +2581,13 @@ describe('steered provenance stamp (trust loop U1)', () => {
     }
   })
 
-  it('AE5 (build half): substitution fires on a steered build → no stamp', () => {
+  it('AE5 (rewritten by U6): on-target substitution now earns the stamp', () => {
     // pair/open + last main_skill d03 promotes substitute d10 (rung 3).
-    // Position 3 makes the substitute land ON the steer target — the
-    // stamp must still be withheld because the pick came from the
-    // substitution path, not pickForSlot's rung preference (KTD6).
+    // Position 3 lands the substitute ON the steer target. v10 withheld
+    // the stamp because the substitution path bypassed rung preference;
+    // U6 (D159) made the substitution choice itself rung-aware, so an
+    // on-target substitute IS the steering working and the build is
+    // stamped like any other realized-on-target pick.
     const pairOpenPass: SetupContext = {
       playerMode: 'pair',
       timeProfile: 25,
@@ -2599,7 +2603,61 @@ describe('steered provenance stamp (trust loop U1)', () => {
     expect(draft).not.toBeNull()
     const main = draft!.blocks.find((b) => b.type === 'main_skill')
     expect(main?.drillId).toBe('d10')
+    expect(main?.rationale).toMatch(/is unavailable today, so this keeps/)
+    expect(draft!.steeredFocus).toBe('pass')
+  })
+
+  it('off-target substitution still fails quiet — no stamp', () => {
+    // Same firing rule, but position 1: the only authored substitute
+    // d10 sits at rung 3, so the realized pick is off-target and the
+    // stamp is withheld (quiet-fail, R7/R11/R12).
+    const pairOpenPass: SetupContext = {
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'pass',
+    }
+    const draft = buildDraft(pairOpenPass, {
+      assemblySeed: 'stamp-substitution-off-target',
+      lastCompletedByType: { main_skill: 'd03' },
+      stressPositions: { pass: 1 },
+    })
+    expect(draft).not.toBeNull()
+    const main = draft!.blocks.find((b) => b.type === 'main_skill')
+    expect(main?.drillId).toBe('d10')
     expect(draft!.steeredFocus).toBeUndefined()
+  })
+
+  it('substitution reservation and the stamp coexist across seeds', () => {
+    // The up-front d10 reservation keeps earlier slots (technique,
+    // movement) from shuffle-claiming the substitute; with position 3
+    // the reserved substitute realizes the target on every seed, so
+    // every build is stamped.
+    const pairOpenPass: SetupContext = {
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'pass',
+    }
+    for (let i = 0; i < 25; i++) {
+      const draft = buildDraft(pairOpenPass, {
+        assemblySeed: `stamp-substitution-reservation-${i}`,
+        lastCompletedByType: { main_skill: 'd03' },
+        stressPositions: { pass: 3 },
+      })
+      expect(draft).not.toBeNull()
+      const main = draft!.blocks.find((b) => b.type === 'main_skill')
+      expect(main?.drillId).toBe('d10')
+      for (const block of draft!.blocks) {
+        if (block.type === 'main_skill') continue
+        expect(block.drillId, `${block.type} shuffle-claimed the reserved substitute`).not.toBe(
+          'd10',
+        )
+      }
+      expect(draft!.steeredFocus).toBe('pass')
+    }
   })
 
   it('nearest-rung fallback off the target rung → no stamp', () => {
@@ -2655,5 +2713,122 @@ describe('steered provenance stamp (trust loop U1)', () => {
     })
     expect(recovery).not.toBeNull()
     expect(recovery!.steeredFocus).toBeUndefined()
+  })
+})
+
+/**
+ * U6 (D159, R6): the assembly trace records WHICH policy decided the
+ * main-skill slot (`rung_nearest | duration_fit | reroute |
+ * substitution`) so the diagnostics steered sweep can audit steering
+ * without re-implementing `pickForSlot`'s duration policy. Absent on
+ * non-main-skill slots and on unsteered default picks.
+ */
+describe('main-skill selection-path marker (U6)', () => {
+  const soloPass: SetupContext = {
+    playerMode: 'solo',
+    timeProfile: 25,
+    netAvailable: true,
+    wallAvailable: false,
+    sessionFocus: 'pass',
+  }
+
+  function mainSkillTraceSlot(result: ReturnType<typeof buildDraftWithAssemblyTrace>) {
+    return result?.assemblyTrace.slots.find((slot) => slot.type === 'main_skill')
+  }
+
+  it('substitution builds mark the slot `substitution`', () => {
+    const result = buildDraftWithAssemblyTrace(
+      {
+        playerMode: 'pair',
+        timeProfile: 25,
+        netAvailable: false,
+        wallAvailable: false,
+        sessionFocus: 'pass',
+      },
+      {
+        assemblySeed: 'marker-substitution',
+        lastCompletedByType: { main_skill: 'd03' },
+        stressPositions: { pass: 3 },
+      },
+    )
+    const slot = mainSkillTraceSlot(result)
+    expect(slot?.selected).toBe(true)
+    expect(slot?.selected ? slot.drillId : undefined).toBe('d10')
+    expect(slot?.selected ? slot.selectionPath : undefined).toBe('substitution')
+  })
+
+  it('steered builds mark the slot, with `rung_nearest` for honored pool heads', () => {
+    const seen = new Set<string>()
+    for (let i = 0; i < 25; i++) {
+      const result = buildDraftWithAssemblyTrace(soloPass, {
+        assemblySeed: `marker-steered-${i}`,
+        playerLevel: 'intermediate',
+        stressPositions: { pass: 4 },
+      })
+      const slot = mainSkillTraceSlot(result)
+      expect(slot?.selected).toBe(true)
+      if (!slot?.selected) continue
+      expect(slot.selectionPath).toBeDefined()
+      expect(['rung_nearest', 'duration_fit', 'reroute']).toContain(slot.selectionPath)
+      seen.add(slot.selectionPath!)
+    }
+    expect(seen.has('rung_nearest')).toBe(true)
+  })
+
+  it('unsteered builds never claim `rung_nearest`', () => {
+    let sawUnmarked = false
+    for (let i = 0; i < 25; i++) {
+      const result = buildDraftWithAssemblyTrace(soloPass, {
+        assemblySeed: `marker-unsteered-${i}`,
+        playerLevel: 'intermediate',
+      })
+      const slot = mainSkillTraceSlot(result)
+      expect(slot?.selected).toBe(true)
+      if (!slot?.selected) continue
+      expect(slot.selectionPath).not.toBe('rung_nearest')
+      if (slot.selectionPath === undefined) sawUnmarked = true
+    }
+    expect(sawUnmarked).toBe(true)
+  })
+
+  it('source-backed reroutes mark the slot `reroute`', () => {
+    // Advanced solo/open setting on the 40 profile: base allocation
+    // exceeds D47/D48's envelope and the registry reroutes to d49
+    // (same fixture as the base-allocation reroute test above). Hunt
+    // for a seed where the reroute actually fired — d49 can also be a
+    // direct pool-head pick, which stays unmarked.
+    let found: string | undefined
+    for (let i = 0; i < 500 && found === undefined; i++) {
+      const result = buildDraftWithAssemblyTrace(
+        {
+          playerMode: 'solo',
+          timeProfile: 40,
+          netAvailable: false,
+          wallAvailable: false,
+          sessionFocus: 'set',
+          playerLevel: 'advanced',
+        },
+        { assemblySeed: `marker-reroute-${i}`, playerLevel: 'advanced' },
+      )
+      const slot = mainSkillTraceSlot(result)
+      if (slot?.selected && slot.selectionPath === 'reroute') {
+        expect(slot.drillId).toBe('d49')
+        found = `marker-reroute-${i}`
+      }
+    }
+    expect(found).toBeDefined()
+  })
+
+  it('non-main-skill slots never carry the marker', () => {
+    const result = buildDraftWithAssemblyTrace(soloPass, {
+      assemblySeed: 'marker-other-slots',
+      playerLevel: 'intermediate',
+      stressPositions: { pass: 4 },
+    })
+    expect(result).not.toBeNull()
+    for (const slot of result!.assemblyTrace.slots) {
+      if (slot.type === 'main_skill' || !slot.selected) continue
+      expect(slot.selectionPath, `${slot.type} slot carried a selection path`).toBeUndefined()
+    }
   })
 })

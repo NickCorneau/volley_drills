@@ -12,6 +12,7 @@ import type { SessionCalibration } from './calibration/sessionCalibration'
 import {
   candidateCanCarryTargetDuration,
   pickForSlot,
+  pickForSlotWithPath,
   type CandidateVariant,
 } from './sessionAssembly/candidates'
 import {
@@ -43,7 +44,15 @@ export { deriveBlockRationale } from './sessionAssembly/rationale'
 // allocation (effective budget = profile ÷ overhead ratio) so the
 // session's expected WALL time lands near the chosen profile.
 // Calibration-less builds are output-identical to v9.
-export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 10
+// v11: rung-aware substitution (2026-06-12, D159/U6) — the build-time
+// main-skill substitution path orders the firing rule's authored
+// substitutes by stress-ladder distance to the steered rung (stable
+// sort, authored order breaks ties), and a substituted pick that
+// realizes the steer target is now `steeredFocus`-stamp-eligible like
+// any other pick (the v10 substitution stamp guard is deleted).
+// Position-less and single-substitute builds are output-identical to
+// v10.
+export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 11
 
 /**
  * Optional inputs that scope build-time drill substitution.
@@ -81,12 +90,12 @@ export interface BuildDraftOptions {
   /**
    * Stress-substrate (D154): derived per-focus ladder positions
    * (`deriveStressPositions`). Steers the main_skill pick toward the
-   * session focus's current rung; absent → legacy selection. Known v1
-   * bypass: when the `lastCompletedByType` substitution rule fires,
-   * `pickMainSkillSubstitute` decides the slot without `pickForSlot`,
-   * so rung preference does not apply to that pick — and the build is
-   * NOT stamped `steeredFocus`, so every steering trace stays quiet
-   * for that session (trust-loop KTD6, R12).
+   * session focus's current rung; absent → legacy selection. U6
+   * (D159) closed the v1 substitution bypass: when the
+   * `lastCompletedByType` rule fires, `pickMainSkillSubstitute` now
+   * receives these positions and picks the rung-nearest authored
+   * substitute (authored-order tie-break), and the realized pick is
+   * `steeredFocus`-stamp-eligible exactly like a `pickForSlot` pick.
    */
   readonly stressPositions?: Partial<Record<StressLadderFocus, number>>
   /**
@@ -100,6 +109,18 @@ export interface BuildDraftOptions {
   readonly calibration?: SessionCalibration
 }
 
+/**
+ * Which policy decided a selected main-skill slot (U6/D159, R6):
+ * `rung_nearest` — stress-ordered pool head honored; `duration_fit` —
+ * the duration carve-out overrode the pool head; `reroute` — the
+ * source-backed base-allocation reroute re-picked; `substitution` —
+ * the blocked-progression substitute decided the slot. Absent on
+ * non-main-skill slots and on unsteered default picks. Diagnostics
+ * key steering checks on this marker instead of re-implementing
+ * `pickForSlot` policy.
+ */
+export type MainSkillSelectionPath = 'rung_nearest' | 'duration_fit' | 'reroute' | 'substitution'
+
 interface DraftAssemblyTraceSlotBase {
   readonly layoutIndex: number
   readonly type: BlockSlotType
@@ -112,6 +133,7 @@ interface SelectedDraftAssemblyTraceSlot extends DraftAssemblyTraceSlotBase {
   readonly blockId: string
   readonly drillId: string
   readonly variantId: string
+  readonly selectionPath?: MainSkillSelectionPath
 }
 
 interface UnselectedDraftAssemblyTraceSlot extends DraftAssemblyTraceSlotBase {
@@ -141,7 +163,9 @@ function buildTraceSlot(
   slot: BlockSlot,
   layoutIndex: number,
   allocatedMinutes: number,
-  selected: { readonly pick: CandidateVariant } | undefined,
+  selected:
+    | { readonly pick: CandidateVariant; readonly selectionPath?: MainSkillSelectionPath }
+    | undefined,
   blockId: string | undefined,
 ): DraftAssemblyTraceSlot {
   if (!selected) {
@@ -166,6 +190,7 @@ function buildTraceSlot(
     blockId,
     drillId: selected.pick.drill.id,
     variantId: selected.pick.variant.id,
+    ...(selected.selectionPath !== undefined ? { selectionPath: selected.selectionPath } : {}),
   }
 }
 
@@ -204,10 +229,12 @@ function buildDraftResult(
   if (!durations) return null
 
   const usedDrillIds = new Set<string>()
-  const selectedByLayoutIndex = new Map<
-    number,
-    { readonly pick: CandidateVariant; readonly substitutionRationale?: string }
-  >()
+  interface SelectedSlot {
+    readonly pick: CandidateVariant
+    readonly substitutionRationale?: string
+    readonly selectionPath?: MainSkillSelectionPath
+  }
+  const selectedByLayoutIndex = new Map<number, SelectedSlot>()
 
   // Decide build-time substitution UP FRONT and reserve the
   // substitute drillId so earlier slots in the layout (e.g.,
@@ -227,7 +254,10 @@ function buildDraftResult(
         usedDrillIds,
         lastMainSkillDrillId,
         undefined,
-        { playerLevel: options?.playerLevel },
+        // U6 (D159): the substitution choice is rung-aware — the same
+        // positions that order pickForSlot's pool order the rule's
+        // authored substitutes.
+        { playerLevel: options?.playerLevel, stressPositions: options?.stressPositions },
       )
       if (mainSkillSubstitute) {
         usedDrillIds.add(mainSkillSubstitute.candidate.drill.id)
@@ -239,21 +269,29 @@ function buildDraftResult(
     slot: BlockSlot,
     allowUsedFallback: boolean,
     targetDurationMinutes: number,
-  ): { readonly pick: CandidateVariant; readonly substitutionRationale?: string } | undefined {
+  ): SelectedSlot | undefined {
     if (slot.type === 'main_skill' && mainSkillSubstitute) {
       return {
         pick: mainSkillSubstitute.candidate,
         substitutionRationale: mainSkillSubstitute.rationale,
+        selectionPath: 'substitution',
       }
     }
 
-    const pick = pickForSlot(slot, effectiveContext, usedDrillIds, random, {
+    const result = pickForSlotWithPath(slot, effectiveContext, usedDrillIds, random, {
       playerLevel: options?.playerLevel,
       allowUsedFallback,
       targetDurationMinutes,
       stressPositions: options?.stressPositions,
     })
-    return pick ? { pick } : undefined
+    if (!result) return undefined
+    // The marker is a main-skill steering audit substrate (R6); the
+    // per-type preference scans elsewhere all read `default` and stay
+    // unmarked.
+    if (slot.type === 'main_skill' && result.path !== 'default') {
+      return { pick: result.pick, selectionPath: result.path }
+    }
+    return { pick: result.pick }
   }
 
   for (let i = 0; i < layout.length; i++) {
@@ -324,7 +362,7 @@ function buildDraftResult(
       stressPositions: options?.stressPositions,
     })
     if (rerouted) {
-      selectedByLayoutIndex.set(index, { pick: rerouted })
+      selectedByLayoutIndex.set(index, { pick: rerouted, selectionPath: 'reroute' })
     }
   }
 
@@ -389,19 +427,21 @@ function buildDraftResult(
 
   // Stress-visibility provenance (trust-loop KTD1): one build-time
   // "steered" definition on REALIZED outcomes. Stamp only when the
-  // session focus is scoped, a derived position resolved for it, the
-  // main_skill pick came from `pickForSlot`'s rung preference (not the
-  // substitution path), and the picked drill's authored rung equals the
-  // steer target. Rung preference is a preference — nearest-rung
-  // fallback and the duration-fit reroute can land off-target — and an
-  // off-target pick fails quiet exactly like substitution, so no trace
-  // ever claims stress the session does not contain (R7/R11/R12).
-  // Metadata only: selection semantics unchanged, no algorithm-version
-  // bump (KTD6).
+  // session focus is scoped, a derived position resolved for it, and
+  // every realized main_skill pick's authored rung equals the steer
+  // target — regardless of which selection path produced the pick.
+  // U6 (D159) deleted the v10 substitution guard: the substitution
+  // path is itself rung-aware now, so a substitute that lands on the
+  // target IS the steering working and the trace may say so. Rung
+  // preference remains a preference — nearest-rung fallback, the
+  // duration-fit carve-out, the reroute, and an off-rung substitute
+  // can all land off-target, and an off-target pick fails quiet, so
+  // no trace ever claims stress the session does not contain
+  // (R7/R11/R12).
   let steeredFocus: SessionDraft['steeredFocus']
   const steerFocus = effectiveContext.sessionFocus
   const steerTarget = steerFocus === undefined ? undefined : options?.stressPositions?.[steerFocus]
-  if (steerFocus !== undefined && steerTarget !== undefined && !mainSkillSubstitute) {
+  if (steerFocus !== undefined && steerTarget !== undefined) {
     const mainSkillPicks = layout
       .map((slot, index) => ({ slot, index }))
       .filter(({ slot }) => slot.type === 'main_skill')

@@ -47,6 +47,26 @@ export function findPreferredCandidate(
 }
 
 /**
+ * The first rule whose `fromDrillId` matches and whose `blockedBy`
+ * constraint is active under today's `context`, or `undefined`.
+ * Shared rule-matching predicate for `findSubstitute` (swap path,
+ * authored-order choice) and `pickMainSkillSubstitute` (build path,
+ * rung-aware choice per U6/D159) so the (from -> substitutes)
+ * relationship stays single-sourced in the rules data.
+ */
+export function findActiveSubstitutionRule(
+  currentDrillId: string,
+  context: SetupContext,
+  rules: readonly SubstitutionRule[],
+): SubstitutionRule | undefined {
+  return rules.find(
+    (candidateRule) =>
+      candidateRule.fromDrillId === currentDrillId &&
+      isConstraintActive(candidateRule.blockedBy, context),
+  )
+}
+
+/**
  * Find a substitute candidate for `currentDrillId` under today's
  * `context`, given a catalog of `SubstitutionRule`s.
  *
@@ -61,10 +81,10 @@ export function findPreferredCandidate(
  * dependence on call order, and rule iteration follows the catalog
  * order.
  *
- * This helper is the single source of truth for blocked-progression
- * substitution. The build path (`buildDraft`) and the swap path
- * (`findSwapAlternatives`) both call it; rules data is the only place
- * that names the (from -> substitute) relationship.
+ * Authored order is the SWAP-path semantic (live D157 deferral): the
+ * mid-run Swap sheet stays a context-fit affordance, not a steering
+ * one. The BUILD path orders the same rule's substitutes by rung
+ * distance in `pickMainSkillSubstitute` (U6/D159).
  */
 export function findSubstitute(
   currentDrillId: string,
@@ -72,11 +92,7 @@ export function findSubstitute(
   context: SetupContext,
   rules: readonly SubstitutionRule[],
 ): SubstituteSelection | undefined {
-  const rule = rules.find(
-    (candidateRule) =>
-      candidateRule.fromDrillId === currentDrillId &&
-      isConstraintActive(candidateRule.blockedBy, context),
-  )
+  const rule = findActiveSubstitutionRule(currentDrillId, context, rules)
   if (!rule) return undefined
 
   for (const substituteId of rule.substituteDrillIds) {

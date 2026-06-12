@@ -164,6 +164,21 @@ export function orderByStressDistance<T extends { readonly drill: { readonly id:
   return [...pool].sort((a, b) => distance(a) - distance(b))
 }
 
+/**
+ * Which selection policy decided a `pickForSlotWithPath` result
+ * (U6/D159 trace substrate). `rung_nearest` — the stress-ordered pool
+ * head; `duration_fit` — the main_skill duration carve-out overrode the
+ * pool head; `default` — unsteered pool head or a per-type preference
+ * scan. Only main_skill consumers distinguish these; other slot types
+ * always read `default`.
+ */
+export type SlotSelectionPath = 'rung_nearest' | 'duration_fit' | 'default'
+
+export interface PickForSlotResult {
+  readonly pick: CandidateVariant
+  readonly path: SlotSelectionPath
+}
+
 export function pickForSlot(
   slot: BlockSlot,
   context: SetupContext,
@@ -171,6 +186,16 @@ export function pickForSlot(
   random: RandomSource,
   options?: PickForSlotOptions,
 ): CandidateVariant | undefined {
+  return pickForSlotWithPath(slot, context, usedDrillIds, random, options)?.pick
+}
+
+export function pickForSlotWithPath(
+  slot: BlockSlot,
+  context: SetupContext,
+  usedDrillIds: Set<string>,
+  random: RandomSource,
+  options?: PickForSlotOptions,
+): PickForSlotResult | undefined {
   const candidates = findCandidates(slot, context, options)
   const unused = candidates.filter((candidate) => !usedDrillIds.has(candidate.drill.id))
   if (unused.length === 0 && options?.allowUsedFallback === false) return undefined
@@ -217,6 +242,7 @@ export function pickForSlot(
   const stressFocus = slot.type === 'main_skill' ? context.sessionFocus : undefined
   const stressPosition =
     stressFocus === undefined ? undefined : options?.stressPositions?.[stressFocus]
+  const stressOrdered = stressFocus !== undefined && stressPosition !== undefined
   if (stressFocus !== undefined && stressPosition !== undefined) {
     pool = orderByStressDistance(pool, stressFocus, stressPosition)
   }
@@ -234,13 +260,13 @@ export function pickForSlot(
       const durationFit = pool.find((candidate) =>
         candidateCanCarryTargetDuration(candidate, targetDurationMinutes),
       )
-      if (durationFit) return durationFit
+      if (durationFit) return { pick: durationFit, path: 'duration_fit' }
       const strongestCandidate = strongestDurationCapacityCandidate(
         defaultPick?.drill.id === 'd01'
           ? pool.filter((candidate) => candidate.drill.id !== 'd01')
           : pool,
       )
-      if (strongestCandidate) return strongestCandidate
+      if (strongestCandidate) return { pick: strongestCandidate, path: 'duration_fit' }
     }
   }
 
@@ -248,23 +274,23 @@ export function pickForSlot(
     const warmup =
       pool.find((candidate) => candidate.drill.skillFocus.includes('warmup')) ??
       pool.find((candidate) => !candidate.drill.skillFocus.includes('recovery'))
-    if (warmup) return warmup
+    if (warmup) return { pick: warmup, path: 'default' }
   }
 
   if (slot.type === 'technique') {
     const passOnly = pool.find((candidate) => !candidate.drill.skillFocus.includes('movement'))
-    if (passOnly) return passOnly
+    if (passOnly) return { pick: passOnly, path: 'default' }
   }
 
   if (slot.type === 'movement_proxy') {
     const movement = pool.find((candidate) => candidate.drill.skillFocus.includes('movement'))
-    if (movement) return movement
+    if (movement) return { pick: movement, path: 'default' }
   }
 
   if (slot.type === 'wrap') {
     const recovery = pool.find((candidate) => candidate.drill.skillFocus.includes('recovery'))
-    if (recovery) return recovery
+    if (recovery) return { pick: recovery, path: 'default' }
   }
 
-  return pool[0]
+  return { pick: pool[0], path: stressOrdered ? 'rung_nearest' : 'default' }
 }

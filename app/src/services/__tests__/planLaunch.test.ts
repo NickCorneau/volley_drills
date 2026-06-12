@@ -174,6 +174,41 @@ describe('startPlanSession', () => {
     expect(calibration?.overheadRatio).toBeCloseTo(1.2, 5)
   })
 
+  it('U6 (R4): passes the last-completed history so Home builds substitute identically to Setup', async () => {
+    // Seed a completed session whose main_skill block was d03; the
+    // launch context has no net, so the d03 → d10 substitution rule
+    // fires exactly as a Setup-built session would.
+    await db.sessionPlans.put(
+      currentPersistedPlan({
+        id: 'plan-sub',
+        blocks: [{ type: 'main_skill', drillId: 'd03', drillName: 'Continuous Passing' }],
+        createdAt: 1_000_000,
+      }),
+    )
+    await db.executionLogs.put(
+      currentPersistedExecutionLog({
+        id: 'exec-sub',
+        planId: 'plan-sub',
+        status: 'completed',
+        blockStatuses: [{ status: 'completed' }],
+        startedAt: 1_000_000,
+        completedAt: 1_000_000 + 25 * 60_000,
+      }),
+    )
+
+    await startPlanSession({
+      priorContext: { ...PRIOR_CONTEXT, playerMode: 'pair', wallAvailable: false },
+      nextFocus: 'pass',
+    })
+
+    expect(lastBuildDraftOptions()?.lastCompletedByType).toEqual({ main_skill: 'd03' })
+    const draft = await getCurrentDraft()
+    expect(draft).not.toBeNull()
+    const main = draft!.blocks.find((b) => b.type === 'main_skill')
+    expect(main?.drillId).toBe('d10')
+    expect(main?.rationale).toMatch(/is unavailable today, so this keeps/)
+  })
+
   it('trust-loop U1: a steered launch stamps steeredFocus only on a realized on-target pick', async () => {
     // No persisted skill level → beginner band, pass position 1. The
     // saved draft is the real assembly result, so the stamp must track
