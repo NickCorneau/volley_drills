@@ -46,9 +46,9 @@ export interface HomeFlags {
   /**
    * Trust-loop U5 (R8/KTD7): one quiet line beside the Repeat
    * affordances when the last-complete plan's focus position moved
-   * since that session was assembled. Derived (fold-compare at
-   * `plan.createdAt` vs now); null when nothing moved, the focus is
-   * non-scoped, or there is no last-complete session.
+   * since that session was assembled. Derived (fold-compare at the
+   * plan's assembly time vs now); null when nothing moved, the focus
+   * is non-scoped, or there is no last-complete session.
    */
   repeatNote: string | null
 }

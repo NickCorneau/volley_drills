@@ -52,6 +52,7 @@ function plan(
   id: string,
   createdAt: number,
   steeredFocus?: SessionPlan['steeredFocus'],
+  assembledAt?: number,
 ): SessionPlan {
   return {
     id,
@@ -62,6 +63,7 @@ function plan(
     safetyCheck: { painFlag: false, heatCta: false, painOverridden: false },
     createdAt,
     ...(steeredFocus !== undefined ? { steeredFocus } : {}),
+    ...(assembledAt !== undefined ? { assembledAt } : {}),
   }
 }
 
@@ -138,6 +140,18 @@ describe('loadSteeringTrace', () => {
     await db.sessionReviews.add(acceptedReview('set', 'more', 5000))
 
     const model = await loadSteeringTrace(steeredDraft('set', 6000))
+    expect(model.line).toBe('A bit more stress on setting today.')
+  })
+
+  it('stale steered draft started after the accept does not burn the promise (assembledAt anchor)', async () => {
+    // Assembled at 1000 (pre-accept, steered at the OLD position),
+    // Begin tapped at 6000 (post-accept), trained. Consumption keys on
+    // assembly time, so the promise survives for the next fresh build.
+    await db.sessionReviews.add(acceptedReview('set', 'more', 5000))
+    await db.sessionPlans.add(plan('plan-1', 6000, 'set', 1000))
+    await db.executionLogs.add(terminalLog('plan-1'))
+
+    const model = await loadSteeringTrace(steeredDraft('set', 7000))
     expect(model.line).toBe('A bit more stress on setting today.')
   })
 

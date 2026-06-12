@@ -97,12 +97,12 @@ describe('resolveArmedPromise', () => {
     })
   })
 
-  it('a terminal steered plan created after the accept consumes the promise', () => {
+  it('a terminal steered plan assembled after the accept consumes the promise', () => {
     const reviews = [verdictReview('set', 'more', 'accepted', 1000)]
     expect(resolveArmedPromise(reviews, 'set', [2000])).toBeNull()
   })
 
-  it('deferred review: a plan created before the accept does not consume', () => {
+  it('deferred review: a plan assembled before the accept does not consume', () => {
     const reviews = [verdictReview('set', 'more', 'accepted', 3000)]
     expect(resolveArmedPromise(reviews, 'set', [2000])).not.toBeNull()
   })
@@ -163,6 +163,22 @@ describe('deriveSteeringTrace', () => {
         draft: { steeredFocus: 'set', updatedAt: 5000 },
         reviews: armedReviews,
         terminalSteeredPlans: [{ steeredFocus: 'pass', createdAt: 2000 }],
+        everSteeredPlan: true,
+      }),
+    )
+    expect(model.line).toBe('A bit more stress on setting today.')
+  })
+
+  it('a stale steered plan STARTED after the accept but assembled before it does not consume', () => {
+    // The promise-burn fix: consumption keys on assembly time, mirroring
+    // the line-render freshness check. A draft built pre-accept (at the
+    // OLD position) that the athlete starts post-accept never saw the
+    // moved position — the promise stays armed for the next fresh build.
+    const model = deriveSteeringTrace(
+      traceInput({
+        draft: { steeredFocus: 'set', updatedAt: 5000 },
+        reviews: armedReviews,
+        terminalSteeredPlans: [{ steeredFocus: 'set', createdAt: 2000, assembledAt: 500 }],
         everSteeredPlan: true,
       }),
     )
@@ -253,6 +269,15 @@ describe('repeatPlanDrifted', () => {
     const reviews = [verdictReview('pass', 'more', 'accepted', 1000)]
     const plan = { createdAt: 2000, context: passContext, blocks: [] }
     expect(repeatPlanDrifted(reviews, plan)).toBe(false)
+  })
+
+  it('anchors on assembledAt, not the Begin tap: an accept landing between assembly and start reads as drift', () => {
+    const reviews = [verdictReview('pass', 'more', 'accepted', 1000)]
+    // Assembled at 500 (pre-accept), started at 2000 (post-accept): the
+    // repeated blocks reflect the pre-accept position, so the plan HAS
+    // moved since assembly even though createdAt postdates the accept.
+    const plan = { createdAt: 2000, assembledAt: 500, context: passContext, blocks: [] }
+    expect(repeatPlanDrifted(reviews, plan)).toBe(true)
   })
 
   it('net-zero movement since assembly reports no drift (KTD7)', () => {

@@ -10,9 +10,13 @@
  * KTD5 cash trigger, in full:
  * - Armed(F): the latest accepted review on F moved the position
  *   (fold-compare, band-aware), and no TERMINAL session stamped
- *   `steeredFocus === F` was assembled after it. Requiring a terminal
+ *   `steeredFocus === F` was ASSEMBLED after it (`assembledAt`, with a
+ *   `createdAt` fallback for legacy plans). Requiring a terminal
  *   session means a built-then-discarded draft does not burn the
- *   promise; a repeat carries no provenance and can never consume.
+ *   promise; a repeat carries no provenance and can never consume; a
+ *   STALE steered draft (assembled before the accept, started after
+ *   it) does not consume either — its assembly never saw the moved
+ *   position, so the promise stays armed for the next fresh build.
  * - The line renders only on a draft built after the arming accept's
  *   `submittedAt`: a steered draft assembled before the accept (a
  *   stale draft resurfaced from Home after a deferred review) was
@@ -57,14 +61,15 @@ export interface ArmedSteeringPromise {
 }
 
 /**
- * The armed promise for `focus`, or null. `terminalSteeredPlanCreatedAts`
- * carries the `createdAt` of every TERMINAL (trained) plan stamped
- * `steeredFocus === focus`; the caller (service tier) owns that join.
+ * The armed promise for `focus`, or null. `terminalSteeredPlanAssembledAts`
+ * carries the assembly time (`assembledAt ?? createdAt`) of every
+ * TERMINAL (trained) plan stamped `steeredFocus === focus`; the caller
+ * (service tier) owns that join.
  */
 export function resolveArmedPromise(
   reviews: readonly SessionReview[],
   focus: ScopedFocus,
-  terminalSteeredPlanCreatedAts: readonly number[],
+  terminalSteeredPlanAssembledAts: readonly number[],
   band: PlayerLevel = 'beginner',
 ): ArmedSteeringPromise | null {
   const latestAccept = reviews
@@ -84,8 +89,11 @@ export function resolveArmedPromise(
   // and must never arm a line. Band-aware — see `acceptedReviewMovedPosition`.
   if (!acceptedReviewMovedPosition(reviews, latestAccept, band)) return null
 
-  // Consumed: a steered-on-F session was trained after the accept.
-  const consumed = terminalSteeredPlanCreatedAts.some((t) => t > latestAccept.submittedAt)
+  // Consumed: a trained steered-on-F session whose ASSEMBLY postdates
+  // the accept — symmetric with the line-render freshness check below,
+  // so a stale steered draft started after the accept neither renders
+  // nor burns the promise.
+  const consumed = terminalSteeredPlanAssembledAts.some((t) => t > latestAccept.submittedAt)
   if (consumed) return null
 
   return { focus, direction: delta.direction, acceptedAt: latestAccept.submittedAt }
@@ -100,7 +108,7 @@ export interface SteeringTraceInput {
   draft: Pick<SessionDraft, 'steeredFocus' | 'updatedAt'> | null
   reviews: readonly SessionReview[]
   /** Terminal (trained) plans carrying any `steeredFocus` stamp. */
-  terminalSteeredPlans: readonly Pick<SessionPlan, 'steeredFocus' | 'createdAt'>[]
+  terminalSteeredPlans: readonly Pick<SessionPlan, 'steeredFocus' | 'createdAt' | 'assembledAt'>[]
   /** Any persisted plan carries `steeredFocus` (terminal or not). */
   everSteeredPlan: boolean
   band?: PlayerLevel
@@ -128,7 +136,7 @@ export function deriveSteeringTrace(input: SteeringTraceInput): SteeringTraceMod
       focus,
       input.terminalSteeredPlans
         .filter((plan) => plan.steeredFocus === focus)
-        .map((plan) => plan.createdAt),
+        .map((plan) => plan.assembledAt ?? plan.createdAt),
       input.band,
     )
     if (armed && input.draft.updatedAt > armed.acceptedAt) {
@@ -160,20 +168,21 @@ export const REPEAT_DRIFT_NOTE = 'Repeating with the same setup. Your plan has m
 
 /**
  * KTD7 — has the repeated plan's focus position moved between its
- * assembly time and now? Fold-compare at `plan.createdAt` vs the full
- * fold; net-zero movement reports no drift. Focus comes from the
- * plan's persisted context, falling back to inference over its blocks
- * (block overrides already applied by the caller's lastComplete join);
- * a non-scoped focus can never drift.
+ * assembly time and now? Fold-compare at `assembledAt` (falling back
+ * to `createdAt` for legacy plans) vs the full fold; net-zero movement
+ * reports no drift. Focus comes from the plan's persisted context,
+ * falling back to inference over its blocks (block overrides already
+ * applied by the caller's lastComplete join); a non-scoped focus can
+ * never drift.
  */
 export function repeatPlanDrifted(
   reviews: readonly SessionReview[],
-  plan: Pick<SessionPlan, 'createdAt' | 'context' | 'blocks'>,
+  plan: Pick<SessionPlan, 'createdAt' | 'assembledAt' | 'context' | 'blocks'>,
   band?: PlayerLevel,
 ): boolean {
   const focus = plan.context?.sessionFocus ?? inferSessionFocus(plan.blocks)
   if (!isScopedFocus(focus)) return false
-  const atAssembly = deriveStressPositionsAt(reviews, plan.createdAt, band)
+  const atAssembly = deriveStressPositionsAt(reviews, plan.assembledAt ?? plan.createdAt, band)
   const current = deriveStressPositions(reviews, band)
   return atAssembly[focus] !== current[focus]
 }

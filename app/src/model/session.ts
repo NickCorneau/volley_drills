@@ -82,6 +82,16 @@ export interface SessionPlan {
    * 2026-06-11 trust-loop plan). Absent reads as unsteered.
    */
   steeredFocus?: NonNullable<SetupContext['sessionFocus']>
+  /**
+   * The draft's `updatedAt` (assembly time), copied at session create.
+   * `createdAt` records the Begin tap; this records when the blocks
+   * were actually built — the timestamp steering-trace consumption and
+   * the repeat-drift fold anchor on, since a stale draft can be
+   * started long after it was assembled. Absent on legacy plans;
+   * readers fall back to `createdAt` (conservative: never earlier
+   * than assembly).
+   */
+  assembledAt?: number
   blocks: SessionPlanBlock[]
   safetyCheck: SessionPlanSafetyCheck
   context?: SetupContext
