@@ -1,4 +1,5 @@
 import type { DrillSegment } from '../../types/drill'
+import type { GlossedString } from '../../domain/glossedText'
 import { SEGMENT_INDEX_BONUS } from '../../domain/runFlow'
 import { GlossInline, GlossReveal, useGloss } from '../ui'
 
@@ -113,13 +114,24 @@ export function SegmentList({ segments, currentIndex, bonus }: SegmentListProps)
 }
 
 /**
- * One segment row owns its own gloss open-scope. Opening a term in
- * row 1 does not close a term in row 2 (per-row scope, mirroring
- * the per-paragraph contract on `<GlossedText>`). The reveal
- * renders as a 4th grid item with `col-start-2 col-span-2` so it
- * sits beneath the row's marker / label / duration line, anchored
- * under the label column. The 3-column layout stays put regardless
- * of whether a definition is open.
+ * Shibui polish 2026-06-12 (origin R9): gloss underlines render only
+ * on the ACTIVE row — 4-5 dotted underlines competing with the one
+ * active row was the noisiest element on the segmented face. Past and
+ * future rows render the plain parsed text (term words kept, `(= …)`
+ * markup stripped) with NO button in the a11y tree: an intended
+ * tap-target reduction, not an invisible tappable. A row's definitions
+ * become reachable when it turns active. Rows only move forward
+ * (future → now → done) mid-run, so a reveal open at the moment the
+ * timer advances simply unmounts with the row's active status — the
+ * cut is instant by design (no motion on this screen).
+ *
+ * One segment row owns its own gloss open-scope (per-row scope,
+ * mirroring the per-paragraph contract on `<GlossedText>`); since R9
+ * only one row offers glosses at a time. The reveal renders as a 4th
+ * grid item with `col-start-2 col-span-2` so it sits beneath the
+ * row's marker / label / duration line, anchored under the label
+ * column. The 3-column layout stays put regardless of whether a
+ * definition is open.
  */
 function SegmentRow({
   segment,
@@ -153,7 +165,11 @@ function SegmentRow({
         <SegmentMarker status={status} />
       </span>
       <span className={labelClassForStatus(status)}>
-        <GlossInline parts={parts} isOpen={isOpen} onToggle={toggle} />
+        {isNow ? (
+          <GlossInline parts={parts} isOpen={isOpen} onToggle={toggle} />
+        ) : (
+          plainLabelText(parts)
+        )}
         {segment.eachSide && (
           <span className="text-text-secondary"> (each side)</span>
         )}
@@ -175,7 +191,7 @@ function SegmentRow({
       <span className="self-end pb-[2px] text-sm tabular-nums text-text-secondary">
         {Math.round(segment.durationSec)}s
       </span>
-      {openDefinition != null && (
+      {isNow && openDefinition != null && (
         <GlossReveal
           definition={openDefinition}
           className="col-start-2 col-span-2"
@@ -183,6 +199,16 @@ function SegmentRow({
       )}
     </li>
   )
+}
+
+/**
+ * Flatten parsed gloss parts to display text for non-active rows:
+ * term words stay, `(= …)` definition markup stays stripped. Using
+ * the parsed parts (not the raw label) keeps the visible text
+ * identical to what the active row shows.
+ */
+function plainLabelText(parts: GlossedString): string {
+  return parts.map((p) => (p.type === 'text' ? p.text : p.term)).join('')
 }
 
 function labelClassForStatus(status: SegmentRowStatus): string {

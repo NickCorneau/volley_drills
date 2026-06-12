@@ -9,18 +9,27 @@ import { SegmentList } from '../SegmentList'
  * contract (active row, eachSide suffix, bonus paragraph, aria-live
  * announcer) is pinned in `SegmentList.test.tsx`; this file pins
  * the layered gloss behavior added in the 2026-05-13
- * universalization pass:
+ * universalization pass, amended by the 2026-06-12 shibui polish
+ * (origin R9): gloss buttons render ONLY on the active row.
  *
- *   1. Flagged terms in segment labels render as dotted-underline
- *      `<button>`s; tapping reveals the `↳ definition` line.
- *   2. Each row is its own open-scope (per-row, mirroring the
- *      per-paragraph scope on `<GlossedText>`).
- *   3. Opening a different term in the SAME row swaps the
+ *   1. Flagged terms in the ACTIVE row's label render as
+ *      dotted-underline `<button>`s; tapping reveals the
+ *      `↳ definition` line.
+ *   2. Past/future rows render plain text — gloss buttons drop from
+ *      the a11y tree entirely (no invisible tappables), with the
+ *      `(= …)` markup still stripped from the visible text.
+ *   3. A row's definitions become reachable when it turns active;
+ *      an open reveal unmounts when its row leaves active.
+ *   4. Opening a different term in the SAME (active) row swaps the
  *      definition.
- *   4. Layout invariants: the duration cell stays in column 3 and
+ *   5. Layout invariants: the duration cell stays in column 3 and
  *      `aria-current` continues to mark the active row.
- *   5. Labels with no `(= …)` render unchanged (no buttons, no
- *      reveal slot).
+ *   6. Active-row labels with no `(= …)` render unchanged (no
+ *      buttons, no reveal slot).
+ *
+ * The pre-R9 "per-row open scope" contract (row 1 and row 4 holding
+ * reveals open simultaneously) is dead by design — only one row can
+ * offer glosses at a time now.
  */
 
 const SEGMENTS_WITH_GLOSSES: readonly DrillSegment[] = [
@@ -88,51 +97,91 @@ describe('<SegmentList> inline gloss behavior', () => {
     expect(reveal.textContent).toContain('↳')
   })
 
-  it('isolates open scopes per row — tapping a term in row 1 does not close row 4 (per-row contract)', async () => {
-    const user = userEvent.setup()
-    render(<SegmentList segments={SEGMENTS_WITH_GLOSSES} currentIndex={0} />)
+  it('renders gloss buttons only on the active row — past and future rows are plain text (R9)', () => {
+    render(<SegmentList segments={SEGMENTS_WITH_GLOSSES} currentIndex={1} />)
 
     const list = screen.getByRole('list', { name: 'Segments' })
     const rows = within(list).getAllByRole('listitem')
 
-    await user.click(within(rows[0]).getByRole('button', { name: 'A-skip' }))
-    await user.click(within(rows[3]).getByRole('button', { name: 'pivot-back starts' }))
-
-    expect(within(rows[0]).getByRole('button', { name: 'A-skip' })).toHaveAttribute(
-      'aria-expanded',
-      'true',
-    )
+    // Active row (index 1) offers its two gloss terms.
+    expect(within(rows[1]).getByRole('button', { name: 'ankle hops' })).toBeInTheDocument()
     expect(
-      within(rows[3]).getByRole('button', { name: 'pivot-back starts' }),
-    ).toHaveAttribute('aria-expanded', 'true')
-    // Both reveals visible inside their respective rows (per-row scope).
+      within(rows[1]).getByRole('button', { name: 'lateral shuffles' }),
+    ).toBeInTheDocument()
+
+    // Past row (0) and future row (3) carry flagged terms but expose
+    // NO buttons — the affordance leaves the a11y tree entirely.
+    expect(within(rows[0]).queryAllByRole('button')).toHaveLength(0)
+    expect(within(rows[3]).queryAllByRole('button')).toHaveLength(0)
+
+    // Their visible text keeps the term words with `(= …)` stripped.
+    expect(rows[0].textContent).toContain('A-skip')
+    expect(rows[0].textContent).not.toContain('(=')
+    expect(rows[3].textContent).toContain('pivot-back starts')
+    expect(rows[3].textContent).not.toContain('(=')
+
+    // Total buttons in the list == the active row's gloss-term count.
+    expect(within(list).getAllByRole('button')).toHaveLength(2)
+  })
+
+  it('unmounts an open reveal when the row leaves active, and the next row gains its glosses (R9)', async () => {
+    const user = userEvent.setup()
+    const { rerender } = render(
+      <SegmentList segments={SEGMENTS_WITH_GLOSSES} currentIndex={0} />,
+    )
+
+    const list = screen.getByRole('list', { name: 'Segments' })
+    let rows = within(list).getAllByRole('listitem')
+
+    await user.click(within(rows[0]).getByRole('button', { name: 'A-skip' }))
     expect(
       within(rows[0]).getByText(/skip forward, lifting the front knee/),
     ).toBeInTheDocument()
+
+    // Timer advances: row 0 turns done, row 1 turns active.
+    rerender(<SegmentList segments={SEGMENTS_WITH_GLOSSES} currentIndex={1} />)
+    rows = within(list).getAllByRole('listitem')
+
+    expect(within(rows[0]).queryAllByRole('button')).toHaveLength(0)
     expect(
-      within(rows[3]).getByText(/pivot the inside foot and step back/),
+      within(rows[0]).queryByText(/skip forward, lifting the front knee/),
+    ).not.toBeInTheDocument()
+    expect(
+      within(rows[1]).getByRole('button', { name: 'ankle hops' }),
     ).toBeInTheDocument()
   })
 
-  it('swaps the open definition when a different term is tapped within the SAME row', async () => {
-    const user = userEvent.setup()
-    render(<SegmentList segments={SEGMENTS_WITH_GLOSSES} currentIndex={0} />)
+  it('renders zero gloss buttons in the bonus state (all rows done)', () => {
+    render(<SegmentList segments={SEGMENTS_WITH_GLOSSES} currentIndex={-1} bonus="Hydrate." />)
+    const list = screen.getByRole('list', { name: 'Segments' })
+    expect(within(list).queryAllByRole('button')).toHaveLength(0)
+  })
 
-    const ankle = screen.getByRole('button', { name: 'ankle hops' })
-    const shuffles = screen.getByRole('button', { name: 'lateral shuffles' })
+  it('swaps the open definition when a different term is tapped within the SAME (active) row', async () => {
+    const user = userEvent.setup()
+    render(<SegmentList segments={SEGMENTS_WITH_GLOSSES} currentIndex={1} />)
+
+    // Scope to the row: the aria-live announcer outside the list
+    // reproduces the active row's RAW label (including `(= …)`), so
+    // document-level text queries would double-match.
+    const list = screen.getByRole('list', { name: 'Segments' })
+    const row = within(list).getAllByRole('listitem')[1]
+
+    const ankle = within(row).getByRole('button', { name: 'ankle hops' })
+    const shuffles = within(row).getByRole('button', { name: 'lateral shuffles' })
 
     await user.click(ankle)
-    expect(screen.getByText(/small two-foot hops in place/)).toBeInTheDocument()
+    expect(within(row).getByText(/small two-foot hops in place/)).toBeInTheDocument()
     expect(
-      screen.queryByText(/quick sideways shuffle steps, feet never crossing/),
+      within(row).queryByText(/quick sideways shuffle steps, feet never crossing/),
     ).not.toBeInTheDocument()
 
     await user.click(shuffles)
     expect(
-      screen.queryByText(/small two-foot hops in place/),
+      within(row).queryByText(/small two-foot hops in place/),
     ).not.toBeInTheDocument()
     expect(
-      screen.getByText(/quick sideways shuffle steps, feet never crossing/),
+      within(row).getByText(/quick sideways shuffle steps, feet never crossing/),
     ).toBeInTheDocument()
     expect(ankle).toHaveAttribute('aria-expanded', 'false')
     expect(shuffles).toHaveAttribute('aria-expanded', 'true')
@@ -163,11 +212,12 @@ describe('<SegmentList> inline gloss behavior', () => {
     )
   })
 
-  it('renders unchanged for segment labels with no `(= …)` (no buttons, no reveal slot)', () => {
-    render(<SegmentList segments={SEGMENTS_WITH_GLOSSES} currentIndex={0} />)
+  it('renders unchanged for an ACTIVE segment label with no `(= …)` (no buttons, no reveal slot)', () => {
+    render(<SegmentList segments={SEGMENTS_WITH_GLOSSES} currentIndex={2} />)
     const row3 = within(screen.getByRole('list', { name: 'Segments' })).getAllByRole(
       'listitem',
     )[2]
+    expect(row3).toHaveAttribute('aria-current', 'step')
     expect(row3.textContent).toContain('arm circles forward and back')
     expect(within(row3).queryAllByRole('button')).toHaveLength(0)
     expect(row3.textContent).not.toContain('↳')
