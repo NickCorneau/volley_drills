@@ -75,6 +75,29 @@ Relocated links keep the existing `Button variant="link"` quiet-tertiary treatme
 
 If the Home covenant's render-budget test exists by S5 ship time, the S5 PR updates the pinned census in the same change (see the plan's Deferred to Follow-Up Work).
 
+## Home v2 Frames (2026-06-12 founder feedback iteration)
+
+Same-day founder feedback on the live ended-early Home card: the card is crowded, the `Last session:` meta line wraps to two lines with too much info, the focal CTA is not visibly the *recommended* action, and the three-link stack has uneven spacing and is too many links to scan. The v2 frames respond to that feedback on the same live ended-early state (`Pair + Net · 4 of 38 min`).
+
+Shared v2 moves (all three frames):
+
+- All three links leave the card into a `gap-1` page field (R1 option B, extended to the repeat links), dissolving the uneven `-mt-2`/`gap-2`/44-px-hit-target rhythm of the in-card stack.
+- A quiet uppercase eyebrow (`text-xs font-medium uppercase tracking-wider text-text-secondary`, copy `Recommended`) sits directly above the focal CTA — same micro-label vocabulary as the Setup option-A frames.
+- Link behavior unchanged (R2 guardrail); 44-px tap targets kept.
+
+| Frame | Meta line | Link field | Decision it carries |
+|---|---|---|---|
+| `home-v2-01-minimal-card.png` | **Removed** — Recent sessions' top row (`Today · Passing · Partial`) already carries last-session recency/outcome | 3 stacked links | Most-stripped card: greeting + eyebrow + CTA + `Then:` queue line only |
+| `home-v2-02-repeat-inline.png` | Removed | 2 rows — `Repeat full plan · shorter version (10 min)` inline pair + `Start a different session` | Fewer visible link rows; inline pair keeps both repeats one tap with shared context |
+| `home-v2-03-trimmed-meta.png` | **Trimmed to one line** — `Pair + Net · ended early today` (drops `Last session:` prefix + `4 of 38 min`) | 3 stacked links | Keeps an in-card continuity cue without the wrap; minutes honesty moves to the shorter-repeat label alone |
+
+### Decisions deferred to this v2 review (Home)
+
+1. **Meta line** — remove entirely (v2-01/02, Recent sessions owns history) vs. trimmed one-liner (v2-03). Note: removing the line also removes the in-card "ended early" context that motivates `Repeat full plan` vs `Repeat shorter version`.
+2. **Eyebrow copy** — `Recommended` (shown) vs. `Recommended next` vs. none (founder said the unlabeled CTA was "maybe fine").
+3. **Repeat-link consolidation** — stacked (v2-01/03) vs. inline pair (v2-02). The inline pair shortens the second label to `shorter version (10 min)`; both segments stay independent 44-px buttons.
+4. Supersedes the v1 Home question "do the Repeat links move too?" — founder feedback ("3 links are just too many") reads as yes; v1 frames 01/03 (repeat kept in card) remain for reference.
+
 ## What Approval Unlocks
 
 Founder approval of a variant per question above unlocks the follow-up implementation plans: S1 Setup restructure code (R4–R6) and S5 Home relocation code (R1–R3, carrying origin R11 — the Home covenant "Deferred for later" amendment — and the D152 decision-row update).
