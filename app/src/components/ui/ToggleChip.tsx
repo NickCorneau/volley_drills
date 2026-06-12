@@ -18,6 +18,8 @@ export interface ToggleChipProps {
   fill?: boolean
   /** Optional aria-label override when the visible label is ambiguous. */
   ariaLabel?: string
+  /** Optional id of an element that further describes this chip. */
+  ariaDescribedBy?: string
   className?: string
 }
 
@@ -80,6 +82,7 @@ export function ToggleChip({
   shape = 'rounded',
   fill = true,
   ariaLabel,
+  ariaDescribedBy,
   className,
 }: ToggleChipProps) {
   return (
@@ -88,6 +91,7 @@ export function ToggleChip({
       role="radio"
       aria-checked={selected}
       aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
       onClick={onTap}
       className={cx(
         fill && 'flex-1',

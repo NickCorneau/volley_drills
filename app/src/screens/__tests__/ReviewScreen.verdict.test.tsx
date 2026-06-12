@@ -46,6 +46,16 @@ function passPlan(id: string, createdAt: number) {
       },
     ],
     safetyCheck: { painFlag: false, heatCta: false, painOverridden: false },
+    // Persisted context feeds the trust-loop U3 consequence caption
+    // (the composer filters exemplar candidates by these conditions).
+    context: {
+      playerMode: 'solo' as const,
+      timeProfile: 25 as const,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'pass' as const,
+      playerLevel: 'intermediate' as const,
+    },
     createdAt,
   }
 }
@@ -139,6 +149,16 @@ describe('ReviewScreen verdict (M002.1 R5)', () => {
     // Keep-original is the pre-selected default (safe, no silent reshuffle).
     expect(keep).toHaveAttribute('aria-checked', 'true')
     expect(tryIt).toHaveAttribute('aria-checked', 'false')
+
+    // Trust-loop U3: the accept option carries its consequence caption
+    // (intermediate pass position 2, 'less' → prospective rung 1 = d01),
+    // programmatically associated via aria-describedby.
+    const caption = screen.getByText(
+      'Passing sessions lean toward drills like Pass & Slap Hands.',
+    )
+    expect(caption).toHaveAttribute('id', 'verdict-accept-consequence')
+    expect(tryIt).toHaveAttribute('aria-describedby', 'verdict-accept-consequence')
+    expect(keep).not.toHaveAttribute('aria-describedby')
 
     // Accept the offer, rate effort, submit.
     await user.click(tryIt)

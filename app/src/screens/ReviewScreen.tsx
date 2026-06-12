@@ -37,6 +37,7 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
     canSubmit,
     missingHint,
     verdictLine,
+    acceptConsequenceLine,
     verdictChoice,
     setVerdictChoice,
     handleToggleNotCaptured,
@@ -228,9 +229,20 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
               ariaLabelledBy="verdict-heading"
               options={[
                 { value: 'kept_original', label: 'Keep the same' },
-                { value: 'accepted', label: 'Try it' },
+                {
+                  value: 'accepted',
+                  label: 'Try it',
+                  // Trust-loop U3: assistive tech hears the consequence
+                  // caption on the option it qualifies.
+                  ariaDescribedBy: acceptConsequenceLine ? 'verdict-accept-consequence' : undefined,
+                },
               ]}
             />
+            {acceptConsequenceLine && (
+              <p id="verdict-accept-consequence" className="text-xs text-text-secondary">
+                {acceptConsequenceLine}
+              </p>
+            )}
           </Card>
         )}
       </ScreenShell.Body>

@@ -14,6 +14,7 @@ import {
   inferPlanMainMetricType,
   metricShowsReviewCounts,
 } from '../../domain/capture'
+import { composeAcceptConsequence } from '../../domain/adaptation/acceptConsequence'
 import { composeCarryForwardLine } from '../../domain/adaptation/replayAdaptation'
 import { isScopedFocus } from '../../domain/eligibleSessions'
 import { inferSessionFocus } from '../../domain/sessionFocus'
@@ -69,6 +70,9 @@ export function useReviewController(executionLogId: string) {
   const [hydrated, setHydrated] = useState(false)
   // Default is keep-original so doing nothing is the safe, no-reshuffle path.
   const [offeredDelta, setOfferedDelta] = useState<AdaptationDelta | null>(null)
+  // The derived ladder position the offer gate resolved (trust-loop
+  // U2/U3): one fold serves the gate and the consequence caption.
+  const [offerPosition, setOfferPosition] = useState<number | null>(null)
   const [verdictChoice, setVerdictChoice] = useState<VerdictChoice>('kept_original')
 
   useEffect(() => {
@@ -126,8 +130,11 @@ export function useReviewController(executionLogId: string) {
         const focus = result.plan ? inferSessionFocus(result.plan.blocks) : 'partial'
         if (isScopedFocus(focus)) {
           try {
-            const { offer } = await loadVerdictOffer(focus, executionLogId)
-            if (!cancelled && offer.direction !== 'keep') setOfferedDelta(offer)
+            const { offer, position } = await loadVerdictOffer(focus, executionLogId)
+            if (!cancelled && offer.direction !== 'keep') {
+              setOfferedDelta(offer)
+              setOfferPosition(position)
+            }
           } catch (offerErr) {
             if (!isSchemaBlocked()) {
               console.error('Verdict offer load failed; continuing without it', offerErr)
@@ -218,6 +225,23 @@ export function useReviewController(executionLogId: string) {
   // A 'keep' offer produces a null line (composeCarryForwardLine), so the
   // verdict block is absent whenever there's nothing worth changing.
   const verdictLine = offeredDelta ? composeCarryForwardLine(offeredDelta) : null
+  // Trust-loop U3 (R4): the accept option's hedged drill exemplar at
+  // the prospective position. Null fails quiet — legacy plans without
+  // context, non-scoped focus, or an empty/ineligible prospective rung
+  // all render no caption rather than a wrong one (KTD8).
+  const acceptConsequenceLine =
+    offeredDelta !== null &&
+    offerPosition !== null &&
+    plan?.context !== undefined &&
+    isScopedFocus(offeredDelta.focus)
+      ? composeAcceptConsequence({
+          focus: offeredDelta.focus,
+          direction: offeredDelta.direction,
+          position: offerPosition,
+          context: plan.context,
+          excludeDrillId: plan.blocks.find((b) => b.type === 'main_skill')?.drillId,
+        })
+      : null
   const missingHint: string | null = isSubmitting
     ? null
     : sessionRpe == null
@@ -339,6 +363,7 @@ export function useReviewController(executionLogId: string) {
     canSubmit,
     missingHint,
     verdictLine,
+    acceptConsequenceLine,
     verdictChoice,
     setVerdictChoice,
     handleToggleNotCaptured,

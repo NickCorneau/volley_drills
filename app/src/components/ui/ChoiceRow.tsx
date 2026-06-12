@@ -12,6 +12,13 @@ export type ChoiceRowOption<T extends string> = {
   tone?: ToggleChipTone
   size?: ToggleChipSize
   ariaLabel?: string
+  /**
+   * Optional id of an element that qualifies this option (e.g. the
+   * Review accept-consequence caption). Forwarded to the chip's
+   * `aria-describedby` so assistive tech hears the consequence on the
+   * option it describes.
+   */
+  ariaDescribedBy?: string
 }
 
 export type ChoiceRowLayout = 'flex' | 'grid-2' | 'grid-3'
@@ -101,6 +108,7 @@ export function ChoiceRow<T extends string>({
           tone={opt.tone ?? defaultTone}
           size={opt.size}
           ariaLabel={opt.ariaLabel}
+          ariaDescribedBy={opt.ariaDescribedBy}
           // In grid layouts, drop `flex-1` (it's a no-op on grid parents
           // and stops short-label chips from filling cells via `w-full`).
           // In flex layouts, keep `fill=true` so chips share row width.
