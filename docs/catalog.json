@@ -1,7 +1,7 @@
 {
   "schema_version": 5,
   "repo_id": "volley_drills",
-  "last_updated": "2026-06-11",
+  "last_updated": "2026-06-12",
   "_strategy_anchor": "STRATEGY.md is the repo-root strategy anchor (target problem, approach, persona, metrics, tracks). Authored via the ce-strategy skill; orients but does not outrank docs/vision.md, docs/decisions.md, or docs/prd-foundation.md.",
   "_meta": {
     "description": "Machine-readable map of the docs tree, routing-critical entry surfaces, and update ownership.",
@@ -575,7 +575,7 @@
       "path": "docs/research/brand-ux-guidelines.md",
       "type": "research",
       "status": "active",
-      "canonical_for": "Canonical Volleycraft UX behavior reference for typography, color, copy voice, layout, iconography, states, and per-screen posture. Includes the 2026-05-03 first-pass typography role checklist, evidence lanes, route/state inventory, screenshot matrix, and narrow drift guardrail contract."
+      "canonical_for": "Canonical Volleycraft UX behavior reference for typography, color, copy voice, layout, iconography, states, and per-screen posture. Includes the 2026-05-03 first-pass typography role checklist, evidence lanes, route/state inventory, screenshot matrix, and narrow drift guardrail contract. Section 7.1 is the canonical home of the D156 Home covenant (identity sentence, five rules, D151 scheduled-tenancy contract, named escalation triggers) and the M002 claimant-lane ledger; load it before any change that adds, moves, or grows a Home surface. The steady-state Home render budget is enforced by app/src/screens/__tests__/HomeScreen.render-budget.test.tsx."
     },
     {
       "id": "outdoor-courtside-ui-brief",
@@ -912,14 +912,14 @@
       "path": "docs/brainstorms/2026-06-11-home-covenant-requirements.md",
       "type": "requirements",
       "status": "active",
-      "canonical_for": "Requirements for ratifying the Home covenant after D152 used the last focal capacity: Home's identity in the founder's words (calm + obvious next-session start, trusted recommendation, quick custom escape) plus five rules R1-R6 (lifecycle-only focal slot, plan-as-mouthpiece default integration, genkan dwelling test, quiet-dark periphery with at most one steady-state line, input parsimony — behavior-first learning, never require users to explain deviations), a default-lane ledger for all six M002 claimants (R7; deviations need a decision row; every M002 milestone plan carries a one-line Home section citing its lane), D151 readiness as the single scheduled focal tenant (R8: capability-semantics tenancy test, lifecycle states outrank it, post-session window excluded, card inherits the render budget), a minimal render-budget test pinning steady-state Home (R9), named triggers gating heavier machinery (R10), and registration in agent routing surfaces at ratification (R11). Doc-and-one-test pass; zero UI changes. Follow-on brainstorm queued: game-time observation input seam. Origin: docs/ideation/2026-06-11-home-focal-headroom-ideation.md."
+      "canonical_for": "Requirements for ratifying the Home covenant after D152 used the last focal capacity: Home's identity in the founder's words (calm + obvious next-session start, trusted recommendation, quick custom escape) plus five rules R1-R6 (lifecycle-only focal slot, plan-as-mouthpiece default integration, genkan dwelling test, quiet-dark periphery with at most one steady-state line, input parsimony — behavior-first learning, never require users to explain deviations), a default-lane ledger for all six M002 claimants (R7; deviations need a decision row; every M002 milestone plan carries a one-line Home section citing its lane), D151 readiness as the single scheduled focal tenant (R8: capability-semantics tenancy test, lifecycle states outrank it, post-session window excluded, card inherits the render budget), a minimal render-budget test pinning steady-state Home (R9), named triggers gating heavier machinery (R10), and registration in agent routing surfaces at ratification (R11). Doc-and-one-test pass; zero UI changes. Follow-on brainstorm queued: game-time observation input seam. Origin: docs/ideation/2026-06-11-home-focal-headroom-ideation.md. Ratified 2026-06-12 by D156 (docs/decisions.md); the operational covenant and ledger now live canonically in docs/research/brand-ux-guidelines.md section 7.1 — route there for design-time questions; this doc remains the requirements provenance."
     },
     {
       "id": "shibui-empty-space-polish-requirements-2026-06-11",
       "path": "docs/brainstorms/2026-06-11-shibui-empty-space-polish-requirements.md",
       "type": "requirements",
       "status": "active",
-      "canonical_for": "Requirements for shipping the 2026-06-11 shibui / empty-space research pass's proposals as one polish plan, with founder-set priority from real-session evidence: S5 Home link-pile relocation (founder-felt #1; promoted from D130-window candidate on founder-use evidence, revisits D152-ratified card internals via a decision-row update, activates the Home covenant's deferred custom-escape polish) and S1 recommendation-first Setup restructure (founder-felt #2; oldest unrealized visual-direction canon item, onboarding inherits via the shared component) both gate behind approved 390x844 screenshot comps before code (R1-R6); S2 quiet Transition receipt, S3 empty Good-passes collapse-to-line, and S4 active-segment-only gloss underlines ship directly with in-session screenshot iteration (R7-R9); S6 brand-ux-guidelines section 3.4 separator reconciliation rides doc-only (R10). Zero semantic/route/data changes anywhere; each item independently revertible against founder-use gates in the D130 window."
+      "canonical_for": "Requirements for shipping the 2026-06-11 shibui / empty-space research pass's proposals as one polish plan, with founder-set priority from real-session evidence: S5 Home link-pile relocation (founder-felt #1; promoted from D130-window candidate on founder-use evidence, revisits D152-ratified card internals via a decision-row update, activates the Home covenant's deferred custom-escape polish) and S1 recommendation-first Setup restructure (founder-felt #2; oldest unrealized visual-direction canon item, onboarding inherits via the shared component) both gate behind approved 390x844 screenshot comps before code (R1-R6); S2 quiet Transition receipt, S3 empty Good-passes collapse-to-line, and S4 active-segment-only gloss underlines ship directly with in-session screenshot iteration (R7-R9); S6 brand-ux-guidelines section 3.4 separator reconciliation rides doc-only (R10), plus R11 amending the Home covenant's stale custom-escape deferral when S5 ships. Hardened by the 2026-06-12 doc review: R9 scopes its unchanged-guarantee to the active row (gloss button drops on non-active rows), R8 defines its collapse trigger (drillsWithCounts === 0) with a tag-acknowledging copy variant, R4/R5 enumerate the focal line's non-happy-path states and add the incomplete state to the comp set, R4 pins the focal line's minute segment to the assembled total (founder call: the screen's two duration statements can never disagree), and S3 gains a named failure mode. Zero semantic/route/data changes anywhere; each item independently revertible against founder-use gates in the D130 window."
     },
     {
       "id": "dogfood-m002-1-thin-spine-2026-06-04",
@@ -1958,6 +1958,20 @@
       "status": "complete",
       "active_registry": true,
       "canonical_for": "Implementation plan and shipped ledger for the per-move pacing indicator. Adds `DrillSegment` type + `DrillVariant.segments?` + `courtsideInstructionsBonus?`; authors segments on `d28-solo` (4×45s), `d26-solo` (3×60s), `d25-solo` (5 segments / 60+30+30+30+30; durationMinMinutes bumped 2→3); pure helper at `app/src/domain/runFlow/segmentTiming.ts`; `<SegmentList>` at `app/src/components/run/SegmentList.tsx`; controller wiring in `useRunController` + extension of `useBlockPacingTicks` for per-segment end beep; catalog validation rule `segment_duration_mismatch`. Shipped UI uses the V2 aligned accent-dot/checkmark marker system rather than the earlier `Now` pill, and later V3/V4 iterations made the list Shorten-aware and `eachSide`-aware. Visible-channel half of S1 from `docs/ideation/2026-04-28-what-to-add-next-ideation.md`."
+    },
+    {
+      "id": "home-covenant-ratification-plan-2026-06-12",
+      "path": "docs/plans/2026-06-12-001-docs-home-covenant-ratification-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Implementation plan for the Home covenant ratification pass (origin: docs/brainstorms/2026-06-11-home-covenant-requirements.md): U1 decision row D156 + decision-debt sweep in docs/decisions.md, U2 operational covenant + canonical six-claimant lane ledger folded into brand-ux-guidelines.md section 7.1, U3 routing-surface registration (catalog, AGENTS.md, component-patterns.mdc pointer) validated by scripts/validate-agent-docs.sh, U4 steady-state Home render-budget test (element census, tap targets, card-interior line cap) at the screen-integration tier. Zero UI changes."
+    },
+    {
+      "id": "shibui-empty-space-polish-plan-2026-06-12",
+      "path": "docs/plans/2026-06-12-002-feat-shibui-empty-space-polish-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "Implementation plan for the shibui/empty-space polish pass (origin: docs/brainstorms/2026-06-11-shibui-empty-space-polish-requirements.md), delivered in two tiers: Tier 1 code units U1 Transition quiet receipt (JustFinishedPill presentation variant), U2 Review empty Good-passes collapse keyed on drillsWithCounts === 0 with tag-acknowledging copy, U3 active-segment-only gloss underlines on the run face, U4 brand-ux-guidelines section 3.4 separator reconciliation; Tier 2 artifact units U5/U6 produce founder-reviewable 390x844 comp sets under docs/design/comps/ for the comp-gated S1 Setup recommendation-first restructure and S5 Home link-pile relocation, whose code (plus the R11 covenant amendment and D152 decision-row update) is deferred to follow-up plans behind founder comp approval. Zero semantic/route/data changes; each item independently revertible in the D130 window."
     },
     {
       "id": "per-drill-capture-coverage-phase-2a-streak-2026-04-28",

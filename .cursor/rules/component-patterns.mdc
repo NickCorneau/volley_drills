@@ -45,6 +45,10 @@ Never build inline Tailwind class-string arrays with `.join(' ')` for buttons. U
 
 Toggle/selection patterns (PlayerToggle, RpeSelector, chips) have selection-specific styling and should use inline Tailwind, not the Button primitive.
 
+## Home covenant (D156)
+
+Any change that adds, moves, or grows a surface on `HomeScreen` (or its `components/home/` cards) is governed by the Home covenant: lifecycle-only focal slot, plan-as-mouthpiece integration, quiet-dark periphery, input parsimony, and a claimant-lane ledger for M002 features. Read `docs/research/brand-ux-guidelines.md` §7.1 before touching Home. The steady-state census is pinned by `app/src/screens/__tests__/HomeScreen.render-budget.test.tsx` — exceeding a budget means evicting an element or amending the budget via a decision row citing `D156`, never silently bumping the constant.
+
 ## Screen structure
 
 Screens should be thin: read state from a controller, render UI, dispatch UI events. Screens never import `db` directly, never call `navigator.*` runtime APIs, and never hold product policy in JSX. See `.cursor/rules/data-access.mdc` for the full layer map.

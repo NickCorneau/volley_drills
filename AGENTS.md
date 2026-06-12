@@ -6,7 +6,7 @@ stage: validation
 type: agent-contract
 summary: "Canonical prose repo contract: current state, read order, source-of-truth order, and repo-wide working constraints."
 authority: repo-wide routing, working constraints, and agent-facing orientation
-last_updated: 2026-06-03
+last_updated: 2026-06-12
 depends_on:
  - docs/catalog.json
  - docs/vision.md
@@ -82,7 +82,7 @@ Read only as much as the task needs.
    - **App architecture / new feature work**: `app/README.md` -> `docs/ops/app-architecture-guidance.md` -> `.cursor/rules/data-access.mdc` / `component-patterns.mdc` / `routing.mdc` / `testing.mdc`
    - Documented solutions / known fixes: `docs/solutions/` (when present) for past bugs, best practices, and workflow patterns, organized by category with YAML frontmatter such as `module`, `tags`, and `problem_type`; relevant when implementing or debugging in documented areas
    - Research: `docs/research/README.md` -> narrowest relevant note
-   - Design / UX work: `docs/design/README.md` -> referenced design-canonical doc (brand / visual / outdoor)
+   - Design / UX work: `docs/design/README.md` -> referenced design-canonical doc (brand / visual / outdoor). Home-surface changes also load the `D156` Home covenant + M002 claimant-lane ledger in `docs/research/brand-ux-guidelines.md` §7.1
    - Docs editing: `docs/README.md` -> `docs/ops/agent-documentation-contract.md`
    - Agent/runtime guidance: `docs/ops/agent-operations.md`
 
@@ -158,3 +158,4 @@ Durable docs under `docs/` should keep YAML frontmatter and explicit ownership. 
 - The live v0b PWA deploys as a Cloudflare Worker at <https://volleydrills.nicholascorneau.workers.dev>; use `app/README.md` and `docs/ops/deploy-cloudflare-worker.md` for deploy runbooks.
 - Generated-plan diagnostics are the active focus-readiness quality surface; `docs/reviews/2026-05-01-generated-plan-diagnostics-report.md`, `docs/reviews/2026-05-01-generated-plan-diagnostics-triage.md`, and `npm run diagnostics:report:*` own the report/triage loop.
 - **D137** retired the standalone `/tune-today` pre-run screen: it is not part of `routePaths` in `app/src/routes.ts`; stale `/tune-today` entry is handled via `FirstOpenGate` and tests while Setup → Safety remains the active pre-run spine.
+- **D156** ratified the Home covenant (2026-06-12): the Home focal slot is lifecycle-only, M002 features integrate through the derived plan by default, and the six M002 claimants inherit default lanes from the ledger in `docs/research/brand-ux-guidelines.md` §7.1 (the ledger's canonical home). `app/src/screens/__tests__/HomeScreen.render-budget.test.tsx` pins the steady-state Home census; exceeding it requires evicting an element or a decision row amending the budget. Every M002 milestone plan carries a one-line Home section citing its inherited lane.

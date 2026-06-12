@@ -6,7 +6,7 @@ stage: planning
 type: research
 authority: canonical UX behaviour reference — typography, color, copy voice, layout, iconography, states, and per-screen posture for the Volleycraft prototype and M001 build
 summary: "How Volleycraft should look and behave: a concrete, screen-by-screen reference for amateur athletes who take their sport seriously."
-last_updated: 2026-06-11
+last_updated: 2026-06-12
 depends_on:
   - docs/vision.md
   - docs/research/outdoor-courtside-ui-brief.md
@@ -25,6 +25,7 @@ related:
 ## Agent Quick Scan
 
 - Use this note when choosing type, color, copy voice, layout rhythm, icon treatment, empty-state handling, interaction pattern, or screen posture for Volleycraft.
+- Also use it for Home presence / focal-slot admissibility: §7.1 carries the Home covenant and the M002 claimant-lane ledger (`D156`). Load §7.1 before any change that adds, moves, or grows a Home surface.
 - This note codifies the current state of the app after F1–F11 landed. It is prescriptive going forward; any change that contradicts it should either update this note first or reference a new decision in `docs/decisions.md`.
 - Not this note for: outdoor legibility floors (`docs/research/outdoor-courtside-ui-brief.md`), the shibui thesis (`docs/research/japanese-inspired-visual-direction.md`), the product-name rationale (`docs/research/product-naming.md`), or product principles (`docs/vision.md` P1–P12). Those outrank this note when they conflict.
 
@@ -314,7 +315,7 @@ Keep these compact. One middle dot separator max per meta line.
 
 | Screen | Focal zone |
 |--------|-----------|
-| Home | Primary card (variant-selected by precedence) |
+| Home | Primary card (variant-selected by precedence; one scheduled-tenancy exception per the §7.1 Home covenant, `D156`) |
 | Onboarding — Skill level | The four option cards as a grouped list |
 | Onboarding — Today's setup | The chip grid resolving to `Build session` |
 | Safety | The two gate questions + their selected state |
@@ -435,12 +436,39 @@ Each screen has an intended posture. These are the reference treatments; when ad
 ### 7.1 Home
 
 - App-bar band: inline `Brandmark` (28 px) + `Volleycraft` wordmark (`text-xl font-semibold tracking-tight`). Subtle but owned (F11). Pre-2026-05-25 canon claimed `text-lg font-bold`; shipped is `text-xl font-semibold` (calmer, more weight-restrained register — audit follow-up plan U8).
-- One primary card, exactly, chosen by the 5-variant precedence (`resume > review_pending > draft > last_complete > new_user`).
+- One primary card, exactly, chosen by the 5-variant precedence (`resume > review_pending > draft > last_complete > new_user`). This is the covenant's lifecycle-only focal rule (`D156`, below): no other surface may occupy the focal slot, with the single scheduled exception recorded in the covenant's tenancy contract.
 - `last_complete` internals (`D152`, folded into canon 2026-06-11): state line (`Ready to train again.`) + a **labeled** metadata line (`Last session: {preset} · {duration} · ended early {when}`). The `Last session:` label is load-bearing — the focal CTA below describes the *next* session, so unlabeled preset/duration metadata would read as a description of what the button starts. The focal CTA is `Start {focus} session` (the card IS the plan), with a quiet `Then: {backlog gerunds}.` queue line beneath it. Quiet-tertiary links below: `Repeat last session` + `Start a different session` in the normal completed case.
 - Ended-early `last_complete` (`D152` + 2026-06-11 fresh-eyes corrections): the repeat link relabels to `Repeat full plan`, and a third `Repeat shorter version (N min)` link offers the completed subset — but **only when the completed blocks total ≥ 10 min** (`REPEAT_SUBSET_MIN_MINUTES`). Below the floor a tiny repeat affordance ("Repeat shorter version (3 min)") is menu noise, and the card keeps the two-link set. The metadata duration reports time trained against plan (`6 of 38 min`), not the planned total alone — same duration basis (`sessionDurationMinutes`) as Review's meta line (§9.2 data honesty); it falls back to the planned total for legacy logs without a stored honest duration.
 - Recent block (`D152`): the `Recent sessions` h2 absorbs the weekly receipt — an optional `Last week: N sessions[ — ahead of your usual rhythm].` consistency line plus felt-difficulty lines render under the header, and the rows themselves are a quiet `day · focus · Done/Partial` three-column list. There is no standalone weekly-receipt section.
 - Optional secondary-rows cluster below the primary, as a single soft-container list (F1). Secondary rows flatten their surface; only the list container holds the shadow/ring.
 - Footer: `Settings` link + `Your data stays on this device.` in `text-xs text-text-secondary`.
+
+#### The Home covenant (`D156`, ratified 2026-06-12)
+
+Home's identity, in the founder's words: **calmly and obviously start the next session; be trusted that it is the right session; offer a quick custom escape.** No Home element may work against these three jobs. Five rules govern every future Home claim (origin: `docs/brainstorms/2026-06-11-home-covenant-requirements.md`):
+
+1. **Lifecycle-only focal slot.** Only session-lifecycle states occupy the primary card, chosen by the precedence above. The only non-lifecycle tenancy is the scheduled, expiring exception class below.
+2. **Plan-as-mouthpiece.** An M002 feature is "present" on Home when it changes what the derived plan assembles, launches, or says — inputs in, smarter sentence and launch out (`D154` is the shipped proof: a flagship feature with zero new Home chrome). New Home pixels require their own decision row citing this covenant.
+3. **Genkan test.** Home is a threshold, not a room. A feature whose value requires dwelling (studying a trend, browsing goals, reviewing a roster) fails Home placement by category — regardless of proposed footprint — and routes to session-end surfaces or a dedicated destination.
+4. **Periphery contract.** Steady-state Home carries at most one quiet peripheral line. Every peripheral signal defines its dark state — the condition under which it renders nothing — and recedes once seen or acted on. No dark state, no slot. The pre-covenant spine surfaces (plan line, carry-forward cell, the weekly read merged into Recent sessions, felt-difficulty lines) are grandfathered as-is until the collapse trigger below, but no new quiet line may be added while more than one already renders.
+5. **Input parsimony.** The plan learns primarily from behavior (sessions completed, ended-early, swaps, Setup choices — routing around the plan is itself a signal, never a prompt to explain). Any explicit ask is near-zero cost and skippable, or clearly high-value to future adaptation and programming. Users never have to explain deviations.
+
+**Claimant-lane ledger** (canonical home of the ledger — `D156`). Each M002 milestone inherits its default lane. Deviating from a lane requires a decision row citing the covenant rule it trades against, and every M002 milestone plan carries a one-line Home section citing its inherited lane (a milestone plan with no Home section is non-conforming).
+
+| Claimant | Default lane |
+| --- | --- |
+| M002.2 stress rung | Plan input (steers assembly); rung movement surfaces at Transition/Complete, plus at most one quiet, receding Home line per the periphery contract |
+| M002.3 progress score | Complete/Review reveal; kura destination later; never a steady-state Home number |
+| M002.4 goals | Plan lens (goal re-keys focus ordering and CTA phrasing); reflection at Review |
+| M002.5 roster | Setup-time concern; Home reflects it only through plan phrasing (e.g. "Start pair passing session") |
+| M002.6 attack/tactics | Plan vocabulary (focus names, drill content); no dedicated Home surface |
+| D151 readiness capture | The one scheduled focal tenant (tenancy contract below) |
+
+**Scheduled tenancy (`D151`).** The weekly readiness check-in is the single approved scheduled focal tenant: at most once per training week, at its research-correct moment, skippable without consequence, expiring after the visit. It claims the slot only when precedence would otherwise resolve to `last_complete`; when `resume`, `review_pending`, or `draft` is present the visit defers to the next qualifying open in the same week and the weekly chance is not consumed. The post-session window stays excluded (per `D151`'s capture research): if the week's first qualifying open immediately follows a session completion, tenancy defers to the next open. It must demonstrably feed the plan under capability semantics — an honest no-change week is a valid outcome; a check-in whose answers can never influence the plan loses tenancy. Its card inherits the render budget below as a second test case when `D151` ships.
+
+**Render budget.** `app/src/screens/__tests__/HomeScreen.render-budget.test.tsx` pins the steady-state census — top-level element count, enabled tap-target count, card-interior line cap — for the `last_complete` primary with the periphery dark, plus the skipped-tail card variant. A change that exceeds the budget names what it evicts or amends the budget via decision row. The shipped Recent-sessions consistency line and felt-difficulty lines are classified behavioral receipts inside this baseline, not progress signals; promoting them toward score/trend framing requires a decision row.
+
+**Named triggers** (heavier machinery stays parked until these fire): extract a pure focal-occupancy policy when `D151` ships; collapse the grandfathered spine slots into a single ranked peripheral line at the third peripheral claimant; define a plan-phrasing composition rule at the second plan-phrasing claimant; build the kura/Progress destination when two or more longitudinal surfaces exist; full CI ledger machinery only if the render test is repeatedly contested.
 
 ### 7.2 Onboarding (Skill level, Today's setup)
 
@@ -594,7 +622,7 @@ Small inconsistencies (a stray period, a button that drifted to Title Case) shou
 
 ## 13 · For agents
 
-- **Authoritative for**: concrete type / color / copy / layout / icon / state / interaction defaults for Volleycraft surfaces.
+- **Authoritative for**: concrete type / color / copy / layout / icon / state / interaction defaults for Volleycraft surfaces, plus Home focal-slot admissibility and the M002 claimant-lane ledger (§7.1 Home covenant, `D156`).
 - **Edit when**: the item falls under §11 "Update when" above.
 - **Belongs elsewhere**: readability floors (`outdoor-courtside-ui-brief.md`), thematic direction (`japanese-inspired-visual-direction.md`), naming (`product-naming.md`), product principles (`vision.md`), scope (`prd-foundation.md`).
 - **Outranked by**: `docs/vision.md` (product principles P1–P12), `docs/decisions.md` (durable decisions), `docs/research/outdoor-courtside-ui-brief.md` (readability contract).
