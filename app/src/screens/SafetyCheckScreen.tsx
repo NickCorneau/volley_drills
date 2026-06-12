@@ -22,6 +22,9 @@ import {
 } from '../platform'
 import { routes } from '../routes'
 import { createSessionFromDraft, getCurrentDraft, hasEverStartedSession } from '../services/session'
+import { dismissAdaptDisclosure, loadSteeringTrace } from '../services/steeringTrace'
+import type { SteeringTraceModel } from '../domain/adaptation/steeringTrace'
+import { isSchemaBlocked } from '../lib/schema-blocked'
 
 // Primary recency chips. `2+` is an intermediate value - tapping it
 // reveals a sub-row of granular buckets (post-physio-review 2026-04-20,
@@ -105,6 +108,16 @@ export function SafetyCheckScreen() {
   // one frame on every Safety visit for returning users.
   const [hasSessionHistory, setHasSessionHistory] = useState(true)
 
+  // Trust-loop U4 (R6/R9/R10): steering line, one-time disclosure, and
+  // "How sessions adapt" gloss, derived from the saved draft's
+  // provenance plus existing records. Loaded inside the same gate as
+  // the draft so the trace never pops in after first paint. Null means
+  // "no trace" — a failed read fails quiet rather than blocking Safety.
+  const [steeringTrace, setSteeringTrace] = useState<SteeringTraceModel | null>(null)
+  // Local mirror of the dismissal so the Callout hides on the same tap
+  // that persists `ux.adaptDisclosureDismissed`.
+  const [disclosureDismissed, setDisclosureDismissed] = useState(false)
+
   useEffect(() => {
     let cancelled = false
     ;(async () => {
@@ -116,8 +129,18 @@ export function SafetyCheckScreen() {
           navigate(routes.setup(), { replace: true })
           return
         }
+        let trace: SteeringTraceModel | null = null
+        try {
+          trace = await loadSteeringTrace(d)
+        } catch {
+          // Quiet failure direction (R11): a broken trace read renders
+          // nothing rather than blocking the safety questions.
+          trace = null
+        }
+        if (cancelled) return
         setDraft(d)
         setHasSessionHistory(hasHistory)
+        setSteeringTrace(trace)
         setDraftLoaded(true)
       } catch {
         if (!cancelled) {
@@ -130,6 +153,14 @@ export function SafetyCheckScreen() {
       cancelled = true
     }
   }, [navigate])
+
+  function handleDismissDisclosure() {
+    setDisclosureDismissed(true)
+    void dismissAdaptDisclosure().catch((err) => {
+      if (isSchemaBlocked()) return
+      console.error('SafetyCheckScreen: failed to persist disclosure dismissal', err)
+    })
+  }
 
   // Returning users never see "First time" - the chip is only meaningful
   // on a genuinely fresh install.
@@ -265,6 +296,40 @@ export function SafetyCheckScreen() {
       />
 
       <ScreenShell.Body>
+        {/* Trust-loop U4: the steering line (R6) and one-time
+          disclosure (R9) render as one quiet block above the recency
+          question — Safety is the surface every steered session
+          traverses (KTD3). All trace elements suppress while the pain
+          override is active: the created session would be the recovery
+          rebuild, which carries no provenance, and the recovery copy
+          must not coexist with a steering claim. Note that Home's
+          carry-forward summary uses global-latest-verdict semantics
+          (`resolveLastAcceptedDelta`) while this line is per-focus
+          armed — the two can intentionally tell different stories; do
+          not "fix" one to match the other. */}
+        {painFlag !== true &&
+          steeringTrace !== null &&
+          (steeringTrace.line !== null ||
+            (steeringTrace.showDisclosure && !disclosureDismissed)) && (
+            <section className="flex flex-col gap-3" data-testid="steering-trace">
+              {steeringTrace.line !== null && (
+                <p className="text-sm leading-relaxed text-text-secondary">{steeringTrace.line}</p>
+              )}
+              {steeringTrace.showDisclosure && !disclosureDismissed && (
+                <Callout tone="info">
+                  <p className="text-sm leading-relaxed text-text-secondary">
+                    Your plan quietly adjusts its challenge as you train. You approve every change
+                    at review.
+                  </p>
+                  <div className="mt-1 flex justify-end">
+                    <Button variant="ghost" onClick={handleDismissDisclosure}>
+                      Got it
+                    </Button>
+                  </div>
+                </Callout>
+              )}
+            </section>
+          )}
         {/* 2026-04-19 dogfeed reorder: Recency first, then Pain. The
           old order placed the pain question first and rendered the
           PainOverrideCard between the two sections, which made the
@@ -445,6 +510,25 @@ export function SafetyCheckScreen() {
             </Callout>
           </Expander>
         </section>
+
+        {/* Trust-loop U4 (R10): evergreen "How sessions adapt" gloss,
+          reachable on every Safety visit once the athlete has EVER
+          been steered (current draft or any persisted plan) — never
+          before. Collapsed Expander mirrors the heat-tips disclosure
+          above; content states the contract in jargon-gated plain
+          language. Suppressed with the rest of the trace while the
+          pain override is active. */}
+        {painFlag !== true && steeringTrace?.showGloss && (
+          <section>
+            <Expander trigger={<>How sessions adapt</>} contentClassName="flex flex-col gap-2">
+              <p className="text-sm leading-relaxed text-text-secondary">
+                Sessions adjust their challenge as you train. After each session, you review how it
+                went and approve or skip any change. Nothing changes without your okay, and Repeat
+                always repeats the same session.
+              </p>
+            </Expander>
+          </section>
+        )}
 
         {createError && <StatusMessage variant="error" message={createError} />}
       </ScreenShell.Body>
