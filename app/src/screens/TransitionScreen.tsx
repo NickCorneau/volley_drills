@@ -122,7 +122,7 @@ export function TransitionScreen() {
         }
       />
 
-      <ScreenShell.Body className="gap-4 pb-4">
+      <ScreenShell.Body rhythm="cockpit">
         {prevBlock && (
           <JustFinishedPill
             drillName={prevBlock.drillName}
@@ -214,7 +214,7 @@ export function TransitionScreen() {
         )}
       </ScreenShell.Body>
 
-      <ScreenShell.Footer className="flex flex-col gap-3 pt-4">
+      <ScreenShell.Footer>
         <Button variant="primary" fullWidth onClick={handleStartNext}>
           Start next block
         </Button>

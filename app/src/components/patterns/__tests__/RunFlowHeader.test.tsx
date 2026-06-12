@@ -63,6 +63,10 @@ describe('RunFlowHeader', () => {
     })
     const wrapper = container.querySelector('[data-screen-shell-header]')
     expect(wrapper!.className).toContain('my-runflow-class')
-    expect(wrapper!.className).toContain('grid grid-cols-3 items-center pt-2 pb-3')
+    expect(wrapper!.className).toContain('grid grid-cols-3 items-center')
+    // Zone spacing comes from ScreenShell.Header's default `flow` rhythm
+    // (HEADER_RHYTHM), not from this pattern's own className.
+    expect(wrapper!.className).toContain('pt-2')
+    expect(wrapper!.className).toContain('pb-3')
   })
 })

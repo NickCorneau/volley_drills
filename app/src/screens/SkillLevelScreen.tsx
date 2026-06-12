@@ -127,14 +127,14 @@ export function SkillLevelScreen() {
         the body scrolls independently in that case without dragging
         the rest of the chrome offscreen.
       */}
-      <ScreenShell.Header className="flex flex-col gap-2 pt-8 pb-4">
+      <ScreenShell.Header rhythm="landing" className="flex flex-col gap-2">
         <h1 className="text-xl font-semibold tracking-tight text-text-primary">{copy.heading}</h1>
         <p className="text-sm text-text-secondary">
           Your rough current level. We size today&apos;s drills to match. Change anytime.
         </p>
       </ScreenShell.Header>
 
-      <ScreenShell.Body className="pb-6">
+      <ScreenShell.Body rhythm="quiet">
         {/* Phase F2 (2026-04-19): option cards now use the same calm
           focal-surface language as HomePrimaryCard / SettingsScreen -
           soft shadow + hairline ring instead of a hard `border-2`, a

@@ -86,7 +86,7 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
 
   return (
     <ScreenShell>
-      <ScreenShell.Header className="flex flex-col items-center gap-1 pt-2 pb-3">
+      <ScreenShell.Header className="flex flex-col items-center gap-1">
         <div className="flex w-full items-center justify-between">
           <SafetyIcon />
           <h1 className="text-xl font-semibold tracking-tight text-text-primary">Quick review</h1>
@@ -97,7 +97,7 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
         </p>
       </ScreenShell.Header>
 
-      <ScreenShell.Body className="gap-6 pb-4">
+      <ScreenShell.Body>
         <Card className="flex flex-col gap-3">
           <h2 id="rpe-heading" className="text-base font-semibold text-text-primary">
             {rpePrompt}
@@ -235,7 +235,7 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
         )}
       </ScreenShell.Body>
 
-      <ScreenShell.Footer className="flex flex-col gap-3 pt-4">
+      <ScreenShell.Footer>
         {submitError && <StatusMessage variant="error" message={submitError} />}
         {missingHint && (
           <p className="text-center text-sm text-text-secondary" aria-live="polite">

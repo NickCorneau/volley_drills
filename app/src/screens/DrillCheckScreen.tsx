@@ -146,11 +146,13 @@ export function DrillCheckScreen() {
         pill mid-screen on tall viewports, which read as a loading state
         and pushed the chips past the thumb zone; the Continue CTA is
         footer-anchored regardless, so vertical centering bought us
-        nothing on tap-reach. A small `pt-2` keeps the pill from
-        slamming against the header hairline. No "Up next" content here
-        — that lives on the next screen by design.
+        nothing on tap-reach. The pill starts at the shared header
+        rhythm (RunFlowHeader's `pb-3`), matching TransitionScreen
+        exactly so the Last → Next pair sits at the same height. No
+        "Up next" content here — that lives on the next screen by
+        design.
       */}
-      <ScreenShell.Body className="items-stretch gap-6 pb-4 pt-2">
+      <ScreenShell.Body>
         {/*
           2026-05-25 a11y fix (plan B1 of
           `docs/plans/2026-05-25-005-polish-design-critique-residuals-plan.md`,
@@ -227,7 +229,7 @@ export function DrillCheckScreen() {
         single-purpose nature of this screen — there is no "skip", no
         "swap", no shorten. The only way out forward is to tag.
       */}
-      <ScreenShell.Footer className="flex flex-col gap-3 pt-4">
+      <ScreenShell.Footer>
         {captureSaveError && <StatusMessage variant="error" message={captureSaveError} />}
         {!captureSatisfied && (
           <p

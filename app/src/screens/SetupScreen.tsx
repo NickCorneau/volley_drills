@@ -350,7 +350,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         title={<>Today&apos;s setup</>}
       />
 
-      <ScreenShell.Body className="gap-6 pb-4">
+      <ScreenShell.Body>
         <ChoiceSection title="Players">
           <ChoiceRow<PlayerMode>
             value={playerMode}
@@ -422,7 +422,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         {error && <StatusMessage variant="error" message={error} />}
       </ScreenShell.Body>
 
-      <ScreenShell.Footer className="flex flex-col gap-2 pt-3">
+      <ScreenShell.Footer>
         {/* U6 (2026-05-24 duration-honesty plan, R9): large-gap guard.
             When the assembled total is short of the named profile by
             5+ min, surface a calm warning inline above the Build

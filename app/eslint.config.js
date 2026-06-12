@@ -10,6 +10,10 @@ import volleycraftRules from './eslint-rules/index.js'
 // `app/eslint-rules/`. Adds `volleycraft/no-inline-primitive-drift`
 // which fails when patterns the consolidation just centralised get
 // hand-rolled inline again. See the rule file for the list of checks.
+// Spacing-contract pass (2026-06-11) adds
+// `volleycraft/screen-shell-zone-spacing`: zone spacing on
+// ScreenShell.Header/Body/Footer routes through named rhythm variants,
+// not inline utility strings.
 export default defineConfig([
   globalIgnores(['dist', 'eslint-rules']),
   {
@@ -25,6 +29,7 @@ export default defineConfig([
     },
     rules: {
       'volleycraft/no-inline-primitive-drift': 'error',
+      'volleycraft/screen-shell-zone-spacing': 'error',
     },
     languageOptions: {
       ecmaVersion: 2020,

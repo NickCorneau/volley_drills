@@ -369,14 +369,14 @@ export function HomeScreen() {
           curves - avoids the “app icon dwarfing the title” effect from
           pairing a 28 px mark with `text-lg` bold (F11). See
           `docs/research/brand-ux-guidelines.md` §1 (type hierarchy). */}
-      <ScreenShell.Header className="flex items-center gap-2.5 pt-6 pb-4">
+      <ScreenShell.Header rhythm="landing" className="flex items-center gap-2.5">
         <Brandmark size={24} className="shrink-0" />
         <h1 className="text-xl font-semibold leading-none tracking-tight text-text-primary">
           Volleycraft
         </h1>
       </ScreenShell.Header>
 
-      <ScreenShell.Body className="gap-8 pb-6">
+      <ScreenShell.Body rhythm="landing">
         <UpdatePrompt needRefresh={needRefresh} onUpdate={updateApp} />
 
         {/* M002.1 thin-spine cluster: the plan line orients the focal
@@ -477,7 +477,7 @@ export function HomeScreen() {
         )}
       </ScreenShell.Body>
 
-      <ScreenShell.Footer className="flex flex-col items-center gap-1 pt-3 text-center text-xs text-text-secondary">
+      <ScreenShell.Footer rhythm="caption" className="text-xs text-text-secondary">
         <Link
           to={routes.settings()}
           className="inline-flex min-h-[44px] items-center px-2 underline underline-offset-2"

@@ -6,9 +6,11 @@
  */
 
 import noInlinePrimitiveDrift from './no-inline-primitive-drift.js'
+import screenShellZoneSpacing from './screen-shell-zone-spacing.js'
 
 export default {
   rules: {
     'no-inline-primitive-drift': noInlinePrimitiveDrift,
+    'screen-shell-zone-spacing': screenShellZoneSpacing,
   },
 }

@@ -74,6 +74,7 @@ Dated design / UX review passes. Each is a point-in-time capture, not a source o
 | 2026-05-25 | `docs/design/reviews/2026-05-25-h1-h2-experiment-revaluation.md` | H1 / H2 experiment re-evaluation | Viewport-bound code-review assessment of the 2026-05-25 plan U6 / U7 follow-ups; D91 field run remains the durable keep/revert authority |
 | 2026-06-11 | `docs/design/reviews/2026-06-11-red-team-design-language-review.md` | Red-team design-language adherence + live mobile pass | Code-level audit against the four design contracts + dev server at 390×844; verification dispositions per finding (fixed / falsified / routed); umbrella capture in `docs/reviews/2026-06-11-red-team-review.md` |
 | 2026-06-11 | `docs/design/reviews/2026-06-11-design-language-deep-pass.md` | Founder-directed deep pass: challenge, reconcile, polish | Adversarial canon-vs-code re-read + full live walk at 390×844; resolves the red team's routed D145 finding via `D153`; ships stacked cue lines + quiet Review empty voice; corrects seven stale `brand-ux-guidelines.md` passages; records falsified challenge candidates |
+| 2026-06-11 | `docs/design/reviews/2026-06-11-shibui-empty-space-research-pass.md` | Shibui / `ma` research + empty-space design pass | External research synthesis (ma, kanso, calm tech, iA reduction, NN/g signifiers) + live walk at 390×844; defends the run flow's ma; five evidence-gated proposals (S1–S5, led by the recommendation-first Setup restructure) + one canon nit; suggestions only, no code shipped |
 
 ## Related Surfaces
 

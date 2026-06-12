@@ -49,7 +49,7 @@ export type RunFlowHeaderProps = {
  */
 export function RunFlowHeader({ eyebrow, counter, className }: RunFlowHeaderProps) {
   return (
-    <ScreenShell.Header className={cx('grid grid-cols-3 items-center pt-2 pb-3', className)}>
+    <ScreenShell.Header className={cx('grid grid-cols-3 items-center', className)}>
       <div className="justify-self-start">
         <SafetyIcon />
       </div>

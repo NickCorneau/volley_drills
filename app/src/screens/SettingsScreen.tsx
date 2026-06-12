@@ -138,7 +138,7 @@ export function SettingsScreen() {
       */}
       <ScreenHeader backLabel="Back" onBack={() => navigate(routes.home())} title="Settings" />
 
-      <ScreenShell.Body className="gap-8 pb-4">
+      <ScreenShell.Body rhythm="landing">
         <Card variant="focal">
           <div>
             <h2 className="text-base font-semibold text-text-primary">Export training records</h2>
@@ -235,7 +235,7 @@ export function SettingsScreen() {
         </section>
       </ScreenShell.Body>
 
-      <ScreenShell.Footer className="pt-3">
+      <ScreenShell.Footer rhythm="caption">
         {/* 2026-04-27 reconciled-list `R13` (Settings investment footer):
             quiet `Logged: N sessions · {duration} total` row above the
             existing privacy promise (duration via `formatTotalDurationLine`,
@@ -249,17 +249,12 @@ export function SettingsScreen() {
             `discarded_resume` stubs via the existing
             `isTerminalSession` predicate (`A8`). */}
         {tally && tally.count > 0 && (
-          <p
-            className="pb-1 text-center text-xs text-text-secondary"
-            data-testid="settings-investment-footer"
-          >
+          <p className="text-xs text-text-secondary" data-testid="settings-investment-footer">
             Logged: {tally.count} {tally.count === 1 ? 'session' : 'sessions'} ·{' '}
             {formatTotalDurationLine(tally.totalMinutes)} total
           </p>
         )}
-        <p className="pb-2 text-center text-xs text-text-secondary">
-          Your data stays on this device.
-        </p>
+        <p className="text-xs text-text-secondary">Your data stays on this device.</p>
         {/* 2026-04-26 pre-D91 editorial polish (`F14`): build-id row
             for D91 field-test debugging hygiene. When a tester reports
             a bug, the founder's first triage question is "what build
@@ -287,7 +282,7 @@ export function SettingsScreen() {
             `docs/plans/2026-05-25-002-feat-2026-05-24-design-critique-followups-plan.md`
             U2. */}
         <p
-          className="pb-3 text-center text-xs font-medium text-text-secondary/80"
+          className="text-xs font-medium text-text-secondary/80"
           data-testid="settings-build-id"
         >
           Build {formatBuildVersion(BUILD_VERSION, import.meta.env.DEV ? 'dev' : 'prod')} ·{' '}

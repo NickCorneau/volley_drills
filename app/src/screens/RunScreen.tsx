@@ -199,7 +199,7 @@ export function RunScreen() {
         }
       />
 
-      <ScreenShell.Body className="gap-4 pb-4">
+      <ScreenShell.Body rhythm="cockpit">
         <div>
           <h1 className="text-xl font-semibold tracking-tight text-text-primary">
             {currentBlock.drillName}
@@ -296,7 +296,7 @@ export function RunScreen() {
         tight instrument. `runError` surfaces inside the footer so
         the tester never loses sight of the actionable message.
       */}
-      <ScreenShell.Footer className="flex flex-col gap-3 px-1 pt-4">
+      <ScreenShell.Footer>
         {runError && (
           <div>
             <StatusMessage variant="error" message={runError} />

@@ -46,7 +46,7 @@ export function ScreenHeader({
   className,
 }: ScreenHeaderProps) {
   return (
-    <ScreenShell.Header className={cx('flex items-center gap-2 pt-2 pb-3', className)}>
+    <ScreenShell.Header className={cx('flex items-center gap-2', className)}>
       <BackButton label={backLabel} onClick={onBack} aria-label={backAriaLabel} />
       <h1 className="flex-1 text-center text-xl font-semibold tracking-tight text-text-primary">
         {title}

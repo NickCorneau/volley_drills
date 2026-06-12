@@ -279,7 +279,7 @@ export function CompleteScreen() {
         phones. Also cleans up the odd vertical justification math the
         previous `min-h` trick required.
       */}
-      <ScreenShell.Header className="flex w-full items-center justify-between pt-2 pb-3">
+      <ScreenShell.Header className="flex items-center justify-between">
         <SafetyIcon />
         {/* Phase F8 (2026-04-19): was a `<p>` rendering `{summary.header}`
             at `text-sm font-semibold uppercase tracking-wider`. Promoted
@@ -299,7 +299,7 @@ export function CompleteScreen() {
         <div className="h-14 w-14 shrink-0" aria-hidden />
       </ScreenShell.Header>
 
-      <ScreenShell.Body className="items-center gap-10 pb-4">
+      <ScreenShell.Body rhythm="celebration" className="items-center">
         <section
           aria-labelledby="summary-verdict"
           className="flex w-full flex-col items-center gap-4 text-center"
@@ -431,7 +431,7 @@ export function CompleteScreen() {
         <UpdatePrompt needRefresh={needRefresh} onUpdate={updateApp} />
       </ScreenShell.Body>
 
-      <ScreenShell.Footer className="flex w-full flex-col gap-4 pt-4">
+      <ScreenShell.Footer>
         {/* 2026-04-21 partner-walkthrough P1-2 fix: the CTA was "Done",
             which carried the terminal meaning ("session complete") but
             dropped the destination. Seb landed on Home and could not

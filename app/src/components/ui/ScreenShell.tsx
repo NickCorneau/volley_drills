@@ -24,10 +24,16 @@ import { cx } from '../../lib/cn'
  * Structure:
  *
  *   <ScreenShell>
- *     <ScreenShell.Header>   // optional. shrink-0.
+ *     <ScreenShell.Header>   // optional. shrink-0. rhythm: flow | landing.
  *     <ScreenShell.Body>     // flex-1 min-h-0 overflow-y-auto — scrolls.
+ *                            // rhythm: cockpit | calm | landing | celebration | quiet.
  *     <ScreenShell.Footer>   // optional. shrink-0 + safe-area-bottom.
+ *                            // rhythm: cta | caption.
  *   </ScreenShell>
+ *
+ * Zone spacing is owned by the named rhythm maps below (HEADER_RHYTHM /
+ * BODY_RHYTHM / FOOTER_RHYTHM) — one spot to retune the whole app.
+ * Spacing utilities in a zone's `className` are lint-blocked.
  *
  * Mechanics:
  *
@@ -81,14 +87,64 @@ function Root({ children, className }: ScreenShellProps) {
   )
 }
 
+/*
+ * Named zone rhythms (2026-06-11 spacing-contract pass).
+ *
+ * Zone-level spacing (header pt/pb, body gap + end padding, footer
+ * gap/pt) is owned HERE, not at call sites. Before this pass every
+ * screen hand-tuned `pt-* pb-* gap-*` strings on its zones and the
+ * values drifted a few pixels per screen (footer pt-3 vs pt-4, a
+ * stray px-1 on Run, an extra pt-2 on Drill Check). Screens now pick
+ * a *named* rhythm; the pixel values live in these three maps so the
+ * whole app retunes from one spot.
+ *
+ * Adding spacing classes to a zone's `className` is lint-blocked
+ * (`volleycraft/screen-shell-zone-spacing`). If a screen genuinely
+ * needs a new rhythm, add a named variant here instead of inlining
+ * the one-off — the name is the documentation.
+ */
+
+export const HEADER_RHYTHM = {
+  /** In-flow top bar: back rows, run-flow eyebrow grids, review/complete. */
+  flow: 'pt-2 pb-3',
+  /** Surfaces that open the app (Home brand row, onboarding skill level): extra top air. */
+  landing: 'pt-6 pb-4',
+} as const
+
+export const BODY_RHYTHM = {
+  /** Run-flow instrument surfaces (Run, Transition): dense courtside read. */
+  cockpit: 'gap-4 pb-4',
+  /** Default. Pre-run forms, capture, review: standard section breathing. */
+  calm: 'gap-6 pb-4',
+  /** Card-stack surfaces (Home, Settings): airier gaps between focal cards. */
+  landing: 'gap-8 pb-4',
+  /** Terminal verdict beat (Complete): widest air around the hero. */
+  celebration: 'gap-10 pb-4',
+  /** Single-component bodies that own their internal rhythm (skill-level
+      pickers). No zone gap; deeper end padding closes the scroll on these
+      footer-less screens. */
+  quiet: 'pb-6',
+} as const
+
+export const FOOTER_RHYTHM = {
+  /** Default. CTA stacks: primary button + helper/error/caption rows. */
+  cta: 'flex flex-col gap-3 pt-4',
+  /** Text-only caption clusters (Home, Settings): tight centered lines. */
+  caption: 'flex flex-col items-center gap-1 pt-4 text-center',
+} as const
+
+export type HeaderRhythm = keyof typeof HEADER_RHYTHM
+export type BodyRhythm = keyof typeof BODY_RHYTHM
+export type FooterRhythm = keyof typeof FOOTER_RHYTHM
+
 type PartProps = {
   children: ReactNode
   className?: string
 }
 
-function Header({ children, className }: PartProps) {
+function Header({ children, className, rhythm = 'flow' }: PartProps & { rhythm?: HeaderRhythm }) {
   return (
-    <div data-screen-shell-header className={cx('shrink-0', className)}>
+    <div data-screen-shell-header className={cx('shrink-0', HEADER_RHYTHM[rhythm], className)}>
       {children}
     </div>
   )
@@ -157,11 +213,12 @@ function useScrollEdges(ref: RefObject<HTMLDivElement | null>): ScrollEdges {
  * is not an action target; the visible cue is the screen's header +
  * content itself.
  *
- * The `className` prop is forwarded to the scroll container so screens
- * can tune inner rhythm (e.g. `gap-4 pb-4` on Run, `gap-6 pb-4` on
- * Review) without leaking layout into the fade/scrollbar plumbing.
+ * Zone spacing comes from the named `rhythm` variant (see BODY_RHYTHM);
+ * the `className` prop is forwarded to the scroll container for
+ * non-spacing layout (e.g. `items-center` on Complete) without leaking
+ * into the fade/scrollbar plumbing.
  */
-function Body({ children, className }: PartProps) {
+function Body({ children, className, rhythm = 'calm' }: PartProps & { rhythm?: BodyRhythm }) {
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const { canScrollUp, canScrollDown } = useScrollEdges(scrollRef)
 
@@ -179,6 +236,7 @@ function Body({ children, className }: PartProps) {
         className={cx(
           'flex flex-1 flex-col overflow-y-auto overscroll-contain focus:outline-none',
           '[&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none]',
+          BODY_RHYTHM[rhythm],
           className,
         )}
       >
@@ -218,9 +276,10 @@ function Body({ children, className }: PartProps) {
 }
 
 /**
- * The pinned-footer zone. Bottom padding is always at least 1 rem
- * plus `safe-area-inset-bottom` so CTAs are never flush against the
- * physical or logical bottom edge.
+ * The pinned-footer zone. Bottom padding is `max(0.5rem,
+ * safe-area-inset-bottom)` so CTAs are never flush against the
+ * physical or logical bottom edge; top padding and content gap come
+ * from the named `rhythm` variant (see FOOTER_RHYTHM).
  *
  * A subtle `border-t border-text-primary/5` sits above the footer as
  * a hairline "dock" cue — quiet enough to disappear on calm screens
@@ -228,12 +287,13 @@ function Body({ children, className }: PartProps) {
  * that the footer is fixed when the body *has* scrolled. This holds
  * the shibui envelope without needing a JS-driven shadow-on-scroll.
  */
-function Footer({ children, className }: PartProps) {
+function Footer({ children, className, rhythm = 'cta' }: PartProps & { rhythm?: FooterRhythm }) {
   return (
     <div
       data-screen-shell-footer
       className={cx(
         'shrink-0 border-t border-text-primary/5 bg-surface-calm pb-[max(0.5rem,env(safe-area-inset-bottom))]',
+        FOOTER_RHYTHM[rhythm],
         className,
       )}
     >

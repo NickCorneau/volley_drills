@@ -92,7 +92,7 @@ export function SettingsSkillLevelScreen() {
     <ScreenShell>
       <ScreenHeader backLabel="Back" onBack={() => navigate(routes.settings())} title={heading} />
 
-      <ScreenShell.Body className="pb-6">
+      <ScreenShell.Body rhythm="quiet">
         <p className="mb-4 text-sm text-text-secondary">
           Your rough current level. We size today&apos;s drills to match.
         </p>

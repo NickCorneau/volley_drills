@@ -79,6 +79,10 @@ describe('ScreenHeader', () => {
     })
     const headerWrapper = container.querySelector('[data-screen-shell-header]')
     expect(headerWrapper!.className).toContain('my-custom-class')
-    expect(headerWrapper!.className).toContain('flex items-center gap-2 pt-2 pb-3')
+    expect(headerWrapper!.className).toContain('flex items-center gap-2')
+    // Zone spacing comes from ScreenShell.Header's default `flow` rhythm
+    // (HEADER_RHYTHM), not from this pattern's own className.
+    expect(headerWrapper!.className).toContain('pt-2')
+    expect(headerWrapper!.className).toContain('pb-3')
   })
 })

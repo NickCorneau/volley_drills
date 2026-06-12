@@ -264,7 +264,7 @@ export function SafetyCheckScreen() {
         title="Before we start"
       />
 
-      <ScreenShell.Body className="gap-6 pb-4">
+      <ScreenShell.Body>
         {/* 2026-04-19 dogfeed reorder: Recency first, then Pain. The
           old order placed the pain question first and rendered the
           PainOverrideCard between the two sections, which made the
@@ -450,7 +450,7 @@ export function SafetyCheckScreen() {
       </ScreenShell.Body>
 
       {painFlag !== true && (
-        <ScreenShell.Footer className="flex flex-col gap-3 pt-4">
+        <ScreenShell.Footer>
           {missingHint && (
             <p className="text-center text-sm text-text-secondary" aria-live="polite">
               {missingHint}

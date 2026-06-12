@@ -26,7 +26,7 @@ alwaysApply: false
 - `<Disclosure label children testId?>` for collapsed-by-default reveal that REPLACES its trigger when expanded (PerDrillCapture drawers).
 - `<Expander trigger children onOpenChange?>` for collapse/expand where the trigger STAYS VISIBLE with a chevron (SafetyCheckScreen heat tips).
 - `<NumberCell label value onCommit validate? invalidMessage? helperText? testId?>` for large numeric tap-to-type input. Empty input commits `null`; the empty-zero rule renders `value === 0` as a placeholder.
-- `<ScreenShell>` (with `.Header` / `.Body` / `.Footer` subcomponents) for the outer screen layout.
+- `<ScreenShell>` (with `.Header` / `.Body` / `.Footer` subcomponents) for the outer screen layout. Zone spacing is owned by named `rhythm` variants (`HEADER_RHYTHM`: `flow|landing`; `BODY_RHYTHM`: `cockpit|calm|landing|celebration|quiet`; `FOOTER_RHYTHM`: `cta|caption`) defined once in `ScreenShell.tsx` — do NOT put `pt-*`/`pb-*`/`gap-*` spacing utilities in a zone's `className` (lint-enforced; see Drift Guardrail). Pick a rhythm, or add a new named variant when a screen genuinely needs a new rhythm.
 - `<StatusMessage variant="loading|error|empty">` for page-load states (loading / error / empty). Distinct from `Callout`.
 - `<ToggleChip label selected onTap tone? size? shape? fill? ariaLabel?>` for individual chips (used inside `ChoiceRow`).
 - `<ActionOverlay title description? children initialFocusRef? refocusKey?>` for low-level modal / sheet shells. Most callers should use `ConfirmModal` (in `patterns/`) instead; reach for `ActionOverlay` only when the content shape is heavier than a confirm (e.g., ResumePrompt's paused-info display).
@@ -68,12 +68,14 @@ Controllers MUST NOT branch on `navigator.vibrate` or call Dexie directly. If a 
 
 ## Drift Guardrail
 
-The custom ESLint rule `volleycraft/no-inline-primitive-drift` (in `app/eslint-rules/`) fails at edit time when patterns the consolidation centralised get hand-rolled inline again. Currently enforced:
+The custom ESLint rules in `app/eslint-rules/` fail at edit time when patterns the consolidation centralised get hand-rolled inline again. Currently enforced:
 
-- **`role="radiogroup"`** outside `app/src/components/ui/ChoiceRow.tsx`. Use `<ChoiceRow>` instead.
-- **`data-action-overlay-initial-focus`** anywhere. The string-attribute contract was removed in plan U2 (2026-05-04); pass `initialFocusRef` to `ActionOverlay` (or use `<ConfirmModal>` which threads the ref internally).
+- `volleycraft/no-inline-primitive-drift`:
+  - **`role="radiogroup"`** outside `app/src/components/ui/ChoiceRow.tsx`. Use `<ChoiceRow>` instead.
+  - **`data-action-overlay-initial-focus`** anywhere. The string-attribute contract was removed in plan U2 (2026-05-04); pass `initialFocusRef` to `ActionOverlay` (or use `<ConfirmModal>` which threads the ref internally).
+- `volleycraft/screen-shell-zone-spacing` (2026-06-11 spacing-contract pass): **spacing utilities (`p*-`/`m*-`/`gap-`/`space-*`) in `className` on `ScreenShell.Header` / `.Body` / `.Footer`**. Zone spacing routes through the named `rhythm` variants in `ScreenShell.tsx`. `gap-*` is allowed on `.Header` only (it arranges header content, not zone spacing).
 
-The escape hatch is `// eslint-disable-next-line volleycraft/no-inline-primitive-drift -- <reason>`. Use it only when there's a documented reason the primitive can't fit; PR review catches disables without a reason.
+The escape hatch is `// eslint-disable-next-line volleycraft/<rule> -- <reason>`. Use it only when there's a documented reason the primitive can't fit; PR review catches disables without a reason.
 
 ## P12 contract
 
@@ -83,9 +85,11 @@ Wrap screen content in `<ScreenShell>` (from `components/ui`) using the Header /
 
 ```tsx
 <ScreenShell>
-  <ScreenShell.Header>{/* top bar */}</ScreenShell.Header>
-  <ScreenShell.Body>{/* scrolls when content exceeds the fold */}</ScreenShell.Body>
-  <ScreenShell.Footer>{/* pinned CTAs; 1rem + safe-area-bottom padding */}</ScreenShell.Footer>
+  <ScreenShell.Header>{/* top bar. rhythm: flow (default) | landing */}</ScreenShell.Header>
+  <ScreenShell.Body rhythm="cockpit">{/* scrolls when content exceeds the fold.
+      rhythm: cockpit | calm (default) | landing | celebration | quiet */}</ScreenShell.Body>
+  <ScreenShell.Footer>{/* pinned CTAs; safe-area-bottom padding.
+      rhythm: cta (default) | caption */}</ScreenShell.Footer>
 </ScreenShell>
 ```
 
