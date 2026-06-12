@@ -53,6 +53,15 @@ const uppercaseTrackingAllowlist = [
     rationale:
       'D158 (2026-06-12 shibui v2-04 comp, founder-approved): quiet uppercase micro-labels are the sanctioned section/eyebrow vocabulary — secondary ink, text-xs, never a state indicator.',
   },
+  {
+    path: 'components/ui/ChoiceSection.tsx',
+    requiredUtilities: ['uppercase', 'tracking-wider', 'text-text-secondary', 'text-xs'],
+    role: 'micro-label section heading',
+    surface: 'ChoiceSection headingVariant="micro" (Setup refine cluster)',
+    activeRunEligible: false,
+    rationale:
+      'D158 (2026-06-12 shibui setup-01 comp, founder-approved): Setup section headings recede to quiet uppercase micro-labels so the focal resolved line carries the screen — secondary ink, text-xs, opt-in per section (Safety keeps the default question-scale headings).',
+  },
 ]
 
 const fontMonoAllowlist = [

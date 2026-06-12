@@ -3,6 +3,15 @@ import { cx } from '../../lib/cn'
 
 export type ChoiceSectionProps = {
   title: ReactNode
+  /**
+   * Heading treatment. `default` is the shared pre-run scale
+   * (`text-base` semibold) — Safety keeps this because its titles are
+   * full questions. `micro` is the D158 Setup refine-cluster
+   * treatment (founder-chosen `setup-01-returning-quiet-labels` comp):
+   * a quiet uppercase micro-label that recedes so the focal resolved
+   * line above the cluster carries the screen.
+   */
+  headingVariant?: 'default' | 'micro'
   /** Subhead under the heading; rendered as `text-sm text-text-secondary`. */
   description?: ReactNode
   /** Fine print under the chip row (same pattern as the Time clarifier). */
@@ -15,7 +24,7 @@ export type ChoiceSectionProps = {
 
 /**
  * Shared layout for every choice row in the pre-run flow (Setup,
- * Safety): one heading scale (`text-base` semibold), shared gap, optional
+ * Safety): one heading scale per `headingVariant`, shared gap, optional
  * description above the chips, optional footnote below.
  *
  * Use `ChoiceSubsection` for conditional follow-up rows that nest inside a
@@ -24,6 +33,7 @@ export type ChoiceSectionProps = {
  */
 export function ChoiceSection({
   title,
+  headingVariant = 'default',
   description,
   footerNote,
   optional,
@@ -32,7 +42,13 @@ export function ChoiceSection({
 }: ChoiceSectionProps) {
   return (
     <section className={cx('flex flex-col gap-3', className)}>
-      <h2 className="text-base font-semibold text-text-primary">
+      <h2
+        className={
+          headingVariant === 'micro'
+            ? 'text-xs font-medium uppercase tracking-wider text-text-secondary'
+            : 'text-base font-semibold text-text-primary'
+        }
+      >
         {title}
         {optional ? (
           <>
@@ -52,6 +68,8 @@ export type ChoiceSubsectionProps = {
   /** Stable id for `aria-labelledby` on the nested radiogroup. */
   titleId: string
   title: ReactNode
+  /** Same opt-in micro-label treatment as `ChoiceSection` (D158 Setup). */
+  headingVariant?: 'default' | 'micro'
   /** Optional description rendered between the h3 and the children. */
   description?: ReactNode
   children: ReactNode
@@ -62,10 +80,23 @@ export type ChoiceSubsectionProps = {
  * layoff buckets after `2+` recency). Same heading scale as the parent section
  * so it doesn't read as fine print, default `lg` chips inside.
  */
-export function ChoiceSubsection({ titleId, title, description, children }: ChoiceSubsectionProps) {
+export function ChoiceSubsection({
+  titleId,
+  title,
+  headingVariant = 'default',
+  description,
+  children,
+}: ChoiceSubsectionProps) {
   return (
     <div className="flex animate-[choice-subsection-reveal_180ms_ease-out] flex-col gap-3 rounded-base bg-bg-warm/60 p-3 motion-reduce:animate-none">
-      <h3 id={titleId} className="text-base font-semibold text-text-primary">
+      <h3
+        id={titleId}
+        className={
+          headingVariant === 'micro'
+            ? 'text-xs font-medium uppercase tracking-wider text-text-secondary'
+            : 'text-base font-semibold text-text-primary'
+        }
+      >
         {title}
       </h3>
       {description ? <p className="text-sm text-text-secondary">{description}</p> : null}

@@ -112,7 +112,8 @@ export const HEADER_RHYTHM = {
 } as const
 
 export const BODY_RHYTHM = {
-  /** Run-flow instrument surfaces (Run, Transition): dense courtside read. */
+  /** Run-flow instrument surfaces (Run, Transition) and the Setup
+      refine cluster (D158 setup-01 frame): dense glanceable read. */
   cockpit: 'gap-4 pb-4',
   /** Default. Pre-run forms, capture, review: standard section breathing. */
   calm: 'gap-6 pb-4',

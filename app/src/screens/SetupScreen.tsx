@@ -252,6 +252,20 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       : null
   }, [previewTotalMinutes, timeProfile])
 
+  // D158 (2026-06-12 shibui comp review, setup-01 frame): focal resolved
+  // line at the top of the refine cluster — `Pair + Net · 38 min ·
+  // Recommended focus`. The minute segment always reads the *assembled
+  // preview total* (the same number the footer Callout reports), never
+  // the named Time-chip profile, so the screen's two duration statements
+  // cannot disagree (duration-honesty R4). Null until the preview draft
+  // exists; the incomplete placeholder renders in its slot instead.
+  const resolvedLine = useMemo(() => {
+    if (!previewDraft || previewTotalMinutes === null) return null
+    const focusLabel =
+      FOCUS_OPTIONS.find((option) => option.value === sessionFocus)?.label ?? 'Recommended'
+    return `${previewDraft.archetypeName} · ${previewTotalMinutes} min · ${focusLabel} focus`
+  }, [previewDraft, previewTotalMinutes, sessionFocus])
+
   const submitting = useRef(false)
 
   const handleConfirm = useCallback(async () => {
@@ -350,8 +364,28 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
         title={<>Today&apos;s setup</>}
       />
 
-      <ScreenShell.Body>
-        <ChoiceSection title="Players">
+      {/* D158 (setup-01 frame): the body is recommendation-first — a
+          focal resolved line carries the screen ("Pair + Net · 38 min ·
+          Recommended focus") and the chip sections recede into a dense
+          refine cluster (`cockpit` rhythm, quiet uppercase micro-label
+          headings). Incomplete states render the existing hint copy in
+          the focal slot in secondary voice instead of fabricating a
+          resolved summary. */}
+      <ScreenShell.Body rhythm="cockpit">
+        {resolvedLine ? (
+          <p
+            data-testid="setup-resolved-line"
+            className="text-lg font-semibold leading-snug text-text-primary"
+          >
+            {resolvedLine}
+          </p>
+        ) : incompleteHint ? (
+          <p data-testid="setup-resolved-line-placeholder" className="text-sm text-text-secondary">
+            {incompleteHint}
+          </p>
+        ) : null}
+
+        <ChoiceSection title="Players" headingVariant="micro">
           <ChoiceRow<PlayerMode>
             value={playerMode}
             onChange={setPlayerMode}
@@ -363,7 +397,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           />
         </ChoiceSection>
 
-        <ChoiceSection title="Net">
+        <ChoiceSection title="Net" headingVariant="micro">
           <ChoiceRow<'yes' | 'no'>
             value={netAvailable === null ? null : netAvailable ? 'yes' : 'no'}
             onChange={(next) => setNetAvailable(next === 'yes')}
@@ -374,7 +408,11 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
             ariaLabel="Net available"
           />
           {showWall && (
-            <ChoiceSubsection titleId="wall-available-label" title="Wall or fence nearby?">
+            <ChoiceSubsection
+              titleId="wall-available-label"
+              title="Wall or fence nearby?"
+              headingVariant="micro"
+            >
               <ChoiceRow<'yes' | 'no'>
                 value={wallAvailable === null ? null : wallAvailable ? 'yes' : 'no'}
                 onChange={(next) => setWallAvailable(next === 'yes')}
@@ -388,7 +426,11 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           )}
         </ChoiceSection>
 
-        <ChoiceSection title="Time" footerNote="Includes warm-up and cool-down.">
+        <ChoiceSection
+          title="Time"
+          headingVariant="micro"
+          footerNote="Includes warm-up and cool-down."
+        >
           {/* 2026-04-21 partner-walkthrough P1-10: Seb expected 15 min to
             mean 15 min of main/technique work, not "total session
             including warm-up and cool-down." Clarifier lives in the
@@ -404,7 +446,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
           />
         </ChoiceSection>
 
-        <ChoiceSection title="Focus">
+        <ChoiceSection title="Focus" headingVariant="micro">
           <ChoiceRow<SetupFocus>
             value={sessionFocus}
             onChange={setSessionFocus}

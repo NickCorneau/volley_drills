@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -92,7 +92,10 @@ describe('SetupScreen (C-3)', () => {
       screen.getByRole('heading', { level: 3, name: /wall or fence nearby/i }),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /build session/i })).toBeDisabled()
-    expect(screen.getByText('Choose wall or fence availability to build.')).toBeInTheDocument()
+    // D158 (setup-01 frame 06): the incomplete hint renders twice on
+    // purpose — once in the focal slot at the top of the cluster, once
+    // in the footer next to the disabled Build button.
+    expect(screen.getAllByText('Choose wall or fence availability to build.')).toHaveLength(2)
     expect(screen.queryByRole('radiogroup', { name: 'Wind' })).not.toBeInTheDocument()
     await user.click(
       within(screen.getByRole('radiogroup', { name: /wall or fence nearby/i })).getByRole('radio', {
@@ -389,9 +392,10 @@ describe('SetupScreen (C-3)', () => {
         }),
       )
 
-      // Build is disabled and the incomplete hint shows the wall ask.
+      // Build is disabled and the incomplete hint shows the wall ask
+      // (focal slot + footer per D158 frame 06).
       expect(screen.getByRole('button', { name: /build session/i })).toBeDisabled()
-      expect(screen.getByText(/wall or fence availability/i)).toBeInTheDocument()
+      expect(screen.getAllByText(/wall or fence availability/i).length).toBeGreaterThan(0)
       // Duration preview is not rendered while Setup is incomplete.
       expect(screen.queryByTestId('setup-assembled-duration')).not.toBeInTheDocument()
     })
@@ -700,6 +704,90 @@ describe('SetupScreen (C-3)', () => {
     expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
     const draft = await db.sessionDrafts.get('current')
     expect(draft?.context.sessionFocus).toBe('pass')
+  })
+
+  /**
+   * D158 (2026-06-12 shibui comp review, setup-01 frame):
+   * recommendation-first restructure. A focal resolved line tops the
+   * refine cluster ("Solo + Net · 14 min · Recommended focus"); its
+   * minute segment always reads the *assembled preview total* — the
+   * same number the footer Callout reports — so the screen's two
+   * duration statements can never disagree (duration-honesty R4).
+   * While Setup is incomplete the slot carries the existing hint copy
+   * in quiet secondary voice instead of a fabricated summary.
+   */
+  describe('D158 setup-01 focal resolved line', () => {
+    beforeEach(async () => {
+      await db.storageMeta.put({
+        key: 'onboarding.completedAt',
+        value: 1_700_000_000_000,
+        updatedAt: 1_700_000_000_000,
+      })
+    })
+
+    it('renders archetype + assembled minutes + focus, agreeing with the footer Callout', async () => {
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      const line = await screen.findByTestId('setup-resolved-line')
+      expect(line.textContent).toMatch(/^Solo \+ Net · \d+ min · Recommended focus$/)
+
+      const lineMinutes = line.textContent?.match(/· (\d+) min ·/)?.[1]
+      const callout = await screen.findByTestId('setup-assembled-duration')
+      const calloutMinutes = callout.textContent?.match(/about (\d+) min/)?.[1]
+      expect(lineMinutes).toBeDefined()
+      expect(lineMinutes).toBe(calloutMinutes)
+    })
+
+    it('tracks an explicit focus chip in the resolved line', async () => {
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      await screen.findByTestId('setup-resolved-line')
+      await user.click(
+        within(screen.getByRole('radiogroup', { name: 'Focus' })).getByRole('radio', {
+          name: 'Passing',
+        }),
+      )
+
+      await waitFor(() => {
+        expect(screen.getByTestId('setup-resolved-line').textContent).toMatch(/Passing focus$/)
+      })
+    })
+
+    it('renders the quiet hint placeholder in the focal slot while Setup is incomplete', async () => {
+      const user = userEvent.setup()
+      render(
+        <MemoryRouter initialEntries={['/setup']}>
+          <Routes>
+            <Route path="/setup" element={<SetupScreen />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+
+      await user.click(await screen.findByRole('radio', { name: 'Solo' }))
+      await user.click(
+        within(screen.getByRole('radiogroup', { name: 'Net available' })).getByRole('radio', {
+          name: 'No',
+        }),
+      )
+
+      expect(screen.queryByTestId('setup-resolved-line')).not.toBeInTheDocument()
+      expect(screen.getByTestId('setup-resolved-line-placeholder').textContent).toBe(
+        'Choose wall or fence availability to build.',
+      )
+    })
   })
 
   /**

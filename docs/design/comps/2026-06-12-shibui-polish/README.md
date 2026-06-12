@@ -112,3 +112,7 @@ What removal gives up (for the decision record): one-tap verbatim repeat with th
 ## What Approval Unlocks
 
 Founder approval of a variant per question above unlocks the follow-up implementation plans: S1 Setup restructure code (R4–R6) and S5 Home relocation code (R1–R3, carrying origin R11 — the Home covenant "Deferred for later" amendment — and the D152 decision-row update).
+
+## Implementation Status (2026-06-12)
+
+Both ratified frames shipped same day under `D158`: the Home v2-04 card + repeat-machinery removal landed first (commit `eae68ae`), then the Setup `setup-01` restructure (focal resolved line, `ChoiceSection`/`ChoiceSubsection` `headingVariant="micro"`, `cockpit` body rhythm). Canon lives in `docs/decisions.md` `D158` and `docs/research/brand-ux-guidelines.md` §1.4 / §7.1 / §7.3; this folder stays frozen comp provenance.

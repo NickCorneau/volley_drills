@@ -125,7 +125,10 @@ Exceptions:
 - Single-word imperative buttons are ambiguous and read the same either way: `Done`, `Pause`, `Next`, `Resume`, `Yes`, `No`. Prefer the single-case form.
 - Drill names, plan names, and player-mode labels (`Solo + Net`, `One-Arm Passing Drill`) are content-level names and may use their own capitalization conventions.
 
-Upper-case letter-tracked "dashboard eyebrow" labels (`UPPERCASE tracking-wider`) are **not allowed** as a design pattern. The one legitimate uppercase-tracked surface is the `BlockTimer` `PAUSED` state indicator, which is a transient state marker attached to the live timer, not a content eyebrow.
+Upper-case letter-tracked "dashboard eyebrow" labels (`UPPERCASE tracking-wider`) are **not allowed** as a general design pattern. Two sanctioned surfaces exist:
+
+- The `BlockTimer` `PAUSED` state indicator — a transient state marker attached to the live timer, not a content eyebrow.
+- The `D158` (2026-06-12 shibui comp review) **quiet micro-label** vocabulary: the Home focal-card `Recommended` eyebrow and the Setup refine-cluster section labels (`ChoiceSection`/`ChoiceSubsection` `headingVariant="micro"`). These are always `text-xs font-medium uppercase tracking-wider text-text-secondary` — secondary ink, never accent, never a state indicator. The markup stays sentence case (`Players`, `Recommended`); uppercase is CSS-only, so accessible names are unaffected. Both surfaces are pinned in `app/scripts/validate-typography-guardrails.mjs`; extending the vocabulary to a new surface means adding an allowlist entry with a decision-row rationale, not relaxing the rule.
 
 ### 1.5 Typography pass lanes
 
@@ -317,7 +320,7 @@ Keep these compact. Keep meta lines to at most three `·`-separated segments (sh
 |--------|-----------|
 | Home | Primary card (variant-selected by precedence; one scheduled-tenancy exception per the §7.1 Home covenant, `D156`) |
 | Onboarding — Skill level | The four option cards as a grouped list |
-| Onboarding — Today's setup | The chip grid resolving to `Build session` |
+| Onboarding — Today's setup | The focal resolved line (`D158`) over the chip cluster, resolving to `Build session` |
 | Safety | The two gate questions + their selected state |
 | Run | The timer (live) or the drill title (between blocks) |
 | Transition | The "Up next" drill title + `Start next block` CTA |
@@ -481,7 +484,9 @@ Home's identity, in the founder's words: **calmly and obviously start the next s
 - **Centered** `← Back` button (left) + centered h1 (`text-xl font-semibold tracking-tight`). Pre-2026-05-25 canon claimed `text-xl font-bold tracking-tight`; shipped is `text-xl font-semibold` across all prep screens (`SetupScreen`, `SafetyCheckScreen`, `SettingsScreen`, `SettingsSkillLevelScreen`) and the onboarding `SkillLevelScreen`, matching the calmer register the U8 reconciliation already established elsewhere (residuals polish plan C1 / `D145`).
 - On Safety: **no** session-summary meta line under the h1. Pre-2026-05-25 canon described an amber `text-sm font-medium` orientation line here, but Safety deliberately does **not** echo the draft or focus — pinned by the `does not echo the draft or focus in the default safety header` test in `SafetyCheckScreen.test.tsx` (the only time focus is mentioned is when pain-recovery overrides an explicit focus). Safety stays a pure readiness gate; the draft summary already lives on the Home Draft card. Audit follow-up plan U8 (see `docs/design/reviews/2026-05-24-agent-e2e-design-critique.md`).
 - On Safety: a fail-quiet gating hint (`text-sm text-text-secondary`, `aria-live="polite"`) renders above the disabled `Start session` button explaining what's still unanswered (§6.4), mirroring the Review / Drill Check `missingHint` voice. The `2+ days` branch gets its own message because tapping it reveals a required "how long off?" sub-row.
-- Section h2s: `text-base font-semibold`.
+- **Setup is recommendation-first (`D158`, 2026-06-12 shibui comp review, `setup-01` frame).** A focal resolved line tops the body — `{archetype} · {assembled min} min · {focus} focus` in `text-lg font-semibold leading-snug` (e.g. `Pair + Net · 38 min · Recommended focus`; two-line wrap accepted). The minute segment always reads the **assembled preview total** — the same number the footer Callout reports — never the named Time-chip profile, so the screen's two duration statements cannot disagree (duration-honesty R4). While Setup is incomplete the slot carries the existing `Choose … to build.` hint in quiet secondary voice (`text-sm text-text-secondary`); the footer hint by the disabled Build button stays too (both shown in the approved frame 06).
+- Section h2s: **Setup** uses the `D158` quiet uppercase micro-labels (`ChoiceSection` `headingVariant="micro"`, §1.4) so the chip sections recede behind the focal line; the wall `ChoiceSubsection` follows. **Safety** keeps `text-base font-semibold` — its titles are full questions, and the questions ARE that screen's focal zone.
+- Setup body runs the `cockpit` rhythm (`gap-4`) — the refine cluster reads as one dense glanceable unit under the focal line; Safety keeps `calm` (`gap-6`).
 - Binary/trinary chip rows for inputs.
 - One primary CTA; one tertiary "Back"-ish escape.
 
