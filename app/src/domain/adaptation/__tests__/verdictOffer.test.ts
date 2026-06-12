@@ -1,4 +1,5 @@
 import { buildVerdictReplayInput, computeVerdictOffer } from '../verdictOffer'
+import { stressLadderBounds } from '../../../data/stressLadders'
 import type { DifficultyTag, SessionReview } from '../../../model'
 
 function review(opts: {
@@ -87,5 +88,92 @@ describe('computeVerdictOffer', () => {
   it('returns keep when there is no sustained prior trend', () => {
     const reviews = [review({ execId: 'a', submittedAt: 100, passTags: ['too_hard'] })]
     expect(computeVerdictOffer(reviews, 'pass', 'current').direction).toBe('keep')
+  })
+})
+
+/**
+ * Trust-loop U2 — position-aware offer gating (R15/KTD4). No delta is
+ * offered whose acceptance cannot move the position at a ladder bound.
+ */
+describe('computeVerdictOffer position gating (R15)', () => {
+  const positions = (overrides: Partial<Record<'pass' | 'serve' | 'set', number>>) => ({
+    pass: 3,
+    serve: 3,
+    set: 3,
+    ...overrides,
+  })
+
+  function serveReview(opts: { execId: string; submittedAt: number; tags: DifficultyTag[] }) {
+    return {
+      ...review({ execId: opts.execId, submittedAt: opts.submittedAt }),
+      perDrillCaptures: opts.tags.map((tag, i) => ({
+        drillId: 'd31', // serve focus
+        variantId: 'd31-solo-open',
+        blockIndex: i,
+        difficulty: tag,
+        capturedAt: opts.submittedAt,
+      })),
+    }
+  }
+
+  it('AE7: beginner at the pass ladder floor with a too-hard trend gets no "less" offer', () => {
+    const reviews = [
+      review({ execId: 'a', submittedAt: 100, passTags: ['too_hard', 'too_hard'] }),
+      review({ execId: 'b', submittedAt: 200, passTags: ['too_hard', 'too_hard'] }),
+    ]
+    const gated = computeVerdictOffer(reviews, 'pass', 'current', positions({ pass: 1 }))
+    expect(gated.direction).toBe('keep')
+  })
+
+  it('AE7: advanced at the serve ladder top with a too-easy trend gets no "more" offer', () => {
+    const reviews = [
+      serveReview({ execId: 'a', submittedAt: 100, tags: ['too_easy', 'too_easy'] }),
+      serveReview({ execId: 'b', submittedAt: 200, tags: ['too_easy', 'too_easy'] }),
+    ]
+    const top = stressLadderBounds('serve').max
+    const gated = computeVerdictOffer(reviews, 'serve', 'current', positions({ serve: top }))
+    expect(gated.direction).toBe('keep')
+  })
+
+  it('mid-ladder trends keep their offers unchanged from today', () => {
+    const reviews = [
+      review({ execId: 'a', submittedAt: 100, passTags: ['too_hard', 'too_hard'] }),
+      review({ execId: 'b', submittedAt: 200, passTags: ['too_hard', 'too_hard'] }),
+    ]
+    expect(computeVerdictOffer(reviews, 'pass', 'current', positions({ pass: 3 }))).toEqual({
+      kind: 'stress',
+      focus: 'pass',
+      direction: 'less',
+    })
+  })
+
+  it('omitted positions keep the legacy ungated read', () => {
+    const reviews = [
+      review({ execId: 'a', submittedAt: 100, passTags: ['too_hard', 'too_hard'] }),
+      review({ execId: 'b', submittedAt: 200, passTags: ['too_hard', 'too_hard'] }),
+    ]
+    expect(computeVerdictOffer(reviews, 'pass', 'current').direction).toBe('less')
+  })
+
+  it('gating composes with hysteresis: a gated direction does not poison later offers the other way', () => {
+    // Floor-gated 'less' is never offered, so no declined verdict is
+    // persisted for it — a later too-easy trend must still offer 'more'
+    // (F13 suppression keys on persisted priorVerdict only).
+    const hardTrend = [
+      review({ execId: 'a', submittedAt: 100, passTags: ['too_hard', 'too_hard'] }),
+      review({ execId: 'b', submittedAt: 200, passTags: ['too_hard', 'too_hard'] }),
+    ]
+    expect(computeVerdictOffer(hardTrend, 'pass', 'current', positions({ pass: 1 })).direction).toBe(
+      'keep',
+    )
+
+    const laterEasyTrend = [
+      ...hardTrend,
+      review({ execId: 'c', submittedAt: 300, passTags: ['too_easy', 'too_easy'] }),
+      review({ execId: 'd', submittedAt: 400, passTags: ['too_easy', 'too_easy'] }),
+    ]
+    expect(
+      computeVerdictOffer(laterEasyTrend, 'pass', 'current', positions({ pass: 1 })).direction,
+    ).toBe('more')
   })
 })

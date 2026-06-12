@@ -13,6 +13,7 @@ import type { AdaptationDelta, SessionReview } from '../../model'
 import { eligibleTrainingSessions, type ScopedFocus } from '../eligibleSessions'
 import { focusForDrillId } from '../sessionFocus'
 import { replayAdaptation, type ReplayInput } from './replayAdaptation'
+import { directionCanMovePosition, type StressPositions } from './stressPosition'
 
 export function buildVerdictReplayInput(
   reviews: readonly SessionReview[],
@@ -46,10 +47,28 @@ export function buildVerdictReplayInput(
   return { currentFocus, recentTagsForFocus, recentRpe, priorVerdict }
 }
 
+/**
+ * Position-aware offer gating (trust-loop R15/KTD4): after replay, a
+ * direction that cannot move the position at the focus's ladder bound
+ * degrades to `keep` — acceptance of such an offer would be a no-op
+ * the carry-forward line then misreports as steering (R11). The gate
+ * sits at this seam, after `replayAdaptation`, so the hysteresis and
+ * declined-re-offer rules inside replay stay untouched. `positions` is
+ * optional so pure-replay callers (tests, diagnostics) keep the
+ * ungated read; the service seam always supplies it.
+ */
 export function computeVerdictOffer(
   reviews: readonly SessionReview[],
   currentFocus: ScopedFocus,
   excludeExecutionLogId: string,
+  positions?: StressPositions,
 ): AdaptationDelta {
-  return replayAdaptation(buildVerdictReplayInput(reviews, currentFocus, excludeExecutionLogId))
+  const offer = replayAdaptation(
+    buildVerdictReplayInput(reviews, currentFocus, excludeExecutionLogId),
+  )
+  if (positions === undefined || offer.direction === 'keep') return offer
+  if (directionCanMovePosition(currentFocus, positions[currentFocus], offer.direction)) {
+    return offer
+  }
+  return { kind: 'stress', focus: currentFocus, direction: 'keep' }
 }

@@ -111,6 +111,16 @@ function renderAt(execId: string) {
 describe('ReviewScreen verdict (M002.1 R5)', () => {
   beforeEach(async () => {
     await clearDb()
+    // Trust-loop U2 re-seed: two too-hard pass sessions with no skill
+    // level is exactly the AE7 ladder-floor fixture (beginner pass
+    // starts at rung 1, so a 'less' offer is gated to keep). Persist an
+    // intermediate-band skill level so pass starts at rung 2 and the
+    // 'less' offer stays movable.
+    await db.storageMeta.put({
+      key: 'onboarding.skillLevel',
+      value: 'rally_builders',
+      updatedAt: Date.now(),
+    })
   })
 
   it('offers the verdict with keep-original pre-selected, and persists "accepted" on submit', async () => {

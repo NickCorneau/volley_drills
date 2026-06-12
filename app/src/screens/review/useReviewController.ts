@@ -126,7 +126,7 @@ export function useReviewController(executionLogId: string) {
         const focus = result.plan ? inferSessionFocus(result.plan.blocks) : 'partial'
         if (isScopedFocus(focus)) {
           try {
-            const offer = await loadVerdictOffer(focus, executionLogId)
+            const { offer } = await loadVerdictOffer(focus, executionLogId)
             if (!cancelled && offer.direction !== 'keep') setOfferedDelta(offer)
           } catch (offerErr) {
             if (!isSchemaBlocked()) {

@@ -17,7 +17,7 @@
  * Pure domain: imports only model + data + sibling domain, mirroring
  * `verdictOffer.ts`.
  */
-import type { PlayerLevel, SessionReview } from '../../model'
+import type { PlayerLevel, SessionReview, StressDirection } from '../../model'
 import { startingStressRung, stressLadderBounds } from '../../data/stressLadders'
 import { isScopedFocus, SCOPED_FOCUSES, type ScopedFocus } from '../eligibleSessions'
 
@@ -58,4 +58,81 @@ export function deriveStressPositions(
   }
 
   return positions
+}
+
+/**
+ * Positions as they stood at time `t`: the same fold, restricted to
+ * reviews submitted at or before `t`. Serves the trust-loop repeat-
+ * drift comparison (position at the repeated plan's `createdAt` vs
+ * now, R8) and any other point-in-time read.
+ */
+export function deriveStressPositionsAt(
+  reviews: readonly SessionReview[],
+  t: number,
+  band: PlayerLevel = 'beginner',
+): StressPositions {
+  return deriveStressPositions(
+    reviews.filter((review) => review.submittedAt <= t),
+    band,
+  )
+}
+
+/**
+ * True when stepping one rung in `direction` from `position` actually
+ * changes it — false at the ladder bound (and always false for
+ * `keep`). The trust-loop offer gate (R15): no delta is offered whose
+ * acceptance cannot move the position.
+ */
+export function directionCanMovePosition(
+  focus: ScopedFocus,
+  position: number,
+  direction: StressDirection,
+): boolean {
+  if (direction === 'keep') return false
+  const { min, max } = stressLadderBounds(focus)
+  return direction === 'more' ? position < max : position > min
+}
+
+/**
+ * The clamped position one rung in `direction` — the prospective
+ * position an accepted delta would steer toward. Feeds the Review
+ * accept-consequence exemplar (U3).
+ */
+export function prospectiveStressPosition(
+  focus: ScopedFocus,
+  position: number,
+  direction: StressDirection,
+): number {
+  if (direction === 'keep') return position
+  const { min, max } = stressLadderBounds(focus)
+  const step = direction === 'more' ? 1 : -1
+  return clamp(position + step, min, max)
+}
+
+/**
+ * Did this accepted review actually move its focus position at its
+ * point in the fold? Fold-compare: positions over the prefix up to and
+ * including the review vs the same prefix without it. A clamped accept
+ * (accepted at a ladder bound, pre-gating historical records) reports
+ * `false` — movement-based derivations stay quiet rather than
+ * rendering false steering lines (R11). Reviews submitted after this
+ * one cannot affect the answer.
+ */
+export function acceptedReviewMovedPosition(
+  reviews: readonly SessionReview[],
+  review: SessionReview,
+  band: PlayerLevel = 'beginner',
+): boolean {
+  const delta = review.offeredDelta
+  if (!delta || review.verdictChoice !== 'accepted') return false
+  if (delta.kind !== 'stress' || delta.direction === 'keep') return false
+  if (!isScopedFocus(delta.focus)) return false
+
+  const prefix = reviews.filter((r) => r.submittedAt <= review.submittedAt)
+  const withReview = deriveStressPositions(prefix, band)
+  const withoutReview = deriveStressPositions(
+    prefix.filter((r) => r.id !== review.id),
+    band,
+  )
+  return withReview[delta.focus] !== withoutReview[delta.focus]
 }

@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type { AdaptationDelta, SessionReview, VerdictChoice } from '../../../model'
 import { stressLadderBounds } from '../../../data/stressLadders'
-import { deriveStressPositions } from '../stressPosition'
+import {
+  acceptedReviewMovedPosition,
+  deriveStressPositions,
+  deriveStressPositionsAt,
+  directionCanMovePosition,
+  prospectiveStressPosition,
+} from '../stressPosition'
 
 let reviewCounter = 0
 
@@ -133,5 +139,87 @@ describe('deriveStressPositions', () => {
       'beginner',
     )
     expect(positions.pass).toBe(2)
+  })
+})
+
+/** Trust-loop U2 helpers (2026-06-11 plan): point-in-time, gating, movement. */
+describe('deriveStressPositionsAt', () => {
+  it('excludes reviews submitted after t from the fold', () => {
+    const reviews = [
+      verdictReview('pass', 'more', 'accepted', 1000),
+      verdictReview('pass', 'more', 'accepted', 5000),
+    ]
+    expect(deriveStressPositionsAt(reviews, 2000, 'beginner').pass).toBe(2)
+    expect(deriveStressPositionsAt(reviews, 5000, 'beginner').pass).toBe(3)
+    expect(deriveStressPositionsAt(reviews, 500, 'beginner').pass).toBe(1)
+  })
+})
+
+describe('directionCanMovePosition (R15 gate predicate)', () => {
+  it('blocks "less" at the ladder floor and "more" at the top', () => {
+    const { min, max } = stressLadderBounds('serve')
+    expect(directionCanMovePosition('serve', min, 'less')).toBe(false)
+    expect(directionCanMovePosition('serve', max, 'more')).toBe(false)
+  })
+
+  it('allows movable directions mid-ladder and at the opposite bound', () => {
+    const { min, max } = stressLadderBounds('serve')
+    expect(directionCanMovePosition('serve', min, 'more')).toBe(true)
+    expect(directionCanMovePosition('serve', max, 'less')).toBe(true)
+    expect(directionCanMovePosition('pass', 3, 'more')).toBe(true)
+    expect(directionCanMovePosition('pass', 3, 'less')).toBe(true)
+  })
+
+  it('keep can never move', () => {
+    expect(directionCanMovePosition('pass', 3, 'keep')).toBe(false)
+  })
+})
+
+describe('prospectiveStressPosition', () => {
+  it('steps one rung in the direction, clamped to the ladder bounds', () => {
+    expect(prospectiveStressPosition('pass', 1, 'more')).toBe(2)
+    expect(prospectiveStressPosition('pass', 2, 'less')).toBe(1)
+    expect(prospectiveStressPosition('pass', 1, 'less')).toBe(1)
+    const { max } = stressLadderBounds('set')
+    expect(prospectiveStressPosition('set', max, 'more')).toBe(max)
+    expect(prospectiveStressPosition('set', 3, 'keep')).toBe(3)
+  })
+})
+
+describe('acceptedReviewMovedPosition (movement detection)', () => {
+  it('a mid-ladder accept reports movement', () => {
+    const accept = verdictReview('pass', 'more', 'accepted', 1000)
+    expect(acceptedReviewMovedPosition([accept], accept, 'beginner')).toBe(true)
+  })
+
+  it('a historical clamped accept reports no movement', () => {
+    // Beginner pass starts at rung 1; an accepted 'less' was clamped —
+    // exactly the pre-gating record that must never arm a steering line.
+    const clamped = verdictReview('pass', 'less', 'accepted', 1000)
+    expect(acceptedReviewMovedPosition([clamped], clamped, 'beginner')).toBe(false)
+  })
+
+  it('band-dependence: the same accept can be clamped in one band and movable in another', () => {
+    // Intermediate pass starts at rung 2, so the 'less' accept moves
+    // (2 → 1) — the beginner default would mask exactly this case.
+    const accept = verdictReview('pass', 'less', 'accepted', 1000)
+    expect(acceptedReviewMovedPosition([accept], accept, 'intermediate')).toBe(true)
+    expect(acceptedReviewMovedPosition([accept], accept, 'beginner')).toBe(false)
+  })
+
+  it('later reviews do not affect whether an earlier accept moved', () => {
+    const first = verdictReview('pass', 'more', 'accepted', 1000)
+    const later = verdictReview('pass', 'less', 'accepted', 2000)
+    expect(acceptedReviewMovedPosition([first, later], first, 'beginner')).toBe(true)
+  })
+
+  it('kept-original, keep-direction, and non-scoped rows report no movement', () => {
+    const kept = verdictReview('pass', 'more', 'kept_original', 1000)
+    const keep = verdictReview('pass', 'keep', 'accepted', 2000)
+    const nonScoped = verdictReview('movement', 'more', 'accepted', 3000)
+    const all = [kept, keep, nonScoped]
+    expect(acceptedReviewMovedPosition(all, kept, 'beginner')).toBe(false)
+    expect(acceptedReviewMovedPosition(all, keep, 'beginner')).toBe(false)
+    expect(acceptedReviewMovedPosition(all, nonScoped, 'beginner')).toBe(false)
   })
 })
