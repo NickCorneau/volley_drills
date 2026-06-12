@@ -290,7 +290,7 @@ The one-liner that orients the user on Safety, Home-review-pending, and Complete
 - Complete reason: `Session {n}. One more in the book. Ready when you are.`
 - Home last-complete: `{planMinutes} min · {daysAgo}` (with `· ended early` appended if relevant)
 
-Keep these compact. One middle dot separator max per meta line.
+Keep these compact. Keep meta lines to at most three `·`-separated segments (shipped reality since the v0b meta lines; reconciled 2026-06-12 per the shibui polish pass R10).
 
 ### 3.5 Numeric formatting
 
