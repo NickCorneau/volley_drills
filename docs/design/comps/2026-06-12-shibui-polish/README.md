@@ -11,7 +11,7 @@ depends_on:
   - docs/brainstorms/2026-06-11-shibui-empty-space-polish-requirements.md
   - docs/plans/2026-06-12-002-feat-shibui-empty-space-polish-plan.md
   - docs/research/brand-ux-guidelines.md
-  - docs/design/outdoor-courtside-ui-brief.md
+  - docs/research/outdoor-courtside-ui-brief.md
 ---
 
 # Shibui Polish Comp Set (2026-06-12)
