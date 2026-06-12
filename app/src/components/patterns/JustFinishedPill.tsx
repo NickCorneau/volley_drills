@@ -1,8 +1,19 @@
 export type JustFinishedStatus = 'completed' | 'skipped'
 
+export type JustFinishedPresentation = 'panel' | 'line'
+
 export type JustFinishedPillProps = {
   drillName: string
   status: JustFinishedStatus
+  /**
+   * `panel` (default) is the original warm panel + success-circle pill —
+   * Drill check keeps it because there the just-finished drill is the
+   * subject of the screen. `line` is the 2026-06-12 shibui-polish quiet
+   * receipt for Transition (origin R7): one `text-sm text-text-secondary`
+   * line with a small success-tone glyph, no panel fill, no semibold —
+   * so `Up next` keeps the screen's focal weight.
+   */
+  presentation?: JustFinishedPresentation
 }
 
 function CheckGlyph() {
@@ -54,9 +65,28 @@ const STATUS_LABEL: Record<JustFinishedStatus, string> = {
  *
  * The success tone applies to BOTH variants — `Skipped` reads as a quiet
  * acknowledgement that the user moved on, not as a warning. The dash vs
- * check glyph carries the variant signal.
+ * check glyph carries the variant signal — on the `line` presentation it is
+ * the ONLY variant signal, so both glyphs render at the same size and tone
+ * (a skipped drill must be as legible as a completed one, origin R7).
  */
-export function JustFinishedPill({ drillName, status }: JustFinishedPillProps) {
+export function JustFinishedPill({
+  drillName,
+  status,
+  presentation = 'panel',
+}: JustFinishedPillProps) {
+  if (presentation === 'line') {
+    return (
+      <p className="flex items-center gap-2 text-sm text-text-secondary">
+        <span className="shrink-0 text-success">
+          {status === 'completed' ? <CheckGlyph /> : <DashGlyph />}
+        </span>
+        <span>
+          {drillName} · {STATUS_LABEL[status]}
+        </span>
+      </p>
+    )
+  }
+
   return (
     <div className="flex items-start gap-2.5 rounded-base bg-bg-warm p-3">
       <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success text-white">

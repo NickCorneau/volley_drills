@@ -123,10 +123,17 @@ export function TransitionScreen() {
       />
 
       <ScreenShell.Body rhythm="cockpit">
+        {/*
+         * Shibui polish 2026-06-12 (origin R7): the receipt is one quiet
+         * line so `Up next` keeps the focal weight on this screen. Drill
+         * check keeps the fuller panel pill — there the just-finished
+         * drill is the subject.
+         */}
         {prevBlock && (
           <JustFinishedPill
             drillName={prevBlock.drillName}
             status={prevBlockStatus?.status === 'completed' ? 'completed' : 'skipped'}
+            presentation="line"
           />
         )}
 
