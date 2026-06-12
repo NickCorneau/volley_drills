@@ -1,8 +1,11 @@
 /**
  * Progression chains - ordered drill graphs. LIVE ROLE: swap-hint
- * preference (`swapAlternatives` prefers same-chain drills) and
- * authoring metadata (chain orderings informed the D154 stress-ladder
- * placements; `drill_chain_membership_missing` validates membership).
+ * preference (`swapAlternatives` promotes the progression-link target
+ * via `findPreferredProgressionTarget`, reading `chain.links`; the
+ * substitution rules are its fallback) and authoring metadata (chain
+ * orderings informed the D154 stress-ladder placements; `drillIds`
+ * membership is validated by `drill_chain_membership_missing` but is
+ * not read at assembly or swap time).
  *
  * GATING IS RETIRED (D154): the pass/fail promotion philosophy below
  * was never wired into assembly and the stress substrate replaced it —
