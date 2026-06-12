@@ -28,6 +28,8 @@ Record the current generated-plan diagnostic snapshot for the Setup inline-focus
 - Observation-only cells: 375
 - Hard-failure cells: 0
 - Routeable observation groups: 50
+- Steered sweep cells (U7): 135
+- Steered sweep hard failures: 0
 
 ## Interpretation
 
@@ -437,6 +439,56 @@ The committed report intentionally keeps top routeable groups plus examples only
       ]
     }
   ],
+  "steered_sweep": {
+    "source_helper": "summarizeSteeredGeneratedPlanDiagnostics(buildSteeredGeneratedPlanDiagnostics())",
+    "surface": {
+      "focuses": [
+        "pass",
+        "serve",
+        "set"
+      ],
+      "configurations": [
+        "solo_net",
+        "solo_wall",
+        "solo_open",
+        "pair_net",
+        "pair_open"
+      ],
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "durations": [
+        25
+      ],
+      "seed_ids": [
+        "matrix-a"
+      ],
+      "position_roles": [
+        "ladder_min",
+        "band_start",
+        "ladder_max"
+      ],
+      "cell_count": 135,
+      "degenerate_band_start_cell_count": 20
+    },
+    "status_counts": {
+      "clean": 93,
+      "observation_only": 42,
+      "hard_failure": 0
+    },
+    "hard_failure_count": 0,
+    "observation_count": 86,
+    "hard_failure_counts": {},
+    "observation_counts": {
+      "slot_dropped": 18,
+      "under_named_profile_duration": 19,
+      "over_authored_max": 9,
+      "over_fatigue_cap": 9,
+      "under_authored_min": 31
+    }
+  },
   "redistribution_causality_receipt": {
     "comparison_mode": "allocated_duration_counterfactual",
     "runtime_boundary": "retired_by_duration_honesty_v8: redistributedMinutes is no longer a runtime mechanism; see docs/plans/2026-05-24-001-feat-session-duration-honesty-plan.md",

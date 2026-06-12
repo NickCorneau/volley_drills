@@ -1,5 +1,10 @@
 import { DRILLS } from '../data/drills'
 import { selectArchetype } from '../data/archetypes'
+import {
+  startingStressRung,
+  stressLadderBounds,
+  stressRungForDrill,
+} from '../data/stressLadders'
 import type { BlockSlot, BlockSlotType, PlayerLevel, SessionDraft, SetupContext, TimeProfile } from '../model'
 import { buildDraftWithAssemblyTrace } from './sessionBuilder'
 import type { DraftAssemblyTrace, DraftAssemblyTraceSlot } from './sessionBuilder'
@@ -29,6 +34,16 @@ export type GeneratedPlanHardFailureCode =
   | 'off_focus_controlled_work'
   | 'unclassified_stretch_pressure'
   | 'assembly_trace_mismatch'
+  // U7 (D159, R6) — steered-sweep-only codes, keyed on the U6
+  // selection-path trace marker:
+  //   - `steering_violation`: a steered main-skill slot has no marker,
+  //     a `rung_nearest` marker whose selected drill is not
+  //     nearest-eligible, or a `steeredFocus` stamp the realized rungs
+  //     do not support.
+  //   - `steered_focus_missing`: every realized main-skill rung equals
+  //     the steer target but the draft carries no `steeredFocus`.
+  | 'steering_violation'
+  | 'steered_focus_missing'
 
 export type GeneratedPlanObservationCode =
   | 'under_authored_min'
@@ -63,6 +78,10 @@ export type GeneratedPlanSurfaceContractDimension =
   | 'duration'
   | 'seed'
   | 'theme'
+  // U7: the steered sweep's position-role dimension. Only the steered
+  // surface contract emits issues on it; the 540-cell contract never
+  // uses it.
+  | 'position'
 
 export type GeneratedPlanSurfaceContractState =
   | 'pre_activation_deferred'
@@ -294,8 +313,15 @@ export const DEFAULT_GENERATED_PLAN_SURFACE: GeneratedPlanSupportedSurface =
 
 const PLACEHOLDER_SURFACE_REASONS = new Set(['unsupported', 'n/a', 'na', 'todo', 'tbd'])
 
+/**
+ * The non-theme dimensions of the 540-cell default sweep. `position`
+ * belongs only to the U7 steered sweep and is deliberately excluded —
+ * the default contract and baseline stay untouched (KTD).
+ */
+type DefaultSurfaceDimension = Exclude<GeneratedPlanSurfaceContractDimension, 'theme' | 'position'>
+
 const REQUIRED_GENERATED_PLAN_SURFACE_BASELINE: Record<
-  Exclude<GeneratedPlanSurfaceContractDimension, 'theme'>,
+  DefaultSurfaceDimension,
   readonly string[]
 > = {
   focus: ['pass', 'serve', 'set'],
@@ -306,7 +332,7 @@ const REQUIRED_GENERATED_PLAN_SURFACE_BASELINE: Record<
 } as const
 
 function surfaceValues(surface: GeneratedPlanSupportedSurface): Record<
-  Exclude<GeneratedPlanSurfaceContractDimension, 'theme'>,
+  DefaultSurfaceDimension,
   readonly string[]
 > {
   return {
@@ -319,7 +345,7 @@ function surfaceValues(surface: GeneratedPlanSupportedSurface): Record<
 }
 
 function canonicalSurfaceValues(): Record<
-  Exclude<GeneratedPlanSurfaceContractDimension, 'theme'>,
+  DefaultSurfaceDimension,
   readonly string[]
 > {
   return {
@@ -365,7 +391,7 @@ export function validateGeneratedPlanSurfaceContract(
   const baselineValues = REQUIRED_GENERATED_PLAN_SURFACE_BASELINE
 
   for (const [dimension, values] of Object.entries(includedValues) as Array<
-    [Exclude<GeneratedPlanSurfaceContractDimension, 'theme'>, readonly string[]]
+    [DefaultSurfaceDimension, readonly string[]]
   >) {
     if (values.length === 0) {
       issues.push(
@@ -460,7 +486,7 @@ export function validateGeneratedPlanSurfaceContract(
     }
     excludedKeys.add(key)
 
-    if (entry.dimension !== 'theme') {
+    if (entry.dimension !== 'theme' && entry.dimension !== 'position') {
       const dimension = entry.dimension
       const includedValueSet = new Set(includedValues[dimension])
       const canonicalValueSet = new Set(canonicalValues[dimension])
@@ -1200,6 +1226,479 @@ export function buildGeneratedPlanDiagnostics(
     }
     return evaluateGeneratedPlanDiagnosticCell(cell, configuration)
   })
+}
+
+// ---------------------------------------------------------------------------
+// U7 (D159, R6): the steered sweep.
+//
+// The 540-cell default sweep exercises assembly exactly as Setup invoked
+// it BEFORE D154 — no stress positions — so the steered path (the path
+// every live caller now takes) had no regression surface. The steered
+// sweep is a separate bounded scenario set: 3 scoped focuses × 5
+// readiness configurations × 3 levels × the 25-min profile × seed
+// `matrix-a` × 3 position roles = 135 nominal cells. Position roles
+// resolve per (focus, level) — `ladder_min`, `band_start`
+// (`startingStressRung`), `ladder_max` — and may degenerately coincide
+// (e.g. beginner band start IS the ladder min); the role stays the
+// dimension so the cell count is stable and the overlap is visible in
+// the resolved `position` value rather than collapsing the matrix.
+//
+// Hard-failure checks are keyed on the U6 selection-path trace marker,
+// so the checker never re-implements `pickForSlot`'s duration policy:
+// `duration_fit`, `reroute`, and `substitution` markers are legitimate
+// non-violations by construction.
+// ---------------------------------------------------------------------------
+
+export type SteeredGeneratedPlanPositionRole = 'ladder_min' | 'band_start' | 'ladder_max'
+
+export const STEERED_GENERATED_PLAN_POSITION_ROLES: readonly SteeredGeneratedPlanPositionRole[] = [
+  'ladder_min',
+  'band_start',
+  'ladder_max',
+] as const
+
+export const STEERED_GENERATED_PLAN_SEEDS: readonly string[] = ['matrix-a'] as const
+
+export const STEERED_GENERATED_PLAN_DURATIONS: readonly TimeProfile[] = [25] as const
+
+export interface SteeredGeneratedPlanSurface {
+  readonly focuses: readonly VisibleFocus[]
+  readonly configurations: readonly ReadinessConfiguration[]
+  readonly levels: readonly PlayerLevel[]
+  readonly durations: readonly TimeProfile[]
+  readonly seeds: readonly string[]
+  readonly positionRoles: readonly SteeredGeneratedPlanPositionRole[]
+}
+
+export interface SteeredGeneratedPlanSurfaceContract {
+  readonly included: SteeredGeneratedPlanSurface
+}
+
+export const STEERED_GENERATED_PLAN_SURFACE_CONTRACT: SteeredGeneratedPlanSurfaceContract = {
+  included: {
+    focuses: VISIBLE_FOCUSES,
+    configurations: READINESS_CONFIGURATIONS,
+    levels: PLAYER_LEVELS,
+    durations: STEERED_GENERATED_PLAN_DURATIONS,
+    seeds: STEERED_GENERATED_PLAN_SEEDS,
+    positionRoles: STEERED_GENERATED_PLAN_POSITION_ROLES,
+  },
+}
+
+export const STEERED_GENERATED_PLAN_SURFACE: SteeredGeneratedPlanSurface =
+  STEERED_GENERATED_PLAN_SURFACE_CONTRACT.included
+
+/**
+ * The steered sweep's own baseline (KTD: the 540-cell contract and
+ * `REQUIRED_GENERATED_PLAN_SURFACE_BASELINE` stay untouched). Bounded
+ * by design: one duration, one seed, three position roles.
+ */
+type SteeredSurfaceDimension = DefaultSurfaceDimension | 'position'
+
+const REQUIRED_STEERED_GENERATED_PLAN_SURFACE_BASELINE: Record<
+  SteeredSurfaceDimension,
+  readonly string[]
+> = {
+  focus: ['pass', 'serve', 'set'],
+  configuration: ['solo_net', 'solo_wall', 'solo_open', 'pair_net', 'pair_open'],
+  level: ['beginner', 'intermediate', 'advanced'],
+  duration: ['25'],
+  seed: ['matrix-a'],
+  position: ['ladder_min', 'band_start', 'ladder_max'],
+} as const
+
+function steeredSurfaceValues(surface: SteeredGeneratedPlanSurface): Record<
+  SteeredSurfaceDimension,
+  readonly string[]
+> {
+  return {
+    focus: surface.focuses,
+    configuration: surface.configurations.map((configuration) => configuration.id),
+    level: surface.levels,
+    duration: surface.durations.map(String),
+    seed: surface.seeds,
+    position: surface.positionRoles,
+  }
+}
+
+export function validateSteeredGeneratedPlanSurfaceContract(
+  contract: SteeredGeneratedPlanSurfaceContract = STEERED_GENERATED_PLAN_SURFACE_CONTRACT,
+): GeneratedPlanSurfaceContractValidation {
+  const issues: GeneratedPlanSurfaceContractIssue[] = []
+  const values = steeredSurfaceValues(contract.included)
+
+  for (const [dimension, dimensionValues] of Object.entries(values) as readonly [
+    SteeredSurfaceDimension,
+    readonly string[],
+  ][]) {
+    if (dimensionValues.length === 0) {
+      issues.push(
+        surfaceIssue(
+          'empty_included_surface_dimension',
+          dimension,
+          undefined,
+          `Steered surface dimension ${dimension} is empty.`,
+        ),
+      )
+    }
+    for (const value of dimensionValues) {
+      if (dimensionValues.indexOf(value) !== dimensionValues.lastIndexOf(value)) {
+        issues.push(
+          surfaceIssue(
+            'duplicate_included_surface_value',
+            dimension,
+            value,
+            `Steered surface dimension ${dimension} repeats ${value}.`,
+          ),
+        )
+      }
+    }
+    const required = REQUIRED_STEERED_GENERATED_PLAN_SURFACE_BASELINE[dimension]
+    for (const value of required) {
+      if (!dimensionValues.includes(value)) {
+        issues.push(
+          surfaceIssue(
+            'missing_required_surface_value',
+            dimension,
+            value,
+            `Steered surface dimension ${dimension} is missing required value ${value}.`,
+          ),
+        )
+      }
+    }
+    for (const value of dimensionValues) {
+      if (!required.includes(value)) {
+        issues.push(
+          surfaceIssue(
+            'unknown_included_surface_value',
+            dimension,
+            value,
+            `Steered surface dimension ${dimension} includes unknown value ${value}.`,
+          ),
+        )
+      }
+    }
+  }
+
+  const canonicalConfigurationsById = new Map(
+    READINESS_CONFIGURATIONS.map((configuration) => [configuration.id, configuration] as const),
+  )
+  for (const configuration of contract.included.configurations) {
+    const canonical = canonicalConfigurationsById.get(configuration.id)
+    if (canonical && !sameReadinessConfigurationContext(configuration, canonical)) {
+      issues.push(
+        surfaceIssue(
+          'configuration_context_mismatch',
+          'configuration',
+          configuration.id,
+          `Steered surface configuration ${configuration.id} does not match its canonical readiness context.`,
+        ),
+      )
+    }
+  }
+
+  return { issues, blockingIssues: issues }
+}
+
+/** Resolve a position role to a concrete rung for (focus, level). */
+export function steeredPositionForCell(
+  focus: VisibleFocus,
+  level: PlayerLevel,
+  role: SteeredGeneratedPlanPositionRole,
+): number {
+  switch (role) {
+    case 'ladder_min':
+      return stressLadderBounds(focus).min
+    case 'band_start':
+      return startingStressRung(focus, level)
+    case 'ladder_max':
+      return stressLadderBounds(focus).max
+    default: {
+      const exhausted: never = role
+      throw new Error(`Unhandled steered position role: ${String(exhausted)}`)
+    }
+  }
+}
+
+export interface SteeredGeneratedPlanMatrixCell extends GeneratedPlanMatrixCell {
+  readonly positionRole: SteeredGeneratedPlanPositionRole
+  readonly position: number
+}
+
+export interface SteeredGeneratedPlanDiagnosticResult extends SteeredGeneratedPlanMatrixCell {
+  readonly status: GeneratedPlanDiagnosticStatus
+  readonly hardFailures: readonly GeneratedPlanHardFailure[]
+  readonly observations: readonly GeneratedPlanObservation[]
+}
+
+export function buildSteeredGeneratedPlanMatrix(
+  surface: SteeredGeneratedPlanSurface = STEERED_GENERATED_PLAN_SURFACE,
+): SteeredGeneratedPlanMatrixCell[] {
+  const cells: SteeredGeneratedPlanMatrixCell[] = []
+  for (const focus of surface.focuses) {
+    for (const configuration of surface.configurations) {
+      for (const level of surface.levels) {
+        for (const duration of surface.durations) {
+          for (const seed of surface.seeds) {
+            for (const positionRole of surface.positionRoles) {
+              cells.push({
+                focus,
+                configuration: configuration.id,
+                level,
+                duration,
+                seed,
+                positionRole,
+                position: steeredPositionForCell(focus, level, positionRole),
+              })
+            }
+          }
+        }
+      }
+    }
+  }
+  return cells
+}
+
+const STEERED_OFF_LADDER_DISTANCE = Number.MAX_SAFE_INTEGER
+
+function steeredRungDistance(focus: VisibleFocus, drillId: string, position: number): number {
+  const rung = stressRungForDrill(focus, drillId)
+  return rung === undefined ? STEERED_OFF_LADDER_DISTANCE : Math.abs(rung - position)
+}
+
+/**
+ * Steered-sweep hard failures, keyed on the U6 selection-path marker.
+ *
+ * `rung_nearest` claims are re-checked against the focused candidate
+ * pool with the draft's OTHER blocks excluded — an over-approximation
+ * of `usedDrillIds` at main-skill selection time that can only weaken
+ * the check (a benign false-negative direction), never misflag a
+ * legitimate pick. `duration_fit`, `reroute`, and `substitution`
+ * markers are legitimate overrides and are never violations.
+ */
+export function steeredGenerationHardFailures(
+  cell: SteeredGeneratedPlanMatrixCell,
+  draft: SessionDraft,
+  trace: DraftAssemblyTrace,
+): GeneratedPlanHardFailure[] {
+  const failures: GeneratedPlanHardFailure[] = []
+  const archetype = selectArchetype(draft.context)
+  const layout = archetype?.layouts[draft.context.timeProfile] ?? []
+
+  const mainSkillSlots = trace.slots.filter(
+    (slot): slot is Extract<DraftAssemblyTraceSlot, { selected: true }> =>
+      slot.type === 'main_skill' && slot.selected,
+  )
+
+  for (const traceSlot of mainSkillSlots) {
+    if (traceSlot.selectionPath === undefined) {
+      failures.push({
+        code: 'steering_violation',
+        blockId: traceSlot.blockId,
+        blockType: traceSlot.type,
+        layoutIndex: traceSlot.layoutIndex,
+        drillId: traceSlot.drillId,
+        variantId: traceSlot.variantId,
+        message: 'Steered main-skill slot carries no selection-path marker.',
+      })
+      continue
+    }
+    if (traceSlot.selectionPath !== 'rung_nearest') continue
+
+    const slot = layout[traceSlot.layoutIndex]
+    if (!slot) continue // assembly_trace_mismatch owns layout drift
+    const pool = findCandidates(slot, draft.context, { playerLevel: draft.context.playerLevel })
+    if (!pool.some((candidate) => candidate.drill.id === traceSlot.drillId)) {
+      continue // hard_filter_violation owns out-of-pool picks
+    }
+    const otherBlockDrillIds = new Set(
+      draft.blocks
+        .filter((block) => block.id !== traceSlot.blockId)
+        .map((block) => block.drillId),
+    )
+    const eligible = pool.filter((candidate) => !otherBlockDrillIds.has(candidate.drill.id))
+    const checkPool = eligible.length > 0 ? eligible : pool
+    const nearestDistance = Math.min(
+      ...checkPool.map((candidate) => steeredRungDistance(cell.focus, candidate.drill.id, cell.position)),
+    )
+    const selectedDistance = steeredRungDistance(cell.focus, traceSlot.drillId, cell.position)
+    if (selectedDistance > nearestDistance) {
+      failures.push({
+        code: 'steering_violation',
+        blockId: traceSlot.blockId,
+        blockType: traceSlot.type,
+        layoutIndex: traceSlot.layoutIndex,
+        drillId: traceSlot.drillId,
+        variantId: traceSlot.variantId,
+        message: `rung_nearest pick is ${selectedDistance} rungs from position ${cell.position}; a candidate at distance ${nearestDistance} was eligible.`,
+      })
+    }
+  }
+
+  // Provenance integrity mirrors the builder's stamp rule (one
+  // build-time "steered" definition, KTD1): all realized main-skill
+  // rungs on target ⇔ `steeredFocus` stamped.
+  if (mainSkillSlots.length > 0) {
+    const realizedOnTarget = mainSkillSlots.every(
+      (slot) => stressRungForDrill(cell.focus, slot.drillId) === cell.position,
+    )
+    if (realizedOnTarget && draft.steeredFocus !== cell.focus) {
+      failures.push({
+        code: 'steered_focus_missing',
+        message: `Every realized main-skill rung equals position ${cell.position} but the draft carries no steeredFocus.`,
+      })
+    }
+    if (!realizedOnTarget && draft.steeredFocus === cell.focus) {
+      failures.push({
+        code: 'steering_violation',
+        message: 'steeredFocus is stamped but a realized main-skill rung is off the steer target.',
+      })
+    }
+  }
+
+  return failures
+}
+
+export function evaluateSteeredGeneratedPlanDiagnosticCell(
+  cell: SteeredGeneratedPlanMatrixCell,
+  configuration: ReadinessConfiguration,
+): SteeredGeneratedPlanDiagnosticResult {
+  const context = contextForDiagnosticCell(cell, configuration)
+  const generated = buildDraftWithAssemblyTrace(context, {
+    assemblySeed: cell.seed,
+    playerLevel: cell.level,
+    stressPositions: { [cell.focus]: cell.position },
+  })
+
+  if (!generated) {
+    return {
+      ...cell,
+      status: 'hard_failure',
+      hardFailures: [{ code: 'no_draft' }],
+      observations: [],
+    }
+  }
+
+  const applicableCell: ApplicableGeneratedPlanMatrixCell = {
+    focus: cell.focus,
+    configuration: cell.configuration,
+    level: cell.level,
+    duration: cell.duration,
+    seed: cell.seed,
+    status: 'applicable',
+  }
+  const base = analyzeGeneratedPlanDraft(
+    applicableCell,
+    configuration,
+    generated.draft,
+    generated.assemblyTrace,
+  )
+  const hardFailures = [
+    ...base.hardFailures,
+    ...steeredGenerationHardFailures(cell, generated.draft, generated.assemblyTrace),
+  ]
+
+  return {
+    ...cell,
+    status: statusForFindings(hardFailures, base.observations),
+    hardFailures,
+    observations: base.observations,
+  }
+}
+
+export function buildSteeredGeneratedPlanDiagnostics(
+  surface: SteeredGeneratedPlanSurface = STEERED_GENERATED_PLAN_SURFACE,
+): SteeredGeneratedPlanDiagnosticResult[] {
+  const canonicalConfigurationsById = new Map(
+    READINESS_CONFIGURATIONS.map((configuration) => [configuration.id, configuration] as const),
+  )
+  return buildSteeredGeneratedPlanMatrix(surface).map((cell) => {
+    const configuration = canonicalConfigurationsById.get(cell.configuration)
+    if (!configuration) {
+      return {
+        ...cell,
+        status: 'hard_failure' as const,
+        hardFailures: [
+          {
+            code: 'no_draft' as const,
+            message: `No canonical readiness configuration for ${cell.configuration}.`,
+          },
+        ],
+        observations: [],
+      }
+    }
+    return evaluateSteeredGeneratedPlanDiagnosticCell(cell, configuration)
+  })
+}
+
+export interface SteeredGeneratedPlanDiagnosticSummary {
+  readonly surface: {
+    readonly focuses: readonly VisibleFocus[]
+    readonly configurations: readonly ReadinessConfigurationId[]
+    readonly levels: readonly PlayerLevel[]
+    readonly durations: readonly TimeProfile[]
+    readonly seedIds: readonly string[]
+    readonly positionRoles: readonly SteeredGeneratedPlanPositionRole[]
+    readonly cellCount: number
+    /**
+     * Cells whose `band_start` position degenerately coincides with the
+     * same cell's ladder min or max (documented overlap; the role stays
+     * a distinct matrix dimension).
+     */
+    readonly degenerateBandStartCellCount: number
+  }
+  readonly statusCounts: Record<GeneratedPlanDiagnosticStatus, number>
+  readonly hardFailureCount: number
+  readonly observationCount: number
+  readonly hardFailureCounts: Partial<Record<GeneratedPlanHardFailureCode, number>>
+  readonly observationCounts: Partial<Record<GeneratedPlanObservationCode, number>>
+}
+
+export function summarizeSteeredGeneratedPlanDiagnostics(
+  results: readonly SteeredGeneratedPlanDiagnosticResult[],
+): SteeredGeneratedPlanDiagnosticSummary {
+  const statusCounts: Record<GeneratedPlanDiagnosticStatus, number> = {
+    clean: 0,
+    observation_only: 0,
+    hard_failure: 0,
+  }
+  const hardFailureCounts: Partial<Record<GeneratedPlanHardFailureCode, number>> = {}
+  const observationCounts: Partial<Record<GeneratedPlanObservationCode, number>> = {}
+
+  for (const result of results) {
+    statusCounts[result.status] += 1
+    for (const failure of result.hardFailures) {
+      incrementCount(hardFailureCounts, failure.code)
+    }
+    for (const observation of result.observations) {
+      incrementCount(observationCounts, observation.code)
+    }
+  }
+
+  const degenerateBandStartCellCount = results.filter(
+    (result) =>
+      result.positionRole === 'band_start' &&
+      (result.position === stressLadderBounds(result.focus).min ||
+        result.position === stressLadderBounds(result.focus).max),
+  ).length
+
+  return {
+    surface: {
+      focuses: [...new Set(results.map((result) => result.focus))],
+      configurations: [...new Set(results.map((result) => result.configuration))],
+      levels: [...new Set(results.map((result) => result.level))],
+      durations: [...new Set(results.map((result) => result.duration))],
+      seedIds: [...new Set(results.map((result) => result.seed))],
+      positionRoles: [...new Set(results.map((result) => result.positionRole))],
+      cellCount: results.length,
+      degenerateBandStartCellCount,
+    },
+    statusCounts,
+    hardFailureCount: results.reduce((sum, result) => sum + result.hardFailures.length, 0),
+    observationCount: results.reduce((sum, result) => sum + result.observations.length, 0),
+    hardFailureCounts,
+    observationCounts,
+  }
 }
 
 export function summarizeGeneratedPlanDiagnostics(

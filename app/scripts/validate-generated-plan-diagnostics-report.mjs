@@ -176,6 +176,8 @@ Record the current generated-plan diagnostic snapshot for the Setup inline-focus
 - Observation-only cells: ${data.status_counts.observation_only}
 - Hard-failure cells: ${data.status_counts.hard_failure}
 - Routeable observation groups: ${data.routeable_observation_group_count}
+- Steered sweep cells (U7): ${data.steered_sweep.surface.cell_count}
+- Steered sweep hard failures: ${data.steered_sweep.hard_failure_count}
 
 ## Interpretation
 
@@ -299,6 +301,14 @@ try {
   const matrix = diagnostics.buildGeneratedPlanMatrix()
   const results = diagnostics.buildGeneratedPlanDiagnostics()
   const summary = diagnostics.summarizeGeneratedPlanDiagnostics(results, matrix)
+  const steeredResults = diagnostics.buildSteeredGeneratedPlanDiagnostics()
+  const steeredSummary = diagnostics.summarizeSteeredGeneratedPlanDiagnostics(steeredResults)
+  const steeredContractValidation = diagnostics.validateSteeredGeneratedPlanSurfaceContract()
+  if (steeredContractValidation.blockingIssues.length > 0) {
+    throw new Error(
+      `Steered generated plan diagnostics surface contract has ${steeredContractValidation.blockingIssues.length} blocking validation issue(s).`,
+    )
+  }
   const surfaceContract = diagnostics.DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT
   const surfaceContractValidation =
     diagnostics.validateGeneratedPlanSurfaceContract(surfaceContract)
@@ -356,6 +366,30 @@ try {
     observation_counts: summary.observationCounts,
     routeable_observation_group_count: groups.length,
     top_routeable_observation_groups: groups.slice(0, 5).map(snakeCaseGroup),
+    // U7 (D159, R6): the steered sweep's committed surface. Bounded,
+    // deterministic, keyed on the U6 selection-path trace marker —
+    // hard failures here mean the steered path (every live caller's
+    // path) regressed. Summary only; the per-cell sweep lives in
+    // `buildSteeredGeneratedPlanDiagnostics()`.
+    steered_sweep: {
+      source_helper:
+        'summarizeSteeredGeneratedPlanDiagnostics(buildSteeredGeneratedPlanDiagnostics())',
+      surface: {
+        focuses: steeredSummary.surface.focuses,
+        configurations: steeredSummary.surface.configurations,
+        levels: steeredSummary.surface.levels,
+        durations: steeredSummary.surface.durations,
+        seed_ids: steeredSummary.surface.seedIds,
+        position_roles: steeredSummary.surface.positionRoles,
+        cell_count: steeredSummary.surface.cellCount,
+        degenerate_band_start_cell_count: steeredSummary.surface.degenerateBandStartCellCount,
+      },
+      status_counts: steeredSummary.statusCounts,
+      hard_failure_count: steeredSummary.hardFailureCount,
+      observation_count: steeredSummary.observationCount,
+      hard_failure_counts: steeredSummary.hardFailureCounts,
+      observation_counts: steeredSummary.observationCounts,
+    },
     redistribution_causality_receipt: snakeCaseRedistributionCausalityReceipt(
       redistributionCausalityReceipt,
     ),

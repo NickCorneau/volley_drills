@@ -4,6 +4,9 @@ import {
   DEFAULT_GENERATED_PLAN_SEEDS,
   DEFAULT_GENERATED_PLAN_SURFACE,
   DEFAULT_GENERATED_PLAN_SURFACE_CONTRACT,
+  STEERED_GENERATED_PLAN_POSITION_ROLES,
+  STEERED_GENERATED_PLAN_SEEDS,
+  STEERED_GENERATED_PLAN_SURFACE_CONTRACT,
   analyzeSelectedDraftStretch,
   analyzeGeneratedPlanDraft,
   buildApplicableGeneratedPlanInputs,
@@ -12,10 +15,18 @@ import {
   buildGeneratedPlanObservationGroups,
   buildGeneratedPlanSurfaceContractReport,
   buildGeneratedPlanSurfaceSummary,
+  buildSteeredGeneratedPlanDiagnostics,
+  buildSteeredGeneratedPlanMatrix,
   isGeneratedPlanDiagnosticStatus,
+  steeredGenerationHardFailures,
+  steeredPositionForCell,
   summarizeGeneratedPlanDiagnostics,
+  summarizeSteeredGeneratedPlanDiagnostics,
   validateGeneratedPlanSurfaceContract,
+  validateSteeredGeneratedPlanSurfaceContract,
+  type SteeredGeneratedPlanMatrixCell,
 } from '../generatedPlanDiagnostics'
+import { startingStressRung, stressLadderBounds, stressRungForDrill } from '../../data/stressLadders'
 import {
   PLAYER_LEVELS,
   READINESS_CONFIGURATIONS,
@@ -1052,4 +1063,211 @@ describe('seeded generated plan diagnostics', () => {
     )
   })
 
+})
+
+/**
+ * U7 (D159, R6): the steered sweep. The steered path — every live
+ * caller's path since D154 — gets a bounded regression surface keyed on
+ * the U6 selection-path trace marker. These tests cover the checker
+ * directly (crafted traces) AND the real-catalog sweep.
+ */
+describe('steered generated plan diagnostics (U7)', () => {
+  const PASS_BOUNDS = stressLadderBounds('pass')
+
+  function steeredCell(
+    overrides: Partial<SteeredGeneratedPlanMatrixCell> = {},
+  ): SteeredGeneratedPlanMatrixCell {
+    return {
+      focus: 'pass',
+      configuration: 'pair_open',
+      level: 'intermediate',
+      duration: 25,
+      seed: 'matrix-a',
+      positionRole: 'ladder_max',
+      position: PASS_BOUNDS.max,
+      ...overrides,
+    }
+  }
+
+  function mainSkillBlock(
+    drillId: string,
+    variantId: string,
+  ): SessionDraft['blocks'][number] {
+    return {
+      id: 'block-main',
+      type: 'main_skill',
+      drillId,
+      variantId,
+      drillName: drillId,
+      shortName: drillId,
+      durationMinutes: 8,
+      coachingCue: 'cue',
+      courtsideInstructions: 'do',
+      required: true,
+      rationale: 'fixture',
+    }
+  }
+
+  function steeredDraft(
+    block: SessionDraft['blocks'][number],
+    steeredFocus?: SessionDraft['steeredFocus'],
+  ): SessionDraft {
+    return {
+      id: 'current',
+      context: {
+        playerMode: 'pair',
+        timeProfile: 25,
+        netAvailable: false,
+        wallAvailable: false,
+        sessionFocus: 'pass',
+        playerLevel: 'intermediate',
+      },
+      archetypeId: 'pair_open',
+      archetypeName: 'Pair + Open',
+      blocks: [block],
+      updatedAt: 1,
+      ...(steeredFocus !== undefined ? { steeredFocus } : {}),
+    }
+  }
+
+  function trace(
+    selectionPath: 'rung_nearest' | 'duration_fit' | 'reroute' | 'substitution' | undefined,
+    block: SessionDraft['blocks'][number],
+  ): DraftAssemblyTrace {
+    return {
+      slots: [
+        {
+          layoutIndex: 0,
+          type: 'main_skill',
+          required: true,
+          allocatedMinutes: 8,
+          selected: true,
+          blockId: block.id,
+          drillId: block.drillId,
+          variantId: block.variantId,
+          ...(selectionPath !== undefined ? { selectionPath } : {}),
+        },
+      ],
+      skippedOptionalLayoutIndexes: [],
+      redistributedMinutes: 0,
+      redistributionLayoutIndex: undefined,
+    }
+  }
+
+  it('resolves position roles to ladder min, band start, and ladder max', () => {
+    expect(steeredPositionForCell('pass', 'beginner', 'ladder_min')).toBe(PASS_BOUNDS.min)
+    expect(steeredPositionForCell('pass', 'beginner', 'ladder_max')).toBe(PASS_BOUNDS.max)
+    // band_start delegates to startingStressRung; assert agreement
+    // rather than hard-coding the band map.
+    expect(steeredPositionForCell('pass', 'intermediate', 'band_start')).toBe(
+      startingStressRung('pass', 'intermediate'),
+    )
+  })
+
+  it('builds a bounded 135-cell matrix (3 focuses × 5 configs × 3 levels × 25 × matrix-a × 3 roles)', () => {
+    const matrix = buildSteeredGeneratedPlanMatrix()
+    expect(matrix).toHaveLength(
+      VISIBLE_FOCUSES.length * READINESS_CONFIGURATIONS.length * PLAYER_LEVELS.length * 1 * 1 * 3,
+    )
+    expect(matrix).toHaveLength(135)
+    expect([...new Set(matrix.map((cell) => cell.duration))]).toEqual([25])
+    expect([...new Set(matrix.map((cell) => cell.seed))]).toEqual(['matrix-a'])
+    expect([...new Set(matrix.map((cell) => cell.positionRole))].sort()).toEqual(
+      [...STEERED_GENERATED_PLAN_POSITION_ROLES].sort(),
+    )
+  })
+
+  it('the steered surface contract validates cleanly and accepts the position dimension', () => {
+    const validation = validateSteeredGeneratedPlanSurfaceContract()
+    expect(validation.blockingIssues).toEqual([])
+    expect(STEERED_GENERATED_PLAN_SURFACE_CONTRACT.included.positionRoles).toEqual(
+      STEERED_GENERATED_PLAN_POSITION_ROLES,
+    )
+    expect(STEERED_GENERATED_PLAN_SEEDS).toEqual(['matrix-a'])
+  })
+
+  it('the steered sweep over the real catalog yields zero hard failures', () => {
+    const results = buildSteeredGeneratedPlanDiagnostics()
+    const summary = summarizeSteeredGeneratedPlanDiagnostics(results)
+    expect(summary.surface.cellCount).toBe(135)
+    expect(summary.hardFailureCount).toBe(0)
+    expect(results.filter((result) => result.status === 'hard_failure')).toEqual([])
+    // Degenerate band-start overlaps (e.g. beginner band start = ladder
+    // min) are documented, not collapsed — the role stays a dimension.
+    expect(summary.surface.degenerateBandStartCellCount).toBeGreaterThan(0)
+  })
+
+  it('steering_violation fires when a rung_nearest pick is not nearest-eligible', () => {
+    // Claim rung_nearest at position max (5) but select d01 (rung 1):
+    // the pair/open pass pool holds d46/d50 at rung 5, so d01 is not
+    // nearest-eligible.
+    expect(stressRungForDrill('pass', 'd01')).toBe(1)
+    const block = mainSkillBlock('d01', 'd01-pair')
+    const failures = steeredGenerationHardFailures(
+      steeredCell(),
+      steeredDraft(block),
+      trace('rung_nearest', block),
+    )
+    expect(failures.map((failure) => failure.code)).toContain('steering_violation')
+  })
+
+  it('steering_violation fires when a steered main-skill slot has no marker', () => {
+    const block = mainSkillBlock('d46', 'd46-pair-open')
+    const failures = steeredGenerationHardFailures(
+      steeredCell(),
+      steeredDraft(block, 'pass'),
+      trace(undefined, block),
+    )
+    expect(failures.map((failure) => failure.code)).toContain('steering_violation')
+  })
+
+  it('does NOT fire steering_violation on duration_fit / reroute / substitution markers', () => {
+    // d01 (rung 1) under a position-5 steer would be a violation IF the
+    // marker claimed rung_nearest; the legitimate-override markers make
+    // it a non-violation regardless of realized rung.
+    const block = mainSkillBlock('d01', 'd01-pair')
+    for (const path of ['duration_fit', 'reroute', 'substitution'] as const) {
+      const failures = steeredGenerationHardFailures(
+        steeredCell(),
+        steeredDraft(block),
+        trace(path, block),
+      )
+      expect(failures.map((failure) => failure.code)).not.toContain('steering_violation')
+    }
+  })
+
+  it('steered_focus_missing fires when a realized on-target pick lacks provenance', () => {
+    // d46 sits at rung 5 = position; an honest build would stamp
+    // steeredFocus. A draft missing the stamp is a provenance failure.
+    expect(stressRungForDrill('pass', 'd46')).toBe(PASS_BOUNDS.max)
+    const block = mainSkillBlock('d46', 'd46-pair-open')
+    const failures = steeredGenerationHardFailures(
+      steeredCell(),
+      steeredDraft(block, undefined),
+      trace('rung_nearest', block),
+    )
+    expect(failures.map((failure) => failure.code)).toContain('steered_focus_missing')
+  })
+
+  it('accepts a faithful on-target rung_nearest pick with provenance (no failures)', () => {
+    const block = mainSkillBlock('d46', 'd46-pair-open')
+    const failures = steeredGenerationHardFailures(
+      steeredCell(),
+      steeredDraft(block, 'pass'),
+      trace('rung_nearest', block),
+    )
+    expect(failures).toEqual([])
+  })
+
+  it('flags a steeredFocus stamp the realized rungs do not support', () => {
+    // Stamp claims pass but the realized main-skill rung (d01 = 1) is
+    // off the position-5 target.
+    const block = mainSkillBlock('d01', 'd01-pair')
+    const failures = steeredGenerationHardFailures(
+      steeredCell(),
+      steeredDraft(block, 'pass'),
+      trace('duration_fit', block),
+    )
+    expect(failures.map((failure) => failure.code)).toContain('steering_violation')
+  })
 })
