@@ -1,14 +1,14 @@
 ---
 id: brainstorm-stress-visibility-trust-loop
 title: Stress Visibility — v1 Trust Loop
-status: active
-stage: planning
+status: complete
+stage: complete
 type: requirements
 date: 2026-06-11
 topic: stress-visibility-trust-loop
 summary: "Close the D154 steering trust loop at the two deliberate-reading moments — a hedged drill-exemplar consequence line on the Review accept, a cash-the-promise steering line on the Setup preview, a conditional repeat-path note, and a one-time disclosure plus evergreen gloss — gated on steering traces never asserting steering that did not happen, under two ratified display rulings (no raw rungs ever; present-tense only)."
-authority: requirements input for the stress-visibility plan; subordinate to docs/decisions.md and the M002 series requirements
-last_updated: 2026-06-11
+authority: requirements input for the stress-visibility plan (consumed planning history; shipped 2026-06-12 per D157); subordinate to docs/decisions.md and the M002 series requirements
+last_updated: 2026-06-12
 depends_on:
   - docs/ideation/2026-06-11-stress-substrate-visibility-ideation.md
   - docs/brainstorms/2026-06-11-stress-substrate-requirements.md

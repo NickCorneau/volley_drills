@@ -414,8 +414,9 @@
       "id": "stress-visibility-trust-loop-plan-2026-06-11",
       "path": "docs/plans/2026-06-11-003-feat-stress-visibility-trust-loop-plan.md",
       "type": "plan",
-      "status": "active",
-      "canonical_for": "Implementation plan for the stress-visibility v1 trust loop over the D154 substrate: U1 build-time steered predicate + optional steeredFocus assembly-metadata stamp on draft/plan (no Dexie bump, no capture field), U2 position-aware verdict-offer gating + prospective/movement/position-at-time helpers, U3 hedged drill-exemplar consequence caption on the Review accept, U4 Safety-screen steering trace (cash-the-promise line + one-time dismissable disclosure + evergreen how-sessions-adapt expander), U5 Home repeat note on position drift since the repeated plan's assembly, U6 docs/decision trail. Founder-ratified origin revisions: trace surface moved from Setup preview to Safety (plan-launch skips Setup; Recommended-focus Setup builds are unsteered) and clamped offers gated (R15); substitution honesty lands as trace suppression with rung-aware substitution deferred."
+      "status": "complete",
+      "active_registry": true,
+      "canonical_for": "Implementation plan + landed registry for the D157 stress-visibility v1 trust loop over the D154 substrate (shipped 2026-06-12): U1 build-time steered predicate + optional steeredFocus assembly-metadata stamp on draft/plan (no Dexie bump, no capture field, no algorithm-version bump), U2 position-aware verdict-offer gating + prospective/movement/position-at-time helpers, U3 hedged drill-exemplar consequence caption on the Review accept (KTD8 deterministic candidate rule), U4 Safety-screen steering trace (cash-the-promise line + one-time dismissable disclosure + evergreen how-sessions-adapt expander, all pain-override-suppressed), U5 Home repeat note on position drift since the repeated plan's assembly, U6 docs/decision trail. Founder-ratified origin revisions: trace surface moved from Setup preview to Safety (plan-launch skips Setup; Recommended-focus Setup builds are unsteered) and clamped offers gated (R15); substitution honesty lands as trace suppression with rung-aware substitution deferred (v9 to 10 semantics change). Decision: D157."
     },
     {
       "id": "design-critique-followups-2026-05-25",
@@ -904,8 +905,8 @@
       "id": "stress-visibility-trust-loop-requirements-2026-06-11",
       "path": "docs/brainstorms/2026-06-11-stress-visibility-trust-loop-requirements.md",
       "type": "requirements",
-      "status": "active",
-      "canonical_for": "Requirements for making the D154 stress steering legible without touching the run face (R1-R14): two ratified display rulings (no raw rungs ever; present-tense only), hedged drill-exemplar consequence line on the Review accept, cash-the-promise steering line on the next steered session per focus, conditional repeat-path note, one-time disclosure + evergreen gloss, and an honesty gate (no trace may assert steering that did not happen; the substitution path respects rung preference or suppresses the trace). Revises D154's exposure deferral and the prior stress brainstorm's R11/R14 posture. Plan: docs/plans/2026-06-11-003-feat-stress-visibility-trust-loop-plan.md (which revises the trace surface to Safety)."
+      "status": "complete",
+      "canonical_for": "Requirements input for the D157 stress-visibility v1 trust loop (consumed planning history; shipped 2026-06-12): two ratified display rulings (no raw rungs ever; present-tense only), hedged drill-exemplar consequence line on the Review accept, cash-the-promise steering line on the next steered session per focus, conditional repeat-path note, one-time disclosure + evergreen gloss, and an honesty gate (no trace may assert steering that did not happen; the substitution path respects rung preference or suppresses the trace). Revises D154's exposure deferral and the prior stress brainstorm's R11/R14 posture. Plan: docs/plans/2026-06-11-003-feat-stress-visibility-trust-loop-plan.md (which revised the trace surface to Safety and added R15 offer gating)."
     },
     {
       "id": "home-covenant-requirements-2026-06-11",

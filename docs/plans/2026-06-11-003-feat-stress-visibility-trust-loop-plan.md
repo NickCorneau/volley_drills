@@ -1,7 +1,7 @@
 ---
 title: "feat: Stress visibility — v1 trust loop"
 type: feat
-status: active
+status: complete
 date: 2026-06-11
 origin: docs/brainstorms/2026-06-11-stress-visibility-trust-loop-requirements.md
 ---
