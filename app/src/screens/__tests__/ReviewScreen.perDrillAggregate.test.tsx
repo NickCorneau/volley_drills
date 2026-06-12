@@ -202,7 +202,13 @@ describe('ReviewScreen per-drill aggregate (D133)', () => {
     expect(screen.queryByLabelText(/^total$/i)).not.toBeInTheDocument()
   })
 
-  it('shows a tagged-only summary when captures have a difficulty but no counts', async () => {
+  /*
+   * Shibui polish 2026-06-12 (origin R8): the wholly-empty aggregate
+   * drops the card chrome and renders one quiet line. The line must
+   * acknowledge tag captures (a logged tag never disappears from
+   * Review) and keep teaching where capture lives.
+   */
+  it('collapses to a quiet tag-acknowledging line (no card chrome) when captures have a difficulty but no counts', async () => {
     const execId = 'exec-tag-only'
     await seedCompletedSkillSession(execId)
 
@@ -228,9 +234,99 @@ describe('ReviewScreen per-drill aggregate (D133)', () => {
     renderAt(execId)
 
     const aggregate = await screen.findByTestId('per-drill-aggregate')
-    expect(aggregate).toHaveTextContent(/counts not logged/i)
+    // Tag-acknowledging copy variant: the logged tag stays visible.
+    expect(aggregate).toHaveTextContent(/difficulty noted on 1 drill/i)
+    // The line still teaches where capture lives.
+    expect(aggregate).toHaveTextContent(/no counts logged between blocks/i)
+    // Quiet register, no card chrome: the Good-passes heading is gone.
+    expect(aggregate.className).toContain('text-text-secondary')
+    expect(
+      screen.queryByRole('heading', { name: /^good passes$/i }),
+    ).not.toBeInTheDocument()
     // Still no session-level input.
     expect(screen.queryByLabelText(/^good$/i)).not.toBeInTheDocument()
+  })
+
+  it('collapses for notCaptured-only captures and pluralizes the tag count', async () => {
+    const execId = 'exec-not-captured-only'
+    await seedCompletedSkillSession(execId)
+
+    await db.sessionReviews.put({
+      id: `review-${execId}`,
+      executionLogId: execId,
+      sessionRpe: null,
+      goodPasses: 0,
+      totalAttempts: 0,
+      perDrillCaptures: [
+        {
+          drillId: COUNT_DRILL.id,
+          variantId: COUNT_VARIANT.id,
+          blockIndex: 0,
+          difficulty: 'too_hard',
+          notCaptured: true,
+          capturedAt: Date.now(),
+        },
+        {
+          drillId: COUNT_DRILL.id,
+          variantId: COUNT_VARIANT.id,
+          blockIndex: 1,
+          difficulty: 'still_learning',
+          notCaptured: true,
+          capturedAt: Date.now(),
+        },
+      ],
+      submittedAt: Date.now(),
+      status: 'draft',
+    })
+
+    renderAt(execId)
+
+    const aggregate = await screen.findByTestId('per-drill-aggregate')
+    expect(aggregate).toHaveTextContent(/difficulty noted on 2 drills/i)
+    expect(
+      screen.queryByRole('heading', { name: /^good passes$/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('keeps the full card (heading + pass-rate line) whenever any count exists', async () => {
+    const execId = 'exec-card-returns'
+    await seedCompletedSkillSession(execId)
+
+    await db.sessionReviews.put({
+      id: `review-${execId}`,
+      executionLogId: execId,
+      sessionRpe: null,
+      goodPasses: 0,
+      totalAttempts: 0,
+      perDrillCaptures: [
+        {
+          drillId: COUNT_DRILL.id,
+          variantId: COUNT_VARIANT.id,
+          blockIndex: 0,
+          difficulty: 'still_learning',
+          goodPasses: 3,
+          attemptCount: 5,
+          capturedAt: Date.now(),
+        },
+        {
+          drillId: COUNT_DRILL.id,
+          variantId: COUNT_VARIANT.id,
+          blockIndex: 1,
+          difficulty: 'too_hard',
+          capturedAt: Date.now(),
+        },
+      ],
+      submittedAt: Date.now(),
+      status: 'draft',
+    })
+
+    renderAt(execId)
+
+    const aggregate = await screen.findByTestId('per-drill-aggregate')
+    expect(aggregate).toHaveTextContent(/3 of 5/)
+    expect(
+      screen.getByRole('heading', { name: /^good passes$/i }),
+    ).toBeInTheDocument()
   })
 
   it('threads the perDrillCaptures payload + the aggregate good/total onto the submitted record', async () => {

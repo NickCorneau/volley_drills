@@ -4,7 +4,7 @@ import { PassMetricInput } from '../components/PassMetricInput'
 import { RpeSelector } from '../components/RpeSelector'
 import { SafetyIcon } from '../components/SafetyIcon'
 import { Button, Card, ChoiceRow, ScreenShell, StatusMessage } from '../components/ui'
-import { formatPassRateLine } from '../lib/format'
+import { formatEmptyAggregateLine, formatPassRateLine } from '../lib/format'
 import { routes } from '../routes'
 import { useReviewController } from './review/useReviewController'
 
@@ -118,9 +118,21 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
               role="presentation"
               aria-hidden="true"
             />
-            <Card className="flex flex-col gap-3">
-              {useAggregateSummary && captureAggregate ? (
-                <>
+            {/*
+              Shibui polish 2026-06-12 (origin R8): when no drill has a
+              logged count, full card chrome announcing nothing was the
+              heaviest empty state on the screen. The card collapses to
+              one quiet line that still teaches where capture lives; a
+              second copy variant acknowledges difficulty tags so a
+              logged tag never disappears from Review. The card returns
+              whenever any count exists. (`useAggregateSummary` is gated
+              on `drillsTagged > 0` today, so the tag variant is the
+              live branch; the base variant keeps the component honest
+              if controller gating ever changes.)
+            */}
+            {useAggregateSummary && captureAggregate ? (
+              captureAggregate.drillsWithCounts > 0 ? (
+                <Card className="flex flex-col gap-3">
                   <h2 className="text-base font-semibold text-text-primary">Good passes</h2>
                   <p className="text-sm text-text-secondary">
                     Captured between blocks on{' '}
@@ -130,54 +142,43 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
                     drill
                     {captureAggregate.drillsTagged === 1 ? '' : 's'}.
                   </p>
-                  {/*
-                    Design-language pass 2026-06-11: the no-counts case is
-                    an absence statement, not a result — rendering it in
-                    the pass-rate line's semibold primary voice gave a
-                    "nothing happened" sentence the heaviest ink on the
-                    card. Real aggregates keep the result voice; the
-                    empty case drops to the quiet secondary register
-                    (§6.2 empty-state voice in brand-ux-guidelines).
-                  */}
                   <p
-                    className={
-                      captureAggregate.drillsWithCounts > 0
-                        ? 'text-base font-semibold text-text-primary'
-                        : 'text-sm text-text-secondary'
-                    }
+                    className="text-base font-semibold text-text-primary"
                     data-testid="per-drill-aggregate"
                   >
-                    {captureAggregate.drillsWithCounts > 0
-                      ? formatPassRateLine(
-                          captureAggregate.goodPasses,
-                          captureAggregate.totalAttempts,
-                        )
-                      : 'Counts not logged for any drill.'}
+                    {formatPassRateLine(
+                      captureAggregate.goodPasses,
+                      captureAggregate.totalAttempts,
+                    )}
                   </p>
-                </>
+                </Card>
               ) : (
-                <>
-                  <div>
-                    <h2 className="text-base font-semibold text-text-primary">Good passes</h2>
-                    <p className="mt-1 text-sm text-text-secondary">
-                      <span className="font-medium text-text-primary">Success rule:</span> ball
-                      reached the target zone or the next contact was playable.{' '}
-                      <span className="font-medium text-text-primary">
-                        If unsure, don&rsquo;t count it as Good.
-                      </span>
-                    </p>
-                  </div>
-                  <PassMetricInput
-                    good={good}
-                    total={total}
-                    onGoodChange={setGood}
-                    onTotalChange={setTotal}
-                    notCaptured={quickTags.includes('notCaptured')}
-                    onToggleNotCaptured={handleToggleNotCaptured}
-                  />
-                </>
-              )}
-            </Card>
+                <p className="text-sm text-text-secondary" data-testid="per-drill-aggregate">
+                  {formatEmptyAggregateLine(captureAggregate.drillsTagged)}
+                </p>
+              )
+            ) : (
+              <Card className="flex flex-col gap-3">
+                <div>
+                  <h2 className="text-base font-semibold text-text-primary">Good passes</h2>
+                  <p className="mt-1 text-sm text-text-secondary">
+                    <span className="font-medium text-text-primary">Success rule:</span> ball
+                    reached the target zone or the next contact was playable.{' '}
+                    <span className="font-medium text-text-primary">
+                      If unsure, don&rsquo;t count it as Good.
+                    </span>
+                  </p>
+                </div>
+                <PassMetricInput
+                  good={good}
+                  total={total}
+                  onGoodChange={setGood}
+                  onTotalChange={setTotal}
+                  notCaptured={quickTags.includes('notCaptured')}
+                  onToggleNotCaptured={handleToggleNotCaptured}
+                />
+              </Card>
+            )}
           </>
         )}
 

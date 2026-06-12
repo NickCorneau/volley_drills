@@ -153,6 +153,25 @@ export function formatPassRateLine(good: number, total: number): string {
 }
 
 /**
+ * Shibui polish 2026-06-12 (origin R8): the quiet line that replaces the
+ * Good-passes card on Review when no drill has a logged count. Two copy
+ * variants: tag-acknowledging when difficulty tags were captured (a
+ * logged tag never disappears from Review), base otherwise. Both keep
+ * teaching where capture lives ("between blocks"). The base variant is
+ * unreachable via today's controller gating (`useAggregateSummary`
+ * requires `drillsTagged > 0`) but stays implemented and pinned so the
+ * line remains honest if that gating ever changes.
+ */
+export function formatEmptyAggregateLine(drillsTagged: number): string {
+  if (drillsTagged > 0) {
+    return `Difficulty noted on ${drillsTagged} drill${
+      drillsTagged === 1 ? '' : 's'
+    }. No counts logged between blocks.`
+  }
+  return 'No counts logged. Counts are captured between blocks.'
+}
+
+/**
  * 2026-04-27 pre-D91 editorial polish (plan Item 8): compose the
  * Complete-recap "Difficulty" row from a per-drill tag breakdown.
  *
