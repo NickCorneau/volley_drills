@@ -101,8 +101,8 @@ describe('v0b session services', () => {
     })
     const [plan] = await db.sessionPlans.toArray()
     expect(plan.steeredFocus).toBe('pass')
-    // Assembly time rides with the provenance (review fix: consumption
-    // and the repeat-drift fold anchor on when blocks were built).
+    // Assembly time rides with the provenance (steering-trace
+    // consumption anchors on when blocks were built).
     expect(plan.assembledAt).toBe(steered.updatedAt)
 
     // And an unstamped draft persists an unsteered plan (absent field).

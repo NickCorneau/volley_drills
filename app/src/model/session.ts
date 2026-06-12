@@ -85,11 +85,10 @@ export interface SessionPlan {
   /**
    * The draft's `updatedAt` (assembly time), copied at session create.
    * `createdAt` records the Begin tap; this records when the blocks
-   * were actually built — the timestamp steering-trace consumption and
-   * the repeat-drift fold anchor on, since a stale draft can be
-   * started long after it was assembled. Absent on legacy plans;
-   * readers fall back to `createdAt` (conservative: never earlier
-   * than assembly).
+   * were actually built — the timestamp steering-trace consumption
+   * anchors on, since a stale draft can be started long after it was
+   * assembled. Absent on legacy plans; readers fall back to
+   * `createdAt` (conservative: never earlier than assembly).
    */
   assembledAt?: number
   blocks: SessionPlanBlock[]

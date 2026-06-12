@@ -37,9 +37,9 @@ export interface PlanInputsBundle {
   trainedSessions: AttributedTrainingSession[]
   /**
    * Trust-loop U5: the persisted skill level mapped to its drill band,
-   * for band-dependent position folds (the Home repeat-drift note).
-   * `undefined` when no level was persisted — the fold then uses its
-   * beginner default, matching assembly's behavior.
+   * for band-dependent stress-position folds (`startingStressRung`'s
+   * band mapping). `undefined` when no level was persisted — the fold
+   * then uses its beginner default, matching assembly's behavior.
    */
   skillBand: PlayerLevel | undefined
   /**

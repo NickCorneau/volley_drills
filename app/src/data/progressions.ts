@@ -1,10 +1,20 @@
 /**
- * Progression chains - ordered drill sequences with gating criteria.
+ * Progression chains - ordered drill graphs. LIVE ROLE: swap-hint
+ * preference (`swapAlternatives` prefers same-chain drills) and
+ * authoring metadata (chain orderings informed the D154 stress-ladder
+ * placements; `drill_chain_membership_missing` validates membership).
+ *
+ * GATING IS RETIRED (D154): the pass/fail promotion philosophy below
+ * was never wired into assembly and the stress substrate replaced it —
+ * movement on a ladder is user-accepted only, derived from review
+ * verdicts. No code reads `defaultGatingThreshold` or `gatingCriteria`.
+ * The original gating design is kept verbatim for the historical
+ * record:
  *
  * `defaultGatingThreshold: 0.7` is the **latent** true-rate target (D80,
  * Volleyball Canada development matrix). It is NOT the raw observed gate.
  * The operational progression gate (D104, specified in
- * docs/specs/m001-adaptation-rules.md) is:
+ * docs/specs/m001-adaptation-rules.md) was:
  *   - minimum 50 scored contacts in the same drill-variant + success-rule
  *     + stable-fatigue context (no progression signal below that);
  *   - a Bayesian posterior rule: progress only when
@@ -13,10 +23,6 @@
  *     "Good" reps (boundary ~76% corrected);
  *   - a pre-calibration raw proxy of 41/50 (general) or 42/50
  *     (injury-sensitive) until personal bias calibration exists.
- *
- * The progression engine that applies this rule is M001-build scope.
- * v0b surfaces only show informational feedback below the gate and
- * cap outcome at `hold` when N < 50 (see V0B-11).
  *
  * Source: research-output/drill-library-content-structure.md,
  * docs/research/binary-scoring-progression.md

@@ -72,8 +72,8 @@ export async function createSessionFromDraft(
     // automatically and the curated payload maps fields explicitly, so
     // neither export bumps its schemaVersion for this.
     steeredFocus: draft.steeredFocus,
-    // Assembly time rides with the provenance: consumption and the
-    // repeat-drift fold need when the blocks were BUILT, not when the
+    // Assembly time rides with the provenance: steering-trace
+    // consumption needs when the blocks were BUILT, not when the
     // athlete tapped Begin (a stale draft can be started days later).
     assembledAt: draft.updatedAt,
     blocks: draft.blocks.map((b) => ({
