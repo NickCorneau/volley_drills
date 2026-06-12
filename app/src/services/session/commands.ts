@@ -66,6 +66,12 @@ export async function createSessionFromDraft(
     participants: defaultParticipantsForPlayerCount(playerCount),
     assemblySeed: draft.assemblySeed,
     assemblyAlgorithmVersion: draft.assemblyAlgorithmVersion,
+    // Trust-loop KTD2: steering provenance rides from draft to plan so
+    // persisted records distinguish steered from unsteered sessions.
+    // Additive optional row field; the raw founder export carries it
+    // automatically and the curated payload maps fields explicitly, so
+    // neither export bumps its schemaVersion for this.
+    steeredFocus: draft.steeredFocus,
     blocks: draft.blocks.map((b) => ({
       id: b.id,
       type: b.type,

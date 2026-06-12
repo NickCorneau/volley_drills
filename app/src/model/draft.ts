@@ -42,6 +42,15 @@ export interface SessionDraft {
   archetypeName: string
   assemblySeed?: string
   assemblyAlgorithmVersion?: number
+  /**
+   * Stress-visibility provenance (KTD1/KTD2 of the 2026-06-11 trust-loop
+   * plan): the focus this draft's assembly was rung-steered on, stamped
+   * at build time only when the realized main_skill pick landed on the
+   * steer-target rung. Assembly metadata in the `assemblySeed` family —
+   * non-indexed, not a capture field. Absent means unsteered (legacy
+   * drafts, Repeat, recovery, substitution, off-target picks).
+   */
+  steeredFocus?: NonNullable<SetupContext['sessionFocus']>
   blocks: DraftBlock[]
   updatedAt: number
   rationale?: string

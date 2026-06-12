@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../db'
 import type { SessionReview, SetupContext } from '../../model'
+import { stressRungForDrill } from '../../data/stressLadders'
 import { buildDraft } from '../../domain/sessionBuilder'
 import {
   currentPersistedExecutionLog,
@@ -168,6 +169,24 @@ describe('startPlanSession', () => {
     expect(calibration?.sampleCount).toBe(3)
     expect(calibration?.overheadRatio).toBeCloseTo(1.2, 5)
   })
+
+  it('trust-loop U1: a steered launch stamps steeredFocus only on a realized on-target pick', async () => {
+    // No persisted skill level → beginner band, pass position 1. The
+    // saved draft is the real assembly result, so the stamp must track
+    // the realized main_skill rung (KTD1) — assert the biconditional
+    // rather than a fixed outcome to stay catalog-robust.
+    await startPlanSession({ priorContext: PRIOR_CONTEXT, nextFocus: 'pass' })
+
+    const draft = await getCurrentDraft()
+    expect(draft).not.toBeNull()
+    const main = draft!.blocks.find((b) => b.type === 'main_skill')
+    expect(main).toBeDefined()
+    if (stressRungForDrill('pass', main!.drillId) === 1) {
+      expect(draft!.steeredFocus).toBe('pass')
+    } else {
+      expect(draft!.steeredFocus).toBeUndefined()
+    }
+  })
 })
 
 describe('repeatSession', () => {
@@ -203,5 +222,15 @@ describe('repeatSession', () => {
     await repeatSession(PRIOR_CONTEXT)
 
     expect(lastBuildDraftOptions()?.calibration).toBeUndefined()
+  })
+
+  it('trust-loop U1: a Repeat draft never carries steering provenance', async () => {
+    await db.sessionReviews.add(verdictReview('more', 'accepted', 1000))
+
+    await repeatSession(PRIOR_CONTEXT)
+
+    const draft = await getCurrentDraft()
+    expect(draft).not.toBeNull()
+    expect(draft!.steeredFocus).toBeUndefined()
   })
 })

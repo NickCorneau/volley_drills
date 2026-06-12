@@ -1,5 +1,5 @@
 import { selectArchetype } from '../data/archetypes'
-import type { StressLadderFocus } from '../data/stressLadders'
+import { stressRungForDrill, type StressLadderFocus } from '../data/stressLadders'
 import type {
   BlockSlot,
   BlockSlotType,
@@ -85,7 +85,9 @@ export interface BuildDraftOptions {
    * session focus's current rung; absent → legacy selection. Known v1
    * bypass: when the `lastCompletedByType` substitution rule fires,
    * `pickMainSkillSubstitute` decides the slot without `pickForSlot`,
-   * so rung preference does not apply to that pick.
+   * so rung preference does not apply to that pick — and the build is
+   * NOT stamped `steeredFocus`, so every steering trace stays quiet
+   * for that session (trust-loop KTD6, R12).
    */
   readonly stressPositions?: Partial<Record<StressLadderFocus, number>>
   /**
@@ -382,6 +384,34 @@ function buildDraftResult(
 
   if (blocks.length === 0) return null
 
+  // Stress-visibility provenance (trust-loop KTD1): one build-time
+  // "steered" definition on REALIZED outcomes. Stamp only when the
+  // session focus is scoped, a derived position resolved for it, the
+  // main_skill pick came from `pickForSlot`'s rung preference (not the
+  // substitution path), and the picked drill's authored rung equals the
+  // steer target. Rung preference is a preference — nearest-rung
+  // fallback and the duration-fit reroute can land off-target — and an
+  // off-target pick fails quiet exactly like substitution, so no trace
+  // ever claims stress the session does not contain (R7/R11/R12).
+  // Metadata only: selection semantics unchanged, no algorithm-version
+  // bump (KTD6).
+  let steeredFocus: SessionDraft['steeredFocus']
+  const steerFocus = effectiveContext.sessionFocus
+  const steerTarget = steerFocus === undefined ? undefined : options?.stressPositions?.[steerFocus]
+  if (steerFocus !== undefined && steerTarget !== undefined && !mainSkillSubstitute) {
+    const mainSkillPicks = layout
+      .map((slot, index) => ({ slot, index }))
+      .filter(({ slot }) => slot.type === 'main_skill')
+      .map(({ index }) => selectedByLayoutIndex.get(index))
+      .filter((selected) => selected !== undefined)
+    const realizedOnTarget =
+      mainSkillPicks.length > 0 &&
+      mainSkillPicks.every(
+        (selected) => stressRungForDrill(steerFocus, selected.pick.drill.id) === steerTarget,
+      )
+    if (realizedOnTarget) steeredFocus = steerFocus
+  }
+
   const draft: SessionDraft = {
     id: 'current',
     context: effectiveContext,
@@ -389,6 +419,7 @@ function buildDraftResult(
     archetypeName: archetype.name,
     assemblySeed,
     assemblyAlgorithmVersion: SESSION_ASSEMBLY_ALGORITHM_VERSION,
+    ...(steeredFocus !== undefined ? { steeredFocus } : {}),
     blocks,
     updatedAt: Date.now(),
   }

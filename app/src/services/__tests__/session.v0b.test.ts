@@ -80,6 +80,40 @@ describe('v0b session services', () => {
     expect(plan[0].participants?.length).toBe(plan[0].playerCount)
   })
 
+  it('trust-loop U1: steeredFocus provenance survives createSessionFromDraft onto the plan', async () => {
+    const draft = buildDraft({
+      playerMode: 'solo',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'pass',
+    })
+    expect(draft).not.toBeNull()
+    // Stamp directly: this test pins the draft → plan carry, not the
+    // build-time predicate (sessionBuilder.test.ts owns that).
+    const steered = { ...draft!, steeredFocus: 'pass' as const }
+
+    await createSessionFromDraft({
+      draft: steered,
+      painFlag: false,
+      heatCta: false,
+      painOverridden: false,
+    })
+    const [plan] = await db.sessionPlans.toArray()
+    expect(plan.steeredFocus).toBe('pass')
+
+    // And an unstamped draft persists an unsteered plan (absent field).
+    await clearDb()
+    await createSessionFromDraft({
+      draft: draft!,
+      painFlag: false,
+      heatCta: false,
+      painOverridden: false,
+    })
+    const [unsteered] = await db.sessionPlans.toArray()
+    expect(unsteered.steeredFocus).toBeUndefined()
+  })
+
   it('persists a self+partner participants array for pair-mode drafts (U6 invariant)', async () => {
     const draft = buildDraft({
       playerMode: 'pair',

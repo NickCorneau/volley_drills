@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { selectArchetype } from '../data/archetypes'
 import { DRILLS } from '../data/drills'
+import { stressRungForDrill } from '../data/stressLadders'
 import {
   buildDraft,
   buildDraftWithAssemblyTrace,
@@ -2451,5 +2452,173 @@ describe('stress-rung preference (D154)', () => {
       // their incoming relative order via the finite sentinel.
       expect(ordered.map((c) => c.drill.id)).toEqual(['d05', 'dX-one', 'dX-two'])
     })
+  })
+})
+
+/**
+ * Stress-visibility trust loop (2026-06-11 plan, U1) — the build-time
+ * "steered" predicate stamped as `steeredFocus` provenance (KTD1/KTD2).
+ *
+ * KTD1 realized-outcome rule: the stamp requires a scoped focus, a
+ * resolved position for it, a non-substituted main_skill pick, AND the
+ * picked drill's authored rung equal to the steer target. Off-target
+ * picks (nearest-rung fallback, duration-fit reroute) fail quiet
+ * exactly like substitution — no trace may claim stress the session
+ * does not contain (R7/R11/R12).
+ */
+describe('steered provenance stamp (trust loop U1)', () => {
+  const soloPassContext: SetupContext = {
+    playerMode: 'solo',
+    timeProfile: 25,
+    netAvailable: false,
+    wallAvailable: false,
+    sessionFocus: 'pass',
+    playerLevel: 'intermediate',
+  }
+
+  it('stamps exactly when the realized main_skill rung equals the steer target', () => {
+    // Position 4 (intermediate solo/open pass): the steer prefers d11
+    // (rung 4), but the technique slot can shuffle-claim d11 first on
+    // some seeds, landing main_skill on d07 (rung 3). The stamp must
+    // track the REALIZED rung, never the intent — assert the
+    // biconditional across seeds and require both branches observed so
+    // neither side of the rule is vacuously pinned.
+    let sawStamped = false
+    let sawUnstamped = false
+    for (let i = 0; i < 50; i++) {
+      const draft = buildDraft(soloPassContext, {
+        assemblySeed: `stamp-realized-${i}`,
+        playerLevel: 'intermediate',
+        stressPositions: { pass: 4 },
+      })
+      expect(draft).not.toBeNull()
+      const main = draft!.blocks.find((b) => b.type === 'main_skill')
+      expect(main).toBeDefined()
+      const realizedOnTarget = stressRungForDrill('pass', main!.drillId) === 4
+      if (realizedOnTarget) {
+        expect(draft!.steeredFocus).toBe('pass')
+        sawStamped = true
+      } else {
+        expect(draft!.steeredFocus).toBeUndefined()
+        sawUnstamped = true
+      }
+    }
+    expect(sawStamped).toBe(true)
+    expect(sawUnstamped).toBe(true)
+  })
+
+  it('focus-absent (Recommended) build with positions → no stamp', () => {
+    const unscoped: SetupContext = { ...soloPassContext }
+    delete unscoped.sessionFocus
+    for (let i = 0; i < 10; i++) {
+      const draft = buildDraft(unscoped, {
+        assemblySeed: `stamp-unscoped-${i}`,
+        playerLevel: 'intermediate',
+        stressPositions: { pass: 4, serve: 4, set: 4 },
+      })
+      expect(draft).not.toBeNull()
+      expect(draft!.steeredFocus).toBeUndefined()
+    }
+  })
+
+  it('scoped-focus build without positions → no stamp', () => {
+    for (let i = 0; i < 10; i++) {
+      const draft = buildDraft(soloPassContext, {
+        assemblySeed: `stamp-positionless-${i}`,
+        playerLevel: 'intermediate',
+      })
+      expect(draft).not.toBeNull()
+      expect(draft!.steeredFocus).toBeUndefined()
+    }
+  })
+
+  it('position resolved for a different focus than the session → no stamp', () => {
+    for (let i = 0; i < 10; i++) {
+      const draft = buildDraft(soloPassContext, {
+        assemblySeed: `stamp-other-focus-${i}`,
+        playerLevel: 'intermediate',
+        stressPositions: { serve: 2 },
+      })
+      expect(draft).not.toBeNull()
+      expect(draft!.steeredFocus).toBeUndefined()
+    }
+  })
+
+  it('AE5 (build half): substitution fires on a steered build → no stamp', () => {
+    // pair/open + last main_skill d03 promotes substitute d10 (rung 3).
+    // Position 3 makes the substitute land ON the steer target — the
+    // stamp must still be withheld because the pick came from the
+    // substitution path, not pickForSlot's rung preference (KTD6).
+    const pairOpenPass: SetupContext = {
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'pass',
+    }
+    const draft = buildDraft(pairOpenPass, {
+      assemblySeed: 'stamp-substitution',
+      lastCompletedByType: { main_skill: 'd03' },
+      stressPositions: { pass: 3 },
+    })
+    expect(draft).not.toBeNull()
+    const main = draft!.blocks.find((b) => b.type === 'main_skill')
+    expect(main?.drillId).toBe('d10')
+    expect(draft!.steeredFocus).toBeUndefined()
+  })
+
+  it('nearest-rung fallback off the target rung → no stamp', () => {
+    // Beginner solo/open pass at position 4: rung-4 drills are out of
+    // band or assembly-blocked, so the realized pick is the nearest
+    // available rung (d05, rung 2) — off-target, no stamp, every seed.
+    const beginnerContext: SetupContext = { ...soloPassContext, playerLevel: 'beginner' }
+    for (let i = 0; i < 25; i++) {
+      const draft = buildDraft(beginnerContext, {
+        assemblySeed: `stamp-fallback-${i}`,
+        playerLevel: 'beginner',
+        stressPositions: { pass: 4 },
+      })
+      expect(draft).not.toBeNull()
+      const main = draft!.blocks.find((b) => b.type === 'main_skill')
+      expect(main).toBeDefined()
+      expect(stressRungForDrill('pass', main!.drillId)).not.toBe(4)
+      expect(draft!.steeredFocus).toBeUndefined()
+    }
+  })
+
+  it('duration-fit divergence off the target rung → no stamp', () => {
+    // Beginner solo/open pass at position 1: the steer prefers d01
+    // (rung 1), but d01-solo carries at most 5 minutes and the 25-min
+    // profile allocates more to main_skill, so the duration-fit
+    // carve-out reroutes off d01 every seed. Realized rung ≠ 1 → the
+    // mechanism steered but the outcome diverged → no stamp.
+    const beginnerContext: SetupContext = { ...soloPassContext, playerLevel: 'beginner' }
+    for (let i = 0; i < 25; i++) {
+      const draft = buildDraft(beginnerContext, {
+        assemblySeed: `stamp-duration-fit-${i}`,
+        playerLevel: 'beginner',
+        stressPositions: { pass: 1 },
+      })
+      expect(draft).not.toBeNull()
+      const main = draft!.blocks.find((b) => b.type === 'main_skill')
+      expect(main).toBeDefined()
+      if (stressRungForDrill('pass', main!.drillId) === 1) {
+        expect(draft!.steeredFocus).toBe('pass')
+      } else {
+        expect(draft!.steeredFocus).toBeUndefined()
+      }
+    }
+  })
+
+  it('recovery rebuilds never carry provenance', () => {
+    const recovery = buildRecoveryDraft({
+      playerMode: 'pair',
+      timeProfile: 25,
+      netAvailable: false,
+      wallAvailable: false,
+      sessionFocus: 'pass',
+    })
+    expect(recovery).not.toBeNull()
+    expect(recovery!.steeredFocus).toBeUndefined()
   })
 })

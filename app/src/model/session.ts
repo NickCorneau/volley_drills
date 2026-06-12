@@ -74,6 +74,14 @@ export interface SessionPlan {
   participants?: SessionParticipant[]
   assemblySeed?: string
   assemblyAlgorithmVersion?: number
+  /**
+   * Stress-visibility provenance, copied verbatim from the draft at
+   * session create (see `SessionDraft.steeredFocus`). Distinguishes
+   * rung-steered plans from unsteered ones in persisted records so the
+   * Safety steering trace can cash the promise honestly (R7/R11 of the
+   * 2026-06-11 trust-loop plan). Absent reads as unsteered.
+   */
+  steeredFocus?: NonNullable<SetupContext['sessionFocus']>
   blocks: SessionPlanBlock[]
   safetyCheck: SessionPlanSafetyCheck
   context?: SetupContext
