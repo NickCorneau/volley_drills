@@ -82,7 +82,7 @@ Founder-review comp frames awaiting or carrying an approval decision. Each set's
 
 | Date | Set | Covers | Status |
 | --- | --- | --- | --- |
-| 2026-06-12 | `docs/design/comps/2026-06-12-shibui-polish/` | S1 Setup recommendation-first restructure (R4–R6, 7 frames) + S5 Home link-pile relocation (R1–R3, 3 frames) | Awaiting founder comp review; approval unlocks the S1/S5 follow-up implementation plans |
+| 2026-06-12 | `docs/design/comps/2026-06-12-shibui-polish/` | S1 Setup recommendation-first restructure (R4–R6, 7 frames) + S5 Home card/link restructure (R1–R3, 3 frames + 4 v2 frames) | Ratified as `D158` (2026-06-12): `setup-01` + `home-v2-04` chosen; both shipped same day |
 
 ## Related Surfaces
 

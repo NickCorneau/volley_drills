@@ -61,23 +61,6 @@ export function deriveStressPositions(
 }
 
 /**
- * Positions as they stood at time `t`: the same fold, restricted to
- * reviews submitted at or before `t`. Serves the trust-loop repeat-
- * drift comparison (position at the repeated plan's `createdAt` vs
- * now, R8) and any other point-in-time read.
- */
-export function deriveStressPositionsAt(
-  reviews: readonly SessionReview[],
-  t: number,
-  band: PlayerLevel = 'beginner',
-): StressPositions {
-  return deriveStressPositions(
-    reviews.filter((review) => review.submittedAt <= t),
-    band,
-  )
-}
-
-/**
  * True when stepping one rung in `direction` from `position` actually
  * changes it — false at the ladder bound (and always false for
  * `keep`). The trust-loop offer gate (R15): no delta is offered whose

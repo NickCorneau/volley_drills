@@ -198,10 +198,11 @@ export function HomeScreen() {
           navigate(routes.setup())
         }
       }),
-      // Phase F Unit 1: LastComplete's sole secondary. Fresh setup for
-      // the tester whose answer to "same as last time?" is *no*. The
-      // intercept ensures review_pending still fires the soft-block
-      // modal.
+      // Phase F Unit 1 (2026-04-19): fresh setup (physical chips
+      // pre-filled, no banner) for the tester whose answer to "same as
+      // last time?" is *no*. D158: rendered by HomeScreen as a
+      // page-level link below the focal cluster, no longer a card prop.
+      // The intercept keeps the review_pending soft-block contract.
       handleStartDifferentSession: intercept(() => {
         if (!beginNonReviewAction()) return
         navigate(routes.setup())
@@ -444,14 +445,6 @@ interface PrimaryHandlers {
   handleRequestSkip: () => void
   handleDraftStart: () => void
   handleDraftEdit: () => void
-  /**
-   * Phase F Unit 1 (2026-04-19): replaces the pre-Phase-F
-   * `handleSameAsLast` + `handleLastCompleteEdit` pair. Routes to fresh
-   * `/setup` (physical chips pre-filled, no banner) - the "today is
-   * different" path. D158: rendered by HomeScreen as a page-level link,
-   * no longer a card prop.
-   */
-  handleStartDifferentSession: () => void
   /**
    * Home-coherence: the focal action on the LastComplete card — starts a
    * session steered to the plan's next focus (staleness head).

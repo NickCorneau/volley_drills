@@ -4,7 +4,7 @@ title: Shibui Polish Comp Set — Setup Recommendation-First + Home Link Relocat
 status: active
 stage: validation
 type: design-comps
-summary: "Founder-review 390x844 comp frames for the S1 Setup recommendation-first restructure (origin R4-R6) and the S5 Home link-pile relocation (origin R1-R3). Artifacts only - no application code ships with these; approval gates the follow-up implementation plans."
+summary: "Founder-review 390x844 comp frames for the S1 Setup recommendation-first restructure (origin R4-R6) and the S5 Home card/link restructure (origin R1-R3, including the v2 iteration). Ratified as D158 (2026-06-12): setup-01 and home-v2-04 chosen; both frames implemented same day."
 authority: comp-review artifact set for the 2026-06-12 shibui polish plan Tier 2 units (U5/U6)
 last_updated: 2026-06-12
 depends_on:

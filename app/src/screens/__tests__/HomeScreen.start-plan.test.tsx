@@ -1,8 +1,9 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../db'
+import { getStorageMeta } from '../../services/storageMeta'
 import { HomeScreen } from '../HomeScreen'
 
 /**
@@ -12,7 +13,23 @@ import { HomeScreen } from '../HomeScreen'
  * plan's next focus (reusing the last session's physical conditions) and
  * routes through the Setup -> Safety spine. When there is no prior context
  * to reuse, it falls back to a fresh Setup. Safety is never skipped.
+ *
+ * Also pins the single-flight race guard (`beginNonReviewAction`):
+ * competing Home actions are disabled while a launch is mid-flight. The
+ * pre-D158 pin lived in HomeScreen.repeat-race.test.tsx and was deleted
+ * with the Repeat affordance; the contract survived the removal and now
+ * protects the plan CTA plus the page-level escape link.
  */
+
+vi.mock('../../services/storageMeta', async () => {
+  const actual = await vi.importActual<typeof import('../../services/storageMeta')>(
+    '../../services/storageMeta',
+  )
+  return {
+    ...actual,
+    getStorageMeta: vi.fn(),
+  }
+})
 
 async function clearDb() {
   await Promise.all([
@@ -82,6 +99,9 @@ function renderHome() {
 describe('HomeScreen plan launch (Start [focus] session)', () => {
   beforeEach(async () => {
     await clearDb()
+    vi.mocked(getStorageMeta).mockReset()
+    // Matches the real implementation on a cleared storageMeta table.
+    vi.mocked(getStorageMeta).mockResolvedValue(undefined)
   })
 
   it('launches a focus-steered session through Safety, overriding the prior focus', async () => {
@@ -112,5 +132,42 @@ describe('HomeScreen plan launch (Start [focus] session)', () => {
 
     expect(await screen.findByTestId('setup-route')).toBeInTheDocument()
     expect(await db.sessionDrafts.get('current')).toBeUndefined()
+  })
+
+  it('disables competing Home actions while the launch is mid-flight', async () => {
+    const user = userEvent.setup()
+    await seedLastComplete({ withContext: true })
+    renderHome()
+
+    const startPlan = await screen.findByRole('button', { name: /start passing session/i })
+
+    // Arm the hanging skill-level read only AFTER Home has painted: the
+    // initial snapshot's `loadPlanInputs` also reads
+    // `onboarding.skillLevel`, and a pre-render pending mock would stall
+    // the whole screen at Loading. The race window under test is the
+    // read inside `startPlanSession`'s draft rebuild.
+    let resolveSkillLevel: (value: undefined) => void = () => undefined
+    vi.mocked(getStorageMeta).mockReturnValue(
+      new Promise((resolve) => {
+        resolveSkillLevel = resolve
+      }),
+    )
+
+    await user.click(startPlan)
+
+    // Single-flight: both the focal CTA and the page-level escape link
+    // sit disabled until the in-flight launch settles.
+    expect(startPlan).toBeDisabled()
+    expect(
+      await screen.findByRole('button', { name: /start a different session/i }),
+    ).toBeDisabled()
+
+    await act(async () => {
+      resolveSkillLevel(undefined)
+      await Promise.resolve()
+    })
+
+    expect(await screen.findByTestId('safety-route')).toBeInTheDocument()
+    expect(await db.sessionDrafts.get('current')).toBeDefined()
   })
 })

@@ -523,8 +523,7 @@ export function SafetyCheckScreen() {
             <Expander trigger={<>How sessions adapt</>} contentClassName="flex flex-col gap-2">
               <p className="text-sm leading-relaxed text-text-secondary">
                 Sessions adjust their challenge as you train. After each session, you review how it
-                went and approve or skip any change. Nothing changes without your okay, and Repeat
-                always repeats the same session.
+                went and approve or skip any change. Nothing changes without your okay.
               </p>
             </Expander>
           </section>

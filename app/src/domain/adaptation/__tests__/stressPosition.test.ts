@@ -4,7 +4,6 @@ import { stressLadderBounds } from '../../../data/stressLadders'
 import {
   acceptedReviewMovedPosition,
   deriveStressPositions,
-  deriveStressPositionsAt,
   directionCanMovePosition,
   prospectiveStressPosition,
 } from '../stressPosition'
@@ -139,19 +138,6 @@ describe('deriveStressPositions', () => {
       'beginner',
     )
     expect(positions.pass).toBe(2)
-  })
-})
-
-/** Trust-loop U2 helpers (2026-06-11 plan): point-in-time, gating, movement. */
-describe('deriveStressPositionsAt', () => {
-  it('excludes reviews submitted after t from the fold', () => {
-    const reviews = [
-      verdictReview('pass', 'more', 'accepted', 1000),
-      verdictReview('pass', 'more', 'accepted', 5000),
-    ]
-    expect(deriveStressPositionsAt(reviews, 2000, 'beginner').pass).toBe(2)
-    expect(deriveStressPositionsAt(reviews, 5000, 'beginner').pass).toBe(3)
-    expect(deriveStressPositionsAt(reviews, 500, 'beginner').pass).toBe(1)
   })
 })
 

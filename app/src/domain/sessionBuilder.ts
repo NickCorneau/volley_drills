@@ -51,9 +51,10 @@ export const SESSION_ASSEMBLY_ALGORITHM_VERSION = 10
  * Phase 2 of the 2026-04-26 red-team remediation promotes substitution
  * out of `findSwapAlternatives` and into `buildDraft`. The caller MUST
  * opt in by passing `lastCompletedByType.main_skill`; without it
- * `buildDraft` keeps the legacy default selection path so existing
- * call sites (Repeat-this-session, Repeat-what-you-did, tests) stay
- * untouched.
+ * `buildDraft` keeps the legacy default selection path. (The original
+ * non-opting call sites were the Repeat paths, retired by `D158`;
+ * today the legacy path serves callers and tests that omit the
+ * option.)
  *
  * Substitution fires only on the `main_skill` slot, only when ALL of:
  *   1. `lastCompletedByType.main_skill` resolves to a drill id,
@@ -92,8 +93,9 @@ export interface BuildDraftOptions {
    * Clock calibration (U5/KTD6): session-grain overhead ratio derived
    * from clean completes (`deriveSessionCalibration`). Scales the
    * time-profile budget before allocation so expected wall time tracks
-   * the chosen profile; absent or inert → budget unchanged. Repeat
-   * paths deliberately omit it — repeat means repeat.
+   * the chosen profile; absent or inert → budget unchanged. (The
+   * Repeat paths, which deliberately omitted it — repeat means repeat —
+   * were retired by `D158`; all live steered callers pass it.)
    */
   readonly calibration?: SessionCalibration
 }

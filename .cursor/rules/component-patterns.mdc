@@ -21,8 +21,8 @@ alwaysApply: false
 - `<Card variant="soft|focal">` for rounded content sections (warm or focal-surface background).
 - `<Callout tone="info|warning|success" emphasis="flat|hairline" size="md|sm">` for tone-driven information panels (heat warnings, PainOverrideCard outer panel, Settings export-success message). `StatusMessage variant="error"` uses Callout internally.
 - `<ChoiceRow value onChange options layout ariaLabel|ariaLabelledBy>` for radiogroup chip rows. Layout is `'flex' | 'grid-2' | 'grid-3'`. Per-option `tone` overrides `defaultTone` (mixed-tone case: SafetyCheckScreen Recency `0 days` is warning while siblings are accent).
-- `<ChoiceSection title description? footerNote? optional?>` for headed choice sections. Closed slot set; new slot needs use opaque `children`.
-- `<ChoiceSubsection titleId title description?>` for nested follow-up panels inside a `ChoiceSection`.
+- `<ChoiceSection title headingVariant? description? footerNote? optional?>` for headed choice sections. Closed slot set; new slot needs use opaque `children`. `headingVariant="micro"` is the `D158` quiet uppercase micro-label treatment (Setup refine cluster only; Safety keeps the `default` question-scale headings) — micro surfaces must stay allowlisted in `app/scripts/validate-typography-guardrails.mjs`.
+- `<ChoiceSubsection titleId title headingVariant? description?>` for nested follow-up panels inside a `ChoiceSection`.
 - `<Disclosure label children testId?>` for collapsed-by-default reveal that REPLACES its trigger when expanded (PerDrillCapture drawers).
 - `<Expander trigger children onOpenChange?>` for collapse/expand where the trigger STAYS VISIBLE with a chevron (SafetyCheckScreen heat tips).
 - `<NumberCell label value onCommit validate? invalidMessage? helperText? testId?>` for large numeric tap-to-type input. Empty input commits `null`; the empty-zero rule renders `value === 0` as a placeholder.
