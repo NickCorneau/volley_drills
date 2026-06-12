@@ -433,7 +433,18 @@ export function SafetyCheckScreen() {
           </div>
         )}
 
-        <section>
+        {/*
+          Secondary disclosures read as ONE quiet cluster, not two
+          free-floating links. Before: each Expander sat in its own
+          top-level <section>, so the body's gap-6 (24px) stacked on top
+          of each trigger's min-h-[54px] tap padding — ~58px of air
+          between two thin text links, more separation than the actual
+          questions above them got (inverted hierarchy; founder-flagged
+          2026-06-12). Now both triggers share one section: a single
+          gap-6 separates the cluster from the pain question, and the two
+          54px tap targets sit adjacent in a calm settings-list rhythm.
+        */}
+        <section className="flex flex-col">
           <Expander
             onOpenChange={(open) => setHeatExpanded(open)}
             trigger={
@@ -509,25 +520,23 @@ export function SafetyCheckScreen() {
               </ul>
             </Callout>
           </Expander>
-        </section>
 
-        {/* Trust-loop U4 (R10): evergreen "How sessions adapt" gloss,
-          reachable on every Safety visit once the athlete has EVER
-          been steered (current draft or any persisted plan) — never
-          before. Collapsed Expander mirrors the heat-tips disclosure
-          above; content states the contract in jargon-gated plain
-          language. Suppressed with the rest of the trace while the
-          pain override is active. */}
-        {painFlag !== true && steeringTrace?.showGloss && (
-          <section>
+          {/* Trust-loop U4 (R10): evergreen "How sessions adapt" gloss,
+            reachable on every Safety visit once the athlete has EVER
+            been steered (current draft or any persisted plan) — never
+            before. Shares the disclosure cluster with the heat tips
+            above; content states the contract in jargon-gated plain
+            language. Suppressed with the rest of the trace while the
+            pain override is active. */}
+          {painFlag !== true && steeringTrace?.showGloss && (
             <Expander trigger={<>How sessions adapt</>} contentClassName="flex flex-col gap-2">
               <p className="text-sm leading-relaxed text-text-secondary">
                 Sessions adjust their challenge as you train. After each session, you review how it
                 went and approve or skip any change. Nothing changes without your okay.
               </p>
             </Expander>
-          </section>
-        )}
+          )}
+        </section>
 
         {createError && <StatusMessage variant="error" message={createError} />}
       </ScreenShell.Body>
