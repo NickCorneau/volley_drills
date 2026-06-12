@@ -98,6 +98,17 @@ Shared v2 moves (all three frames):
 3. **Repeat-link consolidation** — stacked (v2-01/03) vs. inline pair (v2-02). The inline pair shortens the second label to `shorter version (10 min)`; both segments stay independent 44-px buttons.
 4. Supersedes the v1 Home question "do the Repeat links move too?" — founder feedback ("3 links are just too many") reads as yes; v1 frames 01/03 (repeat kept in card) remain for reference.
 
+### v2-04: repeat-removal frame (founder follow-up, 2026-06-12)
+
+Founder follow-up question on the v2 frames: do the repeat links need to exist at all, given Setup already pre-fills the physical chips from `getLastContext()` ("I don't think I'd ever used repeat plan")? `home-v2-04-no-repeat.png` shows that end state: the v2-01 minimal card with **both repeat links removed** — the page field is the single `Start a different session` escape hatch.
+
+What removal gives up (for the decision record): one-tap verbatim repeat with the same focus (the Setup path pre-fills conditions but resets focus to Recommended, so a true same-focus repeat costs one extra chip tap), and the ended-early subset rebuild (`Repeat shorter version` is the only path that rebuilds exactly the completed blocks). Removal would retire the 2026-04-22 one-tap-Repeat decision surface, the repeat-drift note (trust-loop U5/R8), the `REPEAT_SUBSET_MIN_MINUTES` floor, and the HomeSecondaryRow repeat action — a `docs/decisions.md` entry, not just a UI edit.
+
+## Founder Comp Decisions (recorded 2026-06-12)
+
+- **Setup: frame `setup-01-returning-quiet-labels.png` chosen** ("liked setup 1 the most") — heading option A (quiet uppercase micro-labels) at `gap-4` cluster spacing. Implicitly accepts the two-line focal-line wrap shown in that frame (open question 4). Callout copy stays unchanged (conservative default; frame 07's slim variant not chosen).
+- **Home: direction is the v2 family** (links out of the card, `Recommended` eyebrow, meta line removed); final variant pending the repeat-removal call (v2-01/02 vs. v2-04).
+
 ## What Approval Unlocks
 
 Founder approval of a variant per question above unlocks the follow-up implementation plans: S1 Setup restructure code (R4–R6) and S5 Home relocation code (R1–R3, carrying origin R11 — the Home covenant "Deferred for later" amendment — and the D152 decision-row update).
