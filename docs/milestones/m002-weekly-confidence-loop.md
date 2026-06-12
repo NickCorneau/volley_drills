@@ -1,12 +1,12 @@
 ---
 id: M002
 title: Weekly Training Home (M002 series)
-status: draft
-stage: planning
+status: active
+stage: build
 type: milestone
 authority: post-M001 self-coached deepening series scope, milestone-level breakdown, and main-tool evidence bar
-summary: "M002 is a SERIES of milestones (self-coached deepening arc), not a single surface — re-scoped and ratified 2026-06-03 (D149). A progression spine (M002.1 thin-spine + visible adaptation → M002.2 stress ladders + technique-how depth → M002.3 the objective '1% better' drill score) plus three attaching tracks (M002.4 goals/anchor, M002.5 bring others in, M002.6 attack + tactics content) plus a Phase 1.5 handoff. Confidence is reframed to a felt-readiness companion with a behavioral-primary receipt. Milestone-level breakdown lives in docs/brainstorms/2026-06-03-m002-thin-spine-and-milestone-series-requirements.md; each milestone is planned 1-by-1 after the roadmap is reconciled."
-last_updated: 2026-06-03
+summary: "M002 is a SERIES of milestones (self-coached deepening arc), not a single surface — re-scoped and ratified 2026-06-03 (D149). A progression spine (M002.1 thin-spine + visible adaptation → M002.2 stress ladders + technique-how depth → M002.3 the objective '1% better' drill score) plus three attaching tracks (M002.4 goals/anchor, M002.5 bring others in, M002.6 attack + tactics content) plus a Phase 1.5 handoff. Confidence is reframed to a felt-readiness companion with a behavioral-primary receipt. The series is IN FLIGHT: M002.1 shipped 2026-06-04/05 (D150–D152), with substrate/visibility/integrity pull-forwards D153–D160 landed through 2026-06-12; M002.2 is the next spine milestone. Milestone-level breakdown lives in docs/brainstorms/2026-06-03-m002-thin-spine-and-milestone-series-requirements.md; each milestone is planned 1-by-1."
+last_updated: 2026-06-12
 depends_on:
   - docs/vision.md
   - docs/prd-foundation.md
@@ -31,6 +31,17 @@ decision_refs:
   - D146
   - D147
   - D149
+  - D150
+  - D151
+  - D152
+  - D153
+  - D154
+  - D155
+  - D156
+  - D157
+  - D158
+  - D159
+  - D160
 open_question_refs:
   - O2
   - O21
@@ -69,7 +80,13 @@ M002 is a **series of milestones**, not a single surface (`D149`). The framing r
 
 **Ratified roadmap-lock calls (`D149`):** umbrella name "Weekly Training Home" (ID + filename stable); **content-forward ordering** (M002.2 → M002.6 → M002.3 → M002.4 → M002.5); coach-gate after the spine; this charter's `open_question_refs` drop the resolved `O24` and add `O21` (input-only). The **hybrid stress-ladder spine** (the BAB-camp "Stress" framework = progressive contextual interference, `D68`) organizes the mid-series content/progression milestones; v1 speaks stress vocabulary without building ladder content.
 
-**Reading the legacy scope sections below.** The "In scope" / "Minimal surface contract" / "Planning defaults" sections that follow were written for the single "Weekly Confidence Loop" milestone and describe **M002.1 (v1)** specifically. Where they say "weekly confidence matters more than rich history," "a confidence and investment surface," or a receipt of "one load proxy + one skill proxy," they are **superseded by `D149`**: the receipt is behavioral-primary, confidence is a felt-readiness companion, and user-facing load is dropped to backend-only. The series brainstorm's M002.1 requirements (R1–R11) are authoritative for v1.
+## Series progress (as of 2026-06-12)
+
+- **M002.1 Thin-Spine + Visible Adaptation — SHIPPED** 2026-06-04 (plan `docs/plans/2026-06-04-001-feat-m002-1-thin-spine-and-adaptation-plan.md`; `D150` derive-don't-persist, `D151` felt-readiness deferral) with the 2026-06-05 Home-coherence follow-on (`D152`: focal card launches the derived plan; weekly receipt merged into Recent sessions).
+- **Pull-forwards landed on the v1 surface** (each a bounded `/lfg` dispatch, not a new milestone): `D153` design-language corrections; `D154` stress substrate (ladders + derived position + rung-steered assembly — the accepted delta now acts); `D155` session-truth + clock calibration; `D156` Home covenant; `D157` stress-visibility trust loop; `D158` shibui empty-space polish (Home repeat affordances removed; Setup recommendation-first frame); `D159` steering everywhere (Setup Recommended resolves through the derived plan; rung-aware substitution; Home/Setup build parity) + `D160` catalog-wide stress-ladder membership + validation hardening (2026-06-12).
+- **Next spine milestone: M002.2** Stress Ladders + Technique "How" Depth — the `D154`/`D160` ladder substrate and `D159` default-path steering are in place; M002.2 is the content milestone over them (new rung drills, per-rung cues, technique-how depth). Planned 1-by-1 per `D149`.
+
+**Reading the legacy scope sections below.** The "In scope" / "Minimal surface contract" / "Planning defaults" sections that follow were written for the single "Weekly Confidence Loop" milestone and describe **M002.1 (v1)** specifically. Where they say "weekly confidence matters more than rich history," "a confidence and investment surface," or a receipt of "one load proxy + one skill proxy," they are **superseded by `D149`**: the receipt is behavioral-primary, confidence is a felt-readiness companion, and user-facing load is dropped to backend-only. The series brainstorm's M002.1 requirements (R1–R11) are authoritative for v1. **As shipped** (see Series progress above): the standalone weekly-receipt surface merged into the Recent-sessions header (`D152`), the `Queue` surface landed as the focal card's "Then:" line rather than a separate view, and Home Repeat affordances were later removed outright (`D158`) — read the contract below as the v1 design intent, not the live surface census.
 
 ## Why this milestone exists
 

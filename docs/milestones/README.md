@@ -6,7 +6,7 @@ stage: planning
 type: index
 authority: milestone conventions, status vocabulary, charter requirements
 summary: "How milestones work, status vocabulary, and charter requirements."
-last_updated: "2026-04-16"
+last_updated: "2026-06-12"
 depends_on:
   - docs/vision.md
   - docs/prd-foundation.md
@@ -58,6 +58,6 @@ Suggested statuses:
 
 ## Planning-stage rule
 
-The v0b Starter Loop under `app/` is **feature-complete** as the D91 field-test artifact (`D119`); Phases A, B, C (C-0 → C-5), E, and F (F1 – F12) landed through 2026-04-19. **M001 milestone closed 2026-05-27 by founder executive call (`D147`)** — build phase shipped under D130 in tiers (Tier 1a / Tier 1b Layer A / Tier 1c) between 2026-04-20 and 2026-05-08; validation phase ran 2026-04-20 → 2026-05-27. **M002 Weekly Confidence Loop** is the active milestone post-closure (`status: draft / stage: planning`); M002 absorbed M001 carry-forward as discretionary post-M002-core follow-on per D147 R13. Future milestone files should still behave like charters and thin-slice specs until their build phase is explicitly active.
+The v0b Starter Loop under `app/` is **feature-complete** as the D91 field-test artifact (`D119`); Phases A, B, C (C-0 → C-5), E, and F (F1 – F12) landed through 2026-04-19. **M001 milestone closed 2026-05-27 by founder executive call (`D147`)** — build phase shipped under D130 in tiers (Tier 1a / Tier 1b Layer A / Tier 1c) between 2026-04-20 and 2026-05-08; validation phase ran 2026-04-20 → 2026-05-27. **M002 Weekly Training Home** (renamed from "Weekly Confidence Loop" per `D149`; ID + filename stable) is the active milestone series post-closure (`status: active / stage: build` — M002.1 shipped 2026-06-04/05, pull-forwards `D153`–`D160` landed through 2026-06-12, M002.2 next); M002 absorbed M001 carry-forward as discretionary post-M002-core follow-on per D147 R13. Future milestone files should still behave like charters and thin-slice specs until their build phase is explicitly active.
 
 Use `docs/templates/milestone-charter.md` as the default starting point.

@@ -51,14 +51,14 @@ Decomposition skipped — surprise-me mode.
 **Rationale:** Trust time-bomb in the product's stated second act. The 2026-07-20 re-eval needs evidence that adaptation *works*; a presentation-only verdict can never produce that evidence. Highest evidence-per-effort move available; built as a typed modifier channel, every later progression feature (ladders, goals, taper) becomes a new modifier producer rather than a new assembly fork.
 **Downsides:** Less visibly "new" than a feature; with no ladder content yet, modulation is coarse-grained at first.
 **Confidence:** 90% · **Complexity:** Medium
-**Status:** **Explored** — selected as the brainstorm seed on 2026-06-11
+**Status:** **Shipped** — selected as the brainstorm seed on 2026-06-11; landed across `D154` (stress substrate: the accepted verdict delta now acts on assembly), `D155` (session-truth terminal semantics + clamped recorded duration + session-grain clock calibration), `D157` (stress-visibility trust loop), and `D159` (steering extended to the default Setup path + rung-aware substitution, closing the act-everywhere gap)
 
 ### 2. The Stress Rung, Derived
 **Description:** One canonical difficulty axis on drill variants unifying the five disjoint encodings, rendered as a **finite graded syllabus** (ABRSM/étude-book shape, not endless library); rung position **derived** from history (never picked); degraded-input variants ("game days") as a second axis. M002.2/.3/.6 + verdict assembly all become consumers of one substrate.
 **Basis:** `direct:` dormant `progressions.ts` chains; five difficulty encodings with no unifying axis; BAB stress ladder already named the organizing primitive.
 **Rationale:** Three remaining milestones depend on a difficulty ordering; whoever builds M002.2 first will define this substrate accidentally under deadline pressure. The derived-rung pin avoids shipping a difficulty *setting* instead of a *coach's judgment*.
 **Downsides:** Early schema commitment; content payoff lands a milestone later.
-**Confidence:** 80% · **Complexity:** Medium-High · **Status:** Unexplored
+**Confidence:** 80% · **Complexity:** Medium-High · **Status:** **Substantially shipped** — `D154` shipped the canonical per-focus stress-rung axis (static ladders over the catalog), the **derived** ladder position (user-accepted verdicts only, never picked), and rung-steered assembly; `D160` broadened ladder membership to every scoped-tag drill with validation cross-checks. Remainder owned by M002.2: per-rung cue/content authoring (the graded-syllabus rendering), thin-rung backfill, and the degraded-input "game days" second axis
 
 ### 3. Chains Before Attack
 **Description:** Ship the variant-level scenario/chain field the type system already predicts, then author the attack track *into* it; one-tap chain-split attribution ("which link broke?") at DrillCheck.
