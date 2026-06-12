@@ -1,14 +1,14 @@
 ---
 id: brainstorm-home-covenant
 title: Home Covenant — Focal-Slot Governance for the M002 Series
-status: active
-stage: planning
+status: complete
+stage: implemented
 type: requirements
 date: 2026-06-11
 topic: home-covenant
 summary: "Ratify a Home covenant: Home's identity in the founder's words plus five rules (lifecycle-only focal slot, plan-as-mouthpiece integration, genkan test, quiet-dark periphery, input parsimony), with default Home lanes for all six M002 claimants that each milestone inherits unless a decision row justifies deviation, backed by a minimal render test. Doc-and-one-test pass; zero UI changes."
 authority: requirements input for the Home covenant ratification pass; subordinate to docs/decisions.md and docs/vision.md
-last_updated: 2026-06-11
+last_updated: 2026-06-12
 depends_on:
   - docs/ideation/2026-06-11-home-focal-headroom-ideation.md
   - docs/decisions.md

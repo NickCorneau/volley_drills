@@ -79,7 +79,7 @@ Read only as much as the task needs.
    - Product direction: `STRATEGY.md` (tight anchor) -> `docs/vision.md` -> `docs/decisions.md` -> `docs/prd-foundation.md`
    - Milestone/spec work: `docs/milestones/m001-solo-session-loop.md` -> relevant `docs/specs/`
    - Prototype work: `docs/research/2026-04-12-v0a-runner-probe-feedback.md` -> `docs/research/2026-04-19-v0b-starter-loop-feedback.md` -> `app/README.md`
-   - **App architecture / new feature work**: `app/README.md` -> `docs/ops/app-architecture-guidance.md` -> `.cursor/rules/data-access.mdc` / `component-patterns.mdc` / `routing.mdc` / `testing.mdc`
+   - **App architecture / new feature work**: `app/README.md` -> `docs/ops/app-architecture-guidance.md` -> `.cursor/rules/data-access.mdc` / `component-patterns.mdc` / `routing.mdc` / `testing.mdc`. Features that want Home presence also load the `D156` Home covenant + claimant-lane ledger in `docs/research/brand-ux-guidelines.md` §7.1
    - Documented solutions / known fixes: `docs/solutions/` (when present) for past bugs, best practices, and workflow patterns, organized by category with YAML frontmatter such as `module`, `tags`, and `problem_type`; relevant when implementing or debugging in documented areas
    - Research: `docs/research/README.md` -> narrowest relevant note
    - Design / UX work: `docs/design/README.md` -> referenced design-canonical doc (brand / visual / outdoor). Home-surface changes also load the `D156` Home covenant + M002 claimant-lane ledger in `docs/research/brand-ux-guidelines.md` §7.1

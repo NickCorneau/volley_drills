@@ -1,7 +1,7 @@
 ---
 title: "docs: Ratify the Home covenant — decision row, canon, routing, render budget"
 type: docs
-status: active
+status: complete
 date: 2026-06-12
 origin: docs/brainstorms/2026-06-11-home-covenant-requirements.md
 ---

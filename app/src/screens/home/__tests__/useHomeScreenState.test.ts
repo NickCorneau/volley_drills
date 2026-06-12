@@ -23,6 +23,7 @@ const EMPTY_PLAN_INPUTS = {
   reviews: [] as SessionReview[],
   trainedSessions: [],
   lastAcceptedDelta: null,
+  skillBand: undefined,
 }
 
 describe('useHomeScreenState', () => {
@@ -147,6 +148,7 @@ describe('useHomeScreenState', () => {
         reviews: [submittedReview()],
         trainedSessions: [{ focus: 'pass', trainedAt: 1000 }],
         lastAcceptedDelta: null,
+        skillBand: undefined,
       })
       const flags = await resolveHomeSnapshot()
       expect(flags.receipt).not.toBeNull()
@@ -157,6 +159,7 @@ describe('useHomeScreenState', () => {
         reviews: [submittedReview()],
         trainedSessions: [{ focus: 'pass', trainedAt: 1000 }],
         lastAcceptedDelta: { kind: 'stress', focus: 'serve', direction: 'more' },
+        skillBand: undefined,
       })
       const flags = await resolveHomeSnapshot()
       expect(flags.carryForwardLine).toBe('Carried forward: a bit more stress on serving.')
@@ -169,6 +172,7 @@ describe('useHomeScreenState', () => {
         reviews: [submittedReview()],
         trainedSessions: [{ focus: 'pass', trainedAt: 1000 }],
         lastAcceptedDelta: null,
+        skillBand: undefined,
       })
       const flags = await resolveHomeSnapshot()
       expect(flags.carryForwardLine).toBeNull()

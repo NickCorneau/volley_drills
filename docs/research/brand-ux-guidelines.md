@@ -445,7 +445,7 @@ Each screen has an intended posture. These are the reference treatments; when ad
 
 #### The Home covenant (`D156`, ratified 2026-06-12)
 
-Home's identity, in the founder's words: **calmly and obviously start the next session; be trusted that it is the right session; offer a quick custom escape.** No Home element may work against these three jobs. Five rules govern every future Home claim (origin: `docs/brainstorms/2026-06-11-home-covenant-requirements.md`):
+Home's identity, in the founder's words: **calmly and obviously start the next session; be trusted that it is the right session; offer a quick custom escape.** No Home element may work against these three jobs. Five rules govern every future Home claim (origin: `docs/brainstorms/2026-06-11-home-covenant-requirements.md`). `D156` in `docs/decisions.md` is the ratification record and outranks this section; amendments land as a new decision row and are folded here in the same pass:
 
 1. **Lifecycle-only focal slot.** Only session-lifecycle states occupy the primary card, chosen by the precedence above. The only non-lifecycle tenancy is the scheduled, expiring exception class below.
 2. **Plan-as-mouthpiece.** An M002 feature is "present" on Home when it changes what the derived plan assembles, launches, or says — inputs in, smarter sentence and launch out (`D154` is the shipped proof: a flagship feature with zero new Home chrome). New Home pixels require their own decision row citing this covenant.

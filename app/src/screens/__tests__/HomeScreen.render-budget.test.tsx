@@ -20,6 +20,10 @@ import { HomeScreen } from '../HomeScreen'
  * Counting rules (jsdom does no layout, so everything is a DOM census):
  * - tap target  = enabled button or link, page-wide
  * - region      = ARIA region landmark (sections with accessible names)
+ * - top-level   = direct element child of the ScreenShell body
+ *                 ([data-screen-shell-body]) — catches additions that
+ *                 carry no landmark and no tap target (a quiet <p>
+ *                 line is exactly the R5 creep class)
  * - card line   = text-bearing row inside the Train again card
  *                 (paragraphs and action labels each count once;
  *                 visual wrapping never multiplies the count)
@@ -32,14 +36,21 @@ import { HomeScreen } from '../HomeScreen'
 // Steady state: 3 card actions (focal CTA + 2 tertiary links) + the
 // Settings footer link; the Train again + Recent sessions regions; a
 // 6-line card interior (state line, metadata, CTA, Then-line, 2 links).
+// The body hosts exactly 2 top-level elements: the thin-spine cluster
+// and the Recent sessions section.
 const STEADY_TAP_TARGETS = 4
 const STEADY_REGIONS = 2
+const STEADY_BODY_CHILDREN = 2
 const STEADY_CARD_LINE_CAP = 6
 
 // Skipped-tail variant adds exactly one element: the subset-repeat link.
 const SKIPPED_TAIL_TAP_TARGETS = 5
 const SKIPPED_TAIL_CARD_LINE_CAP = 7
 
+// Coupled to the shipped SkillFocus set on purpose: extend the
+// alternation when a new focus ships (e.g. the queued M002 attack
+// track), otherwise the await anchor times out opaquely. Do not loosen
+// to `.+` — that would also match "Start a different session".
 const LAUNCH_CTA = /start (passing|serving|setting) session/i
 
 async function clearDb() {
@@ -101,7 +112,7 @@ async function seedSkippedTail(execId: string) {
   const completedAt = Date.now() - 2 * 24 * 60 * 60 * 1000
   const block = (id: string, durationMinutes: number) => ({
     id,
-    type: 'skill' as const,
+    type: 'technique' as const,
     drillName: `Drill ${id}`,
     shortName: id,
     durationMinutes,
@@ -161,9 +172,21 @@ function countEnabledTapTargets() {
   return enabledButtons.length + links.length
 }
 
-function cardLineCount(card: HTMLElement) {
-  return card.querySelectorAll('p, button').length
+function bodyChildCount() {
+  const body = document.querySelector('[data-screen-shell-body]')
+  if (!body) throw new Error('ScreenShell body not found')
+  return body.childElementCount
 }
+
+// Row-level text elements only. Spans/divs are deliberately excluded
+// because they nest inside buttons and rows and would multiply the
+// count without representing a new visual line.
+function cardLineCount(card: HTMLElement) {
+  return card.querySelectorAll('p, button, a, li, h1, h2, h3, h4, h5, h6').length
+}
+
+const BUDGET_MSG =
+  'Home render budget exceeded — evict an element or amend the budget via a decision row citing D156 (see file docblock)'
 
 describe('Home covenant render budget (D156)', () => {
   beforeEach(async () => {
@@ -176,10 +199,10 @@ describe('Home covenant render budget (D156)', () => {
       renderHome()
       await screen.findByRole('button', { name: LAUNCH_CTA })
 
-      expect(countEnabledTapTargets()).toBe(STEADY_TAP_TARGETS)
+      expect(countEnabledTapTargets(), BUDGET_MSG).toBe(STEADY_TAP_TARGETS)
     })
 
-    it('renders exactly the budgeted region census', async () => {
+    it('renders exactly the budgeted region and top-level element census', async () => {
       await seedSteadyState('exec-budget')
       renderHome()
       await screen.findByRole('button', { name: LAUNCH_CTA })
@@ -187,6 +210,9 @@ describe('Home covenant render budget (D156)', () => {
       // The two budgeted regions: the primary card + the Recent block.
       const regions = screen.getAllByRole('region')
       expect(regions).toHaveLength(STEADY_REGIONS)
+      // Top-level census: catches additions that carry no landmark and
+      // no tap target (an unlandmarked quiet line still adds a child).
+      expect(bodyChildCount(), BUDGET_MSG).toBe(STEADY_BODY_CHILDREN)
       expect(screen.getByRole('region', { name: /train again/i })).toBeInTheDocument()
       expect(screen.getByRole('region', { name: /recent sessions/i })).toBeInTheDocument()
 
@@ -205,7 +231,7 @@ describe('Home covenant render budget (D156)', () => {
       await screen.findByRole('button', { name: LAUNCH_CTA })
 
       const card = screen.getByRole('region', { name: /train again/i })
-      expect(cardLineCount(card)).toBeLessThanOrEqual(STEADY_CARD_LINE_CAP)
+      expect(cardLineCount(card), BUDGET_MSG).toBeLessThanOrEqual(STEADY_CARD_LINE_CAP)
     })
 
     it('keeps the periphery dark when no peripheral signal has a live condition', async () => {
@@ -239,10 +265,15 @@ describe('Home covenant render budget (D156)', () => {
       ).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /repeat full plan/i })).toBeInTheDocument()
 
-      expect(countEnabledTapTargets()).toBe(SKIPPED_TAIL_TAP_TARGETS)
+      expect(countEnabledTapTargets(), BUDGET_MSG).toBe(SKIPPED_TAIL_TAP_TARGETS)
+
+      // Region + top-level census stay at the steady-state pins — the
+      // variant's extra element lives inside the card, not the body.
+      expect(screen.getAllByRole('region')).toHaveLength(STEADY_REGIONS)
+      expect(bodyChildCount(), BUDGET_MSG).toBe(STEADY_BODY_CHILDREN)
 
       const card = screen.getByRole('region', { name: /train again/i })
-      expect(cardLineCount(card)).toBeLessThanOrEqual(SKIPPED_TAIL_CARD_LINE_CAP)
+      expect(cardLineCount(card), BUDGET_MSG).toBeLessThanOrEqual(SKIPPED_TAIL_CARD_LINE_CAP)
     })
   })
 })

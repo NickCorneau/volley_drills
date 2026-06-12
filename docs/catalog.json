@@ -912,7 +912,7 @@
       "id": "home-covenant-requirements-2026-06-11",
       "path": "docs/brainstorms/2026-06-11-home-covenant-requirements.md",
       "type": "requirements",
-      "status": "active",
+      "status": "complete",
       "canonical_for": "Requirements for ratifying the Home covenant after D152 used the last focal capacity: Home's identity in the founder's words (calm + obvious next-session start, trusted recommendation, quick custom escape) plus five rules R1-R6 (lifecycle-only focal slot, plan-as-mouthpiece default integration, genkan dwelling test, quiet-dark periphery with at most one steady-state line, input parsimony — behavior-first learning, never require users to explain deviations), a default-lane ledger for all six M002 claimants (R7; deviations need a decision row; every M002 milestone plan carries a one-line Home section citing its lane), D151 readiness as the single scheduled focal tenant (R8: capability-semantics tenancy test, lifecycle states outrank it, post-session window excluded, card inherits the render budget), a minimal render-budget test pinning steady-state Home (R9), named triggers gating heavier machinery (R10), and registration in agent routing surfaces at ratification (R11). Doc-and-one-test pass; zero UI changes. Follow-on brainstorm queued: game-time observation input seam. Origin: docs/ideation/2026-06-11-home-focal-headroom-ideation.md. Ratified 2026-06-12 by D156 (docs/decisions.md); the operational covenant and ledger now live canonically in docs/research/brand-ux-guidelines.md section 7.1 — route there for design-time questions; this doc remains the requirements provenance."
     },
     {
@@ -1964,7 +1964,8 @@
       "id": "home-covenant-ratification-plan-2026-06-12",
       "path": "docs/plans/2026-06-12-001-docs-home-covenant-ratification-plan.md",
       "type": "plan",
-      "status": "active",
+      "status": "complete",
+      "active_registry": true,
       "canonical_for": "Implementation plan for the Home covenant ratification pass (origin: docs/brainstorms/2026-06-11-home-covenant-requirements.md): U1 decision row D156 + decision-debt sweep in docs/decisions.md, U2 operational covenant + canonical six-claimant lane ledger folded into brand-ux-guidelines.md section 7.1, U3 routing-surface registration (catalog, AGENTS.md, component-patterns.mdc pointer) validated by scripts/validate-agent-docs.sh, U4 steady-state Home render-budget test (element census, tap targets, card-interior line cap) at the screen-integration tier. Zero UI changes."
     },
     {
