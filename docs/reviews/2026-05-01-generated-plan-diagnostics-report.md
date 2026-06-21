@@ -24,10 +24,10 @@ Record the current generated-plan diagnostic snapshot for the Setup inline-focus
 ## Summary
 
 - Total seeded cells: 540
-- Clean cells: 165
-- Observation-only cells: 375
+- Clean cells: 142
+- Observation-only cells: 398
 - Hard-failure cells: 0
-- Routeable observation groups: 50
+- Routeable observation groups: 67
 - Steered sweep cells (U7): 135
 - Steered sweep hard failures: 0
 
@@ -132,24 +132,24 @@ The committed report intentionally keeps top routeable groups plus examples only
     "validation_issues": []
   },
   "status_counts": {
-    "clean": 165,
-    "observation_only": 375,
+    "clean": 142,
+    "observation_only": 398,
     "hard_failure": 0
   },
   "hard_failure_count": 0,
-  "observation_count": 763,
+  "observation_count": 838,
   "hard_failure_counts": {},
   "observation_counts": {
-    "under_authored_min": 290,
-    "slot_dropped": 48,
-    "under_named_profile_duration": 207,
-    "over_authored_max": 109,
-    "over_fatigue_cap": 109
+    "under_authored_min": 301,
+    "under_named_profile_duration": 197,
+    "over_authored_max": 159,
+    "over_fatigue_cap": 159,
+    "slot_dropped": 22
   },
-  "routeable_observation_group_count": 50,
+  "routeable_observation_group_count": 67,
   "top_routeable_observation_groups": [
     {
-      "affected_cell_count": 207,
+      "affected_cell_count": 197,
       "observation_codes": [
         "under_named_profile_duration"
       ],
@@ -164,7 +164,7 @@ The committed report intentionally keeps top routeable groups plus examples only
           "level": "beginner",
           "duration": 25,
           "seed": "matrix-a",
-          "planned_minutes": 20,
+          "planned_minutes": 24,
           "observation_codes": [
             "under_named_profile_duration"
           ]
@@ -173,20 +173,20 @@ The committed report intentionally keeps top routeable groups plus examples only
           "focus": "pass",
           "configuration": "solo_net",
           "level": "beginner",
-          "duration": 25,
+          "duration": 40,
+          "seed": "matrix-a",
+          "planned_minutes": 38,
+          "observation_codes": [
+            "under_named_profile_duration"
+          ]
+        },
+        {
+          "focus": "pass",
+          "configuration": "solo_net",
+          "level": "beginner",
+          "duration": 40,
           "seed": "matrix-b",
-          "planned_minutes": 20,
-          "observation_codes": [
-            "under_named_profile_duration"
-          ]
-        },
-        {
-          "focus": "pass",
-          "configuration": "solo_net",
-          "level": "beginner",
-          "duration": 25,
-          "seed": "matrix-c",
-          "planned_minutes": 19,
+          "planned_minutes": 38,
           "observation_codes": [
             "under_named_profile_duration"
           ]
@@ -199,7 +199,7 @@ The committed report intentionally keeps top routeable groups plus examples only
       "block_type": "wrap",
       "required": true,
       "authored_min_minutes": 4,
-      "affected_cell_count": 65,
+      "affected_cell_count": 99,
       "observation_codes": [
         "under_authored_min"
       ],
@@ -215,7 +215,22 @@ The committed report intentionally keeps top routeable groups plus examples only
           "configuration": "solo_net",
           "level": "beginner",
           "duration": 15,
-          "seed": "matrix-a",
+          "seed": "matrix-b",
+          "block_id": "block-3",
+          "planned_minutes": 3,
+          "allocated_minutes": 3,
+          "authored_min_minutes": 4,
+          "authored_max_minutes": 5,
+          "observation_codes": [
+            "under_authored_min"
+          ]
+        },
+        {
+          "focus": "pass",
+          "configuration": "solo_net",
+          "level": "beginner",
+          "duration": 15,
+          "seed": "matrix-c",
           "block_id": "block-3",
           "planned_minutes": 3,
           "allocated_minutes": 3,
@@ -239,28 +254,13 @@ The committed report intentionally keeps top routeable groups plus examples only
           "observation_codes": [
             "under_authored_min"
           ]
-        },
-        {
-          "focus": "pass",
-          "configuration": "solo_net",
-          "level": "intermediate",
-          "duration": 15,
-          "seed": "matrix-a",
-          "block_id": "block-3",
-          "planned_minutes": 3,
-          "allocated_minutes": 3,
-          "authored_min_minutes": 4,
-          "authored_max_minutes": 5,
-          "observation_codes": [
-            "under_authored_min"
-          ]
         }
       ]
     },
     {
       "block_type": "movement_proxy",
       "required": false,
-      "affected_cell_count": 48,
+      "affected_cell_count": 22,
       "observation_codes": [
         "slot_dropped"
       ],
@@ -272,18 +272,7 @@ The committed report intentionally keeps top routeable groups plus examples only
         {
           "focus": "pass",
           "configuration": "solo_net",
-          "level": "beginner",
-          "duration": 25,
-          "seed": "matrix-a",
-          "allocated_minutes": 5,
-          "observation_codes": [
-            "slot_dropped"
-          ]
-        },
-        {
-          "focus": "pass",
-          "configuration": "solo_net",
-          "level": "beginner",
+          "level": "advanced",
           "duration": 25,
           "seed": "matrix-b",
           "allocated_minutes": 5,
@@ -294,9 +283,20 @@ The committed report intentionally keeps top routeable groups plus examples only
         {
           "focus": "pass",
           "configuration": "solo_net",
-          "level": "beginner",
+          "level": "advanced",
           "duration": 25,
           "seed": "matrix-c",
+          "allocated_minutes": 5,
+          "observation_codes": [
+            "slot_dropped"
+          ]
+        },
+        {
+          "focus": "pass",
+          "configuration": "solo_net",
+          "level": "advanced",
+          "duration": 25,
+          "seed": "matrix-d",
           "allocated_minutes": 5,
           "observation_codes": [
             "slot_dropped"
@@ -305,11 +305,11 @@ The committed report intentionally keeps top routeable groups plus examples only
       ]
     },
     {
-      "drill_id": "d51",
-      "variant_id": "d51-solo-open",
-      "block_type": "main_skill",
+      "drill_id": "d07",
+      "variant_id": "d07-solo-open",
+      "block_type": "technique",
       "required": true,
-      "authored_min_minutes": 8,
+      "authored_min_minutes": 5,
       "affected_cell_count": 21,
       "observation_codes": [
         "under_authored_min"
@@ -322,49 +322,49 @@ The committed report intentionally keeps top routeable groups plus examples only
       ],
       "example_affected_cells": [
         {
-          "focus": "serve",
+          "focus": "pass",
           "configuration": "solo_net",
-          "level": "beginner",
+          "level": "intermediate",
           "duration": 15,
           "seed": "matrix-a",
-          "block_id": "block-2",
-          "planned_minutes": 5,
-          "allocated_minutes": 5,
-          "authored_min_minutes": 8,
-          "authored_max_minutes": 14,
-          "fatigue_max_minutes": 14,
+          "block_id": "block-1",
+          "planned_minutes": 4,
+          "allocated_minutes": 4,
+          "authored_min_minutes": 5,
+          "authored_max_minutes": 8,
+          "fatigue_max_minutes": 8,
           "observation_codes": [
             "under_authored_min"
           ]
         },
         {
-          "focus": "serve",
+          "focus": "pass",
           "configuration": "solo_net",
-          "level": "beginner",
+          "level": "intermediate",
           "duration": 15,
           "seed": "matrix-b",
-          "block_id": "block-2",
-          "planned_minutes": 5,
-          "allocated_minutes": 5,
-          "authored_min_minutes": 8,
-          "authored_max_minutes": 14,
-          "fatigue_max_minutes": 14,
+          "block_id": "block-1",
+          "planned_minutes": 4,
+          "allocated_minutes": 4,
+          "authored_min_minutes": 5,
+          "authored_max_minutes": 8,
+          "fatigue_max_minutes": 8,
           "observation_codes": [
             "under_authored_min"
           ]
         },
         {
-          "focus": "serve",
+          "focus": "pass",
           "configuration": "solo_net",
-          "level": "beginner",
+          "level": "intermediate",
           "duration": 15,
-          "seed": "matrix-c",
-          "block_id": "block-2",
-          "planned_minutes": 5,
-          "allocated_minutes": 5,
-          "authored_min_minutes": 8,
-          "authored_max_minutes": 14,
-          "fatigue_max_minutes": 14,
+          "seed": "matrix-d",
+          "block_id": "block-1",
+          "planned_minutes": 4,
+          "allocated_minutes": 4,
+          "authored_min_minutes": 5,
+          "authored_max_minutes": 8,
+          "fatigue_max_minutes": 8,
           "observation_codes": [
             "under_authored_min"
           ]
@@ -372,12 +372,12 @@ The committed report intentionally keeps top routeable groups plus examples only
       ]
     },
     {
-      "drill_id": "d07",
-      "variant_id": "d07-solo-open",
-      "block_type": "technique",
+      "drill_id": "d51",
+      "variant_id": "d51-solo-open",
+      "block_type": "main_skill",
       "required": true,
-      "authored_min_minutes": 5,
-      "affected_cell_count": 18,
+      "authored_min_minutes": 8,
+      "affected_cell_count": 16,
       "observation_codes": [
         "under_authored_min"
       ],
@@ -389,49 +389,49 @@ The committed report intentionally keeps top routeable groups plus examples only
       ],
       "example_affected_cells": [
         {
-          "focus": "pass",
+          "focus": "serve",
           "configuration": "solo_net",
-          "level": "intermediate",
+          "level": "beginner",
           "duration": 15,
           "seed": "matrix-a",
-          "block_id": "block-1",
-          "planned_minutes": 4,
-          "allocated_minutes": 4,
-          "authored_min_minutes": 5,
-          "authored_max_minutes": 8,
-          "fatigue_max_minutes": 8,
+          "block_id": "block-2",
+          "planned_minutes": 5,
+          "allocated_minutes": 5,
+          "authored_min_minutes": 8,
+          "authored_max_minutes": 14,
+          "fatigue_max_minutes": 14,
           "observation_codes": [
             "under_authored_min"
           ]
         },
         {
-          "focus": "pass",
+          "focus": "serve",
           "configuration": "solo_net",
-          "level": "intermediate",
-          "duration": 15,
-          "seed": "matrix-c",
-          "block_id": "block-1",
-          "planned_minutes": 4,
-          "allocated_minutes": 4,
-          "authored_min_minutes": 5,
-          "authored_max_minutes": 8,
-          "fatigue_max_minutes": 8,
+          "level": "beginner",
+          "duration": 25,
+          "seed": "matrix-a",
+          "block_id": "block-3",
+          "planned_minutes": 7,
+          "allocated_minutes": 7,
+          "authored_min_minutes": 8,
+          "authored_max_minutes": 14,
+          "fatigue_max_minutes": 14,
           "observation_codes": [
             "under_authored_min"
           ]
         },
         {
-          "focus": "pass",
+          "focus": "serve",
           "configuration": "solo_net",
-          "level": "advanced",
+          "level": "intermediate",
           "duration": 15,
-          "seed": "matrix-a",
-          "block_id": "block-1",
-          "planned_minutes": 4,
-          "allocated_minutes": 4,
-          "authored_min_minutes": 5,
-          "authored_max_minutes": 8,
-          "fatigue_max_minutes": 8,
+          "seed": "matrix-b",
+          "block_id": "block-2",
+          "planned_minutes": 5,
+          "allocated_minutes": 5,
+          "authored_min_minutes": 8,
+          "authored_max_minutes": 14,
+          "fatigue_max_minutes": 14,
           "observation_codes": [
             "under_authored_min"
           ]
@@ -474,19 +474,18 @@ The committed report intentionally keeps top routeable groups plus examples only
       "degenerate_band_start_cell_count": 20
     },
     "status_counts": {
-      "clean": 93,
-      "observation_only": 42,
+      "clean": 78,
+      "observation_only": 57,
       "hard_failure": 0
     },
     "hard_failure_count": 0,
-    "observation_count": 86,
+    "observation_count": 80,
     "hard_failure_counts": {},
     "observation_counts": {
-      "slot_dropped": 18,
-      "under_named_profile_duration": 19,
-      "over_authored_max": 9,
-      "over_fatigue_cap": 9,
-      "under_authored_min": 31
+      "under_named_profile_duration": 9,
+      "over_authored_max": 14,
+      "over_fatigue_cap": 14,
+      "under_authored_min": 43
     }
   },
   "redistribution_causality_receipt": {

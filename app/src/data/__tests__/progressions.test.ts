@@ -104,7 +104,10 @@ describe('chain-6-serving (Tier 1b-A serving wave)', () => {
   it('keeps the authored serving drills and excludes unauthored placeholders', () => {
     // 2026-05-04: d51 (Outside the Heart Serving, FIVB 2.2) added as the
     // lateral long-envelope sibling to d31. Slotted between d31 and d23.
-    expect(chain?.drillIds).toEqual(['d22', 'd31', 'd51', 'd23', 'd33'])
+    // 2026-06-21 roster-depth wave: d53 (Deep Serve Practice, FIVB 2.3),
+    // d54 (Four Corner Serving, BAB), d55 (Sideline Serving Challenge, BAB)
+    // added as serve rung 1/2/3 depth siblings.
+    expect(chain?.drillIds).toEqual(['d22', 'd31', 'd51', 'd23', 'd33', 'd53', 'd54', 'd55'])
     expect(chain?.drillIds).not.toContain('d32')
     expect(chain?.drillIds).not.toContain('d36')
     expect(
@@ -183,7 +186,22 @@ describe('chain-7-setting (Tier 1b-A setting progression)', () => {
   })
 
   it('has the authored setting drills with d43 deferred to 3+ player support', () => {
-    expect(chain?.drillIds).toEqual(['d38', 'd39', 'd40', 'd41', 'd42', 'd47', 'd48', 'd49'])
+    // 2026-06-21 roster-depth wave: d56 (Set and Move, FIVB 4.1), d57
+    // (Moving Target Setting, FIVB 4.4), d58 (Two-Touch Set Choice, BAB)
+    // added as set rung 2/3/4 depth siblings.
+    expect(chain?.drillIds).toEqual([
+      'd38',
+      'd39',
+      'd40',
+      'd41',
+      'd42',
+      'd47',
+      'd48',
+      'd49',
+      'd56',
+      'd57',
+      'd58',
+    ])
     expect(chain?.drillIds).not.toContain('d43')
   })
 

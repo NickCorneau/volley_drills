@@ -860,19 +860,28 @@ describe('validateDrillCatalog', () => {
       expect(advisories.find((a) => a.focus === 'pass' && a.rung === 1)).toBeUndefined()
     })
 
-    it('surfaces exactly the known thin rungs in the real catalog as advisories, not hard issues', () => {
+    it('reports no under-depth rungs in the real catalog after the M002.2 roster-depth wave', () => {
+      // 2026-06-21: the roster-depth wave (d52-d58,
+      // docs/plans/2026-06-21-002-feat-roster-depth-source-backed-drills-plan.md)
+      // brought every previously-thin rung (pass.1, serve.1/2/3, set.2/3/4)
+      // to >=2 assembly-eligible drills. The advisory set should now be empty.
+      // A regression that drops one of the new drills off its rung, flips its
+      // m001Candidate flag, or mis-counts eligibility trips here.
       const advisories = auditRungDepth({ drills: DRILLS, stressLadders: STRESS_LADDERS })
       const thin = advisories.map((a) => `${a.focus}.${a.rung}`).sort()
-      // Pin the exact set: a regression that mis-counts a rung (dropping a
-      // legitimately-thin rung, or spuriously flagging a full one) trips
-      // here rather than slipping through a toContain spot-check.
-      expect(thin).toEqual(['pass.1', 'serve.1', 'serve.2', 'serve.3', 'set.2', 'set.3', 'set.4'])
-      // Every flagged rung is depth 1 today (single source-backed drill).
-      for (const advisory of advisories) {
-        expect(advisory.eligibleCount).toBeLessThan(RUNG_DEPTH_TARGET)
+      expect(thin).toEqual([])
+
+      // Every real rung meets the depth target.
+      for (const focus of Object.keys(STRESS_LADDERS) as (keyof typeof STRESS_LADDERS)[]) {
+        for (const rungEntry of STRESS_LADDERS[focus]) {
+          const eligible = rungEntry.drillIds.filter(
+            (id) => DRILLS.find((d) => d.id === id)?.m001Candidate,
+          ).length
+          expect(eligible).toBeGreaterThanOrEqual(RUNG_DEPTH_TARGET)
+        }
       }
 
-      // And those thin rungs never appear in the hard catalog gate.
+      // And the hard catalog gate stays clean.
       const hard = validateDrillCatalog({
         drills: DRILLS,
         progressionChains: PROGRESSION_CHAINS,

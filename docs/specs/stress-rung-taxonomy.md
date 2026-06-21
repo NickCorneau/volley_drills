@@ -109,7 +109,9 @@ Readiness to climb is *felt*, not measured — `graduationFeel` describes the mo
 
 ### Depth target (advisory)
 
-A rung wants at least **2 assembly-eligible (`m001Candidate: true`) drills** so stepping onto it picks genuinely different work (`auditRungDepth`, `RUNG_DEPTH_TARGET = 2`). This is an **advisory, not a hard gate** — legitimately thin rungs with no source-backed sibling yet (serve 1/3, set 2/3 today; pass 1, serve 2, and set 4 are eligible-count 1 with an inert parked sibling — d23 on serve 2 — that has no fresh `graduate-when` trigger) must not fail CI. The advisory surfaces all 7 under-target rungs today; the backlog table below is the subset needing brand-new content. The advisory is the machine-checked tracker for both.
+A rung wants at least **2 assembly-eligible (`m001Candidate: true`) drills** so stepping onto it picks genuinely different work (`auditRungDepth`, `RUNG_DEPTH_TARGET = 2`). This is an **advisory, not a hard gate** — legitimately thin rungs with no source-backed sibling yet must not fail CI.
+
+As of the **2026-06-21 roster-depth wave** (`docs/plans/2026-06-21-002-feat-roster-depth-source-backed-drills-plan.md`), every rung meets the target: seven source-backed drills (`d52`–`d58`) deepened the seven previously-thin rungs (pass 1, serve 1/2/3, set 2/3/4), so `auditRungDepth` returns empty. The advisory remains the live machine-checked tracker — if a future change drops a rung below 2 it resurfaces.
 
 ## Skill-Band Starting Rung
 
@@ -129,20 +131,21 @@ The clamp guards future mapping/ladder tuning; today advanced → 4 lands exactl
 - **Authoring invariant (`D160`)**: every new scoped-tag catalog drill ships with a same-commit ladder rung plus a one-line placement rationale. `scoped_drill_off_ladder` in `validateDrillCatalog` enforces this at test time; M002.2's authoring wave inherits it as the placement procedure.
 - **Named authoring backlog** (missing rungs from the founder's example ladder, not blockers): pass-to-setter-to-hit sequences, dive/emergency passing, deeper serve-pressure formats. Author only where a ladder proves too sparse to step in dogfood — serve's single-drill rungs 1 and 3 are the visible thin spots.
 
-### Roster-depth backlog (M002.2, source-cited)
+### Roster-depth backlog (M002.2, source-cited) — FILLED 2026-06-21
 
-M002.2 re-evaluated the parked (`m001Candidate: false`) reserve against `docs/reviews/2026-04-28-m001-candidate-false-audit.md` and **activated none** — no parked drill has a fresh `graduate-when` trigger logged, and the remaining reserve is gated on `D101` 3+ geometry (d08, d14, d20), group mode (d19, d21), or unmodeled equipment (d06, d12, d13, d16, d17, d24). Activation without a fresh trigger is out of bounds per the audit.
+The 2026-06-21 roster-depth wave (`docs/plans/2026-06-21-002-feat-roster-depth-source-backed-drills-plan.md`) authored seven source-backed drills under `D130` founder-as-coach mode, one per thin rung, each obeying the courtside-copy authoring checklist and shipping its rung + chain membership in the same change (`D160`):
 
-Depth for the four thinnest rungs (no parked sibling) therefore needs **new, coach-reviewed, source-backed content**, not autonomous authoring. The precise shopping list, with source anchors already in `docs/research/bab-source-material.md`, so a future authoring wave (founder-as-coach in `D130` mode) can fill them under the `D160` same-commit-rung invariant:
+| Rung | New drill | Source anchor |
+|------|-----------|---------------|
+| pass 1 (constant) | `d52` Pass Back and Forth | BAB Plan 1 Drill 1 (pass back and forth, 10 each) |
+| serve 1 (constant) | `d53` Deep Serve Practice | FIVB 2.3 Deep Serve Practice |
+| serve 2 (serial) | `d54` Four Corner Serving | BAB Plan 2 Drill 3 (Serving Spots Around the World, 4-zone) |
+| serve 3 (varied + pressure) | `d55` Sideline Serving Challenge | BAB Plan 2 Drills 5–7 (Server vs Passer) |
+| set 2 (serial) | `d56` Set and Move | FIVB 4.1 Set and Move (adds the solo route beside pair-only d41) |
+| set 3 (varied) | `d57` Moving Target Setting | FIVB 4.4 High Rep Setting (Triangle) reduced + BAB footwork |
+| set 4 (varied + pressure) | `d58` Two-Touch Set Choice | BAB Plan 6 Drill 2 (Corner to Corner) Steps 2 & 4 |
 
-| Rung | Need | Source anchor |
-|------|------|---------------|
-| serve 1 (constant) | a second single-target repetition serving drill beside d31 | BAB "Serving Spots Around the World" reduced to one held spot; or a wall/target single-zone repetition form |
-| serve 3 (varied + pressure) | a second called/scored-target serving drill beside d22 | BAB Plan 2 "Server vs Passer (Sideline / Middle-Seam)" reduced to a solo/pair scored-target form |
-| set 2 (serial) | a second continuous-rhythm setting drill beside d41 | BAB Plan 1 "Set back and forth, 10 each"; BAB "Pass, Set, Set, Set" reduced to pair |
-| set 3 (varied) | a second changing-target setting drill beside d42 | BAB "Triangle Setting (Toss)" reduced to 1–2 player; or a moving-target variant of d42 |
-
-Each new drill must pass the full courtside-copy authoring checklist and ship its rung + content in the same commit. Until authored, the `auditRungDepth` advisory carries these rungs as the live tracker.
+The parked (`m001Candidate: false`) reserve was re-evaluated against `docs/reviews/2026-04-28-m001-candidate-false-audit.md` and **none were activated** — no parked drill has a fresh `graduate-when` trigger, and the reserve stays gated on `D101` 3+ geometry, group mode, or unmodeled equipment. Depth came from new authored content, not flag flips. `auditRungDepth` now returns empty; it remains the live tracker if any rung later drops below 2.
 
 ## Update When
 

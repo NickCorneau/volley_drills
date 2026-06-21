@@ -38,7 +38,7 @@ const chain1: ProgressionChain = {
   id: 'chain-1-platform',
   name: 'Platform Quality and Posture',
   focus: 'Stable contact fundamentals: platform consistency, posture, clean repeatable contact.',
-  drillIds: ['d01', 'd02', 'd03', 'd04'],
+  drillIds: ['d01', 'd02', 'd03', 'd04', 'd52'],
   defaultGatingThreshold: 0.7,
   links: [
     {
@@ -252,7 +252,7 @@ const chain6: ProgressionChain = {
   id: 'chain-6-serving',
   name: 'Serving as the Enabling Skill',
   focus: 'Serve consistency, zone targeting, and transition movement.',
-  drillIds: ['d22', 'd31', 'd51', 'd23', 'd33'],
+  drillIds: ['d22', 'd31', 'd51', 'd23', 'd33', 'd53', 'd54', 'd55'],
   defaultGatingThreshold: 0.7,
   links: [
     {
@@ -300,7 +300,7 @@ const chain7: ProgressionChain = {
   id: 'chain-7-setting',
   name: 'Setting Fundamentals',
   focus: 'Bump-set shape, hand-set contact, footwork, pair rhythm, and advanced setting reads.',
-  drillIds: ['d38', 'd39', 'd40', 'd41', 'd42', 'd47', 'd48', 'd49'],
+  drillIds: ['d38', 'd39', 'd40', 'd41', 'd42', 'd47', 'd48', 'd49', 'd56', 'd57', 'd58'],
   defaultGatingThreshold: 0.7,
   links: [
     {

@@ -93,6 +93,10 @@ M002.2 (rung depth + progression content, `docs/plans/2026-06-21-001-feat-m002-2
 
 The verdicts in the table above are unchanged.
 
+### Roster-depth wave follow-on (2026-06-21)
+
+The roster-depth wave (`docs/plans/2026-06-21-002-feat-roster-depth-source-backed-drills-plan.md`) filled all seven previously-thin rungs (pass 1, serve 1/2/3, set 2/3/4) with **new authored, source-backed drills** (`d52`–`d58`, BAB + FIVB), again **activating no parked drill**. The parked reserve's verdicts here remain unchanged: `d02`/`d04` (pass 1) stay parked on prop-friction / net-required + substitution-linkage; `d23` (serve 2) stays conditioning-gated (`D149`); `d20`/`d21` (set 4) stay `hold-pending-D101` 3+ geometry. Depth was added beside them, not by flipping them. `auditRungDepth` now returns empty.
+
 ## Applied Changes
 
 No drill records were removed. Stream 3 should apply only:

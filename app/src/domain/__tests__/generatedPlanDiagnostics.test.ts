@@ -720,8 +720,15 @@ describe('seeded generated plan diagnostics', () => {
       // collapsed. Observation_only fell 404 -> 375 — the
       // honest-duration cells stop carrying the redistribution-on-
       // main_skill observation and many cleanly hit the cap floor.
-      clean: 165,
-      observation_only: 375,
+      //
+      // 2026-06-21 roster-depth wave (d52-d58): the larger candidate pool
+      // lets the generator fill some previously-sparse cells with the new
+      // (often shorter-envelope) depth drills, shifting 23 cells from clean
+      // to observation_only on the advisory duration-honesty signals. No
+      // hard failures (the load-bearing invariant) and total cells
+      // unchanged at 540.
+      clean: 142,
+      observation_only: 398,
       hard_failure: 0,
     })
     expect(summary.observationCounts).toEqual({
@@ -739,11 +746,20 @@ describe('seeded generated plan diagnostics', () => {
       //   - under_named_profile_duration: NEW. Fires on cells where
       //     total < named profile by >= 1 min (the honest-duration
       //     gap U4's diagnostic-grade threshold surfaces).
-      under_authored_min: 290,
-      slot_dropped: 48,
-      under_named_profile_duration: 207,
-      over_authored_max: 109,
-      over_fatigue_cap: 109,
+      //
+      // 2026-06-21 roster-depth wave (d52-d58): more candidates fill
+      // previously-dropping slots (slot_dropped 48 -> 22) and let the
+      // generator pick the new depth drills, whose realistic fatigue
+      // caps trip the advisory over-cap counterfactual in longer
+      // named-duration cells (over_authored_max / over_fatigue_cap
+      // 109 -> 159 each; under_authored_min 290 -> 301;
+      // under_named_profile_duration 207 -> 197). All advisory; no
+      // hard failures.
+      under_authored_min: 301,
+      slot_dropped: 22,
+      under_named_profile_duration: 197,
+      over_authored_max: 159,
+      over_fatigue_cap: 159,
     })
     expect(results.filter((result) => result.status === 'hard_failure')).toEqual([])
   })

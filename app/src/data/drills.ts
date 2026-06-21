@@ -3372,6 +3372,527 @@ const d28: Drill = {
 }
 
 // ---------------------------------------------------------------------------
+// M002.2 roster-depth wave (2026-06-21): one source-backed second drill per
+// thin stress rung so stepping onto a rung offers genuine variety. See
+// docs/plans/2026-06-21-002-feat-roster-depth-source-backed-drills-plan.md.
+// ---------------------------------------------------------------------------
+
+// BAB Plan 1 Drill 1 (Best Warm Up Ever) - pass back and forth, 10 each.
+// Pass rung 1 sibling for d01: pure continuous control, no behind-back slap.
+const d52: Drill = {
+  id: 'd52',
+  name: 'Pass Back and Forth',
+  shortName: 'Pass B&F',
+  skillFocus: ['pass'],
+  objective: 'Groove a clean, repeatable forearm pass through simple continuous exchange.',
+  levelMin: 'beginner',
+  levelMax: 'intermediate',
+  chainId: 'chain-1-platform',
+  m001Candidate: true,
+  teachingPoints: [
+    'Meet the ball out in front with a steady platform.',
+    'Send it back at a catchable height, not past your partner.',
+    'Reset your feet under the ball between contacts.',
+  ],
+  progressionDescription: 'Add one shuffle step between contacts, or lengthen the rally target.',
+  regressionDescription: 'Allow one catch-reset whenever the ball pulls you off balance.',
+  variants: [
+    {
+      id: 'd52-solo',
+      drillId: 'd52',
+      label: 'Solo',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1 },
+      workload: {
+        durationMinMinutes: 2,
+        durationMaxMinutes: 5,
+        rpeMin: 3,
+        rpeMax: 5,
+        fatigueCap: { maxReps: 40, maxMinutes: 5 },
+      },
+      successMetric: {
+        type: 'streak',
+        description: 'Clean passes to yourself in a row (restart on an obvious mishit).',
+        target: '≥ 20 consecutive clean passes',
+      },
+      courtsideInstructions:
+        'Pass the ball straight up to yourself, over and over, at an even height. Keep the ball in front of you and step under it each time. If it drifts away, catch, reset, and start the count again.',
+      coachingCues: [
+        'Same height every pass.',
+        'Meet the ball out in front.',
+        'Step under it before you contact.',
+      ],
+    },
+    {
+      id: 'd52-pair',
+      drillId: 'd52',
+      label: 'Pair',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['passer', 'passer'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1 },
+      workload: {
+        durationMinMinutes: 3,
+        durationMaxMinutes: 6,
+        rpeMin: 3,
+        rpeMax: 5,
+        fatigueCap: { maxReps: 40, maxMinutes: 6 },
+      },
+      successMetric: {
+        type: 'streak',
+        description: 'Continuous passes between partners before a mishit (restart on a mishit).',
+        target: '≥ 15-pass rally',
+      },
+      courtsideInstructions:
+        'Pass back and forth with your partner, 10 each. You toss first to start the rally. Partner keeps it going at a catchable height; rally until a mishit, then restart the count.',
+      coachingCues: [
+        'Pass to your partner, not past them.',
+        'Catchable height every time.',
+        'Step under the ball before you contact.',
+      ],
+    },
+  ],
+}
+
+// FIVB Drill-book 2.3 Deep Serve Practice. Serve rung 1 sibling for d31:
+// grooves the high, deep serve (force the passers back) rather than pinpoint
+// accuracy to a small circle.
+const d53: Drill = {
+  id: 'd53',
+  name: 'Deep Serve Practice',
+  shortName: 'Deep Serve',
+  skillFocus: ['serve'],
+  objective: 'Groove one repeatable deep serve that arcs high enough to push receivers back.',
+  levelMin: 'beginner',
+  levelMax: 'intermediate',
+  chainId: 'chain-6-serving',
+  m001Candidate: true,
+  teachingPoints: [
+    'Send the ball high so it lands deep, not flat and short.',
+    'Use the same toss height every serve.',
+    'Watch the ball land before you judge the rep.',
+  ],
+  progressionDescription: 'Shrink the deep landing zone or add a little pace once the arc is reliable.',
+  regressionDescription: 'Move closer or widen the deep zone and count clean contact first.',
+  variants: [
+    {
+      id: 'd53-solo-open',
+      drillId: 'd53',
+      label: 'Solo open target',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 4,
+        durationMaxMinutes: 8,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 20, maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Serves that arc high and land past a marked deep line.',
+        target: '8 of 10 landing deep',
+      },
+      courtsideInstructions:
+        'Serve a high ball that drops past a marked deep line. Mark the line about two thirds of the way back. Self-toss the same height each time, count only serves landing deep, and reset your routine before every serve.',
+      coachingCues: ['High arc, not a flat drive.', 'Same toss height.', 'Watch the landing.'],
+    },
+    {
+      id: 'd53-pair-open',
+      drillId: 'd53',
+      label: 'Pair open target',
+      feedType: 'self-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['server', 'shagger'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 4,
+        durationMaxMinutes: 8,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 20, maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Serves arcing high and landing past the marked deep line.',
+        target: '8 of 10 landing deep',
+      },
+      courtsideInstructions:
+        'You serve a high, deep ball past a marked deep line; reset your routine each time. Partner judges each landing, then shags (collects the balls and brings them back). Count serves landing deep, then switch after 10.',
+      coachingCues: ['High arc, not a flat drive.', 'Same toss height.', 'Partner judges the landing.'],
+    },
+  ],
+}
+
+// BAB Plan 2 Drill 3 Serving Spots Around the World (4-zone beginner). Serve
+// rung 2 sibling for d51: a serial zone sequence between d53 (one zone) and
+// d33 (six zones).
+const d54: Drill = {
+  id: 'd54',
+  name: 'Four Corner Serving',
+  shortName: '4 Corner Serve',
+  skillFocus: ['serve'],
+  objective: 'Hold serve quality while working four court zones in sequence.',
+  levelMin: 'beginner',
+  levelMax: 'intermediate',
+  chainId: 'chain-6-serving',
+  m001Candidate: true,
+  teachingPoints: [
+    'Pick the next zone before you toss.',
+    'Keep the same easy contact as you change targets.',
+    'Hit a zone before moving to the next one.',
+  ],
+  progressionDescription: 'Move up to six zones or require two hits per zone before advancing.',
+  regressionDescription: 'Use bigger zones, or count any serve that lands in the right half.',
+  variants: [
+    {
+      id: 'd54-solo-open',
+      drillId: 'd54',
+      label: 'Solo open target',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 4,
+        durationMaxMinutes: 8,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 24, maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Zones cleared in order (a miss repeats the current zone, capped at 3 tries).',
+        target: 'Clear all four zones',
+      },
+      courtsideInstructions:
+        'Serve into zone 1, then 2, 3, and 4 in order. Mark the receiving side into four large zones. A miss repeats the same zone, up to three tries, then move on. Reset your routine before every serve.',
+      coachingCues: ['Name the next zone first.', 'Same contact as targets change.', 'Watch the landing.'],
+    },
+    {
+      id: 'd54-pair-open',
+      drillId: 'd54',
+      label: 'Pair open target',
+      feedType: 'self-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['server', 'caller'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 4,
+        durationMaxMinutes: 8,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 24, maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Zones cleared in the order your partner calls (capped at 3 tries per zone).',
+        target: 'Clear all four called zones',
+      },
+      courtsideInstructions:
+        'You serve into the zone your partner calls. Partner names zone 1, 2, 3, then 4 in order and feeds the ball back. A miss repeats that zone, up to three tries. Switch roles after four zones.',
+      coachingCues: ['Caller names the zone first.', 'Same contact as targets change.', 'Watch the landing.'],
+    },
+  ],
+}
+
+// BAB Plan 2 Drills 5-7 Server vs Passer (sideline / seam, +3/-3). Serve rung
+// 3 sibling for d22: a called single-target serve under a little outcome
+// pressure, vs d22's multi-zone points race.
+const d55: Drill = {
+  id: 'd55',
+  name: 'Sideline Serving Challenge',
+  shortName: 'Sideline Serve',
+  skillFocus: ['serve'],
+  objective: 'Serve to a called sideline or seam target under a little outcome pressure.',
+  levelMin: 'intermediate',
+  levelMax: 'advanced',
+  chainId: 'chain-6-serving',
+  m001Candidate: true,
+  teachingPoints: [
+    'Commit to the called target before you toss.',
+    'Aim at the line or the seam, not just over the net.',
+    'Treat each serve as one scored attempt.',
+  ],
+  progressionDescription: 'Shrink the target band or alternate sideline and seam each serve.',
+  regressionDescription: 'Widen the target band and count clean contact toward the target.',
+  variants: [
+    {
+      id: 'd55-solo-open',
+      drillId: 'd55',
+      label: 'Solo open target',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 9,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxReps: 20, maxMinutes: 9 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Serves landing in the sideline or seam target band you call before each toss.',
+        target: '7 of 10 on the called target',
+      },
+      courtsideInstructions:
+        'Serve to the sideline or seam target you call before each toss. Mark a narrow band along one sideline and along the seam (the middle line between two passers). Count only serves landing in the called band. Reset and call again.',
+      coachingCues: ['Call the target before you toss.', 'Aim at the line, not just in.', 'Watch the landing.'],
+    },
+    {
+      id: 'd55-pair',
+      drillId: 'd55',
+      label: 'Pair (server vs passer)',
+      feedType: 'live-serve',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['server', 'passer'] },
+      environmentFlags: env({ needsNet: true, lowScreenTime: true }),
+      equipment: { balls: 1 },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 10,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxMinutes: 10 },
+      },
+      successMetric: {
+        type: 'points-to-target',
+        description:
+          'Server scores when the serve forces a poor pass (= one a setter could not set); passer scores on a clean pass. Race to +3.',
+        target: 'Reach +3 as the server',
+      },
+      courtsideInstructions:
+        'You serve at your partner aiming for the sideline or seam. Partner passes; a serve that forces a poor pass (= one a setter could not set) scores +1 for you, a clean pass scores +1 for them. First to +3, then switch.',
+      coachingCues: ['Commit to the target before you toss.', 'Make the pass hard, not just in.', 'One scored serve at a time.'],
+    },
+  ],
+}
+
+// FIVB Drill-book 4.1 Set and Move. Set rung 2 sibling for d41: adds a solo
+// continuous-rhythm setting route (d41 is pair-only).
+const d56: Drill = {
+  id: 'd56',
+  name: 'Set and Move',
+  shortName: 'Set & Move',
+  skillFocus: ['set'],
+  objective: 'Keep a clean, repeatable set going while you move along a line.',
+  levelMin: 'beginner',
+  levelMax: 'intermediate',
+  chainId: 'chain-7-setting',
+  m001Candidate: true,
+  teachingPoints: [
+    'Set the ball to the same height every time.',
+    'Keep moving, but plant under the ball before each set.',
+    'Keep a soft, even contact with both hands.',
+  ],
+  progressionDescription: 'Lengthen the line you cover, or quicken the pace between sets.',
+  regressionDescription: 'Stand still and set in place whenever the rhythm breaks.',
+  variants: [
+    {
+      id: 'd56-solo',
+      drillId: 'd56',
+      label: 'Solo',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1 },
+      workload: {
+        durationMinMinutes: 3,
+        durationMaxMinutes: 7,
+        rpeMin: 3,
+        rpeMax: 5,
+        fatigueCap: { maxReps: 40, maxMinutes: 7 },
+      },
+      successMetric: {
+        type: 'streak',
+        description: 'Clean hand-sets to yourself while walking a line (restart on a mishit).',
+        target: '≥ 20 consecutive clean sets',
+      },
+      courtsideInstructions:
+        'Hand-set the ball to yourself while you walk a slow, steady line. Stay under it each time and keep a soft contact at the same height. If it drifts, catch, reset, and start the count again.',
+      coachingCues: ['Same height every set.', 'Stay under the ball as you move.', 'Soft, even contact.'],
+    },
+    {
+      id: 'd56-pair',
+      drillId: 'd56',
+      label: 'Pair',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['setter', 'setter'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1 },
+      workload: {
+        durationMinMinutes: 4,
+        durationMaxMinutes: 8,
+        rpeMin: 3,
+        rpeMax: 5,
+        fatigueCap: { maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'streak',
+        description: 'Continuous hand-sets between partners while both keep moving along a line.',
+        target: '≥ 12-set rally',
+      },
+      courtsideInstructions:
+        'Set back and forth with your partner while you both walk a slow line. You toss first to start, then set and step to keep moving. Partner mirrors you, rallying until a mishit; then restart the count.',
+      coachingCues: ['Set to your partner, not past them.', 'Keep moving, then plant to set.', 'Same height every set.'],
+    },
+  ],
+}
+
+// FIVB Drill-book 4.4 High Rep Setting (Triangle) reduced; BAB
+// footwork-for-setting. Set rung 3 sibling for d42: changing/random targets,
+// vs d42's two fixed corners.
+const d57: Drill = {
+  id: 'd57',
+  name: 'Moving Target Setting',
+  shortName: 'Moving Set',
+  skillFocus: ['set', 'movement'],
+  objective: 'Set to changing targets from changing court spots.',
+  levelMin: 'intermediate',
+  levelMax: 'intermediate',
+  chainId: 'chain-7-setting',
+  m001Candidate: true,
+  teachingPoints: [
+    'Square up: face the target with feet and shoulders before you set.',
+    'Arrive under the ball early so you can choose your target.',
+    'Give enough arc for the target to be reached in time.',
+  ],
+  progressionDescription: 'Add a third target or randomize which one comes next.',
+  regressionDescription: 'Use two close targets and allow catch-reset between sets.',
+  variants: [
+    {
+      id: 'd57-solo',
+      drillId: 'd57',
+      label: 'Solo',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 4,
+        durationMaxMinutes: 8,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 24, maxMinutes: 8 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Sets landing on the alternating marker you face each rep.',
+        target: '3 clean sets to each of two markers',
+      },
+      courtsideInstructions:
+        'Set the ball onto the alternating marker you face each rep. Place two markers a few steps apart. Self-toss, move to face one marker, and set so the ball lands on it. Alternate markers each rep, then retrieve and repeat.',
+      coachingCues: ['Face the target before you set.', 'Arrive under the ball early.', 'Arc above reach height.'],
+    },
+    {
+      id: 'd57-pair',
+      drillId: 'd57',
+      label: 'Pair',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['setter', 'tosser'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1 },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 9,
+        rpeMin: 4,
+        rpeMax: 6,
+        fatigueCap: { maxReps: 24, maxMinutes: 9 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Sets your partner can reach within one step at whichever spot they move to.',
+        target: '8 clean sets to a moving partner',
+      },
+      courtsideInstructions:
+        'Set to your partner wherever they move. Partner tosses you the ball, then jogs to a new spot; you square up and set so they reach it in one step. Switch roles after 8 sets.',
+      coachingCues: ['Face your partner before you set.', 'Arrive under the ball early.', 'Set them, not an empty spot.'],
+    },
+  ],
+}
+
+// BAB Plan 6 Drill 2 (Corner to Corner) Steps 2 & 4 - two-touch sequences
+// (Step 2 bump set, Step 4 hand set), merged here into a read-and-choose.
+// Honest-transfer boundary: the source runs the two touches as separate fixed
+// steps; the bump-vs-hand decision off an imperfect ball is authored synthesis
+// (FIVB setting essay), not prescribed as a choice in the source.
+// Set rung 4 sibling for d47: pass-to-self then choose bump vs hand,
+// reducible to pair, vs d47's four pass locations.
+const d58: Drill = {
+  id: 'd58',
+  name: 'Two-Touch Set Choice',
+  shortName: '2-Touch Set',
+  skillFocus: ['set', 'movement'],
+  objective: 'Take an imperfect first ball, choose bump or hand set, and still deliver a hittable arc.',
+  levelMin: 'intermediate',
+  levelMax: 'advanced',
+  chainId: 'chain-7-setting',
+  m001Candidate: true,
+  teachingPoints: [
+    'Play the first ball to yourself, then decide hands or platform.',
+    'Make the ball playable before you make it perfect.',
+    'Set your hitter, not a spot on the court.',
+  ],
+  progressionDescription: 'Make the first ball messier or shrink the hittable landing window.',
+  regressionDescription: 'Take cleaner first balls and allow catch-reset between reps.',
+  variants: [
+    {
+      id: 'd58-solo',
+      drillId: 'd58',
+      label: 'Solo open',
+      feedType: 'self-toss',
+      participants: { min: 1, ideal: 1, max: 1 },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 9,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxReps: 24, maxMinutes: 9 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Two-touch sets landing in the target window from an uneven self-toss.',
+        target: '3 clean sets each from a tight, deep, and off-side toss',
+      },
+      courtsideInstructions:
+        'Set the ball into a target window after passing it to yourself. Mark the window where a hitter would attack. Self-toss an uneven ball, pass to yourself, then choose a bump set or hand set into the window. Vary tight, deep, and off-side balls.',
+      coachingCues: ['Play the first ball to yourself.', 'Read it, then choose hands or platform.', 'Make it hittable first.'],
+    },
+    {
+      id: 'd58-pair',
+      drillId: 'd58',
+      label: 'Pair',
+      feedType: 'partner-toss',
+      participants: { min: 2, ideal: 2, max: 2, roles: ['setter', 'feeder'] },
+      environmentFlags: env({ lowScreenTime: true }),
+      equipment: { balls: 1, markers: true },
+      workload: {
+        durationMinMinutes: 5,
+        durationMaxMinutes: 9,
+        rpeMin: 5,
+        rpeMax: 7,
+        fatigueCap: { maxReps: 24, maxMinutes: 9 },
+      },
+      successMetric: {
+        type: 'reps-successful',
+        description: 'Two-touch sets delivered to a hittable spot your partner can reach.',
+        target: '8 hittable sets off imperfect feeds',
+      },
+      courtsideInstructions:
+        'Set a hittable ball back to a window after taking your partner\'s feed. Partner (= feeder) tosses you an uneven first ball; you pass to yourself, choose a bump or hand set, and deliver to the window. Feeder varies the tosses. Switch after 8 sets.',
+      coachingCues: ['Play the first ball to yourself.', 'Read it, then choose hands or platform.', 'Set a hittable ball, not a perfect spot.'],
+    },
+  ],
+}
+
+// ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
 
@@ -3416,6 +3937,13 @@ export const DRILLS: readonly Drill[] = [
   d49,
   d50,
   d51,
+  d52,
+  d53,
+  d54,
+  d55,
+  d56,
+  d57,
+  d58,
 ] as const
 
 export const M001_DRILL_IDS: readonly string[] = DRILLS.filter((d) => d.m001Candidate).map(

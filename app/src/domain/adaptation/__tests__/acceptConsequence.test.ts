@@ -53,14 +53,18 @@ describe('composeAcceptConsequence', () => {
     expect(line).toBe('Setting sessions lean toward drills like Bump Set Fundamentals.')
   })
 
-  it('context-eligibility: the pair-only rung-2 set drill renders no caption for a solo session', () => {
+  it('context-eligibility: a solo session surfaces the solo-eligible rung-2 set drill', () => {
+    // 2026-06-21 roster-depth wave: set rung 2 was pair-only (d41) and
+    // rendered no caption for a solo session. d56 (Set and Move, FIVB 4.1)
+    // added a solo continuous-rhythm route, so a solo set session now
+    // names that solo-eligible rung-2 drill instead of falling silent.
     const line = composeAcceptConsequence({
       focus: 'set',
       direction: 'more',
       position: 1,
       context: soloOpenSet,
     })
-    expect(line).toBeNull()
+    expect(line).toBe('Setting sessions lean toward drills like Set and Move.')
   })
 
   it('candidate rule: first-authored assembly-available drill, excluding the just-trained one', () => {

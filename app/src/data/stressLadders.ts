@@ -81,9 +81,10 @@ export interface StressRung {
 export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = {
   pass: [
     // d02/d04: chain-1 blocked posture/self-catch fundamentals beside d01 — constant feed, one outcome.
+    // d52: pure continuous control exchange (BAB Plan 1) beside d01's slap-hands interrupt.
     {
       rung: 1,
-      drillIds: ['d01', 'd02', 'd04'],
+      drillIds: ['d01', 'd02', 'd04', 'd52'],
       intent: 'Groove a repeatable pass on a predictable feed, one clean contact at a time.',
       externalFocusCue: 'Send the ball straight back up to the same height every time.',
       explorationCriterion:
@@ -140,9 +141,10 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
     },
   ],
   serve: [
+    // d53: deep high-arc serve to one held zone (FIVB 2.3) beside d31's pinpoint small-circle target.
     {
       rung: 1,
-      drillIds: ['d31'],
+      drillIds: ['d31', 'd53'],
       intent: 'Commit to one target and repeat the same serve until it grooves.',
       externalFocusCue: 'Land the ball in the same circle on the sand each time.',
       explorationCriterion: 'Notice how a steady toss in front of you makes the contact repeatable.',
@@ -150,9 +152,10 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
         'Your serve lands near the circle most tries, and stringing several zones together would feel doable.',
     },
     // d23: full-routine serial reps; the dash is body load, not contextual interference (D149 keeps load off this scale).
+    // d54: serial four-zone sequence (BAB Around the World, 4-zone beginner) beside d51's single no-serve heart zone.
     {
       rung: 2,
-      drillIds: ['d23', 'd51'],
+      drillIds: ['d23', 'd51', 'd54'],
       intent: 'Hold serve quality across longer sets and across zones in sequence.',
       externalFocusCue: 'Place each serve into the next zone in order, keeping the same easy contact.',
       explorationCriterion:
@@ -160,9 +163,10 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
       graduationFeel:
         'Rhythm holds across rounds, and aiming at a scored target would feel like a welcome challenge.',
     },
+    // d55: called single-target serve under +/- pressure (BAB Server vs Passer) beside d22's multi-zone points race.
     {
       rung: 3,
-      drillIds: ['d22'],
+      drillIds: ['d22', 'd55'],
       intent: 'Serve to a called or scored target under a little outcome pressure.',
       externalFocusCue: 'Aim past the passer to the open zone, not just over the net.',
       explorationCriterion:
@@ -192,9 +196,10 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
       graduationFeel:
         'The set shape repeats cleanly, and keeping a continuous rally going would feel natural.',
     },
+    // d56: solo continuous-rhythm self-set route (FIVB 4.1 Set and Move) beside the pair-only d41.
     {
       rung: 2,
-      drillIds: ['d41'],
+      drillIds: ['d41', 'd56'],
       intent: 'Keep the set shape while rallying continuously with a partner.',
       externalFocusCue: 'Float each set so your partner barely moves to reach it.',
       explorationCriterion:
@@ -202,9 +207,10 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
       graduationFeel:
         'The rally stays smooth, and setting from new spots to new targets would feel like the next step.',
     },
+    // d57: changing/random targets while moving (FIVB 4.4 reduced) beside d42's two fixed corners.
     {
       rung: 3,
-      drillIds: ['d42'],
+      drillIds: ['d42', 'd57'],
       intent: 'Set to changing targets and from changing court spots.',
       externalFocusCue: 'Square up to the target before the ball arrives.',
       explorationCriterion: 'Notice how arriving early and facing the target changes how settable the ball lands.',
@@ -212,9 +218,10 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
         'You arrive and square up in time, and solving messier passes would feel like a fair challenge.',
     },
     // d20: setting off live-ish passes in continuity flow; d21: 500's scored chaotic entries — reactive/graded beside d47.
+    // d58: pass-to-self then choose bump/hand, reducible to pair (BAB Plan 6 Drill 2) beside d47's four pass locations.
     {
       rung: 4,
-      drillIds: ['d20', 'd21', 'd47'],
+      drillIds: ['d20', 'd21', 'd47', 'd58'],
       intent: 'Choose bump or hand set from imperfect passes and still deliver a hittable ball.',
       externalFocusCue: 'Send the ball to the same hittable spot wherever the pass pulls you.',
       explorationCriterion: 'See which option keeps the set clean when the pass is off.',

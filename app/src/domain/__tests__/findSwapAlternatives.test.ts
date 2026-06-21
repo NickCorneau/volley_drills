@@ -113,7 +113,18 @@ describe('findSwapAlternatives (Phase F Unit 4)', () => {
     // no-net + no-wall (`env({ lowScreenTime: true })`). It is therefore
     // a legitimate same-focus strict alternate to `d31` in this context.
     // Origin: docs/plans/2026-05-04-004-feat-d51-beginner-serving-tactical-zone-depth-plan.md
-    expect(strict.map((alternate) => alternate.drillId).sort()).toEqual(['d22', 'd33', 'd51'])
+    // 2026-06-21 roster-depth wave: d53 / d54 / d55 each ship a solo
+    // open-sand variant (`env({ lowScreenTime: true })`), so they also
+    // qualify as strict same-focus serve alternates here.
+    // Origin: docs/plans/2026-06-21-002-feat-roster-depth-source-backed-drills-plan.md
+    expect(strict.map((alternate) => alternate.drillId).sort()).toEqual([
+      'd22',
+      'd33',
+      'd51',
+      'd53',
+      'd54',
+      'd55',
+    ])
     expect(
       strict.every((alternate) => {
         const drill = DRILLS.find((candidate) => candidate.id === alternate.drillId)

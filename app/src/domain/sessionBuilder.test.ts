@@ -296,9 +296,16 @@ describe('sessionBuilder', () => {
     // inputs, no positions.)
     expect(draft?.assemblyAlgorithmVersion).toBe(11)
     // 2026-05-13: segment snap is wired into `buildDraft`, so the
-    // pair-open-25 wrap (d26-solo, natural 3 min) snaps from 4 → 3
-    // and the freed minute redistributes into technique (6 → 7)
-    // under the default priority. Total stays at 25.
+    // pair-open-25 wrap snaps and the freed minute redistributes into
+    // technique under the default priority. Total stays at 25.
+    //
+    // 2026-06-21 roster-depth wave (d52-d58): session assembly consumes a
+    // single seeded RNG stream, so adding pass candidate d52 to the early
+    // slots shifts RNG consumption and cascades a deterministic reshuffle
+    // across every slot for this fixed seed (algorithm version unchanged at
+    // 11; total still 25 min; all picks remain valid m001 candidates). This
+    // is the expected golden-pin churn for a catalog change, not a behavior
+    // change.
     expect(
       draft?.blocks.map((block) => ({
         type: block.type,
@@ -315,27 +322,27 @@ describe('sessionBuilder', () => {
       },
       {
         type: 'technique',
-        durationMinutes: 7,
-        drillId: 'd05',
-        variantId: 'd05-pair',
+        durationMinutes: 6,
+        drillId: 'd11',
+        variantId: 'd11-pair',
       },
       {
         type: 'movement_proxy',
         durationMinutes: 5,
-        drillId: 'd10',
-        variantId: 'd10-pair',
+        drillId: 'd46',
+        variantId: 'd46-pair-open',
       },
       {
         type: 'main_skill',
         durationMinutes: 7,
-        drillId: 'd07',
-        variantId: 'd07-pair-open',
+        drillId: 'd10',
+        variantId: 'd10-pair',
       },
       {
         type: 'wrap',
-        durationMinutes: 3,
-        drillId: 'd26',
-        variantId: 'd26-solo',
+        durationMinutes: 4,
+        drillId: 'd25',
+        variantId: 'd25-solo',
       },
     ])
   })
@@ -2438,6 +2445,11 @@ describe('stress-rung preference (D154)', () => {
     const nonCandidateIds = new Set(
       DRILLS.filter((drill) => !drill.m001Candidate).map((drill) => drill.id),
     )
+    // 2026-06-21 roster-depth wave: d52 (Pass Back and Forth) joined pass
+    // rung 1 as a second m001Candidate beside d01, so the seeded shuffle
+    // may legitimately surface either. The invariant under test is that the
+    // pick is an assembly-eligible rung-1 drill, never an inert sibling.
+    const eligibleRung1Pass = new Set(['d01', 'd52'])
     const beginnerContext: SetupContext = { ...soloPassContext, playerLevel: 'beginner' }
     for (let i = 0; i < 25; i++) {
       const pick = pickForSlot(
@@ -2447,7 +2459,9 @@ describe('stress-rung preference (D154)', () => {
         createSeededRandom(`d160-inert-${i}`),
         { playerLevel: 'beginner', stressPositions: { pass: 1 } },
       )
-      expect(pick?.drill.id).toBe('d01')
+      expect(pick).not.toBeNull()
+      expect(nonCandidateIds.has(pick!.drill.id)).toBe(false)
+      expect(eligibleRung1Pass.has(pick!.drill.id)).toBe(true)
 
       const draft = buildDraft(beginnerContext, {
         assemblySeed: `d160-inert-build-${i}`,
