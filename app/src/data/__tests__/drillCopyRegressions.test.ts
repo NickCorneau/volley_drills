@@ -332,8 +332,11 @@ describe('drill copy regressions', () => {
       expect(bonus).toMatch(/glutes \(back of hips\)/)
       expect(bonus).toMatch(/adductors \(inner thighs\)/)
       const segmentLabels = (solo.segments ?? []).map((s) => s.label).join('\n')
-      expect(segmentLabels).toMatch(/Hamstring \(back of thigh\):/)
-      expect(segmentLabels).toMatch(/Hip flexor \(front of upper thigh\):/)
+      // 2026-06-21 quality+tone audit: segment labels gained a rule 7
+      // cadence-format prefix ("Continuous hold (each side): ") matching
+      // d28's warmup labels; the anatomy gloss now follows the prefix.
+      expect(segmentLabels).toMatch(/hamstring \(back of thigh\)/i)
+      expect(segmentLabels).toMatch(/hip flexor \(front of upper thigh\)/i)
     })
 
     it('marks all three stretches as eachSide (each-side iteration: mirror is built into the floor)', () => {
@@ -357,9 +360,10 @@ describe('drill copy regressions', () => {
       // `courtsideInstructions` (that's now intro-only).
       expect(solo.segments).toBeDefined()
       expect(solo.segments).toHaveLength(3)
-      expect(solo.segments?.[0].label).toMatch(/^Calf:/)
-      expect(solo.segments?.[1].label).toMatch(/^Hamstring \(back of thigh\):/)
-      expect(solo.segments?.[2].label).toMatch(/^Hip flexor \(front of upper thigh\):/)
+      // 2026-06-21 quality+tone audit: rule 7 cadence-format prefix added.
+      expect(solo.segments?.[0].label).toMatch(/^Continuous hold \(each side\): calf/i)
+      expect(solo.segments?.[1].label).toMatch(/^Continuous hold \(each side\): hamstring \(back of thigh\)/i)
+      expect(solo.segments?.[2].label).toMatch(/^Continuous hold \(each side\): hip flexor \(front of upper thigh\)/i)
       expect(solo.segments?.every((s) => s.durationSec === 60)).toBe(true)
     })
 
@@ -1118,12 +1122,16 @@ describe('drill copy regressions', () => {
     it('keeps the 6-zone ladder + miss-handling rule in the courtside copy', () => {
       if (!pair) throw new Error('pair variant missing')
       const text = pair.courtsideInstructions.toLowerCase()
-      expect(text).toContain('front-left')
-      expect(text).toContain('front-middle')
-      expect(text).toContain('front-right')
-      expect(text).toContain('back-left')
-      expect(text).toContain('back-middle')
-      expect(text).toContain('back-right')
+      // 2026-06-21 quality+tone audit: converted the 6-zone enumeration
+      // from front/back to short/deep so the net pair variant matches
+      // the open variants and satisfies rule 11 (short/deep is the
+      // preferred POV-unambiguous vocabulary from the server's side).
+      expect(text).toContain('short-left')
+      expect(text).toContain('short-middle')
+      expect(text).toContain('short-right')
+      expect(text).toContain('deep-left')
+      expect(text).toContain('deep-middle')
+      expect(text).toContain('deep-right')
       // 2026-05-10 first-time-runnability sweep: miss-handling
       // language shifted from "miss repeats the same zone" to the
       // more compact "Miss → repeat; after 3 misses, move on."

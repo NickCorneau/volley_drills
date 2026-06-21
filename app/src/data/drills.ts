@@ -135,7 +135,7 @@ const d01: Drill = {
       // 2026-05-10 first-time-runnability sweep (rule 8 role-tagged
       // via "you/partner" clauses; rule 14 trim 48->42 words).
       courtsideInstructions:
-        'You forearm-pass; partner tosses an easy arc from 3 m. Pass back at catchable height, then clap behind your back while partner catches. Reset and repeat. Switch roles after 10 reps or any miss.',
+        'You forearm-pass; partner tosses an easy arc from 3 m. Pass back at catchable height, then clap behind your back while partner catches. Reset and repeat. Switch roles after 15 clean passes or any miss.',
       coachingCues: [
         'Pass to a height your partner can catch.',
         'Ready posture.',
@@ -159,7 +159,7 @@ const d02: Drill = {
   m001Candidate: false,
   teachingPoints: [
     'Ribs tucked - do not over-arch.',
-    'Platform angle is the crucial part.',
+    'Arm angle that drives direction is the crucial part.',
     'Shoulders oriented to target.',
   ],
   progressionDescription: 'Tosses become faster/flatter; receiver starts from deeper position.',
@@ -182,14 +182,14 @@ const d02: Drill = {
       },
       successMetric: {
         type: 'pass-rate-good',
-        description: 'Passes graded 2+ over 20 tosses.',
+        description: 'Passes graded 2+ (= ball lands within 1 m of the set window with enough arc to be settable) over 20 tosses.',
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'Receiver places towel across neck/upper back. Partner tosses left/right. Receiver passes to the set window (where the setter would stand, ~3 m off the net) without dropping towel.',
+        'You pass with a towel across your neck and upper back; partner tosses left and right. Pass to the set window (where the setter would stand, ~3 m off the net) without dropping the towel.',
       coachingCues: [
         'Ribs tucked - do not over-arch.',
-        'Platform angle is the crucial part.',
+        'Arm angle drives where the ball goes.',
         'Shoulders oriented to target.',
       ],
     },
@@ -236,7 +236,7 @@ const d03: Drill = {
       successMetric: {
         type: 'pass-rate-good',
         description: 'Passes catchable by tosser or graded 2+ (= ball lands within 1 m of the set window with enough arc to be settable).',
-        target: '20/20 or ≥ 70% graded 2+',
+        target: '≥ 14 of 20 passes graded 2+',
       },
       // 2026-05-10 final-audit polish: gloss "serve-receive stance"
       // inline per rule 2 (one-season rec player would not know the
@@ -288,11 +288,11 @@ const d04: Drill = {
       },
       successMetric: {
         type: 'pass-rate-good',
-        description: 'Passes graded 2+ out of 10.',
+        description: 'Passes graded 2+ (= ball lands within 1 m of the set window with enough arc to be settable) out of 10.',
         target: '≥ 7/10',
       },
       courtsideInstructions:
-        'Feeder serves or tosses across. Passer passes up/down to the set window (where the setter would stand, ~3 m off the net), then catches their own pass (or partner catches).',
+        'Pass across the net; feeder serves or tosses to you. Pass up or down to the set window (where the setter would stand, ~3 m off the net), then catch your own pass.',
       coachingCues: [
         'Move to pass in centerline.',
         'Target forward and slightly inward.',
@@ -316,11 +316,11 @@ const d04: Drill = {
       },
       successMetric: {
         type: 'pass-rate-good',
-        description: 'Passes graded 2+ out of 10.',
+        description: 'Passes graded 2+ (= ball lands within 1 m of the set window with enough arc to be settable) out of 10.',
         target: '≥ 7/10',
       },
       courtsideInstructions:
-        'Self-toss across the net. Pass up/down to the set window (where the setter would stand, ~3 m off the net) and catch your own pass. Retrieve and repeat.',
+        'Pass across the net from a self-toss. Pass up or down to the set window (where the setter would stand, ~3 m off the net), catch your own pass, retrieve, and repeat.',
       coachingCues: [
         'Move to pass in centerline.',
         'Target forward and slightly inward.',
@@ -339,8 +339,8 @@ const d05: Drill = {
   name: 'Self-Toss Pass to Set Window',
   shortName: 'Set Window Pass',
   skillFocus: ['pass'],
-  objective:
-    'Directional control; settable pass shape for beach. Honesty clause: trains platform + direction, not serve-reading.',
+  // Framing only: trains platform + direction, not serve-reading.
+  objective: 'Directional control and a settable pass shape for beach.',
   levelMin: 'beginner',
   levelMax: 'intermediate',
   chainId: 'chain-2-direction',
@@ -432,7 +432,7 @@ const d06: Drill = {
   name: 'Pass & Slap Hands with Target',
   shortName: 'Slap + Target',
   skillFocus: ['pass'],
-  objective: 'Maintain platform shape while aiming at set window.',
+  objective: 'Maintain platform shape while aiming at the set window.',
   levelMin: 'beginner',
   levelMax: 'intermediate',
   chainId: 'chain-2-direction',
@@ -462,11 +462,11 @@ const d06: Drill = {
       },
       successMetric: {
         type: 'pass-grade-avg',
-        description: 'Average pass grade across 20 contacts.',
+        description: 'Average pass grade (0 = unplayable, 3 = settable in the set window) across 20 contacts.',
         target: '≥ 2.0 average',
       },
       courtsideInstructions:
-        'Run D01 (Pass & Slap Hands) but now score each contact as 0–3 based on proximity/trajectory to your set window (where the setter would stand, ~3 m off the net).',
+        'Pass up to yourself off your own toss; clap behind your back between contacts. Score each contact 0 to 3 by how close the pass lands to your set window (where the setter would stand, ~3 m off the net).',
       coachingCues: [
         'Platform set early.',
         'Arms parallel to ground for accuracy.',
@@ -526,7 +526,7 @@ const d07: Drill = {
         target: '≥ 70% passes 2+ AND ≥ 80% correct calls',
       },
       courtsideInstructions:
-        'You pass; partner flashes a number 1–5 with their fingers the moment your platform meets the ball. Pass to the set window, then call the number you saw before the next ball.',
+        'You pass; partner serves and flashes 1 to 5 when your platform meets the ball. Pass to the set window (where the setter would stand, ~3 m off the net), call the number, then reset.',
       coachingCues: [
         "Look at your partner's hand the moment your platform meets the ball.",
         'Hold platform first; look after contact.',
@@ -559,7 +559,7 @@ const d07: Drill = {
         target: '16 of 24 passes 2+ and 20 of 24 correct calls',
       },
       courtsideInstructions:
-        'Pass to the set window from a self-toss, then lift your eyes and call the nearest of four numbered targets before the ball lands.',
+        'Pass to the set window (where the setter would stand, ~3 m off the net) from a self-toss, then lift your eyes and call the nearest of four numbered targets before the ball lands.',
       coachingCues: [
         'Look at the target card the moment your platform meets the ball.',
         'Hold platform first; look after contact.',
@@ -594,7 +594,7 @@ const d07: Drill = {
         target: '16 of 24 passes 2+ and 20 of 24 correct calls',
       },
       courtsideInstructions:
-        'You pass; partner flashes 1–5 with their fingers the moment your platform meets the ball. Pass to the set window, then call the number before the next feed. Switch roles after 12 reps.',
+        'You pass; partner flashes 1–5 with their fingers the moment your platform meets the ball. Pass to the set window (where the setter would stand, ~3 m off the net), then call the number before the next feed. Switch roles after 12 reps.',
       coachingCues: [
         "Look at partner's hand the moment your platform meets the ball.",
         'Be still through contact.',
@@ -648,7 +648,7 @@ const d08: Drill = {
       successMetric: {
         type: 'points-to-target',
         description:
-          'First to +3. Scoring: +1 catcher ≤ 1 step or service error; −1 bad pass or ace.',
+          'First to +3. Scoring: +1 catcher ≤ 1 step or service error; −1 pass graded below 2+ (= not settable within 1 m of the set window) or ace.',
         target: 'Win 2 rounds or pass average ≥ 2.0 across 15 serves',
       },
       courtsideInstructions:
@@ -704,11 +704,11 @@ const d09: Drill = {
       // lints already passed; reviewer-checklist reorder only.
       successMetric: {
         type: 'reps-successful',
-        description: 'Complete laps without losing control.',
+        description: 'Finish 2 full sideline laps with no more than 3 mishits (ball hits the sand or goes past your partner).',
         target: '2 full laps with ≤ 3 errors',
       },
       courtsideInstructions:
-        'Pass back and forth with your partner while shuffling along the sideline to the service line, across, and back. Keep the rally alive.',
+        'You pass; partner passes back while you both shuffle the sideline to the service line, across, and back. One lap = there and back. Up to 3 mishits are okay; a 4th restarts the lap count. Stop at 2 laps or time-up.',
       coachingCues: [
         'Pass to your partner, not past them.',
         'Wide base.',
@@ -775,7 +775,7 @@ const d10: Drill = {
       courtsideInstructions:
         'You pass; tosser feeds six tosses from 2 to 3 m away. (toss → you pass back to the set window) × 6 spots, in order: front-left, side-left, behind-left, front-right, side-right, behind-right.',
       coachingCues: [
-        'Pass into the set window from every spot.',
+        'Pass so the ball lands where the setter would stand (~3 m off the net) from every spot.',
         'Drop near shoulder, lift far shoulder on wide passes.',
         'Feel your platform face the target before contact.',
       ],
@@ -832,7 +832,7 @@ const d11: Drill = {
         target: '8/10 each side',
       },
       courtsideInstructions:
-        'You pass with only your near arm (the one closer to the ball); partner (feeder) tosses wide to the sideline. Pass with the near arm, then with the far arm, then with both arms.',
+        'You pass with only your near arm (the one closer to the ball); partner (feeder) tosses wide to each sideline, 10 tosses per side. Pass with the near arm, then the far arm, then both arms.',
       coachingCues: [
         'Move through ball.',
         'Arm behind ball.',
@@ -863,7 +863,7 @@ const d11: Drill = {
         target: '8/10 each side',
       },
       courtsideInstructions:
-        'Pass with only your near arm (the one closer to the ball). Self-toss wide to the left, then to the right; pass with the near arm each time, then with the far arm, then with both arms.',
+        'Pass with only your near arm (the one closer to the ball). Self-toss wide to each side, 10 tosses per side; pass with the near arm each time, then the far arm, then both arms.',
       coachingCues: [
         'Move through ball.',
         'Arm behind ball.',
@@ -913,7 +913,7 @@ const d12: Drill = {
       },
       successMetric: {
         type: 'pass-rate-good',
-        description: 'Contacts with up/down control graded 2+.',
+        description: 'Contacts graded 2+ (= ball lands within 1 m of the target with enough arc to be settable).',
         target: '≥ 70%',
       },
       courtsideInstructions:
@@ -967,7 +967,7 @@ const d13: Drill = {
       },
       successMetric: {
         type: 'pass-rate-good',
-        description: 'Passes graded 2+ across 2 rounds.',
+        description: 'Passes graded 2+ (= ball lands within 1 m of the set window with enough arc to be settable) across 2 W-path rounds (one full W = one round).',
         target: '≥ 70%',
       },
       courtsideInstructions:
@@ -1020,7 +1020,7 @@ const d14: Drill = {
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'One feeder passes to two passers who swap positions after each rep. Emphasize avoiding leg crossing sideways; 12–20 reps each direction.',
+        'Pass back to the feeder; feeder tosses to two passers who swap after each rep. Avoid crossing your legs sideways; 12–20 reps each direction.',
       coachingCues: [
         'Play ball in front.',
         'Wide base helps.',
@@ -1135,7 +1135,7 @@ const d16: Drill = {
       },
       successMetric: {
         type: 'pass-rate-good',
-        description: 'In each set of 4, passes graded 2+.',
+        description: 'In each set of 4, passes graded 2+ (= ball lands within 1 m of the set window with enough arc to be settable).',
         target: '≥ 3/4 per set',
       },
       courtsideInstructions:
@@ -1188,7 +1188,7 @@ const d46: Drill = {
       },
       successMetric: {
         type: 'pass-rate-good',
-        description: 'Spin-fed self tosses passed into a 1 m set window.',
+        description: 'Spin-fed self tosses passed into a 1 m set window (where the setter would stand, ~3 m off the net).',
         target: '16 of 24 passes land in the set window',
       },
       courtsideInstructions:
@@ -1216,7 +1216,7 @@ const d46: Drill = {
       },
       successMetric: {
         type: 'pass-rate-good',
-        description: 'Partner spin feeds passed into a 1 m set window.',
+        description: 'Partner spin feeds passed into a 1 m set window (where the setter would stand, ~3 m off the net).',
         target: '16 of 24 passes land in the set window',
       },
       // 2026-05-10 first-time-runnability sweep (rule 8 role-tagged).
@@ -1267,7 +1267,7 @@ const d17: Drill = {
       },
       successMetric: {
         type: 'composite',
-        description: 'No collision/hesitation errors AND passes graded 2+.',
+        description: 'No collision/hesitation errors AND passes graded 2+ (= ball lands within 1 m of the set window with enough arc to be settable).',
         target: '0 collisions across 12 reps; ≥ 70% pass grade 2+',
       },
       courtsideInstructions:
@@ -1383,7 +1383,7 @@ const d19: Drill = {
         target: '20 controlled passes',
       },
       courtsideInstructions:
-        'Tosser tosses to passer; passer passes to target; target catches; rotate through spots. After 20 passes, progress to live serve.',
+        'Tosser tosses to passer; passer passes to target; target catches; rotate through spots. After 20 passes, move on to live serve.',
       coachingCues: [
         'Controlled toss/serve down the line.',
         'Keep rhythm.',
@@ -1477,9 +1477,9 @@ const d21: Drill = {
         target: 'Reach 500 within cap time or improve vs last session',
       },
       courtsideInstructions:
-        'Tosser initiates with a Skyball (high lob), Free Ball (easy arcing ball, pass-to-set ready), or Down Ball (flat ball from a non-spiker). Points: pass-only (25), pass+set (50), pass+set+attack (100). Race to 500.',
+        'Tosser initiates with a Skyball (= high lob), Free Ball (easy arcing ball, pass-to-set ready), or Down Ball (flat ball from a non-spiker). Points: pass-only (25), pass+set (50), pass+set+attack (100). Race to 500.',
       coachingCues: [
-        'Tabletop passing.',
+        'Keep the pass flat and in front of you, like a table surface.',
         'Defined apex on every contact.',
         'Square hips to target.',
       ],
@@ -1496,7 +1496,7 @@ const d22: Drill = {
   name: 'First to 10 Serving',
   shortName: 'First to 10',
   skillFocus: ['serve'],
-  objective: 'Serving consistency + serving to zones.',
+  objective: 'Build a repeatable serve and place it in the zones you mark.',
   // Focus-readiness batch 2 (2026-04-30): align level band to
   // FIVB 2.6 First to 10 Serving Drill (`intermediate / advanced`),
   // recorded in docs/reviews/2026-04-22-drill-level-audit.md.
@@ -1505,8 +1505,8 @@ const d22: Drill = {
   chainId: 'chain-6-serving',
   m001Candidate: true,
   teachingPoints: [
-    'Develop a serving routine.',
-    'Consistent hand contact.',
+    'Same pre-serve routine every rep.',
+    'Same toss height and contact sound each rep.',
     'Adjust for wind movement.',
   ],
   progressionDescription: 'Jump serve to spots instead of standing serve.',
@@ -1538,13 +1538,13 @@ const d22: Drill = {
       },
       successMetric: {
         type: 'points-to-target',
-        description: 'Assign point values to zones; serve out loses a point.',
-        target: 'Reach 10 points with no more than 3 missed serves',
+        description: 'Mark sand zones with point values; each in-zone serve scores those points, each serve out loses 1 point.',
+        target: 'Reach 10 points',
       },
       courtsideInstructions:
-        'Serve to earn 10 points across self-assigned zones. Assign point values to zones; each serve in scores those points; a serve out loses a point. Adjust zone values for your level or objective.',
+        'Serve to earn 10 points across marked sand zones. Assign point values before you start; each in-zone serve scores, each serve out loses 1 point.',
       coachingCues: [
-        'Develop a serving routine.',
+        'Same pre-serve routine every rep.',
         'Consistent hand contact.',
         'Adjust for wind movement.',
       ],
@@ -1587,9 +1587,9 @@ const d22: Drill = {
       courtsideInstructions:
         "You serve first; partner serves next, taking turns. Mark shared sand zones with point values; each in-zone serve scores, each serve out loses a point. First to 10 wins. If the block ends before either of you hits 10, the higher score wins.",
       coachingCues: [
-        'Develop a serving routine.',
+        'Same pre-serve routine every rep.',
         'Consistent hand contact.',
-        "Score honestly; this is your data, not your opponent's.",
+        'Call in or out before you hand the ball over.',
       ],
     },
     // Focus-readiness batch 2: no-net solo adaptation of FIVB 2.6
@@ -1612,8 +1612,8 @@ const d22: Drill = {
       },
       successMetric: {
         type: 'points-to-target',
-        description: 'Serve-toss contact scores against the called sand target zone.',
-        target: 'Reach 10 points with no more than 3 misses',
+        description: 'Self-toss contacts landing in the target you name before the toss score those points; a miss loses 1 point.',
+        target: 'Reach 10 points',
       },
       courtsideInstructions:
         'Serve to earn 10 points across marked sand targets. Assign point values to short, middle, and deep targets. Each contact landing in the called target scores those points; a miss loses 1 point. Reset routine before every attempt.',
@@ -1643,13 +1643,13 @@ const d22: Drill = {
       },
       successMetric: {
         type: 'points-to-target',
-        description: 'Serve-toss contact scores against the target zone called before the toss.',
+        description: 'Each in-zone serve scores the called value; each serve out loses 1 point.',
         target: 'First partner to 10 points wins',
       },
       courtsideInstructions:
-        'Serve to earn points across shared sand targets. Caller names the next target and point value before the toss. Server resets routine, contacts toward the target, scores the result, then hands the ball over. First partner to 10 wins.',
+        'You serve first; caller names the next target and point value before each toss. In-zone serve scores, serve out loses 1 point. First to 10 wins; if time runs out, higher score wins.',
       coachingCues: [
-        'Caller names the point target.',
+        "On caller's name, serve to that target.",
         'Consistent hand contact.',
         'Score honestly; this is your data.',
       ],
@@ -1662,7 +1662,7 @@ const d23: Drill = {
   name: 'Serve & Dash',
   shortName: 'Serve & Dash',
   skillFocus: ['serve', 'conditioning'],
-  objective: 'Serve routine + immediate movement to defensive base.',
+  objective: 'Serve, then sprint to your defensive base spot while watching the ball.',
   levelMin: 'beginner',
   levelMax: 'intermediate',
   chainId: 'chain-6-serving',
@@ -1670,7 +1670,7 @@ const d23: Drill = {
   teachingPoints: [
     'Full routine each serve.',
     'Watch ball while moving.',
-    'Treat as a pressure rep.',
+    'Sprint every rep; no walking to base.',
   ],
   progressionDescription: 'Alternate starting serve locations along end line.',
   regressionDescription: 'Reduce sprint distance; reduce total reps.',
@@ -1692,14 +1692,14 @@ const d23: Drill = {
       },
       successMetric: {
         type: 'reps-successful',
-        description: 'Serves "in" with consistent dash (no walking).',
-        target: '10 serves in',
+        description: 'Serves in the court plus a full sprint to base (no walking).',
+        target: '8 serves in with a full sprint after each',
       },
       courtsideInstructions:
-        'Serve. Immediately sprint to your chosen defensive base spot while watching the ball flight. Reset and repeat.',
+        'Serve in, then sprint to a marked base spot while watching the ball flight. A serve out or a walk to base does not count; reset and repeat.',
       coachingCues: [
-        'Full routine each serve.',
-        'Watch ball while moving.',
+        'Watch the ball flight as you sprint.',
+        'Push off the instant the ball leaves your hand.',
         'Treat as a pressure rep.',
       ],
     },
@@ -1744,8 +1744,8 @@ const d31: Drill = {
       },
       successMetric: {
         type: 'reps-successful',
-        description: 'Serves or serve-toss contacts landing in or near a marked target circle.',
-        target: '8 of 10 near the target',
+        description: 'Serves or serve-toss contacts landing in or brushing a marked target circle.',
+        target: '8 of 10 in or brushing the target',
       },
       courtsideInstructions:
         'Serve into a 2 m target circle. Mark the circle. Self-toss and serve toward it. Count only balls landing in or brushing the circle. Reset your routine before every rep.',
@@ -1772,13 +1772,13 @@ const d31: Drill = {
       successMetric: {
         type: 'reps-successful',
         description:
-          'Serve-toss contacts landing in or near the target circle called before the toss.',
-        target: '8 of 10 near the called target',
+          'Serve-toss contacts landing in or brushing the target circle called before the toss.',
+        target: '8 of 10 in or brushing the called target',
       },
       courtsideInstructions:
-        'Serve toward a partner-called 2 m target circle on open sand. Mark the circle. Caller names the target before the server tosses. Server resets routine, tosses, and contacts toward the called circle. Switch after 10 attempts.',
+        'You serve first; caller names the target before each toss. Serve toward the called 2 m circle; count lands in or brushing it. Misses do not count; switch roles after 10 serves.',
       coachingCues: [
-        'Caller names the target first.',
+        'On caller\'s name, serve to that circle.',
         'Same toss height.',
         'Watch the landing before you reset.',
       ],
@@ -1816,13 +1816,13 @@ const d31: Drill = {
       successMetric: {
         type: 'reps-successful',
         description:
-          'Serves landing in or near the 2 m target circle named by the shagger before each toss.',
-        target: '8 of 10 near the called target',
+          'Serves landing in or brushing the 2 m target circle named by the shagger before each toss.',
+        target: '8 of 10 in or brushing the called target',
       },
       courtsideInstructions:
-        'You serve toward a 2 m circle (mark it on the sand) named by your shagger (= partner across the net). (shagger calls → you toss and serve toward the circle) × 10 serves. Shagger collects between rounds. Switch roles.',
+        'You serve first; shagger (= partner across the net) calls the target before each toss. (shagger calls then you serve toward the 2 m circle) x 10 serves; count lands in or brushing the circle. Shagger collects the balls and brings them back; switch roles.',
       coachingCues: [
-        'Call the target before you toss.',
+        "Wait for shagger's call before you toss.",
         'Same toss height.',
         'Watch the landing before you reset.',
       ],
@@ -1848,11 +1848,11 @@ const d33: Drill = {
   m001Candidate: true,
   teachingPoints: [
     'Name the zone before you serve.',
-    'Serve high and deep when targeting the back zones.',
+    'Serve high and deep when targeting the deep zones.',
     'Into-wind serves are more predictable than with-wind serves.',
   ],
   progressionDescription: 'Require two makes per zone, then shrink each zone.',
-  regressionDescription: 'Use three large zones: left, middle, right.',
+  regressionDescription: 'Use three large sand targets from your side: left, middle, right.',
   variants: [
     // Focus-readiness batch 1 (2026-04-30): no-net adaptation of the
     // BAB six-zone Around the World serving convention. Zones become
@@ -1924,8 +1924,8 @@ const d33: Drill = {
       // for "shag"). Solo POV already unambiguous because the doer is
       // alone; default from-doer's-side-of-net POV (rule 11) applies.
       courtsideInstructions:
-        'Serve through six zones in order: front-left, front-middle, front-right, back-left, back-middle, back-right (from your side of the net). Misses repeat the same zone. Shag (collect the balls from the receiver\'s side) between rounds.',
-      coachingCues: ['Name the zone first.', 'High arc for deep zones.', 'Reset after each miss.'],
+        'Serve through six zones in order, from your side of the net: short-left, short-middle, short-right, deep-left, deep-middle, deep-right. Misses repeat the same zone; after 3 misses, move on. Shag (= collect the balls from the receiver\'s side) after all six.',
+      coachingCues: ['Name the zone first.', 'High arc for the deep zones.', 'Reset after each miss.'],
     },
     // Focus-readiness batch 1 (2026-04-30): pair/no-net target ladder
     // from the same BAB six-zone serving convention. Caller/shagger
@@ -2014,7 +2014,7 @@ const d33: Drill = {
       // specimen for the 2026-05-10 "peak and flash / number drill"
       // confusion class.
       courtsideInstructions:
-        "You serve; shagger (= partner across the net) calls the zone, then collects after the 6-zone round. Zones from your side: front-left, front-middle, front-right, back-left, back-middle, back-right. Miss → repeat; after 3 misses, move on. Switch roles.",
+        "You serve first; shagger (= partner across the net) calls the zone before each serve, then collects after the 6-zone round. Zones from your side: short-left, short-middle, short-right, deep-left, deep-middle, deep-right. Miss → repeat; after 3 misses, move on. Switch roles.",
       coachingCues: [
         'Shagger calls the zone first.',
         'High arc for deep zones.',
@@ -2059,7 +2059,7 @@ const d24: Drill = {
       },
       successMetric: {
         type: 'pass-rate-good',
-        description: 'Reps landing in target corner area.',
+        description: 'Passes graded 2+ (= ball lands within 1 m of the marked corner target) out of 15 reps.',
         target: '≥ 70%',
       },
       courtsideInstructions:
@@ -2085,8 +2085,9 @@ const d25: Drill = {
   name: 'Downshift',
   shortName: 'Downshift',
   skillFocus: ['recovery'],
+  // Framing only; not an injury-prevention or recovery claim (D86).
   objective:
-    'Transition out of the session: settle breathing, unload the feet and hips, do a quick symptom/hydration check. Not an injury-prevention or recovery claim.',
+    'Transition out of the session: slow your breathing, unload feet and hips, and drink if you are thirsty.',
   levelMin: 'beginner',
   levelMax: 'advanced',
   chainId: 'chain-cooldown',
@@ -2097,7 +2098,7 @@ const d25: Drill = {
     'Skip any movement that hurts today.',
   ],
   progressionDescription: 'Add an extra 30–60 seconds of easy walking on very hot days.',
-  regressionDescription: 'Easy walk only (60–90 seconds).',
+  regressionDescription: 'Walk with long exhales only (60 to 90 s).',
   variants: [
     {
       // Timed sub-blocks: 60-90 s walk + ~30 s each for 3-4 stretch/recovery
@@ -2178,35 +2179,35 @@ const d25: Drill = {
       // to switch. Sum raised to 240 s = 4 min; workload floor
       // bumped to 4 (see workload comment above).
       courtsideInstructions:
-        'Walk first, then four short stretch holds. Gentle tension only; skip any move that hurts today.',
-      courtsideInstructionsBonus: 'Drink water and note any pain.',
+        'Walk first, then four short holds: calves, hips, overhead reach, shoulders. Gentle tension only; skip any move that hurts today.',
+      courtsideInstructionsBonus: 'Drink water if you are thirsty. Skip any move that hurts today.',
       segments: [
-        { id: 'd25-solo-s1', label: 'Walk with long exhales.', durationSec: 60 },
+        { id: 'd25-solo-s1', label: 'Continuous: walk with long exhales.', durationSec: 60 },
         {
           id: 'd25-solo-s2',
-          label: 'Sit or lean to rest calves and feet.',
+          label: 'Continuous hold: calf release, straight back leg, heel down, lean in until the calf tightens.',
           durationSec: 30,
         },
         {
           id: 'd25-solo-s3',
-          label: 'Hip stretch: cross one ankle over the opposite knee and lean forward.',
+          label: 'Continuous hold (each side): hip stretch, cross one ankle over the opposite knee and lean forward.',
           durationSec: 60,
           eachSide: true,
         },
         {
           id: 'd25-solo-s4',
-          label: 'Reach arms overhead with a gentle back-bend.',
+          label: 'Continuous hold: reach arms overhead and arch gently through the upper back.',
           durationSec: 30,
         },
         {
           id: 'd25-solo-s5',
-          label: 'Shoulder stretch: one arm across chest.',
+          label: 'Continuous hold (each side): shoulder stretch, pull one arm across your chest with the other hand.',
           durationSec: 60,
           eachSide: true,
         },
       ],
       coachingCues: [
-        'Long exhale, let heart rate come down.',
+        'Long exhale until your breathing feels steady.',
         'Gentle tension only.',
         'Hot session? Drink water before you leave.',
       ],
@@ -2224,8 +2225,13 @@ const d26: Drill = {
   levelMax: 'advanced',
   chainId: 'chain-cooldown',
   m001Candidate: true,
-  teachingPoints: ['Breathe.', 'Avoid pain.', 'Hold steady.'],
-  progressionDescription: 'When wrap runs 5+ minutes, add second sides, glutes, or adductors.',
+  teachingPoints: [
+    'Breathe through each hold.',
+    'Firm tension, never sharp pain.',
+    'Hold still, then switch sides halfway.',
+  ],
+  progressionDescription:
+    'If time remains after all three holds, add glutes (back of the hips) or adductors (inner thighs).',
   regressionDescription: 'Two moves only (calf + hamstring) if you are pressed for time.',
   variants: [
     {
@@ -2325,26 +2331,26 @@ const d26: Drill = {
         {
           id: 'd26-solo-s1',
           label:
-            'Calf: straight back leg, heel down, lean in; soften the back knee for the lower calf.',
+            'Continuous hold (each side): calf, straight back leg, heel down, lean in; soften the back knee for the lower calf.',
           durationSec: 60,
           eachSide: true,
         },
         {
           id: 'd26-solo-s2',
           label:
-            'Hamstring (back of thigh): front leg heel down, toes up; tip your hips back and lean your chest toward the front leg, back flat.',
+            'Continuous hold (each side): hamstring (back of thigh), front leg heel down, toes up; tip your hips back and lean your chest toward the front leg, back flat.',
           durationSec: 60,
           eachSide: true,
         },
         {
           id: 'd26-solo-s3',
           label:
-            'Hip flexor (front of upper thigh): half-kneel (one knee on the ground, other foot in front), squeeze the back-leg glute, lean gently into the front leg.',
+            'Continuous hold (each side): hip flexor (front of upper thigh), half-kneel (one knee on the ground, other foot in front), squeeze the back-leg glute, lean gently into the front leg.',
           durationSec: 60,
           eachSide: true,
         },
       ],
-      coachingCues: ['Breathe.', 'Avoid pain.', 'Hold steady.'],
+      coachingCues: ['Heel down, lean in until the calf tightens.', 'Avoid pain.', 'Hold steady.'],
     },
   ],
 }
@@ -2419,11 +2425,11 @@ const d38: Drill = {
       successMetric: {
         type: 'reps-successful',
         description:
-          'Bump-sets reaching target height (~1.5 m above head) and landing within 1 m of start.',
+          'Bump-sets reaching ~1.5 m above your head and landing inside your 1 m circle.',
         target: '15 controlled sets',
       },
       courtsideInstructions:
-        'Bump-set off your own toss into a 1 m landing circle around you. Self-toss to yourself ~1.5 m up; bump-set the ball back up with platform angled at the sky; aim for a settable arc landing within the circle. Reset and repeat.',
+        'Bump-set off your own toss into a 1 m landing circle around you. Self-toss to yourself ~1.5 m up; bump-set the ball back up with platform angled at the sky; aim for a catchable arc landing inside the circle. Reset and repeat.',
       coachingCues: [
         'Land each set inside your circle.',
         'Contact on forearms.',
@@ -2459,7 +2465,7 @@ const d38: Drill = {
       // 2026-05-10 first-time-runnability sweep (rule 8 role-tagged via
       // "you/partner" clauses; rule 15(b) external focus on cue[0]).
       courtsideInstructions:
-        'You bump-set; partner tosses. Stand 3 m apart; partner tosses an arc; bump-set it back at catchable height. Goal: unbroken rally; restart on a catch or mishit. Switch roles every 10 reps.',
+        'You bump-set; partner tosses. Stand 3 m apart; partner tosses an arc; bump-set it back at catchable height. Goal: unbroken rally; restart on a catch or mishit. Switch roles after each broken rally or at 15 sets, whichever comes first.',
       coachingCues: [
         'Set to your partner, not past them.',
         'Platform square to partner.',
@@ -2478,7 +2484,7 @@ const d39: Drill = {
   name: 'Hand Set Fundamentals',
   shortName: 'Hand Set',
   skillFocus: ['set'],
-  objective: 'Clean overhand hand-set off self-toss; symmetric hand shape and forehead contact.',
+  objective: 'Clean overhand hand-set; symmetric hand shape and forehead contact on every rep.',
   levelMin: 'beginner',
   levelMax: 'intermediate',
   chainId: 'chain-7-setting',
@@ -2516,7 +2522,7 @@ const d39: Drill = {
       courtsideInstructions:
         'Hand-set off your own toss straight back up ~2 m. Self-toss above your forehead; hand-set it straight up; both hands release at the same instant. A slap means too low; a pause means you carried.',
       coachingCues: [
-        'Contact above the forehead.',
+        'Send the ball straight up to the same height every time.',
         'Window between thumbs and forefingers.',
         'Both hands release together.',
       ],
@@ -2554,7 +2560,7 @@ const d39: Drill = {
         "You hand-set; partner tosses an arc above your forehead. Stand 3 m apart; hand-set back so partner catches without moving more than one step. A slap means too low; a pause means you carried. Switch roles after 12 clean sets.",
       coachingCues: [
         'Set to your partner, not past them.',
-        'Contact above the forehead.',
+        'A slap sound on release means your contact was too low.',
         'Both hands release together.',
       ],
     },
@@ -2582,7 +2588,8 @@ const d40: Drill = {
     'Finish facing the target.',
   ],
   progressionDescription: 'Add one step forward, back, left, and right before each set.',
-  regressionDescription: 'Catch in the setting window, plant, then re-toss and set.',
+  regressionDescription:
+    'Catch in the set window (where the setter would stand, ~3 m off the net), plant, then re-toss and set.',
   variants: [
     {
       id: 'd40-solo',
@@ -2637,8 +2644,8 @@ const d40: Drill = {
       // 2026-05-10 first-time-runnability sweep (rule 8 role-tagged
       // via "you/partner" clauses; rule 14 trim).
       courtsideInstructions:
-        'You set; partner (tosser) tosses 3 m away, varying short / deep / left / right. Move, plant feet, then set back so partner catches without a step. Reset if you set while drifting. Switch after 20 sets.',
-      coachingCues: ['Move first.', 'Plant both feet.', 'Face your partner.'],
+        'You set; partner (tosser) tosses 3 m away, varying short, deep, left, and right. Move, plant feet, then set back so partner catches without moving more than one step. After 3 misses in a row, switch who tosses and restart the 20-set count.',
+      coachingCues: ['Move first.', 'Land balanced before you release the set.', 'Face your partner.'],
     },
   ],
 }
@@ -2710,7 +2717,7 @@ const d42: Drill = {
   // Named targets require court-position movement before the set; keep
   // `set` primary and `movement` secondary for set-focus support slots.
   skillFocus: ['set', 'movement'],
-  objective: 'Set a partner to useful beach targets from changing court positions.',
+  objective: 'Set your partner to two marked corner targets from a planted base.',
   levelMin: 'intermediate',
   levelMax: 'intermediate',
   chainId: 'chain-7-setting',
@@ -2742,14 +2749,14 @@ const d42: Drill = {
       },
       successMetric: {
         type: 'reps-successful',
-        description: 'Sets your partner can reach within one step at the named corner target.',
+        description: 'Hand-sets your partner can reach within one step at the named corner.',
         target: '3 clean sets to each corner',
       },
       // 2026-05-10 first-time-runnability sweep (rule 11 miss-handling
       // escape clause added). No roles defined so rule 8 does not
       // apply; reviewer-checklist tightening only.
       courtsideInstructions:
-        'Set to a partner-named corner across two targets 3 m apart. Mark the corners. Partner tosses; setter plants and sets to the named corner. Miss → repeat the same corner. Switch setter after 6 clean sets.',
+        'Set to a partner-named corner across two targets 3 m apart. Mark the corners. Partner tosses; setter plants and sets to the named corner. Miss → repeat the same corner; after 3 misses, switch corners. Switch setter after 6 clean sets.',
       coachingCues: ['Set your partner.', 'Face the target.', 'Arc above reach height.'],
     },
   ],
@@ -2766,14 +2773,14 @@ const d47: Drill = {
   // Four-location setting is advanced setting plus movement/choice under
   // imperfect positions, not a static hand-shape drill.
   skillFocus: ['set', 'movement'],
-  objective: 'Choose bump or hand set from varied pass locations and still deliver a hittable arc.',
+  objective: 'Choose a bump-set or hand-set from varied pass locations and still deliver a hittable arc.',
   levelMin: 'intermediate',
   levelMax: 'advanced',
   chainId: 'chain-7-setting',
   m001Candidate: true,
   teachingPoints: [
     'Move first, then decide hands or platform.',
-    'Set your hitter, not the drawn target.',
+    'Set to the marked window where a hitter would attack, not just the marker dot.',
     'Make the bad pass playable before making it perfect.',
   ],
   progressionDescription: 'Randomize the four positions and shrink the acceptable landing window.',
@@ -2797,11 +2804,11 @@ const d47: Drill = {
       successMetric: {
         type: 'reps-successful',
         description:
-          'Sets from four self-toss locations landing within one step of the target window.',
+          'Sets from four self-toss locations landing within one step of the target window (where a hitter would attack, ~3 m off the net).',
         target: '3 clean sets from each of the four locations',
       },
       courtsideInstructions:
-        'Set into a target window from four start spots: tight, perfect, deep, and off-side. Self-toss from each spot, move, choose bump set or hand set, and rotate spots after each clean rep.',
+        'Set into a target window (where a hitter would attack, ~3 m off the net) from four start spots: tight, perfect, deep, and off-side. Self-toss from each spot, move, choose bump-set or hand-set, and rotate spots after each clean rep.',
       coachingCues: [
         'Read the ball before choosing hands or platform.',
         'Stop drifting before release.',
@@ -2830,7 +2837,7 @@ const d47: Drill = {
       },
       // 2026-05-10 first-time-runnability sweep (rule 8 role-tagged).
       courtsideInstructions:
-        'You set; partner (tosser) feeds from four locations: tight, perfect, deep, and off-side. Move, choose bump-set or hand-set, and set back so partner can reach it within one step. Switch roles after a full round.',
+        'You set; partner feeds from four locations. Move, choose bump-set or hand-set, then set back within partner\'s reach. Miss → repeat the same location; after 3 misses on one spot, move on. Switch roles after 3 clean sets from each of the four locations.',
       coachingCues: [
         'Set the partner, not the marker.',
         'Move first, then choose the set.',
@@ -2848,14 +2855,14 @@ const d48: Drill = {
   name: 'Set and Look',
   shortName: 'Set & Look',
   skillFocus: ['set'],
-  objective: 'Deliver a stable set, then immediately find and call the open-court cue.',
+  objective: 'Deliver a stable set, then immediately find and call the numbered cue you read.',
   levelMin: 'advanced',
   levelMax: 'advanced',
   chainId: 'chain-7-setting',
   m001Candidate: true,
   teachingPoints: [
     'Finish the set before turning the eyes.',
-    'Call what is open, not what you hoped was open.',
+    'Call the number you actually saw, not the one you hoped for.',
     'Keep the set arc predictable under the read.',
   ],
   progressionDescription: 'Flash the read later or shrink the set target window.',
@@ -2878,13 +2885,13 @@ const d48: Drill = {
       },
       successMetric: {
         type: 'composite',
-        description: 'Sets land in the target window AND the post-set cue is called.',
+        description: 'Hand-sets land in the marked window AND the post-set numbered cue is called.',
         target: '16 of 24 sets in-window and 20 of 24 cue calls',
       },
       courtsideInstructions:
         'Set into a marked window from a self-toss, then turn your eyes and call the first of four numbered cue markers you see before the ball lands.',
       coachingCues: [
-        'Set first; look second.',
+        'Look at the numbered marker the moment the ball leaves your hands.',
         'Keep shoulders quiet through release.',
         'Call early and clearly.',
       ],
@@ -2933,7 +2940,7 @@ const d49: Drill = {
   name: 'Set and Recover',
   shortName: 'Set Recover',
   skillFocus: ['set', 'movement'],
-  objective: 'Deliver controlled out-of-system sets while recovering to a home marker under fatigue.',
+  objective: 'Deliver playable high sets from off-net or deep feeds while recovering to a home marker under fatigue.',
   levelMin: 'advanced',
   levelMax: 'advanced',
   chainId: 'chain-7-setting',
@@ -2963,11 +2970,11 @@ const d49: Drill = {
       },
       successMetric: {
         type: 'reps-successful',
-        description: 'Out-of-system self-toss sets landing in the target window after recovery.',
+        description: 'High arcing self-toss sets from off-net or deep feeds landing in the marked target window after recovery.',
         target: '24 of 36 sets in-window across three rounds',
       },
       courtsideInstructions:
-        'Set from three recovery rounds. Start at a home marker, self-toss off-net or deep, move to set into a marked target window, then recover home before the next toss. Rest 30 seconds between rounds; stop early if set shape collapses.',
+        'Set from three recovery rounds. Start at a home marker, self-toss off-net or deep, move to set into a marked target window, then recover home before the next toss. Rest 30 seconds between rounds; stop early if your sets start sailing long or getting tight.',
       coachingCues: [
         'Recover first, toss second.',
         'Arrive low before you set.',
@@ -3000,7 +3007,7 @@ const d49: Drill = {
       // because the scoring-vocab lint reads it as the FIVB grading
       // taxonomy. Same meaning achieved with "high arcing set".
       courtsideInstructions:
-        'You set from three recovery rounds; partner tosses from end-line, off-net, and side-line markers. Start at a home marker; move, send a high arcing set to a reachable window, then recover home. Rest 30 seconds between rounds. Switch roles.',
+        'You set across three rounds; partner tosses from off-net, deep, and side-line markers. Move, send a high arcing set to a reachable window, then recover home. Miss → repeat the feed; after 3 misses, switch markers. Rest 30 s between rounds; stop at time-up.',
       coachingCues: [
         'Beat the toss with your feet.',
         'Set high enough to attack.',
@@ -3030,8 +3037,9 @@ const d51: Drill = {
   name: 'Outside the Heart Serving',
   shortName: 'Outside Heart',
   skillFocus: ['serve'],
+  // Framing only: trains tactical zone avoidance, not single-target accuracy (d31 owns single-target commitment).
   objective:
-    'Avoid the middle-front "heart" of the receiving court while landing serves anywhere in the outer ring across longer fatigue rounds. Honesty clause: trains tactical zone avoidance, not single-target accuracy (d31 owns single-target commitment).',
+    'Serve around a marked heart zone into the outer ring across three rest rounds.',
   levelMin: 'beginner',
   levelMax: 'intermediate',
   chainId: 'chain-6-serving',
@@ -3061,13 +3069,13 @@ const d51: Drill = {
       },
       successMetric: {
         type: 'reps-successful',
-        description: 'Self-toss serves landing on sand outside a marked 2 m heart zone across rest cycles.',
-        target: '24 of 32 serves outside the heart across three rounds',
+        description: 'Self-toss serves landing on sand outside a marked 2 m heart zone; 10 serves per round across three rounds.',
+        target: '21 of 30 serves outside the heart across three 10-serve rounds',
       },
       // 2026-05-10 first-time-runnability sweep (rule 14 trim 46->42
       // words; rule 6 skill-verb-first lead preserved).
       courtsideInstructions:
-        'Serve outside a 2 m heart zone (marked with 4 markers in the middle-front). Pick an outer direction (left, right, deep, short) before each toss. Three rounds; rest 30 s between.',
+        'Serve outside a 2 m heart zone (mark it in the middle of the receiving half, from your side). Pick an outer direction (left, right, deep, short) before each toss. Ten serves per round; three rounds; rest 30 s between.',
       coachingCues: [
         'Mark the heart first.',
         'Call the outer direction before you toss.',
@@ -3096,13 +3104,13 @@ const d51: Drill = {
       successMetric: {
         type: 'reps-successful',
         description: 'Self-toss serves landing outside the marked heart zone toward the called outer direction.',
-        target: '24 of 32 serves outside the heart toward the called direction',
+        target: '21 of 30 serves outside the heart toward the called direction',
       },
       // 2026-05-10 first-time-runnability sweep (rule 8 role-tagged
       // via "you/partner" clauses; rule 14 trim; rule 9 cue->action
       // arrow microformat).
       courtsideInstructions:
-        'You serve outside a 2 m heart zone; partner (caller) names the outer direction (left, right, deep, short) before each toss. Mark the heart first. (caller calls → you serve outside the heart) × 10 serves. Three rounds; rest 30 s. Switch.',
+        'Serve outside a 2 m heart zone (mark it first); caller names left, right, deep, or short before each toss. Server clears the called edge. Ten serves per round; three rounds; rest 30 s. Switch roles after each round.',
       coachingCues: [
         'Caller names the outer direction first.',
         'Server picks the heart edge to clear.',
@@ -3130,7 +3138,7 @@ const d51: Drill = {
       successMetric: {
         type: 'reps-successful',
         description: 'Net-cleared serves landing outside the marked heart zone in the receiving court.',
-        target: '24 of 32 serves outside the heart and over the net across three rounds',
+        target: '21 of 30 serves outside the heart and over the net across three 10-serve rounds',
       },
       // 2026-05-10 first-time-runnability sweep (rule 8 role-tagged
       // via "you/partner" clauses; rule 2 logistics gloss for
@@ -3139,7 +3147,7 @@ const d51: Drill = {
         "You serve over the net; shagger (= partner on the receiving side) calls an outer direction (left, right, deep, short) before each toss and collects between rounds. Mark a 2 m heart zone first. Three rounds; rest 30 s between. Switch.",
       coachingCues: [
         'Clear the net first, then place the serve.',
-        'Shagger calls the outer direction before the toss.',
+        "On shagger's call, clear the heart toward that direction.",
         'Reset after each heart miss.',
       ],
     },
@@ -3169,8 +3177,9 @@ const d50: Drill = {
   name: 'Short/Deep Pass Read',
   shortName: 'Short/Deep Read',
   skillFocus: ['pass', 'movement'],
+  // Framing only: trains zone decisioning + recovery, not spin reading (d46 owns spin reading).
   objective:
-    'Read short vs deep zone early and pass into the set window across longer fatigue rounds. Honesty clause: trains zone decisioning + recovery, not spin reading (d46 owns spin reading).',
+    'Read short versus deep zone early and pass into the set window across longer fatigue rounds.',
   levelMin: 'advanced',
   levelMax: 'advanced',
   chainId: 'chain-4-serve-receive',
@@ -3200,7 +3209,7 @@ const d50: Drill = {
       },
       successMetric: {
         type: 'pass-rate-good',
-        description: 'Short and deep partner feeds passed into a 1 m set window across recovery rounds.',
+        description: 'Short and deep partner feeds passed into a 1 m set window (where the setter would stand, ~3 m off the net) across recovery rounds.',
         target: '20 of 28 passes land in the set window across three rounds',
       },
       // 2026-05-10 first-time-runnability sweep (rule 14 trim 67->45
@@ -3232,7 +3241,7 @@ const d50: Drill = {
       },
       successMetric: {
         type: 'pass-rate-good',
-        description: 'Self-toss short and deep alternations passed into a 1 m set window.',
+        description: 'Self-toss short and deep alternations passed into a 1 m set window (where the setter would stand, ~3 m off the net).',
         target: '20 of 28 passes land in the set window across three rounds',
       },
       // 2026-05-10 first-time-runnability sweep (rule 14 trim 56->43
@@ -3274,13 +3283,13 @@ const d28: Drill = {
   m001Candidate: true,
   teachingPoints: [
     'Move through full range before loading.',
-    'Ankles first: short hops and lateral shuffles wake up sand balance faster than jogging.',
+    'Ankles first: short hops and lateral shuffles (= quick sideways shuffle steps, feet never crossing) wake up sand balance faster than jogging.',
     'End warmer than you started; cold shoulders do not pass well.',
   ],
   progressionDescription:
     'Add a second round of the shoulder/trunk sequence once 3 min feels undercooked on cold mornings.',
   regressionDescription:
-    'On hot days or short sessions, collapse the sand movement block to a single lap of A-skips + shuffles.',
+    'On hot days or short sessions, collapse the sand movement block to one lap of A-skips (= skip forward, lifting the front knee toward the thigh) plus lateral shuffles (= quick sideways shuffle steps, feet never crossing).',
   variants: [
     {
       // Timed sub-blocks: 4 x ~45 s segments (jog/skip, ankle hops,
@@ -3343,7 +3352,7 @@ const d28: Drill = {
       segments: [
         {
           id: 'd28-solo-s1',
-          label: 'Continuous: jog or A-skip (= skip forward, lifting the front knee until the thigh is parallel to the sand) around your sand box.',
+          label: 'Continuous: jog or A-skip (= skip forward, lifting the front knee until the thigh is parallel to the sand) around a short loop on the sand (about 10 to 15 m, or one court width).',
           durationSec: 45,
         },
         {
@@ -3358,7 +3367,7 @@ const d28: Drill = {
         },
         {
           id: 'd28-solo-s4',
-          label: 'Rep-paced at game tempo: quick side shuffles, then pivot-back starts (= pivot the inside foot and step back).',
+          label: 'Rep-paced at game tempo: lateral shuffles (= quick sideways shuffle steps, feet never crossing), then pivot-back starts (= pivot the inside foot and step back).',
           durationSec: 45,
         },
       ],
@@ -3446,7 +3455,7 @@ const d52: Drill = {
         target: '≥ 15-pass rally',
       },
       courtsideInstructions:
-        'Pass back and forth with your partner, 10 each. You toss first to start the rally. Partner keeps it going at a catchable height; rally until a mishit, then restart the count.',
+        'Pass back and forth with your partner. You toss first to start the rally. Partner keeps it going at a catchable height. Rally until a mishit, then restart the count; switch who tosses first after each break.',
       coachingCues: [
         'Pass to your partner, not past them.',
         'Catchable height every time.',
@@ -3522,8 +3531,8 @@ const d53: Drill = {
         target: '8 of 10 landing deep',
       },
       courtsideInstructions:
-        'You serve a high, deep ball past a marked deep line; reset your routine each time. Partner judges each landing, then shags (collects the balls and brings them back). Count serves landing deep, then switch after 10.',
-      coachingCues: ['High arc, not a flat drive.', 'Same toss height.', 'Partner judges the landing.'],
+        'You serve first; shagger judges each landing, then shags (= collects the balls and brings them back). Serve high past the marked deep line; count lands deep. Switch roles after 10 serves.',
+      coachingCues: ['High arc, not a flat drive.', 'Same toss height.', 'Watch the ball land past the deep line before you reset.'],
     },
   ],
 }
@@ -3566,11 +3575,11 @@ const d54: Drill = {
       },
       successMetric: {
         type: 'reps-successful',
-        description: 'Zones cleared in order (a miss repeats the current zone, capped at 3 tries).',
+        description: 'Four zones cleared in order from your side: short-left, short-right, deep-left, deep-right; miss repeats, capped at 3 tries.',
         target: 'Clear all four zones',
       },
       courtsideInstructions:
-        'Serve into zone 1, then 2, 3, and 4 in order. Mark the receiving side into four large zones. A miss repeats the same zone, up to three tries, then move on. Reset your routine before every serve.',
+        'Serve through four marked zones in order, from your side: short-left, short-right, deep-left, deep-right. A miss repeats the same zone; after 3 misses, move on. Reset before every serve.',
       coachingCues: ['Name the next zone first.', 'Same contact as targets change.', 'Watch the landing.'],
     },
     {
@@ -3590,11 +3599,11 @@ const d54: Drill = {
       },
       successMetric: {
         type: 'reps-successful',
-        description: 'Zones cleared in the order your partner calls (capped at 3 tries per zone).',
+        description: 'Four called zones cleared in order: short-left, short-right, deep-left, deep-right; capped at 3 tries per zone.',
         target: 'Clear all four called zones',
       },
       courtsideInstructions:
-        'You serve into the zone your partner calls. Partner names zone 1, 2, 3, then 4 in order and feeds the ball back. A miss repeats that zone, up to three tries. Switch roles after four zones.',
+        'You serve first; caller names short-left, short-right, deep-left, then deep-right in order before each toss. A miss repeats that zone; after 3 misses, move on. Caller brings the ball back; switch roles after four zones.',
       coachingCues: ['Caller names the zone first.', 'Same contact as targets change.', 'Watch the landing.'],
     },
   ],
@@ -3615,7 +3624,7 @@ const d55: Drill = {
   m001Candidate: true,
   teachingPoints: [
     'Commit to the called target before you toss.',
-    'Aim at the line or the seam, not just over the net.',
+    'Aim at the sideline band or seam band you called, not just in the court.',
     'Treat each serve as one scored attempt.',
   ],
   progressionDescription: 'Shrink the target band or alternate sideline and seam each serve.',
@@ -3663,12 +3672,12 @@ const d55: Drill = {
       successMetric: {
         type: 'points-to-target',
         description:
-          'Server scores when the serve forces a poor pass (= one a setter could not set); passer scores on a clean pass. Race to +3.',
+          'Server scores when the pass would not reach the set window (where the setter would stand, ~3 m off the net); passer scores on a pass that does. Race to +3.',
         target: 'Reach +3 as the server',
       },
       courtsideInstructions:
-        'You serve at your partner aiming for the sideline or seam. Partner passes; a serve that forces a poor pass (= one a setter could not set) scores +1 for you, a clean pass scores +1 for them. First to +3, then switch.',
-      coachingCues: ['Commit to the target before you toss.', 'Make the pass hard, not just in.', 'One scored serve at a time.'],
+        'You serve first at the sideline or seam band you call before each toss. Partner passes; a pass that misses the set window (~3 m off the net) scores +1 for you, a pass that hits it scores +1 for them. First to +3, switch.',
+      coachingCues: ['Commit to the target before you toss.', 'Aim at the line or seam band you called.', 'One scored serve at a time.'],
     },
   ],
 }
@@ -3680,7 +3689,7 @@ const d56: Drill = {
   name: 'Set and Move',
   shortName: 'Set & Move',
   skillFocus: ['set'],
-  objective: 'Keep a clean, repeatable set going while you move along a line.',
+  objective: 'Keep a clean, repeatable hand-set going while you move along a line.',
   levelMin: 'beginner',
   levelMax: 'intermediate',
   chainId: 'chain-7-setting',
@@ -3715,7 +3724,7 @@ const d56: Drill = {
       },
       courtsideInstructions:
         'Hand-set the ball to yourself while you walk a slow, steady line. Stay under it each time and keep a soft contact at the same height. If it drifts, catch, reset, and start the count again.',
-      coachingCues: ['Same height every set.', 'Stay under the ball as you move.', 'Soft, even contact.'],
+      coachingCues: ['Same height every set.', 'Stay under the ball as you move.', 'Same quiet sound on every contact.'],
     },
     {
       id: 'd56-pair',
@@ -3738,7 +3747,7 @@ const d56: Drill = {
         target: '≥ 12-set rally',
       },
       courtsideInstructions:
-        'Set back and forth with your partner while you both walk a slow line. You toss first to start, then set and step to keep moving. Partner mirrors you, rallying until a mishit; then restart the count.',
+        'Hand-set back and forth with your partner while you both walk a slow line. You toss first to start, then hand-set and step to keep moving. Partner mirrors you, rallying until a mishit; then restart the count.',
       coachingCues: ['Set to your partner, not past them.', 'Keep moving, then plant to set.', 'Same height every set.'],
     },
   ],
@@ -3810,7 +3819,7 @@ const d57: Drill = {
         target: '8 clean sets to a moving partner',
       },
       courtsideInstructions:
-        'Set to your partner wherever they move. Partner tosses you the ball, then jogs to a new spot; you square up and set so they reach it in one step. Switch roles after 8 sets.',
+        'Set to your partner wherever they move. Partner tosses you the ball, then jogs to a new spot; you square up and set so they reach it in one step. Miss → repeat the same feed; switch roles after 8 clean sets.',
       coachingCues: ['Face your partner before you set.', 'Arrive under the ball early.', 'Set them, not an empty spot.'],
     },
   ],
@@ -3828,7 +3837,7 @@ const d58: Drill = {
   name: 'Two-Touch Set Choice',
   shortName: '2-Touch Set',
   skillFocus: ['set', 'movement'],
-  objective: 'Take an imperfect first ball, choose bump or hand set, and still deliver a hittable arc.',
+  objective: 'Take an imperfect first ball, choose a bump-set or hand-set, and still deliver a hittable arc.',
   levelMin: 'intermediate',
   levelMax: 'advanced',
   chainId: 'chain-7-setting',
@@ -3844,7 +3853,7 @@ const d58: Drill = {
     {
       id: 'd58-solo',
       drillId: 'd58',
-      label: 'Solo open',
+      label: 'Solo',
       feedType: 'self-toss',
       participants: { min: 1, ideal: 1, max: 1 },
       environmentFlags: env({ lowScreenTime: true }),
@@ -3862,8 +3871,8 @@ const d58: Drill = {
         target: '3 clean sets each from a tight, deep, and off-side toss',
       },
       courtsideInstructions:
-        'Set the ball into a target window after passing it to yourself. Mark the window where a hitter would attack. Self-toss an uneven ball, pass to yourself, then choose a bump set or hand set into the window. Vary tight, deep, and off-side balls.',
-      coachingCues: ['Play the first ball to yourself.', 'Read it, then choose hands or platform.', 'Make it hittable first.'],
+        'Bump-set or hand-set into a target window after a self-pass. Mark the window where a hitter would attack. Self-toss tight, deep, and off-side balls; pass to yourself, then deliver into the window.',
+      coachingCues: ['Pass the uneven toss to a catchable spot first.', 'Read it, then choose hands or platform.', 'Make it hittable first.'],
     },
     {
       id: 'd58-pair',
@@ -3886,7 +3895,7 @@ const d58: Drill = {
         target: '8 hittable sets off imperfect feeds',
       },
       courtsideInstructions:
-        'Set a hittable ball back to a window after taking your partner\'s feed. Partner (= feeder) tosses you an uneven first ball; you pass to yourself, choose a bump or hand set, and deliver to the window. Feeder varies the tosses. Switch after 8 sets.',
+        'Set a hittable ball after your partner\'s feed. Partner (= feeder) tosses you an uneven first ball; you pass to yourself, choose a bump-set or hand-set, and deliver to the window. Miss → repeat the same feed; after 3 messy feeds, switch who feeds.',
       coachingCues: ['Play the first ball to yourself.', 'Read it, then choose hands or platform.', 'Set a hittable ball, not a perfect spot.'],
     },
   ],

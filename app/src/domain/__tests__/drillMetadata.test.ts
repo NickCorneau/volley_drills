@@ -59,7 +59,7 @@ describe('getBlockSuccessRule', () => {
   it('returns the variant`s successMetric.description for a known drill block', () => {
     const block = makeBlock({ drillId: 'd31', variantId: 'd31-solo-open' })
     expect(getBlockSuccessRule(block, 1)).toBe(
-      'Serves or serve-toss contacts landing in or near a marked target circle.',
+      'Serves or serve-toss contacts landing in or brushing a marked target circle.',
     )
   })
 
@@ -120,7 +120,7 @@ describe('getBlockSuccessRule', () => {
     // variant rather than envelope-flipping to Pair.
     const soloBlock = makeBlock({ drillId: 'd31', variantId: 'd31-solo-open' })
     expect(getBlockSuccessRule(soloBlock, 2)).toMatch(
-      /^Serves or serve-toss contacts landing in or near/,
+      /^Serves or serve-toss contacts landing in or brushing/,
     )
   })
 
