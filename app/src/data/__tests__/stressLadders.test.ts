@@ -65,6 +65,94 @@ describe('stress ladder registry invariants', () => {
   })
 })
 
+describe('rung progression content (M002.2)', () => {
+  // Body-part / internal-focus tokens that disqualify an external-focus
+  // cue (Wulf; courtside-copy rule 12b). The cue must name an outcome or
+  // environmental referent, not a body part. "Square up" and "reach"
+  // describe a movement outcome / partner referent and are allowed.
+  const INTERNAL_FOCUS_TOKENS = [
+    'platform',
+    'knee',
+    'elbow',
+    'wrist',
+    'shoulder',
+    'forearm',
+    'hips',
+    'whole body',
+  ]
+  // Pass/fail threshold vocabulary that disqualifies an exploration
+  // criterion (D154 gating retired; process-framed only).
+  const PASS_FAIL_TOKENS = ['%', ' graded', 'must ', 'pass/fail', 'fail', 'score at least']
+  // FIVB / coaching jargon that must be glossed or rephrased before it
+  // reaches a one-season rec player (courtside-copy rule 2). These fields
+  // are unrendered today, but the authoring invariant holds now so the
+  // future UI pass inherits clean copy.
+  const UNGLOSSED_JARGON_TOKENS = ['out-of-system', 'out of system', 'in-system', 'in system']
+
+  it.each(FOCUSES)('every %s rung carries non-empty progression content', (focus) => {
+    for (const rung of STRESS_LADDERS[focus]) {
+      expect(rung.intent.trim().length).toBeGreaterThan(0)
+      expect(rung.externalFocusCue.trim().length).toBeGreaterThan(0)
+      expect(rung.explorationCriterion.trim().length).toBeGreaterThan(0)
+      expect(rung.graduationFeel.trim().length).toBeGreaterThan(0)
+    }
+  })
+
+  it.each(FOCUSES)('%s rung content uses no em-dash (courtside-copy rule 4)', (focus) => {
+    for (const rung of STRESS_LADDERS[focus]) {
+      for (const field of [
+        rung.intent,
+        rung.externalFocusCue,
+        rung.explorationCriterion,
+        rung.graduationFeel,
+      ]) {
+        expect(field).not.toContain('\u2014')
+      }
+    }
+  })
+
+  it.each(FOCUSES)('%s external-focus cue names no body part (Wulf / rule 12b)', (focus) => {
+    for (const rung of STRESS_LADDERS[focus]) {
+      const cue = rung.externalFocusCue.toLowerCase()
+      for (const token of INTERNAL_FOCUS_TOKENS) {
+        expect(cue).not.toContain(token)
+      }
+    }
+  })
+
+  it.each(FOCUSES)(
+    '%s exploration criterion and graduation feel are process-framed, never pass/fail (D154)',
+    (focus) => {
+      for (const rung of STRESS_LADDERS[focus]) {
+        // graduationFeel is descriptive felt-readiness, never a gate, so it
+        // is held to the same no-pass/fail bar as the exploration criterion.
+        for (const text of [rung.explorationCriterion, rung.graduationFeel]) {
+          const lowered = text.toLowerCase()
+          for (const token of PASS_FAIL_TOKENS) {
+            expect(lowered).not.toContain(token)
+          }
+        }
+      }
+    },
+  )
+
+  it.each(FOCUSES)('%s rung content carries no unglossed FIVB jargon (rule 2)', (focus) => {
+    for (const rung of STRESS_LADDERS[focus]) {
+      for (const field of [
+        rung.intent,
+        rung.externalFocusCue,
+        rung.explorationCriterion,
+        rung.graduationFeel,
+      ]) {
+        const lowered = field.toLowerCase()
+        for (const token of UNGLOSSED_JARGON_TOKENS) {
+          expect(lowered).not.toContain(token)
+        }
+      }
+    }
+  })
+})
+
 describe('stressRungForDrill', () => {
   it('returns the authored rung for an on-ladder drill', () => {
     expect(stressRungForDrill('pass', 'd01')).toBe(1)

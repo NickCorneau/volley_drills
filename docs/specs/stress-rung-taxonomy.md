@@ -4,19 +4,22 @@ title: Stress-Rung Taxonomy
 status: active
 stage: validation
 type: spec
-summary: "Ordinal stress-rung scale (progressive contextual interference) and the authored per-focus ladders over the full scoped-tag drill catalog; gates all rung annotation."
-authority: canonical definition of stress-rung semantics, per-focus ladder orderings, and the skill-band starting-rung mapping
-last_updated: 2026-06-12
+summary: "Ordinal stress-rung scale (progressive contextual interference), the authored per-focus ladders over the full scoped-tag drill catalog, and the M002.2 per-rung progression content (intent + external-focus cue + exploration criterion + graduation feel); gates all rung annotation."
+authority: canonical definition of stress-rung semantics, per-focus ladder orderings, per-rung progression content rules, and the skill-band starting-rung mapping
+last_updated: 2026-06-21
 depends_on:
   - docs/decisions.md
   - docs/brainstorms/2026-06-11-stress-substrate-requirements.md
   - docs/plans/2026-06-11-001-feat-stress-substrate-plan.md
   - docs/plans/2026-06-12-003-feat-engine-integrity-front-porch-plan.md
+  - docs/plans/2026-06-21-001-feat-m002-2-rung-depth-and-progression-plan.md
+  - docs/reviews/2026-04-28-m001-candidate-false-audit.md
 decision_refs:
   - D68
   - D149
   - D150
   - D154
+  - D159
   - D160
 ---
 
@@ -81,6 +84,33 @@ Rows marked **†** are **runtime-inert non-candidate placements** (`m001Candida
 | 4 | d20 3 Serve Pass to Attack † · d21 500 † · d47 Four Great Sets | constrained: quality-graded multi-target; d20 sets off live-ish passes in continuity flow; d21 sets off scored chaotic entries |
 | 5 | d48 Set and Look · d49 Set and Recover | live-read perception / recover-and-repeat chaos |
 
+## Progression Content (M002.2)
+
+Each rung carries four authored fields that make climbing it a *meaningful* skill step, not just a harder one. The exact athlete-facing strings live in `app/src/data/stressLadders.ts` (they are data); this spec is authoritative for the **fields, the authoring rules, and the per-focus progression story**. `rung_content_missing` in `validateDrillCatalog` enforces that every rung ships all four.
+
+| Field | What it is | Authoring rule |
+|-------|------------|----------------|
+| `intent` | what the rung trains, in contextual-interference terms | speaks variability / perception / live-read, never physiological load (`D149`) |
+| `externalFocusCue` | the one prompt that makes the step real | external focus (Wulf; courtside-copy rule 12b): an outcome or environmental referent (ball flight, target, landing, partner reach), never a body part or internal sensation |
+| `explorationCriterion` | a process-framed "see how it feels" read | exploratory and user-owned; never a coach-graded pass/fail threshold (`D154` gating stays retired; coach-pedagogy evidence shows pass/fail backfires coachlessly) |
+| `graduationFeel` | the felt readiness-to-step signal | descriptive only; movement stays user-accepted via the review verdict (`D154`); the ladder-top rung describes staying and deepening, not stepping |
+
+All four fields obey the courtside-copy invariants even though nothing renders them yet (no em-dash; jargon glossed; the cue passes rule 12b). **Rendering is a deferred M002.2 UI pass** — these fields are pure data + spec today.
+
+### Why each step is a real improvement (progression story)
+
+The mechanism is unchanged: an accepted "more stress" verdict steps the derived position one rung (`D154`); this content gives the step its meaning. Climbing is a contextual-interference ramp (`D68`) — the *thing you attend to* shifts outward as the environment gets less predictable.
+
+- **Pass.** 1 groove a clean contact on a predictable feed → 2 hold that contact while the ball keeps coming → 3 read flight, move, and still pass to one target → 4 keep control when the tool or time is taken away (one-arm, short-then-deep) → 5 read a real served ball at game speed. Each step trades a fixed variable for a read: feed predictability, then rhythm, then movement, then degraded tools, then live opponent.
+- **Serve.** 1 commit to one target until it grooves → 2 hold quality across longer sets and zone sequences → 3 serve to a called/scored target under a little outcome pressure → 4 serve into a live receiver and a sequence you do not control. The cue moves from "same circle" to "the zone that pressures the receiver."
+- **Set.** 1 build a repeatable shape on a predictable toss → 2 hold the shape in a continuous partner rally → 3 set to changing targets from changing spots → 4 choose bump or hand set from imperfect passes and still deliver hittable → 5 set under live chaos when the pass pulls you out of position and recover for the next ball.
+
+Readiness to climb is *felt*, not measured — `graduationFeel` describes the moment a rung stops feeling like a stretch and a new variable feels welcome rather than overwhelming. The objective "cleared this rung at a higher stress level" signal is the **`M002.3` seam** (the 1% Better Signal), not built here; M002.2 deliberately keeps progression user-owned and exploratory so M002.3 has honest, low-pressure content to score against.
+
+### Depth target (advisory)
+
+A rung wants at least **2 assembly-eligible (`m001Candidate: true`) drills** so stepping onto it picks genuinely different work (`auditRungDepth`, `RUNG_DEPTH_TARGET = 2`). This is an **advisory, not a hard gate** — legitimately thin rungs with no source-backed sibling yet (serve 1/3, set 2/3 today; pass 1, serve 2, and set 4 are eligible-count 1 with an inert parked sibling — d23 on serve 2 — that has no fresh `graduate-when` trigger) must not fail CI. The advisory surfaces all 7 under-target rungs today; the backlog table below is the subset needing brand-new content. The advisory is the machine-checked tracker for both.
+
 ## Skill-Band Starting Rung
 
 For a focus with no accepted verdicts, position starts from the onboarding drill band (`skillLevelToDrillBand`):
@@ -99,8 +129,24 @@ The clamp guards future mapping/ladder tuning; today advanced → 4 lands exactl
 - **Authoring invariant (`D160`)**: every new scoped-tag catalog drill ships with a same-commit ladder rung plus a one-line placement rationale. `scoped_drill_off_ladder` in `validateDrillCatalog` enforces this at test time; M002.2's authoring wave inherits it as the placement procedure.
 - **Named authoring backlog** (missing rungs from the founder's example ladder, not blockers): pass-to-setter-to-hit sequences, dive/emergency passing, deeper serve-pressure formats. Author only where a ladder proves too sparse to step in dogfood — serve's single-drill rungs 1 and 3 are the visible thin spots.
 
+### Roster-depth backlog (M002.2, source-cited)
+
+M002.2 re-evaluated the parked (`m001Candidate: false`) reserve against `docs/reviews/2026-04-28-m001-candidate-false-audit.md` and **activated none** — no parked drill has a fresh `graduate-when` trigger logged, and the remaining reserve is gated on `D101` 3+ geometry (d08, d14, d20), group mode (d19, d21), or unmodeled equipment (d06, d12, d13, d16, d17, d24). Activation without a fresh trigger is out of bounds per the audit.
+
+Depth for the four thinnest rungs (no parked sibling) therefore needs **new, coach-reviewed, source-backed content**, not autonomous authoring. The precise shopping list, with source anchors already in `docs/research/bab-source-material.md`, so a future authoring wave (founder-as-coach in `D130` mode) can fill them under the `D160` same-commit-rung invariant:
+
+| Rung | Need | Source anchor |
+|------|------|---------------|
+| serve 1 (constant) | a second single-target repetition serving drill beside d31 | BAB "Serving Spots Around the World" reduced to one held spot; or a wall/target single-zone repetition form |
+| serve 3 (varied + pressure) | a second called/scored-target serving drill beside d22 | BAB Plan 2 "Server vs Passer (Sideline / Middle-Seam)" reduced to a solo/pair scored-target form |
+| set 2 (serial) | a second continuous-rhythm setting drill beside d41 | BAB Plan 1 "Set back and forth, 10 each"; BAB "Pass, Set, Set, Set" reduced to pair |
+| set 3 (varied) | a second changing-target setting drill beside d42 | BAB "Triangle Setting (Toss)" reduced to 1–2 player; or a moving-target variant of d42 |
+
+Each new drill must pass the full courtside-copy authoring checklist and ship its rung + content in the same commit. Until authored, the `auditRungDepth` advisory carries these rungs as the live tracker.
+
 ## Update When
 
 - A drill is added (it must take a rung in the same change), activates into, or retires from `m001Candidate` (inert ↔ live flips need no rung change, but candidacy notes here should stay honest).
 - Dogfood evidence shows a rung assignment mis-steers sessions.
-- M002.2 attaches cue/criterion depth to rungs (extend the rung rows here first).
+- M002.2 cue/criterion depth changes — keep the Progression Content section and the registry (`app/src/data/stressLadders.ts`) in sync; `rung_content_missing` enforces presence, not wording.
+- A roster-depth backlog row is filled (new drill authored) or a parked drill clears a fresh `graduate-when` trigger — update the backlog table and the audit doc together.

@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import type { Drill, ProgressionChain } from '../../types/drill'
-import { validateDrillCatalog } from '../catalogValidation'
+import { auditRungDepth, RUNG_DEPTH_TARGET, validateDrillCatalog } from '../catalogValidation'
 import { DRILLS } from '../drills'
 import { PROGRESSION_CHAINS } from '../progressions'
-import { STRESS_LADDERS } from '../stressLadders'
+import { STRESS_LADDERS, type StressRung } from '../stressLadders'
 
 const env = {
   needsNet: false,
@@ -61,6 +61,18 @@ function chain(overrides: Partial<ProgressionChain> = {}): ProgressionChain {
     drillIds: ['d-test'],
     links: [],
     defaultGatingThreshold: 0.7,
+    ...overrides,
+  }
+}
+
+function rung(overrides: Partial<StressRung> = {}): StressRung {
+  return {
+    rung: 1,
+    drillIds: ['d-test'],
+    intent: 'Fixture intent.',
+    externalFocusCue: 'Send the ball to the same spot.',
+    explorationCriterion: 'Notice how it feels.',
+    graduationFeel: 'Ready for more variety.',
     ...overrides,
   }
 }
@@ -694,7 +706,7 @@ describe('validateDrillCatalog', () => {
         progressionChains: [chain()],
         stressLadders: {
           ...emptyLadders,
-          pass: [{ rung: 1, drillIds: ['d-test', 'd-ghost'] }],
+          pass: [rung({ drillIds: ['d-test', 'd-ghost'] })],
         },
       })
 
@@ -707,10 +719,7 @@ describe('validateDrillCatalog', () => {
         progressionChains: [chain()],
         stressLadders: {
           ...emptyLadders,
-          pass: [
-            { rung: 1, drillIds: ['d-test'] },
-            { rung: 2, drillIds: ['d-test'] },
-          ],
+          pass: [rung({ rung: 1, drillIds: ['d-test'] }), rung({ rung: 2, drillIds: ['d-test'] })],
         },
       })
 
@@ -746,6 +755,130 @@ describe('validateDrillCatalog', () => {
       })
 
       expect(issues.map((i) => i.code)).not.toContain('scoped_drill_off_ladder')
+    })
+
+    it.each([
+      ['intent', { intent: '' }, 'stressLadders.pass.1.intent'],
+      ['externalFocusCue', { externalFocusCue: '' }, 'stressLadders.pass.1.externalFocusCue'],
+      [
+        'explorationCriterion',
+        { explorationCriterion: '' },
+        'stressLadders.pass.1.explorationCriterion',
+      ],
+      ['graduationFeel', { graduationFeel: '' }, 'stressLadders.pass.1.graduationFeel'],
+      // Whitespace-only must read as missing too: both gates rely on .trim().
+      ['whitespace intent', { intent: '   ' }, 'stressLadders.pass.1.intent'],
+    ])('reports a rung whose %s field is empty', (_label, overrides, expectedPath) => {
+      const issues = validateDrillCatalog({
+        drills: [drill()],
+        progressionChains: [chain()],
+        stressLadders: { ...emptyLadders, pass: [rung(overrides)] },
+      })
+
+      const missing = issues.filter((i) => i.code === 'rung_content_missing')
+      expect(missing).toHaveLength(1)
+      expect(missing[0].path).toBe(expectedPath)
+    })
+
+    it('reports one rung_content_missing per blank field on the same rung', () => {
+      const issues = validateDrillCatalog({
+        drills: [drill()],
+        progressionChains: [chain()],
+        stressLadders: {
+          ...emptyLadders,
+          pass: [rung({ intent: '', externalFocusCue: '', explorationCriterion: '', graduationFeel: '' })],
+        },
+      })
+
+      const missing = issues.filter((i) => i.code === 'rung_content_missing')
+      expect(missing).toHaveLength(4)
+      expect(missing.map((i) => i.path)).toEqual(
+        expect.arrayContaining([
+          'stressLadders.pass.1.intent',
+          'stressLadders.pass.1.externalFocusCue',
+          'stressLadders.pass.1.explorationCriterion',
+          'stressLadders.pass.1.graduationFeel',
+        ]),
+      )
+    })
+
+    it('raises no rung_content_missing for the real authored catalog', () => {
+      const issues = validateDrillCatalog({
+        drills: DRILLS,
+        progressionChains: PROGRESSION_CHAINS,
+        stressLadders: STRESS_LADDERS,
+      })
+
+      expect(issues.map((i) => i.code)).not.toContain('rung_content_missing')
+    })
+  })
+
+  describe('auditRungDepth (KTD6 advisory)', () => {
+    const emptyLadders = { pass: [], serve: [], set: [] } as const
+
+    it('flags a rung below the eligible-drill target with the full advisory shape', () => {
+      const advisories = auditRungDepth({
+        drills: [drill()],
+        stressLadders: { ...emptyLadders, pass: [rung({ drillIds: ['d-test'] })] },
+      })
+
+      const passOne = advisories.find((a) => a.focus === 'pass' && a.rung === 1)
+      expect(passOne).toBeDefined()
+      expect(passOne?.eligibleCount).toBe(1)
+      expect(passOne?.target).toBe(RUNG_DEPTH_TARGET)
+      expect(passOne?.message).toMatch(/pass/)
+    })
+
+    it('honors a custom target threshold', () => {
+      // Two eligible drills clears the default (2) but not a target of 3.
+      const ladders = { ...emptyLadders, pass: [rung({ drillIds: ['d-a', 'd-b'] })] }
+      const drills = [drill({ id: 'd-a' }), drill({ id: 'd-b' })]
+
+      expect(auditRungDepth({ drills, stressLadders: ladders })).toHaveLength(0)
+
+      const stricter = auditRungDepth({ drills, stressLadders: ladders, target: 3 })
+      expect(stricter.find((a) => a.focus === 'pass' && a.rung === 1)?.eligibleCount).toBe(2)
+    })
+
+    it('counts only assembly-eligible (m001Candidate) drills', () => {
+      const advisories = auditRungDepth({
+        drills: [drill({ id: 'd-a' }), drill({ id: 'd-b', m001Candidate: false })],
+        stressLadders: { ...emptyLadders, pass: [rung({ drillIds: ['d-a', 'd-b'] })] },
+      })
+
+      // Two placed, but only one is assembly-eligible, so still under target.
+      const passOne = advisories.find((a) => a.focus === 'pass' && a.rung === 1)
+      expect(passOne?.eligibleCount).toBe(1)
+    })
+
+    it('does not flag a rung that meets the target', () => {
+      const advisories = auditRungDepth({
+        drills: [drill({ id: 'd-a' }), drill({ id: 'd-b' })],
+        stressLadders: { ...emptyLadders, pass: [rung({ drillIds: ['d-a', 'd-b'] })] },
+      })
+
+      expect(advisories.find((a) => a.focus === 'pass' && a.rung === 1)).toBeUndefined()
+    })
+
+    it('surfaces exactly the known thin rungs in the real catalog as advisories, not hard issues', () => {
+      const advisories = auditRungDepth({ drills: DRILLS, stressLadders: STRESS_LADDERS })
+      const thin = advisories.map((a) => `${a.focus}.${a.rung}`).sort()
+      // Pin the exact set: a regression that mis-counts a rung (dropping a
+      // legitimately-thin rung, or spuriously flagging a full one) trips
+      // here rather than slipping through a toContain spot-check.
+      expect(thin).toEqual(['pass.1', 'serve.1', 'serve.2', 'serve.3', 'set.2', 'set.3', 'set.4'])
+      // Every flagged rung is depth 1 today (single source-backed drill).
+      for (const advisory of advisories) {
+        expect(advisory.eligibleCount).toBeLessThan(RUNG_DEPTH_TARGET)
+      }
+
+      // And those thin rungs never appear in the hard catalog gate.
+      const hard = validateDrillCatalog({
+        drills: DRILLS,
+        progressionChains: PROGRESSION_CHAINS,
+        stressLadders: STRESS_LADDERS,
+      })
+      expect(hard).toEqual([])
     })
   })
 

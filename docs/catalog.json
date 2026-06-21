@@ -410,6 +410,13 @@
       "canonical_for": "Implementation plan + landed registry for the D154 stress substrate (shipped 2026-06-11): U1 taxonomy brief (docs/specs/stress-rung-taxonomy.md), U2 static ladder registry (app/src/data/stressLadders.ts + invariant tests), U3 pure derived position (app/src/domain/adaptation/stressPosition.ts), U4 assembly rung preference (pickForSlot stable-sort; SESSION_ASSEMBLY_ALGORITHM_VERSION 8 -> 9), U5 service seam + caller wiring (loadStressPositions; startPlanSession + Setup steered, repeatSession verbatim), U6 founder export schemaVersion 5 -> 6 + stressPositions, U7 docs trail. Named deferral: build-time main-skill substitution path bypasses rung preference."
     },
     {
+      "id": "m002-2-rung-depth-and-progression-plan-2026-06-21",
+      "path": "docs/plans/2026-06-21-001-feat-m002-2-rung-depth-and-progression-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "M002.2 plan: per-rung progression content + roster-depth, at the data/spec layer before any UI. Adds intent + externalFocusCue + explorationCriterion + graduationFeel to every StressRung (app/src/data/stressLadders.ts; authored rules + per-focus progression story in docs/specs/stress-rung-taxonomy.md), a hard rung_content_missing check + advisory auditRungDepth (RUNG_DEPTH_TARGET 2) in catalogValidation, and a source-cited roster-depth backlog. Roster activations: re-evaluated the candidate-false reserve and activated none (no fresh graduate-when trigger). Deferred: rendering the content (M002.2 UI pass), the objective 1% score (M002.3), and new coach-reviewed source-backed drills for the thin rungs (serve 1/3, set 2/3)."
+    },
+    {
       "id": "session-truth-clock-plan-2026-06-11",
       "path": "docs/plans/2026-06-11-002-feat-session-truth-and-clock-calibration-plan.md",
       "type": "plan",
@@ -517,7 +524,7 @@
       "path": "docs/specs/stress-rung-taxonomy.md",
       "type": "spec",
       "status": "active",
-      "canonical_for": "Stress-rung semantics (D154): the 1-5 ordinal rung scale in progressive contextual-interference terms (D68; never physiological load), the authored per-focus ladders (pass/serve/set) over m001Candidate drills, the skill-band -> starting-rung mapping (beginner 1 / intermediate 2 / advanced 4), and the named exclusions + authoring backlog. Gates all rung annotation: app/src/data/stressLadders.ts must match this brief. The just-in-time taxonomy brief D149 queued ahead of stress-ladder work."
+      "canonical_for": "Stress-rung semantics (D154): the 1-5 ordinal rung scale in progressive contextual-interference terms (D68; never physiological load), the authored per-focus ladders (pass/serve/set) over the full scoped-tag catalog (D160), the skill-band -> starting-rung mapping (beginner 1 / intermediate 2 / advanced 4), the M002.2 per-rung progression content (intent + external-focus cue + exploration criterion + graduation feel, with authoring rules + per-focus progression story + depth-target advisory), and the named exclusions + source-cited roster-depth backlog. Gates all rung annotation: app/src/data/stressLadders.ts must match this brief. The just-in-time taxonomy brief D149 queued ahead of stress-ladder work."
     },
     {
       "id": "v0-prototype-ladder-design",

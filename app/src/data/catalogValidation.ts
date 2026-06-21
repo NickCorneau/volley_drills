@@ -22,6 +22,7 @@ export type DrillCatalogIssueCode =
   | 'ladder_unknown_drill'
   | 'ladder_duplicate_drill'
   | 'scoped_drill_off_ladder'
+  | 'rung_content_missing'
 
 export interface DrillCatalogIssue {
   code: DrillCatalogIssueCode
@@ -353,8 +354,85 @@ export function validateDrillCatalog({
           )
         }
       }
+
+      // M002.2: every rung ships authored progression content. A rung
+      // missing any of intent / external-focus cue / exploration
+      // criterion / graduation feel is a hard authoring failure (the
+      // rung-content invariant in docs/specs/stress-rung-taxonomy.md).
+      for (const rung of stressLadders[focus]) {
+        const missing = (
+          [
+            ['intent', rung.intent],
+            ['externalFocusCue', rung.externalFocusCue],
+            ['explorationCriterion', rung.explorationCriterion],
+            ['graduationFeel', rung.graduationFeel],
+          ] as const
+        ).filter(([, value]) => value.trim().length === 0)
+        for (const [field] of missing) {
+          issues.push(
+            issue(
+              'rung_content_missing',
+              `stressLadders.${focus}.${rung.rung}.${field}`,
+              `${focus} rung ${rung.rung} is missing ${field} (M002.2: every rung ships intent + external-focus cue + exploration criterion + graduation feel)`,
+            ),
+          )
+        }
+      }
     }
   }
 
   return issues
+}
+
+/**
+ * Default depth target (KTD6): a rung wants at least this many
+ * assembly-eligible (`m001Candidate: true`) drills so stepping onto it
+ * picks genuinely different work. Advisory, not a hard gate — legitimate
+ * thin rungs (7 under target today: pass 1, serve 1/2/3, set 2/3/4) have
+ * no source-backed sibling yet and must not fail CI. See the depth-target
+ * and roster-depth-backlog sections of docs/specs/stress-rung-taxonomy.md.
+ */
+export const RUNG_DEPTH_TARGET = 2
+
+export interface RungDepthAdvisory {
+  focus: StressLadderFocus
+  rung: number
+  /** Count of `m001Candidate: true` drills placed on this rung. */
+  eligibleCount: number
+  target: number
+  message: string
+}
+
+/**
+ * Surface rungs below the depth target. Separate from
+ * `validateDrillCatalog` on purpose: this is an advisory the catalog can
+ * carry while thin rungs await source-backed content, not a hard failure
+ * the `toEqual([])` catalog gate would trip on.
+ */
+export function auditRungDepth({
+  drills,
+  stressLadders,
+  target = RUNG_DEPTH_TARGET,
+}: {
+  drills: readonly Drill[]
+  stressLadders: Record<StressLadderFocus, readonly StressRung[]>
+  target?: number
+}): RungDepthAdvisory[] {
+  const candidateById = new Map(drills.map((drill) => [drill.id, drill.m001Candidate]))
+  const advisories: RungDepthAdvisory[] = []
+  for (const focus of SCOPED_FOCUSES) {
+    for (const rung of stressLadders[focus]) {
+      const eligibleCount = rung.drillIds.filter((id) => candidateById.get(id) === true).length
+      if (eligibleCount < target) {
+        advisories.push({
+          focus,
+          rung: rung.rung,
+          eligibleCount,
+          target,
+          message: `${focus} rung ${rung.rung} has ${eligibleCount} assembly-eligible drill(s); depth target is ${target}`,
+        })
+      }
+    }
+  }
+  return advisories
 }

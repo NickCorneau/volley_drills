@@ -83,6 +83,16 @@ Make every `m001Candidate:false` drill legible. The inactive reserve is intentio
 - **Equipment/reachability matters.** Several records are only blocked because cones, many balls, wall, or net requirements are not first-class setup context today.
 - **`d24` has catalog drift worth preserving.** Its `chainId` claims `chain-2-direction`, but `PROGRESSION_CHAINS` omits it. That is a future cleanup signal, not a retire reason.
 
+## M002.2 Re-evaluation (2026-06-21)
+
+M002.2 (rung depth + progression content, `docs/plans/2026-06-21-001-feat-m002-2-rung-depth-and-progression-plan.md`) re-checked every row here for a fresh activation trigger and **activated none**. Findings:
+
+- No parked drill has a freshly-logged `graduate-when` signal. The 2026-05-10 serving dogfood did not log a serve-to-defensive-base *need*, so `d23` stays parked (and its conditioning load still cuts against the accuracy-first serving layer).
+- `d08`, `d14`, `d20` remain `hold-pending-D101`; `d19`, `d21` remain group/`hold-pending-M002` (now M002.5 "bring others in"); `d06`, `d12`, `d13`, `d16`, `d17`, `d24` remain equipment/evidence-gated.
+- Depth for the four thinnest rungs (serve 1/3, set 2/3 — no parked sibling) is tracked as a source-cited backlog in `docs/specs/stress-rung-taxonomy.md` (Roster-depth backlog) and machine-checked by `auditRungDepth`. It needs new coach-reviewed content, not reserve activation.
+
+The verdicts in the table above are unchanged.
+
 ## Applied Changes
 
 No drill records were removed. Stream 3 should apply only:

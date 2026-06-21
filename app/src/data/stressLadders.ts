@@ -30,6 +30,34 @@ export interface StressRung {
   readonly rung: number
   /** Drills sharing this rung (catalog ids). */
   readonly drillIds: readonly string[]
+  // Progression content (M002.2). The field set, authoring rules, and
+  // per-focus progression story are specified in
+  // `docs/specs/stress-rung-taxonomy.md`; the authored strings themselves
+  // live here as data. These fields are NOT rendered anywhere yet — the
+  // run/transition/setup/review surface is a deferred M002.2 UI pass.
+  /** What this rung trains, in contextual-interference terms (D68), never physiological load (D149). */
+  readonly intent: string
+  /**
+   * The one external-focus attention prompt that makes this rung a real
+   * step (Wulf; courtside-copy rule 12b). Names an outcome or
+   * environmental referent (ball flight, target, landing, partner
+   * reach), never a body part or internal sensation.
+   */
+  readonly externalFocusCue: string
+  /**
+   * Process-framed "see how it feels" read. Exploratory and
+   * user-owned — never a coach-graded pass/fail threshold (D154 gating
+   * stays retired; coach-pedagogy evidence: pass/fail backfires
+   * coachlessly). No "%", "graded", "must", or pass/fail vocabulary.
+   */
+  readonly explorationCriterion: string
+  /**
+   * The felt readiness-to-step signal for this rung. Descriptive only:
+   * movement stays user-accepted via the review verdict (D154). Never a
+   * gate, never auto-promotion. The ladder-top rung describes staying
+   * and deepening rather than stepping.
+   */
+  readonly graduationFeel: string
 }
 
 /**
@@ -53,32 +81,156 @@ export interface StressRung {
 export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = {
   pass: [
     // d02/d04: chain-1 blocked posture/self-catch fundamentals beside d01 — constant feed, one outcome.
-    { rung: 1, drillIds: ['d01', 'd02', 'd04'] },
+    {
+      rung: 1,
+      drillIds: ['d01', 'd02', 'd04'],
+      intent: 'Groove a repeatable pass on a predictable feed, one clean contact at a time.',
+      externalFocusCue: 'Send the ball straight back up to the same height every time.',
+      explorationCriterion:
+        'Notice how little you have to move when you meet the ball out in front of you.',
+      graduationFeel:
+        'The ball returns to the same height almost without thinking, and a steadier rhythm would feel welcome rather than rushed.',
+    },
     // d06: fixed set-window target beside its chain-2 sibling d05; d19: controlled-input butterfly rotation — serial rhythm.
-    { rung: 2, drillIds: ['d03', 'd05', 'd06', 'd19'] },
+    {
+      rung: 2,
+      drillIds: ['d03', 'd05', 'd06', 'd19'],
+      intent: 'Hold pass quality while the ball keeps coming in a steady rhythm.',
+      externalFocusCue:
+        'Float each pass to the same spot in the air where a setter would stand (about 3 m off the net).',
+      explorationCriterion:
+        'See whether your passes stay matched as the rally lengthens, or start to wander once you tire.',
+      graduationFeel:
+        'The rally feels easy to sustain, and you find yourself wanting the ball to come from somewhere new.',
+    },
     // d12/d13/d14: chain-3 movement courses beside d09/d10; d16: defined-sequence footwork (one below d15's reactive read);
     // d17: two-role coordination off serve/toss; d24: move-to-ball corner targeting — varied movement/perception.
-    { rung: 3, drillIds: ['d07', 'd09', 'd10', 'd12', 'd13', 'd14', 'd16', 'd17', 'd24'] },
+    {
+      rung: 3,
+      drillIds: ['d07', 'd09', 'd10', 'd12', 'd13', 'd14', 'd16', 'd17', 'd24'],
+      intent: 'Read where the ball is going, move to it, and still pass to one target.',
+      externalFocusCue: 'Pick the landing spot early and arrive before the ball does.',
+      explorationCriterion:
+        'See how reading the flight sooner gives you time to square up to your target.',
+      graduationFeel:
+        'You are reading and arriving in time on most balls, and a real served ball would feel like the natural next test.',
+    },
     // d20: live serve receive inside a pass-set-attack continuity constraint; d21: 500's scored anticipation reads — reactive/outcome pressure beside d11/d15.
-    { rung: 4, drillIds: ['d11', 'd15', 'd20', 'd21'] },
+    {
+      rung: 4,
+      drillIds: ['d11', 'd15', 'd20', 'd21'],
+      intent:
+        'Keep control when the tool or the time is taken away, like a one-arm play or a short-then-deep ball.',
+      externalFocusCue: 'Guide the ball back to your target even on the emergency play.',
+      explorationCriterion: 'Notice what still works when you cannot get set early.',
+      graduationFeel:
+        'Emergency plays feel recoverable, and a live server reading you back would feel exciting rather than overwhelming.',
+    },
     // d08: live serve receive under +3/−3 stakes beside d18/d46 — live-read.
-    { rung: 5, drillIds: ['d08', 'd18', 'd46', 'd50'] },
+    {
+      rung: 5,
+      drillIds: ['d08', 'd18', 'd46', 'd50'],
+      intent: 'Pass a real served ball you have to read at game speed.',
+      externalFocusCue:
+        'Track the contact and the spin, then send it to the set window (about 3 m off the net).',
+      explorationCriterion:
+        'See how committing to your read early changes how clean the pass feels, even when you guess wrong.',
+      graduationFeel:
+        'You are reading live serves at speed. Stay here and keep inviting new servers, spins, and conditions to keep it honest.',
+    },
   ],
   serve: [
-    { rung: 1, drillIds: ['d31'] },
+    {
+      rung: 1,
+      drillIds: ['d31'],
+      intent: 'Commit to one target and repeat the same serve until it grooves.',
+      externalFocusCue: 'Land the ball in the same circle on the sand each time.',
+      explorationCriterion: 'Notice how a steady toss in front of you makes the contact repeatable.',
+      graduationFeel:
+        'Your serve lands near the circle most tries, and stringing several zones together would feel doable.',
+    },
     // d23: full-routine serial reps; the dash is body load, not contextual interference (D149 keeps load off this scale).
-    { rung: 2, drillIds: ['d23', 'd51'] },
-    { rung: 3, drillIds: ['d22'] },
+    {
+      rung: 2,
+      drillIds: ['d23', 'd51'],
+      intent: 'Hold serve quality across longer sets and across zones in sequence.',
+      externalFocusCue: 'Place each serve into the next zone in order, keeping the same easy contact.',
+      explorationCriterion:
+        'See whether your rhythm holds as the rounds add up, or your contact changes when you push for more pace.',
+      graduationFeel:
+        'Rhythm holds across rounds, and aiming at a scored target would feel like a welcome challenge.',
+    },
+    {
+      rung: 3,
+      drillIds: ['d22'],
+      intent: 'Serve to a called or scored target under a little outcome pressure.',
+      externalFocusCue: 'Aim past the passer to the open zone, not just over the net.',
+      explorationCriterion:
+        'Notice how aiming at a spot, rather than just in, changes where your misses go.',
+      graduationFeel:
+        'You are hitting called zones under a little pressure, and a live receiver reading you would feel like the real test.',
+    },
     // d08: serving into live receive with error scoring — rung 4's "serve into live receive" signature beside d18.
-    { rung: 4, drillIds: ['d08', 'd18', 'd33'] },
+    {
+      rung: 4,
+      drillIds: ['d08', 'd18', 'd33'],
+      intent: 'Serve into a live receiver and a sequence you do not fully control.',
+      externalFocusCue: 'Pick the zone that pressures the receiver before you toss.',
+      explorationCriterion:
+        'See how serving at a target instead of at the court feels under the back-and-forth of a live point.',
+      graduationFeel:
+        'You are serving into live receivers with intent. Stay here and keep varying zones, receivers, and stakes.',
+    },
   ],
   set: [
-    { rung: 1, drillIds: ['d38', 'd39', 'd40'] },
-    { rung: 2, drillIds: ['d41'] },
-    { rung: 3, drillIds: ['d42'] },
+    {
+      rung: 1,
+      drillIds: ['d38', 'd39', 'd40'],
+      intent: 'Build a clean, repeatable set shape on a predictable toss.',
+      externalFocusCue: 'Release the ball softly to the same height above you every time.',
+      explorationCriterion: 'Notice how a quiet, even contact sends the ball straight up without spin.',
+      graduationFeel:
+        'The set shape repeats cleanly, and keeping a continuous rally going would feel natural.',
+    },
+    {
+      rung: 2,
+      drillIds: ['d41'],
+      intent: 'Keep the set shape while rallying continuously with a partner.',
+      externalFocusCue: 'Float each set so your partner barely moves to reach it.',
+      explorationCriterion:
+        'See whether the rally stays smooth as it lengthens, or the ball starts to lead your partner.',
+      graduationFeel:
+        'The rally stays smooth, and setting from new spots to new targets would feel like the next step.',
+    },
+    {
+      rung: 3,
+      drillIds: ['d42'],
+      intent: 'Set to changing targets and from changing court spots.',
+      externalFocusCue: 'Square up to the target before the ball arrives.',
+      explorationCriterion: 'Notice how arriving early and facing the target changes how settable the ball lands.',
+      graduationFeel:
+        'You arrive and square up in time, and solving messier passes would feel like a fair challenge.',
+    },
     // d20: setting off live-ish passes in continuity flow; d21: 500's scored chaotic entries — reactive/graded beside d47.
-    { rung: 4, drillIds: ['d20', 'd21', 'd47'] },
-    { rung: 5, drillIds: ['d48', 'd49'] },
+    {
+      rung: 4,
+      drillIds: ['d20', 'd21', 'd47'],
+      intent: 'Choose bump or hand set from imperfect passes and still deliver a hittable ball.',
+      externalFocusCue: 'Send the ball to the same hittable spot wherever the pass pulls you.',
+      explorationCriterion: 'See which option keeps the set clean when the pass is off.',
+      graduationFeel:
+        'You keep sets hittable from imperfect passes, and live scramble play would feel like the real game.',
+    },
+    {
+      rung: 5,
+      drillIds: ['d48', 'd49'],
+      intent: 'Set under live chaos when the pass pulls you out of position, and recover for the next ball.',
+      externalFocusCue: 'Put the ball where your hitter is going, then find your base again.',
+      explorationCriterion:
+        'Notice how committing to a target early lets you recover faster for the next play.',
+      graduationFeel:
+        'You are setting under live chaos and recovering. Stay here and keep raising the speed and disorder.',
+    },
   ],
 }
 
