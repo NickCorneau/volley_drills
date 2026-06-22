@@ -22,6 +22,9 @@ describe('SkillLevelPicker', () => {
   it('uses default unsure subtext when no override is provided', () => {
     render(<SkillLevelPicker onPick={vi.fn()} />)
     expect(screen.getByText(/We'll size a light starter/)).toBeInTheDocument()
+    // T2 (one home per fact): the default no longer repeats "change
+    // later" — the onboarding subtitle ("Change anytime.") owns it.
+    expect(screen.queryByText(/you can change this after/i)).not.toBeInTheDocument()
   })
 
   it('uses custom unsure subtext when provided (Settings sub-route variant)', () => {

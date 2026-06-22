@@ -7,8 +7,9 @@ import { SettingsScreen } from '../SettingsScreen'
 
 /**
  * 2026-04-27 reconciled-list `R13`: SettingsScreen carries a quiet
- * `Logged: N sessions · {duration} total` footer just above the existing
- * `Your data stays on this device.` line.
+ * `Logged: N sessions · {duration} total` footer above the build-id row.
+ * (T2 2026-06-22: the old `Your data stays on this device.` footer line
+ * was removed — durability lives once, in the storage section.)
  *
  * Pin three behaviors:
  *   1. Hidden when `count === 0` so first-week testers see no row.
@@ -82,8 +83,10 @@ describe('SettingsScreen investment footer (R13)', () => {
   it('hides the footer entirely when no sessions have been logged', async () => {
     renderSettings()
 
-    // Wait for the privacy line so we know the screen has settled.
-    await screen.findByText(/your data stays on this device/i)
+    // Wait for the always-present storage section so we know the screen
+    // has settled. (T2: the footer privacy line was removed — durability
+    // now lives once, in this storage section.)
+    await screen.findByText(/about local storage/i)
 
     expect(screen.queryByTestId('settings-investment-footer')).not.toBeInTheDocument()
     expect(screen.queryByText(/^Logged:/)).not.toBeInTheDocument()

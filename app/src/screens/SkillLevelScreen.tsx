@@ -156,12 +156,16 @@ export function SkillLevelScreen() {
           `setStorageMetaMany`). */}
         {/*
           No `unsureSubtext` override: `SkillLevelPicker`'s
-          DEFAULT_UNSURE_SUBTEXT is already the onboarding-flavored copy
-          ("We'll size a light starter. You can change this after."). The
-          prior override duplicated that string but with an ASCII hyphen
-          as a sentence dash, which violates courtside-copy.mdc rule 4
-          (no dashes in prose). Falling back to the default removes the
-          duplication and the punctuation bug in one move.
+          DEFAULT_UNSURE_SUBTEXT ("We'll size a light starter.") is the
+          onboarding-flavored copy. A prior override duplicated it with an
+          ASCII hyphen sentence dash (courtside-copy.mdc rule 4
+          violation); the default fixed that.
+
+          T2 (2026-06-22 shibui audit, one home per fact): the default
+          subtext used to append "You can change this after.", repeating
+          the header subtitle's "Change anytime." That clause was trimmed
+          — the subtitle is the single home for the change-later fact. See
+          docs/plans/2026-06-22-005-refactor-t2-duplicate-facts-plan.md U6.
         */}
         {/*
           T6 competing-focal-weight (2026-06-22 shibui audit): mark

@@ -52,14 +52,18 @@ export interface SkillLevelPickerProps {
    */
   recommendedLevel?: SkillLevel
   /**
-   * Custom copy under the "Not sure yet" card. Defaults to the
-   * onboarding-flavored copy. The Settings sub-route uses a more
-   * change-flavored variant.
+   * Custom copy under the "Not sure yet" card. Defaults to
+   * `DEFAULT_UNSURE_SUBTEXT`; the Settings sub-route passes its own copy
+   * explicitly.
    */
   unsureSubtext?: string
 }
 
-const DEFAULT_UNSURE_SUBTEXT = "We'll size a light starter. You can change this after."
+// T2 (2026-06-22 shibui audit, one home per fact): this default used to
+// append "You can change this after.", repeating the onboarding header
+// subtitle's "Change anytime." The subtitle is the single home for the
+// change-later fact, so the clause was trimmed here.
+const DEFAULT_UNSURE_SUBTEXT = "We'll size a light starter."
 
 export function SkillLevelPicker({
   onPick,
