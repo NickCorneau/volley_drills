@@ -136,12 +136,16 @@ describe('CompleteScreen summary (C-2 Unit 3)', () => {
     expect(await screen.findByText('Keep building')).toBeInTheDocument()
     expect(screen.queryByText(/today's verdict/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/today's pair verdict/i)).not.toBeInTheDocument()
-    // 2026-04-26 pre-D91 editorial polish (`F9`): the
-    // `Completed session N:` ordinal prefix was dropped — the reason
-    // line leads with the stats sentence directly.
+    // 2026-06-22 shibui audit T2 (one home per fact): the hero reason is
+    // a count-free completion beat; the pass count lives once, in the
+    // recap "Good passes" row below. sessionCount === 1 here (only this
+    // submitted review), so the first-session line shows.
     expect(
-      screen.getByText(/^40 good passes today out of 60 attempts\. Ready when you are\.$/),
+      screen.getByText(/^First one\u2019s in the book\. Ready when you are\.$/),
     ).toBeInTheDocument()
+    // The pass count's single home: the recap row.
+    expect(screen.getByTestId('recap-good-passes')).toHaveTextContent('67% (40 of 60)')
+    expect(screen.queryByText(/good passes today out of/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/Completed session/i)).not.toBeInTheDocument()
   })
 
@@ -187,27 +191,29 @@ describe('CompleteScreen summary (C-2 Unit 3)', () => {
     expect(screen.getByText(/gentler/i)).toBeInTheDocument()
   })
 
-  it('reason line reflects the submitted stats regardless of session count', async () => {
-    // 2026-04-26 pre-D91 editorial polish (`F9`): the
-    // `Completed session N` ordinal was dropped from Complete, so
-    // `countSubmittedReviews` no longer surfaces on this screen.
-    // `sessionCount` still flows through `composeSummary` as data
-    // (other surfaces may want it later), but the rendered reason
-    // line is identical for any sessionCount > 0 + attempts > 0 — it
-    // leads with the stats sentence and ends with the forward hook.
+  it('hero reason states no pass count; the recap row is its single home (T2)', async () => {
+    // 2026-06-22 shibui audit T2 (one home per fact): the hero reason no
+    // longer restates the pass count (it was previously also shown in
+    // the recap "Good passes" row, and the two were sourced differently
+    // so they could disagree). With 3 submitted reviews the reason is
+    // the returning-session completion beat; the count lives once, in
+    // the recap row.
     await seed({
       execId: 'exec-counter',
       playerCount: 1,
       reviewStatus: 'submitted',
       goodPasses: 80,
       totalAttempts: 100,
-      extraSubmittedCount: 2, // would have been "Completed session 3" pre-`F9`.
+      extraSubmittedCount: 2, // sessionCount === 3 (this + two extras).
     })
     renderAt('exec-counter')
 
     expect(
-      await screen.findByText(/^80 good passes today out of 100 attempts\. Ready when you are\.$/),
+      await screen.findByText(/^One more in the book\. Ready when you are\.$/),
     ).toBeInTheDocument()
+    // The pass count appears exactly once, in the recap row.
+    expect(screen.getByTestId('recap-good-passes')).toHaveTextContent('80% (80 of 100)')
+    expect(screen.queryByText(/good passes today out of/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/Completed session/i)).not.toBeInTheDocument()
   })
 

@@ -171,6 +171,6 @@ describe('PassMetricInput (V0B-02 / H13 tap-to-type)', () => {
   it('keeps the notCaptured chip present below the numeric inputs', () => {
     render(<Harness initialGood={3} initialTotal={5} />)
 
-    expect(screen.getByRole('button', { name: /couldn.t capture reps/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /didn.t count reps/i })).toBeInTheDocument()
   })
 })

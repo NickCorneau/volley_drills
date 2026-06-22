@@ -1,13 +1,14 @@
 import type { ReactNode } from 'react'
 import { cx } from '../../lib/cn'
-import { ELEVATED_PANEL_SURFACE, FOCAL_SURFACE_CLASS } from './surfaces'
+import { ELEVATED_PANEL_SURFACE, FOCAL_SURFACE_CLASS, SOFT_SURFACE_CLASS } from './surfaces'
 
 // Back-compat re-exports. The tokens themselves moved to `./surfaces.ts`
 // 2026-05-04 (plan U1) so non-Card consumers (`SkillLevelScreen` option
 // rows, `ActionOverlay` panel, `home/cardStyles.ts`) don't have to import
 // from a Card module to reach a class string. New code should import
-// directly from `./surfaces`.
-export { ELEVATED_PANEL_SURFACE, FOCAL_SURFACE_CLASS }
+// directly from `./surfaces`. `SOFT_SURFACE_CLASS` joined them 2026-06-22
+// (T7) so `SettingsScreen` sections share the warm surface this variant uses.
+export { ELEVATED_PANEL_SURFACE, FOCAL_SURFACE_CLASS, SOFT_SURFACE_CLASS }
 
 type CardVariant = 'soft' | 'focal'
 
@@ -31,7 +32,7 @@ type CardProps = {
 }
 
 const VARIANT_CLASS: Record<CardVariant, string> = {
-  soft: 'rounded-base bg-bg-warm p-4',
+  soft: SOFT_SURFACE_CLASS,
   // Phase F2: focal variant layers the shared surface class with
   // F1-matched internal rhythm (p-6 padding + gap-4). Kept inline so
   // the single-source-of-truth surface class stays padding-agnostic

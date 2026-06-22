@@ -93,7 +93,8 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
         <div className="flex w-full items-center justify-between">
           <SafetyIcon />
           <h1 className="text-xl font-semibold tracking-tight text-text-primary">Quick review</h1>
-          <div className="h-14 w-14 shrink-0" aria-hidden />
+          {/* Mirrors the SafetyIcon width (T6: 44px) so the title stays centered. */}
+          <div className="h-11 w-11 shrink-0" aria-hidden />
         </div>
         <p className="text-sm text-text-secondary">
           {sessionTitle} &middot; {durationPart} &middot; {statusPart}
@@ -115,11 +116,9 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
 
         {showMetricsCard && (
           <>
-            <div
-              className="h-px w-full bg-text-secondary/15"
-              role="presentation"
-              aria-hidden="true"
-            />
+            {/* T3 (2026-06-22 shibui audit): the ScreenShell.Body gap
+              already separates the RPE card from the metrics card, so
+              the decorative hairline that sat here was removed. */}
             {/*
               Shibui polish 2026-06-12 (origin R8): when no drill has a
               logged count, full card chrome announcing nothing was the
@@ -192,24 +191,21 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
         )}
 
         {/*
-          2026-05-10 first-time-runnability sweep R16: short-note
-          placeholder updated to a Volleyball Canada Person Pillar
-          Guidebook reflection-question template ("observe / reinforce
-          / question, do not judge"). The prompt invites the user to
-          self-generate a next-action rather than report a vibe; the
-          neutral "Short note" label stays so users who don't want to
-          reflect deeply can still write whatever they want.
+          T4 shibui (2026-06-22): the note has no validation and submit
+          works without it, so the field is optional by nature and the
+          "(optional)" qualifier was redundant ink; the placeholder is
+          one quiet line rather than a two-clause reflection prompt.
         */}
         <section className="flex flex-col gap-2">
           <label htmlFor="review-note" className="text-base font-semibold text-text-primary">
-            Short note <span className="font-normal text-text-secondary">(optional)</span>
+            Short note
           </label>
           <textarea
             id="review-note"
             rows={3}
             value={shortNote}
             onChange={(e) => setShortNote(e.target.value)}
-            placeholder="What's worth keeping for next time, or what would you change?"
+            placeholder="One line for next time."
             className="min-h-[88px] w-full resize-y rounded-base border border-text-primary/10 bg-bg-primary px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           />
         </section>
@@ -218,18 +214,28 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
           Keep-the-same is the pre-selected default, so doing nothing
           leaves the plan unchanged (never a silent reshuffle). Framed in
           stress vocabulary, forward-compatible with M002.2 ladders.
+
+          T6 competing-focal-weight (2026-06-22 shibui audit): the verdict
+          is a chrome-less <section>, not a Card — the required RPE rating
+          is the gate, so its card must dominate the screen. The verdict
+          already defaults to "Keep the same" (no card chrome needed to act
+          on it). Mirrors the chrome-less "Short note" section above.
         */}
         {verdictLine && (
-          <Card className="flex flex-col gap-3">
+          <section className="flex flex-col gap-3">
             <h2 id="verdict-heading" className="text-base font-semibold text-text-primary">
               Next time
             </h2>
             {/*
-              M002.2 progression read: the offer line and the reflective
-              line (what to notice about the rung just trained) group
-              tight above the choice; the readiness + accept-consequence
-              lines group tight below it. Quiet text-xs secondary, no
-              labels/chrome (proximity-only grouping per design review).
+              M002.2 progression read, capped at 3 prose lines (T5
+              2026-06-22 shibui audit; revisits D161): the offer line and
+              the reflective line (what to notice about the rung just
+              trained) group tight above the choice; below the choice sits
+              the accept-consequence, OR the readiness line as a forward
+              fallback when no accept-consequence renders (the controller
+              suppresses readiness whenever the accept-consequence is
+              present). Quiet text-xs secondary, no labels/chrome
+              (proximity-only grouping per design review).
             */}
             <div className="flex flex-col gap-1">
               <p className="text-sm text-text-secondary">{verdictLine}</p>
@@ -267,7 +273,7 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
                 )}
               </div>
             )}
-          </Card>
+          </section>
         )}
       </ScreenShell.Body>
 

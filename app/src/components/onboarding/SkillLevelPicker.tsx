@@ -40,6 +40,18 @@ export interface SkillLevelPickerProps {
   onPick: (level: SkillLevel) => Promise<void> | void
   currentLevel?: SkillLevel
   /**
+   * T6 competing-focal-weight (2026-06-22 shibui audit): the band to
+   * mark as the recommended "start here if unsure" default, giving the
+   * five equal option cards an entry point. Opt-in — passed by the
+   * onboarding `SkillLevelScreen` (the "if unsure" context) and omitted
+   * by the Settings sub-route (a returning user already has a Current
+   * band, so a recommendation there would be noise). A band that is both
+   * `currentLevel` and `recommendedLevel` shows only "Current" (current
+   * state outranks a suggestion); in practice the two never co-occur
+   * because only onboarding passes `recommendedLevel`.
+   */
+  recommendedLevel?: SkillLevel
+  /**
    * Custom copy under the "Not sure yet" card. Defaults to the
    * onboarding-flavored copy. The Settings sub-route uses a more
    * change-flavored variant.
@@ -49,9 +61,15 @@ export interface SkillLevelPickerProps {
 
 const DEFAULT_UNSURE_SUBTEXT = "We'll size a light starter. You can change this after."
 
-export function SkillLevelPicker({ onPick, currentLevel, unsureSubtext }: SkillLevelPickerProps) {
+export function SkillLevelPicker({
+  onPick,
+  currentLevel,
+  recommendedLevel,
+  unsureSubtext,
+}: SkillLevelPickerProps) {
   const renderCard = (level: SkillLevel, description: string) => {
     const isCurrent = level === currentLevel
+    const isRecommended = !isCurrent && level === recommendedLevel
     return (
       <button
         type="button"
@@ -66,14 +84,18 @@ export function SkillLevelPicker({ onPick, currentLevel, unsureSubtext }: SkillL
         {/*
           Title at `text-base` (16px) so it reads a step above the
           `text-sm` descriptor below — within-card hierarchy was carried
-          by weight alone when both lines sat at 14px. The "Current"
-          badge keeps its own `text-xs`.
+          by weight alone when both lines sat at 14px. The "Current" /
+          "Recommended" badge keeps its own `text-xs`.
         */}
         <span className="flex w-full items-center justify-between gap-3 text-base font-semibold text-text-primary">
           <span>{SKILL_LEVEL_LABEL[level]}</span>
           {isCurrent ? (
             <span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent">
               Current
+            </span>
+          ) : isRecommended ? (
+            <span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent">
+              Recommended
             </span>
           ) : null}
         </span>

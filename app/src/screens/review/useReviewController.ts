@@ -259,11 +259,20 @@ export function useReviewController(executionLogId: string) {
         })
       : { reflection: null, readiness: null }
   const progressionReflectionLine = progressionRead.reflection
-  const progressionReadinessLine = progressionRead.readiness
+  // T5 verdict-card density cap (2026-06-22 shibui audit; revisits D161):
+  // on a `more` offer the readiness line (graduationFeel) overlaps the
+  // carry-forward offer line ("you're ready for more") and the reflection
+  // line, so it is the redundant one when the card is dense. Suppress it
+  // whenever the accept-consequence renders, capping the card at 3 prose
+  // lines (offer -> reflection -> accept-consequence). Readiness survives
+  // only as the forward line when no accept-consequence renders (legacy /
+  // no-context plans), so a `more` card always carries a step-up read and
+  // never exceeds 3 prose lines.
+  const progressionReadinessLine = acceptConsequenceLine ? null : progressionRead.readiness
   const missingHint: string | null = isSubmitting
     ? null
     : sessionRpe == null
-      ? 'Rate your effort above to finish.'
+      ? 'Pick effort to finish.'
       : needsIncompleteReason && incompleteReason == null
         ? 'Pick a reason you ended early to finish.'
         : null

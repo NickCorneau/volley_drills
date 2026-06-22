@@ -88,7 +88,11 @@ export function ChoiceSubsection({
   children,
 }: ChoiceSubsectionProps) {
   return (
-    <div className="flex animate-[choice-subsection-reveal_180ms_ease-out] flex-col gap-3 rounded-base bg-bg-warm/60 p-3 motion-reduce:animate-none">
+    // T3 (2026-06-22 shibui audit): the warm card chrome (bg-warm +
+    // rounded + padding) was removed so the nested follow-up reads as a
+    // calm body in the pre-run flow, not a tinted panel. The reveal
+    // animation (opacity + translateY) stays as the nesting affordance.
+    <div className="flex animate-[choice-subsection-reveal_180ms_ease-out] flex-col gap-3 motion-reduce:animate-none">
       <h3
         id={titleId}
         className={

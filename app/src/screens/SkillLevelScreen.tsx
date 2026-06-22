@@ -163,7 +163,16 @@ export function SkillLevelScreen() {
           (no dashes in prose). Falling back to the default removes the
           duplication and the punctuation bug in one move.
         */}
-        <SkillLevelPicker onPick={handlePick} />
+        {/*
+          T6 competing-focal-weight (2026-06-22 shibui audit): mark
+          `rally_builders` as the recommended "start here if unsure"
+          default so the five equal option cards gain an entry point.
+          rally_builders is the one-season rec player the whole
+          courtside-copy system targets ("Pass easy serves, short
+          rallies"). Onboarding only — the Settings sub-route omits this
+          (it already shows the user's Current band).
+        */}
+        <SkillLevelPicker onPick={handlePick} recommendedLevel="rally_builders" />
       </ScreenShell.Body>
     </ScreenShell>
   )

@@ -201,7 +201,7 @@ describe('ReviewScreen 2026-04-23 polish (merged proposal)', () => {
       // The pre-close 2026-04-21 default-to-notCaptured chip also
       // disappears with the card.
       expect(
-        screen.queryByRole('button', { name: /couldn.t capture reps/i }),
+        screen.queryByRole('button', { name: /didn.t count reps/i }),
       ).not.toBeInTheDocument()
     })
 

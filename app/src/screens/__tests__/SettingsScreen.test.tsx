@@ -70,7 +70,7 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
 
     await user.click(screen.getByRole('button', { name: /^export$/i }))
 
-    expect(await screen.findByText(/export saved.*check your downloads/i)).toBeInTheDocument()
+    expect(await screen.findByText(/export saved/i)).toBeInTheDocument()
 
     downloadSpy.mockRestore()
   })
@@ -176,7 +176,8 @@ describe('SettingsScreen (V0B-15 / Phase E Unit 2)', () => {
       expect(await screen.findByText('Rally builders')).toBeInTheDocument()
       const section = screen.getByTestId('settings-skill-level')
       expect(section).toHaveTextContent('Skill level')
-      expect(section).toHaveTextContent(/Your level/i)
+      // T1 shibui (2026-06-22): the "Your level:" prefix was dropped; the
+      // section now shows the heading + the label value alone.
     })
 
     it('Change button navigates to /settings/skill-level', async () => {

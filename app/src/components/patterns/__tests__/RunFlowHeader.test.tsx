@@ -26,10 +26,15 @@ describe('RunFlowHeader', () => {
     expect(screen.getByTestId('counter')).toBeInTheDocument()
   })
 
-  it('preserves caller-owned eyebrow typography (focal vs status case)', () => {
+  it('preserves caller-owned eyebrow typography (no override)', () => {
+    // T6 (2026-06-22): the run-flow eyebrow is the calm status-marker
+    // treatment (`text-sm font-medium text-text-secondary`) across all
+    // three screens. This test pins that RunFlowHeader does not override
+    // the caller's typography — the wrapping grid-cell span carries
+    // alignment only, never font classes.
     renderHeader({
       eyebrow: (
-        <span data-testid="eyebrow" className="text-sm font-semibold text-accent">
+        <span data-testid="eyebrow" className="text-sm font-medium text-text-secondary">
           Main drill · Serve
         </span>
       ),
@@ -37,11 +42,9 @@ describe('RunFlowHeader', () => {
     })
 
     const eyebrow = screen.getByTestId('eyebrow')
-    // The wrapping span (inside the grid cell) has no typography of its own;
-    // the caller-supplied span keeps its classes intact.
     expect(eyebrow.className).toContain('text-sm')
-    expect(eyebrow.className).toContain('font-semibold')
-    expect(eyebrow.className).toContain('text-accent')
+    expect(eyebrow.className).toContain('font-medium')
+    expect(eyebrow.className).toContain('text-text-secondary')
   })
 
   it('renders SafetyIcon (with a recognisable accessible name) in the left cell', () => {
@@ -52,7 +55,12 @@ describe('RunFlowHeader', () => {
     // SafetyIcon renders a `<button aria-label="Safety information">`.
     // Coupling to the accessible name (rather than a class) keeps the test
     // resilient to SafetyIcon's internal styling drift.
-    expect(screen.getByRole('button', { name: /safety information/i })).toBeInTheDocument()
+    const safety = screen.getByRole('button', { name: /safety information/i })
+    expect(safety).toBeInTheDocument()
+    // T6 (2026-06-22): the trigger is the 44px tap-target FLOOR. Pin it so
+    // a future shrink below the brand §4.5 / outdoor-brief minimum breaks.
+    expect(safety.className).toContain('h-11')
+    expect(safety.className).toContain('w-11')
   })
 
   it('appends caller-supplied className to the ScreenShell.Header wrapper', () => {

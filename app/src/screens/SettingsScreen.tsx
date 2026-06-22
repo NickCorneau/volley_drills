@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Callout, Card, ScreenHeader, ScreenShell, StatusMessage } from '../components/ui'
+import { SOFT_SURFACE_CLASS } from '../components/ui/surfaces'
 import { useInstallPosture } from '../hooks/useInstallPosture'
 import { BUILD_DATE, BUILD_VERSION, formatBuildVersion } from '../lib/buildInfo'
+import { cx } from '../lib/cn'
 import { formatTotalDurationLine } from '../lib/format'
 import { isSchemaBlocked } from '../lib/schema-blocked'
 import {
@@ -119,7 +121,7 @@ export function SettingsScreen() {
       console.error('Export failed:', err)
       setState({
         kind: 'error',
-        message: 'Export failed. Try again, or reload the app if it keeps happening.',
+        message: 'Export failed. Try again.',
       })
       return
     }
@@ -133,19 +135,16 @@ export function SettingsScreen() {
         for consistency — the export card is short enough that this screen
         fits a 390 × 844 iPhone today, but aligning the layout primitive
         with the rest of the app keeps the back-button position, top-bar
-        rhythm, and footer ("Your data stays on this device.") on the
-        same grid as SetupScreen / SafetyCheckScreen / ReviewScreen.
+        rhythm, and footer on the same grid as SetupScreen /
+        SafetyCheckScreen / ReviewScreen.
       */}
       <ScreenHeader backLabel="Back" onBack={() => navigate(routes.home())} title="Settings" />
 
       <ScreenShell.Body rhythm="landing">
         <Card variant="focal">
-          <div>
-            <h2 className="text-base font-semibold text-text-primary">Export training records</h2>
-            <p className="mt-1 text-sm text-text-secondary">
-              Downloads your session history as a JSON file you can share.
-            </p>
-          </div>
+          {/* T1 shibui (2026-06-22): the JSON-file description restated the
+              "Export training records" heading + "Export" button; dropped. */}
+          <h2 className="text-base font-semibold text-text-primary">Export training records</h2>
           <Button
             variant="primary"
             fullWidth
@@ -156,7 +155,7 @@ export function SettingsScreen() {
           </Button>
           {state.kind === 'success' && (
             <Callout tone="success" size="sm" role="status">
-              Export saved. Check your downloads.
+              Export saved.
             </Callout>
           )}
           {state.kind === 'error' && <StatusMessage variant="error" message={state.message} />}
@@ -166,7 +165,7 @@ export function SettingsScreen() {
           <section
             aria-labelledby="settings-skill-level-heading"
             data-testid="settings-skill-level"
-            className="flex flex-col gap-2 rounded-base border border-text-secondary/15 bg-bg-warm/40 p-4"
+            className={cx(SOFT_SURFACE_CLASS, 'flex flex-col gap-2')}
           >
             {/* 2026-05-25 (plan A1 of
                 `docs/plans/2026-05-25-005-polish-design-critique-residuals-plan.md`,
@@ -184,12 +183,10 @@ export function SettingsScreen() {
               Skill level
             </h2>
             {skillLevel ? (
-              <p className="text-sm text-text-secondary">
-                Your level:{' '}
-                <span className="font-medium text-text-primary">
-                  {SKILL_LEVEL_LABEL[skillLevel]}
-                </span>
-                .
+              // T1 shibui (2026-06-22): "Your level:" prefix restated the
+              // "Skill level" heading; the label alone is the value.
+              <p className="text-sm font-medium text-text-primary">
+                {SKILL_LEVEL_LABEL[skillLevel]}
               </p>
             ) : (
               <p className="text-sm text-text-secondary">
@@ -222,16 +219,13 @@ export function SettingsScreen() {
           aria-labelledby="settings-storage-heading"
           data-testid="settings-storage-info"
           data-posture={posture}
-          className="flex flex-col gap-2 rounded-base border border-text-secondary/15 bg-bg-warm/40 p-4"
+          className={cx(SOFT_SURFACE_CLASS, 'flex flex-col gap-2')}
         >
           <h2 id="settings-storage-heading" className="text-base font-semibold text-text-primary">
             About local storage
           </h2>
           <p className="text-sm font-medium text-text-primary">{storageCopy.primary}</p>
           <p className="text-sm leading-relaxed text-text-secondary">{storageCopy.secondary}</p>
-          <p className="text-sm leading-relaxed text-text-secondary">
-            Use Export above to move your history between devices or keep a copy off-device.
-          </p>
         </section>
       </ScreenShell.Body>
 
@@ -254,7 +248,6 @@ export function SettingsScreen() {
             {formatTotalDurationLine(tally.totalMinutes)} total
           </p>
         )}
-        <p className="text-xs text-text-secondary">Your data stays on this device.</p>
         {/* 2026-04-26 pre-D91 editorial polish (`F14`): build-id row
             for D91 field-test debugging hygiene. When a tester reports
             a bug, the founder's first triage question is "what build

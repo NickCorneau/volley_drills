@@ -186,7 +186,6 @@ export function DrillCheckScreen() {
         */}
         {captureShape.kind === 'count' && (
           <PerDrillCapture
-            drillName={captureTarget.drillName}
             difficulty={difficulty}
             onDifficultyChange={setDifficulty}
             captureShape={{ kind: 'count' }}
@@ -201,7 +200,6 @@ export function DrillCheckScreen() {
         )}
         {captureShape.kind === 'streak' && (
           <PerDrillCapture
-            drillName={captureTarget.drillName}
             difficulty={difficulty}
             onDifficultyChange={setDifficulty}
             captureShape={{ kind: 'streak' }}
@@ -212,7 +210,6 @@ export function DrillCheckScreen() {
         )}
         {captureShape.kind === 'none' && (
           <PerDrillCapture
-            drillName={captureTarget.drillName}
             difficulty={difficulty}
             onDifficultyChange={setDifficulty}
             captureShape={{ kind: 'none' }}

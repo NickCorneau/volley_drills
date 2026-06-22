@@ -287,9 +287,14 @@ export function HomeScreen() {
   // The descriptive plan line is additionally absorbed by the
   // last_complete focal card, whose primary CTA ("Start passing session")
   // now states the next focus and launches it — rendering the line above
-  // would duplicate that. The carry-forward cell still shows (a separate
-  // signal), so it stays on the broader showPlanLayer gate.
-  const showPlanLine = showPlanLayer && primary !== 'last_complete'
+  // would duplicate that. The `draft` primary is absorbed for the same
+  // reason (T6 competing-focal-weight, 2026-06-22 shibui audit): the draft
+  // card already states the assembled "what's next" session, so the plan
+  // line above it is a second equal "what's next" frame. The carry-forward
+  // cell still shows (a separate signal), so it stays on the broader
+  // showPlanLayer gate.
+  const showPlanLine =
+    showPlanLayer && primary !== 'last_complete' && primary !== 'draft'
 
   return (
     <ScreenShell>

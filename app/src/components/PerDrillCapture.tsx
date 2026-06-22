@@ -83,7 +83,6 @@ const DIFFICULTY_CHIPS: readonly ChoiceRowOption<DifficultyTag>[] = [
  * — one source of truth for "what shape do we render".
  */
 type PerDrillCaptureCommonProps = {
-  drillName: string
   difficulty: DifficultyTag | null
   onDifficultyChange: (next: DifficultyTag) => void
   /**
@@ -128,12 +127,16 @@ type PerDrillCaptureProps = PerDrillCaptureCommonProps &
   (PerDrillCaptureCountProps | PerDrillCaptureStreakProps | PerDrillCaptureNoneProps)
 
 export function PerDrillCapture(props: PerDrillCaptureProps) {
-  const { drillName, difficulty, onDifficultyChange, successRuleDescription } = props
+  const { difficulty, onDifficultyChange, successRuleDescription } = props
 
   return (
     <section
       aria-labelledby="per-drill-heading"
-      className="flex flex-col gap-3 rounded-base border border-text-secondary/15 bg-bg-primary p-4"
+      // T3 (2026-06-22 shibui audit): the bordered "form panel" chrome
+      // (border + bg + padding) was removed so the capture surface reads
+      // as a calm body inside the otherwise-empty Drill Check screen,
+      // not a re-introduced card.
+      className="flex flex-col gap-3"
       data-testid="per-drill-capture"
     >
       <div className="flex flex-col gap-1">
@@ -144,8 +147,11 @@ export function PerDrillCapture(props: PerDrillCaptureProps) {
           apart). The screen header owns the section label; this card
           leads straight with its question heading.
         */}
+        {/* T1 shibui (2026-06-22): the drill name already shows in the
+            JustFinishedPill directly above (and the sr-only h1); "How was
+            that?" drops the second in-screen repeat of the name. */}
         <h2 id="per-drill-heading" className="text-base font-semibold text-text-primary">
-          How was {drillName}?
+          How was that?
         </h2>
         {/*
           2026-05-10 first-time-runnability sweep R16

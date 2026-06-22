@@ -183,9 +183,18 @@ export function RunScreen() {
         The 3-column grid layout (and the "why grid not flex"
         rationale) lives once on `RunFlowHeader` (plan U5).
       */}
+      {/*
+        T6 competing-focal-weight (2026-06-22 shibui audit): the eyebrow
+        is a calm secondary status marker (`text-text-secondary` /
+        `font-medium`), NOT accent-focal — the run focal zone is the
+        timer (live) or the drill title (between blocks), per brand
+        §4.2. This unifies the eyebrow with Transition / DrillCheck and
+        reverses the prior "focal vs status / don't unify" RunFlowHeader
+        note (now updated in that docblock).
+      */}
       <RunFlowHeader
         eyebrow={
-          <span className="text-sm font-semibold text-accent">
+          <span className="text-sm font-medium text-text-secondary">
             {blockEyebrowLabel(
               currentBlock.type,
               getBlockSkillFocus(currentBlock, plan?.playerCount ?? 1),

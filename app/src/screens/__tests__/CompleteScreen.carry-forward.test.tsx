@@ -103,14 +103,16 @@ describe('CompleteScreen carry-forward (M002.1)', () => {
     })
     renderAt('exec-kept')
     // Wait for the screen to settle (recap renders) before asserting absence.
-    expect(await screen.findByText('Session recap')).toBeInTheDocument()
+    // T1 (2026-06-22): the visible "Session recap" label was dropped; the
+    // recap Card keeps its aria-label, so assert via the accessible name.
+    expect(await screen.findByLabelText('Session recap')).toBeInTheDocument()
     expect(screen.queryByTestId('complete-carry-forward')).not.toBeInTheDocument()
   })
 
   it('does NOT render the carry-forward line when no delta was offered', async () => {
     await seed({ execId: 'exec-none' })
     renderAt('exec-none')
-    expect(await screen.findByText('Session recap')).toBeInTheDocument()
+    expect(await screen.findByLabelText('Session recap')).toBeInTheDocument()
     expect(screen.queryByTestId('complete-carry-forward')).not.toBeInTheDocument()
   })
 })

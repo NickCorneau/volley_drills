@@ -37,6 +37,7 @@ function passPlan(
   id: string,
   createdAt: number,
   main: { drillName: string; drillId: string } = D03,
+  options: { omitContext?: boolean } = {},
 ) {
   return {
     id,
@@ -59,14 +60,21 @@ function passPlan(
     safetyCheck: { painFlag: false, heatCta: false, painOverridden: false },
     // Persisted context feeds the trust-loop U3 consequence caption
     // (the composer filters exemplar candidates by these conditions).
-    context: {
-      playerMode: 'solo' as const,
-      timeProfile: 25 as const,
-      netAvailable: false,
-      wallAvailable: false,
-      sessionFocus: 'pass' as const,
-      playerLevel: 'intermediate' as const,
-    },
+    // Omitting it models a legacy / no-context plan, where the
+    // accept-consequence fails quiet and the readiness line becomes the
+    // verdict card's forward fallback (T5 3-line cap, plan 2026-06-22-004).
+    ...(options.omitContext
+      ? {}
+      : {
+          context: {
+            playerMode: 'solo' as const,
+            timeProfile: 25 as const,
+            netAvailable: false,
+            wallAvailable: false,
+            sessionFocus: 'pass' as const,
+            playerLevel: 'intermediate' as const,
+          },
+        }),
     createdAt,
   }
 }
@@ -112,9 +120,10 @@ async function seedPriorPassSession(
 async function seedCurrentSession(
   execId: string,
   main: { drillName: string; drillId: string } = D03,
+  options: { omitContext?: boolean } = {},
 ) {
   const now = Date.now()
-  await db.sessionPlans.put(passPlan(`plan-${execId}`, now - 60_000, main))
+  await db.sessionPlans.put(passPlan(`plan-${execId}`, now - 60_000, main, options))
   await db.executionLogs.put({
     id: execId,
     planId: `plan-${execId}`,
@@ -199,7 +208,7 @@ describe('ReviewScreen verdict (M002.1 R5)', () => {
     })
   })
 
-  it('on a "more" offer, renders both the reflection and the readiness line (on-target rung)', async () => {
+  it('on a "more" offer with a concrete next-drill consequence, caps the card: reflection + accept-consequence, readiness suppressed (T5)', async () => {
     // Two easy prior pass sessions (RPE 3) -> sustained too_easy -> "more".
     await seedPriorPassSession('e1', 4, 'too_easy', 3)
     await seedPriorPassSession('e2', 2, 'too_easy', 3)
@@ -208,14 +217,17 @@ describe('ReviewScreen verdict (M002.1 R5)', () => {
     renderAt('cur')
 
     expect(await screen.findByText('Next time')).toBeInTheDocument()
-    // Reflection = trained rung 2 explorationCriterion; readiness = offer
-    // position 2 graduationFeel (shown because the offer is "more").
+    // Reflection (trained rung 2 explorationCriterion) stays above the choice.
     expect(screen.getByText(getStressRung('pass', 2)!.explorationCriterion)).toBeInTheDocument()
-    expect(screen.getByText(getStressRung('pass', 2)!.graduationFeel)).toBeInTheDocument()
-    // The readiness line is NOT wired into Try-it's aria-describedby; the
-    // accept-consequence remains the single described consequence.
+    // The accept-consequence (the concrete next-drill exemplar) renders and
+    // remains the single described consequence on Try-it.
     const tryIt = screen.getByRole('radio', { name: 'Try it' })
     expect(tryIt).toHaveAttribute('aria-describedby', 'verdict-accept-consequence')
+    expect(screen.getByText(/lean toward drills like/)).toBeInTheDocument()
+    // T5 cap (revisits D161): the readiness line (graduationFeel) is
+    // suppressed whenever the accept-consequence renders, holding the card
+    // at 3 prose lines (offer -> reflection -> accept-consequence).
+    expect(screen.queryByText(getStressRung('pass', 2)!.graduationFeel)).not.toBeInTheDocument()
   })
 
   it('keys the reflection off the TRAINED rung, not the offer position (off-target landing)', async () => {
@@ -230,17 +242,34 @@ describe('ReviewScreen verdict (M002.1 R5)', () => {
 
     expect(await screen.findByText('Next time')).toBeInTheDocument()
     // Reflection follows the rung actually trained (3), never the offer
-    // position (2).
+    // position (2). (The readiness -> offer-position keying is proven at the
+    // domain tier in progressionRead.test.ts; the screen-level readiness
+    // line is suppressed here by the T5 cap because the accept-consequence
+    // renders.)
     expect(screen.getByText(getStressRung('pass', 3)!.explorationCriterion)).toBeInTheDocument()
     expect(
       screen.queryByText(getStressRung('pass', 2)!.explorationCriterion),
     ).not.toBeInTheDocument()
-    // Readiness keys off the offer position (2), since stepping is a
-    // position move, not a trained-drill move.
+  })
+
+  it('on a "more" offer with no accept-consequence, the readiness line is the forward fallback (T5)', async () => {
+    await seedPriorPassSession('e1', 4, 'too_easy', 3)
+    await seedPriorPassSession('e2', 2, 'too_easy', 3)
+    // No persisted context -> the accept-consequence fails quiet, so the
+    // readiness line survives as the card's forward step-up read. The card
+    // is still 3 prose lines (offer -> reflection -> readiness).
+    await seedCurrentSession('cur', D03, { omitContext: true })
+
+    renderAt('cur')
+
+    expect(await screen.findByText('Next time')).toBeInTheDocument()
+    // Reflection (trained rung 2) and readiness (offer position 2) both render.
+    expect(screen.getByText(getStressRung('pass', 2)!.explorationCriterion)).toBeInTheDocument()
     expect(screen.getByText(getStressRung('pass', 2)!.graduationFeel)).toBeInTheDocument()
-    expect(
-      screen.queryByText(getStressRung('pass', 3)!.graduationFeel),
-    ).not.toBeInTheDocument()
+    // No accept-consequence: Try-it carries no described consequence.
+    const tryIt = screen.getByRole('radio', { name: 'Try it' })
+    expect(tryIt).not.toHaveAttribute('aria-describedby')
+    expect(screen.queryByText(/lean toward drills like/)).not.toBeInTheDocument()
   })
 
   it('shows no verdict block when there is no prior trend (keep offer)', async () => {

@@ -165,11 +165,11 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
     playerMode !== null && netAvailable !== null && (!showWall || wallAvailable !== null)
   const incompleteHint =
     playerMode === null
-      ? 'Choose players to build.'
+      ? 'Pick players.'
       : netAvailable === null
-        ? 'Choose net availability to build.'
+        ? 'Pick net.'
         : showWall && wallAvailable === null
-          ? 'Choose wall or fence availability to build.'
+          ? 'Pick wall or fence.'
           : null
 
   // U5 (2026-05-24 duration-honesty plan, PD-2 (A)): load preview-build
@@ -312,21 +312,26 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
   }, [previewTotalMinutes, timeProfile])
 
   // D158 (2026-06-12 shibui comp review, setup-01 frame): focal resolved
-  // line at the top of the refine cluster — `Pair + Net · 38 min ·
-  // Recommended focus`. The minute segment always reads the *assembled
-  // preview total* (the same number the footer Callout reports), never
-  // the named Time-chip profile, so the screen's two duration statements
-  // cannot disagree (duration-honesty R4). Null until the preview draft
-  // exists; the incomplete placeholder renders in its slot instead.
+  // line at the top of the refine cluster — `Pair + Net · Recommended
+  // focus`. It carries session *identity* (archetype + focus); duration
+  // is not restated here.
   //
-  // All three segments read the *preview build* — the focus comes from
+  // T2 (2026-06-22 shibui audit, one home per fact): the assembled
+  // minutes were previously a third segment on this line AND in the
+  // footer Callout ("This session will run about N min."). The footer
+  // Callout is now the single home for duration, so the screen states
+  // the duration exactly once and the two surfaces can never disagree
+  // (the original duration-honesty R4 goal, met here by subtraction).
+  // See docs/plans/2026-06-22-005-refactor-t2-duplicate-facts-plan.md U2.
+  //
+  // Both segments read the *preview build* — the focus comes from
   // `previewDraft.context`, not live chip state (which leads the
   // effect-rebuilt draft by one commit), so the line can never pair a
-  // fresh focus label with the previous build's archetype/minutes.
+  // fresh focus label with the previous build's archetype.
   //
   // D159: a resolved context renders the concrete focus with its
-  // provenance — `Solo + Net · 25 min · Passing (recommended)` — so the
-  // default path names what it will actually train. A named pick keeps
+  // provenance — `Solo + Net · Passing (recommended)` — so the default
+  // path names what it will actually train. A named pick keeps
   // `Passing focus`; the unstamped fallback keeps `Recommended focus`.
   const resolvedLine = useMemo(() => {
     if (!previewDraft || previewTotalMinutes === null) return null
@@ -337,7 +342,7 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       previewDraft.context.focusSource === 'resolved'
         ? `${focusLabel} (recommended)`
         : `${focusLabel} focus`
-    return `${previewDraft.archetypeName} · ${previewTotalMinutes} min · ${focusSegment}`
+    return `${previewDraft.archetypeName} · ${focusSegment}`
   }, [previewDraft, previewTotalMinutes])
 
   const submitting = useRef(false)
@@ -459,12 +464,19 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
       />
 
       {/* D158 (setup-01 frame): the body is recommendation-first — a
-          focal resolved line carries the screen ("Pair + Net · 38 min ·
+          focal resolved line carries the screen ("Pair + Net ·
           Recommended focus") and the chip sections recede into a dense
           refine cluster (`cockpit` rhythm, quiet uppercase micro-label
-          headings). Incomplete states render the existing hint copy in
-          the focal slot in secondary voice instead of fabricating a
-          resolved summary. */}
+          headings).
+
+          T2 (2026-06-22 shibui audit, one home per fact): the
+          `incompleteHint` was previously mirrored here in the focal slot
+          AND beside the disabled Build button in the footer. The footer
+          is now its single home (the "why" beside the disabled CTA, per
+          brand-ux §6.4 and matching Safety/Review `missingHint`), so the
+          focal slot stays empty until a preview resolves rather than
+          restating the hint. See
+          docs/plans/2026-06-22-005-refactor-t2-duplicate-facts-plan.md U3. */}
       <ScreenShell.Body rhythm="cockpit">
         {resolvedLine ? (
           <p
@@ -472,10 +484,6 @@ export function SetupScreen({ isOnboarding = false }: SetupScreenProps) {
             className="text-lg font-semibold leading-snug text-text-primary"
           >
             {resolvedLine}
-          </p>
-        ) : incompleteHint ? (
-          <p data-testid="setup-resolved-line-placeholder" className="text-sm text-text-secondary">
-            {incompleteHint}
           </p>
         ) : null}
 

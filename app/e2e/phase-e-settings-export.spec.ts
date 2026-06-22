@@ -85,7 +85,7 @@ test.describe('phase-e settings + export', () => {
     await exportBtn.click()
 
     // Success toast appears (role=status, aria-live=polite).
-    await expect(page.getByText(/export saved.*check your downloads/i)).toBeVisible({
+    await expect(page.getByText(/export saved/i)).toBeVisible({
       timeout: 5_000,
     })
 

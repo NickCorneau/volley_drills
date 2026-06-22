@@ -25,10 +25,20 @@ export function SafetyIcon() {
 
   return (
     <>
+      {/*
+        T6 competing-focal-weight (2026-06-22 shibui audit): the trigger
+        is `h-11 w-11` (44px) — the brand §4.5 / outdoor-brief ghost
+        tap-target FLOOR, not below it — so the safety affordance stays
+        reachable courtside without over-weighting the run cockpit
+        header. The 20px shield glyph is unchanged. Used by RunFlowHeader
+        (Run / Transition / DrillCheck) and by the ReviewScreen and
+        CompleteScreen headers, whose aria-hidden spacers mirror this
+        width to keep their centered titles on true center.
+      */}
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-14 w-14 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-text-primary/5 hover:text-text-primary active:bg-text-primary/10 active:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        className="flex h-11 w-11 items-center justify-center rounded-full text-text-secondary transition-colors hover:bg-text-primary/5 hover:text-text-primary active:bg-text-primary/10 active:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         aria-label="Safety information"
       >
         <ShieldSvg />

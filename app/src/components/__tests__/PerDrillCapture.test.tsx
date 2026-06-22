@@ -25,7 +25,6 @@ describe('PerDrillCapture difficulty chips (always rendered)', () => {
   it('renders the three difficulty chips with stable per-chip vocabulary', () => {
     render(
       <PerDrillCapture
-        drillName="One-arm Passing"
         difficulty={null}
         onDifficultyChange={noop}
         captureShape={{ kind: 'none' }}
@@ -42,7 +41,6 @@ describe('PerDrillCapture difficulty chips (always rendered)', () => {
   it('marks the matching chip as aria-checked when difficulty is set', () => {
     const { rerender } = render(
       <PerDrillCapture
-        drillName="One-arm Passing"
         difficulty={null}
         onDifficultyChange={noop}
         captureShape={{ kind: 'none' }}
@@ -54,7 +52,6 @@ describe('PerDrillCapture difficulty chips (always rendered)', () => {
 
     rerender(
       <PerDrillCapture
-        drillName="One-arm Passing"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'none' }}
@@ -74,7 +71,6 @@ describe('PerDrillCapture difficulty chips (always rendered)', () => {
     const onDifficultyChange = vi.fn()
     render(
       <PerDrillCapture
-        drillName="One-arm Passing"
         difficulty={null}
         onDifficultyChange={onDifficultyChange}
         captureShape={{ kind: 'none' }}
@@ -90,7 +86,6 @@ describe('PerDrillCapture captureShape: none (Phase 2B-deferred drills)', () => 
   it('renders neither the count drawer nor the streak drawer', () => {
     render(
       <PerDrillCapture
-        drillName="Wall Reading"
         difficulty="too_hard"
         onDifficultyChange={noop}
         captureShape={{ kind: 'none' }}
@@ -108,7 +103,6 @@ describe('PerDrillCapture captureShape: count', () => {
   it('starts with counts collapsed behind an "Add counts" affordance', () => {
     render(
       <PerDrillCapture
-        drillName="One-arm Passing"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'count' }}
@@ -129,7 +123,6 @@ describe('PerDrillCapture captureShape: count', () => {
   it('keeps the collapsed counts affordance at a comfortable tap height', () => {
     render(
       <PerDrillCapture
-        drillName="One-arm Passing"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'count' }}
@@ -148,7 +141,6 @@ describe('PerDrillCapture captureShape: count', () => {
   it('reveals the Good/Total inputs after tapping "Add counts"', () => {
     render(
       <PerDrillCapture
-        drillName="One-arm Passing"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'count' }}
@@ -178,7 +170,6 @@ describe('PerDrillCapture captureShape: count', () => {
     it('renders the per-drill success rule and the anti-generosity nudge above the inputs after expanding counts', () => {
       render(
         <PerDrillCapture
-          drillName="Self Toss Target Practice"
           difficulty="still_learning"
           onDifficultyChange={noop}
           captureShape={{ kind: 'count' }}
@@ -204,7 +195,6 @@ describe('PerDrillCapture captureShape: count', () => {
     it('does not render the success rule while the counts surface is collapsed', () => {
       render(
         <PerDrillCapture
-          drillName="Self Toss Target Practice"
           difficulty="still_learning"
           onDifficultyChange={noop}
           captureShape={{ kind: 'count' }}
@@ -224,7 +214,6 @@ describe('PerDrillCapture captureShape: count', () => {
     it('omits the success rule when successRuleDescription is undefined (defensive default)', () => {
       render(
         <PerDrillCapture
-          drillName="Self Toss Target Practice"
           difficulty="still_learning"
           onDifficultyChange={noop}
           captureShape={{ kind: 'count' }}
@@ -245,7 +234,6 @@ describe('PerDrillCapture captureShape: count', () => {
     it('omits the success rule on chip-only drills (captureShape: none)', () => {
       render(
         <PerDrillCapture
-          drillName="Pass and Slap Hands"
           difficulty="too_easy"
           onDifficultyChange={noop}
           captureShape={{ kind: 'none' }}
@@ -269,7 +257,6 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
   it('starts with the streak drawer collapsed behind an "Add longest streak (optional)" affordance', () => {
     render(
       <PerDrillCapture
-        drillName="Bump Set Fundamentals"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'streak' }}
@@ -287,7 +274,6 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
   it('keeps the collapsed streak affordance at a comfortable tap height', () => {
     render(
       <PerDrillCapture
-        drillName="Bump Set Fundamentals"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'streak' }}
@@ -302,7 +288,6 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
   it('reveals the streak input after tapping the affordance', () => {
     render(
       <PerDrillCapture
-        drillName="Bump Set Fundamentals"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'streak' }}
@@ -323,7 +308,6 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
   it('renders the success rule above the input WITHOUT the anti-generosity nudge', () => {
     render(
       <PerDrillCapture
-        drillName="Bump Set Fundamentals"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'streak' }}
@@ -344,7 +328,6 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
   it('input uses inputMode=numeric and pattern=[0-9]* for iOS number-pad', () => {
     render(
       <PerDrillCapture
-        drillName="Bump Set Fundamentals"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'streak' }}
@@ -364,7 +347,6 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
     const onStreakLongestChange = vi.fn()
     render(
       <PerDrillCapture
-        drillName="Bump Set Fundamentals"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'streak' }}
@@ -384,7 +366,6 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
     const onStreakLongestChange = vi.fn()
     render(
       <PerDrillCapture
-        drillName="Bump Set Fundamentals"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'streak' }}
@@ -404,7 +385,6 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
     const onStreakLongestChange = vi.fn()
     render(
       <PerDrillCapture
-        drillName="Bump Set Fundamentals"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'streak' }}
@@ -432,7 +412,6 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
     const onStreakLongestChange = vi.fn()
     render(
       <PerDrillCapture
-        drillName="Bump Set Fundamentals"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'streak' }}
@@ -455,7 +434,6 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
   it('clears the inline correction text once the value becomes valid', () => {
     const { rerender } = render(
       <PerDrillCapture
-        drillName="Bump Set Fundamentals"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'streak' }}
@@ -473,7 +451,6 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
 
     rerender(
       <PerDrillCapture
-        drillName="Bump Set Fundamentals"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'streak' }}
@@ -489,7 +466,6 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
   it('rehydrates the input text from streakLongest on mount', () => {
     render(
       <PerDrillCapture
-        drillName="Bump Set Fundamentals"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'streak' }}
@@ -525,7 +501,6 @@ describe('PerDrillCapture inline gloss behavior (2026-05-13 universalization)', 
   it('renders flagged terms in the observable line as dotted-underline buttons', () => {
     render(
       <PerDrillCapture
-        drillName="The 6-Legged Monster"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'none' }}
@@ -545,7 +520,6 @@ describe('PerDrillCapture inline gloss behavior (2026-05-13 universalization)', 
     const user = userEvent.setup()
     render(
       <PerDrillCapture
-        drillName="The 6-Legged Monster"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'none' }}
@@ -571,7 +545,6 @@ describe('PerDrillCapture inline gloss behavior (2026-05-13 universalization)', 
     const user = userEvent.setup()
     render(
       <PerDrillCapture
-        drillName="The 6-Legged Monster"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'count' }}
@@ -601,7 +574,6 @@ describe('PerDrillCapture inline gloss behavior (2026-05-13 universalization)', 
     const user = userEvent.setup()
     render(
       <PerDrillCapture
-        drillName="The 6-Legged Monster"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'streak' }}
@@ -625,7 +597,6 @@ describe('PerDrillCapture inline gloss behavior (2026-05-13 universalization)', 
   it('does not render gloss buttons or reveal slots when the description has no `(= …)`', () => {
     render(
       <PerDrillCapture
-        drillName="Plain Drill"
         difficulty="still_learning"
         onDifficultyChange={noop}
         captureShape={{ kind: 'none' }}

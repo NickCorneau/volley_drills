@@ -5,10 +5,15 @@ import { ScreenShell } from '../ui/ScreenShell'
 
 export type RunFlowHeaderProps = {
   /**
-   * Center-cell content. Caller owns the typography because the focal-vs-status
-   * distinction is intentional: RunScreen uses `text-sm font-semibold text-accent`
-   * (focal), Transition / DrillCheck use `text-sm font-medium text-text-secondary`
-   * (calm status marker). Don't unify — see RunScreen header comment for context.
+   * Center-cell content. Caller owns the typography. As of T6
+   * competing-focal-weight (2026-06-22 shibui audit), all three
+   * run-flow screens — RunScreen, Transition, DrillCheck — use the same
+   * calm status-marker treatment (`text-sm font-medium text-text-secondary`):
+   * the run focal zone is the timer / drill title (brand §4.2), so the
+   * eyebrow recedes. This reverses the prior accent-focal treatment on
+   * RunScreen and the "don't unify" note that documented it. The prop
+   * stays caller-owned so a future surface can still diverge if a
+   * decision row calls for it.
    */
   eyebrow: ReactNode
   /** Right-cell content (typically a "N/M" or "Last: N/M" / "Next: N/M" counter). */
@@ -28,10 +33,13 @@ export type RunFlowHeaderProps = {
  * the gap-right but does NOT center the middle item relative to the
  * container — the middle item drifts off true center by
  * `(left_child_width - right_child_width) / 2`. With `SafetyIcon` at
- * `h-14 w-14` (56 px) and a short counter `N/M` (~22 px), the math is
- * `+17 px` right of center on RunScreen — visible as misalignment when
- * comparing across run-flow screens (TransitionScreen has the wider
- * `Next: N/M` counter and reads visually centered by accident).
+ * `h-11 w-11` (44 px, the T6 size) and a short counter `N/M` (~22 px),
+ * the middle eyebrow would drift ~11 px right of center under flex —
+ * visible as misalignment when comparing across run-flow screens
+ * (TransitionScreen has the wider `Next: N/M` counter and reads
+ * visually centered by accident). The drift scales with the side-cell
+ * size, so the grid (which centers regardless) is the durable fix, not
+ * any specific icon size.
  *
  * `grid-cols-3` + per-cell `justify-self-{start,center,end}` forces the
  * middle column to center on the container regardless of side-cell

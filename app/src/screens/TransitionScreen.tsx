@@ -137,8 +137,9 @@ export function TransitionScreen() {
           />
         )}
 
-        <div className="border-t border-text-secondary/10" />
-
+        {/* T3 (2026-06-22 shibui audit): the ScreenShell.Body gap
+          already separates the just-finished receipt from "Up next", so
+          the decorative hairline that sat here was removed. */}
         {skipError && <StatusMessage variant="error" message={skipError} />}
 
         {swapError && <StatusMessage variant="error" message={swapError} />}

@@ -93,10 +93,10 @@ describe('SetupScreen (C-3)', () => {
       screen.getByRole('heading', { level: 3, name: /wall or fence nearby/i }),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /build session/i })).toBeDisabled()
-    // D158 (setup-01 frame 06): the incomplete hint renders twice on
-    // purpose — once in the focal slot at the top of the cluster, once
-    // in the footer next to the disabled Build button.
-    expect(screen.getAllByText('Choose wall or fence availability to build.')).toHaveLength(2)
+    // T2 (2026-06-22 shibui audit, one home per fact): the incomplete
+    // hint renders once — in the footer next to the disabled Build
+    // button. The focal slot no longer mirrors it.
+    expect(screen.getAllByText('Pick wall or fence.')).toHaveLength(1)
     expect(screen.queryByRole('radiogroup', { name: 'Wind' })).not.toBeInTheDocument()
     await user.click(
       within(screen.getByRole('radiogroup', { name: /wall or fence nearby/i })).getByRole('radio', {
@@ -396,7 +396,7 @@ describe('SetupScreen (C-3)', () => {
       // Build is disabled and the incomplete hint shows the wall ask
       // (focal slot + footer per D158 frame 06).
       expect(screen.getByRole('button', { name: /build session/i })).toBeDisabled()
-      expect(screen.getAllByText(/wall or fence availability/i).length).toBeGreaterThan(0)
+      expect(screen.getAllByText(/pick wall or fence/i).length).toBeGreaterThan(0)
       // Duration preview is not rendered while Setup is incomplete.
       expect(screen.queryByTestId('setup-assembled-duration')).not.toBeInTheDocument()
     })
@@ -712,12 +712,14 @@ describe('SetupScreen (C-3)', () => {
   /**
    * D158 (2026-06-12 shibui comp review, setup-01 frame):
    * recommendation-first restructure. A focal resolved line tops the
-   * refine cluster ("Solo + Net · 14 min · Recommended focus"); its
-   * minute segment always reads the *assembled preview total* — the
-   * same number the footer Callout reports — so the screen's two
-   * duration statements can never disagree (duration-honesty R4).
-   * While Setup is incomplete the slot carries the existing hint copy
-   * in quiet secondary voice instead of a fabricated summary.
+   * refine cluster ("Solo + Net · Recommended focus"), carrying session
+   * identity (archetype + focus).
+   *
+   * T2 (2026-06-22 shibui audit, one home per fact): the assembled
+   * minutes were dropped from this line — the footer Callout is the
+   * single home for duration, so the screen states it exactly once (the
+   * duration-honesty R4 goal, met by subtraction). While Setup is
+   * incomplete the focal slot stays empty; the hint lives in the footer.
    */
   describe('D158 setup-01 focal resolved line', () => {
     beforeEach(async () => {
@@ -732,7 +734,7 @@ describe('SetupScreen (C-3)', () => {
       vi.restoreAllMocks()
     })
 
-    it('renders archetype + assembled minutes + focus, agreeing with the footer Callout', async () => {
+    it('renders archetype + focus only; duration lives in the footer Callout', async () => {
       render(
         <MemoryRouter initialEntries={['/setup']}>
           <Routes>
@@ -744,14 +746,14 @@ describe('SetupScreen (C-3)', () => {
       // D159: Recommended resolves through the plan — a fresh DB
       // resolves deterministically to the staleness tie-break head
       // (pass), rendered with its provenance.
+      // T2: the line carries identity only — no minute segment.
       const line = await screen.findByTestId('setup-resolved-line')
-      expect(line.textContent).toMatch(/^Solo \+ Net · \d+ min · Passing \(recommended\)$/)
+      expect(line.textContent).toMatch(/^Solo \+ Net · Passing \(recommended\)$/)
+      expect(line.textContent).not.toMatch(/min/)
 
-      const lineMinutes = line.textContent?.match(/· (\d+) min ·/)?.[1]
+      // Duration's single home: the footer Callout still reports it.
       const callout = await screen.findByTestId('setup-assembled-duration')
-      const calloutMinutes = callout.textContent?.match(/about (\d+) min/)?.[1]
-      expect(lineMinutes).toBeDefined()
-      expect(lineMinutes).toBe(calloutMinutes)
+      expect(callout.textContent).toMatch(/about \d+ min/)
     })
 
     it('tracks an explicit focus chip in the resolved line', async () => {
@@ -775,19 +777,12 @@ describe('SetupScreen (C-3)', () => {
         expect(screen.getByTestId('setup-resolved-line').textContent).toMatch(/Passing focus$/)
       })
 
-      // Post-change duration honesty: the rebuilt line's minutes still
-      // agree with the footer Callout. All three line segments read the
-      // same preview build (the focus label comes from
-      // `previewDraft.context`, not live chip state), so a focus change
-      // can never pair a fresh label with the previous build's minutes.
-      const lineMinutes = screen
-        .getByTestId('setup-resolved-line')
-        .textContent?.match(/· (\d+) min ·/)?.[1]
-      const calloutMinutes = screen
-        .getByTestId('setup-assembled-duration')
-        .textContent?.match(/about (\d+) min/)?.[1]
-      expect(lineMinutes).toBeDefined()
-      expect(lineMinutes).toBe(calloutMinutes)
+      // T2: the line carries focus identity only (no minutes). The
+      // focus label comes from `previewDraft.context`, not live chip
+      // state, so a focus change can never pair a fresh label with the
+      // previous build. Duration stays in the footer Callout.
+      expect(screen.getByTestId('setup-resolved-line').textContent).not.toMatch(/min/)
+      expect(screen.getByTestId('setup-assembled-duration').textContent).toMatch(/about \d+ min/)
     })
 
     it('derives the focus segment from the preview draft context, not live chip state', async () => {
@@ -851,7 +846,7 @@ describe('SetupScreen (C-3)', () => {
       })
     })
 
-    it('renders the quiet hint placeholder in the focal slot while Setup is incomplete', async () => {
+    it('shows the incomplete hint only in the footer (no focal placeholder)', async () => {
       const user = userEvent.setup()
       render(
         <MemoryRouter initialEntries={['/setup']}>
@@ -868,10 +863,13 @@ describe('SetupScreen (C-3)', () => {
         }),
       )
 
+      // T2 (one home per fact): the focal slot no longer mirrors the
+      // incomplete hint — neither the resolved line nor a placeholder
+      // renders while Setup is incomplete.
       expect(screen.queryByTestId('setup-resolved-line')).not.toBeInTheDocument()
-      expect(screen.getByTestId('setup-resolved-line-placeholder').textContent).toBe(
-        'Choose wall or fence availability to build.',
-      )
+      expect(screen.queryByTestId('setup-resolved-line-placeholder')).not.toBeInTheDocument()
+      // The hint's single home: the footer, beside the disabled Build.
+      expect(screen.getByText('Pick wall or fence.')).toBeInTheDocument()
     })
   })
 

@@ -90,11 +90,10 @@ describe('HomeScreen', () => {
       </MemoryRouter>,
     )
 
-    // C-4 copy: review-pending primary card renders a calm instruction
-    // plus the plan name. Assert both so a future copy change flips the
-    // test loudly.
-    expect(await screen.findByText(/^Finish the quick review\.$/)).toBeInTheDocument()
-    expect(screen.getByText(/solo \+ wall/i)).toBeInTheDocument()
+    // T1 shibui (2026-06-22): the review-pending card leads with the plan
+    // name (the restating "Finish the quick review." headline was dropped);
+    // the "Finish review" button carries the action.
+    expect(await screen.findByText(/solo \+ wall/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Finish review' })).toBeInTheDocument()
 
     // V0B / red-team #5: Skip review is a two-step confirm. 2026-04-27

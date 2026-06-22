@@ -183,8 +183,10 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     await seedLastComplete('exec-lc')
     renderHome()
     expect(await screen.findByRole('region', { name: /train again/i })).toBeInTheDocument()
-    // No Session ready card.
-    expect(screen.queryByText(/session ready/i)).not.toBeInTheDocument()
+    // No Session ready card. T1 (2026-06-22) dropped the visible "Session
+    // ready." text, so assert the draft region (its aria-label) is absent —
+    // a queryByText guard would now pass trivially.
+    expect(screen.queryByRole('region', { name: /session ready/i })).not.toBeInTheDocument()
   })
 
   // Home-coherence: the focus-steered "Start [focus] session" launch CTA is
@@ -204,6 +206,19 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     renderHome()
     await screen.findByRole('button', { name: /^continue$/i })
     expect(screen.queryByRole('button', { name: LAUNCH_CTA })).not.toBeInTheDocument()
+  })
+
+  // T6 competing-focal-weight (2026-06-22 shibui audit): on the draft
+  // primary the draft card already states the assembled "what's next"
+  // session, so the descriptive plan line must NOT also render above it
+  // (the same absorption already applied to last_complete). composePlan
+  // returns a plan even on a fresh start, so without the suppression the
+  // "Your plan" region would render here.
+  it('draft only: absorbs the plan line (no "Your plan" region above the card)', async () => {
+    await seedDraft()
+    renderHome()
+    await screen.findByRole('button', { name: /^continue$/i })
+    expect(screen.queryByRole('region', { name: /your plan/i })).not.toBeInTheDocument()
   })
 
   it('review_pending: no plan-launch CTA', async () => {
@@ -234,6 +249,11 @@ describe('HomeScreen precedence matrix (C-4 Unit 5)', () => {
     // D158: the last_complete secondary row was retired with its Repeat
     // affordance; Recent sessions owns last-session context.
     expect(screen.queryByRole('list', { name: /other active actions/i })).not.toBeInTheDocument()
+
+    // T6: with last_complete history present, composePlan yields a real
+    // plan — but the draft card is the single "what's next" frame, so the
+    // descriptive plan line stays absorbed (not rendered above the card).
+    expect(screen.queryByRole('region', { name: /your plan/i })).not.toBeInTheDocument()
   })
 
   it('draft primary Continue routes directly to Safety', async () => {

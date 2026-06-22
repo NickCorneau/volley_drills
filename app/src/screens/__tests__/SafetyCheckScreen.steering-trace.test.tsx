@@ -217,6 +217,26 @@ describe('SafetyCheckScreen steering trace (trust-loop U4)', () => {
     expect(screen.getByText(/nothing changes without your okay/i)).toBeInTheDocument()
   })
 
+  it('suppresses the evergreen gloss while the first-steer disclosure is showing (T2)', async () => {
+    // One home per fact: on a first steered visit the one-time
+    // disclosure explains the contract, so the evergreen gloss is
+    // withheld until the disclosure is dismissed. The specific steering
+    // line stays independent.
+    const user = userEvent.setup()
+    await db.sessionReviews.add(acceptedReview('set', 'more', 1000))
+    await seedSteeredDraft('set')
+
+    renderScreen()
+    // Disclosure is up...
+    await screen.findByText(/your plan quietly adjusts its challenge as you train/i)
+    // ...so the gloss trigger is withheld (one contract surface at a time).
+    expect(screen.queryByRole('button', { name: /how sessions adapt/i })).not.toBeInTheDocument()
+
+    // Dismissing the disclosure reveals the evergreen gloss in its place.
+    await user.click(screen.getByRole('button', { name: /got it/i }))
+    expect(await screen.findByRole('button', { name: /how sessions adapt/i })).toBeInTheDocument()
+  })
+
   it('pain override suppresses the line, disclosure, and gloss', async () => {
     const user = userEvent.setup()
     await db.sessionReviews.add(acceptedReview('set', 'more', 1000))
@@ -241,6 +261,14 @@ describe('SafetyCheckScreen steering trace (trust-loop U4)', () => {
     const user = userEvent.setup()
     await db.sessionReviews.add(acceptedReview('set', 'more', 1000))
     await seedSteeredDraft('set')
+    // T2 (one home per fact): the gloss is suppressed while the first-
+    // steer disclosure is showing, so pre-dismiss it to reach the gloss.
+    // The steering line stays independent and still renders.
+    await db.storageMeta.put({
+      key: ADAPT_DISCLOSURE_DISMISSED_KEY,
+      value: true,
+      updatedAt: Date.now(),
+    })
 
     renderScreen()
     await screen.findByText('A bit more stress on setting today.')

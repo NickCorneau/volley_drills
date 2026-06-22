@@ -45,3 +45,21 @@ export const FOCAL_SURFACE_CLASS =
  * Do not add `ring-*` here — see pitfall note on `FOCAL_SURFACE_CLASS`.
  */
 export const ELEVATED_PANEL_SURFACE = 'bg-bg-primary border border-text-primary/10 shadow-lg'
+
+/**
+ * Warm supporting surface used for secondary content groupings inside
+ * broader calm-page screens (Review's nested cards, Complete's recap,
+ * Settings' skill-level / storage sections). Borderless warm fill so it
+ * reads quieter than `FOCAL_SURFACE_CLASS` — the focal card stays the
+ * single elevated surface per screen.
+ *
+ * Single source of truth for `Card`'s `soft` variant AND non-Card
+ * consumers (`SettingsScreen` sections) so the warm surface can't drift
+ * panel-by-panel (T7, 2026-06-22 shibui audit). Consumers add their own
+ * `flex` / `gap` layout beside the token.
+ *
+ * Naming note: distinct from Button's `soft` variant, which is a warm
+ * *filled button* (`bg-bg-warm` on a tap target); here `soft` is a warm
+ * *surface*. The two `soft`s are deliberate but distinct.
+ */
+export const SOFT_SURFACE_CLASS = 'rounded-base bg-bg-warm p-4'

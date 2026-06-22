@@ -109,8 +109,8 @@ test.describe('review hit areas', () => {
     await expectHitAreaAtLeast44(page.getByLabel('Good'), 'Good count input')
     await expectHitAreaAtLeast44(page.getByLabel('Total'), 'Total count input')
     await expectHitAreaAtLeast44(
-      page.getByRole('button', { name: /couldn.t capture reps this time/i }),
-      "Couldn't capture reps button",
+      page.getByRole('button', { name: /didn.t count reps/i }),
+      "Didn't count reps button",
     )
     await expectHitAreaAtLeast44(page.getByLabel(/short note/i), 'Short note textarea')
     await expectHitAreaAtLeast44(page.getByRole('button', { name: 'Done' }), 'Done button')

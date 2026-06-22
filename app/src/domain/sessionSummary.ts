@@ -74,7 +74,7 @@ export function composeSummary(input: SummaryInput): SummaryOutput {
     case: 'default',
     header,
     verdict: VERDICT_DEFAULT,
-    reason: composeDefaultReason(review, sessionCount),
+    reason: composeDefaultReason(sessionCount),
   }
 }
 
@@ -91,12 +91,6 @@ export function composeSummary(input: SummaryInput): SummaryOutput {
 //   cannot back up)
 // - pass the FORBIDDEN_RE copy-guard regex unchanged.
 const FORWARD_HOOK = 'Ready when you are.'
-
-function passAttemptStatsLine(goodPasses: number, totalAttempts: number): string {
-  const passNoun = goodPasses === 1 ? 'good pass' : 'good passes'
-  const attemptNoun = totalAttempts === 1 ? 'attempt' : 'attempts'
-  return `${goodPasses} ${passNoun} today out of ${totalAttempts} ${attemptNoun}.`
-}
 
 // Partner-walkthrough polish 2026-04-22 (design review T3 / trifold T3):
 // a first-ever session deserves a subtly milestone-ish line so the
@@ -128,28 +122,24 @@ function passAttemptStatsLine(goodPasses: number, totalAttempts: number): string
 // session-count signal is still surfaced through the Home recent-
 // recent-sessions row's rolling-recency labels; deleting it from Complete
 // preserves the Jo-Ha-Kyu "kyu" beat per the brand's typography brief.
-// `sessionCount` is no longer threaded into `composeDefaultReason`
-// (kept on `SummaryInput` as data only — future surfaces may want
-// it). See `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 4.
+// `sessionCount` threads into `composeDefaultReason` only to pick the
+// first-vs-repeat completion beat (the ordinal is never shown). See
+// `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 4.
 //
-// 2026-04-22 honest-copy pass: the prior low-N branch rendered
-// "Pass-rate tuning waits until this session logs 50 attempts…" below
-// TUNING_FLOOR_ATTEMPTS. That copy implied a tuning engine the v0b
-// build does not have — nothing reads `review.totalAttempts` and
-// adjusts the next session. Pulled. `TUNING_FLOOR_ATTEMPTS` stays
-// reserved in `policies.ts` for the real D104 / O12 pass-rate
-// progression engine when that ships; Complete copy should not cite
-// it again until then. See decisions.md O12.
-const FIRST_SESSION_NO_ATTEMPTS_REASON = `First one\u2019s in the book. ${FORWARD_HOOK}`
-const REPEAT_NO_ATTEMPTS_REASON = `One more in the book. ${FORWARD_HOOK}`
+// 2026-06-22 shibui audit T2 (one home per fact): the default reason is
+// a count-free completion beat. The pass count was previously restated
+// here ("N good passes today out of M attempts.") AND in the Complete
+// recap "Good passes" row; the two were sourced differently (session-
+// level `review.*` here vs the capture-preferred aggregate in the recap)
+// and could disagree. The recap row is now the single home for the
+// number; this line just lands the session. Honest-copy rule still
+// holds: no claim the v0b engine cannot back. `TUNING_FLOOR_ATTEMPTS`
+// stays reserved in `policies.ts` for the real D104 / O12 pass-rate
+// progression engine. See decisions.md O12 and
+// docs/plans/2026-06-22-005-refactor-t2-duplicate-facts-plan.md U1.
+const FIRST_SESSION_REASON = `First one\u2019s in the book. ${FORWARD_HOOK}`
+const REPEAT_REASON = `One more in the book. ${FORWARD_HOOK}`
 
-function composeDefaultReason(review: SessionReview, sessionCount: number): string {
-  if (review.totalAttempts === 0) {
-    if (sessionCount === 1) {
-      return FIRST_SESSION_NO_ATTEMPTS_REASON
-    }
-    return REPEAT_NO_ATTEMPTS_REASON
-  }
-  const base = passAttemptStatsLine(review.goodPasses, review.totalAttempts)
-  return `${base} ${FORWARD_HOOK}`
+function composeDefaultReason(sessionCount: number): string {
+  return sessionCount === 1 ? FIRST_SESSION_REASON : REPEAT_REASON
 }

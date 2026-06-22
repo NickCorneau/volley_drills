@@ -45,10 +45,13 @@ export function SkipReviewModal({ planName, onConfirm, onCancel }: Props) {
   return (
     <ConfirmModal
       title="Skip review?"
+      // T1 shibui (2026-06-22): body carries a real consequence + data-honesty
+      // (not a button restatement), so only the filler "The session is" is
+      // trimmed; the "out of what comes next" + "still saved" facts stay.
       description={
         <>
           Skipping leaves <span className="font-medium text-text-primary">{planName}</span> out of
-          what comes next. The session is still saved to your history.
+          what comes next. Still saved to your history.
         </>
       }
       safeAction={{ label: 'Never mind', onClick: onCancel }}

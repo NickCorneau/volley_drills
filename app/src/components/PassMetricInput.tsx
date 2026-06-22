@@ -98,7 +98,7 @@ export function PassMetricInput({
               : 'text-text-secondary underline-offset-2 hover:underline',
           ].join(' ')}
         >
-          Couldn&rsquo;t capture reps this time
+          Didn&rsquo;t count reps
         </button>
       )}
     </div>

@@ -13,13 +13,13 @@ export function DraftCard({ data, onStart, onEdit }: DraftCardProps) {
   const totalMinutes = data.blocks.reduce((sum, b) => sum + b.durationMinutes, 0)
   return (
     <section role="region" aria-label="Session ready" className={PRIMARY_CARD_CLASS}>
-      <div>
-        <p className="text-sm font-semibold text-text-primary">Session ready.</p>
-        <p className="mt-2 text-sm text-text-secondary">
-          {data.archetypeName}
-          {totalMinutes > 0 && ` · ${totalMinutes} min`}
-        </p>
-      </div>
+      {/* T1 shibui (2026-06-22): "Session ready." restated the `aria-label`
+          and what "Continue" implies; the card now leads with its value
+          (archetype + minutes) and the button carries the action. */}
+      <p className="text-sm font-semibold text-text-primary">
+        {data.archetypeName}
+        {totalMinutes > 0 && ` · ${totalMinutes} min`}
+      </p>
       <Button variant="primary" fullWidth onClick={onStart}>
         Continue
       </Button>

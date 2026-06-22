@@ -41,40 +41,6 @@ function SavedCheckIcon() {
   )
 }
 
-/**
- * Phase F Unit 5 (2026-04-19): neutral steady-state verdict glyph.
- *
- * Replaces the literal `=` character rendered at `text-4xl`, which
- * visually read as a typo or a placeholder at that size. The glyph's
- * semantic meaning (holding steady / no change in direction; D86
- * compliance: no warning iconography, no red) is the same; the
- * rendering is now unambiguous.
- *
- * Screen readers skip it (`aria-hidden`) - the verdict word below
- * (with `aria-live="polite"`) carries the meaning. See
- * `docs/decisions.md` D86 and
- * `docs/archive/plans/2026-04-19-feat-phase-f-d91-validity-hardening-plan.md`
- * Unit 5.
- */
-function VerdictGlyph() {
-  return (
-    <svg
-      className="h-10 w-10 text-text-secondary"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-      data-testid="verdict-glyph"
-    >
-      <line x1="5" y1="10" x2="19" y2="10" />
-      <line x1="5" y1="15" x2="19" y2="15" />
-    </svg>
-  )
-}
-
 export function CompleteScreen() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -296,7 +262,8 @@ export function CompleteScreen() {
         ) : (
           <span aria-hidden />
         )}
-        <div className="h-14 w-14 shrink-0" aria-hidden />
+        {/* Mirrors the SafetyIcon width (T6: 44px) so the title stays centered. */}
+        <div className="h-11 w-11 shrink-0" aria-hidden />
       </ScreenShell.Header>
 
       <ScreenShell.Body rhythm="celebration" className="items-center">
@@ -304,15 +271,11 @@ export function CompleteScreen() {
           aria-labelledby="summary-verdict"
           className="flex w-full flex-col items-center gap-4 text-center"
         >
-          {/* Verdict icon is a neutral steady-state glyph, not a warning.
-            D86 compliance: no red, no warning iconography.
-            The verdict word (aria-live polite below) carries the meaning
-            for screen readers, so the icon is aria-hidden.
-            Phase F Unit 5 (2026-04-19): replaced the literal `=` char
-            (rendered at text-4xl, which read as a typo) with a purpose-
-            built two-bar horizontal SVG. Same semantic, unambiguous
-            rendering. */}
-          <VerdictGlyph />
+          {/* T3 (2026-06-22 shibui audit): the SR-skipped decorative
+            verdict glyph (a neutral two-bar mark) was removed. D86 keeps
+            this surface free of warning iconography, and the verdict
+            word below (`aria-live="polite"`) is the meaning carrier, so
+            the mark earned nothing. */}
           {/* Phase F11 (2026-04-19): verdict lifted from `text-3xl` to
             `text-4xl` (30 → 36 px). The verdict is the single Jo-Ha-
             Kyu "kyu" / clean-finish beat of the session loop and the
@@ -345,10 +308,9 @@ export function CompleteScreen() {
         </section>
 
         <Card className="w-full" aria-label="Session recap">
-          {/* Phase F8 (2026-04-19): dropped `uppercase tracking-wider` and
-            bumped weight from `semibold` to `medium`. Same restraint move
-            as the verdict header and the HomePrimaryCard eyebrows. */}
-          <p className="mb-3 text-sm font-medium text-text-secondary">Session recap</p>
+          {/* T1 shibui (2026-06-22): the "Session recap" label sat on a
+              self-describing dl (each row is dt/dd-labeled); the Card's
+              `aria-label="Session recap"` carries the name for SR. */}
           <dl className="flex flex-col gap-3 text-sm">
             <div className="flex items-center justify-between gap-4">
               <dt className="text-text-secondary">Session</dt>

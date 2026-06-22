@@ -16,14 +16,11 @@ export interface ReviewPendingCardProps {
 export function ReviewPendingCard({ data, onFinish, onSkip }: ReviewPendingCardProps) {
   return (
     <section role="region" aria-label="Review pending" className={PRIMARY_CARD_CLASS}>
-      <div>
-        {/* 2026-04-26 pre-D91 editorial polish (F11): eyebrow voice
-            aligned with the card's `aria-label="Review pending"` and
-            the SoftBlockModal "review pending for {planName}" copy.
-            See `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 1. */}
-        <p className="text-sm font-semibold text-text-primary">Finish the quick review.</p>
-        <p className="mt-2 text-sm text-text-secondary">{data.planName}</p>
-      </div>
+      {/* T1 shibui (2026-06-22): the "Finish the quick review." line restated
+          the "Finish review" button; the card now leads with the plan name
+          (its meaningful value) and lets the button carry the action. The
+          section `aria-label="Review pending"` keeps the framing for SR. */}
+      <p className="text-sm font-semibold text-text-primary">{data.planName}</p>
       <Button variant="primary" fullWidth onClick={onFinish}>
         Finish review
       </Button>

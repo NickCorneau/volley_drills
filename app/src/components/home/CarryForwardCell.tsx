@@ -8,11 +8,10 @@
  */
 export function CarryForwardCell({ line }: { line: string }) {
   return (
-    <section aria-label="Carried forward from last time" className="flex items-start gap-2">
-      <span
-        aria-hidden="true"
-        className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-text-secondary/40"
-      />
+    // T3 (2026-06-22 shibui audit): the ScreenShell gap above the cell
+    // already separates it from the primary card, so the decorative
+    // bullet dot was removed — the quiet line stands alone.
+    <section aria-label="Carried forward from last time">
       <p className="text-sm leading-5 text-text-secondary">{line}</p>
     </section>
   )

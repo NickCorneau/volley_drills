@@ -230,8 +230,8 @@ describe('RunScreen: body-typography invariants (P1-11 / cca2 dogfeed F1)', () =
     // 2026-04-27 cca2 dogfeed visual catch: the prior `flex
     // justify-between` keeps gap-left = gap-right but does NOT
     // center the middle item relative to the container. With
-    // SafetyIcon at 56 px (h-14 w-14 touch target) and a short
-    // `N/M` counter (~22 px), the middle eyebrow drifts ~17 px
+    // SafetyIcon at 44 px (h-11 w-11 touch target, T6 2026-06-22) and
+    // a short `N/M` counter (~22 px), the middle eyebrow drifts ~11 px
     // right of true center. The fix switches to `grid grid-cols-3`
     // so each column is 1/3 of the container width and the middle
     // column auto-centers the eyebrow regardless of side widths.

@@ -445,32 +445,12 @@ export function SafetyCheckScreen() {
           54px tap targets sit adjacent in a calm settings-list rhythm.
         */}
         <section className="flex flex-col">
+          {/* T3 (2026-06-22 shibui audit): the chevron `Expander` appends
+            is the disclosure affordance, so the decorative flame SVG was
+            removed — the label stands alone. */}
           <Expander
             onOpenChange={(open) => setHeatExpanded(open)}
-            trigger={
-              <>
-                {/* Phase F12 (2026-04-19): the old `🔥` emoji was replaced
-                  with an inline stroke SVG so the flame inherits the
-                  accent text color and renders the same on every OS.
-                  Emoji in UI chrome ties the brand to the host-OS glyph
-                  (see `app/src/components/Brandmark.tsx` for the same
-                  rationale applied to the volleyball logo). */}
-                <svg
-                  aria-hidden="true"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 3c0 4-4 5-4 9a4 4 0 0 0 8 0c0-1.5-1-2.5-2-3 0 2-1 3-2 3 1-3 3-5 3-8-1 1-2 1-3-1z" />
-                </svg>
-                Heat &amp; safety tips
-              </>
-            }
+            trigger="Heat & safety tips"
             contentClassName="flex flex-col gap-3"
           >
             {/* 2026-04-20 physio-review: warning signs first, not mixed
@@ -527,15 +507,26 @@ export function SafetyCheckScreen() {
             before. Shares the disclosure cluster with the heat tips
             above; content states the contract in jargon-gated plain
             language. Suppressed with the rest of the trace while the
-            pain override is active. */}
-          {painFlag !== true && steeringTrace?.showGloss && (
-            <Expander trigger={<>How sessions adapt</>} contentClassName="flex flex-col gap-2">
-              <p className="text-sm leading-relaxed text-text-secondary">
-                Sessions adjust their challenge as you train. After each session, you review how it
-                went and approve or skip any change. Nothing changes without your okay.
-              </p>
-            </Expander>
-          )}
+            pain override is active.
+
+            T2 (2026-06-22 shibui audit, one home per fact): the gloss
+            and the one-time steering disclosure both explain the generic
+            contract, so on a first steered visit they overlapped. The
+            contract is now explained on exactly ONE surface at a time —
+            the disclosure on the first steer, the evergreen gloss
+            thereafter (once the disclosure is dismissed). The specific
+            steering line stays independent. See
+            docs/plans/2026-06-22-005-refactor-t2-duplicate-facts-plan.md U4. */}
+          {painFlag !== true &&
+            steeringTrace?.showGloss &&
+            !(steeringTrace.showDisclosure && !disclosureDismissed) && (
+              <Expander trigger={<>How sessions adapt</>} contentClassName="flex flex-col gap-2">
+                <p className="text-sm leading-relaxed text-text-secondary">
+                  Sessions adjust their challenge as you train. After each session, you review how it
+                  went and approve or skip any change. Nothing changes without your okay.
+                </p>
+              </Expander>
+            )}
         </section>
 
         {createError && <StatusMessage variant="error" message={createError} />}

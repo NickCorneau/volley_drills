@@ -41,11 +41,13 @@ export function SoftBlockModal({ pendingReview, onFinish, onSkipAndContinue, onC
   return (
     <ConfirmModal
       title="Finish your review first?"
+      // T1 shibui (2026-06-22): "Finish it first, or skip and continue?"
+      // restated the two action buttons; the body now carries only the
+      // non-button fact (which plan the pending review is for).
       description={
         <>
           You have a review pending for{' '}
-          <span className="font-medium text-text-primary">{pendingReview.planName}</span>. Finish
-          it first, or skip and continue?
+          <span className="font-medium text-text-primary">{pendingReview.planName}</span>.
         </>
       }
       safeAction={{ label: 'Finish review', onClick: onFinish }}

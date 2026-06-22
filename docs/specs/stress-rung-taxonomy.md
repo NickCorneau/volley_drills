@@ -6,13 +6,14 @@ stage: validation
 type: spec
 summary: "Ordinal stress-rung scale (progressive contextual interference), the authored per-focus ladders over the full scoped-tag drill catalog, and the M002.2 per-rung progression content (intent + external-focus cue + exploration criterion + graduation feel); gates all rung annotation."
 authority: canonical definition of stress-rung semantics, per-focus ladder orderings, per-rung progression content rules, and the skill-band starting-rung mapping
-last_updated: 2026-06-21
+last_updated: 2026-06-22
 depends_on:
   - docs/decisions.md
   - docs/brainstorms/2026-06-11-stress-substrate-requirements.md
   - docs/plans/2026-06-11-001-feat-stress-substrate-plan.md
   - docs/plans/2026-06-12-003-feat-engine-integrity-front-porch-plan.md
   - docs/plans/2026-06-21-001-feat-m002-2-rung-depth-and-progression-plan.md
+  - docs/plans/2026-06-22-004-refactor-t5-verdict-card-density-plan.md
   - docs/reviews/2026-04-28-m001-candidate-false-audit.md
 decision_refs:
   - D68
@@ -21,6 +22,8 @@ decision_refs:
   - D154
   - D159
   - D160
+  - D161
+  - D162
 ---
 
 # Stress-Rung Taxonomy
@@ -95,7 +98,7 @@ Each rung carries four authored fields that make climbing it a *meaningful* skil
 | `explorationCriterion` | a process-framed "see how it feels" read | exploratory and user-owned; never a coach-graded pass/fail threshold (`D154` gating stays retired; coach-pedagogy evidence shows pass/fail backfires coachlessly) |
 | `graduationFeel` | the felt readiness-to-step signal | descriptive only; movement stays user-accepted via the review verdict (`D154`); the ladder-top rung describes staying and deepening, not stepping |
 
-All four fields obey the courtside-copy invariants (no em-dash; jargon glossed; the cue passes rule 12b). **Partial rendering shipped 2026-06-22** (`D161`, plan `docs/plans/2026-06-22-001-feat-m002-2-progression-read-on-review-plan.md`): the Review verdict card now renders `explorationCriterion` (keyed to the rung the athlete actually trained, via `stressRungForDrill`) and, on a `more` offer only, `graduationFeel` (keyed to the derived offer position). Verdict-gated (only inside the existing "Next time" card) and Review-only; no raw rungs render (`D157` holds). `intent` + `externalFocusCue` stay deferred to the run-time technique-how half (Run / Transition / Drill Check) — the M002.2 spine follow-on.
+All four fields obey the courtside-copy invariants (no em-dash; jargon glossed; the cue passes rule 12b). **Partial rendering shipped 2026-06-22** (`D161`, plan `docs/plans/2026-06-22-001-feat-m002-2-progression-read-on-review-plan.md`): the Review verdict card now renders `explorationCriterion` (keyed to the rung the athlete actually trained, via `stressRungForDrill`) and, on a `more` offer, `graduationFeel` (keyed to the derived offer position). **Density cap (`D162`, plan `docs/plans/2026-06-22-004-refactor-t5-verdict-card-density-plan.md`, 2026-06-22):** to hold the card at 3 prose lines, the `graduationFeel` readiness line is suppressed whenever the accept-consequence renders (offer → reflection → accept-consequence); it survives only as the forward fallback when no accept-consequence renders (offer → reflection → readiness). So `graduationFeel` no longer renders on every `more` offer — only on a `more` offer with no accept-consequence. Verdict-gated (only inside the existing "Next time" card) and Review-only; no raw rungs render (`D157` holds). `intent` + `externalFocusCue` stay deferred to the run-time technique-how half (Run / Transition / Drill Check) — the M002.2 spine follow-on.
 
 ### Why each step is a real improvement (progression story)
 

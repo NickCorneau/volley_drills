@@ -95,7 +95,14 @@ describe('composeSummary: Case B (submitted + pain)', () => {
 })
 
 describe('composeSummary: Case C (default)', () => {
-  it('renders the canonical Session N line with good / total numbers + forward hook (totalAttempts >= 50: no low-N suffix, Phase F4 forward hook)', () => {
+  // 2026-06-22 shibui audit T2 (one home per fact): the default reason
+  // is a count-free completion beat keyed ONLY on session ordinality
+  // (first vs repeat). The pass count lives once, in the Complete recap
+  // "Good passes" row (see CompleteScreen.summary.test) — it is
+  // intentionally not restated here, so the hero verdict and the recap
+  // can never disagree. See sessionSummary.ts and
+  // docs/plans/2026-06-22-005-refactor-t2-duplicate-facts-plan.md U1.
+  it('returns the repeat completion line for a returning session and never restates the pass count', () => {
     const review = makeReview({
       status: 'submitted',
       sessionRpe: 6,
@@ -109,85 +116,34 @@ describe('composeSummary: Case C (default)', () => {
     })
     expect(out.case).toBe('default')
     expect(out.verdict).toBe('Keep building')
-    // Phase F4 (2026-04-19): default reason ends with "Ready when you
-    // are." so Complete reads as a handoff rather than a flat verdict.
-    // Low-N case keeps its own forward-looking suffix (tested below).
-    //
-    // 2026-04-26 pre-D91 editorial polish (`F9`): the
-    // `Completed session N:` ordinal prefix was dropped — the reason
-    // line now leads with the stats sentence directly. See
-    // `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 4.
-    expect(out.reason).toBe('40 good passes today out of 60 attempts. Ready when you are.')
+    expect(out.reason).toBe('One more in the book. Ready when you are.')
+    // The pass count is the recap row's job now — the hero reason must
+    // not echo it (T2 dedup) or claim a tuning engine v0b lacks.
+    expect(out.reason).not.toMatch(/good pass|out of|\d/)
+    expect(out.reason).not.toMatch(/tuning|more attempt/i)
     expect(out.reason).not.toContain('Completed session')
   })
 
-  // 2026-04-22 honest-copy pass: the prior low-N branch cited a
-  // "pass-rate tuning waits until 50 attempts" threshold. That copy
-  // implied an adaptation engine v0b does not have — nothing reads
-  // `review.totalAttempts` and changes the next session. Pulled.
-  // `TUNING_FLOOR_ATTEMPTS` stays reserved in `policies.ts` for the
-  // real `D104` / `O12` pass-rate progression engine when it ships.
-  // Until then, every `totalAttempts > 0` submission gets the base
-  // stats line + the standard `FORWARD_HOOK`, regardless of N.
-  it('uses the standard forward hook for low-N submissions (no tuning-engine claim)', () => {
+  it('returns the first-session line for session 1 even when attempts were recorded', () => {
     const review = makeReview({
       status: 'submitted',
-      sessionRpe: 5,
-      goodPasses: 10,
-      totalAttempts: 20,
+      goodPasses: 3,
+      totalAttempts: 5,
     })
     const out = composeSummary({
       review,
       plan: makePlan(1),
       sessionCount: 1,
     })
-    expect(out.reason).toBe('10 good passes today out of 20 attempts. Ready when you are.')
-    expect(out.reason).not.toMatch(/tuning|more attempt/i)
+    expect(out.case).toBe('default')
+    expect(out.verdict).toBe('Keep building')
+    expect(out.reason).toBe('First one\u2019s in the book. Ready when you are.')
+    expect(out.reason).not.toMatch(/good pass|out of/)
+    expect(out.reason).not.toContain('One more in the book')
+    expect(out.reason).not.toContain('Completed session')
   })
 
-  it('uses singular pass/attempt in the stats line when counts are 1', () => {
-    const review = makeReview({
-      status: 'submitted',
-      goodPasses: 1,
-      totalAttempts: 1,
-    })
-    const out = composeSummary({
-      review,
-      plan: makePlan(1),
-      sessionCount: 10,
-    })
-    expect(out.reason).toBe('1 good pass today out of 1 attempt. Ready when you are.')
-  })
-
-  it('uses the same forward hook at or above the 50-attempt floor', () => {
-    const review = makeReview({
-      status: 'submitted',
-      goodPasses: 30,
-      totalAttempts: 50,
-    })
-    const out = composeSummary({
-      review,
-      plan: makePlan(1),
-      sessionCount: 4,
-    })
-    expect(out.reason).toBe('30 good passes today out of 50 attempts. Ready when you are.')
-  })
-
-  it('uses the standard forward hook when goodPasses === 0 with attempts recorded', () => {
-    const review = makeReview({
-      status: 'submitted',
-      goodPasses: 0,
-      totalAttempts: 10,
-    })
-    const out = composeSummary({
-      review,
-      plan: makePlan(1),
-      sessionCount: 2,
-    })
-    expect(out.reason).toBe('0 good passes today out of 10 attempts. Ready when you are.')
-  })
-
-  it("returns the notCaptured copy when totalAttempts === 0 ('one more in the book') + Phase F4 forward hook", () => {
+  it('returns the repeat completion line when totalAttempts === 0 on a returning session', () => {
     const review = makeReview({
       status: 'submitted',
       goodPasses: 0,
@@ -204,11 +160,10 @@ describe('composeSummary: Case C (default)', () => {
 
   // Partner-walkthrough polish 2026-04-22 (design review T3 / trifold T3):
   // a first-ever session deserves a subtly milestone-ish reason line,
-  // not the pattern-matched `One more in the book.` that reads
-  // identical to session 2, 5, 20 on the same path. Shape: single
-  // string, same voice, no celebration theatrics, no streak claim.
+  // not the pattern-matched `One more in the book.` that reads identical
+  // to session 2, 5, 20 on the same path.
   // See `docs/plans/2026-04-22-partner-walkthrough-polish.md` item 4.
-  it('uses a distinct first-session milestone line when sessionCount === 1 and totalAttempts === 0', () => {
+  it('uses a distinct first-session milestone line when sessionCount === 1', () => {
     const review = makeReview({
       status: 'submitted',
       goodPasses: 0,
@@ -222,35 +177,8 @@ describe('composeSummary: Case C (default)', () => {
     expect(out.case).toBe('default')
     expect(out.verdict).toBe('Keep building')
     expect(out.reason).toBe('First one\u2019s in the book. Ready when you are.')
-    // Explicitly NOT the session-2+ template (and not the dropped
-    // `Completed session N` ordinal prefix per `F9` 2026-04-26).
     expect(out.reason).not.toContain('Completed session')
     expect(out.reason).not.toContain('One more in the book')
-  })
-
-  it('uses the stats + forward hook line for sessionCount === 1 when attempts were recorded', () => {
-    // The first-session milestone line is the no-attempts path; a
-    // first-timer who actually logged reps gets the standard stats
-    // line + `FORWARD_HOOK`. (No tuning-engine claim in v0b — see
-    // sessionSummary.ts honest-copy comment.)
-    //
-    // 2026-04-26 pre-D91 editorial polish (`F9`): no `Completed
-    // session N:` ordinal prefix; the line leads with the stats
-    // sentence.
-    const review = makeReview({
-      status: 'submitted',
-      goodPasses: 3,
-      totalAttempts: 5,
-    })
-    const out = composeSummary({
-      review,
-      plan: makePlan(1),
-      sessionCount: 1,
-    })
-    expect(out.reason).toBe('3 good passes today out of 5 attempts. Ready when you are.')
-    expect(out.reason).not.toContain('First session')
-    expect(out.reason).not.toContain('Completed session')
-    expect(out.reason).not.toMatch(/tuning|more attempt/i)
   })
 })
 
