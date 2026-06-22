@@ -201,8 +201,8 @@ export function CompleteScreen() {
   // Hoist it into a three-column top bar that mirrors RunScreen's
   // `[shield | center label | right meta]` pattern: the eyebrow is the
   // centered page label, and an invisible spacer of the SafetyIcon's
-  // 56×56 footprint balances the right column so the eyebrow is
-  // optically centered.
+  // 44×44 footprint (T6 2026-06-22) balances the right column so the
+  // eyebrow is optically centered.
   //
   // 2026-04-26 pre-D91 editorial polish (`F10`, `D125` / `D132` pair-
   // first vision-stance check): the eyebrow is now rendered ONLY in

@@ -266,6 +266,23 @@ describe('RunScreen: body-typography invariants (P1-11 / cca2 dogfeed F1)', () =
     expect(eyebrow.parentElement?.className).toContain('justify-self-center')
   })
 
+  it('renders the run eyebrow as a calm status marker, not accent-focal (T6)', async () => {
+    // T6 competing-focal-weight (2026-06-22 shibui audit): the run focal
+    // zone is the timer (live) / drill title (between blocks), so the
+    // eyebrow recedes to the same calm status-marker treatment as
+    // Transition / DrillCheck. A revert to the prior accent-focal
+    // `text-accent` / `font-semibold` eyebrow (the exact thing T6 fixed)
+    // must break here. RunFlowHeader.test.tsx only proves class
+    // pass-through with its own span; this pins the real screen's choice.
+    await seedPausedSession('exec-eyebrow-weight', 'plan-eyebrow-weight')
+    renderAt('exec-eyebrow-weight')
+    const eyebrow = await screen.findByText('Main drill')
+    expect(eyebrow.className).toContain('text-text-secondary')
+    expect(eyebrow.className).toContain('font-medium')
+    expect(eyebrow.className).not.toContain('text-accent')
+    expect(eyebrow.className).not.toContain('font-semibold')
+  })
+
   it('renders cleanly for legacy plans without a `rationale` field on the block', async () => {
     // Plans created before Tier 1a Unit 4 (and the `rationale` field
     // it added) have `rationale: undefined`. Run-card body must still

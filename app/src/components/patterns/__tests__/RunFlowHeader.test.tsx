@@ -27,11 +27,13 @@ describe('RunFlowHeader', () => {
   })
 
   it('preserves caller-owned eyebrow typography (no override)', () => {
-    // T6 (2026-06-22): the run-flow eyebrow is the calm status-marker
-    // treatment (`text-sm font-medium text-text-secondary`) across all
-    // three screens. This test pins that RunFlowHeader does not override
-    // the caller's typography — the wrapping grid-cell span carries
-    // alignment only, never font classes.
+    // RunFlowHeader never overrides the caller's eyebrow typography — the
+    // wrapping grid-cell span carries alignment only, never font classes.
+    // (The actual run-flow eyebrow-weight invariant — that the real
+    // screens use the calm status-marker treatment, T6 2026-06-22 — is
+    // pinned at the screen tier in RunScreen.rationale-placement and
+    // TransitionScreen.role-eyebrow, not here, since this fixture supplies
+    // its own span and would pass with any classes.)
     renderHeader({
       eyebrow: (
         <span data-testid="eyebrow" className="text-sm font-medium text-text-secondary">

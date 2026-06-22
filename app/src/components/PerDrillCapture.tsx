@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import type { DifficultyTag } from '../model'
 import { validateStreakLongest } from '../domain/capture'
 import { PassMetricInput } from './PassMetricInput'
@@ -35,29 +34,30 @@ import {
  *      - `'count'` — Good/Total counts via the existing
  *        `PassMetricInput`, behind a collapsed "Add counts (optional)"
  *        affordance. Used on `pass-rate-good` / `reps-successful`
- *        drills. Renders the V0B-28 forced-criterion prompt above the
+ *        drills. Renders the V0B-28 anti-generosity nudge above the
  *        inputs.
  *      - `'streak'` — single numeric input for the longest unbroken
  *        streak, behind a collapsed "Add longest streak (optional)"
  *        affordance. Used on `streak`-typed `main_skill` / `pressure`
- *        drills (D134, 2026-04-28). Renders the success rule above
- *        the input but **drops the anti-generosity nudge** because
- *        streak counting is intrinsically conservative — a missed
- *        contact ends the streak, so there is no honest interpretation
- *        of "If unsure, don't count it as Good." See `D134` row in
- *        `docs/decisions.md`.
+ *        drills (D134, 2026-04-28). Carries no nudge because streak
+ *        counting is intrinsically conservative — a missed contact ends
+ *        the streak, so there is no honest interpretation of "If unsure,
+ *        don't count it as Good." See `D134` row in `docs/decisions.md`.
  *      - `'none'` — no drawer; the chip row is the only capture
  *        surface. Used on Phase 2B-deferred drills (`points-to-target`,
  *        `pass-grade-avg`, `composite`, `completion`).
  *
- * **V0B-28 forced-criterion prompt (2026-04-27)**: when the user opens
- * a drawer, render the per-drill success rule above the inputs as
- * `Success rule: <rule>.` plus, on the count branch only, the
- * anti-generosity nudge `If unsure, don't count it as Good.` The rule
- * is sourced from `variant.successMetric.description` via
- * `getBlockSuccessRule` and passed through `successRuleDescription`,
- * so the prompt generalizes across pass / serve / set drills.
- * Implements the first layer of the `D104` three-layer self-scoring
+ * **V0B-28 forced-criterion prompt (2026-04-27; T2-revised 2026-06-22)**:
+ * the per-drill success rule is shown once, in the always-visible "You
+ * aimed for: …" observable line above the difficulty chips (`<ObservableLine>`).
+ * It is sourced from `variant.successMetric.description` via
+ * `getBlockSuccessRule` and passed through `successRuleDescription`, so
+ * it generalizes across pass / serve / set drills. The count drawer
+ * adds only the anti-generosity nudge `If unsure, don't count it as
+ * Good.` at the point of count entry — the `D104` layer-1 forcing
+ * element. The rule text is NOT restated inside the drawers (T2 one-home
+ * dedup; see docs/plans/2026-06-22-005-refactor-t2-duplicate-facts-plan.md
+ * U7). Implements the first layer of the `D104` three-layer self-scoring
  * bias correction on the post-`D133` capture surface. See
  * `docs/archive/plans/2026-04-27-per-drill-success-criterion.md` and
  * `docs/specs/m001-review-micro-spec.md` §Required line 78.
@@ -86,11 +86,13 @@ type PerDrillCaptureCommonProps = {
   difficulty: DifficultyTag | null
   onDifficultyChange: (next: DifficultyTag) => void
   /**
-   * V0B-28 forced-criterion prompt copy, sourced from
+   * V0B-28 forced-criterion copy, sourced from
    * `variant.successMetric.description` via `getBlockSuccessRule`.
-   * Optional so unit tests stay decoupled from the catalog; when
-   * absent, the criterion paragraph is omitted and the inputs render
-   * unchanged. Only renders inside an expanded drawer.
+   * Optional so unit tests stay decoupled from the catalog. When
+   * present, it renders once in the always-visible "You aimed for: …"
+   * observable line above the chips and gates the count drawer's
+   * anti-generosity nudge; when absent, both are omitted gracefully
+   * (legacy drills).
    */
   successRuleDescription?: string
 }
@@ -222,7 +224,6 @@ function renderDrawer(props: PerDrillCaptureProps, successRuleDescription: strin
   if (isStreakProps(props)) {
     return (
       <StreakDrawer
-        successRuleDescription={successRuleDescription}
         streakLongest={props.streakLongest}
         onStreakLongestChange={props.onStreakLongestChange}
       />
@@ -234,7 +235,8 @@ function renderDrawer(props: PerDrillCaptureProps, successRuleDescription: strin
 /**
  * Count-drawer: collapsed-by-default behind `Add counts (optional)`,
  * expands to the legacy `PassMetricInput` Good/Total cells with the
- * V0B-28 forced-criterion prompt + anti-generosity nudge above.
+ * V0B-28 anti-generosity nudge above (the success rule itself lives in
+ * the always-visible observable line above the chips — T2 one-home).
  */
 function CountDrawer({
   successRuleDescription,
@@ -261,29 +263,25 @@ function CountDrawer({
           <span className="font-normal">(optional)</span>
         </p>
       {/*
-        V0B-28 forced-criterion prompt (D104 layer-1). Voice mirrors
-        the legacy `ReviewScreen` fallback path so the rule reads as
-        one rule across the codebase, but the criterion text is now
-        sourced from the drill record (`variant.successMetric.description`)
-        instead of being hard-coded for passing. The anti-generosity
-        nudge ("If unsure, don't count it as Good.") is the count-only
-        layer-1 correction; the streak branch below intentionally
-        drops it because streak counting is intrinsically conservative.
-        See `docs/archive/plans/2026-04-27-per-drill-success-criterion.md`
-        and the `D134` row in `docs/decisions.md`.
+        V0B-28 forced-criterion prompt (D104 layer-1): the anti-generosity
+        nudge sits at the point of count entry. The success-rule text
+        itself is NOT restated here — T2 (2026-06-22 shibui audit, one
+        home per fact) made the always-visible "You aimed for: …"
+        observable line above the chips the rule's single home, so the
+        drawer kept only the count-only forcing nudge ("If unsure, don't
+        count it as Good."). The streak branch drops the nudge entirely
+        because streak counting is intrinsically conservative. See
+        `docs/archive/plans/2026-04-27-per-drill-success-criterion.md`,
+        the `D134` row in `docs/decisions.md`, and
+        docs/plans/2026-06-22-005-refactor-t2-duplicate-facts-plan.md U7.
       */}
       {successRuleDescription && (
-        <SuccessRuleLine
-          successRuleDescription={successRuleDescription}
-          tail={
-            <>
-              {' '}
-              <span className="font-medium text-text-primary">
-                If unsure, don&rsquo;t count it as Good.
-              </span>
-            </>
-          }
-        />
+        <p
+          className="text-sm font-medium text-text-primary"
+          data-testid="per-drill-counts-nudge"
+        >
+          If unsure, don&rsquo;t count it as Good.
+        </p>
       )}
         <PassMetricInput
           good={goodPasses}
@@ -300,19 +298,20 @@ function CountDrawer({
 
 /**
  * Streak drawer (D134, 2026-04-28): collapsed-by-default behind
- * `Add longest streak (optional)`, expands to a single numeric input
- * with the success rule above (no anti-generosity nudge — see the
- * comment in `CountDrawer`). Empty input commits no row; invalid
- * input shows inline correction text and does not persist. Continue
- * is never blocked by a blank or invalid streak — see
+ * `Add longest streak (optional)`, expands to a single numeric input.
+ * T2 (2026-06-22 shibui audit, one home per fact): the success rule is
+ * not restated here — it lives once, in the always-visible "You aimed
+ * for: …" observable line above the chips. The streak branch never
+ * carried the anti-generosity nudge (streak counting is intrinsically
+ * conservative — a missed contact ends the streak). Empty input commits
+ * no row; invalid input shows inline correction text and does not
+ * persist. Continue is never blocked by a blank or invalid streak — see
  * `useDrillCheckController.handleContinue`.
  */
 function StreakDrawer({
-  successRuleDescription,
   streakLongest,
   onStreakLongestChange,
 }: {
-  successRuleDescription: string | undefined
   streakLongest: number | null
   onStreakLongestChange: (next: number | null) => void
 }) {
@@ -323,16 +322,6 @@ function StreakDrawer({
           <span className="font-medium text-text-primary">Streak</span>{' '}
           <span className="font-normal">(optional)</span>
         </p>
-        {/*
-          V0B-28 forced-criterion prompt on the streak branch, with the
-          anti-generosity clause dropped per `D134` rationale: streak
-          counting is intrinsically conservative (a missed contact ends
-          the streak) so applying the count-drill anxiety here would
-          import nuance the input does not actually need.
-        */}
-        {successRuleDescription && (
-          <SuccessRuleLine successRuleDescription={successRuleDescription} />
-        )}
         <StreakInput streakLongest={streakLongest} onStreakLongestChange={onStreakLongestChange} />
       </div>
     </Disclosure>
@@ -395,11 +384,8 @@ function StreakInput({
  * is rendered as a sibling `<div>` after the parent `<p>` (HTML
  * invariant — no `<p>` inside `<p>`), wrapped together inside the
  * existing `data-testid="per-drill-observable"` host so existing
- * test selectors keep resolving.
- *
- * Each instance of this component holds its own gloss open-scope —
- * opening a term here is independent of opens inside the count or
- * streak drawer's `<SuccessRuleLine>`.
+ * test selectors keep resolving. T2 (2026-06-22): this is the single
+ * home for the success rule — the drawers no longer restate it.
  */
 function ObservableLine({
   successRuleDescription,
@@ -417,35 +403,3 @@ function ObservableLine({
   )
 }
 
-/**
- * 2026-05-13 universalization: the count and streak drawers' "Success
- * rule: …" line uses `<GlossInline>` for the description body. The
- * count drawer passes a `tail` for the anti-generosity nudge ("If
- * unsure, don't count it as Good.") so it stays inside the same `<p>`
- * register as before. The streak drawer omits `tail` per the D134
- * contract (anti-generosity nudge belongs only to the count branch).
- *
- * Reveal renders as a sibling `<div>` after the parent `<p>` (HTML
- * invariant — no `<p>` inside `<p>`), wrapped together inside the
- * existing `data-testid="per-drill-success-rule"` host so existing
- * test selectors keep resolving.
- */
-function SuccessRuleLine({
-  successRuleDescription,
-  tail,
-}: {
-  successRuleDescription: string
-  tail?: ReactNode
-}) {
-  const { parts, openDefinition, isOpen, toggle } = useGloss(successRuleDescription)
-  return (
-    <div data-testid="per-drill-success-rule">
-      <p className="text-sm text-text-secondary">
-        <span className="font-medium text-text-primary">Success rule:</span>{' '}
-        <GlossInline parts={parts} isOpen={isOpen} onToggle={toggle} />
-        {tail}
-      </p>
-      {openDefinition != null && <GlossReveal definition={openDefinition} />}
-    </div>
-  )
-}

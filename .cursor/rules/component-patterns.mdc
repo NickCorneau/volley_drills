@@ -34,7 +34,7 @@ alwaysApply: false
 ## Volleycraft-shaped patterns (`components/patterns/`)
 
 - `<ScreenHeader backLabel onBack title backAriaLabel? right?>` for the canonical pre-run/settings header (BackButton + centered title + spacer).
-- `<RunFlowHeader eyebrow counter>` for the run-flow header (SafetyIcon + 3-cell-grid eyebrow + counter). Caller owns eyebrow/counter typography (focal-vs-status distinction is intentional).
+- `<RunFlowHeader eyebrow counter>` for the run-flow header (SafetyIcon + 3-cell-grid eyebrow + counter). Caller owns eyebrow/counter typography; as of the 2026-06-22 T6 audit all three run-flow screens (Run / Transition / DrillCheck) use the same calm status-marker eyebrow treatment (`text-sm font-medium text-text-secondary`) — the run focal zone is the timer/title, so the eyebrow recedes (see the `RunFlowHeader` docblock).
 - `<ConfirmModal title description? safeAction destructiveAction? onDismiss placement?>` for "title + description + safe-primary + optional destructive-secondary" composition over `ActionOverlay`. `placement="bottom-sheet"` for action-sheet positioning (RunScreen end-session). Internally threads `initialFocusRef` to the safe-primary so accidental destructive taps stay one extra deliberate motion away.
 - `<JustFinishedPill drillName status presentation?>` for the drill-completion receipt. `presentation="panel"` (default) is the warm-panel + success-circle pill (DrillCheckScreen); `presentation="line"` is the one-line quiet receipt (TransitionScreen, 2026-06-12 shibui polish).
 - `<BackButton label onClick aria-label?>` for the courtside back affordance (used inside `ScreenHeader`; also available standalone).

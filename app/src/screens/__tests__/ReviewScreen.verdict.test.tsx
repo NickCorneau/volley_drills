@@ -208,6 +208,24 @@ describe('ReviewScreen verdict (M002.1 R5)', () => {
     })
   })
 
+  it('renders the verdict block as a chrome-less <section>, not a Card (T6)', async () => {
+    // T6 competing-focal-weight (2026-06-22 shibui audit): the required
+    // RPE rating is the gate and owns the only Card on the screen; the
+    // verdict already defaults to "Keep the same", so it is a chrome-less
+    // <section>. A revert to <Card> (the exact thing T6 fixed) would
+    // re-introduce a second equal-weight card and must break here.
+    await seedPriorPassSession('e1', 4, 'too_hard')
+    await seedPriorPassSession('e2', 2, 'too_hard')
+    await seedCurrentSession('cur')
+    renderAt('cur')
+
+    const heading = await screen.findByText('Next time')
+    expect(heading).toHaveAttribute('id', 'verdict-heading')
+    // The heading is a direct child of the verdict wrapper; a <Card>
+    // renders a <div>, so the SECTION tag is the precise discriminator.
+    expect(heading.parentElement?.tagName).toBe('SECTION')
+  })
+
   it('on a "more" offer with a concrete next-drill consequence, caps the card: reflection + accept-consequence, readiness suppressed (T5)', async () => {
     // Two easy prior pass sessions (RPE 3) -> sustained too_easy -> "more".
     await seedPriorPassSession('e1', 4, 'too_easy', 3)

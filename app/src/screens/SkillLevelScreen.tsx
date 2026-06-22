@@ -169,11 +169,13 @@ export function SkillLevelScreen() {
         */}
         {/*
           T6 competing-focal-weight (2026-06-22 shibui audit): mark
-          `rally_builders` as the recommended "start here if unsure"
-          default so the five equal option cards gain an entry point.
-          rally_builders is the one-season rec player the whole
-          courtside-copy system targets ("Pass easy serves, short
-          rallies"). Onboarding only — the Settings sub-route omits this
+          `rally_builders` as the recommended default so the five equal
+          option cards gain a single dominant entry point. rally_builders
+          is the one-season rec player the whole courtside-copy system
+          targets ("Pass easy serves, short rallies"). This is the
+          suggested band, distinct from the "Not sure yet" card below it,
+          which stays the dedicated opt-out for a user who won't
+          self-assess. Onboarding only — the Settings sub-route omits this
           (it already shows the user's Current band).
         */}
         <SkillLevelPicker onPick={handlePick} recommendedLevel="rally_builders" />

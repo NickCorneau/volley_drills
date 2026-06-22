@@ -195,8 +195,8 @@ describe('TransitionScreen: role-label eyebrow + rationale absent (cca2 dogfeed 
   it('header uses a 3-column grid (true-center alignment, not flex-justify-between drift)', async () => {
     // 2026-04-27 cca2 dogfeed visual catch on RunScreen showed the
     // prior `flex justify-between` pattern drifts the middle eyebrow
-    // off-center when SafetyIcon (56 px) and the right-side counter
-    // have asymmetric widths. Same pattern was applied here for
+    // off-center when SafetyIcon (44 px since T6 2026-06-22) and the
+    // right-side counter have asymmetric widths. Same pattern was applied here for
     // visual consistency across the run-flow screens (Run /
     // Transition / DrillCheck). This test pins the grid invariant
     // so a silent revert back to `flex justify-between` breaks.

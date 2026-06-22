@@ -293,6 +293,17 @@ export function HomeScreen() {
   // line above it is a second equal "what's next" frame. The carry-forward
   // cell still shows (a separate signal), so it stays on the broader
   // showPlanLayer gate.
+  //
+  // T6 note — currently unreachable BY DESIGN, not dead-by-accident:
+  // review_pending/new_user are gated out by showPlanLayer, resume forces
+  // plan=null (so showPlanLayer is false there), and last_complete + draft
+  // are both absorbed here — so no present Home state renders the
+  // descriptive line. The gate + PlanForTodayLine are kept intentionally as
+  // forward scaffolding: a future "what's next" primary that is neither
+  // draft nor last_complete (with plan != null) would surface the line
+  // again without re-plumbing. Retiring the component outright is a
+  // separate, founder-owned call (it was the M002.1 visible-adaptation
+  // surface, D150–D152).
   const showPlanLine =
     showPlanLayer && primary !== 'last_complete' && primary !== 'draft'
 

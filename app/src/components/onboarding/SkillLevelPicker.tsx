@@ -41,16 +41,24 @@ export interface SkillLevelPickerProps {
   currentLevel?: SkillLevel
   /**
    * T6 competing-focal-weight (2026-06-22 shibui audit): the band to
-   * mark as the recommended "start here if unsure" default, giving the
-   * five equal option cards an entry point. Opt-in — passed by the
-   * onboarding `SkillLevelScreen` (the "if unsure" context) and omitted
-   * by the Settings sub-route (a returning user already has a Current
-   * band, so a recommendation there would be noise). A band that is both
+   * mark as the recommended default, giving the five equal option cards
+   * a single dominant entry point. This is the suggested band, NOT the
+   * "if unsure" path — the "Not sure yet" card remains the dedicated
+   * opt-out for a user who won't self-assess. Opt-in — passed by the
+   * onboarding `SkillLevelScreen` and omitted by the Settings sub-route
+   * (a returning user already has a Current band, so a recommendation
+   * there would be noise). A band that is both
    * `currentLevel` and `recommendedLevel` shows only "Current" (current
    * state outranks a suggestion); in practice the two never co-occur
    * because only onboarding passes `recommendedLevel`.
+   *
+   * Typed `Exclude<SkillLevel, 'unsure'>` (unlike `currentLevel`, which
+   * a user can genuinely have set to `unsure`): a recommended "start
+   * here" default must be one of the four functional bands, never the
+   * "Not sure yet" card, so a nonsensical recommendation fails at the
+   * call site instead of silently badging the unsure card.
    */
-  recommendedLevel?: SkillLevel
+  recommendedLevel?: Exclude<SkillLevel, 'unsure'>
   /**
    * Custom copy under the "Not sure yet" card. Defaults to
    * `DEFAULT_UNSURE_SUBTEXT`; the Settings sub-route passes its own copy
@@ -93,15 +101,11 @@ export function SkillLevelPicker({
         */}
         <span className="flex w-full items-center justify-between gap-3 text-base font-semibold text-text-primary">
           <span>{SKILL_LEVEL_LABEL[level]}</span>
-          {isCurrent ? (
+          {(isCurrent || isRecommended) && (
             <span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent">
-              Current
+              {isCurrent ? 'Current' : 'Recommended'}
             </span>
-          ) : isRecommended ? (
-            <span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent">
-              Recommended
-            </span>
-          ) : null}
+          )}
         </span>
         <span className="text-sm text-text-secondary">{description}</span>
       </button>

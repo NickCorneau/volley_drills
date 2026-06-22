@@ -158,16 +158,18 @@ describe('PerDrillCapture captureShape: count', () => {
     expect(screen.queryByTestId('per-drill-add-counts')).not.toBeInTheDocument()
   })
 
-  // 2026-04-27 V0B-28 surface-move (D104 layer-1 forced-criterion
-  // prompt): when the user expands `Add counts`, the per-drill success
-  // rule and the anti-generosity nudge render above the Good/Total
-  // inputs. Sourced from the drill record's
-  // `variant.successMetric.description` via `getBlockSuccessRule` on
-  // the `DrillCheckScreen` wire-up. See
-  // `docs/archive/plans/2026-04-27-per-drill-success-criterion.md` and
-  // `docs/specs/m001-review-micro-spec.md` §Required line 78.
+  // 2026-04-27 V0B-28 (D104 layer-1 forced-criterion), T2-revised
+  // 2026-06-22: the per-drill success rule shows once in the always-
+  // visible "You aimed for: …" observable line above the chips; the
+  // count drawer adds only the anti-generosity nudge at the point of
+  // count entry. Rule sourced from the drill record's
+  // `variant.successMetric.description` via `getBlockSuccessRule` on the
+  // `DrillCheckScreen` wire-up. See
+  // `docs/archive/plans/2026-04-27-per-drill-success-criterion.md`,
+  // `docs/specs/m001-review-micro-spec.md` §Required line 78, and
+  // docs/plans/2026-06-22-005-refactor-t2-duplicate-facts-plan.md U7.
   describe('V0B-28 forced-criterion prompt', () => {
-    it('renders the per-drill success rule and the anti-generosity nudge above the inputs after expanding counts', () => {
+    it('shows the rule once in the observable line and the count nudge in the drawer (no rule restated)', () => {
       render(
         <PerDrillCapture
           difficulty="still_learning"
@@ -181,18 +183,24 @@ describe('PerDrillCapture captureShape: count', () => {
           onAttemptChange={noop}
           onToggleNotCaptured={noop}
         />,
+      )
+
+      // The rule's single home: the observable line above the chips.
+      const observable = screen.getByTestId('per-drill-observable')
+      expect(observable).toHaveTextContent(
+        /You aimed for: Serves or serve-toss contacts landing in or near a marked target circle\./,
       )
 
       fireEvent.click(screen.getByTestId('per-drill-add-counts'))
-      const rule = screen.getByTestId('per-drill-success-rule')
-      expect(rule).toHaveTextContent(/^Success rule:/)
-      expect(rule).toHaveTextContent(
-        /Serves or serve-toss contacts landing in or near a marked target circle\./,
-      )
-      expect(rule).toHaveTextContent(/If unsure, don.t count it as Good\./)
+      // The drawer carries only the anti-generosity nudge...
+      const nudge = screen.getByTestId('per-drill-counts-nudge')
+      expect(nudge).toHaveTextContent(/^If unsure, don.t count it as Good\.$/)
+      // ...and does NOT restate the rule (no "Success rule:" anywhere).
+      expect(screen.queryByText(/Success rule:/)).not.toBeInTheDocument()
+      expect(screen.queryByTestId('per-drill-success-rule')).not.toBeInTheDocument()
     })
 
-    it('does not render the success rule while the counts surface is collapsed', () => {
+    it('does not render the count nudge while the counts surface is collapsed', () => {
       render(
         <PerDrillCapture
           difficulty="still_learning"
@@ -208,10 +216,13 @@ describe('PerDrillCapture captureShape: count', () => {
         />,
       )
 
-      expect(screen.queryByTestId('per-drill-success-rule')).not.toBeInTheDocument()
+      // The nudge lives inside the collapsed drawer; the rule itself
+      // stays visible in the observable line above the chips.
+      expect(screen.queryByTestId('per-drill-counts-nudge')).not.toBeInTheDocument()
+      expect(screen.getByTestId('per-drill-observable')).toBeInTheDocument()
     })
 
-    it('omits the success rule when successRuleDescription is undefined (defensive default)', () => {
+    it('omits the rule and the nudge when successRuleDescription is undefined (defensive default)', () => {
       render(
         <PerDrillCapture
           difficulty="still_learning"
@@ -226,12 +237,15 @@ describe('PerDrillCapture captureShape: count', () => {
         />,
       )
 
+      // Legacy drills (no description): no observable line...
+      expect(screen.queryByTestId('per-drill-observable')).not.toBeInTheDocument()
       fireEvent.click(screen.getByTestId('per-drill-add-counts'))
       expect(screen.getByTestId('per-drill-counts')).toBeInTheDocument()
-      expect(screen.queryByTestId('per-drill-success-rule')).not.toBeInTheDocument()
+      // ...and no nudge in the drawer.
+      expect(screen.queryByTestId('per-drill-counts-nudge')).not.toBeInTheDocument()
     })
 
-    it('omits the success rule on chip-only drills (captureShape: none)', () => {
+    it('shows the rule in the observable line but adds no drawer nudge on chip-only drills (captureShape: none)', () => {
       render(
         <PerDrillCapture
           difficulty="too_easy"
@@ -241,18 +255,25 @@ describe('PerDrillCapture captureShape: count', () => {
         />,
       )
 
-      expect(screen.queryByTestId('per-drill-success-rule')).not.toBeInTheDocument()
+      expect(screen.getByTestId('per-drill-observable')).toHaveTextContent(
+        /You aimed for: Clean contacts in a row \(restart on obvious mishit\)\./,
+      )
+      // No drawer, so no count nudge.
+      expect(screen.queryByTestId('per-drill-counts-nudge')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('per-drill-add-counts')).not.toBeInTheDocument()
     })
   })
 })
 
 // D134 (2026-04-28): Phase 2A — optional streak capture for
 // `streak`-typed `main_skill` / `pressure` drills. Drawer is collapsed
-// by default behind `Add longest streak (optional)`; expanded body
-// renders the success rule (no anti-generosity nudge) and a single
-// numeric input. Continue is NEVER disabled by a blank or invalid
-// streak (the controller-tier test pins that side of the contract);
-// invalid input shows inline correction copy and persists nothing.
+// by default behind `Add longest streak (optional)`; expanded body is a
+// single numeric input. T2 (2026-06-22): the success rule is not
+// restated in the drawer — it lives once in the observable line above
+// the chips; the streak branch never carried the anti-generosity nudge.
+// Continue is NEVER disabled by a blank or invalid streak (the
+// controller-tier test pins that side of the contract); invalid input
+// shows inline correction copy and persists nothing.
 describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
   it('starts with the streak drawer collapsed behind an "Add longest streak (optional)" affordance', () => {
     render(
@@ -305,7 +326,7 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
     expect(screen.queryByTestId('per-drill-add-streak')).not.toBeInTheDocument()
   })
 
-  it('renders the success rule above the input WITHOUT the anti-generosity nudge', () => {
+  it('shows the rule in the observable line and restates nothing (no rule, no nudge) in the streak drawer', () => {
     render(
       <PerDrillCapture
         difficulty="still_learning"
@@ -317,12 +338,17 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
       />,
     )
 
+    // The rule's single home: the observable line above the chips.
+    expect(screen.getByTestId('per-drill-observable')).toHaveTextContent(
+      /You aimed for: Clean contacts in a row before a mishit\./,
+    )
+
     fireEvent.click(screen.getByTestId('per-drill-add-streak'))
-    const rule = screen.getByTestId('per-drill-success-rule')
-    expect(rule).toHaveTextContent(/^Success rule:/)
-    expect(rule).toHaveTextContent(/Clean contacts in a row before a mishit\./)
-    // The anti-generosity nudge belongs only to the count branch.
-    expect(rule).not.toHaveTextContent(/If unsure, don.t count it as Good/)
+    const drawer = screen.getByTestId('per-drill-streak')
+    // The streak drawer restates neither the rule nor a nudge.
+    expect(within(drawer).queryByText(/Success rule:/)).not.toBeInTheDocument()
+    expect(within(drawer).queryByText(/If unsure, don.t count it as Good/)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('per-drill-counts-nudge')).not.toBeInTheDocument()
   })
 
   it('input uses inputMode=numeric and pattern=[0-9]* for iOS number-pad', () => {
@@ -481,18 +507,15 @@ describe('PerDrillCapture captureShape: streak (Phase 2A — D134)', () => {
 })
 
 /**
- * 2026-05-13 universalization: the GlossedText affordance now applies
- * to PerDrillCapture's "You aimed for: …" observable line and to the
- * count + streak drawers' "Success rule: …" lines. Flagged terms
- * inside `successRuleDescription` render as dotted-underline tappable
- * buttons; tapping reveals a quiet `↳ definition` line beneath the
- * parent `<p>` (the reveal is a sibling element, NOT a `<p>` nested
- * inside the parent `<p>` — the existing testid hosts are now `<div>`
- * wrappers so the HTML invariant holds).
- *
- * Per-site open scope: opening a term on the observable line does
- * not open or close anything inside a drawer's success-rule line,
- * and vice versa.
+ * 2026-05-13 universalization (T2-revised 2026-06-22): the GlossedText
+ * affordance applies to PerDrillCapture's "You aimed for: …" observable
+ * line — the single home for the success rule. Flagged terms inside
+ * `successRuleDescription` render as dotted-underline tappable buttons;
+ * tapping reveals a quiet `↳ definition` line beneath the parent `<p>`
+ * (the reveal is a sibling element, NOT a `<p>` nested inside the parent
+ * `<p>` — the `per-drill-observable` testid host is a `<div>` wrapper so
+ * the HTML invariant holds). The drawers no longer restate the rule, so
+ * gloss now lives only on the observable line.
  */
 describe('PerDrillCapture inline gloss behavior (2026-05-13 universalization)', () => {
   const GLOSSED_RULE =
@@ -541,7 +564,7 @@ describe('PerDrillCapture inline gloss behavior (2026-05-13 universalization)', 
     expect(reveal.textContent).toContain('↳')
   })
 
-  it('renders flagged terms in the count-drawer success rule and keeps the anti-generosity nudge', async () => {
+  it('renders flagged terms in the observable-line rule and keeps the count nudge in the drawer', async () => {
     const user = userEvent.setup()
     render(
       <PerDrillCapture
@@ -558,19 +581,22 @@ describe('PerDrillCapture inline gloss behavior (2026-05-13 universalization)', 
       />,
     )
 
-    fireEvent.click(screen.getByTestId('per-drill-add-counts'))
-    const rule = screen.getByTestId('per-drill-success-rule')
-    expect(rule).toHaveTextContent(/^Success rule:/)
-    expect(rule).toHaveTextContent(/If unsure, don.t count it as Good\./)
-
-    const term = within(rule).getByRole('button', { name: 'graded 2+' })
+    // Gloss lives on the observable line (the rule's single home).
+    const observable = screen.getByTestId('per-drill-observable')
+    const term = within(observable).getByRole('button', { name: 'graded 2+' })
     await user.click(term)
     expect(
-      within(rule).getByText(/ball lands within 1 m of the set window/),
+      within(observable).getByText(/ball lands within 1 m of the set window/),
     ).toBeInTheDocument()
+
+    // The count drawer still carries the anti-generosity nudge.
+    fireEvent.click(screen.getByTestId('per-drill-add-counts'))
+    expect(screen.getByTestId('per-drill-counts-nudge')).toHaveTextContent(
+      /If unsure, don.t count it as Good\./,
+    )
   })
 
-  it('renders flagged terms in the streak-drawer success rule WITHOUT the anti-generosity nudge', async () => {
+  it('renders flagged terms in the observable-line rule for streak drills, with no drawer rule or nudge', async () => {
     const user = userEvent.setup()
     render(
       <PerDrillCapture
@@ -583,15 +609,18 @@ describe('PerDrillCapture inline gloss behavior (2026-05-13 universalization)', 
       />,
     )
 
-    fireEvent.click(screen.getByTestId('per-drill-add-streak'))
-    const rule = screen.getByTestId('per-drill-success-rule')
-    expect(rule).toHaveTextContent(/^Success rule:/)
-    expect(rule).not.toHaveTextContent(/If unsure, don.t count it as Good/)
-
-    await user.click(within(rule).getByRole('button', { name: 'graded 2+' }))
+    // Gloss lives on the observable line (the rule's single home).
+    const observable = screen.getByTestId('per-drill-observable')
+    await user.click(within(observable).getByRole('button', { name: 'graded 2+' }))
     expect(
-      within(rule).getByText(/ball lands within 1 m of the set window/),
+      within(observable).getByText(/ball lands within 1 m of the set window/),
     ).toBeInTheDocument()
+
+    // The streak drawer restates neither the rule nor a nudge.
+    fireEvent.click(screen.getByTestId('per-drill-add-streak'))
+    const drawer = screen.getByTestId('per-drill-streak')
+    expect(within(drawer).queryByText(/Success rule:/)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('per-drill-counts-nudge')).not.toBeInTheDocument()
   })
 
   it('does not render gloss buttons or reveal slots when the description has no `(= …)`', () => {

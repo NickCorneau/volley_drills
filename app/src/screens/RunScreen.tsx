@@ -215,7 +215,17 @@ export function RunScreen() {
           </h1>
         </div>
 
-        {currentCue && (
+        {/*
+         * T2 (2026-06-22 shibui audit): when the cue selector falls
+         * back to the drill name (no usable coaching cue or single-line
+         * instruction), the "Now" line would just echo the `h1` above.
+         * The `h1` is the single home for the drill name, so the "Now"
+         * section is suppressed on that fallback. `currentCue` is still
+         * kept whole for the `hasInstructionDetail` / `hasCueDetail`
+         * checks below, so the "Show full instructions" affordance still
+         * surfaces real instructions when the fallback occurs.
+         */}
+        {currentCue && currentCue.source !== 'drill-name' && (
           <section aria-labelledby="current-cue-title" className="border-l-2 border-accent/70 pl-3">
             <span id="current-cue-title" className="text-xs font-medium text-accent">
               Now
