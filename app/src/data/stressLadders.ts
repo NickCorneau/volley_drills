@@ -34,8 +34,10 @@ export interface StressRung {
   // per-focus progression story are specified in
   // `docs/specs/stress-rung-taxonomy.md`; the authored strings themselves
   // live here as data. `explorationCriterion` + `graduationFeel` render
-  // on the Review verdict card (D161, 2026-06-22); `intent` +
-  // `externalFocusCue` await the deferred run-time technique-how pass.
+  // on the Review verdict card (D161/D162, 2026-06-22); `intent` renders
+  // as a quiet line on the Transition screen (plan 2026-06-22-007, via
+  // `resolveBlockRungIntent` in `domain/drillMetadata.ts`);
+  // `externalFocusCue` and any Run / Drill Check treatment stay deferred.
   /** What this rung trains, in contextual-interference terms (D68), never physiological load (D149). */
   readonly intent: string
   /**
