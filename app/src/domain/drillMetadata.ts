@@ -1,3 +1,4 @@
+import { getStressRung, stressRungForDrill } from '../data/stressLadders'
 import type { MetricType, SessionPlanBlock } from '../model'
 import { drillForBlock, variantForBlock } from './catalogLookup'
 
@@ -81,4 +82,39 @@ export function getBlockSkillFocus(
     return primary as EyebrowSkillFocus
   }
   return null
+}
+
+/**
+ * Resolve the authored stress-rung `intent` for a planned block — the
+ * "what this rung trains" technique-how line surfaced on TransitionScreen
+ * (M002.2 run-time technique-how, plan
+ * `docs/plans/2026-06-22-007-feat-m002-2-technique-how-transition-intent-plan.md`).
+ *
+ * Returns `null` for any block that is not ladder-bearing, so the caller
+ * renders nothing:
+ *   - the block's primary skill focus is not pass / serve / set
+ *     (warmup, wrap, recovery, or a non-surfaced skill) → no ladder,
+ *   - the block has no `drillId`,
+ *   - the drill is off its focus's ladder (synthetic / legacy plan), or
+ *   - the rung exists but carries no `intent`.
+ *
+ * Pure (no React, no Dexie) and null-safe, so a render-body caller never
+ * throws (a throw in the run-flow body trips the app-root ErrorBoundary).
+ * Resolves against the drill's PRIMARY focus via `getBlockSkillFocus`
+ * (the same source the run-flow eyebrow uses), so the line and the
+ * eyebrow never disagree on focus; dual-focus drills use their primary
+ * ladder. The rung is the one the drill actually sits on — no derived
+ * ladder position, steering, or verdict-offer state is read.
+ */
+export function resolveBlockRungIntent(
+  block: SessionPlanBlock | null | undefined,
+  playerCount: 1 | 2,
+): string | null {
+  const focus = getBlockSkillFocus(block, playerCount)
+  if (!focus) return null
+  const drillId = block?.drillId
+  if (!drillId) return null
+  const rung = stressRungForDrill(focus, drillId)
+  if (rung === undefined) return null
+  return getStressRung(focus, rung)?.intent ?? null
 }

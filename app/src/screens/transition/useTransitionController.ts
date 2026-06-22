@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { resolveBlockRungIntent } from '../../domain/drillMetadata'
 import { postBlockRoute } from '../../domain/runFlow'
 import { findSwapAlternatives } from '../../domain/sessionBuilder'
 import { useSessionRunner } from '../../hooks/useSessionRunner'
@@ -16,6 +17,11 @@ export function useTransitionController(executionLogId: string) {
   const prevBlockStatus = execution?.blockStatuses[prevBlockIdx] ?? null
   const nextBlock = plan?.blocks[currentBlockIndex] ?? null
   const hasNextBlock = currentBlockIndex < totalBlocks
+
+  // M002.2 run-time technique-how: the "what this rung trains" line for
+  // the upcoming drill, or null when the next block is not ladder-bearing
+  // (warmup/wrap/recovery/off-ladder). Null-safe — see resolveBlockRungIntent.
+  const rungIntentLine = resolveBlockRungIntent(nextBlock, plan?.playerCount ?? 1)
 
   const [isSkipping, setIsSkipping] = useState(false)
   const [skipError, setSkipError] = useState<string | null>(null)
@@ -91,6 +97,7 @@ export function useTransitionController(executionLogId: string) {
     prevBlock,
     prevBlockStatus,
     nextBlock,
+    rungIntentLine,
     skipError,
     swapError,
     hasAlternates,

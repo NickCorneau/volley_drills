@@ -25,6 +25,7 @@ export function TransitionScreen() {
     prevBlock,
     prevBlockStatus,
     nextBlock,
+    rungIntentLine,
     skipError,
     swapError,
     hasAlternates,
@@ -170,6 +171,15 @@ export function TransitionScreen() {
           <p className="mt-1 text-sm text-text-secondary">
             {formatDuration(nextBlock.durationMinutes)}
           </p>
+          {/* M002.2 run-time technique-how (plan 2026-06-22-007): the
+            authored stress-rung `intent` — what this rung trains — as one
+            quiet unlabeled line, so the athlete reads what they're working
+            on before tapping Start. Absent for non-ladder-bearing blocks
+            (warmup/wrap/recovery/off-ladder); Run stays the one-cue
+            cockpit and Drill Check stays untouched this pass. */}
+          {rungIntentLine && (
+            <p className="text-sm text-text-secondary">{rungIntentLine}</p>
+          )}
         </div>
 
         {/* Full prep at Run's typography: `text-base` primary, pre-line,
