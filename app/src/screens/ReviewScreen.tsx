@@ -38,6 +38,8 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
     missingHint,
     verdictLine,
     acceptConsequenceLine,
+    progressionReflectionLine,
+    progressionReadinessLine,
     verdictChoice,
     setVerdictChoice,
     handleToggleNotCaptured,
@@ -222,7 +224,19 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
             <h2 id="verdict-heading" className="text-base font-semibold text-text-primary">
               Next time
             </h2>
-            <p className="text-sm text-text-secondary">{verdictLine}</p>
+            {/*
+              M002.2 progression read: the offer line and the reflective
+              line (what to notice about the rung just trained) group
+              tight above the choice; the readiness + accept-consequence
+              lines group tight below it. Quiet text-xs secondary, no
+              labels/chrome (proximity-only grouping per design review).
+            */}
+            <div className="flex flex-col gap-1">
+              <p className="text-sm text-text-secondary">{verdictLine}</p>
+              {progressionReflectionLine && (
+                <p className="text-xs text-text-secondary">{progressionReflectionLine}</p>
+              )}
+            </div>
             <ChoiceRow
               value={verdictChoice}
               onChange={setVerdictChoice}
@@ -234,15 +248,24 @@ function ReviewSessionContent({ executionLogId }: { executionLogId: string }) {
                   value: 'accepted',
                   label: 'Try it',
                   // Trust-loop U3: assistive tech hears the consequence
-                  // caption on the option it qualifies.
+                  // caption on the option it qualifies. The readiness
+                  // line is deliberately NOT linked here (one described
+                  // consequence per option).
                   ariaDescribedBy: acceptConsequenceLine ? 'verdict-accept-consequence' : undefined,
                 },
               ]}
             />
-            {acceptConsequenceLine && (
-              <p id="verdict-accept-consequence" className="text-xs text-text-secondary">
-                {acceptConsequenceLine}
-              </p>
+            {(progressionReadinessLine || acceptConsequenceLine) && (
+              <div className="flex flex-col gap-1">
+                {progressionReadinessLine && (
+                  <p className="text-xs text-text-secondary">{progressionReadinessLine}</p>
+                )}
+                {acceptConsequenceLine && (
+                  <p id="verdict-accept-consequence" className="text-xs text-text-secondary">
+                    {acceptConsequenceLine}
+                  </p>
+                )}
+              </div>
             )}
           </Card>
         )}

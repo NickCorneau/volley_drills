@@ -33,8 +33,9 @@ export interface StressRung {
   // Progression content (M002.2). The field set, authoring rules, and
   // per-focus progression story are specified in
   // `docs/specs/stress-rung-taxonomy.md`; the authored strings themselves
-  // live here as data. These fields are NOT rendered anywhere yet — the
-  // run/transition/setup/review surface is a deferred M002.2 UI pass.
+  // live here as data. `explorationCriterion` + `graduationFeel` render
+  // on the Review verdict card (D161, 2026-06-22); `intent` +
+  // `externalFocusCue` await the deferred run-time technique-how pass.
   /** What this rung trains, in contextual-interference terms (D68), never physiological load (D149). */
   readonly intent: string
   /**
@@ -247,6 +248,11 @@ export function stressRungForDrill(focus: StressLadderFocus, drillId: string): n
     if (rung.drillIds.includes(drillId)) return rung.rung
   }
   return undefined
+}
+
+/** The full rung object for a focus + ordinal rung index; undefined when out of range. */
+export function getStressRung(focus: StressLadderFocus, rung: number): StressRung | undefined {
+  return STRESS_LADDERS[focus].find((r) => r.rung === rung)
 }
 
 /** Inclusive rung bounds of a focus ladder. */

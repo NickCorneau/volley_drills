@@ -15,6 +15,7 @@ import {
   metricShowsReviewCounts,
 } from '../../domain/capture'
 import { composeAcceptConsequence } from '../../domain/adaptation/acceptConsequence'
+import { composeProgressionRead, resolveTrainedRung } from '../../domain/adaptation/progressionRead'
 import { composeCarryForwardLine } from '../../domain/adaptation/replayAdaptation'
 import { isScopedFocus } from '../../domain/eligibleSessions'
 import { inferSessionFocus } from '../../domain/sessionFocus'
@@ -242,6 +243,23 @@ export function useReviewController(executionLogId: string) {
           excludeDrillId: plan.blocks.find((b) => b.type === 'main_skill')?.drillId,
         })
       : null
+  // M002.2 progression read (plan 2026-06-22-001): the trained rung's
+  // explorationCriterion (reflection, direction-agnostic) and the
+  // offer-position rung's graduationFeel (readiness, 'more' only). Gated
+  // on the same offer the verdict card is. Deliberately does NOT reuse
+  // the acceptConsequence guard wholesale - that requires plan.context,
+  // which the progression read does not need. Null-safe (never throws).
+  const progressionRead =
+    offeredDelta !== null && offerPosition !== null && isScopedFocus(offeredDelta.focus)
+      ? composeProgressionRead({
+          focus: offeredDelta.focus,
+          trainedRung: resolveTrainedRung(offeredDelta.focus, plan?.blocks),
+          offerPosition,
+          direction: offeredDelta.direction,
+        })
+      : { reflection: null, readiness: null }
+  const progressionReflectionLine = progressionRead.reflection
+  const progressionReadinessLine = progressionRead.readiness
   const missingHint: string | null = isSubmitting
     ? null
     : sessionRpe == null
@@ -364,6 +382,8 @@ export function useReviewController(executionLogId: string) {
     missingHint,
     verdictLine,
     acceptConsequenceLine,
+    progressionReflectionLine,
+    progressionReadinessLine,
     verdictChoice,
     setVerdictChoice,
     handleToggleNotCaptured,

@@ -417,6 +417,13 @@
       "canonical_for": "M002.2 plan: per-rung progression content + roster-depth, at the data/spec layer before any UI. Adds intent + externalFocusCue + explorationCriterion + graduationFeel to every StressRung (app/src/data/stressLadders.ts; authored rules + per-focus progression story in docs/specs/stress-rung-taxonomy.md), a hard rung_content_missing check + advisory auditRungDepth (RUNG_DEPTH_TARGET 2) in catalogValidation, and a source-cited roster-depth backlog. Roster activations: re-evaluated the candidate-false reserve and activated none (no fresh graduate-when trigger). Deferred: rendering the content (M002.2 UI pass), the objective 1% score (M002.3), and new coach-reviewed source-backed drills for the thin rungs (serve 1/3, set 2/3)."
     },
     {
+      "id": "m002-2-progression-read-on-review-plan-2026-06-22",
+      "path": "docs/plans/2026-06-22-001-feat-m002-2-progression-read-on-review-plan.md",
+      "type": "plan",
+      "status": "active",
+      "canonical_for": "M002.2 progression-read UI slice (D161, shipped 2026-06-22): the first render of the per-rung progression content layer. Renders explorationCriterion + graduationFeel inside Review's existing verdict-gated 'Next time' card via a pure data-only composer (app/src/domain/adaptation/progressionRead.ts) + getStressRung accessor. Reflective line keys off the rung actually trained (stressRungForDrill), readiness line keys off the offer position and only on a 'more' offer; null-safe; verdict-gated + Review-only. Honors D157 (no raw rungs) and D154 (movement user-accepted). Origin: docs/brainstorms/2026-06-22-m002-2-progression-read-on-review-requirements.md. Deferred: run-time intent/externalFocusCue half (M002.2 spine follow-on), an 'easing is legitimate' less-offer read, Safety-trace enrichment, M002.3 score. No Dexie/route/assembly change."
+    },
+    {
       "id": "drill-catalog-quality-tone-audit-plan-2026-06-21",
       "path": "docs/plans/2026-06-21-003-refactor-drill-catalog-quality-tone-audit-plan.md",
       "type": "plan",
@@ -942,6 +949,13 @@
       "type": "requirements",
       "status": "complete",
       "canonical_for": "Requirements input for the D157 stress-visibility v1 trust loop (consumed planning history; shipped 2026-06-12): two ratified display rulings (no raw rungs ever; present-tense only), hedged drill-exemplar consequence line on the Review accept, cash-the-promise steering line on the next steered session per focus, conditional repeat-path note, one-time disclosure + evergreen gloss, and an honesty gate (no trace may assert steering that did not happen; the substitution path respects rung preference or suppresses the trace). Revises D154's exposure deferral and the prior stress brainstorm's R11/R14 posture. Plan: docs/plans/2026-06-11-003-feat-stress-visibility-trust-loop-plan.md (which revised the trace surface to Safety and added R15 offer gating)."
+    },
+    {
+      "id": "m002-2-progression-read-on-review-requirements-2026-06-22",
+      "path": "docs/brainstorms/2026-06-22-m002-2-progression-read-on-review-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for the D161 M002.2 progression-read UI slice (shipped 2026-06-22): render the authored per-rung felt content the adaptation engine already computes but never showed, at the Review verdict moment. R1-R2 inherit D157's display rulings (no raw rungs; present-tense). R3-R5 reflective line (explorationCriterion) keyed to the rung ACTUALLY trained (stressRungForDrill), fail-quiet. R6-R8 readiness line (graduationFeel) keyed to the offer position, 'more' offers only, not aria-linked. R9 quiet proximity-grouped presentation. R10 no Dexie/route/assembly change. Fixed scope decisions: verdict-gated presence + Review-only surface. Framed as a step-moment trust + voice-validation slice; the run-time technique-how half (intent + externalFocusCue) stays the M002.2 spine follow-on. Plan: docs/plans/2026-06-22-001-feat-m002-2-progression-read-on-review-plan.md."
     },
     {
       "id": "home-covenant-requirements-2026-06-11",

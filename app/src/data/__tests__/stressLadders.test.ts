@@ -151,6 +151,19 @@ describe('rung progression content (M002.2)', () => {
       }
     }
   })
+
+  // The two fields the M002.2 Review verdict card renders (plan
+  // 2026-06-22-001). Em-dash, body-part, pass/fail, and jargon are
+  // already covered above for all four fields; this closes the one
+  // remaining punctuation gap (en-dash) on the rendered copy so a number
+  // range never reaches the screen as "3-5" via a stray en-dash.
+  it.each(FOCUSES)('%s rendered-on-Review fields use no en-dash', (focus) => {
+    for (const rung of STRESS_LADDERS[focus]) {
+      for (const field of [rung.explorationCriterion, rung.graduationFeel]) {
+        expect(field).not.toContain('\u2013')
+      }
+    }
+  })
 })
 
 describe('stressRungForDrill', () => {

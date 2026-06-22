@@ -4,7 +4,13 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../db'
 import { ReviewScreen } from '../ReviewScreen'
+import { getStressRung } from '../../data/stressLadders'
 import type { DifficultyTag } from '../../model'
+
+// Reviewed-session main drills (drillName feeds inferSessionFocus; drillId
+// feeds the trained-rung resolution the progression read keys off).
+const D03 = { drillName: 'Continuous Passing', drillId: 'd03' } // pass rung 2
+const D07 = { drillName: 'Pass & Look', drillId: 'd07' } // pass rung 3
 
 /**
  * M002.1 (R5): the accept/keep verdict at review end.
@@ -27,7 +33,11 @@ async function clearDb() {
   ])
 }
 
-function passPlan(id: string, createdAt: number) {
+function passPlan(
+  id: string,
+  createdAt: number,
+  main: { drillName: string; drillId: string } = D03,
+) {
   return {
     id,
     presetId: 'solo_wall',
@@ -37,7 +47,8 @@ function passPlan(id: string, createdAt: number) {
       {
         id: `${id}-b1`,
         type: 'main_skill' as const,
-        drillName: 'Continuous Passing',
+        drillName: main.drillName,
+        drillId: main.drillId,
         shortName: 'Pass',
         durationMinutes: 12,
         coachingCue: '',
@@ -60,7 +71,12 @@ function passPlan(id: string, createdAt: number) {
   }
 }
 
-async function seedPriorPassSession(execId: string, daysAgo: number, tag: DifficultyTag) {
+async function seedPriorPassSession(
+  execId: string,
+  daysAgo: number,
+  tag: DifficultyTag,
+  rpe = 7,
+) {
   const now = Date.now()
   const t = now - daysAgo * 86400000
   await db.sessionPlans.put(passPlan(`plan-${execId}`, t))
@@ -76,7 +92,7 @@ async function seedPriorPassSession(execId: string, daysAgo: number, tag: Diffic
   await db.sessionReviews.put({
     id: `review-${execId}`,
     executionLogId: execId,
-    sessionRpe: 7,
+    sessionRpe: rpe,
     goodPasses: 0,
     totalAttempts: 0,
     submittedAt: t,
@@ -93,9 +109,12 @@ async function seedPriorPassSession(execId: string, daysAgo: number, tag: Diffic
 }
 
 /** A current, completed, not-yet-reviewed session. */
-async function seedCurrentSession(execId: string) {
+async function seedCurrentSession(
+  execId: string,
+  main: { drillName: string; drillId: string } = D03,
+) {
   const now = Date.now()
-  await db.sessionPlans.put(passPlan(`plan-${execId}`, now - 60_000))
+  await db.sessionPlans.put(passPlan(`plan-${execId}`, now - 60_000, main))
   await db.executionLogs.put({
     id: execId,
     planId: `plan-${execId}`,
@@ -160,6 +179,14 @@ describe('ReviewScreen verdict (M002.1 R5)', () => {
     expect(tryIt).toHaveAttribute('aria-describedby', 'verdict-accept-consequence')
     expect(keep).not.toHaveAttribute('aria-describedby')
 
+    // M002.2 progression read: on a 'less' offer the reflective line (the
+    // trained rung's explorationCriterion, pass rung 2 here) renders, but
+    // the step-up readiness line is suppressed.
+    expect(screen.getByText(getStressRung('pass', 2)!.explorationCriterion)).toBeInTheDocument()
+    expect(
+      screen.queryByText(getStressRung('pass', 2)!.graduationFeel),
+    ).not.toBeInTheDocument()
+
     // Accept the offer, rate effort, submit.
     await user.click(tryIt)
     await user.click(screen.getByRole('radio', { name: /Right/i }))
@@ -170,6 +197,50 @@ describe('ReviewScreen verdict (M002.1 R5)', () => {
       expect(row?.verdictChoice).toBe('accepted')
       expect(row?.offeredDelta).toEqual({ kind: 'stress', focus: 'pass', direction: 'less' })
     })
+  })
+
+  it('on a "more" offer, renders both the reflection and the readiness line (on-target rung)', async () => {
+    // Two easy prior pass sessions (RPE 3) -> sustained too_easy -> "more".
+    await seedPriorPassSession('e1', 4, 'too_easy', 3)
+    await seedPriorPassSession('e2', 2, 'too_easy', 3)
+    await seedCurrentSession('cur', D03) // trained pass rung 2, on-target with offer position 2
+
+    renderAt('cur')
+
+    expect(await screen.findByText('Next time')).toBeInTheDocument()
+    // Reflection = trained rung 2 explorationCriterion; readiness = offer
+    // position 2 graduationFeel (shown because the offer is "more").
+    expect(screen.getByText(getStressRung('pass', 2)!.explorationCriterion)).toBeInTheDocument()
+    expect(screen.getByText(getStressRung('pass', 2)!.graduationFeel)).toBeInTheDocument()
+    // The readiness line is NOT wired into Try-it's aria-describedby; the
+    // accept-consequence remains the single described consequence.
+    const tryIt = screen.getByRole('radio', { name: 'Try it' })
+    expect(tryIt).toHaveAttribute('aria-describedby', 'verdict-accept-consequence')
+  })
+
+  it('keys the reflection off the TRAINED rung, not the offer position (off-target landing)', async () => {
+    await seedPriorPassSession('e1', 4, 'too_easy', 3)
+    await seedPriorPassSession('e2', 2, 'too_easy', 3)
+    // Trained Pass & Look (pass rung 3) while the derived offer position is
+    // 2 (intermediate band, no accepted verdicts) -> trained rung diverges
+    // from offer position. This is the test that pins the P1 trust fix.
+    await seedCurrentSession('cur', D07)
+
+    renderAt('cur')
+
+    expect(await screen.findByText('Next time')).toBeInTheDocument()
+    // Reflection follows the rung actually trained (3), never the offer
+    // position (2).
+    expect(screen.getByText(getStressRung('pass', 3)!.explorationCriterion)).toBeInTheDocument()
+    expect(
+      screen.queryByText(getStressRung('pass', 2)!.explorationCriterion),
+    ).not.toBeInTheDocument()
+    // Readiness keys off the offer position (2), since stepping is a
+    // position move, not a trained-drill move.
+    expect(screen.getByText(getStressRung('pass', 2)!.graduationFeel)).toBeInTheDocument()
+    expect(
+      screen.queryByText(getStressRung('pass', 3)!.graduationFeel),
+    ).not.toBeInTheDocument()
   })
 
   it('shows no verdict block when there is no prior trend (keep offer)', async () => {

@@ -95,7 +95,7 @@ Each rung carries four authored fields that make climbing it a *meaningful* skil
 | `explorationCriterion` | a process-framed "see how it feels" read | exploratory and user-owned; never a coach-graded pass/fail threshold (`D154` gating stays retired; coach-pedagogy evidence shows pass/fail backfires coachlessly) |
 | `graduationFeel` | the felt readiness-to-step signal | descriptive only; movement stays user-accepted via the review verdict (`D154`); the ladder-top rung describes staying and deepening, not stepping |
 
-All four fields obey the courtside-copy invariants even though nothing renders them yet (no em-dash; jargon glossed; the cue passes rule 12b). **Rendering is a deferred M002.2 UI pass** — these fields are pure data + spec today.
+All four fields obey the courtside-copy invariants (no em-dash; jargon glossed; the cue passes rule 12b). **Partial rendering shipped 2026-06-22** (`D161`, plan `docs/plans/2026-06-22-001-feat-m002-2-progression-read-on-review-plan.md`): the Review verdict card now renders `explorationCriterion` (keyed to the rung the athlete actually trained, via `stressRungForDrill`) and, on a `more` offer only, `graduationFeel` (keyed to the derived offer position). Verdict-gated (only inside the existing "Next time" card) and Review-only; no raw rungs render (`D157` holds). `intent` + `externalFocusCue` stay deferred to the run-time technique-how half (Run / Transition / Drill Check) — the M002.2 spine follow-on.
 
 ### Why each step is a real improvement (progression story)
 
