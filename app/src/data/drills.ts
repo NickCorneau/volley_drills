@@ -681,7 +681,7 @@ const d09: Drill = {
     'Do not cross legs while shuffling.',
     'Communicate especially at corners.',
   ],
-  progressionDescription: 'Only forearm passing (no hand sets).',
+  progressionDescription: 'Shuffle faster or narrow the passing lane so every pass must be tighter.',
   regressionDescription: 'Walk the pattern; allow catch-reset on mishits.',
   variants: [
     {
@@ -1509,7 +1509,7 @@ const d22: Drill = {
     'Same toss height and contact sound each rep.',
     'Adjust for wind movement.',
   ],
-  progressionDescription: 'Jump serve to spots instead of standing serve.',
+  progressionDescription: 'Shrink the scoring zones, or set a higher point goal, once you reliably reach 10.',
   regressionDescription: 'Bigger zones; count "in" serves only.',
   variants: [
     {
@@ -2671,7 +2671,7 @@ const d41: Drill = {
     'Reset feet between sets; plant before you set.',
     'Arc the ball ~1.5 m above reach height so your partner has time to square up.',
   ],
-  progressionDescription: 'Add a lateral step between sets - set, shuffle one step, set again.',
+  progressionDescription: "Tighten the target so each set lands within your partner's reach, or push for a longer unbroken rally.",
   regressionDescription:
     'Catch and re-set (reset the rhythm) if the ball lands more than one step away.',
   variants: [
@@ -2950,7 +2950,7 @@ const d49: Drill = {
     'Use legs for the high ball.',
     'Protect set quality when breathing hard.',
   ],
-  progressionDescription: 'Shorten recovery time or shrink the target window after quality stays stable.',
+  progressionDescription: 'Shrink the target window, or add a fourth feed location, once your set quality stays stable.',
   regressionDescription: 'Use fewer locations, longer rest, or a larger target window.',
   variants: [
     {
@@ -3050,7 +3050,7 @@ const d51: Drill = {
     'Reset your routine after every miss into the heart.',
   ],
   progressionDescription: 'Shrink the outer ring or shorten rest cycles when accuracy stays stable.',
-  regressionDescription: 'Expand the heart zone, lengthen rest, or count any serve outside the heart as success.',
+  regressionDescription: 'Expand the heart zone, or count any serve landing outside the heart as success.',
   variants: [
     {
       id: 'd51-solo-open',
@@ -3616,6 +3616,10 @@ const d55: Drill = {
   id: 'd55',
   name: 'Sideline Serving Challenge',
   shortName: 'Sideline Serve',
+  // skillFocus stays ['serve'] for both variants: the pair adds a live passer
+  // to pressure the server's placement, but the server (the trainee) is still
+  // serving a called target. Deliberately reconciled, not split into a
+  // serve-receive drill (2026-06-21 audit routed-out disposition).
   skillFocus: ['serve'],
   objective: 'Serve to a called sideline or seam target under a little outcome pressure.',
   levelMin: 'intermediate',

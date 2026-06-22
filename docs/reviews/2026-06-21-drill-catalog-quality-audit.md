@@ -6,7 +6,7 @@ stage: build
 type: review
 summary: "Catalog-wide read of all 47 drills for logical coherence, authoring quality, and tone/voice consistency; findings scored by rubric, with applied edits and routed-out (envelope) findings separated."
 authority: working findings log for the 2026-06-21 drill-quality audit
-last_updated: 2026-06-21
+last_updated: 2026-06-22
 depends_on:
  - app/src/data/drills.ts
  - .cursor/rules/courtside-copy.mdc
@@ -83,20 +83,22 @@ Envelope-routed: d25/d26/d28 progression+regression items that change segment du
 
 ---
 
-## Routed-out findings (envelope / assembly — NOT applied in this audit)
+## Routed-out findings (envelope / assembly) — DISPOSITIONED 2026-06-22
 
-| Drill | Field | Why it needs an envelope/assembly change | Route-out target |
+The audit deferred these because a naive fix *looked* like it needed envelope/assembly changes. On a 2026-06-22 re-read, five were honest **wrong-axis / over-promise** description bugs whose minimal honest fix is a within-envelope reword (no workload, fatigueCap, equipment, skillFocus, chain, or ladder change); three were already honest on close read and need no code.
+
+| Drill | Field | Original concern | Disposition (2026-06-22) |
 | --- | --- | --- | --- |
-| d09 | progressionDescription | "forearm only" does not add difficulty to a pass-and-shuffle drill | workload/feed envelope (faster feeds / narrower lane) |
-| d20 | courtsideInstructions | pass is one beat in a multi-skill group sequence; cannot honestly foreground pass | group-drill / chainId redesign |
-| d22 | progressionDescription | "jump serve to spots" exceeds the standing-serve envelope | add jump-serve variant or reword to standing-only scale |
-| d51 | regressionDescription | "lengthen rest / expand heart" partly implies fatigueCap change | workload regression variant |
-| d55 | skillFocus (pair) | pair is live-serve pass-pressure game, not called-target accuracy (solo) | split drill id or reconcile skillFocus/objective across variants |
-| d41 | progressionDescription | "add a lateral step between sets" overlaps d56's identity | progression-spine redesign (d41↔d56↔d40) |
-| d49 | progressionDescription | "shorten recovery / shrink window" = fatigueCap/marker change | workload envelope |
-| d25/d26/d28 | progression/regression (subset) | "collapse block", "two moves only", "5+ min wrap", "extra 30–60 s" change segment durations/count | warmup/recovery workload + segment envelope |
+| d09 | progressionDescription | "forearm only" does not add difficulty to a pass-and-shuffle drill | **Reworded** → "Shuffle faster or narrow the passing lane so every pass must be tighter." Real difficulty axis inside the existing 3–6 min / 1-ball / partner-toss envelope. |
+| d22 | progressionDescription | "jump serve to spots" exceeds the standing-serve envelope | **Reworded standing-only** → "Shrink the scoring zones, or set a higher point goal, once you reliably reach 10." No jump-serve variant added; that stays a separate content decision. |
+| d49 | progressionDescription | "shorten recovery time" fights the 30 s rest fatigueCap | **Reworded** → "Shrink the target window, or add a fourth feed location, once your set quality stays stable." Dropped the rest-cut clause; kept window + variety axes inside the envelope. |
+| d51 | regressionDescription | "lengthen rest" implies a fatigueCap rest change | **Reworded** → "Expand the heart zone, or count any serve landing outside the heart as success." Dropped the rest clause; kept the two within-envelope easings. |
+| d41 | progressionDescription | "add a lateral step between sets" poaches d56 "Set and Move" identity | **Re-aimed** → "Tighten the target so each set lands within your partner's reach, or push for a longer unbroken rally." Distinct precision/rally-length axis (matches the streak metric); d56 keeps move-along-a-line. Removed the spaced-hyphen-as-dash. |
+| d20 | courtsideInstructions | pass is one beat in a multi-skill group sequence | **No change (honest for its kind).** Group continuity drill (`m001Candidate: false`, 4–8 players, `chain-5-group-addons`); foregrounding one skill would misrepresent a pass→set→attack sequence. Revisit only if `D101` 3+-player drills activate. |
+| d55 | skillFocus (pair) | pair reads as a pass-pressure game, not called-target accuracy | **Reconciled in place (no split).** Both variants `skillFocus: ['serve']`: the server (trainee) still serves a *called* target; the live passer only pressures placement. In-code note added at `d55`. |
+| d25/d26/d28 | progression/regression (subset) | "add 30–60 s", "two moves only", "collapse block", "second round" looked like segment-count/duration changes | **No change (within envelope).** Advisory text for the *allocated* wrap/warmup minutes; each "more" case fits under `durationMaxMinutes` (d25 4→5, d26 3→6, d28 3→5) and each "less" case is fewer reps in the same slot. Rendered segment list unchanged. |
 
-These are handed off as follow-up; the audit applies copy-only fixes.
+Net: 5 within-envelope description rewords applied; 3 dispositioned as no-change. No workload, fatigueCap, equipment, participants, skillFocus, chain, or ladder field changed — assembly + diagnostics outputs unchanged.
 
 ---
 
