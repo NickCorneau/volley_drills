@@ -13,6 +13,11 @@ describe('run-flow lexicon (Stage 0 beat contract)', () => {
     expect(RUN_FLOW_LABELS.moreCues).toBe('Show more cues')
   })
 
+  it('pins the Stage 2 recovery-peek labels', () => {
+    expect(RUN_FLOW_LABELS.peek).toBe('Peek setup')
+    expect(RUN_FLOW_LABELS.peekClose).toBe('Back to drill')
+  })
+
   it('records the labels retired by Stage 1', () => {
     expect(SUNSET_RUN_FLOW_LABELS).toContain('Start next block')
     expect(SUNSET_RUN_FLOW_LABELS).toContain('GO')

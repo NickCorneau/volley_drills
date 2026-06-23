@@ -4,13 +4,14 @@ title: Run-Flow Beat Contract
 status: active
 stage: validation
 type: spec
-summary: "The beat contract for the run flow (Transition / Run / Drill Check / Review): each athlete-facing field gets exactly one full-weight home, with named demoted and must-not-render placements, so the flow reads as one calm instrument. Stage 1 is shipped (D164); Stages 2-4 are deferred and gated on dogfood."
+summary: "The beat contract for the run flow (Transition / Run / Drill Check / Review): each athlete-facing field gets exactly one full-weight home, with named demoted and must-not-render placements, so the flow reads as one calm instrument. Stages 1-2 are shipped (D164, D165); Stages 3-4 are deferred and gated on dogfood."
 authority: canonical per-field placement contract for the run-flow beats and the run-flow label lexicon; gates where each athlete-facing field may render at full weight
 last_updated: 2026-06-23
 depends_on:
   - docs/decisions.md
   - docs/brainstorms/2026-06-23-run-flow-beat-contract-requirements.md
   - docs/plans/2026-06-23-001-feat-run-flow-stage1-beat-contract-plan.md
+  - docs/plans/2026-06-23-002-feat-run-flow-stage2-recovery-peek-plan.md
   - docs/specs/m001-courtside-run-flow.md
   - docs/specs/stress-rung-taxonomy.md
   - docs/research/brand-ux-guidelines.md
@@ -21,6 +22,7 @@ decision_refs:
   - D157
   - D163
   - D164
+  - D165
 ---
 
 # Run-Flow Beat Contract
@@ -47,14 +49,14 @@ The run flow is a sequence of **beats** — Transition, Run, Drill Check, Review
 - **Transition** is **READ-DO**: the athlete is setting up; they read to learn what to do next.
 - **Run (live)** is **DO-CONFIRM**: the athlete has started; they glance to confirm, not to learn. The one-cue cockpit (rule 12a) governs.
 
-## Beat Contract (Stage 1 shipped, D164)
+## Beat Contract (Stages 1-2 shipped, D164 / D165)
 
-Each athlete-facing field has one full-weight home. "Demoted" = present but secondary (behind a disclosure or as a quiet line); "must-not-render" = deliberately absent on that surface this stage.
+Each athlete-facing field has one full-weight home. "Demoted" = present but secondary (behind a disclosure, as a quiet line, or in an on-demand overlay); "must-not-render" = deliberately absent on that surface this stage.
 
 | Field | Full-weight home | Demoted | Must-not-render |
 |---|---|---|---|
 | Drill identity (title + eyebrow + duration) | Transition (READ-DO setup) and Run header | — | — |
-| Full setup read (`courtsideInstructions`) | Transition (full `GlossedText` read) | — | **Run** (removed Stage 1; returns only as Stage 2's recovery peek) |
+| Full setup read (`courtsideInstructions`) | Transition (full `GlossedText` read) | Run "Peek setup" overlay (D165 recovery only; timer keeps running) | **Run live cockpit body** (removed Stage 1; recoverable only via the transient peek) |
 | Live coaching cue (`coachingCues[0]`) | Run "Now" | Run "Show more cues" (remaining cues, rule 12a) | **Transition** (no "Cue" / "More cues" block) |
 | Rung `intent` (technique-how, `D163`) | Transition, **block-opening only** | — | mid-block Transition; Run; Drill Check |
 | Segment list (`segments`) | Run `SegmentList` | — | — |
@@ -68,6 +70,7 @@ Canonical labels live in code at `app/src/contracts/runFlowLexicon.ts` (`RUN_FLO
 - **Action CTA = "Start"** (was "Start next block"; sunset).
 - **Live cue label = "Now"** (the Transition "Cue" label is retired).
 - **Run extra-cues disclosure = "Show more cues"** (the combined "Show more cues and instructions" is retired — the disclosure is cue-only now).
+- **Recovery peek (D165) = "Peek setup"** trigger / **"Back to drill"** dismiss (the Run on-demand setup overlay).
 - Swap / Shorten / Skip / block-counter strings are contextual variants recorded as canonical-at-current-strings; their normalization is a deferred founder pass, not drift.
 
 ## Block-Opening Rule (rung intent, R6)
@@ -80,7 +83,7 @@ Risk-ordered and founder-dogfood-gated (origin: `docs/brainstorms/2026-06-23-run
 
 - **Stage 0 — Contract + lexicon.** This doc + `runFlowLexicon.ts`. **Shipped (D164).**
 - **Stage 1 — Lean the beats apart.** Cut the Transition cue; gate rung intent to block-opening; remove Run's full read. **Shipped (D164).**
-- **Stage 2 — Safe recovery.** Run's preroll becomes the full-weight read with a glare-safe one-touch "peek setup" recovery (the full read has exactly one home at a time). **Deferred.**
+- **Stage 2 — Safe recovery.** A glare-safe one-touch "Peek setup" overlay recovers the full read on Run while the block timer keeps running; the read keeps its single full-weight home on Transition (the preroll full read is Stage 4, not Stage 2). **Shipped (D165).**
 - **Stage 3 — Felt continuity.** Thread felt continuity across the seams; render the just-finished receipt once. **Deferred.**
 - **Stage 4 — Optional collapse.** Reversible, read-first collapse of the decide-step (the athlete taps "Start" when ready; **no auto-advance** — a resting athlete is never rushed). **Deferred.**
 

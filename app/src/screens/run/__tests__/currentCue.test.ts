@@ -20,8 +20,6 @@ describe('current cue selection', () => {
     expect(cue).toEqual({
       text: compactCue,
       source: 'coaching-cue',
-      fullCue: compactCue,
-      fullInstructions: compactInstructions,
     })
   })
 
@@ -36,7 +34,6 @@ describe('current cue selection', () => {
 
     expect(cue.text).toBe('Contact above the forehead.')
     expect(cue.source).toBe('coaching-cue')
-    expect(cue.fullCue).toBe(fullCue)
   })
 
   it('uses the first delimiter-separated cue clause when a cue is long', () => {
@@ -50,7 +47,6 @@ describe('current cue selection', () => {
 
     expect(cue.text).toBe('Server calls short/deep before contact')
     expect(cue.source).toBe('coaching-cue')
-    expect(cue.fullCue).toBe(fullCue)
   })
 
   it('falls back to a short single-line instruction when no cue exists', () => {
@@ -77,7 +73,6 @@ describe('current cue selection', () => {
 
     expect(cue.text).toBe('Self-Toss Pass')
     expect(cue.source).toBe('drill-name')
-    expect(cue.fullInstructions).toBe(fullInstructions.trim())
   })
 
   it('falls back to drill name instead of parsing long instruction prose', () => {
@@ -95,7 +90,6 @@ describe('current cue selection', () => {
 
     expect(cue.text).toBe('Self-Toss Pass')
     expect(cue.source).toBe('drill-name')
-    expect(cue.fullInstructions).toBe(longInstruction)
   })
 
   it('falls back to drill name when a long cue has no safe delimiter clause', () => {
@@ -108,8 +102,6 @@ describe('current cue selection', () => {
 
     expect(cue.text).toBe('Self-Toss Pass')
     expect(cue.source).toBe('drill-name')
-    expect(cue.fullCue).toBe(longCue)
-    expect(cue.fullInstructions).toBeUndefined()
   })
 
   it('keeps segmented blocks owned by SegmentList instead of the text cue helper', () => {

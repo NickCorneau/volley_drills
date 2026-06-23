@@ -4,7 +4,10 @@ import { BlockTimer } from '../components/BlockTimer'
 import { RunControls } from '../components/RunControls'
 import { SegmentList } from '../components/run/SegmentList'
 import {
+  ActionOverlay,
+  Button,
   ConfirmModal,
+  GlossedText,
   RunFlowHeader,
   ScreenShell,
   StatusMessage,
@@ -23,6 +26,11 @@ export function RunScreen() {
   const shortened = (location.state as { shortened?: boolean } | null)?.shortened ?? false
   const [isEndingSession, setIsEndingSession] = useState(false)
   const endingSessionInFlightRef = useRef(false)
+  // Run-flow beat contract Stage 2 (D165, R9): ephemeral local UI state for
+  // the recovery "Peek setup" overlay. It deliberately touches neither the
+  // timer nor persistence, so peeking the full read leaves the block clock
+  // running (the load-bearing contrast with Swap/Shorten/Pause, which pause).
+  const [peekOpen, setPeekOpen] = useState(false)
 
   const {
     plan,
@@ -104,6 +112,12 @@ export function RunScreen() {
   const hasMoreCues =
     currentBlock.coachingCue.trim().length > 0 &&
     currentBlock.coachingCue.trim() !== currentCue?.text
+  // Run-flow beat contract Stage 2 (D165, R8/R9/R10): the full setup read
+  // is homed on Transition, never inline on the live face. When the block
+  // carries one, Run offers a deliberate one-touch "Peek setup" recovery
+  // that overlays it on demand (timer keeps running) — gated on the read
+  // existing so segmented drills with no prose overview show no empty peek.
+  const hasSetupRead = currentBlock.courtsideInstructions.trim().length > 0
 
   return (
     <ScreenShell>
@@ -255,6 +269,22 @@ export function RunScreen() {
             </section>
           </details>
         )}
+
+        {/*
+         * Run-flow beat contract Stage 2 (D165, R9): a deliberate,
+         * full-width, positionally-stable one-touch recovery affordance.
+         * NOT a small disclosure — Stage 1 removed the inline read on
+         * purpose; this is how a winded athlete re-reads the setup
+         * mid-rep. Tapping it overlays the full read (the same
+         * `courtsideInstructions` homed on Transition) WITHOUT pausing
+         * the block timer (R10: one full-weight home; the peek is
+         * transient recovery, not a second home).
+         */}
+        {hasSetupRead && (
+          <Button variant="outline" fullWidth onClick={() => setPeekOpen(true)}>
+            {RUN_FLOW_LABELS.peek}
+          </Button>
+        )}
       </ScreenShell.Body>
 
       {/*
@@ -332,6 +362,27 @@ export function RunScreen() {
           </>
         )}
       </ScreenShell.Footer>
+
+      {peekOpen && (
+        // Recovery peek overlay (Stage 2, D165, R9): the full setup read,
+        // rendered with the same `GlossedText` treatment as its Transition
+        // home, in a bottom-sheet. Reuses `ActionOverlay` (focus trap +
+        // Escape-to-dismiss + inert siblings). The block timer keeps
+        // running underneath — nothing here calls a pause path.
+        <ActionOverlay
+          title={currentBlock.drillName}
+          onDismiss={() => setPeekOpen(false)}
+          className="items-end bg-black/40 px-4 pb-8 pt-4"
+          panelClassName="max-w-[390px] rounded-focal"
+        >
+          <div className="mt-4 flex flex-col gap-4">
+            <GlossedText text={currentBlock.courtsideInstructions} />
+            <Button variant="primary" fullWidth onClick={() => setPeekOpen(false)}>
+              {RUN_FLOW_LABELS.peekClose}
+            </Button>
+          </div>
+        </ActionOverlay>
+      )}
 
       {showEndConfirm &&
         // Two-intent end sheet (2026-06-11 session-truth U2). With work

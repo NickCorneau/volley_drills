@@ -8,12 +8,14 @@
  * so drift cannot silently return. Stage 1 settles the two
  * founder-decided labels — the decide-step action CTA (`Start`, consumed
  * by `TransitionScreen`) and the live cue label (`Now`, consumed by
- * `RunScreen`). The swap / shorten / skip strings are single-sourced into
- * Transition's footer too but stay canonical-at-current-strings: they are
- * contextual variants (full vs compact, full-width vs paired), not drift,
- * and a quick founder normalization pass unifies the wording later (origin
- * Outstanding Questions). Block-counter prefixes ("Next:" / bare / "Last:")
- * stay context-specific and are not lexicalized here.
+ * `RunScreen`). Stage 2 adds the recovery-peek labels (`Peek setup` /
+ * `Back to drill`, consumed by `RunScreen`'s on-demand setup overlay). The
+ * swap / shorten / skip strings are single-sourced into Transition's footer
+ * too but stay canonical-at-current-strings: they are contextual variants
+ * (full vs compact, full-width vs paired), not drift, and a quick founder
+ * normalization pass unifies the wording later (origin Outstanding
+ * Questions). Block-counter prefixes ("Next:" / bare / "Last:") stay
+ * context-specific and are not lexicalized here.
  *
  * Layer rule: pure data module. No imports from screens / services /
  * Dexie / React. Pinned by `__tests__/runFlowLexicon.test.ts` (constants)
@@ -27,6 +29,10 @@ export const RUN_FLOW_LABELS = {
   cue: 'Now',
   /** Run's extra-coaching-cues disclosure summary (rule 12a). */
   moreCues: 'Show more cues',
+  /** Run's Stage 2 recovery affordance — overlays the full setup read on demand. */
+  peek: 'Peek setup',
+  /** Dismiss control for the recovery peek overlay (back to the one-cue cockpit). */
+  peekClose: 'Back to drill',
   /** Pre-start swap control (contextual full form; awaits normalization). */
   swap: 'Swap drill',
   /** Tired-athlete escape, paired form (awaits normalization). */
