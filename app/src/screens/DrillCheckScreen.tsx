@@ -240,14 +240,14 @@ export function DrillCheckScreen() {
         {/*
           2026-05-25 audit follow-up (L1): the 2026-05-24 e2e critique
           flagged this `Continue` as low-emphasis vs Transition's
-          solid-accent `Start next block`. The button IS already
+          solid-accent `Start` CTA. The button IS already
           `variant="primary"`; the critique's screenshot captured the
           DISABLED state (no capture chip selected yet), which renders
           lower-contrast by design. The `drill-check-gating-hint`
           above carries the "why" voice. Do NOT promote this button
           further (no disabled-state restyle, no enabled-look-alike
-          treatment), and do NOT demote Transition's
-          `Start next block` to match — the asymmetry is the
+          treatment), and do NOT demote Transition's `Start` CTA to
+          match — the asymmetry is the
           tagging-is-load-bearing signal at courtside. See
           `docs/research/brand-ux-guidelines.md` §7.x (post-block
           screens) for the disabled-primary convention and

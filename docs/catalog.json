@@ -445,6 +445,14 @@
       "canonical_for": "M002.2 run-time technique-how slice (D163, shipped 2026-06-22): the first render of the per-rung intent technique-how field. Renders the upcoming drill's authored stress-rung intent as one quiet line on the Transition read-before-you-run screen, for ladder-bearing pass/serve/set blocks only (silent for warmup/wrap/recovery/off-ladder). New null-safe pure domain helper resolveBlockRungIntent (app/src/domain/drillMetadata.ts; primary-focus via getBlockSkillFocus, drill-actual rung via stressRungForDrill + getStressRung) wired through useTransitionController; TransitionScreen renders a muted secondary line under the duration. Scope held minimal by founder steer: one field (intent), one surface (Transition). Run stays the one-cue DO-CONFIRM cockpit; Drill Check untouched. Honors D157 (no raw rungs); no Dexie/route/assembly change (schema v7). Origin: docs/brainstorms/2026-06-22-m002-2-technique-how-transition-intent-requirements.md. Deferred: externalFocusCue rendering, Run/Drill Check treatment, the 'easing is legitimate' less-offer Review read, Safety-trace enrichment."
     },
     {
+      "id": "run-flow-stage1-beat-contract-plan-2026-06-23",
+      "path": "docs/plans/2026-06-23-001-feat-run-flow-stage1-beat-contract-plan.md",
+      "type": "plan",
+      "status": "active",
+      "active_registry": true,
+      "canonical_for": "Implementation plan + landed registry for the run-flow beat contract Stage 0 + Stage 1 (D164, shipped 2026-06-23): U1 run-flow lexicon + sunset module (app/src/contracts/runFlowLexicon.ts; Start CTA, Now cue), U2 cut the coaching cue from Transition + rename CTA to Start, U3 block-opening rung-intent domain helper resolveBlockOpeningIntent (app/src/domain/drillMetadata.ts; resolveBlockRungIntent unchanged), U4 gate the Transition intent line to block-opening, U5 remove Run's inline full read while keeping Now + cue-only Show more cues + SegmentList + preroll, U6 beat-contract spec (docs/specs/run-flow-beat-contract.md) + D164 + catalog + courtside-copy rule 12a prose, U7 cross-surface lexicon guard test. Accepted trade: mid-rep setup re-read stranded on Run until Stage 2's recovery peek. Deferred: Stages 2-4 (recovery peek, felt continuity, read-first collapse); swap/shorten/skip/counter lexicon normalization. Origin: docs/brainstorms/2026-06-23-run-flow-beat-contract-requirements.md."
+    },
+    {
       "id": "drill-catalog-quality-tone-audit-plan-2026-06-21",
       "path": "docs/plans/2026-06-21-003-refactor-drill-catalog-quality-tone-audit-plan.md",
       "type": "plan",
@@ -574,6 +582,13 @@
       "type": "spec",
       "status": "active",
       "canonical_for": "Stress-rung semantics (D154): the 1-5 ordinal rung scale in progressive contextual-interference terms (D68; never physiological load), the authored per-focus ladders (pass/serve/set) over the full scoped-tag catalog (D160), the skill-band -> starting-rung mapping (beginner 1 / intermediate 2 / advanced 4), the M002.2 per-rung progression content (intent + external-focus cue + exploration criterion + graduation feel, with authoring rules + per-focus progression story + depth-target advisory), and the named exclusions + source-cited roster-depth backlog. Gates all rung annotation: app/src/data/stressLadders.ts must match this brief. The just-in-time taxonomy brief D149 queued ahead of stress-ladder work."
+    },
+    {
+      "id": "spec-run-flow-beat-contract",
+      "path": "docs/specs/run-flow-beat-contract.md",
+      "type": "spec",
+      "status": "active",
+      "canonical_for": "Run-flow beat contract (D164): the per-field placement contract for the run-flow beats (Transition / Run / Drill Check / Review) - each athlete-facing field gets exactly one full-weight home, with named demoted + must-not-render placements, plus the run-flow label lexicon (Start / Now / Show more cues; sunset list) and the block-opening rung-intent rule. Stage 1 shipped: cue cut from Transition, rung intent gated to the block-opening Transition, Run's full courtsideInstructions read removed; Run stays the one-cue DO-CONFIRM cockpit. Stages 2-4 (recovery peek, felt continuity, read-first collapse) deferred + dogfood-gated. Gates where each run-flow field may render at full weight; code anchor app/src/contracts/runFlowLexicon.ts. Origin: docs/brainstorms/2026-06-23-run-flow-beat-contract-requirements.md."
     },
     {
       "id": "v0-prototype-ladder-design",
@@ -984,6 +999,20 @@
       "type": "requirements",
       "status": "active",
       "canonical_for": "Requirements for the M002.2 run-time technique-how Transition-intent slice (D163, shipped 2026-06-22): surface the authored per-rung intent on the Transition read-before-you-run beat. Founder steer: as minimal as possible. Fixed scope decisions: one field (intent only; externalFocusCue held back as it overlaps the drill's own coachingCues[0]), one surface (Transition only; Run stays the one-cue DO-CONFIRM cockpit, Drill Check untouched, both revisit-after-dogfood), unlabeled quiet line under the duration, plain text (no GlossedText), per-block drill-actual rung (no derived position/offer state). R1-R8 cover ladder-bearing gating, pure-domain-helper placement, null-safety, and primary-focus resolution. Deferred: externalFocusCue, Run disclosure, Drill Check render, the 'easing is legitimate' less-offer Review read, Safety-trace enrichment. Plan: docs/plans/2026-06-22-007-feat-m002-2-technique-how-transition-intent-plan.md."
+    },
+    {
+      "id": "run-flow-ux-ideation-2026-06-23",
+      "path": "docs/ideation/2026-06-23-run-flow-ux-ideation.md",
+      "type": "ideation",
+      "status": "active",
+      "canonical_for": "Run-flow UX ideation (Transition / Run / Drill Check density + reads-as-one-instrument). Seven survivors across five axes filtered against the live run-flow screens and the design canon, synthesized into the meta-direction 'One Instrument, One Contract' that seeds docs/brainstorms/2026-06-23-run-flow-beat-contract-requirements.md (D164). Core finding: Transition's body had drifted into a near-superset of Run's body one tap apart."
+    },
+    {
+      "id": "run-flow-beat-contract-requirements-2026-06-23",
+      "path": "docs/brainstorms/2026-06-23-run-flow-beat-contract-requirements.md",
+      "type": "requirements",
+      "status": "active",
+      "canonical_for": "Requirements for the run-flow beat-contract / de-duplication program 'One Instrument, One Contract' (seeded from docs/ideation/2026-06-23-run-flow-ux-ideation.md). Makes Transition / Run / Drill Check read as one instrument by authoring one beat contract that gives each athlete-facing field exactly one full-weight home, rolled out in five risk-ordered, founder-dogfood-gated stages. Stage 0 ratifies the contract + a single label lexicon (R1-R4); Stage 1 cuts the duplicated coaching cue so Run's 'Now' is its only home and relocates the rung-intent line to the block-opening only (R5-R7, a D163 revisit); Stage 2 makes Run's preroll the full-weight read with a glare-safe one-touch 'peek setup' recovery, the full read having exactly one home at a time (R8-R10); Stage 3 threads felt continuity across the seams and renders the just-finished receipt once (R11-R12); Stage 4 (founder-confirmed premise that the decide-step is ~always 'start') ships a reversible one-tap GO then collapses Transition into an on-demand preview, keeping block-opening intent and the tired-athlete escape (R13-R15). R16-R18 pin invariants (one-cue Run D163, no raw rungs D157, descriptive-not-gate D154, <=45 words / no em-dash, shared header D153). Reverses the earlier 'Transition mirrors Run' dress-rehearsal treatment (documented in app/src/screens/TransitionScreen.tsx). Deferred: a BeatBody enforcement primitive, decision-control (swap/shorten/skip) de-duplication, externalFocusCue as a typed field, peripheral phase signatures. Outstanding: lexicon canonical labels, peek affordance shape, Stage 4 dogfood gate window. Origin: docs/ideation/2026-06-23-run-flow-ux-ideation.md."
     },
     {
       "id": "home-covenant-requirements-2026-06-11",

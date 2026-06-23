@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { RunScreen } from '../RunScreen'
 import { useRunController } from '../run/useRunController'
@@ -117,17 +116,17 @@ describe('RunScreen — drill name lives only in the h1 (T2 U8)', () => {
     expect(screen.getAllByText('Cross-Court Spike Repeat')).toHaveLength(1)
   })
 
-  it('still surfaces the full instructions via the disclosure on a cue-less block', async () => {
-    const user = userEvent.setup()
+  it('shows no full-instructions read on Run for a cue-less block (R7b)', () => {
     renderRun()
 
-    const summary = screen.getByText(/Show full instructions/i)
-    await user.click(summary)
-
-    const fullInstructions = screen.getByLabelText(/Full drill instructions/i)
-    expect(fullInstructions).toBeVisible()
-    expect(fullInstructions).toHaveTextContent('Hitter starts at the ten-foot line.')
-    expect(fullInstructions).toHaveTextContent('Reset and repeat for the block.')
+    // Run-flow beat contract Stage 1 (R7b): a block with no coaching cue
+    // has nothing to put behind "Show more cues", and the full
+    // courtsideInstructions read is homed on Transition — so Run shows
+    // neither a disclosure nor the instruction prose.
+    expect(screen.queryByText(/Show full instructions/i)).toBeNull()
+    expect(screen.queryByText(/Show more cues/i)).toBeNull()
+    expect(screen.queryByLabelText(/Full drill instructions/i)).toBeNull()
+    expect(screen.queryByText(/Hitter starts at the ten-foot line/i)).toBeNull()
   })
 
   it('still renders the "Now" section when a real coaching cue exists', () => {

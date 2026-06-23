@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { resolveBlockRungIntent } from '../../domain/drillMetadata'
+import { resolveBlockOpeningIntent } from '../../domain/drillMetadata'
 import { postBlockRoute } from '../../domain/runFlow'
 import { findSwapAlternatives } from '../../domain/sessionBuilder'
 import { useSessionRunner } from '../../hooks/useSessionRunner'
@@ -18,10 +18,16 @@ export function useTransitionController(executionLogId: string) {
   const nextBlock = plan?.blocks[currentBlockIndex] ?? null
   const hasNextBlock = currentBlockIndex < totalBlocks
 
-  // M002.2 run-time technique-how: the "what this rung trains" line for
-  // the upcoming drill, or null when the next block is not ladder-bearing
-  // (warmup/wrap/recovery/off-ladder). Null-safe — see resolveBlockRungIntent.
-  const rungIntentLine = resolveBlockRungIntent(nextBlock, plan?.playerCount ?? 1)
+  // Run-flow beat contract Stage 1 (R6): the "what this rung trains" line
+  // shows once at a focus block's opening and recedes for the rest of that
+  // focus run, rather than on every ladder-bearing Transition. Null when
+  // the next block is mid-block, not ladder-bearing, or off-ladder.
+  // Null-safe — see resolveBlockOpeningIntent.
+  const rungIntentLine = resolveBlockOpeningIntent(
+    plan?.blocks,
+    currentBlockIndex,
+    plan?.playerCount ?? 1,
+  )
 
   const [isSkipping, setIsSkipping] = useState(false)
   const [skipError, setSkipError] = useState<string | null>(null)

@@ -12,12 +12,14 @@ import { RunScreen } from '../RunScreen'
  *
  *  1. **Render**: when the active block has structured `segments`,
  *     RunScreen renders the structured `<SegmentList>` (one row per
- *     segment, exactly one with `aria-current="step"`) PLUS the
- *     intro paragraph ABOVE it. The cockpit footer (`BlockTimer`,
- *     `RunControls`) still renders.
- *  2. **Fallback**: a block without `segments` renders today's
- *     `whitespace-pre-line` prose and NO `<ul>` (R5 regression
- *     guard).
+ *     segment, exactly one with `aria-current="step"`). The full
+ *     `courtsideInstructions` read no longer renders inline on Run
+ *     (run-flow beat contract Stage 1, R7b — it is homed on
+ *     Transition). The cockpit footer (`BlockTimer`, `RunControls`)
+ *     still renders.
+ *  2. **Fallback**: a block without `segments` renders the single
+ *     "Now" cue and NO `<ul>` (R5 regression guard); the full prose
+ *     read no longer appears on Run (R7b).
  *  3. **AE6 — audio-failure independence (LOAD-BEARING)**: when
  *     `playSubBlockTick`, `playPrerollTick`, and `playBlockEndBeep`
  *     all throw / no-op (silent switch + denied Wake Lock + suspended
@@ -147,22 +149,27 @@ describe('RunScreen segments rendering (U7)', () => {
     expect(activeRows).toHaveLength(1)
     expect(activeRows[0].textContent).toContain('Jog or A-skip')
 
-    // Intro paragraph still renders above the list at segment 0.
-    expect(screen.getByText(/Four quick blocks/i)).toBeInTheDocument()
+    // Run-flow beat contract Stage 1 (R7b): the intro paragraph
+    // (courtsideInstructions) no longer renders inline on Run; the
+    // SegmentList carries the load-bearing read.
+    expect(screen.queryByText(/Four quick blocks/i)).toBeNull()
     // Cockpit footer is still there.
     expect(screen.getByRole('button', { name: /pause/i })).toBeInTheDocument()
   })
 
-  it('falls back to prose render with no <ul> for a block without segments (R5)', async () => {
+  it('falls back to a single "Now" cue (no <ul>, no full read) for a block without segments (R5/R7b)', async () => {
     await seedProseRunningSession('exec-prose', 'plan-prose')
     renderAt('exec-prose')
 
-    expect(await screen.findByText(/Pass controlled balls to target/i)).toBeInTheDocument()
-    // No segment list rendered for a no-segments block; the Run Face
-    // uses a single text cue instead.
-    expect(screen.queryByRole('list', { name: 'Segments' })).toBeNull()
-    expect(screen.getByText('Now')).toBeInTheDocument()
+    // The live face is the one "Now" cue.
+    expect(await screen.findByText('Now')).toBeInTheDocument()
     expect(screen.getByText(/Quiet platform/i)).toBeInTheDocument()
+    // No segment list rendered for a no-segments block (R5 guard).
+    expect(screen.queryByRole('list', { name: 'Segments' })).toBeNull()
+    // Run-flow beat contract Stage 1 (R7b): the full courtsideInstructions
+    // read no longer renders on Run — not inline, not behind a disclosure.
+    expect(screen.queryByText(/Pass controlled balls to target/i)).toBeNull()
+    expect(screen.queryByText(/Show full instructions/i)).toBeNull()
   })
 
   /**

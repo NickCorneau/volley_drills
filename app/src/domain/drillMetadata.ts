@@ -118,3 +118,44 @@ export function resolveBlockRungIntent(
   if (rung === undefined) return null
   return getStressRung(focus, rung)?.intent ?? null
 }
+
+/**
+ * Resolve the rung `intent` for the block at `index` ONLY when that block
+ * opens its focus run — the "what this rung trains" line shows once when a
+ * focus first appears in the session, then recedes for the rest of that
+ * focus run (run-flow beat contract Stage 1, R6; spec
+ * `docs/specs/run-flow-beat-contract.md`).
+ *
+ * A focus block "opens" at `index` when it has a surfaced skill focus
+ * (`getBlockSkillFocus` is non-null) AND no EARLIER block in the session
+ * already surfaced that same focus. The prefix scan (rather than a compare
+ * against only the immediately-previous block) is deliberate: sessions are
+ * single-skill-chain by intent (D141), but a focus-controlled support slot
+ * can still resolve to a different primary focus than its neighbors — a
+ * `['pass','set']` drill (d20 / d21) landing in a set session's technique
+ * or movement slot, or a `['pass','serve']` drill (d08 / d18) in a serve
+ * session, makes the focus sequence read e.g. `set → pass → set`. A
+ * previous-block-only compare would then RE-OPEN the session's primary
+ * focus on the block after that support slot; first-appearance keying
+ * shows each focus's intent exactly once. Warmup / wrap (null focus) never
+ * open a run. Off-ladder openers resolve to `null` via
+ * `resolveBlockRungIntent`, so they surface nothing rather than an empty
+ * line (an accepted Stage-1 edge for the rare on-ladder-successor case).
+ *
+ * Pure (no React, no Dexie) and null-safe: out-of-range indices, null
+ * blocks, and an absent block list all return `null` without throwing.
+ */
+export function resolveBlockOpeningIntent(
+  blocks: readonly (SessionPlanBlock | null | undefined)[] | null | undefined,
+  index: number,
+  playerCount: 1 | 2,
+): string | null {
+  const block = blocks?.[index]
+  if (!block) return null
+  const focus = getBlockSkillFocus(block, playerCount)
+  if (!focus) return null
+  for (let i = 0; i < index; i += 1) {
+    if (getBlockSkillFocus(blocks?.[i], playerCount) === focus) return null
+  }
+  return resolveBlockRungIntent(block, playerCount)
+}

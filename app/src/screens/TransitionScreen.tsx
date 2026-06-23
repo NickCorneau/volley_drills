@@ -7,8 +7,9 @@ import {
   ScreenShell,
   StatusMessage,
 } from '../components/ui'
+import { RUN_FLOW_LABELS } from '../contracts/runFlowLexicon'
 import { getBlockSkillFocus } from '../domain/drillMetadata'
-import { blockEyebrowLabel, formatDuration, splitCueLines } from '../lib/format'
+import { blockEyebrowLabel, formatDuration } from '../lib/format'
 import { routes } from '../routes'
 import { useTransitionController } from './transition/useTransitionController'
 
@@ -58,54 +59,16 @@ export function TransitionScreen() {
   return (
     <ScreenShell>
       {/*
-        2026-04-27 plan Item 9: TransitionScreen is now the rehearsal
-        beat only. The reflective beat (per-drill chip + optional
-        counts) lives on `/run/check` upstream of this screen, so this
-        body is single-purpose: just-finished pill (provenance), Up
-        Next briefing (drill name + full prep + cue), and the action
-        footer. The capture state, draft persistence effects, and
-        capture-target derivation now live in `useDrillCheckController`;
-        this surface only previews the upcoming block. See
-        `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 9.
-
-        2026-04-27 cca2 dogfeed F1 follow-up
-        (`docs/research/2026-04-27-cca2-dogfeed-findings.md`): the
-        per-block `rationale` ("Chosen because: …") prose was deleted
-        from the Up next briefing here in parallel with RunScreen's
-        deletion (the trifold-T1 trigger fires once for both surfaces;
-        keeping rationale on Transition while deleting from Run would
-        re-fragment voice across the run-flow rhythm). Role
-        information now rides on the `Up next · {phaseLabel}` eyebrow
-        below — same role labels as the RunScreen header eyebrow
-        (`Technique` / `Movement` / `Main drill` / `Pressure` /
-        `Downshift`), so the user sees the same role identity in
-        Transition's preview that they'll see in Run's header on the
-        very next screen. The `block.rationale` field is preserved on
-        the data record for future surfaces (Swap sheet, See-Why
-        modal in Tier 2).
-
-        2026-04-22 iPhone-viewport layout pass: the prior `mt-auto`
-        on the button row was decorative — it only activated when the
-        screen div happened to fill main, which it rarely did because
-        nothing enforced shell height. Pinning the CTA stack to
-        `ScreenShell.Footer` makes it genuinely bottom-locked so a
-        long up-next preview (d26 stretches, long coaching cue) can
-        scroll without pushing `Start next block` below the fold.
-
-        2026-04-22 parity pass: the body used to render a truncated
-        preview (first line of `courtsideInstructions`, `text-sm`,
-        secondary color, 2-line clamp). Founder walkthrough caught
-        the resulting inconsistency — the same paragraph rendered at
-        a different size + color + with an ellipsis on Transition vs
-        the full text at `text-base` primary on Run, one tap away.
-        That failure mode is worse than "scroll on long drills":
-        short drills got truncated even though they fit, and long
-        drills lost the expand affordance. The body now mirrors Run's
-        treatment (full title, instructions, coaching cue — same
-        typography, same colors) so Transition reads as a quiet
-        dress-rehearsal of Run. The CTA stack in the footer is the
-        only thing that differs between the two surfaces: decide
-        here, execute there.
+        Run-flow beat contract Stage 1 (2026-06-23, plan
+        docs/plans/2026-06-23-001-feat-run-flow-stage1-beat-contract-plan.md;
+        spec docs/specs/run-flow-beat-contract.md): Transition is the
+        READ-DO setup + decide beat. It carries the next drill's identity
+        (title + eyebrow + duration), the full setup read, and the
+        block-opening rung intent, then the decide footer. It deliberately
+        carries NO coaching cue: the cue's only home is Run's "Now" one tap
+        away (R5), reversing the earlier "mirror Run" dress-rehearsal
+        treatment that duplicated Run's body here. The reflective beat
+        (per-drill chip + counts) lives upstream on /run/check.
       */}
       {/* Phase F8 (2026-04-19): was `text-sm font-bold uppercase
           tracking-wider`. Dropped the dashboard-eyebrow voice to
@@ -145,40 +108,39 @@ export function TransitionScreen() {
 
         {swapError && <StatusMessage variant="error" message={swapError} />}
 
-        <div className="flex flex-col gap-1.5">
-          {/*
-            "Up next" eyebrow keeps the pause-before-action framing so
-            Transition doesn't read as "you're already on Run." Quiet
-            `text-xs font-medium` so the drill title below carries the
-            focal weight (Phase F8 typography).
+        {/*
+          Title cluster (2026-06-23 run-flow calm pass): the next-drill
+          identity reads as ONE tight group — eyebrow + duration on a
+          single row, the focal drill title, then the rung-intent
+          one-liner (what this rung trains, `D163`). Pulling the duration
+          up onto the eyebrow row drops a stacked secondary line, so the
+          title and its intent subtitle carry the weight instead of a
+          column of competing small ink.
 
-            2026-04-27 cca2 dogfeed F1 follow-up: extended the eyebrow
-            with the role label (`Up next · Technique` etc.) so the
-            structural role of the next block is visible at preview
-            time. The temporal cue (`Up next`) and the role cue
-            (`{phaseLabel}`) compose with a thin `·` separator so the
-            two reads stay in one quiet line — no new vertical
-            chrome, no eyebrow stack, just a slightly richer single
-            line. Mirrors RunScreen's header eyebrow vocabulary.
-          */}
-          <p className="text-xs font-medium text-text-secondary">
-            Up next ·{' '}
-            {blockEyebrowLabel(nextBlock.type, getBlockSkillFocus(nextBlock, plan.playerCount))}
-          </p>
+          The eyebrow keeps the pause-before-action framing (`Up next ·
+          {role} · {skill}`, cca2 dogfeed F1) so Transition doesn't read
+          as "you're already on Run," and mirrors RunScreen's header
+          eyebrow vocabulary.
+        */}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-xs font-medium text-text-secondary">
+              Up next ·{' '}
+              {blockEyebrowLabel(nextBlock.type, getBlockSkillFocus(nextBlock, plan.playerCount))}
+            </span>
+            <span className="shrink-0 text-xs font-medium text-text-secondary">
+              {formatDuration(nextBlock.durationMinutes)}
+            </span>
+          </div>
           <h1 className="text-xl font-semibold tracking-tight text-text-primary">
             {nextBlock.drillName}
           </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            {formatDuration(nextBlock.durationMinutes)}
-          </p>
-          {/* M002.2 run-time technique-how (plan 2026-06-22-007): the
-            authored stress-rung `intent` — what this rung trains — as one
-            quiet unlabeled line, so the athlete reads what they're working
-            on before tapping Start. Absent for non-ladder-bearing blocks
-            (warmup/wrap/recovery/off-ladder); Run stays the one-cue
-            cockpit and Drill Check stays untouched this pass. */}
+          {/* M002.2 run-time technique-how (`D163`): the authored
+            stress-rung `intent` — what this rung trains — as one quiet
+            subtitle under the title. Absent for non-ladder-bearing blocks
+            (warmup/wrap/recovery/off-ladder). */}
           {rungIntentLine && (
-            <p className="text-sm text-text-secondary">{rungIntentLine}</p>
+            <p className="text-sm leading-snug text-text-secondary">{rungIntentLine}</p>
           )}
         </div>
 
@@ -199,42 +161,11 @@ export function TransitionScreen() {
         {nextBlock.courtsideInstructions && (
           <GlossedText text={nextBlock.courtsideInstructions} />
         )}
-
-        {/* Coaching cue uses the exact same quiet left-rule treatment as
-          RunScreen so testers see the same visual voice across both
-          screens. Styled identically down to the classes.
-
-          Design-language pass 2026-06-11: cues stack one per line
-          (matching RunScreen's `Full coaching cue` disclosure) instead
-          of rendering the stored `join(' · ')` string as a run-on
-          paragraph — the dot separator collided with sentence periods
-          (". ·") and read as a wall at exactly the moment the athlete
-          is prepping the next drill. */}
-        {nextBlock.coachingCue && (
-          <section
-            aria-labelledby="transition-coaching-cue-title"
-            className="border-l-2 border-accent/70 pl-3"
-          >
-            <span
-              id="transition-coaching-cue-title"
-              className="text-xs font-medium text-accent"
-            >
-              Cue
-            </span>
-            <div className="mt-1 flex flex-col gap-1.5">
-              {splitCueLines(nextBlock.coachingCue).map((line) => (
-                <p key={line} className="text-base leading-relaxed text-text-primary">
-                  {line}
-                </p>
-              ))}
-            </div>
-          </section>
-        )}
       </ScreenShell.Body>
 
       <ScreenShell.Footer>
         <Button variant="primary" fullWidth onClick={handleStartNext}>
-          Start next block
+          {RUN_FLOW_LABELS.startAction}
         </Button>
         {/* Secondary row: Swap + Shorten side-by-side when both are
             available, Shorten full-width when the current block can't
@@ -258,23 +189,23 @@ export function TransitionScreen() {
               variant="secondary"
               className="flex-1"
               onClick={handleSwap}
-              aria-label="Swap drill"
+              aria-label={RUN_FLOW_LABELS.swap}
             >
-              Swap drill
+              {RUN_FLOW_LABELS.swap}
             </Button>
             <Button variant="secondary" className="flex-1" onClick={handleStartShortened}>
-              Shorten
+              {RUN_FLOW_LABELS.shorten}
             </Button>
           </div>
         ) : (
           <Button variant="outline" fullWidth onClick={handleStartShortened}>
-            Shorten block
+            {RUN_FLOW_LABELS.shortenFull}
           </Button>
         )}
         {!nextBlock.required && (
           <div className="flex items-center justify-center">
             <Button variant="ghost" className="text-text-secondary" onClick={handleSkip}>
-              Skip block
+              {RUN_FLOW_LABELS.skip}
             </Button>
           </div>
         )}

@@ -5,12 +5,14 @@ import { db } from '../../db'
 import { RunScreen } from '../RunScreen'
 
 /**
- * Run Face v1: the live surface shows one "Now" cue and keeps full
- * instructions/cue text reachable through inline detail.
+ * Run Face v1: the live surface shows one "Now" cue and keeps the
+ * remaining coaching cues reachable through a cue-only disclosure.
  *
- * Regression contract (updated 2026-05-02): long cue bodies no
- * longer compete with the live cue by default. Full detail stays
- * reachable inline within Run.
+ * Regression contract (updated 2026-06-23, run-flow beat contract
+ * Stage 1 / R7b): long cue bodies no longer compete with the live cue
+ * by default; extra cues sit behind "Show more cues". The full
+ * courtsideInstructions read is homed on Transition — it no longer
+ * renders on Run.
  */
 
 async function clearDb() {
@@ -86,9 +88,8 @@ describe('RunScreen: Run Face cue detail', () => {
     expect(await screen.findByText(/^Now$/)).toBeInTheDocument()
     expect(screen.getByText(/Self-toss; forearm pass up and down/i)).toBeInTheDocument()
 
-    // 2026-05-10 first-time-runnability sweep: affordance label
-    // updated to "Show more cues" / "Show more cues and instructions"
-    // per courtside-copy.mdc rule 12(a).
+    // Run-flow beat contract Stage 1 (R7b): the disclosure is cue-only,
+    // labelled "Show more cues"; the instructions read is gone from Run.
     await user.click(screen.getByText(/show more cues/i))
     expect(screen.getByText(/CUEFULLMARKER_9f3a/)).toBeInTheDocument()
 

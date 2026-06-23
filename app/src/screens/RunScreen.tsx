@@ -5,11 +5,11 @@ import { RunControls } from '../components/RunControls'
 import { SegmentList } from '../components/run/SegmentList'
 import {
   ConfirmModal,
-  GlossedText,
   RunFlowHeader,
   ScreenShell,
   StatusMessage,
 } from '../components/ui'
+import { RUN_FLOW_LABELS } from '../contracts/runFlowLexicon'
 import { getBlockSkillFocus } from '../domain/drillMetadata'
 import { blockEyebrowLabel, splitCueLines } from '../lib/format'
 import { routes } from '../routes'
@@ -92,44 +92,25 @@ export function RunScreen() {
   }
 
   // Swap is only offered when the block has at least one curated
-  // alternate. Warmup/wrap are always empty per D85/D105. The memo
-  // keeps catalog scans out of the 4 Hz timer render path.
+  // alternate. Warmup/wrap are always empty per D85/D105.
   const segmentListOwnsCue = segmentListOwnsCurrentCue(currentBlock)
   const currentCue = segmentListOwnsCue ? null : selectNonSegmentedCurrentCue(currentBlock)
-  const segmentInstructionsAvailable =
-    segmentListOwnsCue && currentBlock.courtsideInstructions.trim().length > 0
-  // 2026-05-25 audit follow-up (H2 experiment): for segmented drills,
-  // keep the full READ-DO `courtsideInstructions` paragraph visible
-  // INLINE only while the user is in the first segment (or paused at
-  // segment 0, including preroll). Once the user advances past segment
-  // 0, route the paragraph into the existing `<details>` affordance —
-  // the DO-CONFIRM density rule (`courtside-copy.mdc` rule 13) wants
-  // the active-run body lean once the rep is in motion, and the
-  // SegmentList plus `coachingCues[0]` carries the load-bearing read.
-  // Aligns with `docs/research/outdoor-courtside-ui-brief.md` active-
-  // run 6-field cockpit invariants. Durable keep/revert gated on the
-  // D91 field run; viewport-bound assessment lives in
-  // `docs/design/reviews/2026-05-25-h1-h2-experiment-revaluation.md`.
-  // See plan U7.
-  const segmentInstructionsInline = segmentInstructionsAvailable && currentSegmentIndex === 0
-  const segmentInstructionsCollapsed = segmentInstructionsAvailable && currentSegmentIndex !== 0
-  const hasInstructionDetail =
-    (!segmentInstructionsAvailable &&
-      currentBlock.courtsideInstructions.trim().length > 0 &&
-      currentBlock.courtsideInstructions.trim() !== currentCue?.text) ||
-    segmentInstructionsCollapsed
-  const hasCueDetail =
+  // Run-flow beat contract Stage 1 (R7b / R16): Run is the one-cue
+  // DO-CONFIRM cockpit. The full `courtsideInstructions` read is homed
+  // only on Transition now; Run renders just the live "Now" cue plus an
+  // extra-COACHING-CUES disclosure (rule 12a). Any cues beyond
+  // `coachingCues[0]` stay one tap away behind "Show more cues"; the full
+  // prose read is gone from Run until Stage 2's recovery peek.
+  const hasMoreCues =
     currentBlock.coachingCue.trim().length > 0 &&
     currentBlock.coachingCue.trim() !== currentCue?.text
-  const hasInlineDetail = hasInstructionDetail || hasCueDetail
-  const inlineDetailLabel = inlineDetailSummaryLabel(hasInstructionDetail, hasCueDetail)
 
   return (
     <ScreenShell>
       {/*
         2026-04-22 iPhone-viewport layout pass: RunScreen moved to the
         `ScreenShell` three-zone layout (Header / Body / Footer). The
-        drill name, instructions, and coaching cue live in the
+        drill name, the live "Now" cue, and the SegmentList live in the
         scrollable body; the timer + controls pin to the footer as a
         single "cockpit" that never slips below the fold, no matter
         how long `courtsideInstructions` runs (d26 stretch list,
@@ -221,28 +202,19 @@ export function RunScreen() {
          * instruction), the "Now" line would just echo the `h1` above.
          * The `h1` is the single home for the drill name, so the "Now"
          * section is suppressed on that fallback. `currentCue` is still
-         * kept whole for the `hasInstructionDetail` / `hasCueDetail`
-         * checks below, so the "Show full instructions" affordance still
-         * surfaces real instructions when the fallback occurs.
+         * kept whole for the `hasMoreCues` comparison below, so the
+         * "Show more cues" disclosure still surfaces extra coaching cues
+         * when the fallback occurs.
          */}
         {currentCue && currentCue.source !== 'drill-name' && (
           <section aria-labelledby="current-cue-title" className="border-l-2 border-accent/70 pl-3">
             <span id="current-cue-title" className="text-xs font-medium text-accent">
-              Now
+              {RUN_FLOW_LABELS.cue}
             </span>
             <p className="mt-1 whitespace-pre-line text-base leading-relaxed text-text-primary">
               {currentCue.text}
             </p>
           </section>
-        )}
-
-        {segmentInstructionsInline && (
-          <p
-            data-testid="run-instructions-inline"
-            className="whitespace-pre-line text-base leading-relaxed text-text-primary"
-          >
-            {currentBlock.courtsideInstructions}
-          </p>
         )}
 
         {/*
@@ -261,47 +233,26 @@ export function RunScreen() {
           />
         )}
 
-        {hasInlineDetail && (
+        {/*
+         * Run-flow beat contract Stage 1 (R7b): the disclosure is now
+         * cue-only. The full `courtsideInstructions` read moved to its
+         * single home on Transition; Run keeps the rule-12a "remaining
+         * cues" affordance. Cues stack one per line (design-language
+         * 2026-06-11) so the dot separator never collides with sentence
+         * periods.
+         */}
+        {hasMoreCues && (
           <details className="rounded-[14px] border border-text-primary/10 bg-bg-primary px-3 py-2">
             <summary className="cursor-pointer text-sm font-medium text-text-secondary">
-              {inlineDetailLabel}
+              {RUN_FLOW_LABELS.moreCues}
             </summary>
-            <div className="mt-3 flex flex-col gap-3">
-              {hasInstructionDetail && (
-                /*
-                 * 2026-05-11 inline-gloss tappable-term swap: the
-                 * overflow body inside the <details> READ-DO surface
-                 * renders through `<GlossedText>` so flagged terms
-                 * become tappable. The active-run body above (live
-                 * `courtsideInstructions` and the SegmentList) keeps
-                 * its plain `(= …)` literal rendering as a deliberate
-                 * exception — courtside-copy.mdc rule 13 (DO-CONFIRM
-                 * triple-only readability) forbids tappable
-                 * affordances mid-rep at glare distance.
-                 */
-                <section aria-label="Full drill instructions">
-                  <GlossedText text={currentBlock.courtsideInstructions} />
-                </section>
-              )}
-              {hasCueDetail && (
-                /*
-                 * Design-language pass 2026-06-11: cues stack one per
-                 * line instead of rendering the stored `join(' · ')`
-                 * string as a run-on paragraph — the dot separator
-                 * collided with sentence periods (". ·") and buried
-                 * the READ-DO checklist rhythm. Per-line `text-base`
-                 * keeps the run-flow body-size invariant pinned by
-                 * `RunScreen.rationale-placement.test.tsx`.
-                 */
-                <section aria-label="Full coaching cue" className="flex flex-col gap-1.5">
-                  {splitCueLines(currentBlock.coachingCue).map((line) => (
-                    <p key={line} className="text-base leading-relaxed text-text-primary">
-                      {line}
-                    </p>
-                  ))}
-                </section>
-              )}
-            </div>
+            <section aria-label="Full coaching cue" className="mt-3 flex flex-col gap-1.5">
+              {splitCueLines(currentBlock.coachingCue).map((line) => (
+                <p key={line} className="text-base leading-relaxed text-text-primary">
+                  {line}
+                </p>
+              ))}
+            </section>
           </details>
         )}
       </ScreenShell.Body>
@@ -438,17 +389,4 @@ export function RunScreen() {
         ))}
     </ScreenShell>
   )
-}
-
-function inlineDetailSummaryLabel(hasInstructionDetail: boolean, hasCueDetail: boolean) {
-  // 2026-05-10 first-time-runnability sweep: label updated to align
-  // with .cursor/rules/courtside-copy.mdc rule 12(a) "one cue
-  // rendered by default; remaining cues sit behind a Show more cues
-  // affordance". The default RunScreen surface shows only the first
-  // clause of `coachingCue` (i.e., the joined `coachingCues[0]`)
-  // and routes the remaining cues + full instructions to this
-  // affordance.
-  if (hasInstructionDetail && hasCueDetail) return 'Show more cues and instructions'
-  if (hasCueDetail) return 'Show more cues'
-  return 'Show full instructions'
 }

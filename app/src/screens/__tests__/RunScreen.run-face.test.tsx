@@ -94,42 +94,42 @@ describe('RunScreen Run Face v1', () => {
     useRunControllerMock.mockReturnValue(controller())
   })
 
-  it('renders one current cue and keeps full detail reachable inline', async () => {
+  it('renders one current cue and keeps extra cues behind a cue-only disclosure', async () => {
     const user = userEvent.setup()
     renderRun()
 
     expect(screen.getByText(/^Now$/)).toBeInTheDocument()
-    // Design-language pass 2026-06-11: the disclosure body now stacks
-    // the full cue list as one line per cue, so the first cue's text
-    // also exists (hidden) inside the closed <details>. Scope the
-    // current-cue assertion to the `Now` region to keep this test
-    // pinning "one current cue on the live face."
+    // Run-flow beat contract Stage 1 (R7b): the live face shows one
+    // "Now" cue; the remaining cues stack one-per-line behind the
+    // disclosure, so the first cue's text also exists (hidden) inside
+    // the closed <details>. Scope the live-face assertion to the `Now`
+    // region to keep this test pinning "one current cue on the live face."
     const nowRegion = screen.getByRole('region', { name: 'Now' })
     expect(within(nowRegion).getByText('Caller names short or deep')).toBeInTheDocument()
     expect(screen.queryByRole('alert')).toBeNull()
-    // 2026-05-10 first-time-runnability sweep: summary label updated
-    // to "Show more cues and instructions" per courtside-copy.mdc rule
-    // 12(a). Section aria-labels (Full coaching cue / Full drill
-    // instructions) preserved for screen-reader semantic clarity.
-    const summary = screen.getByText(/Show more cues and instructions/i)
+    // The disclosure is cue-only now ("Show more cues"); the old
+    // "...and instructions" label and the full instructions read are
+    // gone from Run — the read is homed on Transition (R7b).
+    const summary = screen.getByText(/^Show more cues$/i)
+    expect(screen.queryByText(/Show more cues and instructions/i)).toBeNull()
     const details = summary.closest('details')
     expect(details).not.toHaveAttribute('open')
 
     await user.click(summary)
 
     expect(details).toHaveAttribute('open')
-    expect(screen.getByLabelText(/Full coaching cue/i)).toBeVisible()
+    const fullCue = screen.getByLabelText(/Full coaching cue/i)
+    expect(fullCue).toBeVisible()
     // Design-language pass 2026-06-11: the stored `join(' · ')` cue
     // string renders as stacked lines (one cue per line) instead of a
     // dot-joined run-on paragraph, so assert each cue is present rather
     // than the literal separator.
-    expect(screen.getByLabelText(/Full coaching cue/i)).toHaveTextContent(
-      'Caller names short or deep',
-    )
-    expect(screen.getByLabelText(/Full coaching cue/i)).toHaveTextContent(
-      'Partner shades the seam',
-    )
-    expect(screen.getByLabelText(/Full drill instructions/i)).toBeVisible()
+    expect(fullCue).toHaveTextContent('Caller names short or deep')
+    expect(fullCue).toHaveTextContent('Partner shades the seam')
+    // R7b discriminator: the courtsideInstructions read never renders on
+    // Run, even inside the disclosure.
+    expect(screen.queryByLabelText(/Full drill instructions/i)).toBeNull()
+    expect(screen.queryByText(/One player serves easy balls/i)).toBeNull()
   })
 
   it('labels cue-only disclosure accurately for segmented blocks', async () => {

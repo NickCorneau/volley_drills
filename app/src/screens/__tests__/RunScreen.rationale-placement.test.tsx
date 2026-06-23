@@ -23,9 +23,11 @@ import { RunScreen } from '../RunScreen'
  *   (`Technique` / `Movement` / `Main drill` / `Pressure`). The two
  *   rationale-specific cases in this file were removed — they
  *   pinned a rendering that no longer happens. The remaining cases
- *   continue to pin the run-card type hierarchy: instruction and cue
- *   prose use the shared run-flow `text-base` role, while fuller
- *   context can sit behind inline disclosure to reduce live-screen load.
+ *   continue to pin the run-card type hierarchy: the live "Now" cue and
+ *   the cue-disclosure prose use the shared run-flow `text-base` role.
+ *   (Run-flow beat contract Stage 1 / R7b removed the full
+ *   courtsideInstructions read from Run — it is homed on Transition —
+ *   so only cue prose is pinned here now.)
  *
  * The seeded plan still carries `rationale` on the block so the
  * data field stays exercised in tests; the block render simply
@@ -302,25 +304,17 @@ describe('RunScreen: body-typography invariants (P1-11 / cca2 dogfeed F1)', () =
     expect(screen.getByText('Main drill')).toBeInTheDocument()
   })
 
-  it('full courtsideInstructions render at shared run-flow body size behind inline disclosure', async () => {
+  it('does not render the full courtsideInstructions read on Run (R7b)', async () => {
+    // Run-flow beat contract Stage 1 (R7b): the full read moved to its
+    // single home on Transition. The seeded block's instructions prose
+    // must not appear on Run — not inline, not behind a disclosure.
     await seedPausedSession('exec-instr', 'plan-instr')
     renderAt('exec-instr')
 
-    const instructions = await screen.findByText(/Self-toss; forearm pass up and down\./i)
-
-    // TransitionScreen already renders this instruction role at
-    // `text-base`; RunScreen matches it so interim and live play do
-    // not change prose size for the same content role.
-    //
-    // 2026-05-11: the inline-gloss tappable-term swap moved the prose
-    // text into `<span>` children inside `<GlossedText>`'s wrapping
-    // `<p>`. The `text-base` styling lives on the `<p>` ancestor; walk
-    // up to it so the size invariant is asserted at the right node.
-    const paragraph = instructions.closest('p')
-    expect(paragraph?.className ?? '').toContain('text-base')
-    expect(paragraph?.className ?? '').not.toContain('text-lg')
-    expect(paragraph?.className ?? '').not.toContain('text-sm')
-    expect(paragraph?.className ?? '').not.toContain('text-xs')
+    await screen.findByRole('heading', { name: /Passing/i, level: 1 })
+    expect(screen.queryByText(/Self-toss; forearm pass up and down/i)).toBeNull()
+    expect(screen.queryByText(/Show full instructions/i)).toBeNull()
+    expect(screen.queryByLabelText(/Full drill instructions/i)).toBeNull()
   })
 
   it('full coachingCue detail renders at shared run-flow body size', async () => {

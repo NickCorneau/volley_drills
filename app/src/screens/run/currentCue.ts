@@ -7,6 +7,10 @@ export type CurrentCueSource = 'coaching-cue' | 'instructions' | 'drill-name'
 export interface CurrentCueDisplay {
   text: string
   source: CurrentCueSource
+  // `fullCue` / `fullInstructions` carry the un-truncated bodies. Run no
+  // longer reads `fullInstructions` after the run-flow beat contract
+  // Stage 1 removed the full read from Run (R7b); they are retained for
+  // Stage 2's recovery peek, which re-consumes the full instructions body.
   fullCue?: string
   fullInstructions?: string
 }
