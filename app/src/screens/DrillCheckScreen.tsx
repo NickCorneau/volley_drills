@@ -12,9 +12,13 @@ import { useDrillCheckController } from './drillCheck/useDrillCheckController'
 
 /**
  * 2026-04-27 pre-D91 editorial polish (plan Item 9): dedicated reflective
- * beat between Run and Transition. The just-finished drill's required
- * difficulty chip + optional Good/Total counts live here so that the
- * next-drill briefing on `/run/transition` is single-purpose.
+ * beat after Run. The just-finished drill's required difficulty chip +
+ * optional Good/Total counts live here.
+ *
+ * Run-flow beat contract Stage 4 (D167, R14): Continue and the auto-bypass
+ * now forward to `/run`, whose read-first get-ready beat absorbed the
+ * next-drill briefing that Transition used to own. Transition is a
+ * reversible orphan (still mounted for deep links / rollback).
  *
  * Why a dedicated screen:
  *   - Pre-Item-9 the `PerDrillCapture` component sat at the top of the

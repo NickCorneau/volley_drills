@@ -4,7 +4,7 @@ title: Run-Flow Beat Contract
 status: active
 stage: validation
 type: spec
-summary: "The beat contract for the run flow (Transition / Run / Drill Check / Review): each athlete-facing field gets exactly one full-weight home, with named demoted and must-not-render placements, so the flow reads as one calm instrument. Stages 1-2 are shipped (D164, D165); Stages 3-4 are deferred and gated on dogfood."
+summary: "The beat contract for the run flow (Transition / Run / Drill Check / Review): each athlete-facing field gets exactly one full-weight home, with named demoted and must-not-render placements, so the flow reads as one calm instrument. Stages 1-4 are shipped (D164, D165, D166, D167); Stage 4 collapsed Transition into a read-first Run get-ready beat, leaving Transition a reversible orphan."
 authority: canonical per-field placement contract for the run-flow beats and the run-flow label lexicon; gates where each athlete-facing field may render at full weight
 last_updated: 2026-06-23
 depends_on:
@@ -12,6 +12,7 @@ depends_on:
   - docs/brainstorms/2026-06-23-run-flow-beat-contract-requirements.md
   - docs/plans/2026-06-23-001-feat-run-flow-stage1-beat-contract-plan.md
   - docs/plans/2026-06-23-002-feat-run-flow-stage2-recovery-peek-plan.md
+  - docs/plans/2026-06-23-003-feat-run-flow-stage3-4-continuity-collapse-plan.md
   - docs/specs/m001-courtside-run-flow.md
   - docs/specs/stress-rung-taxonomy.md
   - docs/research/brand-ux-guidelines.md
@@ -23,6 +24,8 @@ decision_refs:
   - D163
   - D164
   - D165
+  - D166
+  - D167
 ---
 
 # Run-Flow Beat Contract
@@ -46,22 +49,22 @@ The run flow is a sequence of **beats** — Transition, Run, Drill Check, Review
 
 ## Reading Registers
 
-- **Transition** is **READ-DO**: the athlete is setting up; they read to learn what to do next.
+- **Run get-ready** is **READ-DO** (the post-Stage-4 collapse home, `D167`): the athlete is setting up; they read to learn what to do next. Pre-collapse this register lived on the **Transition** beat, now a reversible orphan.
 - **Run (live)** is **DO-CONFIRM**: the athlete has started; they glance to confirm, not to learn. The one-cue cockpit (rule 12a) governs.
 
-## Beat Contract (Stages 1-2 shipped, D164 / D165)
+## Beat Contract (Stages 1-4 shipped, D164 / D165 / D166 / D167)
 
-Each athlete-facing field has one full-weight home. "Demoted" = present but secondary (behind a disclosure, as a quiet line, or in an on-demand overlay); "must-not-render" = deliberately absent on that surface this stage.
+Each athlete-facing field has one full-weight home. "Demoted" = present but secondary (behind a disclosure, as a quiet line, or in an on-demand overlay); "must-not-render" = deliberately absent on that surface this stage. **Stage 4 (`D167`) collapsed the Transition decide-step into a read-first Run get-ready beat**, so the READ-DO homes below now live on the **Run get-ready** (pre-collapse they were on Transition, now a reversible orphan reachable only by deep link / rollback).
 
 | Field | Full-weight home | Demoted | Must-not-render |
 |---|---|---|---|
-| Drill identity (title + eyebrow + duration) | Transition (READ-DO setup) and Run header | — | — |
-| Full setup read (`courtsideInstructions`) | Transition (full `GlossedText` read) | Run "Peek setup" overlay (D165 recovery only; timer keeps running) | **Run live cockpit body** (removed Stage 1; recoverable only via the transient peek) |
-| Live coaching cue (`coachingCues[0]`) | Run "Now" | Run "Show more cues" (remaining cues, rule 12a) | **Transition** (no "Cue" / "More cues" block) |
-| Rung `intent` (technique-how, `D163`) | Transition, **block-opening only** | — | mid-block Transition; Run; Drill Check |
+| Drill identity (title + eyebrow + duration) | Run get-ready (READ-DO setup) and Run header | — | — |
+| Full setup read (`courtsideInstructions`) | Run get-ready (full `GlossedText` read; READ-DO home migrated off Transition) | Run "Peek setup" overlay (D165 recovery only; timer keeps running) | **Run live cockpit body** (removed Stage 1; recoverable only via the transient peek) |
+| Live coaching cue (`coachingCues[0]`) | Run "Now" | Run "Show more cues" (remaining cues, rule 12a) | **Run get-ready** (no "Cue" / "More cues" block — the cue's only home is the live "Now") |
+| Rung `intent` (technique-how, `D163`) | Run get-ready, **block-opening only** | — | mid-block get-ready; Run live; Drill Check |
 | Segment list (`segments`) | Run `SegmentList` | — | — |
 | Reflective + readiness rung content (`explorationCriterion` / `graduationFeel`) | Review verdict-gated "Next time" card (`D161`/`D162`) | — | — |
-| Just-finished receipt | Transition quiet line (`D153`); Drill Check fuller pill | — | duplicated full-weight on both |
+| Just-finished receipt (`D166` one-per-drill dedup) | Drill Check fuller pill when capture-eligible; else the bypass beat's quiet line (Run get-ready post-collapse) | — | duplicated on both Drill Check and the bypass beat for one drill |
 
 ### Run-flow label lexicon
 
@@ -75,7 +78,7 @@ Canonical labels live in code at `app/src/contracts/runFlowLexicon.ts` (`RUN_FLO
 
 ## Block-Opening Rule (rung intent, R6)
 
-`SessionPlan.blocks` is a flat ordered list with no "focus block" grouping; sessions are single-skill-chain. A focus run **opens** at index `i` when `getBlockSkillFocus(blocks[i])` is non-null and (`i === 0` or `getBlockSkillFocus(blocks[i-1]) !== getBlockSkillFocus(blocks[i])`). The rung `intent` line renders only on the opening Transition. Implemented as the pure helper `resolveBlockOpeningIntent` (`app/src/domain/drillMetadata.ts`); `resolveBlockRungIntent` is unchanged. **Accepted edge:** if a focus run's opening block is off-ladder (intent `null`) but a later same-focus block is on-ladder, positional gating shows nothing for that run (matches AE1; tracked, not solved).
+`SessionPlan.blocks` is a flat ordered list with no "focus block" grouping; sessions are single-skill-chain by intent, but a focus can still recur **non-contiguously** — a focus-controlled support slot can resolve to a drill whose primary focus differs from its neighbors (e.g. a `['pass','set']` drill landing in a set session's technique/movement slot makes the focus sequence read `set → pass → set`). A focus run **opens** at index `i` when `getBlockSkillFocus(blocks[i])` is non-null and **no earlier block in the session already surfaced that same focus** — first-appearance keying via a prefix scan over `blocks[0..i-1]`, *not* a compare against only `blocks[i-1]` (a previous-block-only compare re-opens the primary focus on the block after an interleaving support slot, re-showing the line that should have receded). The rung `intent` line renders only on that focus run's opening beat — the Run **get-ready** post-Stage-4 (`D167`), the Transition pre-collapse — then recedes for the rest of the focus run. Implemented as the pure helper `resolveBlockOpeningIntent` (`app/src/domain/drillMetadata.ts`), pinned by the `set → pass → set` interleave regression in `drillMetadata.blockOpening.test.ts`; `resolveBlockRungIntent` is unchanged. See `docs/solutions/logic-errors/interleaved-sequence-first-appearance-keying.md` for the adjacent-compare-vs-prefix-scan root cause. **Accepted edge:** if a focus run's opening block is off-ladder (intent `null`) but a later same-focus block is on-ladder, positional gating shows nothing for that run (matches AE1; tracked, not solved).
 
 ## Staged Rollout
 
@@ -84,8 +87,8 @@ Risk-ordered and founder-dogfood-gated (origin: `docs/brainstorms/2026-06-23-run
 - **Stage 0 — Contract + lexicon.** This doc + `runFlowLexicon.ts`. **Shipped (D164).**
 - **Stage 1 — Lean the beats apart.** Cut the Transition cue; gate rung intent to block-opening; remove Run's full read. **Shipped (D164).**
 - **Stage 2 — Safe recovery.** A glare-safe one-touch "Peek setup" overlay recovers the full read on Run while the block timer keeps running; the read keeps its single full-weight home on Transition (the preroll full read is Stage 4, not Stage 2). **Shipped (D165).**
-- **Stage 3 — Felt continuity.** Thread felt continuity across the seams; render the just-finished receipt once. **Deferred.**
-- **Stage 4 — Optional collapse.** Reversible, read-first collapse of the decide-step (the athlete taps "Start" when ready; **no auto-advance** — a resting athlete is never rushed). **Deferred.**
+- **Stage 3 — Felt continuity.** Thread felt continuity across the seams; render the just-finished receipt once (shared `drillCheckBypassedForPreviousBlock` dedup) and pin continuity-by-stillness (identical forward title typography + shared header, no motion). **Shipped (D166).**
+- **Stage 4 — Optional collapse.** Reversible, read-first collapse of the decide-step into a Run **get-ready** beat (the athlete taps "Start" when ready; **no auto-advance** — a resting athlete is never rushed; preroll gates on Start). Drill Check now flows straight to `/run`; `TransitionScreen` + `/run/transition` are retained as a reversible orphan (`D137` redirect pattern, zero `routes.transition()` call sites). The READ-DO setup read + block-opening intent migrate onto the get-ready. **Shipped (D167).**
 
 ## Invariants Preserved
 

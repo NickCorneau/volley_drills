@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { ExecutionLog, SessionPlan, SessionPlanBlock } from '../../model'
+import { drillCheckBypassedForPreviousBlock } from '../capture'
 import { resolveDrillCheckCaptureEligibility } from '../drillCheckCapture'
 
 function block(overrides: Partial<SessionPlanBlock> = {}): SessionPlanBlock {
@@ -245,5 +246,76 @@ describe('resolveDrillCheckCaptureEligibility', () => {
     })
 
     expect(result).toEqual({ status: 'bypass', reason: 'session_complete' })
+  })
+})
+
+/**
+ * Run-flow beat contract Stage 3 (D166, R12): the receipt-dedup predicate.
+ * It is a thin status-of-`resolveDrillCheckCaptureEligibility` projection —
+ * `true` exactly when Drill Check was bypassed for the just-finished block,
+ * so the downstream bypass beat (Run get-ready post-D167; Transition
+ * pre-collapse) owns the just-finished receipt, and `false` when Drill Check
+ * showed the receipt itself. Pinned at the domain tier so the screens never
+ * double-render or drop the receipt.
+ */
+describe('drillCheckBypassedForPreviousBlock (R12 receipt-dedup predicate)', () => {
+  it('is false when the previous block was count-eligible (Drill Check owns the receipt)', () => {
+    expect(
+      drillCheckBypassedForPreviousBlock({
+        plan: plan(block({ type: 'technique', drillId: 'd10', variantId: 'd10-pair' })),
+        execution: execution(),
+        currentBlockIndex: 1,
+      }),
+    ).toBe(false)
+  })
+
+  it('is false when the previous block was difficulty-only eligible (Drill Check owns the receipt)', () => {
+    expect(
+      drillCheckBypassedForPreviousBlock({
+        plan: plan(block({ type: 'main_skill', drillId: 'd38', variantId: 'd38-pair' })),
+        execution: execution(),
+        currentBlockIndex: 1,
+      }),
+    ).toBe(false)
+  })
+
+  it('is true when the previous block bypassed Drill Check (non-count support slot)', () => {
+    expect(
+      drillCheckBypassedForPreviousBlock({
+        plan: plan(block({ type: 'technique', drillId: 'd38', variantId: 'd38-pair' })),
+        execution: execution(),
+        currentBlockIndex: 1,
+      }),
+    ).toBe(true)
+  })
+
+  it('is true when the previous block was skipped', () => {
+    expect(
+      drillCheckBypassedForPreviousBlock({
+        plan: plan(block({ type: 'main_skill', drillId: 'd03', variantId: 'd03-pair' })),
+        execution: execution({ prevStatus: 'skipped' }),
+        currentBlockIndex: 1,
+      }),
+    ).toBe(true)
+  })
+
+  it('is true when the previous block had no catalog identifiers', () => {
+    expect(
+      drillCheckBypassedForPreviousBlock({
+        plan: plan(block({ type: 'main_skill', drillId: undefined, variantId: undefined })),
+        execution: execution(),
+        currentBlockIndex: 1,
+      }),
+    ).toBe(true)
+  })
+
+  it('reports bypass for a missing session (callers gate on prevBlock != null upstream)', () => {
+    // The resolver returns { status: 'bypass', reason: 'missing_session' } for a
+    // null plan/execution, so the raw predicate is true here. Both controllers
+    // guard with `prevBlock != null &&` before consulting it, so this edge never
+    // renders a receipt — pinned so a refactor can't silently flip the contract.
+    expect(
+      drillCheckBypassedForPreviousBlock({ plan: null, execution: null, currentBlockIndex: 1 }),
+    ).toBe(true)
   })
 })

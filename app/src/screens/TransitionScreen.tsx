@@ -25,6 +25,7 @@ export function TransitionScreen() {
     totalBlocks,
     prevBlock,
     prevBlockStatus,
+    showJustFinishedReceipt,
     nextBlock,
     rungIntentLine,
     skipError,
@@ -92,8 +93,13 @@ export function TransitionScreen() {
          * line so `Up next` keeps the focal weight on this screen. Drill
          * check keeps the fuller panel pill — there the just-finished
          * drill is the subject.
+         *
+         * Run-flow beat contract Stage 3 (R12): the receipt renders here
+         * only when the just-finished block bypassed Drill Check; when
+         * Drill Check showed it, `showJustFinishedReceipt` is false so the
+         * receipt is not duplicated one beat later.
          */}
-        {prevBlock && (
+        {showJustFinishedReceipt && prevBlock && (
           <JustFinishedPill
             drillName={prevBlock.drillName}
             status={prevBlockStatus?.status === 'completed' ? 'completed' : 'skipped'}

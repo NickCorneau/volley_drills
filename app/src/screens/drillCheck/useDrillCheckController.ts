@@ -267,6 +267,12 @@ export function useDrillCheckController(executionLogId: string) {
 
   // Bypass ineligible blocks with replace-routing so the user never sees an
   // empty Drill Check body and browser back returns to Run, not the bypass.
+  // Run-flow beat contract Stage 4 (D167, R14): the bypass now lands on
+  // `/run` — RunScreen's read-first get-ready beat replaces the old forced
+  // Transition hop and carries the just-finished receipt for bypassed
+  // blocks (R12). The `/run/transition` route stays a reversible orphan
+  // (D137 pattern): still mounted for deep links / rollback, no longer on
+  // the primary flow.
   useEffect(() => {
     if (!loaded) return
     if (!plan || !execution) return
@@ -278,7 +284,7 @@ export function useDrillCheckController(executionLogId: string) {
       return
     }
     if (!captureTarget) {
-      navigate(routes.transition(executionLogId), { replace: true })
+      navigate(routes.run(executionLogId), { replace: true })
     }
   }, [
     loaded,
@@ -302,7 +308,11 @@ export function useDrillCheckController(executionLogId: string) {
     const saved = await flushCurrentCapture()
     if (!saved) return
     vibrate(50)
-    navigate(routes.transition(executionLogId))
+    // Stage 4 collapse (D167, R14): Continue lands on `/run`, whose
+    // read-first get-ready beat now owns the next-drill briefing that
+    // Transition used to. Drill Check already showed this drill's receipt,
+    // so the get-ready suppresses it (R12 dedup).
+    navigate(routes.run(executionLogId))
   }, [captureSatisfied, executionLogId, flushCurrentCapture, navigate])
 
   const toggleNotCaptured = useCallback(() => {

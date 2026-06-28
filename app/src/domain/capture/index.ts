@@ -5,6 +5,10 @@
  *   - `resolveDrillCheckCaptureEligibility(plan, execution, currentBlockIndex)`
  *     and `inferPlanMainMetricType(plan)` — Drill Check eligibility +
  *     ReviewScreen "what does this plan capture?" question.
+ *   - `drillCheckBypassedForPreviousBlock(...)` — R12 receipt-dedup
+ *     predicate: did the just-finished block bypass Drill Check, so the
+ *     downstream bypass beat (Transition / Run get-ready) owns the
+ *     just-finished receipt?
  *   - `mergePerDrillCaptures(captures, next)` — last-write-wins merge by
  *     `blockIndex`.
  *   - `aggregateDrillCaptures(captures)` — session-level rollup with
@@ -36,6 +40,7 @@ export {
   validateStreakLongest,
 } from './buildPerDrillCapture'
 export {
+  drillCheckBypassedForPreviousBlock,
   inferPlanMainMetricType,
   resolveDrillCheckCaptureEligibility,
   type DrillCheckBypassReason,

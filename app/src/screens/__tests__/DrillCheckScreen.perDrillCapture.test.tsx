@@ -177,7 +177,8 @@ async function seedTwoBlockSession({
 
 // Probe component that exposes the current router location to the
 // test, so bypass redirects are observable as a structural assertion
-// (the user lands on `/run/transition`) rather than only as a "capture
+// (the user lands on `/run` — the Stage-4 collapse, D167/R14 — where the
+// read-first get-ready beat now lives) rather than only as a "capture
 // card not present" assertion.
 function LocationProbe() {
   const location = useLocation()
@@ -240,23 +241,23 @@ beforeEach(async () => {
 })
 
 describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
-  it('bypasses to /run/transition when the prev block was a warmup', async () => {
+  it('bypasses to /run (Stage 4 get-ready) when the prev block was a warmup', async () => {
     const execId = await seedTwoBlockSession({
       prevType: 'warmup',
       prevCompleted: true,
     })
     renderAt(execId)
 
-    // Wait for the bypass effect to land on the Transition stub. The
-    // capture card never renders because the screen unmounts before
-    // first paint of the body.
+    // Wait for the bypass effect to land on the Run stub (Stage-4
+    // get-ready). The capture card never renders because the screen
+    // unmounts before first paint of the body.
     await waitFor(() => {
-      expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
+      expect(screen.getByTestId('route-probe')).toHaveTextContent(/^\/run$/)
     })
     expect(screen.queryByTestId('per-drill-capture')).not.toBeInTheDocument()
   })
 
-  it('bypasses to /run/transition when the prev block was a wrap', async () => {
+  it('bypasses to /run (Stage 4 get-ready) when the prev block was a wrap', async () => {
     const execId = await seedTwoBlockSession({
       prevType: 'wrap',
       prevCompleted: true,
@@ -264,12 +265,12 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     renderAt(execId)
 
     await waitFor(() => {
-      expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
+      expect(screen.getByTestId('route-probe')).toHaveTextContent(/^\/run$/)
     })
     expect(screen.queryByTestId('per-drill-capture')).not.toBeInTheDocument()
   })
 
-  it('bypasses to /run/transition when the prev block was skipped', async () => {
+  it('bypasses to /run (Stage 4 get-ready) when the prev block was skipped', async () => {
     const execId = await seedTwoBlockSession({
       prevType: 'main_skill',
       prevCompleted: false,
@@ -277,7 +278,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     renderAt(execId)
 
     await waitFor(() => {
-      expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
+      expect(screen.getByTestId('route-probe')).toHaveTextContent(/^\/run$/)
     })
     expect(screen.queryByTestId('per-drill-capture')).not.toBeInTheDocument()
   })
@@ -321,7 +322,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     renderAt(execId)
 
     await waitFor(() => {
-      expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
+      expect(screen.getByTestId('route-probe')).toHaveTextContent(/^\/run$/)
     })
     expect(screen.queryByTestId('per-drill-capture')).not.toBeInTheDocument()
   })
@@ -550,7 +551,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     })
   })
 
-  it('waits for the latest per-drill capture save before navigating to transition', async () => {
+  it('waits for the latest per-drill capture save before navigating to /run', async () => {
     let resolveSave!: () => void
     const pendingSave = new Promise<void>((resolve) => {
       resolveSave = resolve
@@ -577,7 +578,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
+      expect(screen.getByTestId('route-probe')).toHaveTextContent(/^\/run$/)
     })
   })
 
@@ -670,7 +671,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     expect(screen.queryByTestId('drill-check-gating-hint')).not.toBeInTheDocument()
   })
 
-  it('navigates to /run/transition on Continue after a chip is tapped', async () => {
+  it('navigates to /run on Continue after a chip is tapped', async () => {
     const execId = await seedTwoBlockSession({
       prevType: 'main_skill',
       prevCompleted: true,
@@ -685,7 +686,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     fireEvent.click(cont)
 
     await waitFor(() => {
-      expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
+      expect(screen.getByTestId('route-probe')).toHaveTextContent(/^\/run$/)
     })
   })
 
@@ -767,7 +768,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
       fireEvent.click(cont)
 
       await waitFor(() => {
-        expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
+        expect(screen.getByTestId('route-probe')).toHaveTextContent(/^\/run$/)
       })
     })
 
@@ -793,7 +794,7 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
       fireEvent.click(cont)
 
       await waitFor(() => {
-        expect(screen.getByTestId('route-probe')).toHaveTextContent('/run/transition')
+        expect(screen.getByTestId('route-probe')).toHaveTextContent(/^\/run$/)
       })
       // The persisted row collapses to difficulty-only — no
       // metricCapture, no count fields.

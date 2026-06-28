@@ -33,28 +33,26 @@ async function passSafety(page: import('@playwright/test').Page) {
   await page.getByRole('button', { name: 'Start session' }).click()
 }
 
-async function waitForRunControls(page: import('@playwright/test').Page) {
-  const pause = page.getByRole('button', { name: /pause/i })
-  const startNext = page.getByRole('button', { name: /start next block/i })
-
-  await expect(pause.or(startNext)).toBeVisible({ timeout: 15_000 })
-
-  if (await startNext.isVisible()) {
-    await startNext.click()
-    await expect(pause).toBeVisible({ timeout: 10_000 })
-  }
+async function waitForLiveBlock(page: import('@playwright/test').Page) {
+  // The first block auto-prerolls straight into the live cockpit from
+  // Safety, so the live control (Pause) is the readiness signal. The 15s
+  // timeout covers the 3-2-1 count-in before Pause appears.
+  await expect(page.getByRole('button', { name: /pause/i })).toBeVisible({ timeout: 15_000 })
 }
 
 async function completeCurrentBlock(page: import('@playwright/test').Page) {
-  await waitForRunControls(page)
+  await waitForLiveBlock(page)
   await page.getByRole('button', { name: /^next$/i }).click()
 }
 
-async function startNextBlock(page: import('@playwright/test').Page) {
-  const startNext = page.getByRole('button', { name: /start next block/i })
-  await expect(startNext).toBeVisible({ timeout: 10_000 })
-  await startNext.click()
-  await expect(startNext).toBeHidden({ timeout: 5_000 })
+async function startGetReadyBlock(page: import('@playwright/test').Page) {
+  // Run-flow beat contract Stage 4 (D167): between blocks the athlete lands
+  // on the read-first get-ready beat and taps Start (the forced Transition
+  // hop is gone); the count-in then runs into the live block.
+  const start = page.getByRole('button', { name: /^start$/i })
+  await expect(start).toBeVisible({ timeout: 10_000 })
+  await start.click()
+  await waitForLiveBlock(page)
 }
 
 async function completeDrillCheck(page: import('@playwright/test').Page) {
@@ -75,7 +73,7 @@ async function completeDrillCheckIfPresent(page: import('@playwright/test').Page
 }
 
 async function endSessionEarly(page: import('@playwright/test').Page) {
-  await waitForRunControls(page)
+  await waitForLiveBlock(page)
   await page.getByRole('button', { name: /pause/i }).click()
   await page
     .getByRole('button', { name: /end session/i })
@@ -98,7 +96,7 @@ test.describe('v0b session flow', () => {
     await expect(page.getByRole('heading', { name: /where are you today/i })).toBeVisible()
     await setupAndStart(page)
     await passSafety(page)
-    await waitForRunControls(page)
+    await waitForLiveBlock(page)
   })
 
   test('solo+net reaches safety without asking for a wall choice', async ({ page }) => {
@@ -129,20 +127,22 @@ test.describe('v0b session flow', () => {
     await passSafety(page)
 
     // 15-min solo sessions run warmup -> technique -> main_skill -> wrap.
-    // Warmup bypasses Drill Check; count-eligible support slots may now
-    // capture there too, and main_skill always renders the capture beat.
+    // Block 0 (warmup) auto-starts from Safety and bypasses Drill Check.
+    // Stage 4 (D167): every later block lands on the read-first get-ready
+    // beat (Start tap) instead of the old forced Transition hop. Count-eligible
+    // support slots may capture on Drill Check; main_skill always renders it.
     await completeCurrentBlock(page)
     await completeDrillCheckIfPresent(page)
-    await startNextBlock(page)
+    await startGetReadyBlock(page)
 
     await completeCurrentBlock(page)
     await completeDrillCheckIfPresent(page)
-    await startNextBlock(page)
+    await startGetReadyBlock(page)
 
     await completeCurrentBlock(page)
     await completeDrillCheck(page)
+    await startGetReadyBlock(page)
 
-    await startNextBlock(page)
     await completeCurrentBlock(page)
 
     await expect(page.getByRole('heading', { name: /quick review/i })).toBeVisible({

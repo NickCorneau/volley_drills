@@ -4,16 +4,21 @@ export const routePaths = {
   safety: '/safety',
   run: '/run',
   /**
-   * 2026-04-27 plan Item 9: dedicated reflective beat between Run and
-   * Transition. The just-finished drill's chip + optional counts live
-   * here so the next-drill briefing on `/run/transition` is single-
-   * purpose. DrillCheckScreen auto-redirects to `/run/transition` when
+   * 2026-04-27 plan Item 9: dedicated reflective beat after Run. The
+   * just-finished drill's chip + optional counts live here. DrillCheck
+   * forwards to `/run` (the next block) on Continue or auto-bypass when
    * the previous block isn't a count-eligible main_skill / pressure
    * block (warmup, technique, wrap, or skipped) so the user never sees
    * an empty reflective beat. See
    * `docs/archive/plans/2026-04-26-pre-d91-editorial-polish.md` Item 9.
    */
   drillCheck: '/run/check',
+  /**
+   * Run-flow beat contract Stage 4 (D167, R14): `/run/transition` is a
+   * reversible orphan. RunScreen's read-first get-ready beat replaced the
+   * forced Transition hop; `routes.transition()` has no call sites. The
+   * path stays registered for deep-link compatibility and rollback only.
+   */
   transition: '/run/transition',
   review: '/review',
   complete: '/complete',

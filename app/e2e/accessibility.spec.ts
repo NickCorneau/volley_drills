@@ -327,10 +327,10 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
     // The <h1> is `sr-only` so it's NOT visible to sighted users, but
     // it IS in the a11y tree (sr-only is a CSS visibility hack, not
     // aria-hidden), so getByRole('heading', { level: 1 }) attaches.
-    await expect(
-      page.getByRole('heading', { level: 1, name: /drill check/i }),
-    ).toBeAttached()
-    // Capture surface rendered (proves we didn't bypass to /run/transition).
+    await expect(page.getByRole('heading', { level: 1, name: /drill check/i })).toBeAttached()
+    // Capture surface rendered (proves the capture-eligible block did not
+    // bypass Drill Check to the Run get-ready beat — Stage 4 / D167; the
+    // bypass target was /run/transition pre-collapse).
     await expect(page.getByText(/how was/i)).toBeVisible()
     await checkA11y(page, 'drill check – capture surface')
   })

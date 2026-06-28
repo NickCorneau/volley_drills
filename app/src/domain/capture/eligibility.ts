@@ -122,6 +122,30 @@ export function resolveDrillCheckCaptureEligibility({
 }
 
 /**
+ * R12 (run-flow beat contract, 2026-06-23): the just-finished receipt
+ * renders once per drill. Drill Check (`/run/check`) owns the receipt
+ * whenever it renders — i.e. whenever capture is eligible. When Drill
+ * Check *bypasses* the just-finished block (warmup / wrap /
+ * technique-support / skipped / missing catalog ids), it never shows the
+ * receipt, so the downstream "bypass beat" owns it instead: the
+ * Transition beat pre-collapse, the Run get-ready beat post-collapse
+ * (`D167`).
+ *
+ * Both beats key off this one predicate, computed from the same resolver
+ * Drill Check already consults with the same `currentBlockIndex`, so the
+ * two surfaces agree by construction — the receipt can never render
+ * twice for one drill, nor vanish for a bypassed one. `true` means Drill
+ * Check did NOT show the receipt, so the bypass beat should.
+ */
+export function drillCheckBypassedForPreviousBlock(args: {
+  plan: SessionPlan | null
+  execution: ExecutionLog | null
+  currentBlockIndex: number
+}): boolean {
+  return resolveDrillCheckCaptureEligibility(args).status === 'bypass'
+}
+
+/**
  * Resolve the metric type that dominates a session plan for ReviewScreen
  * "show the count card?" decisions. Currently keyed off the first
  * `main_skill` block, matching the pre-U2 helper that lived inline in

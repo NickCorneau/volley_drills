@@ -118,6 +118,7 @@ Rules of thumb:
 Durable docs under `docs/` should keep YAML frontmatter and explicit ownership. Prefer cross-references over copying canon into multiple places.
 
 - `docs/solutions/` stores documented solutions to past problems (bugs, best practices, workflow patterns), organized by category with YAML frontmatter (`module`, `tags`, `problem_type`). Relevant when implementing or debugging in documented areas.
+- `CONCEPTS.md` (repo root) is the shared domain glossary — entities, named processes, and status concepts with project-specific meaning. Relevant when orienting to the codebase or discussing domain concepts.
 
 ## Operational Constraints
 

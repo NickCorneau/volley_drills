@@ -18,6 +18,10 @@ describe('run-flow lexicon (Stage 0 beat contract)', () => {
     expect(RUN_FLOW_LABELS.peekClose).toBe('Back to drill')
   })
 
+  it('pins the Stage 4 get-ready Adjust disclosure label', () => {
+    expect(RUN_FLOW_LABELS.adjust).toBe('Adjust')
+  })
+
   it('records the labels retired by Stage 1', () => {
     expect(SUNSET_RUN_FLOW_LABELS).toContain('Start next block')
     expect(SUNSET_RUN_FLOW_LABELS).toContain('GO')

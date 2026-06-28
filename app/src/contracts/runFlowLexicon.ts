@@ -41,6 +41,12 @@ export const RUN_FLOW_LABELS = {
   shortenFull: 'Shorten block',
   /** Skip the upcoming optional block (awaits normalization). */
   skip: 'Skip block',
+  /**
+   * Run get-ready disclosure (Stage 4, R13) that reveals the less-common
+   * Swap / Skip controls so the get-ready footer keeps Start + Shorten
+   * dominant. Cancelable — tapping it again re-collapses.
+   */
+  adjust: 'Adjust',
 } as const
 
 /**

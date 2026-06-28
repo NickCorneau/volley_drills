@@ -569,4 +569,173 @@ describe('useRunController', () => {
       expect(opts.segments?.map((s) => s.durationSec)).toEqual([45, 45, 45, 45])
     })
   })
+
+  /**
+   * Run-flow beat contract Stage 4 (D167, R13/R14): the read-first
+   * get-ready beat gates the 3·2·1 count-in behind Start for
+   * between-block starts (currentBlockIndex > 0) — exactly where the
+   * Transition beat used to sit. Block 0 keeps the session-start
+   * auto-preroll. `usePreroll` is mocked, so `prerollHarness.start` is
+   * the count-in spy.
+   */
+  describe('get-ready beat (Stage 4, D167)', () => {
+    // The real between-block state: the session is in progress but the
+    // upcoming block has not started yet. buildRunnerFixture ties the
+    // active block's status to the execution status, so force it back to
+    // 'planned' to model "session running, next block not started."
+    function freshBetweenBlock(index = 1): RunnerFixture {
+      const fx = buildRunnerFixture({
+        executionId: 'exec-run',
+        planId: 'plan-run',
+        activeBlockIndex: index,
+        status: 'in_progress',
+      })
+      const bs = fx.runner.execution!.blockStatuses[index]!
+      bs.status = 'planned'
+      bs.startedAt = undefined
+      return fx
+    }
+
+    it('lands on the get-ready (no auto count-in) for a between-block start', async () => {
+      vi.mocked(useSessionRunner).mockReturnValue(freshBetweenBlock(1).runner)
+      const { result } = renderHook(() => useRunController('exec-run', false), {
+        wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+      })
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      expect(result.current.isGetReady).toBe(true)
+      expect(prerollHarness.start).not.toHaveBeenCalled()
+    })
+
+    it('auto-starts the count-in for block 0 (session start), skipping the get-ready', async () => {
+      vi.mocked(useSessionRunner).mockReturnValue(
+        buildRunnerFixture({
+          executionId: 'exec-run',
+          planId: 'plan-run',
+          activeBlockIndex: 0,
+          status: 'not_started',
+        }).runner,
+      )
+      const { result } = renderHook(() => useRunController('exec-run', false), {
+        wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+      })
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      expect(result.current.isGetReady).toBe(false)
+      expect(prerollHarness.start).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not enter the get-ready when resuming an in-progress block', async () => {
+      vi.mocked(useSessionRunner).mockReturnValue(
+        buildRunnerFixture({
+          executionId: 'exec-run',
+          planId: 'plan-run',
+          activeBlockIndex: 1,
+          status: 'in_progress',
+        }).runner,
+      )
+      const { result } = renderHook(() => useRunController('exec-run', false), {
+        wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+      })
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      expect(result.current.isGetReady).toBe(false)
+      expect(prerollHarness.start).not.toHaveBeenCalled()
+    })
+
+    it('handleStart leaves the get-ready and fires the count-in exactly once', async () => {
+      vi.mocked(useSessionRunner).mockReturnValue(freshBetweenBlock(1).runner)
+      const { result } = renderHook(() => useRunController('exec-run', false), {
+        wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+      })
+      await act(async () => {
+        await Promise.resolve()
+      })
+      expect(prerollHarness.start).not.toHaveBeenCalled()
+
+      act(() => {
+        result.current.handleStart()
+      })
+
+      expect(result.current.isGetReady).toBe(false)
+      expect(prerollHarness.start).toHaveBeenCalledTimes(1)
+    })
+
+    it('handleStartShortened starts the block at half the authored duration', async () => {
+      // Default fixture block 1 ('b-main') is a 5-min main_skill: 300 s
+      // full, 150 s shortened.
+      vi.mocked(useSessionRunner).mockReturnValue(freshBetweenBlock(1).runner)
+      const { result } = renderHook(() => useRunController('exec-run', false), {
+        wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+      })
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      act(() => {
+        result.current.handleStartShortened()
+      })
+
+      expect(result.current.isGetReady).toBe(false)
+      expect(prerollHarness.start).toHaveBeenCalledTimes(1)
+      expect(result.current.activeDuration).toBe(150)
+    })
+  })
+
+  /**
+   * Run-flow beat contract Stage 4 (D166, R15): the block-opening rung
+   * intent keeps a home on the get-ready after the Transition collapse.
+   * The controller reuses the same pure `resolveBlockOpeningIntent` the
+   * Transition beat consulted, so the first-appearance keying (including
+   * the set → pass → set interleave) is inherited and is unit-tested in
+   * `domain/__tests__/drillMetadata.blockOpening.test.ts`. These cases
+   * only pin the controller wiring + index.
+   */
+  describe('block-opening intent (Stage 4, U6)', () => {
+    it('exposes the rung intent for a focus-opening block (warmup → pass)', () => {
+      const fx = buildRunnerFixture({
+        executionId: 'exec-run',
+        planId: 'plan-run',
+        playerCount: 2,
+        activeBlockIndex: 1,
+        status: 'in_progress',
+        blocks: [
+          { id: 'b-0', type: 'warmup', drillName: 'Warm up', durationMinutes: 3 },
+          {
+            id: 'b-1',
+            type: 'main_skill',
+            drillId: 'd24',
+            drillName: 'Pass into a Corner',
+            durationMinutes: 5,
+          },
+        ],
+      })
+      vi.mocked(useSessionRunner).mockReturnValue(fx.runner)
+
+      const { result } = renderHook(() => useRunController('exec-run', false), {
+        wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+      })
+
+      expect(result.current.rungIntentLine).toBeTruthy()
+      expect(typeof result.current.rungIntentLine).toBe('string')
+    })
+
+    it('exposes no rung intent for a synthetic (off-ladder) block', () => {
+      // The default fixture blocks carry no drillId, so the catalog
+      // resolves no skill focus → no intent.
+      vi.mocked(useSessionRunner).mockReturnValue(fixture.runner)
+
+      const { result } = renderHook(() => useRunController('exec-run', false), {
+        wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+      })
+
+      expect(result.current.rungIntentLine).toBeNull()
+    })
+  })
 })

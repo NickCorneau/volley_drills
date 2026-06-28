@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { drillCheckBypassedForPreviousBlock } from '../../domain/capture'
+import { resolveBlockOpeningIntent } from '../../domain/drillMetadata'
 import { hasCompletedBlock } from '../../domain/executionPredicates'
 import { postBlockRoute, scaleSegmentsForBlockDuration } from '../../domain/runFlow'
 import { findSwapAlternatives } from '../../domain/sessionBuilder'
@@ -22,6 +24,12 @@ import { getStorageMeta, setStorageMeta } from '../../services/storageMeta'
 export function useRunController(executionLogId: string, shortened: boolean) {
   const navigate = useNavigate()
   const [showEndConfirm, setShowEndConfirm] = useState(false)
+  // Run-flow beat contract Stage 4 (D167, R13): the read-first get-ready
+  // beat. For a between-block start the block stays paused on the read
+  // until the athlete taps Start; the 3·2·1 count-in fires only then, so
+  // a resting athlete is never rushed. See the init effect below for the
+  // gate (block 0 keeps the session-start auto-preroll).
+  const [isGetReady, setIsGetReady] = useState(false)
   const [prerollHintDismissed, setPrerollHintDismissed] = useState<boolean | null>(null)
   const blockDurRef = useRef(0)
   const remainingRef = useRef(0)
@@ -186,11 +194,22 @@ export function useRunController(executionLogId: string, shortened: boolean) {
           }
         })
     } else if (bs.status === 'planned' || execution.status === 'not_started') {
-      queueMicrotask(startWithPreroll)
+      // Run-flow beat contract Stage 4 (D167, R13/R14): between-block
+      // starts (currentBlockIndex > 0) land on the read-first get-ready —
+      // exactly where the Transition beat used to sit — and wait for the
+      // athlete to tap Start before the count-in fires. Block 0 keeps the
+      // session-start auto-preroll: Safety hands straight to the count-in,
+      // and there is no upstream decide beat to fold in.
+      if (currentBlockIndex > 0) {
+        setIsGetReady(true)
+      } else {
+        queueMicrotask(startWithPreroll)
+      }
     }
   }, [
     execution,
     currentBlock,
+    currentBlockIndex,
     defaultDuration,
     recoverTimerState,
     timer,
@@ -322,6 +341,28 @@ export function useRunController(executionLogId: string, shortened: boolean) {
     timer.reset(newRemainingSeconds)
   }, [timer, activeDuration])
 
+  // Get-ready Start (Stage 4, R13): leave the read and fire the same
+  // 3·2·1 → startBlock → timer.start ramp the session-start path uses.
+  // This is the only path out of the get-ready into the count-in.
+  const handleStart = useCallback(() => {
+    setIsGetReady(false)
+    startWithPreroll()
+  }, [startWithPreroll])
+
+  // Get-ready Shorten (Stage 4, R13): the block has not begun, so
+  // shortening is simply half the authored duration — the in-place
+  // equivalent of the legacy Transition `shortened` nav-state. Setting
+  // activeDuration before the count-in means handlePrerollComplete (kept
+  // current by usePreroll's onComplete ref) starts the timer and scales
+  // segments at the shortened duration.
+  const handleStartShortened = useCallback(() => {
+    if (currentBlock) {
+      setActiveDuration(currentBlock.durationMinutes * 30)
+    }
+    setIsGetReady(false)
+    startWithPreroll()
+  }, [currentBlock, startWithPreroll])
+
   const handleSwap = useCallback(async () => {
     try {
       if (timer.isRunning) {
@@ -433,6 +474,24 @@ export function useRunController(executionLogId: string, shortened: boolean) {
   // whatever path they take.
   const canWrapSession = execution ? hasCompletedBlock(execution) : false
 
+  // Run-flow beat contract Stage 4 (D166/D167): the get-ready beat owns
+  // the block-opening intent (R15) and, post-collapse, the just-finished
+  // receipt for blocks that bypass Drill Check (R12). Both reuse the pure
+  // resolvers the Transition beat already consulted, so the receipt
+  // renders once per drill and the intent keys to a focus run's opening
+  // block (RunScreen renders them only inside the get-ready branch).
+  const prevBlockIdx = currentBlockIndex - 1
+  const prevBlock = plan?.blocks[prevBlockIdx] ?? null
+  const prevBlockStatus = execution?.blockStatuses[prevBlockIdx] ?? null
+  const showJustFinishedReceipt =
+    prevBlock != null &&
+    drillCheckBypassedForPreviousBlock({ plan, execution, currentBlockIndex })
+  const rungIntentLine = resolveBlockOpeningIntent(
+    plan?.blocks,
+    currentBlockIndex,
+    plan?.playerCount ?? 1,
+  )
+
   return {
     plan,
     execution,
@@ -452,12 +511,19 @@ export function useRunController(executionLogId: string, shortened: boolean) {
     hasAlternates,
     currentSegmentIndex,
     effectiveSegments,
+    isGetReady,
+    prevBlock,
+    prevBlockStatus,
+    showJustFinishedReceipt,
+    rungIntentLine,
     handlePause,
     handleResume,
     handleNext,
     handleSkip,
     handleShorten,
     handleSwap,
+    handleStart,
+    handleStartShortened,
     handleEndSessionRequest,
     handleEndSessionConfirm,
     handleEndSessionCancel,

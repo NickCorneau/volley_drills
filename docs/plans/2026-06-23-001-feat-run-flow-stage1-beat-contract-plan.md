@@ -40,6 +40,8 @@ flowchart TB
   D -- yes --> S["render rung-intent line once"]
 ```
 
+> **Shipped correction (post-review):** the opening predicate above (adjacent `blocks[i-1]` compare) was found in code review to re-open the intent line on interleaved focus runs (`set → pass → set`, reachable when a support slot resolves to a different-primary-focus drill). The shipped helper uses **first-appearance keying via a prefix scan** instead. Canonical contract: `docs/specs/run-flow-beat-contract.md` §Block-Opening Rule; root cause: `docs/solutions/logic-errors/interleaved-sequence-first-appearance-keying.md`. Also recorded in Post-Ship Code-Review Residuals below.
+
 Stage-1 beat bodies (what each screen carries after this plan):
 
 | Beat | Before (today) | After (Stage 1) |

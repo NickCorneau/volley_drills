@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { drillCheckBypassedForPreviousBlock } from '../../domain/capture'
 import { resolveBlockOpeningIntent } from '../../domain/drillMetadata'
 import { postBlockRoute } from '../../domain/runFlow'
 import { findSwapAlternatives } from '../../domain/sessionBuilder'
@@ -17,6 +18,15 @@ export function useTransitionController(executionLogId: string) {
   const prevBlockStatus = execution?.blockStatuses[prevBlockIdx] ?? null
   const nextBlock = plan?.blocks[currentBlockIndex] ?? null
   const hasNextBlock = currentBlockIndex < totalBlocks
+
+  // Run-flow beat contract Stage 3 (R12): the just-finished receipt
+  // renders once per drill. Drill Check owns it when capture is eligible;
+  // Transition shows it only for blocks that bypassed Drill Check
+  // (warmup / wrap / technique-support / skipped). Keying off the shared
+  // resolver guarantees the two beats never double-render or drop it.
+  const showJustFinishedReceipt =
+    prevBlock != null &&
+    drillCheckBypassedForPreviousBlock({ plan, execution, currentBlockIndex })
 
   // Run-flow beat contract Stage 1 (R6): the "what this rung trains" line
   // shows once at a focus block's opening and recedes for the rest of that
@@ -102,6 +112,7 @@ export function useTransitionController(executionLogId: string) {
     totalBlocks,
     prevBlock,
     prevBlockStatus,
+    showJustFinishedReceipt,
     nextBlock,
     rungIntentLine,
     skipError,

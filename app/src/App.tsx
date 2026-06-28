@@ -13,7 +13,7 @@ import { SettingsSkillLevelScreen } from './screens/SettingsSkillLevelScreen'
 import { SetupScreen } from './screens/SetupScreen'
 import { SkillLevelScreen } from './screens/SkillLevelScreen'
 import { TodaysSetupScreen } from './screens/TodaysSetupScreen'
-import { TransitionScreen } from './screens/TransitionScreen'
+import { TransitionRedirect } from './screens/TransitionRedirect'
 import { routePaths } from './routes'
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -100,7 +100,17 @@ export default function App() {
             <Route path={routePaths.safety} element={<SafetyCheckScreen />} />
             <Route path={routePaths.run} element={<RunScreen />} />
             <Route path={routePaths.drillCheck} element={<DrillCheckScreen />} />
-            <Route path={routePaths.transition} element={<TransitionScreen />} />
+            {/*
+              Run-flow beat contract Stage 4 (D167, R14): the forced Transition
+              hop collapsed into RunScreen's read-first get-ready beat, so no
+              flow code navigates here (`routes.transition()` has zero call
+              sites). The `/run/transition` path now redirects to `/run` so a
+              stale deep link lands on the live get-ready instead of a duplicate
+              read. The TransitionScreen component is retained (with its tests)
+              for rollback: swap this element back to <TransitionScreen /> to
+              restore the standalone beat.
+            */}
+            <Route path={routePaths.transition} element={<TransitionRedirect />} />
             <Route path={routePaths.review} element={<ReviewScreen />} />
             <Route path={routePaths.complete} element={<CompleteScreen />} />
             <Route path={routePaths.settings} element={<SettingsScreen />} />
