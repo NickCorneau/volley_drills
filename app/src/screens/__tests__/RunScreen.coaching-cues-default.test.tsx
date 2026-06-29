@@ -11,8 +11,8 @@ import { RunScreen } from '../RunScreen'
  * Regression contract (updated 2026-06-23, run-flow beat contract
  * Stage 1 / R7b): long cue bodies no longer compete with the live cue
  * by default; extra cues sit behind "Show more cues". The full
- * courtsideInstructions read is homed on Transition — it no longer
- * renders on Run.
+ * courtsideInstructions read is homed on the Run get-ready beat (post-D167;
+ * formerly Transition) — it no longer renders on the live face.
  */
 
 async function clearDb() {

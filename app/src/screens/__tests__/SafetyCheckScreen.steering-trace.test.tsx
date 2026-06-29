@@ -245,7 +245,13 @@ describe('SafetyCheckScreen steering trace (trust-loop U4)', () => {
     renderScreen()
     await screen.findByText('A bit more stress on setting today.')
 
-    const painGroup = screen.getByRole('radiogroup', { name: /sharp pain or guarding/i })
+    // 2026-06-29 copy pass: pin the de-jargoned visible pain-question title
+    // (the radiogroup aria-label is pinned just below).
+    expect(
+      screen.getByText(/any pain that.s sharp, or that you.re working around/i),
+    ).toBeInTheDocument()
+
+    const painGroup = screen.getByRole('radiogroup', { name: /sharp pain or pain you work around/i })
     await user.click(within(painGroup).getByRole('radio', { name: 'Yes' }))
 
     expect(screen.queryByText('A bit more stress on setting today.')).not.toBeInTheDocument()

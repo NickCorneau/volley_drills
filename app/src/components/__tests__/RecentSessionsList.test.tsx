@@ -76,9 +76,10 @@ describe('RecentSessionsList', () => {
         receipt={receipt({ consistency: { kind: 'banded', count: 4, band: 'strong' } })}
       />,
     )
-    expect(
-      screen.getByText('Last week: 4 sessions — ahead of your usual rhythm.'),
-    ).toBeInTheDocument()
+    const line = screen.getByText('Last week: 4 sessions, ahead of your usual rhythm.')
+    expect(line).toBeInTheDocument()
+    // courtside-copy rule 4 (D168): no em-dash in user-visible prose.
+    expect(line.textContent).not.toContain('\u2014')
   })
 
   it('shows the temporally-labeled headline for a steady week (R6)', () => {

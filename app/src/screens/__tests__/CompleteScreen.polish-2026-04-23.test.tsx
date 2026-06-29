@@ -135,12 +135,12 @@ describe('CompleteScreen 2026-04-23 polish (storage caveat compression)', () => 
   })
 })
 
-describe('SettingsScreen 2026-04-23 polish (About local storage sub-section)', () => {
+describe('SettingsScreen 2026-04-23 polish (Where your sessions live sub-section)', () => {
   beforeEach(async () => {
     await clearDb()
   })
 
-  it('renders the About local storage section with the posture-sensitive detail body', async () => {
+  it('renders the storage info section with the posture-sensitive detail body', async () => {
     render(
       <MemoryRouter initialEntries={['/settings']}>
         <Routes>
@@ -151,7 +151,7 @@ describe('SettingsScreen 2026-04-23 polish (About local storage sub-section)', (
 
     const section = await screen.findByTestId('settings-storage-info')
     expect(section).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /about local storage/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /where your sessions live/i })).toBeInTheDocument()
     // In jsdom the install posture defaults to `browser-tab`. The
     // browser-tab secondary is browser-neutral but still names the risk.
     expect(section.textContent).toMatch(/works offline/i)

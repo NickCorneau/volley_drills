@@ -116,7 +116,8 @@ describe('RunScreen Run Face v1', () => {
     expect(screen.queryByRole('alert')).toBeNull()
     // The disclosure is cue-only now ("Show more cues"); the old
     // "...and instructions" label and the full instructions read are
-    // gone from Run — the read is homed on Transition (R7b).
+    // gone from the live face — the read is homed on the Run get-ready beat
+    // (post-D167; formerly Transition) (R7b).
     const summary = screen.getByText(/^Show more cues$/i)
     expect(screen.queryByText(/Show more cues and instructions/i)).toBeNull()
     const details = summary.closest('details')

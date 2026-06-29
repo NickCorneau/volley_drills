@@ -80,6 +80,8 @@ Current surfaces and recommended shift:
 | `services/session.ts` `presetName` (pain-triggered path) | "Recovery Technique Session" | Same concern as the visible card; the name also propagates into the session record | "Lighter Technique Session" |
 | `SafetyCheckScreen` error-path copy | "Could not build a recovery session. Try changing your setup." | Low visibility but uses the same therapeutic vocabulary | "Could not build a lighter session. Try changing your setup." |
 
+**2026-06-29 copy/UX pass update (live-string drift, posture unchanged).** The `PainOverrideCard` heading adopted from this audit ("Switched to a lighter session") was later revised to the present-tense **"Lighter session ready"**, and its sub-line to **"Easier drills today."** (from "Lower-load technique work today.", which also dropped the `technique` Run-phase-pill collision). The `SafetyCheckScreen` pain question was reworded from "…makes you guard a movement?" to "…that you're working around?". All three preserve this audit's core rule — **training-choice vocabulary only, no "recovery" / "protect" / "injury" therapeutic coding** — so the `D83` / `D86` / `D88` posture is unchanged. The dated recommendation cells above are left as the 2026-04-16 record. Plan: `docs/plans/2026-06-29-001-refactor-copy-ux-cleanup-pass-plan.md`.
+
 Surfaces that are **not** at issue and should not be changed:
 
 - `RunScreen` cool-down skip copy ("may affect your recovery") is wellness-coaching language about post-exercise physiological recovery, not injury recovery. Safe.

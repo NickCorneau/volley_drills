@@ -19,8 +19,9 @@ const useRunControllerMock = vi.mocked(useRunController)
  * The H2 experiment kept the full `courtsideInstructions` READ-DO
  * paragraph visible inline at `currentSegmentIndex === 0` and routed
  * it into a `<details>` afterward. The beat contract removes that read
- * from Run entirely — Run is the one-cue DO-CONFIRM cockpit; the full
- * read is homed once, on Transition. What remains on Run:
+ * from the live face entirely — Run is the one-cue DO-CONFIRM cockpit; the
+ * full read is homed once, on the Run get-ready beat (post-D167; formerly
+ * Transition). What remains on the live face:
  *
  *  - the live "Now" cue (or the SegmentList's own active row),
  *  - a **cue-only** "Show more cues" disclosure (rule 12a) when extra
@@ -131,7 +132,7 @@ describe('RunScreen — segmented-drill density (beat contract Stage 1)', () => 
     // inline testid and the raw prose must be absent.
     expect(screen.queryByTestId('run-instructions-inline')).toBeNull()
     expect(screen.queryByText(/Four quick blocks/i)).toBeNull()
-    // No instructions affordance either (the read is homed on Transition).
+    // No instructions affordance either (the read is homed on the get-ready beat post-D167).
     expect(screen.queryByText(/Show .*instructions/i)).toBeNull()
   })
 

@@ -99,7 +99,7 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
       .getByRole('radio', { name: 'Yesterday' })
       .click()
     await page
-      .getByRole('radiogroup', { name: /Sharp pain or guarding/i })
+      .getByRole('radiogroup', { name: /Sharp pain or pain you work around/i })
       .getByRole('radio', { name: 'Yes' })
       .click()
     await page.getByRole('button', { name: /Override: use my original session/i }).click()
@@ -125,7 +125,7 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
   async function goToRunPaused(page: import('@playwright/test').Page) {
     await goToSafety(page)
     await page
-      .getByRole('radiogroup', { name: /Sharp pain or guarding/i })
+      .getByRole('radiogroup', { name: /Sharp pain or pain you work around/i })
       .getByRole('radio', { name: 'No' })
       .click()
     await page
@@ -165,7 +165,7 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
     await page.getByRole('button', { name: /build session/i }).click()
 
     await page
-      .getByRole('radiogroup', { name: /Sharp pain or guarding/i })
+      .getByRole('radiogroup', { name: /Sharp pain or pain you work around/i })
       .getByRole('radio', { name: 'No' })
       .click()
     await page
@@ -199,7 +199,7 @@ test.describe('accessibility – WCAG 2.1 AA', () => {
     await page.getByRole('button', { name: /build session/i }).click()
 
     await page
-      .getByRole('radiogroup', { name: /Sharp pain or guarding/i })
+      .getByRole('radiogroup', { name: /Sharp pain or pain you work around/i })
       .getByRole('radio', { name: 'No' })
       .click()
     await page

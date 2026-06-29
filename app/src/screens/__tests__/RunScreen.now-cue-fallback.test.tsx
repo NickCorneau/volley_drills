@@ -128,8 +128,9 @@ describe('RunScreen — drill name lives only in the h1 (T2 U8)', () => {
 
     // Run-flow beat contract Stage 1 (R7b): a block with no coaching cue
     // has nothing to put behind "Show more cues", and the full
-    // courtsideInstructions read is homed on Transition — so Run shows
-    // neither a disclosure nor the instruction prose.
+    // courtsideInstructions read is homed on the Run get-ready beat (post-D167;
+    // formerly Transition) — so the live face shows neither a disclosure nor
+    // the instruction prose.
     expect(screen.queryByText(/Show full instructions/i)).toBeNull()
     expect(screen.queryByText(/Show more cues/i)).toBeNull()
     expect(screen.queryByLabelText(/Full drill instructions/i)).toBeNull()

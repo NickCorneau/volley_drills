@@ -97,7 +97,7 @@ function consistencyCallout(consistency: ConsistencyRead): string | null {
   if (consistency.count === 0) return null
   const noun = consistency.count === 1 ? 'session' : 'sessions'
   return consistency.band === 'strong'
-    ? `Last week: ${consistency.count} ${noun} — ahead of your usual rhythm.`
+    ? `Last week: ${consistency.count} ${noun}, ahead of your usual rhythm.`
     : `Last week: ${consistency.count} ${noun}.`
 }
 

@@ -30,7 +30,7 @@ import { SKILL_LEVEL_LABEL, SKILL_LEVELS, type SkillLevel } from '../../lib/skil
 const BAND_DESCRIPTORS: Record<Exclude<SkillLevel, 'unsure'>, string> = {
   foundations: 'Keeping a friendly toss alive.',
   rally_builders: 'Pass easy serves, short rallies.',
-  side_out_builders: 'Pass to target, attack the 3rd.',
+  side_out_builders: 'Pass to a spot, then hit the third touch.',
   competitive_pair: 'Tougher serves, game-like play.',
 }
 

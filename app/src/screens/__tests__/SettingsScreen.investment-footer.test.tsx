@@ -86,7 +86,7 @@ describe('SettingsScreen investment footer (R13)', () => {
     // Wait for the always-present storage section so we know the screen
     // has settled. (T2: the footer privacy line was removed — durability
     // now lives once, in this storage section.)
-    await screen.findByText(/about local storage/i)
+    await screen.findByText(/where your sessions live/i)
 
     expect(screen.queryByTestId('settings-investment-footer')).not.toBeInTheDocument()
     expect(screen.queryByText(/^Logged:/)).not.toBeInTheDocument()

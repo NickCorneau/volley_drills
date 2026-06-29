@@ -119,7 +119,7 @@ describe('RunScreen get-ready beat (Stage 4, U4)', () => {
     useRunControllerMock.mockReset()
   })
 
-  it('renders a read-first body: title, full setup read, and the count/eyebrow header', () => {
+  it('renders a read-first body: title, upcoming duration, full setup read, and the Next: counter', () => {
     useRunControllerMock.mockReturnValue(controller())
     renderRun()
 
@@ -127,11 +127,26 @@ describe('RunScreen get-ready beat (Stage 4, U4)', () => {
     expect(
       screen.getByText(/Server feeds float serves\. Passer holds a still platform/),
     ).toBeInTheDocument()
-    // Shared RunFlowHeader holds across get-ready → live (R11): the counter renders here too.
-    expect(screen.getByText('2/3')).toBeInTheDocument()
+    // 2026-06-29 continuity restore: the shared RunFlowHeader counter carries
+    // the `Next:` prefix on get-ready (mirrors the former Transition counter)
+    // so it pairs with Drill Check's `Last: N/M`; the live beat keeps `N/M`.
+    expect(screen.getByText('Next: 2/3')).toBeInTheDocument()
+    // The upcoming-block duration is restored near the title cluster.
+    expect(screen.getByText('6 min')).toBeInTheDocument()
     // The live one-cue ("Now") and its recovery peek belong to the live beat only.
     expect(screen.queryByText(RUN_FLOW_LABELS.cue)).toBeNull()
     expect(screen.queryByText(RUN_FLOW_LABELS.peek)).toBeNull()
+  })
+
+  it('keeps the live (DO-CONFIRM) beat counter bare — no Next: prefix, no duration line', () => {
+    useRunControllerMock.mockReturnValue(controller({ isGetReady: false }))
+    renderRun()
+
+    expect(screen.getByText('2/3')).toBeInTheDocument()
+    expect(screen.queryByText('Next: 2/3')).toBeNull()
+    // The duration line is a get-ready orientation aid; the live cockpit owns
+    // the running clock (BlockTimer) and does not restate the planned length.
+    expect(screen.queryByText('6 min')).toBeNull()
   })
 
   it('Start is the dominant CTA and fires handleStart (not the shortened start)', async () => {

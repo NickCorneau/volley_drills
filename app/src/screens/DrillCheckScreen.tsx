@@ -238,7 +238,7 @@ export function DrillCheckScreen() {
             aria-live="polite"
             data-testid="drill-check-gating-hint"
           >
-            Tag how that drill went to keep going.
+            Pick how that drill went to keep going.
           </p>
         )}
         {/*

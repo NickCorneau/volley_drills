@@ -423,7 +423,7 @@ export function CompleteScreen() {
               `docs/archive/plans/2026-04-23-walkthrough-closeout-polish.md`):
               the posture-sensitive Safari-eviction footnote was
               compressed off the terminal verdict surface and into the
-              Settings "About local storage" sub-section. The save
+              Settings "Where your sessions live" sub-section. The save
               line above (`storageCopy.primary`) stays exactly as-is
               — it is the single most trust-building sentence in the
               product per the design review — and a small

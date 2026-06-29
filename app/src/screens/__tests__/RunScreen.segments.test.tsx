@@ -13,10 +13,10 @@ import { RunScreen } from '../RunScreen'
  *  1. **Render**: when the active block has structured `segments`,
  *     RunScreen renders the structured `<SegmentList>` (one row per
  *     segment, exactly one with `aria-current="step"`). The full
- *     `courtsideInstructions` read no longer renders inline on Run
- *     (run-flow beat contract Stage 1, R7b — it is homed on
- *     Transition). The cockpit footer (`BlockTimer`, `RunControls`)
- *     still renders.
+ *     `courtsideInstructions` read no longer renders inline on the live Run
+ *     face (run-flow beat contract Stage 1, R7b — it is homed on the Run
+ *     get-ready beat, post-D167; formerly Transition). The cockpit footer
+ *     (`BlockTimer`, `RunControls`) still renders.
  *  2. **Fallback**: a block without `segments` renders the single
  *     "Now" cue and NO `<ul>` (R5 regression guard); the full prose
  *     read no longer appears on Run (R7b).

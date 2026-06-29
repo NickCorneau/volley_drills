@@ -26,8 +26,9 @@ import { RunScreen } from '../RunScreen'
  *   continue to pin the run-card type hierarchy: the live "Now" cue and
  *   the cue-disclosure prose use the shared run-flow `text-base` role.
  *   (Run-flow beat contract Stage 1 / R7b removed the full
- *   courtsideInstructions read from Run — it is homed on Transition —
- *   so only cue prose is pinned here now.)
+ *   courtsideInstructions read from the live Run face — it is homed on the
+ *   Run get-ready beat (post-D167; formerly Transition) — so only cue prose
+ *   is pinned here now.)
  *
  * The seeded plan still carries `rationale` on the block so the
  * data field stays exercised in tests; the block render simply
@@ -306,8 +307,9 @@ describe('RunScreen: body-typography invariants (P1-11 / cca2 dogfeed F1)', () =
 
   it('does not render the full courtsideInstructions read on Run (R7b)', async () => {
     // Run-flow beat contract Stage 1 (R7b): the full read moved to its
-    // single home on Transition. The seeded block's instructions prose
-    // must not appear on Run — not inline, not behind a disclosure.
+    // single home on the Run get-ready beat (post-D167; formerly Transition).
+    // The seeded block's instructions prose must not appear on the live Run
+    // face — not inline, not behind a disclosure.
     await seedPausedSession('exec-instr', 'plan-instr')
     renderAt('exec-instr')
 

@@ -272,9 +272,11 @@ If you are about to paint a new UI element, pick from this table. If the element
 - All screen titles, section headings, button labels, and eyebrow labels: **sentence case** (§1.4).
 - Period at the end of footer copy and standalone explainer sentences. No period on button labels, chip labels, single-word titles, or eyebrow labels.
 - Use the typographic middle dot `·` (U+00B7) as a separator in meta lines: `Solo + Net · 15 min · today`. Do not use `|`, `-`, or `/` in this position.
-- Use an em dash `—` (U+2014) for parenthetical asides. Do not use `--` or two hyphens.
+- No em dash (`—`, U+2014) in user-visible prose. Use commas, periods, or colons for asides; parentheses for true parentheticals. The en dash (`–`, U+2013) is permitted only inside numeric ranges (`2–3 m`, `1–4 wks`). Do not use `--` or two hyphens.
 - Numerals in prose: spell out zero through nine unless adjacent to a unit (`3 min`, `2+`, `0 days`, `1 day`).
 - Units: short form, lowercase, single space (`15 min`, not `15 Mins` or `15min`).
+
+**Canon-vs-code reconciliation (2026-06-29, copy/UX cleanup plan / `D168`).** This section previously read "Use an em dash for parenthetical asides," which contradicted the enforced `courtside-copy` rule 4 (no em-dash in user-visible courtside prose) and the `CompleteScreen` copy-guard test. The em-dash allowance is retired; `courtside-copy` rule 4 is authoritative for all user-visible app copy. The lone remaining app em-dash (the `RecentSessionsList` strong-week line) was converted to a comma in the same pass. Em-dashes in this note's own author-facing prose are unaffected — rule 4 scopes to app copy surfaces (`app/src/data/drills.ts`, `app/src/screens/**`, `app/src/components/**`). See `D168` in `docs/decisions.md`.
 
 ### 3.3 Verdict copy palette
 
@@ -415,7 +417,7 @@ If a new UI element needs a glyph, draw an inline SVG with:
 ### 6.4 Disabled
 
 - Full-width primary button when disabled: **neutral gray "not yet"** — `bg-text-secondary/10 text-text-primary cursor-not-allowed` (full opacity), not a washed-out accent. The disabled primary deliberately does *not* read as "the same button, muted": a half-transparent accent CTA invites the tap it can't honor, while the neutral form reads as "this becomes the button once you give the gating input." All other variants disable via `opacity-50`. **Correction (2026-06-11, `D153`):** this row previously claimed `opacity-50` on the same accent color; shipped code (`Button.tsx` `disabledStyles.primary`, with inline rationale) has used the neutral-gray treatment — canon now records it.
-- Always include a visible helper line above disabled primary buttons explaining why it is disabled: "Rate your effort above to submit.", "Pick a reason you ended early to submit.", "Tag how that drill went to keep going.", "Tell us when you last trained to start." The helper sits in an `aria-live="polite"` region so screen readers announce it on state change.
+- Always include a visible helper line above disabled primary buttons explaining why it is disabled: "Rate your effort above to submit.", "Pick a reason you ended early to submit.", "Pick how that drill went to keep going.", "Tell us when you last trained to start." The helper sits in an `aria-live="polite"` region so screen readers announce it on state change.
 - **Disabled-primary may legitimately read low-emphasis at glance distance** (notably on `DrillCheckScreen` and `SafetyCheckScreen` while their gating chips are unselected). This is correct — the variant is `primary`, the disabled state is the muted form, the helper line carries the "why" voice. Do not "fix" a disabled-primary by promoting it visually or by demoting a matching sibling primary (e.g., `TransitionScreen.Start next block`) to "match the low-emphasis." The asymmetry is the load-bearing signal that the user has gating input to give. Added 2026-05-25 (audit follow-up plan U5).
 
 ### 6.5 Success
@@ -442,7 +444,7 @@ Each screen has an intended posture. These are the reference treatments; when ad
 - One primary card, exactly, chosen by the 5-variant precedence (`resume > review_pending > draft > last_complete > new_user`). This is the covenant's lifecycle-only focal rule (`D156`, below): no other surface may occupy the focal slot, with the single scheduled exception recorded in the covenant's tenancy contract.
 - `last_complete` internals (`D152`, restructured by `D158` 2026-06-12 — the shibui v2-04 card): the card carries ONLY the plan — state line (`Ready to train again.`), a quiet `Recommended` uppercase micro-label eyebrow, the focal CTA `Start {focus} session` (the card IS the plan), and the `Then: {backlog gerunds}.` queue line. The pre-`D158` metadata line (`Last session: …`) and in-card link stack were removed: Recent sessions' top row owns recency/outcome, and `Start a different session` renders as a **page-level quiet link below the focal cluster** — the single custom-escape affordance (covenant job 3). One card shape for every `last_complete` state (completed, wrapped, ended-early).
 - Repeat affordances (retired, `D158`): `Repeat last session` / `Repeat full plan` / `Repeat shorter version (N min)` and the `REPEAT_SUBSET_MIN_MINUTES` floor were removed after seven unused weeks of founder-use mode — Setup's silent chip prefill (`getLastContext()`) plus the focal plan-launch CTA cover the same intents. Do not reintroduce a repeat affordance without a new decision row citing `D158`.
-- Recent block (`D152`): the `Recent sessions` h2 absorbs the weekly receipt — an optional `Last week: N sessions[ — ahead of your usual rhythm].` consistency line plus felt-difficulty lines render under the header, and the rows themselves are a quiet `day · focus · Done/Partial` three-column list. There is no standalone weekly-receipt section.
+- Recent block (`D152`): the `Recent sessions` h2 absorbs the weekly receipt — an optional `Last week: N sessions[, ahead of your usual rhythm].` consistency line plus felt-difficulty lines render under the header, and the rows themselves are a quiet `day · focus · Done/Partial` three-column list. There is no standalone weekly-receipt section. (The example's separator was an em-dash pre-`D168`; converted to a comma per `courtside-copy` rule 4 in the 2026-06-29 copy/UX pass.)
 - Optional secondary-rows cluster below the primary, as a single soft-container list (F1). Secondary rows flatten their surface; only the list container holds the shadow/ring.
 - Footer: `Settings` link + `Your data stays on this device.` in `text-xs text-text-secondary`.
 
@@ -526,7 +528,7 @@ Home's identity, in the founder's words: **calmly and obviously start the next s
 Added 2026-05-25 (audit follow-up plan U5).
 
 - `DrillCheckScreen` is the single-purpose per-drill capture surface. One primary `Continue` CTA in the footer, gated on a capture-chip selection.
-- The `Continue` button is `variant="primary"` (solid-accent when enabled); when the gating chip is unselected, it reads disabled — the muted form per §6.4. The `drill-check-gating-hint` aria-live region above carries the "why" copy (`Tag how that drill went to keep going.`).
+- The `Continue` button is `variant="primary"` (solid-accent when enabled); when the gating chip is unselected, it reads disabled — the muted form per §6.4. The `drill-check-gating-hint` aria-live region above carries the "why" copy (`Pick how that drill went to keep going.`).
 - Do **not** promote this button (no disabled-state restyle to enabled-look-alike), and do **not** demote the matching `TransitionScreen.Start next block` to match. The asymmetry between the two adjacent between-block CTAs is the load-bearing signal that tagging is required input. See `docs/design/reviews/2026-05-24-agent-e2e-design-critique.md` L1 + the inline code comment at `app/src/screens/DrillCheckScreen.tsx` near the `Continue` button.
 
 ### 7.8 Modals (Resume, Soft-block, Schema-blocked)

@@ -395,16 +395,17 @@ export function SafetyCheckScreen() {
         </ChoiceSection>
 
         <ChoiceSection
-          title="Any pain that's sharp, or makes you guard a movement?"
+          title="Any pain that's sharp, or that you're working around?"
           description="Regular muscle soreness is fine. We'll switch to a lighter session if yes."
         >
-          {/* 2026-04-20 physio-review: the original "pain that changes how
-            you move" read to most users as "am I visibly limping," but
-            the early warning sign is usually subtle guarding or
-            avoidance. The parenthetical gives permission to distinguish
-            DOMS from something that actually warrants a lighter
-            session, which most recreational athletes find hard to
-            self-sort. */}
+          {/* 2026-04-20 physio-review (D129): the original "pain that
+            changes how you move" read to most users as "am I visibly
+            limping," but the early warning sign is usually subtle
+            guarding or avoidance. (2026-06-29 copy pass: the question
+            de-jargoned from "makes you guard a movement?" to "that
+            you're working around?", plainer wording for the same
+            subtle-guarding intent, so a recreational athlete can still
+            self-sort DOMS from pain that warrants a lighter session.) */}
           <ChoiceRow<'no' | 'yes'>
             value={painFlag === null ? null : painFlag ? 'yes' : 'no'}
             onChange={(next) => setPainFlag(next === 'yes')}
@@ -412,7 +413,7 @@ export function SafetyCheckScreen() {
               { value: 'no', label: 'No' },
               { value: 'yes', label: 'Yes', tone: 'warning' },
             ]}
-            ariaLabel="Sharp pain or guarding"
+            ariaLabel="Sharp pain or pain you work around"
           />
         </ChoiceSection>
 

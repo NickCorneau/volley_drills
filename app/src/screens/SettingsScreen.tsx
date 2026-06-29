@@ -171,7 +171,7 @@ export function SettingsScreen() {
                 `docs/plans/2026-05-25-005-polish-design-critique-residuals-plan.md`,
                 `D145`): card heading bumped from `text-sm` (14 px) to
                 `text-base` (16 px) so it matches its sibling card h2s
-                ("Export training records" and "About local storage")
+                ("Export training records" and "Where your sessions live")
                 — three stacked cards on one screen, all section h2s,
                 same hierarchy tier per `brand-ux-guidelines.md` §1.2
                 "Section h2" row. The pre-fix 14 px reading was the
@@ -201,8 +201,9 @@ export function SettingsScreen() {
           </section>
         ) : null}
 
-        {/* 2026-04-23 walkthrough closeout polish item 3: About local
-            storage sub-section, below the Export card. Scope-guardian
+        {/* 2026-04-23 walkthrough closeout polish item 3: storage info
+            sub-section ("Where your sessions live"; "About local storage"
+            pre-2026-06-29 copy pass), below the Export card. Scope-guardian
             A7 discipline (Settings stays single-card minimal in Tier
             1b) allows this addition because it is the *same* D118
             copy previously on CompleteScreen's terminal verdict
@@ -222,7 +223,7 @@ export function SettingsScreen() {
           className={cx(SOFT_SURFACE_CLASS, 'flex flex-col gap-2')}
         >
           <h2 id="settings-storage-heading" className="text-base font-semibold text-text-primary">
-            About local storage
+            Where your sessions live
           </h2>
           <p className="text-sm font-medium text-text-primary">{storageCopy.primary}</p>
           <p className="text-sm leading-relaxed text-text-secondary">{storageCopy.secondary}</p>

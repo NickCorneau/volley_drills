@@ -351,7 +351,10 @@ describe('DrillCheckScreen per-drill capture (Item 9 / D133)', () => {
     await screen.findByTestId('per-drill-capture')
     const cont = screen.getByRole('button', { name: /continue/i })
     expect(cont).toBeDisabled()
-    expect(screen.getByTestId('drill-check-gating-hint')).toBeInTheDocument()
+    const gatingHint = screen.getByTestId('drill-check-gating-hint')
+    expect(gatingHint).toBeInTheDocument()
+    // 2026-06-29 copy pass: pin the de-jargoned gating hint ("Tag" -> "Pick").
+    expect(gatingHint).toHaveTextContent(/pick how that drill went to keep going/i)
 
     fireEvent.click(screen.getByRole('radio', { name: /still learning/i }))
 

@@ -105,7 +105,9 @@ describe('SkillLevelScreen (C-3 Unit 2 / D121)', () => {
     expect(within(rally).getByText(/pass easy serves, short rallies/i)).toBeInTheDocument()
 
     const sideOut = screen.getByRole('button', { name: /side-out builders/i })
-    expect(within(sideOut).getByText(/pass to target, attack the 3rd/i)).toBeInTheDocument()
+    expect(
+      within(sideOut).getByText(/pass to a spot, then hit the third touch/i),
+    ).toBeInTheDocument()
 
     const comp = screen.getByRole('button', { name: /competitive pair/i })
     expect(within(comp).getByText(/tougher serves, game-like play/i)).toBeInTheDocument()

@@ -15,7 +15,7 @@ import {
 } from '../components/ui'
 import { RUN_FLOW_LABELS } from '../contracts/runFlowLexicon'
 import { getBlockSkillFocus } from '../domain/drillMetadata'
-import { blockEyebrowLabel, splitCueLines } from '../lib/format'
+import { blockEyebrowLabel, formatDuration, splitCueLines } from '../lib/format'
 import { routes } from '../routes'
 import { segmentListOwnsCurrentCue, selectNonSegmentedCurrentCue } from './run/currentCue'
 import { useRunController } from './run/useRunController'
@@ -115,20 +115,22 @@ export function RunScreen() {
   // alternate. Warmup/wrap are always empty per D85/D105.
   const segmentListOwnsCue = segmentListOwnsCurrentCue(currentBlock)
   const currentCue = segmentListOwnsCue ? null : selectNonSegmentedCurrentCue(currentBlock)
-  // Run-flow beat contract Stage 1 (R7b / R16): Run is the one-cue
-  // DO-CONFIRM cockpit. The full `courtsideInstructions` read is homed
-  // only on Transition now; Run renders just the live "Now" cue plus an
-  // extra-COACHING-CUES disclosure (rule 12a). Any cues beyond
-  // `coachingCues[0]` stay one tap away behind "Show more cues"; the full
-  // prose read is gone from Run until Stage 2's recovery peek.
+  // Run-flow beat contract Stage 1 (R7b / R16): the live Run face is the
+  // one-cue DO-CONFIRM cockpit. The full `courtsideInstructions` read is
+  // homed on the Run get-ready beat (post-D167; formerly Transition); the
+  // live face renders just the "Now" cue plus an extra-COACHING-CUES
+  // disclosure (rule 12a). Any cues beyond `coachingCues[0]` stay one tap
+  // away behind "Show more cues"; the full prose read is recovered on the
+  // live face via Stage 2's Peek setup.
   const hasMoreCues =
     currentBlock.coachingCue.trim().length > 0 &&
     currentBlock.coachingCue.trim() !== currentCue?.text
   // Run-flow beat contract Stage 2 (D165, R8/R9/R10): the full setup read
-  // is homed on Transition, never inline on the live face. When the block
-  // carries one, Run offers a deliberate one-touch "Peek setup" recovery
-  // that overlays it on demand (timer keeps running) — gated on the read
-  // existing so segmented drills with no prose overview show no empty peek.
+  // is homed on the Run get-ready beat (post-D167; formerly Transition),
+  // never inline on the live face. When the block carries one, the live
+  // face offers a deliberate one-touch "Peek setup" recovery that overlays
+  // it on demand (timer keeps running) — gated on the read existing so
+  // segmented drills with no prose overview show no empty peek.
   const hasSetupRead = currentBlock.courtsideInstructions.trim().length > 0
 
   return (
@@ -210,6 +212,11 @@ export function RunScreen() {
         }
         counter={
           <span className="text-sm font-medium text-text-secondary">
+            {/* 2026-06-29 continuity restore: the get-ready beat carries the
+              `Next:` counter prefix the D167 collapse dropped from Transition,
+              so the between-block read pairs with Drill Check's `Last: N/M`.
+              The live DO-CONFIRM beat keeps the bare `N/M`. */}
+            {isGetReady ? 'Next: ' : ''}
             {currentBlockIndex + 1}/{totalBlocks}
           </span>
         }
@@ -244,9 +251,20 @@ export function RunScreen() {
             )}
 
             <div className="flex flex-col gap-1">
-              <h1 className="text-xl font-semibold tracking-tight text-text-primary">
-                {currentBlock.drillName}
-              </h1>
+              {/* 2026-06-29 continuity restore: the D167 collapse folded
+                Transition into get-ready but dropped its upcoming-block
+                duration. Restored beside the title (reusing the
+                `formatDuration` source Transition used) so the athlete sees
+                the block length before tapping Start; the live cockpit owns
+                the running clock and gains nothing. */}
+              <div className="flex items-baseline justify-between gap-3">
+                <h1 className="text-xl font-semibold tracking-tight text-text-primary">
+                  {currentBlock.drillName}
+                </h1>
+                <span className="shrink-0 text-sm font-medium text-text-secondary">
+                  {formatDuration(currentBlock.durationMinutes)}
+                </span>
+              </div>
               {/* M002.2 technique-how (D163/D166): the authored stress-rung
                 intent — what this rung trains — as one quiet subtitle, on a
                 focus run's opening block only. */}
@@ -360,8 +378,9 @@ export function RunScreen() {
             {/*
              * Run-flow beat contract Stage 1 (R7b): the disclosure is now
              * cue-only. The full `courtsideInstructions` read moved to its
-             * single home on Transition; Run keeps the rule-12a "remaining
-             * cues" affordance. Cues stack one per line (design-language
+             * single home on the Run get-ready beat (post-D167; formerly
+             * Transition); the live face keeps the rule-12a "remaining cues"
+             * affordance. Cues stack one per line (design-language
              * 2026-06-11) so the dot separator never collides with sentence
              * periods.
              */}
@@ -386,9 +405,9 @@ export function RunScreen() {
              * NOT a small disclosure — Stage 1 removed the inline read on
              * purpose; this is how a winded athlete re-reads the setup
              * mid-rep. Tapping it overlays the full read (the same
-             * `courtsideInstructions` homed on Transition) WITHOUT pausing
-             * the block timer (R10: one full-weight home; the peek is
-             * transient recovery, not a second home).
+             * `courtsideInstructions` homed on the get-ready beat post-D167)
+             * WITHOUT pausing the block timer (R10: one full-weight home;
+             * the peek is transient recovery, not a second home).
              */}
             {hasSetupRead && (
               <Button variant="outline" fullWidth onClick={() => setPeekOpen(true)}>
@@ -475,8 +494,9 @@ export function RunScreen() {
 
           {peekOpen && (
             // Recovery peek overlay (Stage 2, D165, R9): the full setup read,
-            // rendered with the same `GlossedText` treatment as its Transition
-            // home, in a bottom-sheet. Reuses `ActionOverlay` (focus trap +
+            // rendered with the same `GlossedText` treatment as its get-ready
+            // home (post-D167; formerly Transition), in a bottom-sheet. Reuses
+            // `ActionOverlay` (focus trap +
             // Escape-to-dismiss + inert siblings). The block timer keeps
             // running underneath — nothing here calls a pause path.
             <ActionOverlay

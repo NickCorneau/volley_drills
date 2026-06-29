@@ -38,9 +38,9 @@ export function PainOverrideCard({
           warning-triangle SVG was removed — the heading leads the card
           directly. */}
       <div>
-        <h3 className="font-semibold text-text-primary">Switched to a lighter session</h3>
+        <h3 className="font-semibold text-text-primary">Lighter session ready</h3>
         <p className="mt-1 text-sm leading-relaxed text-text-secondary">
-          Lower-load technique work today.
+          Easier drills today.
         </p>
       </div>
 
@@ -67,10 +67,13 @@ export function PainOverrideCard({
           `estimateRecoverySessionMinutes` contract), and the reason
           isn't explained to the user. One quiet line names the swap
           so the pick feels honest, not mysterious. Courtside-copy §2
-          rec-player check: `load` is used consistently in this card
-          (`Lower-load technique work today.` above) and rules out
+          rec-player check: `load` is kept only in this card's explainer
+          (`We lower the load, not the time.` below) and rules out
           "deload" / clinical jargon; `your pick` preserves agency
-          framing. The Override path below still exists for the tester
+          framing. (2026-06-29 copy/UX pass: the heading went present-
+          tense "Lighter session ready" and the sub-line de-jargoned
+          from "Lower-load technique work today." to "Easier drills
+          today." to drop the `technique` Run-phase collision.) The Override path below still exists for the tester
           who knows what they want. See
           `docs/research/partner-walkthrough-results/2026-04-21-tier-1a-walkthrough.md`
           wording-check `PainOverrideCard` row and
