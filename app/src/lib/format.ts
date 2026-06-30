@@ -25,7 +25,8 @@ export const CUE_SEPARATOR = ' · '
  * back into its individual cues for stacked-line rendering.
  *
  * The build-time `join(' · ')` produced a run-on paragraph on the
- * Transition `Cue` panel and the Run `Full coaching cue` disclosure:
+ * Transition `Cue` panel and the Run "Drill details" overlay cue list
+ * (formerly the inline "Full coaching cue" disclosure, merged 2026-06-29):
  * cues that end in a period collided with the separator (`". · "`),
  * and a 5-cue drill read as a wall of text instead of the READ-DO
  * checklist the cue list actually is. Display sites stack one cue per

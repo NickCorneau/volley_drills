@@ -90,6 +90,7 @@ export async function createSessionFromDraft(
       required: b.required,
       rationale: b.rationale,
       subBlockIntervalSeconds: b.subBlockIntervalSeconds,
+      segmentsCadenceLabel: b.segmentsCadenceLabel,
       segments: b.segments,
     })),
     safetyCheck,

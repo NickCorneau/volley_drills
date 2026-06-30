@@ -6,7 +6,7 @@ stage: validation
 type: spec
 summary: "The beat contract for the run flow (Transition / Run / Drill Check / Review): each athlete-facing field gets exactly one full-weight home, with named demoted and must-not-render placements, so the flow reads as one calm instrument. Stages 1-4 are shipped (D164, D165, D166, D167); Stage 4 collapsed Transition into a read-first Run get-ready beat, leaving Transition a reversible orphan."
 authority: canonical per-field placement contract for the run-flow beats and the run-flow label lexicon; gates where each athlete-facing field may render at full weight
-last_updated: 2026-06-23
+last_updated: 2026-06-30
 depends_on:
   - docs/decisions.md
   - docs/brainstorms/2026-06-23-run-flow-beat-contract-requirements.md
@@ -26,6 +26,9 @@ decision_refs:
   - D165
   - D166
   - D167
+  - D169
+  - D171
+  - D172
 ---
 
 # Run-Flow Beat Contract
@@ -59,12 +62,12 @@ Each athlete-facing field has one full-weight home. "Demoted" = present but seco
 | Field | Full-weight home | Demoted | Must-not-render |
 |---|---|---|---|
 | Drill identity (title + eyebrow + duration) | Run get-ready (READ-DO setup) and Run header | — | — |
-| Full setup read (`courtsideInstructions`) | Run get-ready (full `GlossedText` read; READ-DO home migrated off Transition) | Run "Peek setup" overlay (D165 recovery only; timer keeps running) | **Run live cockpit body** (removed Stage 1; recoverable only via the transient peek) |
-| Live coaching cue (`coachingCues[0]`) | Run "Now" | Run "Show more cues" (remaining cues, rule 12a) | **Run get-ready** (no "Cue" / "More cues" block — the cue's only home is the live "Now") |
+| Full setup read (`courtsideInstructions`) | Run get-ready (full `GlossedText` read; READ-DO home migrated off Transition) | Run "Drill details" overlay (D165/D169 recovery only; timer keeps running; absent when the read is already on screen as the SegmentList) | **Run live cockpit body** (removed Stage 1; recoverable only via the transient overlay) |
+| Live coaching cue (`coachingCues[0]`) | Run "Now" | Run "Drill details" overlay (remaining cues, rule 12a; merged with the setup read into one control per D169) | **Run get-ready** (no "Cue" / "More cues" block — the cue's only home is the live "Now") |
 | Rung `intent` (technique-how, `D163`) | Run get-ready, **block-opening only** | — | mid-block get-ready; Run live; Drill Check |
 | Segment list (`segments`) | Run `SegmentList` | — | — |
 | Reflective + readiness rung content (`explorationCriterion` / `graduationFeel`) | Review verdict-gated "Next time" card (`D161`/`D162`) | — | — |
-| Just-finished receipt (`D166` one-per-drill dedup) | Drill Check fuller pill when capture-eligible; else the bypass beat's quiet line (Run get-ready post-collapse) | — | duplicated on both Drill Check and the bypass beat for one drill |
+| Just-finished receipt | **Drill Check panel pill only** — there the finished drill is the capture *subject* (its `<h1>` is `sr-only`, `D145`), so the pill is the visible drill identity. **Removed `D171`** from the bypass beats. | — | Run get-ready and the Transition orphan (the quiet `line` receipt was dropped `D171`: restating the just-finished drill one tap later is redundant; continuity rests on stillness, `D166` R11) |
 
 ### Run-flow label lexicon
 
@@ -72,8 +75,7 @@ Canonical labels live in code at `app/src/contracts/runFlowLexicon.ts` (`RUN_FLO
 
 - **Action CTA = "Start"** (was "Start next block"; sunset).
 - **Live cue label = "Now"** (the Transition "Cue" label is retired).
-- **Run extra-cues disclosure = "Show more cues"** (the combined "Show more cues and instructions" is retired — the disclosure is cue-only now).
-- **Recovery peek (D165) = "Peek setup"** trigger / **"Back to drill"** dismiss (the Run on-demand setup overlay).
+- **Run recovery overlay (D165, merged D169) = "Drill details"** trigger / **"Back to drill"** dismiss. One control opens the on-demand overlay carrying BOTH the remaining coaching cues AND the full setup read (sections labeled "Cues" / "Setup" only when both render; **setup read first, then cues**, per `D172` — the cues lean on terms the read defines, so the read grounds them and the crisp cues land last as the send-off above "Back to drill"). The prior split — an inline cue-only "Show more cues" disclosure plus a separate "Peek setup" read button — is retired; both strings are sunset (`SUNSET_RUN_FLOW_LABELS`), alongside the earlier-retired combined "Show more cues and instructions".
 - Swap / Shorten / Skip / block-counter strings are contextual variants recorded as canonical-at-current-strings; their normalization is a deferred founder pass, not drift.
 
 ## Block-Opening Rule (rung intent, R6)
@@ -86,8 +88,8 @@ Risk-ordered and founder-dogfood-gated (origin: `docs/brainstorms/2026-06-23-run
 
 - **Stage 0 — Contract + lexicon.** This doc + `runFlowLexicon.ts`. **Shipped (D164).**
 - **Stage 1 — Lean the beats apart.** Cut the Transition cue; gate rung intent to block-opening; remove Run's full read. **Shipped (D164).**
-- **Stage 2 — Safe recovery.** A glare-safe one-touch "Peek setup" overlay recovers the full read on Run while the block timer keeps running; the read keeps its single full-weight home on Transition (the preroll full read is Stage 4, not Stage 2). **Shipped (D165).**
-- **Stage 3 — Felt continuity.** Thread felt continuity across the seams; render the just-finished receipt once (shared `drillCheckBypassedForPreviousBlock` dedup) and pin continuity-by-stillness (identical forward title typography + shared header, no motion). **Shipped (D166).**
+- **Stage 2 — Safe recovery.** A glare-safe one-touch overlay recovers the full read on Run while the block timer keeps running; the read keeps its single full-weight home on the get-ready beat. **Shipped (D165); merged with the Stage-1 extra-cues disclosure into one "Drill details" control (D169, 2026-06-29)** — see the lexicon note and the beat-contract table.
+- **Stage 3 — Felt continuity.** Thread felt continuity across the seams; render the just-finished receipt once (shared `drillCheckBypassedForPreviousBlock` dedup) and pin continuity-by-stillness (identical forward title typography + shared header, no motion). **Shipped (D166).** **Amended (D171, 2026-06-30):** the quiet `line` receipt on the bypass beats (Run get-ready + Transition orphan) was removed as redundant — continuity now rests on the stillness mechanism alone (the `RunFlowContinuity.stillness.test.tsx` guard is unchanged), and only the Drill Check panel pill remains (as the capture-subject identity). `drillCheckBypassedForPreviousBlock` is retained for the Drill-Check-vs-bypass *routing* it still governs.
 - **Stage 4 — Optional collapse.** Reversible, read-first collapse of the decide-step into a Run **get-ready** beat (the athlete taps "Start" when ready; **no auto-advance** — a resting athlete is never rushed; preroll gates on Start). Drill Check now flows straight to `/run`; `TransitionScreen` + `/run/transition` are retained as a reversible orphan (`D137` redirect pattern, zero `routes.transition()` call sites). The READ-DO setup read + block-opening intent migrate onto the get-ready. **Shipped (D167).**
 
 ## Invariants Preserved

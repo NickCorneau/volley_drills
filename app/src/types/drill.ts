@@ -209,6 +209,30 @@ export interface DrillVariant {
   courtsideInstructionsBonus?: string
   coachingCues: string[]
   /**
+   * Optional list-level cadence header for composed `segments`, shown
+   * once above the `<SegmentList>` (e.g., "Continuous hold", "Continuous").
+   *
+   * Rule 7 (`.cursor/rules/courtside-copy.mdc`, cadence-format sub-rule)
+   * requires every timed segment to name its cadence/load. When ALL
+   * segments in a list share one cadence format, naming it on every row
+   * reads as repetitive prose — so the shared cadence is hoisted here and
+   * the per-row prefix is dropped. Segments whose cadence DIFFERS from
+   * this default keep an inline cadence prefix on their own label (e.g.,
+   * d28's one "rep-paced at game tempo:" segment under a "Continuous"
+   * default) — that prefix leads lowercase too, so the row's casing
+   * matches the lowercase movement-led rows.
+   *
+   * `<SegmentList>` auto-appends "· each side" to this header when every
+   * segment is `eachSide`, and then suppresses the per-row "(each side)"
+   * suffix so the reminder is stated once, not on every row. Authors set
+   * the cadence only here (no "each side" in the string).
+   *
+   * Authoring contract: only meaningful when `segments` is present.
+   * Snapshotted to `DraftBlock` / `SessionPlanBlock` alongside `segments`.
+   * 2026-06-29 segment-density pass (`D170`).
+   */
+  segmentsCadenceLabel?: string
+  /**
    * Pre-close 2026-04-21 (partner-walkthrough P2-2): drills authored
    * with internal timed sub-blocks declare the tick cadence here. When
    * set, `RunScreen` fires a subtle sub-block tick at every multiple

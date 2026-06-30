@@ -1,6 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { RUN_FLOW_LABELS } from '../../contracts/runFlowLexicon'
 import type { SessionPlanBlock } from '../../model'
 import { RunScreen } from '../RunScreen'
 import { useRunController } from '../run/useRunController'
@@ -83,9 +84,6 @@ function controller(overrides: Partial<ReturnType<typeof useRunController>> = {}
     handleShorten: vi.fn(),
     handleSwap: vi.fn(),
     isGetReady: false,
-    prevBlock: null,
-    prevBlockStatus: null,
-    showJustFinishedReceipt: false,
     rungIntentLine: null,
     handleStart: vi.fn(),
     handleStartShortened: vi.fn(),
@@ -101,46 +99,40 @@ describe('RunScreen Run Face v1', () => {
     useRunControllerMock.mockReturnValue(controller())
   })
 
-  it('renders one current cue and keeps extra cues behind a cue-only disclosure', async () => {
+  it('renders one current cue and keeps the rest behind the Drill details overlay', async () => {
     const user = userEvent.setup()
     renderRun()
 
     expect(screen.getByText(/^Now$/)).toBeInTheDocument()
-    // Run-flow beat contract Stage 1 (R7b): the live face shows one
-    // "Now" cue; the remaining cues stack one-per-line behind the
-    // disclosure, so the first cue's text also exists (hidden) inside
-    // the closed <details>. Scope the live-face assertion to the `Now`
+    // Run-flow beat contract Stage 1+2 merge (2026-06-29): the live face
+    // shows one "Now" cue. Scope the live-face assertion to the `Now`
     // region to keep this test pinning "one current cue on the live face."
     const nowRegion = screen.getByRole('region', { name: 'Now' })
     expect(within(nowRegion).getByText('Caller names short or deep')).toBeInTheDocument()
     expect(screen.queryByRole('alert')).toBeNull()
-    // The disclosure is cue-only now ("Show more cues"); the old
-    // "...and instructions" label and the full instructions read are
-    // gone from the live face — the read is homed on the Run get-ready beat
-    // (post-D167; formerly Transition) (R7b).
-    const summary = screen.getByText(/^Show more cues$/i)
-    expect(screen.queryByText(/Show more cues and instructions/i)).toBeNull()
-    const details = summary.closest('details')
-    expect(details).not.toHaveAttribute('open')
 
-    await user.click(summary)
-
-    expect(details).toHaveAttribute('open')
-    const fullCue = screen.getByLabelText(/Full coaching cue/i)
-    expect(fullCue).toBeVisible()
-    // Design-language pass 2026-06-11: the stored `join(' · ')` cue
-    // string renders as stacked lines (one cue per line) instead of a
-    // dot-joined run-on paragraph, so assert each cue is present rather
-    // than the literal separator.
-    expect(fullCue).toHaveTextContent('Caller names short or deep')
-    expect(fullCue).toHaveTextContent('Partner shades the seam')
-    // R7b discriminator: the courtsideInstructions read never renders on
-    // Run, even inside the disclosure.
-    expect(screen.queryByLabelText(/Full drill instructions/i)).toBeNull()
+    // The inline "Show more cues" disclosure is gone. Neither the extra cues
+    // nor the setup read compete on the live face by default — both are one
+    // tap away in the single "Drill details" overlay.
+    expect(screen.queryByText('Partner shades the seam')).toBeNull()
     expect(screen.queryByText(/One player serves easy balls/i)).toBeNull()
+
+    await user.click(screen.getByRole('button', { name: RUN_FLOW_LABELS.peek }))
+
+    const dialog = screen.getByRole('dialog')
+    // Design-language pass 2026-06-11: the stored `join(' · ')` cue string
+    // renders as stacked lines (one cue per line), so assert each cue is
+    // present rather than the literal separator.
+    expect(within(dialog).getByText('Caller names short or deep')).toBeInTheDocument()
+    expect(within(dialog).getByText('Partner shades the seam')).toBeInTheDocument()
+    // The merge (2026-06-29): the full setup read now lives in the SAME
+    // overlay as the cues — recoverable mid-rep without a second home.
+    expect(
+      within(dialog).getByText(/One player serves easy balls\. One player owns the call\./),
+    ).toBeInTheDocument()
   })
 
-  it('labels cue-only disclosure accurately for segmented blocks', async () => {
+  it('routes segmented extra cues into the Drill details overlay without the on-screen read', async () => {
     const user = userEvent.setup()
     useRunControllerMock.mockReturnValue(
       controller({
@@ -163,15 +155,14 @@ describe('RunScreen Run Face v1', () => {
 
     renderRun()
 
-    // 2026-05-10 first-time-runnability sweep: cue-only summary
-    // updated to "Show more cues" per courtside-copy.mdc rule 12(a).
-    const summary = screen.getByText(/Show more cues$/i)
-    expect(screen.queryByText(/Show more cues and instructions/i)).toBeNull()
+    await user.click(screen.getByRole('button', { name: RUN_FLOW_LABELS.peek }))
 
-    await user.click(summary)
-
-    expect(screen.getByLabelText(/Full coaching cue/i)).toBeVisible()
-    expect(screen.getByLabelText(/Full coaching cue/i)).toHaveTextContent('Short hops, loud feet.')
+    // The SegmentList carries the read on the live face, so the overlay
+    // carries the block's extra coaching cue only — the read is NOT
+    // duplicated (R2 density rule, 2026-06-29).
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByText('Short hops, loud feet.')).toBeInTheDocument()
+    expect(within(dialog).queryByText(/Four quick blocks/i)).toBeNull()
   })
 
   it('shows run errors without hiding the cockpit controls', () => {

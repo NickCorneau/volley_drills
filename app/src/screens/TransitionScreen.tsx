@@ -2,7 +2,6 @@ import { Link, useSearchParams } from 'react-router-dom'
 import {
   Button,
   GlossedText,
-  JustFinishedPill,
   RunFlowHeader,
   ScreenShell,
   StatusMessage,
@@ -23,9 +22,6 @@ export function TransitionScreen() {
     loaded,
     currentBlockIndex,
     totalBlocks,
-    prevBlock,
-    prevBlockStatus,
-    showJustFinishedReceipt,
     nextBlock,
     rungIntentLine,
     skipError,
@@ -88,28 +84,11 @@ export function TransitionScreen() {
       />
 
       <ScreenShell.Body rhythm="cockpit">
-        {/*
-         * Shibui polish 2026-06-12 (origin R7): the receipt is one quiet
-         * line so `Up next` keeps the focal weight on this screen. Drill
-         * check keeps the fuller panel pill — there the just-finished
-         * drill is the subject.
-         *
-         * Run-flow beat contract Stage 3 (R12): the receipt renders here
-         * only when the just-finished block bypassed Drill Check; when
-         * Drill Check showed it, `showJustFinishedReceipt` is false so the
-         * receipt is not duplicated one beat later.
-         */}
-        {showJustFinishedReceipt && prevBlock && (
-          <JustFinishedPill
-            drillName={prevBlock.drillName}
-            status={prevBlockStatus?.status === 'completed' ? 'completed' : 'skipped'}
-            presentation="line"
-          />
-        )}
-
-        {/* T3 (2026-06-22 shibui audit): the ScreenShell.Body gap
-          already separates the just-finished receipt from "Up next", so
-          the decorative hairline that sat here was removed. */}
+        {/* D171 (2026-06-30): no just-finished receipt. This Transition beat
+          is a reversible orphan (Stage-4 collapse, D167) kept in lock-step
+          with the live Run get-ready, which dropped the redundant receipt —
+          continuity rests on stillness (shared header + forward title, D166
+          R11), not a line restating the drill just finished. */}
         {skipError && <StatusMessage variant="error" message={skipError} />}
 
         {swapError && <StatusMessage variant="error" message={swapError} />}

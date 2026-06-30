@@ -67,13 +67,16 @@ describe('parseGlossedText', () => {
       ])
     })
 
-    it('parses an inner gloss inside outer parentheses without consuming the outer close-paren (line 1947 shape)', () => {
+    it('parses an inner gloss inside outer parentheses without consuming the outer close-paren (nested-gloss-in-parens shape)', () => {
       const parts = parseGlossedText(
         '(caller calls → you serve → caller shags (= brings the balls back) after the round) × 6 targets',
       )
       // The inner `(=` opens a gloss that closes at its own `)`, leaving
       // the outer `)` to render as plain text. The term span resolves
-      // against `shags` from the registry (the verb form).
+      // against `shags` from the registry (the verb form). Synthetic
+      // specimen: the catalog no longer authors this shape after the
+      // 2026-06-30 d33-pair-open readability rewrite, but the parser must
+      // still handle a nested gloss defensively, so the pin stays.
       expect(parts).toEqual([
         { type: 'text', text: '(caller calls → you serve → caller ' },
         { type: 'gloss', term: 'shags', definition: 'brings the balls back' },
@@ -121,6 +124,44 @@ describe('parseGlossedText', () => {
         p.type === 'gloss',
       )
       expect(gloss?.term).toBe('barfoo')
+    })
+  })
+
+  describe('case-insensitive registry matching (D175 capitalized segment leads)', () => {
+    /*
+     * D175 (2026-06-30): segment rows lead sentence-case so the live
+     * SegmentList reads as properly capitalized under its capitalized
+     * cadence header. The registry enumerates terms lowercase, so the
+     * parser matches case-insensitively and slices the ORIGINAL prefix for
+     * the displayed term. Without this, a capitalized multi-word term at a
+     * row start (e.g. `Hip flexor`) fell back to its last word (`flexor`),
+     * shrinking the gloss underline. These pin the d26-s3 + d28-s1 shapes.
+     */
+    it('resolves a capitalized multi-word registry term at a sentence start (keeps original casing)', () => {
+      const parts = parseGlossedText(
+        'Hip flexor (= front of upper thigh): half-kneel (= one knee on the ground, other foot in front), squeeze the back-leg glute.',
+      )
+      expect(parts).toEqual([
+        { type: 'gloss', term: 'Hip flexor', definition: 'front of upper thigh' },
+        { type: 'text', text: ': ' },
+        {
+          type: 'gloss',
+          term: 'half-kneel',
+          definition: 'one knee on the ground, other foot in front',
+        },
+        { type: 'text', text: ', squeeze the back-leg glute.' },
+      ])
+    })
+
+    it('resolves a single registry term after a capitalized non-term lead (A-skip survives `Jog or`)', () => {
+      const parts = parseGlossedText(
+        'Jog or A-skip (= skip forward, lifting the front knee) around the loop.',
+      )
+      expect(parts).toEqual([
+        { type: 'text', text: 'Jog or ' },
+        { type: 'gloss', term: 'A-skip', definition: 'skip forward, lifting the front knee' },
+        { type: 'text', text: ' around the loop.' },
+      ])
     })
   })
 

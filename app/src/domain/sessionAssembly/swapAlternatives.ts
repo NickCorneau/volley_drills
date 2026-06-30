@@ -158,6 +158,7 @@ function computeAlternatives(
       rationaleByDrillId.get(candidate.drill.id) ??
       deriveBlockRationale(block.type, candidate.drill, context),
     subBlockIntervalSeconds: candidate.variant.subBlockIntervalSeconds,
+    segmentsCadenceLabel: candidate.variant.segmentsCadenceLabel,
     segments: candidate.variant.segments,
   }))
 }

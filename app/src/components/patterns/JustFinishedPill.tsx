@@ -1,19 +1,8 @@
 export type JustFinishedStatus = 'completed' | 'skipped'
 
-export type JustFinishedPresentation = 'panel' | 'line'
-
 export type JustFinishedPillProps = {
   drillName: string
   status: JustFinishedStatus
-  /**
-   * `panel` (default) is the original warm panel + success-circle pill —
-   * Drill check keeps it because there the just-finished drill is the
-   * subject of the screen. `line` is the 2026-06-12 shibui-polish quiet
-   * receipt for Transition (origin R7): one `text-sm text-text-secondary`
-   * line with a small success-tone glyph, no panel fill, no semibold —
-   * so `Up next` keeps the screen's focal weight.
-   */
-  presentation?: JustFinishedPresentation
 }
 
 function CheckGlyph() {
@@ -60,33 +49,22 @@ const STATUS_LABEL: Record<JustFinishedStatus, string> = {
 /**
  * Plan U6 (2026-05-04): the verbatim copy-pasted "warm panel + success-tone
  * circle + drill name + Complete/Skipped subtitle" pill that previously
- * lived inline in `DrillCheckScreen` (always `completed`) and
- * `TransitionScreen` (variant on `prevBlockStatus`).
+ * lived inline in `DrillCheckScreen`.
  *
- * The success tone applies to BOTH variants — `Skipped` reads as a quiet
- * acknowledgement that the user moved on, not as a warning. The dash vs
- * check glyph carries the variant signal — on the `line` presentation it is
- * the ONLY variant signal, so both glyphs render at the same size and tone
- * (a skipped drill must be as legible as a completed one, origin R7).
+ * The only remaining home is Drill Check, where the just-finished drill is
+ * the SUBJECT of the capture screen (its visible `<h1>` is `sr-only`, D145),
+ * so this pill is the visible "which drill am I rating?" identity. The
+ * success tone applies to both statuses — `Skipped` reads as a quiet
+ * acknowledgement that the user moved on, not as a warning — and the dash
+ * vs check glyph carries the status signal.
+ *
+ * The 2026-06-12 shibui `line` quiet receipt (origin R7) on the Run
+ * get-ready beat + Transition orphan was removed 2026-06-30 (`D171`): a
+ * receipt that restates the drill the athlete just finished, one tap later,
+ * is redundant. Felt continuity now rests on stillness alone (shared header
+ * + identical forward title, `D166` R11), not a textual receipt.
  */
-export function JustFinishedPill({
-  drillName,
-  status,
-  presentation = 'panel',
-}: JustFinishedPillProps) {
-  if (presentation === 'line') {
-    return (
-      <p className="flex items-center gap-2 text-sm text-text-secondary">
-        <span className="shrink-0 text-success">
-          {status === 'completed' ? <CheckGlyph /> : <DashGlyph />}
-        </span>
-        <span>
-          {drillName} · {STATUS_LABEL[status]}
-        </span>
-      </p>
-    )
-  }
-
+export function JustFinishedPill({ drillName, status }: JustFinishedPillProps) {
   return (
     <div className="flex items-start gap-2.5 rounded-base bg-bg-warm p-3">
       <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success text-white">

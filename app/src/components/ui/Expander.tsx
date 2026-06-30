@@ -66,7 +66,13 @@ export function Expander({
         aria-expanded={open}
         aria-label={ariaLabel}
         className={cx(
-          'flex min-h-[54px] items-center gap-2 text-sm font-medium text-accent transition-colors hover:text-accent-pressed active:text-accent-pressed',
+          // Calm settings-list row: full width with the chevron pushed to
+          // the right edge, and quiet secondary ink rather than accent.
+          // Accent is reserved for primary action/status (brand §2); a
+          // disclosure is secondary by nature, so it should not compete with
+          // the screen's CTA. Callers house Expanders in one contained list
+          // surface (see SafetyCheckScreen) so the rows read as a group.
+          'flex min-h-[54px] w-full items-center justify-between gap-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary active:text-text-primary',
           triggerClassName,
         )}
       >

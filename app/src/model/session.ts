@@ -34,6 +34,12 @@ export interface SessionPlanBlock {
   rationale?: string
   subBlockIntervalSeconds?: number
   /**
+   * Optional list-level cadence header for composed `segments`, copied
+   * from `DrillVariant.segmentsCadenceLabel` on the same snapshot path as
+   * `segments`. Rendered once above the `<SegmentList>`. See `D170`.
+   */
+  segmentsCadenceLabel?: string
+  /**
    * Composed sub-segments snapshotted from `DrillVariant.segments` at
    * session-create time (see `services/session/commands.ts`). The
    * runner reads this from the plan-block snapshot and never re-reads

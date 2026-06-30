@@ -47,6 +47,7 @@ function currentBlock(overrides: BlockOverrides = {}): SessionPlanBlock {
     required: overrides.required ?? true,
     rationale: overrides.rationale,
     subBlockIntervalSeconds: overrides.subBlockIntervalSeconds,
+    segmentsCadenceLabel: overrides.segmentsCadenceLabel,
     segments: overrides.segments,
   }
 }

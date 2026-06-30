@@ -8,7 +8,6 @@ import {
   Button,
   ConfirmModal,
   GlossedText,
-  JustFinishedPill,
   RunFlowHeader,
   ScreenShell,
   StatusMessage,
@@ -28,10 +27,12 @@ export function RunScreen() {
   const [isEndingSession, setIsEndingSession] = useState(false)
   const endingSessionInFlightRef = useRef(false)
   // Run-flow beat contract Stage 2 (D165, R9): ephemeral local UI state for
-  // the recovery "Peek setup" overlay. It deliberately touches neither the
-  // timer nor persistence, so peeking the full read leaves the block clock
-  // running (the load-bearing contrast with Swap/Shorten/Pause, which pause).
-  const [peekOpen, setPeekOpen] = useState(false)
+  // the recovery "Drill details" overlay (2026-06-29 founder merge of the old
+  // inline "Show more cues" disclosure + the "Peek setup" button into one
+  // control). It deliberately touches neither the timer nor persistence, so
+  // opening details leaves the block clock running (the load-bearing contrast
+  // with Swap/Shorten/Pause, which pause).
+  const [detailsOpen, setDetailsOpen] = useState(false)
   // Run-flow beat contract Stage 4 (D167, R13): the get-ready "Adjust"
   // disclosure. Keeps Start + Shorten dominant in the footer; Swap / Skip
   // stay one cancelable tap away.
@@ -57,9 +58,6 @@ export function RunScreen() {
     currentSegmentIndex,
     effectiveSegments,
     isGetReady,
-    prevBlock,
-    prevBlockStatus,
-    showJustFinishedReceipt,
     rungIntentLine,
     handlePause,
     handleResume,
@@ -115,23 +113,36 @@ export function RunScreen() {
   // alternate. Warmup/wrap are always empty per D85/D105.
   const segmentListOwnsCue = segmentListOwnsCurrentCue(currentBlock)
   const currentCue = segmentListOwnsCue ? null : selectNonSegmentedCurrentCue(currentBlock)
-  // Run-flow beat contract Stage 1 (R7b / R16): the live Run face is the
-  // one-cue DO-CONFIRM cockpit. The full `courtsideInstructions` read is
-  // homed on the Run get-ready beat (post-D167; formerly Transition); the
-  // live face renders just the "Now" cue plus an extra-COACHING-CUES
-  // disclosure (rule 12a). Any cues beyond `coachingCues[0]` stay one tap
-  // away behind "Show more cues"; the full prose read is recovered on the
-  // live face via Stage 2's Peek setup.
+  // Run-flow beat contract Stage 1+2, merged (2026-06-29 founder call): the
+  // live Run face is the one-cue DO-CONFIRM cockpit — just the "Now" cue. The
+  // full `courtsideInstructions` read is homed on the Run get-ready beat
+  // (post-D167; formerly Transition). Everything ELSE about the drill — the
+  // remaining coaching cues AND the full setup read — lives one tap away
+  // behind a single "Drill details" recovery overlay. The prior split (an
+  // inline "Show more cues" <details> + a separate full-width "Peek setup"
+  // button) read as two ambiguous "show me more" controls stacked on a face
+  // meant to be one calm cue; the founder flagged the overlap, so they fold
+  // into one affordance. Derive each section's content independently, then
+  // gate the single control on either having something non-redundant to show.
   const hasMoreCues =
     currentBlock.coachingCue.trim().length > 0 &&
     currentBlock.coachingCue.trim() !== currentCue?.text
-  // Run-flow beat contract Stage 2 (D165, R8/R9/R10): the full setup read
-  // is homed on the Run get-ready beat (post-D167; formerly Transition),
-  // never inline on the live face. When the block carries one, the live
-  // face offers a deliberate one-touch "Peek setup" recovery that overlays
-  // it on demand (timer keeps running) — gated on the read existing so
-  // segmented drills with no prose overview show no empty peek.
   const hasSetupRead = currentBlock.courtsideInstructions.trim().length > 0
+  // R2 density rule (2026-06-29): the setup read only belongs in the overlay
+  // when it is NOT already on screen. Segmented drills (warmup / wrap) render
+  // the full read AS the on-screen SegmentList, so including it would just
+  // duplicate it — the overlay then carries cues only. Non-segmented drills
+  // (one-cue cockpit, read hidden) get the read in the overlay.
+  const segmentsOnScreen = Boolean(effectiveSegments && effectiveSegments.length > 0)
+  const detailsShowCues = hasMoreCues
+  const detailsShowRead = hasSetupRead && !segmentsOnScreen
+  // Stage 2 (D165, R8/R9/R10): one deliberate, positionally-stable recovery
+  // control. Opens the overlay WITHOUT pausing the block timer, and appears
+  // only when the overlay has non-redundant content to reveal.
+  const showDrillDetails = detailsShowCues || detailsShowRead
+  // Label the overlay's sections only when both render, so a single-section
+  // overlay (cues-only or read-only) stays calm and unlabeled.
+  const detailsLabeled = detailsShowCues && detailsShowRead
 
   return (
     <ScreenShell>
@@ -238,91 +249,133 @@ export function RunScreen() {
         */
         <>
           <ScreenShell.Body rhythm="cockpit">
-            {/* R12: the just-finished receipt renders here only when the
-              finished block bypassed Drill Check (warmup / wrap /
-              technique-support / skipped). When Drill Check showed it,
-              `showJustFinishedReceipt` is false so it is not duplicated. */}
-            {showJustFinishedReceipt && prevBlock && (
-              <JustFinishedPill
-                drillName={prevBlock.drillName}
-                status={prevBlockStatus?.status === 'completed' ? 'completed' : 'skipped'}
-                presentation="line"
-              />
-            )}
+            {/* D171 (2026-06-30 founder call): no just-finished receipt on the
+              get-ready beat. Restating the drill the athlete just finished, one
+              tap later, is redundant ("we literally just did it"). Felt
+              continuity rests on stillness alone — shared header + identical
+              forward title (D166 R11) — not a textual receipt. */}
 
-            <div className="flex flex-col gap-1">
-              {/* 2026-06-29 continuity restore: the D167 collapse folded
-                Transition into get-ready but dropped its upcoming-block
-                duration. Restored beside the title (reusing the
-                `formatDuration` source Transition used) so the athlete sees
-                the block length before tapping Start; the live cockpit owns
-                the running clock and gains nothing. */}
-              <div className="flex items-baseline justify-between gap-3">
+            {/* Density re-tier (2026-06-29, issue #4): the upcoming drill is
+              ONE focal briefing block — the hero title, its quiet duration +
+              intent subtitle, then the full read bound directly beneath.
+              Before, the title cluster and the read were separate
+              cockpit-rhythm children (gap-4 apart), so receipt + title +
+              intent + read read as four equal islands ("too busy / seven
+              separate things"). Grouping them collapses the body to two clear
+              tiers: the quiet receipt marker, then this briefing. The title
+              keeps its EXACT hero typography — R11 continuity-by-stillness
+              pins it identical across Transition → get-ready → live
+              (RunFlowContinuity.stillness), and §4.2 makes the live timer the
+              focal element — so focal dominance here comes from grouping + the
+              lighter surrounding tier, never a size bump. */}
+            <section className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1">
                 <h1 className="text-xl font-semibold tracking-tight text-text-primary">
                   {currentBlock.drillName}
                 </h1>
-                <span className="shrink-0 text-sm font-medium text-text-secondary">
+                {/* Duration as a quiet subtitle under the title (2026-06-30
+                  founder call: "make the 3 min cleaner — it's out of place, the
+                  font / formatting feel odd next to the title and the read").
+                  It used to float at the title's right baseline, where it (a)
+                  jumped from text-sm/secondary straight off the
+                  text-xl/semibold title on the SAME line, and (b) rhymed with
+                  the `Next: N/M` counter sitting in the shared header's right
+                  column directly above — two right-aligned secondary tokens
+                  reading as an accidental metadata column. It now sits
+                  left-aligned in the calm secondary register, so the title is
+                  clean and alone and the meta reads as its subtitle. This
+                  mirrors the move TransitionScreen made 2026-06-23 (pull the
+                  duration off the title onto its own meta line), keeping the two
+                  forward beats consistent; the live cockpit still owns the
+                  running clock and shows no duration line (get-ready
+                  orientation only). `formatDuration` is the source Transition
+                  uses. */}
+                <p className="text-sm leading-snug text-text-secondary">
                   {formatDuration(currentBlock.durationMinutes)}
-                </span>
+                </p>
+                {/* M002.2 technique-how (D163/D166), demoted 2026-06-29 (founder
+                  call: "lots of text / different fonts / looks messy"). The
+                  authored stress-rung intent renders as ONE short labelled
+                  framing line — `Trains · {intent}` — directly under the
+                  duration, sharing the same calm secondary subtitle register.
+                  Kept as its OWN line (not merged into the duration line):
+                  intents are full sentences (~8 words, stressLadders.ts), so
+                  `{duration} · Trains · {intent}` would wrap mid-phrase on a
+                  narrow screen, and `Trains {intent}` without the `·` runs the
+                  label into a capitalized sentence. The `Trains` label
+                  (font-medium per §1.3) + the `·` meta separator mark it as
+                  framing, not prose, so the screen carries one black body (the
+                  read) over one quiet metadata layer. Shows on a focus run's
+                  opening block only (R6). */}
+                {rungIntentLine && (
+                  <p className="text-sm leading-snug text-text-secondary">
+                    <span className="font-medium">Trains</span>
+                    {' · '}
+                    {rungIntentLine}
+                  </p>
+                )}
               </div>
-              {/* M002.2 technique-how (D163/D166): the authored stress-rung
-                intent — what this rung trains — as one quiet subtitle, on a
-                focus run's opening block only. */}
-              {rungIntentLine && (
-                <p className="text-sm leading-snug text-text-secondary">{rungIntentLine}</p>
-              )}
-            </div>
 
-            {/* The full setup read at the same GlossedText treatment as its
-              former Transition home. The get-ready is now the single
-              full-weight READ-DO home for the read (R16: the live cockpit
-              stays one-cue and recovers the read via Peek setup). */}
-            {currentBlock.courtsideInstructions && (
-              <GlossedText text={currentBlock.courtsideInstructions} />
-            )}
+              {/* The full setup read at the same GlossedText treatment as its
+                former Transition home. The get-ready is now the single
+                full-weight READ-DO home for the read (R16: the live cockpit
+                stays one-cue and recovers the read via Peek setup). Bound
+                inside the briefing section (not a separate cockpit child) so
+                it reads as the title's body, not a fourth island. */}
+              {currentBlock.courtsideInstructions && (
+                <GlossedText text={currentBlock.courtsideInstructions} />
+              )}
+            </section>
           </ScreenShell.Body>
 
           <ScreenShell.Footer>
             {runError && <StatusMessage variant="error" message={runError} />}
-            {/* Decide hierarchy (R13): Start dominant, Shorten always at
-              CTA width (the tired-athlete escape is never buried), and the
-              less-common Swap / Skip behind a cancelable Adjust. */}
+            {/* Decide hierarchy (R13, revised 2026-06-29 founder call): ONE
+              dominant action — Start — over a single "Adjust" disclosure that
+              now holds EVERY pre-start change: Shorten, Swap, Skip. The prior
+              model promoted Shorten to a permanent CTA-width peer so the
+              tired-athlete escape was never buried; the founder folded it in
+              so (a) the footer reads as one clear go + one calm "change
+              something" menu, and (b) "Adjust" finally contains everything
+              its name implies — the earlier split made "why isn't Shorten
+              under Adjust?" a real question (issue #3). Shorten is always
+              available (every block can be shortened), so Adjust is now
+              ALWAYS present — the old "nothing to adjust" empty case can no
+              longer occur. */}
             <Button variant="primary" fullWidth onClick={handleStart}>
               {RUN_FLOW_LABELS.startAction}
             </Button>
-            <Button variant="outline" fullWidth onClick={handleStartShortened}>
-              {RUN_FLOW_LABELS.shortenFull}
+            <Button
+              variant="ghost"
+              className="text-text-secondary"
+              aria-expanded={adjustOpen}
+              onClick={() => setAdjustOpen((open) => !open)}
+            >
+              {RUN_FLOW_LABELS.adjust}
             </Button>
-            {(hasAlternates || !currentBlock.required) && (
-              <>
-                <Button
-                  variant="ghost"
-                  className="text-text-secondary"
-                  aria-expanded={adjustOpen}
-                  onClick={() => setAdjustOpen((open) => !open)}
-                >
-                  {RUN_FLOW_LABELS.adjust}
+            {adjustOpen && (
+              <div className="flex flex-col gap-3">
+                {/* Most-common adjustment first: the tired-athlete shorten,
+                  which also starts the (shortened) block. */}
+                <Button variant="secondary" fullWidth onClick={handleStartShortened}>
+                  {RUN_FLOW_LABELS.shortenFull}
                 </Button>
-                {adjustOpen && (
-                  <div className="flex flex-col gap-3">
-                    {hasAlternates && (
-                      <Button
-                        variant="secondary"
-                        fullWidth
-                        onClick={() => void handleSwap()}
-                        aria-label={RUN_FLOW_LABELS.swap}
-                      >
-                        {RUN_FLOW_LABELS.swap}
-                      </Button>
-                    )}
-                    {!currentBlock.required && (
-                      <Button variant="secondary" fullWidth onClick={() => void handleSkip()}>
-                        {RUN_FLOW_LABELS.skip}
-                      </Button>
-                    )}
-                  </div>
+                {hasAlternates && (
+                  <Button
+                    variant="secondary"
+                    fullWidth
+                    onClick={() => void handleSwap()}
+                    aria-label={RUN_FLOW_LABELS.swap}
+                  >
+                    {RUN_FLOW_LABELS.swap}
+                  </Button>
                 )}
-              </>
+                {!currentBlock.required && (
+                  <Button variant="secondary" fullWidth onClick={() => void handleSkip()}>
+                    {RUN_FLOW_LABELS.skip}
+                  </Button>
+                )}
+              </div>
             )}
           </ScreenShell.Footer>
         </>
@@ -342,7 +395,7 @@ export function RunScreen() {
              * The `h1` is the single home for the drill name, so the "Now"
              * section is suppressed on that fallback. `currentCue` is still
              * kept whole for the `hasMoreCues` comparison below, so the
-             * "Show more cues" disclosure still surfaces extra coaching cues
+             * "Drill details" overlay still surfaces extra coaching cues
              * when the fallback occurs.
              */}
             {currentCue && currentCue.source !== 'drill-name' && (
@@ -372,45 +425,25 @@ export function RunScreen() {
                 segments={effectiveSegments}
                 currentIndex={currentSegmentIndex}
                 bonus={currentBlock.courtsideInstructionsBonus}
+                cadenceLabel={currentBlock.segmentsCadenceLabel}
               />
             )}
 
             {/*
-             * Run-flow beat contract Stage 1 (R7b): the disclosure is now
-             * cue-only. The full `courtsideInstructions` read moved to its
-             * single home on the Run get-ready beat (post-D167; formerly
-             * Transition); the live face keeps the rule-12a "remaining cues"
-             * affordance. Cues stack one per line (design-language
-             * 2026-06-11) so the dot separator never collides with sentence
-             * periods.
+             * Run-flow beat contract Stage 1+2, merged (2026-06-29 founder
+             * call): ONE deliberate, full-width, positionally-stable recovery
+             * control. Stage 1 removed the inline read on purpose; this is how
+             * a winded athlete re-reads everything mid-rep. Tapping it opens
+             * the overlay below with the remaining coaching cues AND the full
+             * setup read (the same `courtsideInstructions` homed on the
+             * get-ready beat post-D167) WITHOUT pausing the block timer (R10:
+             * one full-weight home; the overlay is transient recovery, not a
+             * second home). Gated on `showDrillDetails` so it appears only
+             * when there is non-redundant content to reveal — never an empty
+             * sheet, never a duplicate of the on-screen SegmentList read.
              */}
-            {hasMoreCues && (
-              <details className="rounded-[14px] border border-text-primary/10 bg-bg-primary px-3 py-2">
-                <summary className="cursor-pointer text-sm font-medium text-text-secondary">
-                  {RUN_FLOW_LABELS.moreCues}
-                </summary>
-                <section aria-label="Full coaching cue" className="mt-3 flex flex-col gap-1.5">
-                  {splitCueLines(currentBlock.coachingCue).map((line) => (
-                    <p key={line} className="text-base leading-relaxed text-text-primary">
-                      {line}
-                    </p>
-                  ))}
-                </section>
-              </details>
-            )}
-
-            {/*
-             * Run-flow beat contract Stage 2 (D165, R9): a deliberate,
-             * full-width, positionally-stable one-touch recovery affordance.
-             * NOT a small disclosure — Stage 1 removed the inline read on
-             * purpose; this is how a winded athlete re-reads the setup
-             * mid-rep. Tapping it overlays the full read (the same
-             * `courtsideInstructions` homed on the get-ready beat post-D167)
-             * WITHOUT pausing the block timer (R10: one full-weight home;
-             * the peek is transient recovery, not a second home).
-             */}
-            {hasSetupRead && (
-              <Button variant="outline" fullWidth onClick={() => setPeekOpen(true)}>
+            {showDrillDetails && (
+              <Button variant="outline" fullWidth onClick={() => setDetailsOpen(true)}>
                 {RUN_FLOW_LABELS.peek}
               </Button>
             )}
@@ -492,22 +525,47 @@ export function RunScreen() {
             )}
           </ScreenShell.Footer>
 
-          {peekOpen && (
-            // Recovery peek overlay (Stage 2, D165, R9): the full setup read,
-            // rendered with the same `GlossedText` treatment as its get-ready
-            // home (post-D167; formerly Transition), in a bottom-sheet. Reuses
-            // `ActionOverlay` (focus trap +
-            // Escape-to-dismiss + inert siblings). The block timer keeps
-            // running underneath — nothing here calls a pause path.
+          {detailsOpen && (
+            // Drill-details overlay (Stage 2 merge, D165, R9): the no-pause
+            // recovery surface now carries BOTH the remaining coaching cues
+            // and the full setup read (the same `courtsideInstructions` homed
+            // on the get-ready beat post-D167), rendered with the same
+            // `GlossedText` treatment, in a bottom-sheet. Reuses `ActionOverlay`
+            // (focus trap + Escape-to-dismiss + inert siblings). The block
+            // timer keeps running underneath — nothing here calls a pause path.
+            // Setup leads (the foundation the cues lean on — court, rules,
+            // scoring define the terms the cues reference); the crisp cues
+            // follow as the send-off the eye lands on right above "Back to
+            // drill" (D172, flips the D169 cues-first order). Section eyebrows
+            // show only when both render.
             <ActionOverlay
               title={currentBlock.drillName}
-              onDismiss={() => setPeekOpen(false)}
+              onDismiss={() => setDetailsOpen(false)}
               className="items-end bg-black/40 px-4 pb-8 pt-4"
               panelClassName="max-w-[390px] rounded-focal"
             >
               <div className="mt-4 flex flex-col gap-4">
-                <GlossedText text={currentBlock.courtsideInstructions} />
-                <Button variant="primary" fullWidth onClick={() => setPeekOpen(false)}>
+                {detailsShowRead && (
+                  <section aria-label="Setup" className="flex flex-col gap-1.5">
+                    {detailsLabeled && (
+                      <span className="text-xs font-medium text-text-secondary">Setup</span>
+                    )}
+                    <GlossedText text={currentBlock.courtsideInstructions} />
+                  </section>
+                )}
+                {detailsShowCues && (
+                  <section aria-label="Coaching cues" className="flex flex-col gap-1.5">
+                    {detailsLabeled && (
+                      <span className="text-xs font-medium text-text-secondary">Cues</span>
+                    )}
+                    {splitCueLines(currentBlock.coachingCue).map((line) => (
+                      <p key={line} className="text-base leading-relaxed text-text-primary">
+                        {line}
+                      </p>
+                    ))}
+                  </section>
+                )}
+                <Button variant="primary" fullWidth onClick={() => setDetailsOpen(false)}>
                   {RUN_FLOW_LABELS.peekClose}
                 </Button>
               </div>

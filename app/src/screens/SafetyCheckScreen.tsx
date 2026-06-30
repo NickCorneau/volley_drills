@@ -14,6 +14,8 @@ import {
   StatusMessage,
 } from '../components/ui'
 import type { SessionDraft } from '../model'
+import { cx } from '../lib/cn'
+import { SOFT_SURFACE_CLASS } from '../components/ui/surfaces'
 import { buildRecoveryDraft, estimateRecoverySessionMinutes } from '../domain/sessionBuilder'
 import {
   primeAudioForGesture,
@@ -317,12 +319,25 @@ export function SafetyCheckScreen() {
               )}
               {steeringTrace.showDisclosure && !disclosureDismissed && (
                 <Callout tone="info">
-                  <p className="text-sm leading-relaxed text-text-secondary">
-                    Your plan quietly adjusts its challenge as you train. You approve every change
-                    at review.
-                  </p>
-                  <div className="mt-1 flex justify-end">
-                    <Button variant="ghost" onClick={handleDismissDisclosure}>
+                  {/* 2026-06-29 polish: the dismiss was a stacked `ghost` Button
+                    (a 54px list-row tap target) below the copy, so inside the
+                    callout's p-4 it left ~33px of dead space under "Got it" and
+                    inset it from the right edge — reading as "off / overly
+                    padded". Re-laid as a single row: copy left, "Got it"
+                    centered right. The button keeps its generous tap target but
+                    bleeds it into the callout's vertical padding (`-my-2`) so it
+                    never exceeds the copy block, and `-mr-2` pulls it snug to
+                    the right edge. No dead space, balanced padding. */}
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm leading-relaxed text-text-secondary">
+                      Your plan quietly adjusts its challenge as you train. You approve every change
+                      at review.
+                    </p>
+                    <Button
+                      variant="ghost"
+                      onClick={handleDismissDisclosure}
+                      className="-my-2 -mr-2 shrink-0 self-center px-2"
+                    >
                       Got it
                     </Button>
                   </div>
@@ -435,17 +450,29 @@ export function SafetyCheckScreen() {
         )}
 
         {/*
-          Secondary disclosures read as ONE quiet cluster, not two
-          free-floating links. Before: each Expander sat in its own
-          top-level <section>, so the body's gap-6 (24px) stacked on top
-          of each trigger's min-h-[54px] tap padding — ~58px of air
-          between two thin text links, more separation than the actual
-          questions above them got (inverted hierarchy; founder-flagged
-          2026-06-12). Now both triggers share one section: a single
-          gap-6 separates the cluster from the pain question, and the two
-          54px tap targets sit adjacent in a calm settings-list rhythm.
-        */}
-        <section className="flex flex-col">
+          Secondary disclosures read as ONE quiet contained group, not two
+          free-floating accent links. Founder flag (2026-06-29): bare
+          `text-accent` Expander triggers floating on the page field read as
+          stray hyperlinks / a broken dropdown. The fix houses them in the
+          canonical warm soft surface (`SOFT_SURFACE_CLASS` — the same
+          secondary-grouping token Settings/Review use, kept as the single
+          source of truth per T7) with calm secondary-ink labels and a
+          right-aligned chevron, so the group reads as "optional extras"
+          that stay subordinate to the two gate questions that own this
+          screen's focal zone (§4.2). The 2026-06-12 pass already merged the
+          two triggers into one section; this adds the missing surface +
+          calm row treatment. The two 54px rows sit in a tight calm list
+          rhythm (gap-1).
+
+          2026-06-29 polish: each Expander trigger is already a 54px tap
+          target, so the token's full `p-4` (16px) stacked ANOTHER 16px above
+          and below it — a single collapsed row ballooned to 86px of mostly
+          air ("overly padded"). `py-2` tightens just the vertical inset to
+          8px (Tailwind emits `py-*` after `p-*`, so it overrides the vertical
+          axis while the token keeps its 16px horizontal inset + look — no
+          drift from SOFT_SURFACE_CLASS). The rows now own the vertical
+          rhythm; the surface just frames them. */}
+        <section className={cx(SOFT_SURFACE_CLASS, 'flex flex-col gap-1 py-2')}>
           {/* T3 (2026-06-22 shibui audit): the chevron `Expander` appends
             is the disclosure affordance, so the decorative flame SVG was
             removed — the label stands alone. */}
@@ -521,7 +548,10 @@ export function SafetyCheckScreen() {
           {painFlag !== true &&
             steeringTrace?.showGloss &&
             !(steeringTrace.showDisclosure && !disclosureDismissed) && (
-              <Expander trigger={<>How sessions adapt</>} contentClassName="flex flex-col gap-2">
+              <Expander
+                trigger={<>How sessions adapt</>}
+                contentClassName="flex flex-col gap-2"
+              >
                 <p className="text-sm leading-relaxed text-text-secondary">
                   Sessions adjust their challenge as you train. After each session, you review how it
                   went and approve or skip any change. Nothing changes without your okay.

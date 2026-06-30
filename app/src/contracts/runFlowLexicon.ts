@@ -8,8 +8,10 @@
  * so drift cannot silently return. Stage 1 settles the two
  * founder-decided labels — the decide-step action CTA (`Start`, consumed
  * by `TransitionScreen`) and the live cue label (`Now`, consumed by
- * `RunScreen`). Stage 2 adds the recovery-peek labels (`Peek setup` /
- * `Back to drill`, consumed by `RunScreen`'s on-demand setup overlay). The
+ * `RunScreen`). Stage 2 adds the recovery-overlay labels (`Drill details` /
+ * `Back to drill`, consumed by `RunScreen`'s on-demand details overlay —
+ * 2026-06-29 founder merge of the old inline "Show more cues" disclosure and
+ * the "Peek setup" button into one control, so both are now SUNSET). The
  * swap / shorten / skip strings are single-sourced into Transition's footer
  * too but stay canonical-at-current-strings: they are contextual variants
  * (full vs compact, full-width vs paired), not drift, and a quick founder
@@ -27,11 +29,14 @@ export const RUN_FLOW_LABELS = {
   startAction: 'Start',
   /** The live one-cue label on Run's cockpit (DO-CONFIRM, courtside-copy rule 12a). */
   cue: 'Now',
-  /** Run's extra-coaching-cues disclosure summary (rule 12a). */
-  moreCues: 'Show more cues',
-  /** Run's Stage 2 recovery affordance — overlays the full setup read on demand. */
-  peek: 'Peek setup',
-  /** Dismiss control for the recovery peek overlay (back to the one-cue cockpit). */
+  /**
+   * Run's Stage 2 recovery affordance — opens the on-demand overlay carrying
+   * the remaining coaching cues AND the full setup read (2026-06-29 founder
+   * merge of "Show more cues" + "Peek setup"). Key stays `peek` for the
+   * recovery-overlay concept; the canonical label is now "Drill details".
+   */
+  peek: 'Drill details',
+  /** Dismiss control for the recovery overlay (back to the one-cue cockpit). */
   peekClose: 'Back to drill',
   /** Pre-start swap control (contextual full form; awaits normalization). */
   swap: 'Swap drill',
@@ -58,7 +63,11 @@ export const RUN_FLOW_LABELS = {
  *  - 'GO' → 'Start' (the read-first Stage-4 collapse fixed the action verb).
  *  - 'Cue' → removed from Transition; the cue's only home is Run's 'Now'.
  *  - 'Show full instructions' / 'Show more cues and instructions' → Run no
- *    longer homes the full read; its disclosure is cue-only ('Show more cues').
+ *    longer homes the full read inline.
+ *  - 'Show more cues' / 'Peek setup' → retired by the 2026-06-29 founder
+ *    merge. The inline extra-cues disclosure and the separate setup-recovery
+ *    button folded into one "Drill details" overlay; neither label may
+ *    return to a live beat.
  */
 export const SUNSET_RUN_FLOW_LABELS = [
   'Start next block',
@@ -66,6 +75,8 @@ export const SUNSET_RUN_FLOW_LABELS = [
   'Cue',
   'Show full instructions',
   'Show more cues and instructions',
+  'Show more cues',
+  'Peek setup',
 ] as const
 
 export type RunFlowLabelKey = keyof typeof RUN_FLOW_LABELS

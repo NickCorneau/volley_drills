@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { RUN_FLOW_LABELS } from '../../contracts/runFlowLexicon'
 import { RunScreen } from '../RunScreen'
 import { useRunController } from '../run/useRunController'
 
@@ -89,9 +90,6 @@ function controller(overrides: Partial<ReturnType<typeof useRunController>> = {}
     handleShorten: vi.fn(),
     handleSwap: vi.fn(),
     isGetReady: false,
-    prevBlock: null,
-    prevBlockStatus: null,
-    showJustFinishedReceipt: false,
     rungIntentLine: null,
     handleStart: vi.fn(),
     handleStartShortened: vi.fn(),
@@ -123,18 +121,20 @@ describe('RunScreen — drill name lives only in the h1 (T2 U8)', () => {
     expect(screen.getAllByText('Cross-Court Spike Repeat')).toHaveLength(1)
   })
 
-  it('shows no full-instructions read on Run for a cue-less block (R7b)', () => {
+  it('keeps the full-instructions read off the live face but recoverable via Drill details (R7b)', () => {
     renderRun()
 
-    // Run-flow beat contract Stage 1 (R7b): a block with no coaching cue
-    // has nothing to put behind "Show more cues", and the full
-    // courtsideInstructions read is homed on the Run get-ready beat (post-D167;
-    // formerly Transition) — so the live face shows neither a disclosure nor
-    // the instruction prose.
+    // Run-flow beat contract Stage 1+2 merge (2026-06-29): a cue-less block
+    // shows no inline disclosure and no instruction prose on the live face —
+    // the read is homed on the Run get-ready beat (post-D167). The retired
+    // inline labels stay gone.
     expect(screen.queryByText(/Show full instructions/i)).toBeNull()
     expect(screen.queryByText(/Show more cues/i)).toBeNull()
     expect(screen.queryByLabelText(/Full drill instructions/i)).toBeNull()
     expect(screen.queryByText(/Hitter starts at the ten-foot line/i)).toBeNull()
+    // But the read is still recoverable mid-rep: the single "Drill details"
+    // control is present (it opens the no-pause overlay with the read).
+    expect(screen.getByRole('button', { name: RUN_FLOW_LABELS.peek })).toBeInTheDocument()
   })
 
   it('still renders the "Now" section when a real coaching cue exists', () => {

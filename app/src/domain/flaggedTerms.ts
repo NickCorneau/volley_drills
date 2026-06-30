@@ -15,8 +15,9 @@
  *
  * Punctuation note: `0–3 rubric` and `0–3 scale` use an en-dash (U+2013),
  * matching the literal spelling in `app/src/data/drills.ts`. The parser's
- * registry-match is byte-exact, so changing the dash form here will
- * silently un-gloss those sites until the catalog is resynced.
+ * registry-match is case-insensitive (`D175`) but otherwise byte-exact, so
+ * changing the dash form here will silently un-gloss those sites until the
+ * catalog is resynced (casing differences are tolerated; punctuation is not).
  */
 
 export const FLAGGED_TERMS: ReadonlySet<string> = new Set<string>([
@@ -57,6 +58,7 @@ export const FLAGGED_TERMS: ReadonlySet<string> = new Set<string>([
   'pivot-back starts',
   "runner's lunge",
   'half-kneel',
+  'hip flexor',
   'hip flexor stretch',
   'RDL',
 

@@ -13,7 +13,7 @@ import type { SessionPlanBlock } from '../../model'
  * `drillMetadata.rungIntent.test.ts`).
  */
 
-const PASS_RUNG_3_INTENT = 'Read where the ball is going, move to it, and still pass to one target.'
+const PASS_RUNG_3_INTENT = 'Read, move, and still pass to one target.'
 
 function makeBlock(overrides: Partial<SessionPlanBlock>): SessionPlanBlock {
   return {

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { drillCheckBypassedForPreviousBlock } from '../../domain/capture'
 import { resolveBlockOpeningIntent } from '../../domain/drillMetadata'
 import { hasCompletedBlock } from '../../domain/executionPredicates'
 import { postBlockRoute, scaleSegmentsForBlockDuration } from '../../domain/runFlow'
@@ -474,18 +473,12 @@ export function useRunController(executionLogId: string, shortened: boolean) {
   // whatever path they take.
   const canWrapSession = execution ? hasCompletedBlock(execution) : false
 
-  // Run-flow beat contract Stage 4 (D166/D167): the get-ready beat owns
-  // the block-opening intent (R15) and, post-collapse, the just-finished
-  // receipt for blocks that bypass Drill Check (R12). Both reuse the pure
-  // resolvers the Transition beat already consulted, so the receipt
-  // renders once per drill and the intent keys to a focus run's opening
-  // block (RunScreen renders them only inside the get-ready branch).
-  const prevBlockIdx = currentBlockIndex - 1
-  const prevBlock = plan?.blocks[prevBlockIdx] ?? null
-  const prevBlockStatus = execution?.blockStatuses[prevBlockIdx] ?? null
-  const showJustFinishedReceipt =
-    prevBlock != null &&
-    drillCheckBypassedForPreviousBlock({ plan, execution, currentBlockIndex })
+  // Run-flow beat contract Stage 4 (D167): the get-ready beat owns the
+  // block-opening intent (R15), keyed to a focus run's opening block via the
+  // pure resolver the Transition beat already consulted (RunScreen renders it
+  // only inside the get-ready branch). The just-finished receipt that used to
+  // live here was removed 2026-06-30 (D171) — restating the finished drill one
+  // tap later was redundant; continuity rests on stillness (D166 R11).
   const rungIntentLine = resolveBlockOpeningIntent(
     plan?.blocks,
     currentBlockIndex,
@@ -512,9 +505,6 @@ export function useRunController(executionLogId: string, shortened: boolean) {
     currentSegmentIndex,
     effectiveSegments,
     isGetReady,
-    prevBlock,
-    prevBlockStatus,
-    showJustFinishedReceipt,
     rungIntentLine,
     handlePause,
     handleResume,

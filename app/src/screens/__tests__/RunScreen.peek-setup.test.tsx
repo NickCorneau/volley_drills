@@ -14,14 +14,17 @@ const useRunControllerMock = vi.mocked(useRunController)
 
 /**
  * Run-flow beat contract Stage 2 (D165, R8/R9/R10/R16): the recovery
- * "Peek setup" affordance on Run.
+ * "Drill details" affordance on Run (2026-06-29 founder merge of the old
+ * "Show more cues" + "Peek setup" controls into one). This file pins the
+ * read-only path: a single-cue block carries just the setup read, so the
+ * overlay shows the read alone.
  *
  * Stage 1 removed the inline full read from the live face on purpose; this
  * stage adds a one-touch overlay to recover it mid-rep WITHOUT a second
  * full-weight home and WITHOUT pausing the block timer. The load-bearing,
  * mutation-checked assertions are negative-today:
  *   - the read is ABSENT from the live face by default (Stage-1 invariant),
- *   - opening the peek NEVER pauses the timer (no pause path is called).
+ *   - opening the overlay NEVER pauses the timer (no pause path is called).
  * Each must go red if the behavior regresses.
  */
 
@@ -90,9 +93,6 @@ function controller(
     handleShorten: vi.fn(),
     handleSwap: vi.fn(),
     isGetReady: false,
-    prevBlock: null,
-    prevBlockStatus: null,
-    showJustFinishedReceipt: false,
     rungIntentLine: null,
     handleStart: vi.fn(),
     handleStartShortened: vi.fn(),
@@ -113,12 +113,12 @@ function renderRun() {
   )
 }
 
-describe('RunScreen — Stage 2 recovery peek (D165)', () => {
+describe('RunScreen — Stage 2 recovery overlay / Drill details (D165)', () => {
   beforeEach(() => {
     useRunControllerMock.mockReturnValue(controller())
   })
 
-  it('offers a deliberate "Peek setup" trigger when the block carries a setup read', () => {
+  it('offers a deliberate "Drill details" trigger when the block carries a setup read', () => {
     renderRun()
     expect(screen.getByRole('button', { name: RUN_FLOW_LABELS.peek })).toBeInTheDocument()
   })
@@ -154,7 +154,7 @@ describe('RunScreen — Stage 2 recovery peek (D165)', () => {
     expect(screen.queryByText(SETUP_READ)).toBeNull()
   })
 
-  it('dismisses the peek on Escape', async () => {
+  it('dismisses the overlay on Escape', async () => {
     const user = userEvent.setup()
     renderRun()
 
@@ -165,7 +165,7 @@ describe('RunScreen — Stage 2 recovery peek (D165)', () => {
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 
-  it('never pauses the block timer while peeking (R9)', async () => {
+  it('never pauses the block timer while the details overlay is open (R9)', async () => {
     const user = userEvent.setup()
     const pause = vi.fn(() => 240)
     const handlePause = vi.fn()
@@ -188,7 +188,7 @@ describe('RunScreen — Stage 2 recovery peek (D165)', () => {
     await user.click(screen.getByRole('button', { name: RUN_FLOW_LABELS.peek }))
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     // The cockpit underneath stays in its running state — no Paused indicator
-    // surfaces and no pause path fires from opening or closing the peek.
+    // surfaces and no pause path fires from opening or closing the overlay.
     expect(screen.queryByText('Paused')).toBeNull()
 
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: RUN_FLOW_LABELS.peekClose }))

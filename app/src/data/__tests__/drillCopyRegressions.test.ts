@@ -332,11 +332,13 @@ describe('drill copy regressions', () => {
       expect(bonus).toMatch(/glutes \(back of hips\)/)
       expect(bonus).toMatch(/adductors \(inner thighs\)/)
       const segmentLabels = (solo.segments ?? []).map((s) => s.label).join('\n')
-      // 2026-06-21 quality+tone audit: segment labels gained a rule 7
-      // cadence-format prefix ("Continuous hold (each side): ") matching
-      // d28's warmup labels; the anatomy gloss now follows the prefix.
-      expect(segmentLabels).toMatch(/hamstring \(back of thigh\)/i)
-      expect(segmentLabels).toMatch(/hip flexor \(front of upper thigh\)/i)
+      // 2026-06-29 density fix (`D170`): the anatomy clarifiers are now
+      // authored in the `(= …)` gloss form (they were plain parens before,
+      // so they never actually glossed) — matching d28's movement glosses
+      // and the §2 jargon-gate intent this test asserts. The shared
+      // cadence is hoisted to `segmentsCadenceLabel` (asserted below).
+      expect(segmentLabels).toMatch(/hamstring \(= back of thigh\)/i)
+      expect(segmentLabels).toMatch(/hip flexor \(= front of upper thigh\)/i)
     })
 
     it('marks all three stretches as eachSide (each-side iteration: mirror is built into the floor)', () => {
@@ -360,10 +362,24 @@ describe('drill copy regressions', () => {
       // `courtsideInstructions` (that's now intro-only).
       expect(solo.segments).toBeDefined()
       expect(solo.segments).toHaveLength(3)
-      // 2026-06-21 quality+tone audit: rule 7 cadence-format prefix added.
-      expect(solo.segments?.[0].label).toMatch(/^Continuous hold \(each side\): calf/i)
-      expect(solo.segments?.[1].label).toMatch(/^Continuous hold \(each side\): hamstring \(back of thigh\)/i)
-      expect(solo.segments?.[2].label).toMatch(/^Continuous hold \(each side\): hip flexor \(front of upper thigh\)/i)
+      // 2026-06-29 D170 cadence-hoist: the shared "Continuous hold" cadence
+      // moved to the list-level `segmentsCadenceLabel` header (rendered once
+      // above the SegmentList, auto-folding "· each side"), so the per-row
+      // prefix is dropped. Rows lead with the muscle target + the `(= …)`
+      // anatomy gloss. The duplicated "(each side)" stays gone.
+      // 2026-06-30 D175: rows lead sentence-case (capital first letter) to
+      // match the capitalized cadence header — pinned case-sensitively below
+      // so a regression back to lowercase leads breaks here.
+      expect(solo.segmentsCadenceLabel).toBe('Continuous hold')
+      expect(solo.segments?.[0].label).toMatch(/^Calf:/)
+      expect(solo.segments?.[1].label).toMatch(/^Hamstring \(= back of thigh\):/)
+      expect(solo.segments?.[2].label).toMatch(/^Hip flexor \(= front of upper thigh\):/)
+      // Every row leads with a capital letter (D175 sentence-case parity).
+      expect(solo.segments?.every((s) => /^[A-Z]/.test(s.label))).toBe(true)
+      // No row hard-codes the cadence prefix or "(each side)" any more.
+      expect(solo.segments?.every((s) => !/\(each side\)/i.test(s.label))).toBe(true)
+      expect(solo.segments?.every((s) => !/^continuous/i.test(s.label))).toBe(true)
+      expect(solo.segments?.every((s) => s.eachSide === true)).toBe(true)
       expect(solo.segments?.every((s) => s.durationSec === 60)).toBe(true)
     })
 
@@ -379,6 +395,71 @@ describe('drill copy regressions', () => {
       for (const segment of solo.segments ?? []) {
         expect(segment.label).not.toContain('\u2014')
       }
+    })
+  })
+
+  /**
+   * 2026-06-29 `D170` cadence-hoist rollout (founder call: apply the d26
+   * pattern to every segmented drill). A shared per-list cadence is named
+   * once on `segmentsCadenceLabel` (rendered as a calm header above the
+   * SegmentList) instead of repeating on every row. Two shapes are pinned
+   * here so the rollout can't silently regress:
+   *  - d28 (`Continuous` + ONE rep-paced exception): the header carries
+   *    the default; the s4 game-tempo segment keeps its inline prefix.
+   *  - d25 (`Continuous`, MIXED each-side): the header stays plain (it
+   *    does NOT fold "· each side" because the list is mixed), and the
+   *    two unilateral rows rely on the `eachSide` flag for their suffix
+   *    rather than hard-coding "(each side)" in the label.
+   * d26 (`Continuous hold`, ALL each-side → folds) is pinned in its own
+   * describe above.
+   */
+  describe('D170 cadence-hoist rollout (d25 / d28)', () => {
+    const d28 = DRILLS.find((d) => d.id === 'd28')?.variants.find((v) => v.id === 'd28-solo')
+    const d25 = DRILLS.find((d) => d.id === 'd25')?.variants.find((v) => v.id === 'd25-solo')
+
+    it('d28 hoists "Continuous" and keeps the rep-paced segment as an inline exception', () => {
+      if (!d28) throw new Error('d28-solo variant missing')
+      expect(d28.segmentsCadenceLabel).toBe('Continuous')
+      const labels = d28.segments ?? []
+      // The continuous segments (s1-s3) drop the cadence prefix...
+      expect(labels[0].label).not.toMatch(/^continuous/i)
+      expect(labels[1].label).not.toMatch(/^continuous/i)
+      expect(labels[2].label).not.toMatch(/^continuous/i)
+      // ...while the one game-tempo segment keeps its inline override.
+      // 2026-06-30 D175: the prefix leads sentence-case ("Rep-paced") like
+      // every other row, superseding the 2026-06-29 follow-up that
+      // lowercased it for parity — under D175 every row is capitalized.
+      expect(labels[3].label).toMatch(/^Rep-paced at game tempo:/)
+      // Capitalization parity (D175 sentence-case): every row begins with a
+      // capital letter, so the list reads as one consistent sentence-case
+      // set under its capitalized cadence header with no lone lowercase row.
+      expect(labels.every((s) => /^[A-Z]/.test(s.label))).toBe(true)
+      // No d28 segment is unilateral, so nothing folds an each-side suffix.
+      expect(labels.every((s) => !s.eachSide)).toBe(true)
+      // Movement jargon stays glossed in the `(= …)` form across the rows.
+      // Case-insensitive: D175 capitalizes row leads, so a movement token at
+      // a row start ("Ankle hops") now leads with a capital — the assertion
+      // pins the gloss FORM, not the lead casing.
+      const joined = labels.map((s) => s.label).join('\n')
+      expect(joined).toMatch(/A-skip \(= /i)
+      expect(joined).toMatch(/ankle hops \(= /i)
+      expect(joined).toMatch(/lateral shuffles \(= /i)
+      expect(joined).toMatch(/pivot-back starts \(= /i)
+    })
+
+    it('d25 hoists "Continuous" and leaves each-side to the flag on its mixed list', () => {
+      if (!d25) throw new Error('d25-solo variant missing')
+      expect(d25.segmentsCadenceLabel).toBe('Continuous')
+      const labels = d25.segments ?? []
+      // No row hard-codes the cadence prefix or the "(each side)" suffix.
+      expect(labels.every((s) => !/^continuous/i.test(s.label))).toBe(true)
+      expect(labels.every((s) => !/\(each side\)/i.test(s.label))).toBe(true)
+      // D175 sentence-case parity: every row leads with a capital letter.
+      expect(labels.every((s) => /^[A-Z]/.test(s.label))).toBe(true)
+      // Mixed list: only the two unilateral stretches (s3 hip, s5 shoulder)
+      // carry the flag, so SegmentList keeps the header plain (no fold).
+      expect(labels.filter((s) => s.eachSide === true)).toHaveLength(2)
+      expect(labels.some((s) => !s.eachSide)).toBe(true)
     })
   })
 
@@ -1132,13 +1213,12 @@ describe('drill copy regressions', () => {
       expect(text).toContain('deep-left')
       expect(text).toContain('deep-middle')
       expect(text).toContain('deep-right')
-      // 2026-05-10 first-time-runnability sweep: miss-handling
-      // language shifted from "miss repeats the same zone" to the
-      // more compact "Miss → repeat; after 3 misses, move on."
-      // (rule 10 5-question logistics checklist requires an escape
-      // clause for unbounded miss-loops). The repeat-on-miss
-      // anti-regression is preserved; the escape clause is new.
-      expect(text).toMatch(/miss\s*[—→-]\s*repeat/)
+      // 2026-06-30 readability rethink (D173): miss-handling moved off the
+      // arrow microformat ("Miss → repeat") to a plain sentence
+      // ("Miss a zone? Repeat it; after 3 misses, move on."). The
+      // repeat-on-miss anti-regression + the rule-10 escape clause are
+      // both preserved; only the notation changed.
+      expect(text).toMatch(/miss a zone\? repeat it/)
       expect(text).toMatch(/after 3 misses/)
     })
 

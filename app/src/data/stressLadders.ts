@@ -88,7 +88,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
     {
       rung: 1,
       drillIds: ['d01', 'd02', 'd04', 'd52'],
-      intent: 'Groove a repeatable pass on a predictable feed, one clean contact at a time.',
+      intent: 'Groove a repeatable pass on a steady feed.',
       externalFocusCue: 'Send the ball straight back up to the same height every time.',
       explorationCriterion:
         'Notice how little you have to move when you meet the ball out in front of you.',
@@ -99,7 +99,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
     {
       rung: 2,
       drillIds: ['d03', 'd05', 'd06', 'd19'],
-      intent: 'Hold pass quality while the ball keeps coming in a steady rhythm.',
+      intent: 'Hold pass quality through a steady rhythm.',
       externalFocusCue:
         'Float each pass to the same spot in the air where a setter would stand (about 3 m off the net).',
       explorationCriterion:
@@ -112,7 +112,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
     {
       rung: 3,
       drillIds: ['d07', 'd09', 'd10', 'd12', 'd13', 'd14', 'd16', 'd17', 'd24'],
-      intent: 'Read where the ball is going, move to it, and still pass to one target.',
+      intent: 'Read, move, and still pass to one target.',
       externalFocusCue: 'Pick the landing spot early and arrive before the ball does.',
       explorationCriterion:
         'See how reading the flight sooner gives you time to square up to your target.',
@@ -123,8 +123,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
     {
       rung: 4,
       drillIds: ['d11', 'd15', 'd20', 'd21'],
-      intent:
-        'Keep control when the tool or the time is taken away, like a one-arm play or a short-then-deep ball.',
+      intent: 'Keep control when the tool or time is taken away.',
       externalFocusCue: 'Guide the ball back to your target even on the emergency play.',
       explorationCriterion: 'Notice what still works when you cannot get set early.',
       graduationFeel:
@@ -134,7 +133,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
     {
       rung: 5,
       drillIds: ['d08', 'd18', 'd46', 'd50'],
-      intent: 'Pass a real served ball you have to read at game speed.',
+      intent: 'Read and pass a real serve at game speed.',
       externalFocusCue:
         'Track the contact and the spin, then send it to the set window (about 3 m off the net).',
       explorationCriterion:
@@ -148,7 +147,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
     {
       rung: 1,
       drillIds: ['d31', 'd53'],
-      intent: 'Commit to one target and repeat the same serve until it grooves.',
+      intent: 'Commit to one target and groove the same serve.',
       externalFocusCue: 'Land the ball in the same circle on the sand each time.',
       explorationCriterion: 'Notice how a steady toss in front of you makes the contact repeatable.',
       graduationFeel:
@@ -159,7 +158,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
     {
       rung: 2,
       drillIds: ['d23', 'd51', 'd54'],
-      intent: 'Hold serve quality across longer sets and across zones in sequence.',
+      intent: 'Hold serve quality across zones in sequence.',
       externalFocusCue: 'Place each serve into the next zone in order, keeping the same easy contact.',
       explorationCriterion:
         'See whether your rhythm holds as the rounds add up, or your contact changes when you push for more pace.',
@@ -170,7 +169,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
     {
       rung: 3,
       drillIds: ['d22', 'd55'],
-      intent: 'Serve to a called or scored target under a little outcome pressure.',
+      intent: 'Serve to a called target under light pressure.',
       externalFocusCue: 'Aim past the passer to the open zone, not just over the net.',
       explorationCriterion:
         'Notice how aiming at a spot, rather than just in, changes where your misses go.',
@@ -181,7 +180,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
     {
       rung: 4,
       drillIds: ['d08', 'd18', 'd33'],
-      intent: 'Serve into a live receiver and a sequence you do not fully control.',
+      intent: 'Serve into a live receiver you do not control.',
       externalFocusCue: 'Pick the zone that pressures the receiver before you toss.',
       explorationCriterion:
         'See how serving at a target instead of at the court feels under the back-and-forth of a live point.',
@@ -193,7 +192,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
     {
       rung: 1,
       drillIds: ['d38', 'd39', 'd40'],
-      intent: 'Build a clean, repeatable set shape on a predictable toss.',
+      intent: 'Build a clean set shape on a steady toss.',
       externalFocusCue: 'Release the ball softly to the same height above you every time.',
       explorationCriterion: 'Notice how a quiet, even contact sends the ball straight up without spin.',
       graduationFeel:
@@ -203,7 +202,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
     {
       rung: 2,
       drillIds: ['d41', 'd56'],
-      intent: 'Keep the set shape while rallying continuously with a partner.',
+      intent: 'Hold the set shape through a continuous rally.',
       externalFocusCue: 'Float each set so your partner barely moves to reach it.',
       explorationCriterion:
         'See whether the rally stays smooth as it lengthens, or the ball starts to lead your partner.',
@@ -214,7 +213,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
     {
       rung: 3,
       drillIds: ['d42', 'd57'],
-      intent: 'Set to changing targets and from changing court spots.',
+      intent: 'Set to changing targets from changing spots.',
       externalFocusCue: 'Square up to the target before the ball arrives.',
       explorationCriterion: 'Notice how arriving early and facing the target changes how settable the ball lands.',
       graduationFeel:
@@ -225,7 +224,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
     {
       rung: 4,
       drillIds: ['d20', 'd21', 'd47', 'd58'],
-      intent: 'Choose bump or hand set from imperfect passes and still deliver a hittable ball.',
+      intent: 'Bump or hand set from imperfect passes.',
       externalFocusCue: 'Send the ball to the same hittable spot wherever the pass pulls you.',
       explorationCriterion: 'See which option keeps the set clean when the pass is off.',
       graduationFeel:
@@ -234,7 +233,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
     {
       rung: 5,
       drillIds: ['d48', 'd49'],
-      intent: 'Set under live chaos when the pass pulls you out of position, and recover for the next ball.',
+      intent: 'Set under chaos, then recover for the next ball.',
       externalFocusCue: 'Put the ball where your hitter is going, then find your base again.',
       explorationCriterion:
         'Notice how committing to a target early lets you recover faster for the next play.',

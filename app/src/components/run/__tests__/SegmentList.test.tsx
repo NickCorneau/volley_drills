@@ -196,4 +196,59 @@ describe('<SegmentList>', () => {
       expect(suffix.className).toContain('text-text-secondary')
     })
   })
+
+  /**
+   * D170 cadence-hoist: a shared per-list cadence renders ONCE as a calm
+   * header above the rows instead of repeating on every label (rule 7
+   * list-level hoist). When every segment is each-side, "· each side"
+   * folds into the header and the per-row "(each side)" suffix is
+   * suppressed so the switch-sides reminder reads once, not N times.
+   */
+  describe('cadence header (D170)', () => {
+    // D175: rows lead sentence-case, mirroring the real d26 / d25 catalog.
+    const ALL_EACHSIDE: readonly DrillSegment[] = [
+      { id: 's1', label: 'Calf: heel down, lean in.', durationSec: 60, eachSide: true },
+      { id: 's2', label: 'Hamstring: hinge your hips back.', durationSec: 60, eachSide: true },
+      { id: 's3', label: 'Hip flexor: half-kneel, lean in.', durationSec: 60, eachSide: true },
+    ]
+    const SOME_EACHSIDE: readonly DrillSegment[] = [
+      { id: 's1', label: 'Walk with long exhales.', durationSec: 60 },
+      { id: 's2', label: 'Hip stretch: cross one ankle over the knee.', durationSec: 60, eachSide: true },
+      { id: 's3', label: 'Overhead reach: arch gently.', durationSec: 30 },
+      { id: 's4', label: 'Shoulder stretch: arm across chest.', durationSec: 60, eachSide: true },
+    ]
+
+    it('renders the cadence label once above the list when provided', () => {
+      const { container } = render(
+        <SegmentList segments={FOUR_SEGMENTS} currentIndex={0} cadenceLabel="Continuous" />,
+      )
+      const header = container.querySelector('p')
+      expect(header?.textContent).toBe('Continuous')
+    })
+
+    it('renders no cadence header when cadenceLabel is omitted', () => {
+      const { container } = render(<SegmentList segments={FOUR_SEGMENTS} currentIndex={0} />)
+      expect(container.querySelector('p')).toBeNull()
+    })
+
+    it('folds "· each side" into the header and suppresses per-row suffixes when every segment is each-side', () => {
+      const { container } = render(
+        <SegmentList segments={ALL_EACHSIDE} currentIndex={0} cadenceLabel="Continuous hold" />,
+      )
+      const header = container.querySelector('p')
+      expect(header?.textContent).toBe('Continuous hold · each side')
+      // No per-row "(each side)" suffix when the reminder is in the header.
+      expect(screen.queryAllByText(/\(each side\)/)).toHaveLength(0)
+    })
+
+    it('keeps per-row "(each side)" and does NOT fold the header when only some segments are each-side', () => {
+      const { container } = render(
+        <SegmentList segments={SOME_EACHSIDE} currentIndex={0} cadenceLabel="Continuous" />,
+      )
+      const header = container.querySelector('p')
+      expect(header?.textContent).toBe('Continuous')
+      // Two each-side rows still render their own suffix.
+      expect(screen.getAllByText(/\(each side\)/)).toHaveLength(2)
+    })
+  })
 })

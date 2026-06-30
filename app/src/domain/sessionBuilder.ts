@@ -419,6 +419,7 @@ function buildDraftResult(
       rationale:
         substitutionRationale ?? deriveBlockRationale(slot.type, pick.drill, effectiveContext),
       subBlockIntervalSeconds: pick.variant.subBlockIntervalSeconds,
+      segmentsCadenceLabel: pick.variant.segmentsCadenceLabel,
       segments: pick.variant.segments,
     })
   }
@@ -626,6 +627,7 @@ export function buildRecoveryDraft(context: SetupContext): SessionDraft | null {
       required: slot.required,
       rationale: deriveBlockRationale(slot.type, pick.drill, recoveryContext),
       subBlockIntervalSeconds: pick.variant.subBlockIntervalSeconds,
+      segmentsCadenceLabel: pick.variant.segmentsCadenceLabel,
       segments: pick.variant.segments,
     })
   }

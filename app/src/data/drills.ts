@@ -186,7 +186,7 @@ const d02: Drill = {
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'You pass with a towel across your neck and upper back; partner tosses left and right. Pass to the set window (where the setter would stand, ~3 m off the net) without dropping the towel.',
+        'You pass with a towel across your neck and upper back; partner tosses left and right. Pass to the set window (= where the setter would stand, ~3 m off the net) without dropping the towel.',
       coachingCues: [
         'Ribs tucked - do not over-arch.',
         'Arm angle drives where the ball goes.',
@@ -292,7 +292,7 @@ const d04: Drill = {
         target: '≥ 7/10',
       },
       courtsideInstructions:
-        'Pass across the net; feeder serves or tosses to you. Pass up or down to the set window (where the setter would stand, ~3 m off the net), then catch your own pass.',
+        'Pass across the net; feeder serves or tosses to you. Pass up or down to the set window (= where the setter would stand, ~3 m off the net), then catch your own pass.',
       coachingCues: [
         'Move to pass in centerline.',
         'Target forward and slightly inward.',
@@ -320,7 +320,7 @@ const d04: Drill = {
         target: '≥ 7/10',
       },
       courtsideInstructions:
-        'Pass across the net from a self-toss. Pass up or down to the set window (where the setter would stand, ~3 m off the net), catch your own pass, retrieve, and repeat.',
+        'Pass across the net from a self-toss. Pass up or down to the set window (= where the setter would stand, ~3 m off the net), catch your own pass, retrieve, and repeat.',
       coachingCues: [
         'Move to pass in centerline.',
         'Target forward and slightly inward.',
@@ -377,7 +377,7 @@ const d05: Drill = {
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'Pass into your set window off a self-toss. Place a marker at the set window (where the setter would stand, ~3 m off the net). Self-toss slightly in front; pass to land within that zone; retrieve quickly and repeat. Use 20 total reps.',
+        'Pass into your set window off a self-toss. Place a marker at the set window (= where the setter would stand, ~3 m off the net). Self-toss slightly in front; pass to land within that zone; retrieve quickly and repeat. Use 20 total reps.',
       coachingCues: [
         'Aim your arm angle toward the target.',
         'Get behind ball horizontally.',
@@ -416,7 +416,7 @@ const d05: Drill = {
         target: '≥ 70% over 20 partner tosses',
       },
       courtsideInstructions:
-        'You pass; partner stands at the set window (where the setter would stand, ~3 m off the net) and tosses an arc 2 to 3 m in front of you. Pass so partner catches without moving more than one step. Switch roles after 20 tosses.',
+        'You pass; partner stands at the set window (= where the setter would stand, ~3 m off the net) and tosses an arc 2 to 3 m in front. Pass so partner catches within one step. Switch roles after 20 tosses.',
       coachingCues: [
         'Pass to your partner, not past them.',
         'Get behind ball horizontally.',
@@ -466,7 +466,7 @@ const d06: Drill = {
         target: '≥ 2.0 average',
       },
       courtsideInstructions:
-        'Pass up to yourself off your own toss; clap behind your back between contacts. Score each contact 0 to 3 by how close the pass lands to your set window (where the setter would stand, ~3 m off the net).',
+        'Pass up to yourself off your own toss; clap behind your back between contacts. Score each contact 0 to 3 by how close the pass lands to your set window (= where the setter would stand, ~3 m off the net).',
       coachingCues: [
         'Platform set early.',
         'Arms parallel to ground for accuracy.',
@@ -526,7 +526,7 @@ const d07: Drill = {
         target: '≥ 70% passes 2+ AND ≥ 80% correct calls',
       },
       courtsideInstructions:
-        'You pass; partner serves and flashes 1 to 5 when your platform meets the ball. Pass to the set window (where the setter would stand, ~3 m off the net), call the number, then reset.',
+        'You pass; partner serves and flashes 1 to 5 when your platform meets the ball. Pass to the set window (= where the setter would stand, ~3 m off the net), call the number, then reset.',
       coachingCues: [
         "Look at your partner's hand the moment your platform meets the ball.",
         'Hold platform first; look after contact.',
@@ -559,7 +559,7 @@ const d07: Drill = {
         target: '16 of 24 passes 2+ and 20 of 24 correct calls',
       },
       courtsideInstructions:
-        'Pass to the set window (where the setter would stand, ~3 m off the net) from a self-toss, then lift your eyes and call the nearest of four numbered targets before the ball lands.',
+        'Pass to the set window (= where the setter would stand, ~3 m off the net) from a self-toss, then lift your eyes and call the nearest of 4 targets before it lands.',
       coachingCues: [
         'Look at the target card the moment your platform meets the ball.',
         'Hold platform first; look after contact.',
@@ -594,7 +594,7 @@ const d07: Drill = {
         target: '16 of 24 passes 2+ and 20 of 24 correct calls',
       },
       courtsideInstructions:
-        'You pass; partner flashes 1–5 with their fingers the moment your platform meets the ball. Pass to the set window (where the setter would stand, ~3 m off the net), then call the number before the next feed. Switch roles after 12 reps.',
+        'You pass; partner flashes 1–5 with their fingers the moment your platform meets the ball. Pass to the set window (= where the setter would stand, ~3 m off the net), then call the number before the next feed. Switch roles after 12 reps.',
       coachingCues: [
         "Look at partner's hand the moment your platform meets the ball.",
         'Be still through contact.',
@@ -652,7 +652,7 @@ const d08: Drill = {
         target: 'Win 2 rounds or pass average ≥ 2.0 across 15 serves',
       },
       courtsideInstructions:
-        'Passer receives serve; catcher stands near the set window (where the setter would stand, ~3 m off the net). +1 if catcher moves ≤ 1 big step or service error; −1 for bad pass or ace. First to +3.',
+        'Passer receives serve; catcher stands near the set window (= where the setter would stand, ~3 m off the net). +1 if catcher moves ≤ 1 big step or service error; −1 for bad pass or ace. First to +3.',
       coachingCues: [
         'Aim pass off net enough to avoid trouble.',
         'Shoulders to target.',
@@ -1081,7 +1081,7 @@ const d15: Drill = {
         target: '≥ 70%',
       },
       courtsideInstructions:
-        'You pass; partner (server) delivers short or deep serves. Read early, move, and pass to the set window (where the setter would stand, ~3 m off the net). Catcher collects.',
+        'You pass; partner (server) delivers short or deep serves. Read early, move, and pass to the set window (= where the setter would stand, ~3 m off the net). Catcher collects.',
       coachingCues: [
         "Read the ball early from the server's hand.",
         'Centered ready position enables quick forward/back.',
@@ -1188,7 +1188,7 @@ const d46: Drill = {
       },
       successMetric: {
         type: 'pass-rate-good',
-        description: 'Spin-fed self tosses passed into a 1 m set window (where the setter would stand, ~3 m off the net).',
+        description: 'Spin-fed self tosses passed into a 1 m set window (= where the setter would stand, ~3 m off the net).',
         target: '16 of 24 passes land in the set window',
       },
       courtsideInstructions:
@@ -1216,7 +1216,7 @@ const d46: Drill = {
       },
       successMetric: {
         type: 'pass-rate-good',
-        description: 'Partner spin feeds passed into a 1 m set window (where the setter would stand, ~3 m off the net).',
+        description: 'Partner spin feeds passed into a 1 m set window (= where the setter would stand, ~3 m off the net).',
         target: '16 of 24 passes land in the set window',
       },
       // 2026-05-10 first-time-runnability sweep (rule 8 role-tagged).
@@ -1878,8 +1878,11 @@ const d33: Drill = {
         description: 'Serve-toss contact lands in the called sand target zone.',
         target: 'Hit all 6 target zones once',
       },
+      // 2026-06-30 readability rethink (D173): grid-form serving ladder.
+      // The 6 sand targets group short/deep on their own lines (`\n` via
+      // GlossedText `whitespace-pre-line`); the flat-list prose is retired.
       courtsideInstructions:
-        'Serve through six marked sand targets in order: short-left, short-middle, short-right, deep-left, deep-middle, deep-right. Misses repeat the same target. Keep the routine identical even without a net.',
+        'Serve to 6 marked sand targets in order.\n\nShort-left, short-middle, short-right.\nDeep-left, deep-middle, deep-right.\n\nMiss a target? Repeat it; after 3 misses, move on. Keep the same routine on every serve, even without a net.',
       coachingCues: ['Name the target first.', 'Same toss and contact.', 'Reset after each miss.'],
     },
     // 2026-04-27 solo-vs-pair sweep: variant ID `d33-solo-net` is
@@ -1920,11 +1923,12 @@ const d33: Drill = {
         description: 'Serve lands in the called zone.',
         target: 'Hit all 6 zones once',
       },
-      // 2026-05-10 first-time-runnability sweep (rule 2 logistics gloss
-      // for "shag"). Solo POV already unambiguous because the doer is
-      // alone; default from-doer's-side-of-net POV (rule 11) applies.
+      // 2026-06-30 readability rethink (D173): grid-form serving ladder.
+      // The 6 zones group short/deep on their own lines; "Shag (= …)" is
+      // dropped for plain "Collect the balls" (no gloss needed). Solo POV
+      // already unambiguous; "from your side of the net" anchors it (rule 11).
       courtsideInstructions:
-        'Serve through six zones in order, from your side of the net: short-left, short-middle, short-right, deep-left, deep-middle, deep-right. Misses repeat the same zone; after 3 misses, move on. Shag (= collect the balls from the receiver\'s side) after all six.',
+        'Serve to 6 zones in order, from your side of the net.\n\nShort-left, short-middle, short-right.\nDeep-left, deep-middle, deep-right.\n\nMiss a zone? Repeat it; after 3 misses, move on. Collect the balls after all six.',
       coachingCues: ['Name the zone first.', 'High arc for the deep zones.', 'Reset after each miss.'],
     },
     // Focus-readiness batch 1 (2026-04-30): pair/no-net target ladder
@@ -1950,12 +1954,20 @@ const d33: Drill = {
         description: 'Serve-toss contact lands in the target zone called before the toss.',
         target: 'Both partners hit all 6 target zones',
       },
-      // 2026-05-10 first-time-runnability sweep (rule 8 role-tagged;
-      // rule 9 cue->action arrow microformat for caller cue; rule 2
-      // logistics gloss for "shags"; rule 11 miss-loop escape clause;
-      // rule 3 bracket-repeat microformat for the 6-target cycle).
+      // 2026-06-30 readability rethink (founder: "weirdly formatted, a
+      // little confusing to quickly read"). The prior copy collided three
+      // microformats in one block — the rule-3 bracket-repeat (`× 6`), the
+      // rule-9 arrow chain, and a parenthetical that RE-stated the roles
+      // already named in the opening clause — and ran the 6 targets as a
+      // flat list of six compounds. Rewritten as a structured READ-DO read:
+      // plain sentences (rule 9 satisfied by the `before`/`then` sequence
+      // verbs, not arrows; rule 3 satisfied by full enumeration, not the
+      // bracket form), the 6 targets grouped short/deep on their own lines
+      // (`\n` line breaks rendered by GlossedText's `whitespace-pre-line`),
+      // and "shags" dropped for plain "fetches the ball" (no gloss needed).
+      // Still rule 6/8/10/11 compliant and under the rule-14 word ceiling.
       courtsideInstructions:
-        "You serve; caller names the target. (caller calls → you serve → caller shags (= brings the balls back) after the round) × 6 targets, in order: short-left, short-middle, short-right, deep-left, deep-middle, deep-right. Miss → repeat; after 3 misses, move on. Switch roles.",
+        'You serve to 6 targets in order; caller names each target before you serve.\n\nShort-left, short-middle, short-right.\nDeep-left, deep-middle, deep-right.\n\nMiss a target? Repeat it; after 3 misses, move on. Caller fetches the ball after the round, then switch roles.',
       coachingCues: [
         'Caller names the target first.',
         'Same toss and contact every time.',
@@ -2013,8 +2025,15 @@ const d33: Drill = {
       // repeat microformat). d33-pair is the canonical worked-rewrite
       // specimen for the 2026-05-10 "peak and flash / number drill"
       // confusion class.
+      // 2026-06-30 readability rethink (D173): grid-form serving ladder.
+      // "shagger (= …)" → plain "partner" (still rule-8 role-tagged: the
+      // `participants.roles[1]` "shagger" is covered by the "partner"
+      // synonym); the arrow miss-rule → a plain sentence; the flat 6-zone
+      // list → a short/deep grid. "after the 6-zone round" + "switch roles"
+      // are kept for the round-based-turn-taking anti-regression (red-team
+      // 2026-04-27 finding pinned in drillCopyRegressions.test.ts).
       courtsideInstructions:
-        "You serve first; shagger (= partner across the net) calls the zone before each serve, then collects after the 6-zone round. Zones from your side: short-left, short-middle, short-right, deep-left, deep-middle, deep-right. Miss → repeat; after 3 misses, move on. Switch roles.",
+        'You serve to 6 zones in order, from your side of the net; partner calls each before you serve.\n\nShort-left, short-middle, short-right.\nDeep-left, deep-middle, deep-right.\n\nMiss a zone? Repeat it; after 3 misses, move on. Partner collects after the 6-zone round, then switch roles.',
       coachingCues: [
         'Shagger calls the zone first.',
         'High arc for deep zones.',
@@ -2181,27 +2200,38 @@ const d25: Drill = {
       courtsideInstructions:
         'Walk first, then four short holds: calves, hips, overhead reach, shoulders. Gentle tension only; skip any move that hurts today.',
       courtsideInstructionsBonus: 'Drink water if you are thirsty. Skip any move that hurts today.',
+      // D170 cadence-hoist: every move is "continuous" (a walk, then four
+      // sustained holds), so the shared rule-7 cadence format is named once
+      // in the SegmentList header and dropped from each row. Not all
+      // segments are each-side (only s3 / s5), so "· each side" is NOT
+      // folded into the header — the flag still renders the suffix on those
+      // two rows. Rows lead with the move (walk / release / stretch /
+      // reach) so hold-vs-walk stays clear without the prefix.
+      // 2026-06-30 D175: rows lead sentence-case to match the capitalized
+      // cadence header (founder call on the d26 face, rolled across all
+      // segmented drills).
+      segmentsCadenceLabel: 'Continuous',
       segments: [
-        { id: 'd25-solo-s1', label: 'Continuous: walk with long exhales.', durationSec: 60 },
+        { id: 'd25-solo-s1', label: 'Walk with long exhales.', durationSec: 60 },
         {
           id: 'd25-solo-s2',
-          label: 'Continuous hold: calf release, straight back leg, heel down, lean in until the calf tightens.',
+          label: 'Calf release: straight back leg, heel down, lean in until the calf tightens.',
           durationSec: 30,
         },
         {
           id: 'd25-solo-s3',
-          label: 'Continuous hold (each side): hip stretch, cross one ankle over the opposite knee and lean forward.',
+          label: 'Hip stretch: cross one ankle over the opposite knee and lean forward.',
           durationSec: 60,
           eachSide: true,
         },
         {
           id: 'd25-solo-s4',
-          label: 'Continuous hold: reach arms overhead and arch gently through the upper back.',
+          label: 'Overhead reach: arch gently through the upper back.',
           durationSec: 30,
         },
         {
           id: 'd25-solo-s5',
-          label: 'Continuous hold (each side): shoulder stretch, pull one arm across your chest with the other hand.',
+          label: 'Shoulder stretch: pull one arm across your chest with the other hand.',
           durationSec: 60,
           eachSide: true,
         },
@@ -2323,29 +2353,55 @@ const d26: Drill = {
       //    segment time); the bonus copy drops the "mirror" clause
       //    because mirroring is built into the floor. Bonus is now
       //    purely accessory ("add glutes or adductors").
+      //
+      // 2026-06-29 segment-density fix (founder dogfood: cooldown segment
+      // text read too long / repetitive). Two regressions vs d28's house
+      // style corrected: (1) "(each side)" was authored into each label
+      // prefix AND rendered again by `eachSide: true` — the duplicate is
+      // removed from the labels, leaving the flag as the single source for
+      // the muted "(each side)" suffix SegmentList renders. (2) The anatomy
+      // clarifiers were authored as plain parens `(back of thigh)` so they
+      // never actually glossed (GLOSS_PATTERN needs `(= …)`); rewired to the
+      // gloss form so they collapse to the bare muscle name on inactive rows
+      // and reveal on tap on the active row (SegmentList R9), matching d28's
+      // movement glosses. The rule-7 cadence name ("Continuous hold") is
+      // kept. Pinned by `drillCopyRegressions.test.ts`.
       courtsideInstructions:
         'Short wrap: three lower-body stretches, each side. No bouncing; firm tension, never sharp pain.',
       courtsideInstructionsBonus:
         'If time remains, add glutes (back of hips) or adductors (inner thighs).',
+      // D170 cadence-hoist: all three moves share the "Continuous hold"
+      // cadence and are each-side, so the cadence is named once in the
+      // SegmentList header ("Continuous hold · each side") and dropped
+      // from every row. Rows lead with the muscle target + the (= …)
+      // anatomy gloss + the execution cue.
+      // 2026-06-30 D175 (founder call on the live d26 face: "this is poorly
+      // capitalized"): rows now lead sentence-case (`Hip flexor`, not
+      // `hip flexor`) so the list reads as properly capitalized under its
+      // capitalized cadence header. The gloss parser was made
+      // case-insensitive in the same pass (glossedText.ts), so the
+      // multi-word `hip flexor` registry term still resolves its full span
+      // for the inline `(= …)` gloss despite the capital lead.
+      segmentsCadenceLabel: 'Continuous hold',
       segments: [
         {
           id: 'd26-solo-s1',
           label:
-            'Continuous hold (each side): calf, straight back leg, heel down, lean in; soften the back knee for the lower calf.',
+            'Calf: straight back leg, heel down, lean in; soften the back knee for the lower calf.',
           durationSec: 60,
           eachSide: true,
         },
         {
           id: 'd26-solo-s2',
           label:
-            'Continuous hold (each side): hamstring (back of thigh), front leg heel down, toes up; tip your hips back and lean your chest toward the front leg, back flat.',
+            'Hamstring (= back of thigh): front leg heel down, toes up; tip your hips back and lean your chest toward the front leg, back flat.',
           durationSec: 60,
           eachSide: true,
         },
         {
           id: 'd26-solo-s3',
           label:
-            'Continuous hold (each side): hip flexor (front of upper thigh), half-kneel (one knee on the ground, other foot in front), squeeze the back-leg glute, lean gently into the front leg.',
+            'Hip flexor (= front of upper thigh): half-kneel (= one knee on the ground, other foot in front), squeeze the back-leg glute, lean gently into the front leg.',
           durationSec: 60,
           eachSide: true,
         },
@@ -3209,7 +3265,7 @@ const d50: Drill = {
       },
       successMetric: {
         type: 'pass-rate-good',
-        description: 'Short and deep partner feeds passed into a 1 m set window (where the setter would stand, ~3 m off the net) across recovery rounds.',
+        description: 'Short and deep partner feeds passed into a 1 m set window (= where the setter would stand, ~3 m off the net) across recovery rounds.',
         target: '20 of 28 passes land in the set window across three rounds',
       },
       // 2026-05-10 first-time-runnability sweep (rule 14 trim 67->45
@@ -3241,7 +3297,7 @@ const d50: Drill = {
       },
       successMetric: {
         type: 'pass-rate-good',
-        description: 'Self-toss short and deep alternations passed into a 1 m set window (where the setter would stand, ~3 m off the net).',
+        description: 'Self-toss short and deep alternations passed into a 1 m set window (= where the setter would stand, ~3 m off the net).',
         target: '20 of 28 passes land in the set window across three rounds',
       },
       // 2026-05-10 first-time-runnability sweep (rule 14 trim 56->43
@@ -3349,20 +3405,34 @@ const d28: Drill = {
       // timing felt off; the implicit cadence under each 45s segment
       // was unstated.
       courtsideInstructions: 'Four quick movement blocks. End warmer than you started.',
+      // D170 cadence-hoist: three of four segments share the "Continuous"
+      // cadence, so it is named once in the SegmentList header and dropped
+      // from those rows. The fourth segment is "Rep-paced at game tempo"
+      // (a DIFFERENT rule-7 cadence / load), so it keeps its cadence prefix
+      // inline as the exception that overrides the header default.
+      // 2026-06-30 D175: rows lead sentence-case (the s4 prefix leads
+      // "Rep-paced", the movement rows lead "Jog" / "Ankle hops" / "Arm
+      // circles") to match the capitalized cadence header. This SUPERSEDES
+      // the 2026-06-29 follow-up that lowercased the lone "Rep-paced" for
+      // parity — under D175 every row is capitalized, so the list reads as
+      // one consistent sentence-case set. Movement-vocab glosses (A-skip /
+      // ankle hops / lateral shuffles / pivot-back starts) still resolve
+      // because the gloss parser is case-insensitive.
+      segmentsCadenceLabel: 'Continuous',
       segments: [
         {
           id: 'd28-solo-s1',
-          label: 'Continuous: jog or A-skip (= skip forward, lifting the front knee until the thigh is parallel to the sand) around a short loop on the sand (about 10 to 15 m, or one court width).',
+          label: 'Jog or A-skip (= skip forward, lifting the front knee until the thigh is parallel to the sand) around a short loop on the sand (about 10 to 15 m, or one court width).',
           durationSec: 45,
         },
         {
           id: 'd28-solo-s2',
-          label: 'Continuous: ankle hops (= small two-foot hops in place, springing off the balls of the feet) then lateral shuffles (= quick sideways shuffle steps, feet never crossing).',
+          label: 'Ankle hops (= small two-foot hops in place, springing off the balls of the feet) then lateral shuffles (= quick sideways shuffle steps, feet never crossing).',
           durationSec: 45,
         },
         {
           id: 'd28-solo-s3',
-          label: 'Continuous: arm circles forward and back, then trunk rotations side to side.',
+          label: 'Arm circles forward and back, then trunk rotations side to side.',
           durationSec: 45,
         },
         {
@@ -3578,8 +3648,10 @@ const d54: Drill = {
         description: 'Four zones cleared in order from your side: short-left, short-right, deep-left, deep-right; miss repeats, capped at 3 tries.',
         target: 'Clear all four zones',
       },
+      // 2026-06-30 readability rethink (D173): grid-form serving ladder.
+      // The 4 zones group short/deep on their own lines; flat-list prose retired.
       courtsideInstructions:
-        'Serve through four marked zones in order, from your side: short-left, short-right, deep-left, deep-right. A miss repeats the same zone; after 3 misses, move on. Reset before every serve.',
+        'Serve to 4 marked zones in order, from your side.\n\nShort-left, short-right.\nDeep-left, deep-right.\n\nMiss a zone? Repeat it; after 3 misses, move on. Reset before every serve.',
       coachingCues: ['Name the next zone first.', 'Same contact as targets change.', 'Watch the landing.'],
     },
     {
@@ -3602,8 +3674,12 @@ const d54: Drill = {
         description: 'Four called zones cleared in order: short-left, short-right, deep-left, deep-right; capped at 3 tries per zone.',
         target: 'Clear all four called zones',
       },
+      // 2026-06-30 readability rethink (D173): grid-form serving ladder.
+      // The 4 called zones group short/deep on their own lines; rule-8
+      // role-tagged (you / caller); rule-9 via "before"/"then" sequence
+      // verbs instead of an arrow chain.
       courtsideInstructions:
-        'You serve first; caller names short-left, short-right, deep-left, then deep-right in order before each toss. A miss repeats that zone; after 3 misses, move on. Caller brings the ball back; switch roles after four zones.',
+        'You serve to 4 zones in order; caller names each zone before you serve.\n\nShort-left, short-right.\nDeep-left, deep-right.\n\nMiss a zone? Repeat it; after 3 misses, move on. Caller fetches the ball after four zones, then switch roles.',
       coachingCues: ['Caller names the zone first.', 'Same contact as targets change.', 'Watch the landing.'],
     },
   ],
@@ -3676,7 +3752,7 @@ const d55: Drill = {
       successMetric: {
         type: 'points-to-target',
         description:
-          'Server scores when the pass would not reach the set window (where the setter would stand, ~3 m off the net); passer scores on a pass that does. Race to +3.',
+          'Server scores when the pass would not reach the set window (= where the setter would stand, ~3 m off the net); passer scores on a pass that does. Race to +3.',
         target: 'Reach +3 as the server',
       },
       courtsideInstructions:

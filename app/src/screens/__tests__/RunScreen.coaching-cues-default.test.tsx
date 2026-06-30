@@ -1,18 +1,20 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { RUN_FLOW_LABELS } from '../../contracts/runFlowLexicon'
 import { db } from '../../db'
 import { RunScreen } from '../RunScreen'
 
 /**
  * Run Face v1: the live surface shows one "Now" cue and keeps the
- * remaining coaching cues reachable through a cue-only disclosure.
+ * remaining coaching cues reachable through the recovery overlay.
  *
- * Regression contract (updated 2026-06-23, run-flow beat contract
- * Stage 1 / R7b): long cue bodies no longer compete with the live cue
- * by default; extra cues sit behind "Show more cues". The full
- * courtsideInstructions read is homed on the Run get-ready beat (post-D167;
- * formerly Transition) — it no longer renders on the live face.
+ * Regression contract (updated 2026-06-29, run-flow beat contract
+ * Stage 1+2 merge): long cue bodies no longer compete with the live cue
+ * by default; extra cues sit one tap away in the single "Drill details"
+ * overlay (alongside the full setup read). The full courtsideInstructions
+ * read is homed on the Run get-ready beat (post-D167; formerly Transition)
+ * — it no longer renders inline on the live face.
  */
 
 async function clearDb() {
@@ -80,20 +82,23 @@ describe('RunScreen: Run Face cue detail', () => {
     await clearDb()
   })
 
-  it('long cue: keeps one live cue and exposes full cue in inline detail', async () => {
+  it('long cue: keeps one live cue and exposes the full cue in the Drill details overlay', async () => {
     const user = userEvent.setup()
     await seedPausedSession('exec-long', 'plan-long', LONG_CUE)
     renderAt('exec-long')
 
     expect(await screen.findByText(/^Now$/)).toBeInTheDocument()
+    // The long coaching cue overflows the one-breath budget, so the live
+    // "Now" cue falls back to the single-line instruction; the long cue body
+    // never competes inline.
     expect(screen.getByText(/Self-toss; forearm pass up and down/i)).toBeInTheDocument()
+    expect(screen.queryByText(/CUEFULLMARKER_9f3a/)).toBeNull()
 
-    // Run-flow beat contract Stage 1 (R7b): the disclosure is cue-only,
-    // labelled "Show more cues"; the instructions read is gone from Run.
-    await user.click(screen.getByText(/show more cues/i))
-    expect(screen.getByText(/CUEFULLMARKER_9f3a/)).toBeInTheDocument()
-
-    expect(screen.queryByRole('button', { name: /show less/i })).not.toBeInTheDocument()
+    // Run-flow beat contract Stage 1+2 merge (2026-06-29): one "Drill
+    // details" control opens the overlay carrying the full cue body.
+    await user.click(screen.getByRole('button', { name: RUN_FLOW_LABELS.peek }))
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByText(/CUEFULLMARKER_9f3a/)).toBeInTheDocument()
   })
 
   it('short cue: renders as the live cue', async () => {

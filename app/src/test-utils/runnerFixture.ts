@@ -71,6 +71,7 @@ function fillBlock(overrides: RunnerBlockOverrides, fallback: SessionPlanBlock):
     required: overrides.required ?? fallback.required,
     rationale: overrides.rationale ?? fallback.rationale,
     subBlockIntervalSeconds: overrides.subBlockIntervalSeconds ?? fallback.subBlockIntervalSeconds,
+    segmentsCadenceLabel: overrides.segmentsCadenceLabel ?? fallback.segmentsCadenceLabel,
     segments: overrides.segments ?? fallback.segments,
   }
 }

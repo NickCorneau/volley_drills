@@ -7,14 +7,13 @@ import { RUN_FLOW_LABELS, SUNSET_RUN_FLOW_LABELS } from '../runFlowLexicon'
  * guard lives in `screens/__tests__/runFlowLexicon.guard.test.tsx`.
  */
 describe('run-flow lexicon (Stage 0 beat contract)', () => {
-  it('pins the founder-decided action, cue, and more-cues labels', () => {
+  it('pins the founder-decided action and cue labels', () => {
     expect(RUN_FLOW_LABELS.startAction).toBe('Start')
     expect(RUN_FLOW_LABELS.cue).toBe('Now')
-    expect(RUN_FLOW_LABELS.moreCues).toBe('Show more cues')
   })
 
-  it('pins the Stage 2 recovery-peek labels', () => {
-    expect(RUN_FLOW_LABELS.peek).toBe('Peek setup')
+  it('pins the Stage 2 recovery-overlay labels (post-2026-06-29 merge)', () => {
+    expect(RUN_FLOW_LABELS.peek).toBe('Drill details')
     expect(RUN_FLOW_LABELS.peekClose).toBe('Back to drill')
   })
 
@@ -26,6 +25,11 @@ describe('run-flow lexicon (Stage 0 beat contract)', () => {
     expect(SUNSET_RUN_FLOW_LABELS).toContain('Start next block')
     expect(SUNSET_RUN_FLOW_LABELS).toContain('GO')
     expect(SUNSET_RUN_FLOW_LABELS).toContain('Cue')
+  })
+
+  it('records the labels retired by the 2026-06-29 Drill-details merge', () => {
+    expect(SUNSET_RUN_FLOW_LABELS).toContain('Show more cues')
+    expect(SUNSET_RUN_FLOW_LABELS).toContain('Peek setup')
   })
 
   it('keeps active and sunset label sets disjoint', () => {

@@ -70,6 +70,16 @@ export interface SegmentListProps {
    * `d25-solo` (hydrate). Renders nothing if undefined or empty.
    */
   bonus?: string
+  /**
+   * Optional shared cadence (rule 7 / `D170`) for the whole list, shown
+   * once as a calm header above the rows (e.g., "Continuous hold",
+   * "Continuous"). When every segment is `eachSide`, "· each side" is
+   * folded into the header and the per-row "(each side)" suffix is
+   * suppressed so the reminder reads once. Segments whose cadence
+   * differs from this default keep an inline cadence prefix on their
+   * own label. Renders nothing if undefined or empty.
+   */
+  cadenceLabel?: string
 }
 
 type SegmentRowStatus = 'done' | 'now' | 'future'
@@ -81,18 +91,39 @@ function statusForIndex(rowIndex: number, currentIndex: number): SegmentRowStatu
   return 'future'
 }
 
-export function SegmentList({ segments, currentIndex, bonus }: SegmentListProps) {
+export function SegmentList({ segments, currentIndex, bonus, cadenceLabel }: SegmentListProps) {
   if (segments.length === 0) return null
 
   const activeSegment =
     currentIndex >= 0 && currentIndex < segments.length ? segments[currentIndex] : null
 
+  // R7 / D170: a shared per-list cadence is hoisted into one calm header
+  // instead of repeating on every row. When EVERY segment is each-side,
+  // "· each side" folds into the header and the per-row suffix is
+  // suppressed so the switch-sides reminder reads once, not N times.
+  const hasCadenceLabel = cadenceLabel != null && cadenceLabel.length > 0
+  const allEachSide = segments.every((s) => s.eachSide)
+  const hoistEachSide = hasCadenceLabel && allEachSide
+
   return (
     <div>
+      {hasCadenceLabel && (
+        <p className="mb-2 text-sm leading-snug text-text-secondary">
+          <span className="font-medium">{cadenceLabel}</span>
+          {hoistEachSide ? ' · each side' : ''}
+        </p>
+      )}
       <ul aria-label="Segments" className="flex flex-col gap-2">
         {segments.map((segment, i) => {
           const status = statusForIndex(i, currentIndex)
-          return <SegmentRow key={segment.id} segment={segment} status={status} />
+          return (
+            <SegmentRow
+              key={segment.id}
+              segment={segment}
+              status={status}
+              suppressEachSide={hoistEachSide}
+            />
+          )
         })}
       </ul>
 
@@ -136,9 +167,11 @@ export function SegmentList({ segments, currentIndex, bonus }: SegmentListProps)
 function SegmentRow({
   segment,
   status,
+  suppressEachSide,
 }: {
   segment: DrillSegment
   status: SegmentRowStatus
+  suppressEachSide?: boolean
 }) {
   const { parts, openDefinition, isOpen, toggle } = useGloss(segment.label)
   const isNow = status === 'now'
@@ -170,7 +203,7 @@ function SegmentRow({
         ) : (
           plainLabelText(parts)
         )}
-        {segment.eachSide && (
+        {segment.eachSide && !suppressEachSide && (
           <span className="text-text-secondary"> (each side)</span>
         )}
       </span>

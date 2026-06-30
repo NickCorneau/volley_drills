@@ -27,6 +27,12 @@ export interface DraftBlock {
   rationale?: string
   subBlockIntervalSeconds?: number
   /**
+   * Optional list-level cadence header for composed `segments`, copied
+   * from `DrillVariant.segmentsCadenceLabel` on the same snapshot path as
+   * `segments`. Rendered once above the `<SegmentList>`. See `D170`.
+   */
+  segmentsCadenceLabel?: string
+  /**
    * Composed sub-segments snapshotted from `DrillVariant.segments` at
    * draft-build time. Rides the same snapshot pipeline as
    * `subBlockIntervalSeconds`. See

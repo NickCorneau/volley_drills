@@ -44,16 +44,12 @@ describe('resolveBlockRungIntent', () => {
 
   it('resolves the pass rung-3 intent for d24 Pass into a Corner (AE1)', () => {
     const block = makeBlock({ drillId: 'd24', variantId: 'd24-solo', drillName: 'Pass into a Corner' })
-    expect(resolveBlockRungIntent(block, 1)).toBe(
-      'Read where the ball is going, move to it, and still pass to one target.',
-    )
+    expect(resolveBlockRungIntent(block, 1)).toBe('Read, move, and still pass to one target.')
   })
 
   it('resolves the set rung-1 intent for d38, not a pass/serve string (AE3)', () => {
     const block = makeBlock({ drillId: 'd38', variantId: 'd38-pair', drillName: 'Bump Set Fundamentals' })
-    expect(resolveBlockRungIntent(block, 2)).toBe(
-      'Build a clean, repeatable set shape on a predictable toss.',
-    )
+    expect(resolveBlockRungIntent(block, 2)).toBe('Build a clean set shape on a steady toss.')
   })
 
   it('resolves a dual-focus drill against its primary ladder (d20 → pass, not set) (AE5)', () => {

@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { SEGMENT_INDEX_BONUS } from '../../hooks/useBlockPacingTicks'
+import { RUN_FLOW_LABELS } from '../../contracts/runFlowLexicon'
 import { RunScreen } from '../RunScreen'
 import { useRunController } from '../run/useRunController'
 
@@ -24,8 +25,9 @@ const useRunControllerMock = vi.mocked(useRunController)
  * Transition). What remains on the live face:
  *
  *  - the live "Now" cue (or the SegmentList's own active row),
- *  - a **cue-only** "Show more cues" disclosure (rule 12a) when extra
- *    coaching cues exist,
+ *  - a single "Drill details" overlay control (2026-06-29 merge) when
+ *    extra coaching cues exist — opening it shows the cues but NOT the
+ *    read, which is already on screen as the SegmentList,
  *  - the load-bearing `<SegmentList>` across every segment position.
  *
  * These tests pin that the inline instructions paragraph is gone at
@@ -101,9 +103,6 @@ function controller(currentSegmentIndex: number): ReturnType<typeof useRunContro
     handleShorten: vi.fn(),
     handleSwap: vi.fn(),
     isGetReady: false,
-    prevBlock: null,
-    prevBlockStatus: null,
-    showJustFinishedReceipt: false,
     rungIntentLine: null,
     handleStart: vi.fn(),
     handleStartShortened: vi.fn(),
@@ -155,21 +154,35 @@ describe('RunScreen — segmented-drill density (beat contract Stage 1)', () => 
     }
   })
 
-  it('offers a cue-only "Show more cues" disclosure that never reveals instructions (R16)', async () => {
+  it('never duplicates the on-screen SegmentList read in the Drill details overlay (2026-06-29 merge)', async () => {
+    // Founder flag: the segmented warmup live face stacked a SegmentList
+    // (which IS the full read) AND a full-width "Peek setup" recovery that
+    // overlaid the same read — pure duplication. Post-merge, the single
+    // "Drill details" overlay still opens (the block has an extra coaching
+    // cue) but must NOT re-show the read; the SegmentList already carries it.
     const user = userEvent.setup()
     useRunControllerMock.mockReturnValue(controller(0))
     renderRun()
 
-    // SegmentList owns the active cue, so the block's coachingCue routes
-    // to the cue-only disclosure (rule 12a). The label is the canonical
-    // "Show more cues" — never "...and instructions".
-    const summary = screen.getByText(/^Show more cues$/i)
-    expect(screen.queryByText(/Show more cues and instructions/i)).toBeNull()
+    expect(screen.getByRole('list', { name: 'Segments' })).toBeInTheDocument()
 
-    await user.click(summary)
+    await user.click(screen.getByRole('button', { name: RUN_FLOW_LABELS.peek }))
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).queryByText(/Four quick blocks/i)).toBeNull()
+  })
 
-    const fullCue = within(summary.closest('details')!).getByLabelText(/Full coaching cue/i)
-    expect(fullCue).toHaveTextContent('Short hops, loud feet.')
-    expect(fullCue).not.toHaveTextContent(/Four quick blocks/i)
+  it('surfaces the block extra cue in the Drill details overlay, never the read (R16)', async () => {
+    const user = userEvent.setup()
+    useRunControllerMock.mockReturnValue(controller(0))
+    renderRun()
+
+    // SegmentList owns the active cue, so the block's coachingCue routes to
+    // the "Drill details" overlay. Opening it reveals the cue but never the
+    // instructions read (R16): the read stays on screen as the SegmentList.
+    await user.click(screen.getByRole('button', { name: RUN_FLOW_LABELS.peek }))
+
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByText('Short hops, loud feet.')).toBeInTheDocument()
+    expect(within(dialog).queryByText(/Four quick blocks/i)).toBeNull()
   })
 })

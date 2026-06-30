@@ -17,7 +17,7 @@ import { TransitionScreen } from '../TransitionScreen'
  * non-ladder-bearing or synthetic blocks.
  */
 
-const PASS_RUNG_3_INTENT = 'Read where the ball is going, move to it, and still pass to one target.'
+const PASS_RUNG_3_INTENT = 'Read, move, and still pass to one target.'
 
 async function clearDb() {
   await Promise.all([

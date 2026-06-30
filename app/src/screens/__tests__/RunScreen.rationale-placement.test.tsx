@@ -1,5 +1,7 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { RUN_FLOW_LABELS } from '../../contracts/runFlowLexicon'
 import { db } from '../../db'
 import type { BlockSlotType } from '../../types/session'
 import { RunScreen } from '../RunScreen'
@@ -24,11 +26,13 @@ import { RunScreen } from '../RunScreen'
  *   rationale-specific cases in this file were removed — they
  *   pinned a rendering that no longer happens. The remaining cases
  *   continue to pin the run-card type hierarchy: the live "Now" cue and
- *   the cue-disclosure prose use the shared run-flow `text-base` role.
+ *   the "Drill details" overlay cue prose use the shared run-flow
+ *   `text-base` role.
  *   (Run-flow beat contract Stage 1 / R7b removed the full
  *   courtsideInstructions read from the live Run face — it is homed on the
  *   Run get-ready beat (post-D167; formerly Transition) — so only cue prose
- *   is pinned here now.)
+ *   is pinned here now. Stage 1+2 merged the inline disclosure into the
+ *   single "Drill details" overlay on 2026-06-29.)
  *
  * The seeded plan still carries `rationale` on the block so the
  * data field stays exercised in tests; the block render simply
@@ -320,13 +324,18 @@ describe('RunScreen: body-typography invariants (P1-11 / cca2 dogfeed F1)', () =
   })
 
   it('full coachingCue detail renders at shared run-flow body size', async () => {
+    const user = userEvent.setup()
     await seedPausedSession('exec-full-cue-size', 'plan-full-cue-size', {
       coachingCue:
         'Athletic posture. · Keep your platform steady through contact and reset your feet before the next touch.',
     })
     renderAt('exec-full-cue-size')
 
-    const fullCue = await screen.findByText(/Keep your platform steady through contact/i)
+    // The full cue body now lives in the "Drill details" overlay (2026-06-29
+    // merge), not an inline disclosure. Open it, then pin the shared body size.
+    await user.click(await screen.findByRole('button', { name: RUN_FLOW_LABELS.peek }))
+    const dialog = screen.getByRole('dialog')
+    const fullCue = within(dialog).getByText(/Keep your platform steady through contact/i)
 
     expect(fullCue.className).toContain('text-base')
     expect(fullCue.className).not.toContain('text-lg')

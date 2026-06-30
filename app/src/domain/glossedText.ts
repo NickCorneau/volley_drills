@@ -10,9 +10,12 @@ import { FLAGGED_TERMS } from './flaggedTerms'
  *
  * 1. For each `(= …)` match in the input string, look at the prefix
  *    text immediately before it.
- * 2. Search the prefix for any registry term occurrence. The MATCH
- *    WHOSE END IS CLOSEST TO `(=` wins (rightmost-end). On a tie of
- *    end positions, the longer term wins.
+ * 2. Search the prefix for any registry term occurrence (CASE-INSENSITIVE
+ *    since `D175` — see `findRightmostRegistryTerm`). The MATCH WHOSE END
+ *    IS CLOSEST TO `(=` wins (rightmost-end). On a tie of end positions,
+ *    the longer term wins. The displayed term keeps the prefix's original
+ *    casing (e.g. a sentence-leading `Hip flexor` resolves the registry's
+ *    `hip flexor` but renders `Hip flexor`).
  * 3. If no registry hit, fall back to "last 1 whitespace-delimited word
  *    before `(=`" as the term span.
  *
@@ -26,9 +29,11 @@ import { FLAGGED_TERMS } from './flaggedTerms'
  * `glossedText.test.ts > resolves rightmost-wins on registry ambiguity`).
  *
  * Nested-paren handling: the regex stops at the first `)` after `(= `,
- * so a gloss inside outer parentheses parses correctly. See line 1947 of
- * `drills.ts`: `(caller calls → you serve → caller shags (= brings the
- * balls back) after the round) × 6 targets`.
+ * so a gloss inside outer parentheses parses correctly. Covered by the
+ * `glossedText.test.ts` "nested-gloss-in-parens" case — a synthetic
+ * specimen kept as a defensive parser pin; the catalog no longer authors
+ * a nested-paren gloss after the 2026-06-30 `d33-pair-open` readability
+ * rewrite removed the last one.
  *
  * Multi-gloss handling: the regex is global — every `(= …)` match in the
  * string yields its own term span and gloss. See line 3320: a single
@@ -48,24 +53,38 @@ const GLOSS_PATTERN = /\(=\s+([^)]+)\)/g
  * whose end is closest to the prefix's end. On a tie of end positions,
  * the longer term wins. Returns null if no registry term appears in the
  * prefix at all.
+ *
+ * Matching is CASE-INSENSITIVE (`D175`, 2026-06-30). Segment rows lead
+ * sentence-case (e.g. `Hip flexor (= …)`) so the on-screen list reads as
+ * properly capitalized, but the registry enumerates terms in their
+ * lowercase authored form. We compare on lowercased copies so a
+ * capitalized multi-word term at a row/sentence start still resolves its
+ * FULL span (without this, `Hip flexor` fell back to the last word
+ * `flexor`), then slice the ORIGINAL prefix for the displayed term so the
+ * rendered button preserves the authored casing. Indices computed on the
+ * lowercased haystack line up with the original prefix because
+ * `toLowerCase()` is length-preserving (1:1) for the registry's ASCII +
+ * en-dash + apostrophe vocabulary.
  */
 function findRightmostRegistryTerm(
   prefix: string,
   registry: ReadonlySet<string>,
 ): { start: number; end: number; term: string } | null {
+  const haystack = prefix.toLowerCase()
   let best: { start: number; end: number; term: string } | null = null
 
   for (const term of registry) {
+    const needle = term.toLowerCase()
     let searchFrom = 0
     let idx = -1
-    while ((idx = prefix.indexOf(term, searchFrom)) !== -1) {
-      const end = idx + term.length
+    while ((idx = haystack.indexOf(needle, searchFrom)) !== -1) {
+      const end = idx + needle.length
       if (
         !best ||
         end > best.end ||
-        (end === best.end && term.length > best.end - best.start)
+        (end === best.end && needle.length > best.end - best.start)
       ) {
-        best = { start: idx, end, term }
+        best = { start: idx, end, term: prefix.slice(idx, end) }
       }
       searchFrom = idx + 1
     }

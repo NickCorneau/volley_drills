@@ -25,10 +25,12 @@ function renderRun() {
  * U4 — the Run get-ready beat UI (run-flow beat contract Stage 4, D167,
  * R13/R15). The controller is mocked so these specs pin the rendered
  * surface in isolation: read-first body (receipt + title + block-opening
- * intent + full setup read) and the calm decide footer (Start dominant,
- * Shorten always CTA-width, Swap/Skip behind a cancelable Adjust).
- * Preroll-gating + which blocks land here is covered by
- * `run/__tests__/useRunController.test.tsx`.
+ * intent + full setup read) and the calm decide footer. Footer hierarchy
+ * revised 2026-06-29 (founder call, issue #3): ONE dominant Start over a
+ * single "Adjust" disclosure that holds every pre-start change — Shorten,
+ * Swap, Skip — so "Adjust" contains everything it names. Because Shorten is
+ * always available, Adjust is now always present. Preroll-gating + which
+ * blocks land here is covered by `run/__tests__/useRunController.test.tsx`.
  */
 function controller(overrides: Partial<ReturnType<typeof useRunController>> = {}) {
   return {
@@ -92,18 +94,6 @@ function controller(overrides: Partial<ReturnType<typeof useRunController>> = {}
     handleShorten: vi.fn(),
     handleSwap: vi.fn(),
     isGetReady: true,
-    prevBlock: {
-      id: 'b-0',
-      type: 'warmup',
-      drillName: 'Movement Prep',
-      shortName: 'Prep',
-      durationMinutes: 4,
-      coachingCue: 'Light feet',
-      courtsideInstructions: 'Jog, then dynamic reaches.',
-      required: false,
-    },
-    prevBlockStatus: { blockId: 'b-0', status: 'completed' },
-    showJustFinishedReceipt: false,
     rungIntentLine: null,
     handleStart: vi.fn(),
     handleStartShortened: vi.fn(),
@@ -161,22 +151,33 @@ describe('RunScreen get-ready beat (Stage 4, U4)', () => {
     expect(handleStartShortened).not.toHaveBeenCalled()
   })
 
-  it('Shorten stays at CTA width and fires the shortened start', async () => {
+  it('folds Shorten into the Adjust menu and fires the shortened start from there (issue #3)', async () => {
     const handleStart = vi.fn()
     const handleStartShortened = vi.fn()
     useRunControllerMock.mockReturnValue(controller({ handleStart, handleStartShortened }))
     renderRun()
 
+    // Shorten is no longer a top-level peer of Start — it lives in Adjust.
+    expect(screen.queryByRole('button', { name: RUN_FLOW_LABELS.shortenFull })).toBeNull()
+
+    await userEvent.click(screen.getByRole('button', { name: RUN_FLOW_LABELS.adjust }))
     await userEvent.click(screen.getByRole('button', { name: RUN_FLOW_LABELS.shortenFull }))
 
     expect(handleStartShortened).toHaveBeenCalledTimes(1)
     expect(handleStart).not.toHaveBeenCalled()
   })
 
-  it('shows the block-opening intent only when the controller supplies it', () => {
+  it('shows the block-opening intent as a quiet "Trains ·" framing line only when the controller supplies it', () => {
+    // 2026-06-29 founder call: the rung intent renders as a demoted,
+    // labelled framing line (`Trains · {intent}`) instead of a sibling
+    // paragraph that competed with the read. The `Trains` label is its own
+    // <span>, so the intent text node carries the `· ` separator — match
+    // the intent via regex (RTL's getNodeText excludes the sibling label
+    // element from the <p>'s direct text).
     useRunControllerMock.mockReturnValue(controller({ rungIntentLine: null }))
     const { rerender } = renderRun()
-    expect(screen.queryByText('Adds a defender so reads stay honest')).toBeNull()
+    expect(screen.queryByText(/Adds a defender so reads stay honest/)).toBeNull()
+    expect(screen.queryByText('Trains')).toBeNull()
 
     useRunControllerMock.mockReturnValue(
       controller({ rungIntentLine: 'Adds a defender so reads stay honest' }),
@@ -188,26 +189,11 @@ describe('RunScreen get-ready beat (Stage 4, U4)', () => {
         </Routes>
       </MemoryRouter>,
     )
-    expect(screen.getByText('Adds a defender so reads stay honest')).toBeInTheDocument()
+    expect(screen.getByText(/Adds a defender so reads stay honest/)).toBeInTheDocument()
+    expect(screen.getByText('Trains')).toBeInTheDocument()
   })
 
-  it('carries the just-finished receipt only when the controller dedup flag is set (R12)', () => {
-    useRunControllerMock.mockReturnValue(controller({ showJustFinishedReceipt: false }))
-    const { rerender } = renderRun()
-    expect(screen.queryByText(/Movement Prep · Complete/)).toBeNull()
-
-    useRunControllerMock.mockReturnValue(controller({ showJustFinishedReceipt: true }))
-    rerender(
-      <MemoryRouter initialEntries={['/run?id=exec-get-ready']}>
-        <Routes>
-          <Route path="/run" element={<RunScreen />} />
-        </Routes>
-      </MemoryRouter>,
-    )
-    expect(screen.getByText(/Movement Prep · Complete/)).toBeInTheDocument()
-  })
-
-  it('keeps Swap / Skip behind a cancelable Adjust disclosure', async () => {
+  it('keeps Shorten / Swap / Skip behind a cancelable Adjust disclosure', async () => {
     useRunControllerMock.mockReturnValue(
       controller({
         hasAlternates: true,
@@ -225,24 +211,34 @@ describe('RunScreen get-ready beat (Stage 4, U4)', () => {
     )
     renderRun()
 
-    // Collapsed by default: Swap / Skip are not in the footer yet.
+    // Collapsed by default: every adjustment is tucked away — only Start +
+    // Adjust are in the footer.
+    expect(screen.queryByRole('button', { name: RUN_FLOW_LABELS.shortenFull })).toBeNull()
     expect(screen.queryByRole('button', { name: RUN_FLOW_LABELS.swap })).toBeNull()
     expect(screen.queryByRole('button', { name: RUN_FLOW_LABELS.skip })).toBeNull()
 
     await userEvent.click(screen.getByRole('button', { name: RUN_FLOW_LABELS.adjust }))
+    expect(screen.getByRole('button', { name: RUN_FLOW_LABELS.shortenFull })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: RUN_FLOW_LABELS.swap })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: RUN_FLOW_LABELS.skip })).toBeInTheDocument()
 
     // Cancelable: tapping Adjust again re-collapses.
     await userEvent.click(screen.getByRole('button', { name: RUN_FLOW_LABELS.adjust }))
+    expect(screen.queryByRole('button', { name: RUN_FLOW_LABELS.shortenFull })).toBeNull()
     expect(screen.queryByRole('button', { name: RUN_FLOW_LABELS.swap })).toBeNull()
     expect(screen.queryByRole('button', { name: RUN_FLOW_LABELS.skip })).toBeNull()
   })
 
-  it('hides the Adjust disclosure when there is nothing to adjust (required block, no alternates)', () => {
+  it('always offers Adjust — it holds Shorten even for a required block with no alternates (issue #3)', async () => {
+    // Old behavior hid Adjust when there was "nothing to adjust"; folding
+    // Shorten in means there is always something to adjust, so Adjust is
+    // always present. Swap (no alternates) and Skip (required) stay absent.
     useRunControllerMock.mockReturnValue(controller({ hasAlternates: false }))
     renderRun()
 
-    expect(screen.queryByRole('button', { name: RUN_FLOW_LABELS.adjust })).toBeNull()
+    await userEvent.click(screen.getByRole('button', { name: RUN_FLOW_LABELS.adjust }))
+    expect(screen.getByRole('button', { name: RUN_FLOW_LABELS.shortenFull })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: RUN_FLOW_LABELS.swap })).toBeNull()
+    expect(screen.queryByRole('button', { name: RUN_FLOW_LABELS.skip })).toBeNull()
   })
 })

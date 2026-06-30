@@ -16,9 +16,9 @@ import { TransitionScreen } from '../TransitionScreen'
  * beat. The scanner is case-SENSITIVE and whole-phrase so a retired
  * label rendered at its canonical casing is caught WITHOUT colliding
  * with active copy that merely shares a lowercase token ("Go back",
- * "coaching cue", "Show more cues"). The final `describe` is the
- * non-vacuous proof: the scanner fires on planted retired labels and
- * stays silent on the active copy it must not flag.
+ * "coaching cue"). The final `describe` is the non-vacuous proof: the
+ * scanner fires on planted retired labels and stays silent on the active
+ * copy it must not flag.
  */
 
 const TRANSITION_CUE = 'Set your contact point before the feed arrives.'
@@ -161,7 +161,7 @@ function collectTextAndAria(root: ParentNode): string {
 function findSunsetHits(haystack: string): string[] {
   return SUNSET_RUN_FLOW_LABELS.filter((label) => {
     // Case-sensitive, whole-phrase. `GO` will not match "Go back";
-    // `Cue` will not match "coaching cue" / "Show more cues".
+    // `Cue` will not match "coaching cue".
     const re = new RegExp(`(^|[^\\w])${escapeRegExp(label)}([^\\w]|$)`)
     return re.test(haystack)
   })
@@ -225,7 +225,7 @@ describe('run-flow lexicon guard — scanner is non-vacuous', () => {
       <div>
         <button type="button">Go back</button>
         <span>{RUN_FLOW_LABELS.startAction}</span>
-        <span>{RUN_FLOW_LABELS.moreCues}</span>
+        <span>{RUN_FLOW_LABELS.peek}</span>
         <span aria-label="Full coaching cue">coaching cue</span>
       </div>,
     )
