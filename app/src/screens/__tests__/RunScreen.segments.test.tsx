@@ -1,5 +1,6 @@
 import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { getStressRung } from '../../data/stressLadders'
 import { db } from '../../db'
 import * as audio from '../../lib/audio'
 import * as platform from '../../platform'
@@ -161,9 +162,16 @@ describe('RunScreen segments rendering (U7)', () => {
     await seedProseRunningSession('exec-prose', 'plan-prose')
     renderAt('exec-prose')
 
-    // The live face is the one "Now" cue.
+    // The live face is the one "Now" cue. d03 is a pass-ladder (rung 2),
+    // unguarded drill, so M002.2 (plan 2026-06-30-001) substitutes the rung's
+    // authored external-focus cue for the drill's generic 'Quiet platform.'
+    // on the live face — the same single "Now" slot, no marker (U4/R5).
+    const rungCue = getStressRung('pass', 2)?.externalFocusCue
+    expect(rungCue).toBeTruthy()
     expect(await screen.findByText('Now')).toBeInTheDocument()
-    expect(screen.getByText(/Quiet platform/i)).toBeInTheDocument()
+    expect(screen.getByText(rungCue as string)).toBeInTheDocument()
+    // The displaced generic cue does not also appear (no torn double cue).
+    expect(screen.queryByText(/Quiet platform/i)).toBeNull()
     // No segment list rendered for a no-segments block (R5 guard).
     expect(screen.queryByRole('list', { name: 'Segments' })).toBeNull()
     // Run-flow beat contract Stage 1 (R7b): the full courtsideInstructions

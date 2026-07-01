@@ -13,7 +13,7 @@ import {
   StatusMessage,
 } from '../components/ui'
 import { RUN_FLOW_LABELS } from '../contracts/runFlowLexicon'
-import { getBlockSkillFocus } from '../domain/drillMetadata'
+import { getBlockSkillFocus, resolveBlockLiveCueOverride } from '../domain/drillMetadata'
 import { blockEyebrowLabel, formatDuration, splitCueLines } from '../lib/format'
 import { routes } from '../routes'
 import { segmentListOwnsCurrentCue, selectNonSegmentedCurrentCue } from './run/currentCue'
@@ -112,7 +112,29 @@ export function RunScreen() {
   // Swap is only offered when the block has at least one curated
   // alternate. Warmup/wrap are always empty per D85/D105.
   const segmentListOwnsCue = segmentListOwnsCurrentCue(currentBlock)
-  const currentCue = segmentListOwnsCue ? null : selectNonSegmentedCurrentCue(currentBlock)
+  const baseCue = segmentListOwnsCue ? null : selectNonSegmentedCurrentCue(currentBlock)
+  // M002.2 rung-aware live cue (U3/U4): on a ladder-bearing, unguarded block
+  // the rung's authored `externalFocusCue` substitutes for the drill's generic
+  // `coachingCues[0]` as the single "Now" cue. `resolveBlockLiveCueOverride`
+  // folds in focus + drill-actual rung + presence + the load-bearing-cue guard.
+  const liveCueOverride = segmentListOwnsCue
+    ? null
+    : resolveBlockLiveCueOverride(currentBlock, plan.playerCount)
+  // R4 "never grows a Now slot": substitution only REPLACES an existing live
+  // cue, never mints one. When today's chain (no override) resolves to the
+  // drill-name source — the case the "Now" section is suppressed for below —
+  // the override is withheld so it cannot grow a slot where none renders today.
+  const liveCuePreferred =
+    liveCueOverride != null && baseCue != null && baseCue.source !== 'drill-name'
+      ? liveCueOverride
+      : undefined
+  const currentCue = liveCuePreferred
+    ? selectNonSegmentedCurrentCue(currentBlock, liveCuePreferred)
+    : baseCue
+  // The override actually won the face only when the selector kept it. An
+  // over-budget override loses to the same `CUE_COMPACT_MAX` gate as any cue
+  // and degrades to today's chain — it must NOT then drive the overlay.
+  const overrideWon = liveCuePreferred != null && currentCue?.text === liveCuePreferred
   // Run-flow beat contract Stage 1+2, merged (2026-06-29 founder call): the
   // live Run face is the one-cue DO-CONFIRM cockpit — just the "Now" cue. The
   // full `courtsideInstructions` read is homed on the Run get-ready beat
@@ -124,9 +146,22 @@ export function RunScreen() {
   // meant to be one calm cue; the founder flagged the overlap, so they fold
   // into one affordance. Derive each section's content independently, then
   // gate the single control on either having something non-redundant to show.
-  const hasMoreCues =
-    currentBlock.coachingCue.trim().length > 0 &&
-    currentBlock.coachingCue.trim() !== currentCue?.text
+  const allCueLines = splitCueLines(currentBlock.coachingCue)
+  // Overlay cue list. When the rung cue won the face, R9: lead the overlay's
+  // cue section with that live cue and show only the drill's REMAINING cues —
+  // never resurface the displaced `coachingCues[0]` (the torn read documented
+  // in docs/solutions/ui-bugs/). Otherwise: today's full cue list.
+  const overlayCueLines =
+    overrideWon && currentCue ? [currentCue.text, ...allCueLines.slice(1)] : allCueLines
+  // The overlay carries a cue section only with content BEYOND the live face:
+  // - override active: the live cue is already on the face, so only the drill's
+  //   remaining cues count (a substituting drill with nothing past the displaced
+  //   [0] suppresses the section, exactly like today's single-cue echo);
+  // - otherwise: today's rule — the joined cue differs from the face lead clause.
+  const hasMoreCues = overrideWon
+    ? allCueLines.length > 1
+    : currentBlock.coachingCue.trim().length > 0 &&
+      currentBlock.coachingCue.trim() !== currentCue?.text
   const hasSetupRead = currentBlock.courtsideInstructions.trim().length > 0
   // R2 density rule (2026-06-29): the setup read only belongs in the overlay
   // when it is NOT already on screen. Segmented drills (warmup / wrap) render
@@ -558,7 +593,7 @@ export function RunScreen() {
                     {detailsLabeled && (
                       <span className="text-xs font-medium text-text-secondary">Cues</span>
                     )}
-                    {splitCueLines(currentBlock.coachingCue).map((line) => (
+                    {overlayCueLines.map((line) => (
                       <p key={line} className="text-base leading-relaxed text-text-primary">
                         {line}
                       </p>
