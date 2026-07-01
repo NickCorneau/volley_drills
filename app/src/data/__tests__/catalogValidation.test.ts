@@ -927,6 +927,26 @@ describe('validateDrillCatalog', () => {
       expect(advisories).toEqual([])
     })
 
+    it('flags a multi-clause rung externalFocusCue (rule 12a: one glanceable clause)', () => {
+      // A live cue must be one clause: the selector renders only the first,
+      // and a CUE_SEPARATOR-joined cue would defeat RunScreen's overrideWon
+      // guard and reintroduce the R9 overlay torn read (KTD5). Both clauses
+      // are in budget, so multi-clause is the only reason flagged.
+      const advisories = auditLiveCueFitness({
+        drills: [drill()],
+        stressLadders: {
+          ...emptyLadders,
+          pass: [rung({ externalFocusCue: 'Send it to the same spot. · Then reset your feet.' })],
+        },
+      })
+
+      const flagged = advisories.filter((a) => a.reason === 'multi-clause')
+      expect(flagged).toHaveLength(1)
+      expect(flagged[0].source).toBe('rung-external-focus-cue')
+      expect(flagged[0].path).toBe('stressLadders.pass.1.externalFocusCue')
+      expect(advisories.some((a) => a.reason === 'over-budget')).toBe(false)
+    })
+
     it('flags a rung externalFocusCue that names a body part (bend your knees)', () => {
       const advisories = auditLiveCueFitness({
         drills: [drill()],

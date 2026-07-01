@@ -459,14 +459,14 @@ export const LIVE_CUE_INTERNAL_FOCUS_TOKENS: readonly string[] = [
   'whole body',
 ]
 
-export type LiveCueFitnessReason = 'over-budget' | 'internal-focus'
+export type LiveCueFitnessReason = 'over-budget' | 'multi-clause' | 'internal-focus'
 
 export interface LiveCueFitnessAdvisory {
   /** The live-eligible surface the flagged cue came from. */
   source: 'rung-external-focus-cue' | 'ladder-coaching-cue'
   /** Why the cue is unfit for the sole live slot. */
   reason: LiveCueFitnessReason
-  /** The offending text (first clause for length; full string for phrasing). */
+  /** The offending text (first clause for length; full string for phrasing/shape). */
   cue: string
   /** Locator, e.g. `stressLadders.pass.2.externalFocusCue` or `drills.d07.variants.d07-pair.coachingCues[0]`. */
   path: string
@@ -474,18 +474,21 @@ export interface LiveCueFitnessAdvisory {
 }
 
 /**
- * The clause the live "Now" selector would actually render for a cue:
+ * The clauses the live "Now" selector would split a cue into:
  * `selectNonSegmentedCurrentCue` splits on `CUE_SEPARATOR` and leads
  * with the first clause. Mirrored here (not imported from
  * `screens/run/currentCue.ts`) so the data-layer floor never reaches up
  * into a screen; the selector's own tests pin the rendering contract.
  */
-function liveCueFirstClause(cue: string): string {
-  const [first] = cue
+function liveCueClauses(cue: string): string[] {
+  return cue
     .split(CUE_SEPARATOR)
     .map((part) => part.trim())
     .filter((part) => part.length > 0)
-  return first ?? ''
+}
+
+function liveCueFirstClause(cue: string): string {
+  return liveCueClauses(cue)[0] ?? ''
 }
 
 function namesInternalFocus(cue: string): boolean {
@@ -509,7 +512,13 @@ function namesInternalFocus(cue: string): boolean {
  * be promoted to the single live cue.
  *
  * Scope split (deliberate):
- *   - `externalFocusCue` lane: length AND external-focus phrasing.
+ *   - `externalFocusCue` lane: length, single-clause shape, AND
+ *     external-focus phrasing. The single-clause check (rule 12a: one
+ *     cue at arm's length) matters because the live selector renders
+ *     only the first clause while the "Drill details" overlay's
+ *     `overrideWon` guard compares against the full string — a
+ *     multi-clause rung cue would silently reintroduce the R9 overlay
+ *     torn read (KTD5), so the floor rejects it at authoring time.
  *   - `coachingCues[0]` lane: length ONLY. The position-aware
  *     `evaluateCue0` detector (`drillCopyRegressions.test.ts`) already
  *     owns `coachingCues[0]` phrasing and correctly passes an
@@ -529,11 +538,12 @@ export function auditLiveCueFitness({
 }): LiveCueFitnessAdvisory[] {
   const advisories: LiveCueFitnessAdvisory[] = []
 
-  // Lane 1: every rung externalFocusCue — length + external-focus phrasing.
+  // Lane 1: every rung externalFocusCue — length + single-clause shape + external-focus phrasing.
   for (const focus of SCOPED_FOCUSES) {
     for (const rung of stressLadders[focus]) {
       const cue = rung.externalFocusCue
-      const firstClause = liveCueFirstClause(cue)
+      const clauses = liveCueClauses(cue)
+      const firstClause = clauses[0] ?? ''
       if (firstClause.length > max) {
         advisories.push({
           source: 'rung-external-focus-cue',
@@ -541,6 +551,15 @@ export function auditLiveCueFitness({
           cue: firstClause,
           path: `stressLadders.${focus}.${rung.rung}.externalFocusCue`,
           message: `${focus} rung ${rung.rung} externalFocusCue first clause is ${firstClause.length} chars; the live-cue budget is ${max}`,
+        })
+      }
+      if (clauses.length > 1) {
+        advisories.push({
+          source: 'rung-external-focus-cue',
+          reason: 'multi-clause',
+          cue,
+          path: `stressLadders.${focus}.${rung.rung}.externalFocusCue`,
+          message: `${focus} rung ${rung.rung} externalFocusCue has ${clauses.length} clauses; a live cue must be one glanceable clause (rule 12a). The selector renders only the first clause, so a multi-clause cue reintroduces the R9 overlay torn read`,
         })
       }
       if (namesInternalFocus(cue)) {
