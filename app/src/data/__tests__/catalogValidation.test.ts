@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
+import { CUE_COMPACT_MAX } from '../../domain/policies'
 import type { Drill, ProgressionChain } from '../../types/drill'
-import { auditRungDepth, RUNG_DEPTH_TARGET, validateDrillCatalog } from '../catalogValidation'
+import {
+  auditLiveCueFitness,
+  auditRungDepth,
+  RUNG_DEPTH_TARGET,
+  validateDrillCatalog,
+} from '../catalogValidation'
 import { DRILLS } from '../drills'
 import { PROGRESSION_CHAINS } from '../progressions'
 import { STRESS_LADDERS, type StressRung } from '../stressLadders'
@@ -888,6 +894,128 @@ describe('validateDrillCatalog', () => {
         stressLadders: STRESS_LADDERS,
       })
       expect(hard).toEqual([])
+    })
+  })
+
+  describe('auditLiveCueFitness (live-cue floor advisory)', () => {
+    const emptyLadders = { pass: [], serve: [], set: [] } as const
+
+    it('flags a rung externalFocusCue whose first clause exceeds the live-cue budget', () => {
+      const overBudget = 'x'.repeat(CUE_COMPACT_MAX + 1)
+
+      const advisories = auditLiveCueFitness({
+        drills: [drill()],
+        stressLadders: { ...emptyLadders, pass: [rung({ externalFocusCue: overBudget })] },
+      })
+
+      const flagged = advisories.filter(
+        (a) => a.source === 'rung-external-focus-cue' && a.reason === 'over-budget',
+      )
+      expect(flagged).toHaveLength(1)
+      expect(flagged[0].path).toBe('stressLadders.pass.1.externalFocusCue')
+    })
+
+    it('does not flag an in-budget external-focus rung cue', () => {
+      const advisories = auditLiveCueFitness({
+        drills: [drill()],
+        stressLadders: {
+          ...emptyLadders,
+          pass: [rung({ externalFocusCue: 'Send it to the same spot.' })],
+        },
+      })
+
+      expect(advisories).toEqual([])
+    })
+
+    it('flags a rung externalFocusCue that names a body part (bend your knees)', () => {
+      const advisories = auditLiveCueFitness({
+        drills: [drill()],
+        stressLadders: {
+          ...emptyLadders,
+          pass: [rung({ externalFocusCue: 'Bend your knees before you contact the ball.' })],
+        },
+      })
+
+      const flagged = advisories.filter((a) => a.reason === 'internal-focus')
+      expect(flagged).toHaveLength(1)
+      expect(flagged[0].source).toBe('rung-external-focus-cue')
+      expect(flagged[0].path).toBe('stressLadders.pass.1.externalFocusCue')
+    })
+
+    it('flags a ladder-bearing drill whose coachingCues[0] first clause is over budget', () => {
+      const overDrill = drill({
+        id: 'd-long',
+        variants: [
+          {
+            ...drill().variants[0],
+            id: 'd-long-solo',
+            drillId: 'd-long',
+            coachingCues: ['x'.repeat(CUE_COMPACT_MAX + 5)],
+          },
+        ],
+      })
+
+      const advisories = auditLiveCueFitness({
+        drills: [overDrill],
+        stressLadders: { ...emptyLadders, pass: [rung({ drillIds: ['d-long'] })] },
+      })
+
+      const flagged = advisories.filter((a) => a.source === 'ladder-coaching-cue')
+      expect(flagged).toHaveLength(1)
+      expect(flagged[0].path).toBe('drills.d-long.variants.d-long-solo.coachingCues[0]')
+    })
+
+    it('does not flag a ladder coachingCues[0] with an object-position body part (d07-style gaze cue)', () => {
+      // Length-only lane: the gaze cue names "platform" in object position but
+      // is in budget, so the floor leaves phrasing to the evaluateCue0 lint
+      // (the exact cue the live-cue guard exists to keep live).
+      const gazeCue = "Look at your partner's hand the moment your platform meets the ball."
+      expect(gazeCue.length).toBeLessThanOrEqual(CUE_COMPACT_MAX)
+      const gazeDrill = drill({
+        id: 'd-gaze',
+        variants: [
+          {
+            ...drill().variants[0],
+            id: 'd-gaze-solo',
+            drillId: 'd-gaze',
+            coachingCues: [gazeCue],
+          },
+        ],
+      })
+
+      const advisories = auditLiveCueFitness({
+        drills: [gazeDrill],
+        stressLadders: { ...emptyLadders, pass: [rung({ drillIds: ['d-gaze'] })] },
+      })
+
+      expect(advisories.filter((a) => a.path.includes('d-gaze'))).toEqual([])
+    })
+
+    it('returns an empty advisory for the real authored catalog (pinned)', () => {
+      // Every authored externalFocusCue fits the budget and names no body
+      // part, and no ladder-bearing coachingCues[0] first clause is over
+      // budget. A future cue that regresses either bar trips here.
+      expect(auditLiveCueFitness({ drills: DRILLS, stressLadders: STRESS_LADDERS })).toEqual([])
+    })
+
+    it('keeps live-cue fitness out of the hard validateDrillCatalog gate', () => {
+      // An over-budget but PRESENT externalFocusCue is flagged by the
+      // advisory yet raises no rung_content_missing (presence-only) issue,
+      // so fitness never leaks into the toEqual([]) catalog gate.
+      const stressLadders = {
+        ...emptyLadders,
+        pass: [rung({ externalFocusCue: 'x'.repeat(CUE_COMPACT_MAX + 5) })],
+      }
+
+      const advisories = auditLiveCueFitness({ drills: [drill()], stressLadders })
+      expect(advisories.some((a) => a.reason === 'over-budget')).toBe(true)
+
+      const issues = validateDrillCatalog({
+        drills: [drill()],
+        progressionChains: [chain()],
+        stressLadders,
+      })
+      expect(issues.map((i) => i.code)).not.toContain('rung_content_missing')
     })
   })
 

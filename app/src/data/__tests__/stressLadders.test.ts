@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { CUE_COMPACT_MAX } from '../../domain/policies'
 import { DRILLS } from '../drills'
 import {
   STRESS_LADDERS,
@@ -119,6 +120,21 @@ describe('rung progression content (M002.2)', () => {
       }
     }
   })
+
+  // M002.2 (rung-aware live cue): externalFocusCue can be promoted to the
+  // sole live "Now" cue, which leads with the first CUE_SEPARATOR clause and
+  // renders un-truncated only when that clause fits the budget. Authoring
+  // that keeps every rung cue live-eligible is pinned here so the floor
+  // advisory stays empty for the real catalog.
+  it.each(FOCUSES)(
+    '%s externalFocusCue first clause fits the live-cue budget (CUE_COMPACT_MAX)',
+    (focus) => {
+      for (const rung of STRESS_LADDERS[focus]) {
+        const [firstClause] = rung.externalFocusCue.split(' · ').map((part) => part.trim())
+        expect(firstClause.length).toBeLessThanOrEqual(CUE_COMPACT_MAX)
+      }
+    },
+  )
 
   it.each(FOCUSES)(
     '%s exploration criterion and graduation feel are process-framed, never pass/fail (D154)',

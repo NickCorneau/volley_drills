@@ -1,3 +1,5 @@
+import { CUE_COMPACT_MAX } from '../domain/policies'
+import { CUE_SEPARATOR } from '../lib/format'
 import type { Drill, DrillVariant, ProgressionChain } from '../types/drill'
 import type { StressLadderFocus, StressRung } from './stressLadders'
 
@@ -434,5 +436,149 @@ export function auditRungDepth({
       }
     }
   }
+  return advisories
+}
+
+/**
+ * Body-part / internal-focus tokens that disqualify an external-focus
+ * cue (Wulf; courtside-copy rule 12b). Mirrors the same list the
+ * `stressLadders.test.ts` body-part lint pins; kept here so the shipping
+ * advisory (not just a test) can flag an unfit rung cue before the
+ * trunk promotes it to the sole live slot. A cue must name an outcome
+ * or environmental referent (ball flight, target, landing, partner
+ * reach), never a body part or internal sensation.
+ */
+export const LIVE_CUE_INTERNAL_FOCUS_TOKENS: readonly string[] = [
+  'platform',
+  'knee',
+  'elbow',
+  'wrist',
+  'shoulder',
+  'forearm',
+  'hips',
+  'whole body',
+]
+
+export type LiveCueFitnessReason = 'over-budget' | 'internal-focus'
+
+export interface LiveCueFitnessAdvisory {
+  /** The live-eligible surface the flagged cue came from. */
+  source: 'rung-external-focus-cue' | 'ladder-coaching-cue'
+  /** Why the cue is unfit for the sole live slot. */
+  reason: LiveCueFitnessReason
+  /** The offending text (first clause for length; full string for phrasing). */
+  cue: string
+  /** Locator, e.g. `stressLadders.pass.2.externalFocusCue` or `drills.d07.variants.d07-pair.coachingCues[0]`. */
+  path: string
+  message: string
+}
+
+/**
+ * The clause the live "Now" selector would actually render for a cue:
+ * `selectNonSegmentedCurrentCue` splits on `CUE_SEPARATOR` and leads
+ * with the first clause. Mirrored here (not imported from
+ * `screens/run/currentCue.ts`) so the data-layer floor never reaches up
+ * into a screen; the selector's own tests pin the rendering contract.
+ */
+function liveCueFirstClause(cue: string): string {
+  const [first] = cue
+    .split(CUE_SEPARATOR)
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0)
+  return first ?? ''
+}
+
+function namesInternalFocus(cue: string): boolean {
+  const lowered = cue.toLowerCase()
+  return LIVE_CUE_INTERNAL_FOCUS_TOKENS.some((token) => lowered.includes(token))
+}
+
+/**
+ * Floor for the rung-aware live cue (M002.2, plan
+ * `docs/plans/2026-06-30-001-feat-m002-2-rung-aware-live-cue-plan.md`
+ * U1): flag every live-eligible cue that would not survive the "Now"
+ * slot — a rung `externalFocusCue` (or a ladder-bearing drill's
+ * `coachingCues[0]` live fallback) whose first clause exceeds the
+ * live-cue budget, or a rung `externalFocusCue` that names a body part
+ * / internal focus.
+ *
+ * Separate from `validateDrillCatalog` on purpose (mirrors
+ * `auditRungDepth`): this is an advisory the catalog carries and the
+ * suite pins, never a hard failure the `toEqual([])` gate trips on. It
+ * runs BEFORE the trunk (R8) so an unfit cue is rewritten before it can
+ * be promoted to the single live cue.
+ *
+ * Scope split (deliberate):
+ *   - `externalFocusCue` lane: length AND external-focus phrasing.
+ *   - `coachingCues[0]` lane: length ONLY. The position-aware
+ *     `evaluateCue0` detector (`drillCopyRegressions.test.ts`) already
+ *     owns `coachingCues[0]` phrasing and correctly passes an
+ *     object-position body-part mention (e.g. d07's rule-12c gaze cue,
+ *     "…your platform meets the ball"). Re-running a naive substring
+ *     check here would false-flag the exact cue the live-cue guard
+ *     exists to keep live, so the floor does not.
+ */
+export function auditLiveCueFitness({
+  drills,
+  stressLadders,
+  max = CUE_COMPACT_MAX,
+}: {
+  drills: readonly Drill[]
+  stressLadders: Record<StressLadderFocus, readonly StressRung[]>
+  max?: number
+}): LiveCueFitnessAdvisory[] {
+  const advisories: LiveCueFitnessAdvisory[] = []
+
+  // Lane 1: every rung externalFocusCue — length + external-focus phrasing.
+  for (const focus of SCOPED_FOCUSES) {
+    for (const rung of stressLadders[focus]) {
+      const cue = rung.externalFocusCue
+      const firstClause = liveCueFirstClause(cue)
+      if (firstClause.length > max) {
+        advisories.push({
+          source: 'rung-external-focus-cue',
+          reason: 'over-budget',
+          cue: firstClause,
+          path: `stressLadders.${focus}.${rung.rung}.externalFocusCue`,
+          message: `${focus} rung ${rung.rung} externalFocusCue first clause is ${firstClause.length} chars; the live-cue budget is ${max}`,
+        })
+      }
+      if (namesInternalFocus(cue)) {
+        advisories.push({
+          source: 'rung-external-focus-cue',
+          reason: 'internal-focus',
+          cue,
+          path: `stressLadders.${focus}.${rung.rung}.externalFocusCue`,
+          message: `${focus} rung ${rung.rung} externalFocusCue names a body part / internal focus (Wulf / rule 12b); name an outcome or referent instead`,
+        })
+      }
+    }
+  }
+
+  // Lane 2: ladder-bearing drills' coachingCues[0] live fallback — length only.
+  const ladderDrillIds = new Set<string>()
+  for (const focus of SCOPED_FOCUSES) {
+    for (const rung of stressLadders[focus]) {
+      for (const id of rung.drillIds) ladderDrillIds.add(id)
+    }
+  }
+  for (const drill of drills) {
+    if (!ladderDrillIds.has(drill.id)) continue
+    for (const variant of drill.variants) {
+      const cue0 = variant.coachingCues[0]
+      if (!cue0) continue
+      const firstClause = liveCueFirstClause(cue0)
+      if (firstClause.length > max) {
+        advisories.push({
+          source: 'ladder-coaching-cue',
+          reason: 'over-budget',
+          cue: firstClause,
+          path: `drills.${drill.id}.variants.${variant.id}.coachingCues[0]`,
+          message: `${variant.id} coachingCues[0] first clause is ${firstClause.length} chars; the live-cue fallback budget is ${max}`,
+        })
+      }
+    }
+  }
+
   return advisories
 }
