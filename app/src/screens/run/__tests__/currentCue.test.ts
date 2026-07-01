@@ -113,4 +113,57 @@ describe('current cue selection', () => {
 
     expect(segmentListOwnsCurrentCue({ segments: undefined })).toBe(false)
   })
+
+  describe('rung-aware preferred cue (M002.2)', () => {
+    it('returns an in-budget preferred cue in the coaching-cue slot', () => {
+      const cue = selectNonSegmentedCurrentCue(block(), 'Send it to the set window every time.')
+
+      expect(cue).toEqual({
+        text: 'Send it to the set window every time.',
+        source: 'coaching-cue',
+      })
+    })
+
+    it('takes the lead clause of a multi-clause preferred cue', () => {
+      const cue = selectNonSegmentedCurrentCue(block(), 'Land it deep. · Then reset your feet.')
+
+      expect(cue.text).toBe('Land it deep.')
+      expect(cue.source).toBe('coaching-cue')
+    })
+
+    it('ignores an over-budget preferred cue and falls back to the authored cue', () => {
+      const overBudget = 'x'.repeat(CUE_COMPACT_MAX + 1)
+
+      const cue = selectNonSegmentedCurrentCue(block({ coachingCue: compactCue }), overBudget)
+
+      expect(cue).toEqual({ text: compactCue, source: 'coaching-cue' })
+    })
+
+    it('falls through to the drill name when preferred is over budget and no other cue fits', () => {
+      const overBudget = 'y'.repeat(CUE_COMPACT_MAX + 1)
+
+      const cue = selectNonSegmentedCurrentCue(
+        block({ coachingCue: '   ', courtsideInstructions: '' }),
+        overBudget,
+      )
+
+      expect(cue).toEqual({ text: 'Self-Toss Pass', source: 'drill-name' })
+    })
+
+    it('does not let an over-budget preferred cue shadow a multi-clause authored fallback lead clause', () => {
+      const overBudget = 'z'.repeat(CUE_COMPACT_MAX + 1)
+      const fullCue = 'Server calls short/deep before contact · Receiver owns platform angle'
+
+      const cue = selectNonSegmentedCurrentCue(block({ coachingCue: fullCue }), overBudget)
+
+      expect(cue.text).toBe('Server calls short/deep before contact')
+      expect(cue.source).toBe('coaching-cue')
+    })
+
+    it('is byte-identical to the base selector when preferredCoachingCue is undefined (regression guard)', () => {
+      const b = block({ coachingCue: 'Contact above the forehead. · Both hands release together.' })
+
+      expect(selectNonSegmentedCurrentCue(b, undefined)).toEqual(selectNonSegmentedCurrentCue(b))
+    })
+  })
 })

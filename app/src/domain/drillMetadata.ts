@@ -1,3 +1,4 @@
+import { isLiveCueGuardProtected } from '../data/liveCueGuard'
 import { getStressRung, stressRungForDrill } from '../data/stressLadders'
 import type { MetricType, SessionPlanBlock } from '../model'
 import { drillForBlock, variantForBlock } from './catalogLookup'
@@ -117,6 +118,47 @@ export function resolveBlockRungIntent(
   const rung = stressRungForDrill(focus, drillId)
   if (rung === undefined) return null
   return getStressRung(focus, rung)?.intent ?? null
+}
+
+/**
+ * Resolve the guarded live-cue override for a block — the rung's authored
+ * `externalFocusCue`, returned ONLY when it should substitute for the
+ * drill's own `coachingCues[0]` on the live "Now" surface (M002.2
+ * rung-aware live cue, plan
+ * `docs/plans/2026-06-30-001-feat-m002-2-rung-aware-live-cue-plan.md` U3).
+ *
+ * Resolves exactly like `resolveBlockRungIntent` (primary focus via
+ * `getBlockSkillFocus`, drill-actual rung via `stressRungForDrill`, no
+ * block-type gate per KTD3 so the live cue and the get-ready rung-intent
+ * line stay phase-matched over the same blocks), then folds in presence
+ * and the guard:
+ *   - off-ladder / unknown focus / no `drillId` / unknown rung → `null`
+ *   - the drill's own cue is guard-protected (`isLiveCueGuardProtected`,
+ *     e.g. d07's gaze cue) → `null`, so that cue stays live
+ *   - the rung carries no `externalFocusCue` (empty / whitespace) → `null`
+ *   - otherwise → the rung's `externalFocusCue`
+ *
+ * Pure and null-safe (a throw in the run-flow render body trips the
+ * app-root ErrorBoundary). This helper does NOT enforce the live-cue
+ * budget or the fallback chain — those stay single-sourced in
+ * `selectNonSegmentedCurrentCue`, which the override feeds as a preferred
+ * cue. The origin's "never grows a Now slot" invariant is gated at the
+ * call site (`RunScreen`), not here: this stays a pure presence+guard
+ * resolver.
+ */
+export function resolveBlockLiveCueOverride(
+  block: SessionPlanBlock | null | undefined,
+  playerCount: 1 | 2,
+): string | null {
+  const focus = getBlockSkillFocus(block, playerCount)
+  if (!focus) return null
+  const drillId = block?.drillId
+  if (!drillId) return null
+  const rung = stressRungForDrill(focus, drillId)
+  if (rung === undefined) return null
+  if (isLiveCueGuardProtected(drillId)) return null
+  const cue = getStressRung(focus, rung)?.externalFocusCue?.trim()
+  return cue && cue.length > 0 ? cue : null
 }
 
 /**

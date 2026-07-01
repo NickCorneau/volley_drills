@@ -15,7 +15,25 @@ export function segmentListOwnsCurrentCue(block: Pick<SessionPlanBlock, 'segment
 
 export function selectNonSegmentedCurrentCue(
   block: Pick<SessionPlanBlock, 'coachingCue' | 'courtsideInstructions' | 'drillName'>,
+  /**
+   * Optional rung-aware override (M002.2): the block's guarded live-cue
+   * substitute (see `resolveBlockLiveCueOverride`). Tried FIRST through the
+   * same `primaryCueFromCoachingCue` budget gate as the authored cue, so a
+   * single `CUE_COMPACT_MAX` rule governs both. When it yields nothing
+   * (absent, or over budget) the selector falls through to today's chain
+   * (`coachingCue` first clause → instructions → drill name) unchanged.
+   * Renders in the same `coaching-cue` slot with no marker (R5).
+   */
+  preferredCoachingCue?: string,
 ): CurrentCueDisplay {
+  const preferredText = primaryCueFromCoachingCue(normalized(preferredCoachingCue ?? ''))
+  if (preferredText) {
+    return {
+      text: preferredText,
+      source: 'coaching-cue',
+    }
+  }
+
   const fullCue = normalized(block.coachingCue)
   const fullInstructions = normalized(block.courtsideInstructions)
 
