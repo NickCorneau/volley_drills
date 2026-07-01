@@ -158,10 +158,10 @@ export function RunScreen() {
   //   remaining cues count (a substituting drill with nothing past the displaced
   //   [0] suppresses the section, exactly like today's single-cue echo);
   // - otherwise: today's rule — the joined cue differs from the face lead clause.
+  const trimmedCoachingCue = currentBlock.coachingCue.trim()
   const hasMoreCues = overrideWon
     ? allCueLines.length > 1
-    : currentBlock.coachingCue.trim().length > 0 &&
-      currentBlock.coachingCue.trim() !== currentCue?.text
+    : trimmedCoachingCue.length > 0 && trimmedCoachingCue !== currentCue?.text
   const hasSetupRead = currentBlock.courtsideInstructions.trim().length > 0
   // R2 density rule (2026-06-29): the setup read only belongs in the overlay
   // when it is NOT already on screen. Segmented drills (warmup / wrap) render

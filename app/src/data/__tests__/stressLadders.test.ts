@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { CUE_COMPACT_MAX } from '../../domain/policies'
+import { CUE_SEPARATOR } from '../../lib/format'
+import { LIVE_CUE_INTERNAL_FOCUS_TOKENS } from '../catalogValidation'
 import { DRILLS } from '../drills'
 import {
   STRESS_LADDERS,
@@ -67,20 +69,6 @@ describe('stress ladder registry invariants', () => {
 })
 
 describe('rung progression content (M002.2)', () => {
-  // Body-part / internal-focus tokens that disqualify an external-focus
-  // cue (Wulf; courtside-copy rule 12b). The cue must name an outcome or
-  // environmental referent, not a body part. "Square up" and "reach"
-  // describe a movement outcome / partner referent and are allowed.
-  const INTERNAL_FOCUS_TOKENS = [
-    'platform',
-    'knee',
-    'elbow',
-    'wrist',
-    'shoulder',
-    'forearm',
-    'hips',
-    'whole body',
-  ]
   // Pass/fail threshold vocabulary that disqualifies an exploration
   // criterion (D154 gating retired; process-framed only).
   const PASS_FAIL_TOKENS = ['%', ' graded', 'must ', 'pass/fail', 'fail', 'score at least']
@@ -112,10 +100,13 @@ describe('rung progression content (M002.2)', () => {
     }
   })
 
+  // The cue must name an outcome or environmental referent, not a body part
+  // (Wulf; courtside-copy rule 12b). Shares the floor advisory's canonical
+  // token list so the authoring bar and the live-cue advisory can't drift.
   it.each(FOCUSES)('%s external-focus cue names no body part (Wulf / rule 12b)', (focus) => {
     for (const rung of STRESS_LADDERS[focus]) {
       const cue = rung.externalFocusCue.toLowerCase()
-      for (const token of INTERNAL_FOCUS_TOKENS) {
+      for (const token of LIVE_CUE_INTERNAL_FOCUS_TOKENS) {
         expect(cue).not.toContain(token)
       }
     }
@@ -130,7 +121,7 @@ describe('rung progression content (M002.2)', () => {
     '%s externalFocusCue first clause fits the live-cue budget (CUE_COMPACT_MAX)',
     (focus) => {
       for (const rung of STRESS_LADDERS[focus]) {
-        const [firstClause] = rung.externalFocusCue.split(' · ').map((part) => part.trim())
+        const [firstClause] = rung.externalFocusCue.split(CUE_SEPARATOR).map((part) => part.trim())
         expect(firstClause.length).toBeLessThanOrEqual(CUE_COMPACT_MAX)
       }
     },
