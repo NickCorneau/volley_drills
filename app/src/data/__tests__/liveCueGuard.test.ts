@@ -12,6 +12,14 @@ describe('live-cue guard registry', () => {
     expect(isLiveCueGuardProtected('d48')).toBe(true)
   })
 
+  it('protects d15 (Read & Move perceptual read cue)', () => {
+    expect(isLiveCueGuardProtected('d15')).toBe(true)
+  })
+
+  it('protects d47 (set read-then-decide cue)', () => {
+    expect(isLiveCueGuardProtected('d47')).toBe(true)
+  })
+
   it('does not protect a non-perceptual pass-rung drill (d24)', () => {
     expect(isLiveCueGuardProtected('d24')).toBe(false)
   })

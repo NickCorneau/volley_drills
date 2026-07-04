@@ -25,8 +25,18 @@
  *
  * To add an entry: confirm the drill's `coachingCues[0]` is genuinely
  * load-bearing per the classes above, then add its `drillId` with a
- * one-line reason. A completeness pass over technique-slot ladder drills
- * is the founder-review follow-up named in the plan's Open Questions.
+ * one-line reason.
+ *
+ * Guard-seed completeness pass (2026-07-04, D176 follow-up): audited all
+ * 44 ladder drills' `coachingCues[0]` per variant against this bar.
+ * Added `d15` and `d47` (perceptual "read" cues the shared rung cue does
+ * not carry). Deliberately left unguarded: `d46` (pass rung 5, "Call the
+ * spin before you move") because that rung's `externalFocusCue` already
+ * says "Track the contact and the spin …", so the read survives the swap;
+ * and `d23` (serve rung 2, "Watch the ball flight as you sprint") which is
+ * a genuine gaze cue but a non-`m001Candidate` drill — runtime-inert until
+ * eligibility widens (revisit then). All other flagged cue0s were
+ * targeting/outcome cues the rung cue is meant to replace.
  */
 export const LIVE_CUE_GUARD_DRILL_IDS: ReadonlySet<string> = new Set([
   // d07 Pass & Look (pass rung 3): coachingCues[0] is the rule-12c gaze
@@ -39,6 +49,17 @@ export const LIVE_CUE_GUARD_DRILL_IDS: ReadonlySet<string> = new Set([
   // The set-and-look read is the drill; the shared set rung cue cannot
   // carry it.
   'd48',
+  // d15 Read & Move (pass rung 4): coachingCues[0] is the rule-12c
+  // perceptual read ("Read the ball early from the server's hand.").
+  // The pass rung-4 cue is an emergency-control cue ("Guide the ball back
+  // to your target even on the emergency play.") and does not carry the
+  // early read, so the swap would erase the drill's whole point.
+  'd15',
+  // d47 (set rung 4): coachingCues[0] is a rule-12c read-then-decide cue
+  // ("Read the ball before choosing hands or platform."). Reading the
+  // imperfect pass to pick bump vs. hand set is the drill; the set rung-4
+  // targeting cue cannot carry that decision read.
+  'd47',
 ])
 
 /**
