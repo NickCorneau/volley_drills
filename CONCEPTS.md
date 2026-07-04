@@ -39,10 +39,10 @@ The per-skill progression of difficulty rungs a drill can sit on, used to advanc
 A single position on a stress ladder representing one difficulty level of a skill.
 
 ### Rung intent
-The authored one-line "what this rung trains" technique-how note attached to a ladder rung. Its home beat is the block-opening Transition.
+The authored one-line "what this rung trains" technique-how note attached to a ladder rung. Its home beat is the block-opening **get-ready** beat on Run (migrated off Transition by `D167`; Transition is retained only as a reversible orphan).
 
 ### External focus cue
-The authored, per-rung prompt that points the athlete's attention outward — to the ball, target, or the movement's effect — rather than to body mechanics. Authored on each stress rung alongside rung intent, and distinct from a drill's own generic coaching cue (`coachingCues[0]`).
+The authored, per-rung prompt that points the athlete's attention outward — to the ball, target, or the movement's effect — rather than to body mechanics. Authored on each stress rung alongside rung intent, and distinct from a drill's own generic coaching cue (`coachingCues[0]`). Since `D176`, it can also become the live "Now" cue during the rep: on a ladder-bearing block it **substitutes** for the drill's `coachingCues[0]` (never renders alongside it), guarded so a load-bearing drill cue (gaze/perceptual or safety) stays live instead.
 
 ### Block-opening
 The status of being the block where a skill focus **first appears** in a session. A focus run's rung intent is surfaced once at its block-opening and then recedes for the rest of that run; "first appears" means first across the whole session so far, not merely different from the immediately-previous block.
