@@ -162,6 +162,40 @@ export function resolveBlockLiveCueOverride(
 }
 
 /**
+ * Resolve the authored stress-rung `reflection` for a just-finished
+ * block — the backward-looking "what that rep was doing to you" line
+ * revealed on Drill Check behind the pull affordance (M002.2 coaching
+ * arc After beat, D177, plan
+ * `docs/plans/2026-07-04-001-feat-m002-2-drill-check-reflection-plan.md`).
+ *
+ * Resolves exactly like `resolveBlockRungIntent` (primary focus via
+ * `getBlockSkillFocus`, drill-actual rung via `stressRungForDrill`, no
+ * block-type gate) with no guard and no budget: the reflection
+ * substitutes for nothing and renders only behind the athlete's own
+ * pull. Surface coverage is bounded by where Drill Check mounts (the
+ * capture-eligibility bypass set — warmup/wrap, non-count support
+ * slots, missing catalog ids), an accepted edge owned by the origin's
+ * R4; this helper stays a pure presence resolver.
+ *
+ * Off-ladder block, unknown focus, missing `drillId`, unknown rung, or
+ * an absent/whitespace reflection → `null`, never a throw (a throw in
+ * a render body trips the app-root ErrorBoundary).
+ */
+export function resolveBlockRungReflection(
+  block: SessionPlanBlock | null | undefined,
+  playerCount: 1 | 2,
+): string | null {
+  const focus = getBlockSkillFocus(block, playerCount)
+  if (!focus) return null
+  const drillId = block?.drillId
+  if (!drillId) return null
+  const rung = stressRungForDrill(focus, drillId)
+  if (rung === undefined) return null
+  const reflection = getStressRung(focus, rung)?.reflection?.trim()
+  return reflection && reflection.length > 0 ? reflection : null
+}
+
+/**
  * Resolve the rung `intent` for the block at `index` ONLY when that block
  * opens its focus run — the "what this rung trains" line shows once when a
  * focus first appears in the session, then recedes for the rest of that
