@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { DRILLS } from '../../data/drills'
 import { getStressRung, stressRungForDrill } from '../../data/stressLadders'
+import { makeBlock } from '../../test-utils/blockFixture'
 import { getBlockSkillFocus, resolveBlockRungIntent } from '../drillMetadata'
-import type { SessionPlanBlock } from '../../model'
 
 /**
  * `resolveBlockRungIntent` surfaces the authored per-rung `intent` string
@@ -21,20 +21,6 @@ import type { SessionPlanBlock } from '../../model'
  *      ErrorBoundary) and never returns a value the data layer disagrees
  *      with (exhaustive consistency sweep).
  */
-
-function makeBlock(overrides: Partial<SessionPlanBlock>): SessionPlanBlock {
-  return {
-    id: 'b-test',
-    type: 'main_skill',
-    drillName: '',
-    shortName: '',
-    durationMinutes: 5,
-    coachingCue: '',
-    courtsideInstructions: '',
-    required: true,
-    ...overrides,
-  }
-}
 
 describe('resolveBlockRungIntent', () => {
   it('returns null for null / undefined block', () => {

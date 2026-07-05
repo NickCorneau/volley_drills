@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { DRILLS } from '../../data/drills'
+import { makeBlock } from '../../test-utils/blockFixture'
 import { getBlockSkillFocus } from '../drillMetadata'
-import type { SessionPlanBlock } from '../../model'
 
 /**
  * 2026-04-27 cca2 dogfeed F8 follow-up
@@ -23,20 +23,6 @@ import type { SessionPlanBlock } from '../../model'
  * appear in the eyebrow (warmup blocks, unknown drills) so the
  * compose layer can render the bare slot label safely.
  */
-
-function makeBlock(overrides: Partial<SessionPlanBlock>): SessionPlanBlock {
-  return {
-    id: 'b-test',
-    type: 'main_skill',
-    drillName: '',
-    shortName: '',
-    durationMinutes: 5,
-    coachingCue: '',
-    courtsideInstructions: '',
-    required: true,
-    ...overrides,
-  }
-}
 
 describe('getBlockSkillFocus', () => {
   it('returns null for null / undefined block', () => {

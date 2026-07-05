@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { DRILLS } from '../../data/drills'
 import { getStressRung, stressRungForDrill } from '../../data/stressLadders'
+import { makeBlock } from '../../test-utils/blockFixture'
 import { getBlockSkillFocus, resolveBlockRungReflection } from '../drillMetadata'
-import type { SessionPlanBlock } from '../../model'
 
 /**
  * `resolveBlockRungReflection` surfaces the authored per-rung `reflection`
@@ -22,20 +22,6 @@ import type { SessionPlanBlock } from '../../model'
  *      ErrorBoundary) and never returns a value the data layer disagrees
  *      with (exhaustive consistency sweep).
  */
-
-function makeBlock(overrides: Partial<SessionPlanBlock>): SessionPlanBlock {
-  return {
-    id: 'b-test',
-    type: 'main_skill',
-    drillName: '',
-    shortName: '',
-    durationMinutes: 5,
-    coachingCue: '',
-    courtsideInstructions: '',
-    required: true,
-    ...overrides,
-  }
-}
 
 describe('resolveBlockRungReflection', () => {
   it('returns null for null / undefined block', () => {
@@ -118,8 +104,13 @@ describe('resolveBlockRungReflection', () => {
 
       const focus = getBlockSkillFocus(block, playerCount)
       const rung = focus ? stressRungForDrill(focus, drill.id) : undefined
-      const expected =
-        focus && rung !== undefined ? (getStressRung(focus, rung)?.reflection ?? null) : null
+      // Mirror the resolver's presence normalization (trim + empty→null,
+      // same shape as the liveCue sweep) so a legal-but-padded authored
+      // string can't pass the catalog gate yet fail this sweep with a
+      // misleading "disagrees with data layer".
+      const reflection =
+        focus && rung !== undefined ? getStressRung(focus, rung)?.reflection.trim() : undefined
+      const expected = reflection && reflection.length > 0 ? reflection : null
       expect(result, `drill ${drill.id} reflection disagrees with data layer`).toBe(expected)
     }
   })

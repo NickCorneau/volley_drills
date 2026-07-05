@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { DRILLS } from '../../data/drills'
 import { isLiveCueGuardProtected } from '../../data/liveCueGuard'
 import { getStressRung, stressRungForDrill } from '../../data/stressLadders'
+import { makeBlock } from '../../test-utils/blockFixture'
 import { getBlockSkillFocus, resolveBlockLiveCueOverride } from '../drillMetadata'
-import type { SessionPlanBlock } from '../../model'
 
 /**
  * `resolveBlockLiveCueOverride` resolves the guarded rung `externalFocusCue`
@@ -24,20 +24,6 @@ import type { SessionPlanBlock } from '../../model'
  * Budget + fallback are the selector's job; the "never grows a Now slot"
  * invariant is the call site's job (both tested elsewhere).
  */
-
-function makeBlock(overrides: Partial<SessionPlanBlock>): SessionPlanBlock {
-  return {
-    id: 'b-test',
-    type: 'main_skill',
-    drillName: '',
-    shortName: '',
-    durationMinutes: 5,
-    coachingCue: '',
-    courtsideInstructions: '',
-    required: true,
-    ...overrides,
-  }
-}
 
 describe('resolveBlockLiveCueOverride', () => {
   it('returns null for null / undefined block (no throw)', () => {

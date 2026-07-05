@@ -1,5 +1,5 @@
 import { isLiveCueGuardProtected } from '../data/liveCueGuard'
-import { getStressRung, stressRungForDrill } from '../data/stressLadders'
+import { getStressRung, stressRungForDrill, type StressRung } from '../data/stressLadders'
 import type { MetricType, SessionPlanBlock } from '../model'
 import { drillForBlock, variantForBlock } from './catalogLookup'
 
@@ -86,38 +86,54 @@ export function getBlockSkillFocus(
 }
 
 /**
- * Resolve the authored stress-rung `intent` for a planned block — the
- * "what this rung trains" technique-how line surfaced on TransitionScreen
- * (M002.2 run-time technique-how, plan
- * `docs/plans/2026-06-22-007-feat-m002-2-technique-how-transition-intent-plan.md`).
+ * The stress rung a planned block sits on — the shared core of the
+ * three per-field resolvers below (`intent` / live-cue override /
+ * `reflection`), so the block→rung resolution rule exists exactly once:
  *
- * Returns `null` for any block that is not ladder-bearing, so the caller
- * renders nothing:
- *   - the block's primary skill focus is not pass / serve / set
- *     (warmup, wrap, recovery, or a non-surfaced skill) → no ladder,
- *   - the block has no `drillId`,
- *   - the drill is off its focus's ladder (synthetic / legacy plan), or
- *   - the rung exists but carries no `intent`.
+ *   - PRIMARY focus via `getBlockSkillFocus` (the same source the
+ *     run-flow eyebrow uses, so rung content and the eyebrow never
+ *     disagree on focus; dual-focus drills use their primary ladder),
+ *   - drill-actual rung via `stressRungForDrill` — no derived ladder
+ *     position, steering, or verdict-offer state is read,
+ *   - no block-type gate (KTD3): rung content stays phase-matched over
+ *     the same blocks across all three coaching-arc beats.
  *
- * Pure (no React, no Dexie) and null-safe, so a render-body caller never
- * throws (a throw in the run-flow body trips the app-root ErrorBoundary).
- * Resolves against the drill's PRIMARY focus via `getBlockSkillFocus`
- * (the same source the run-flow eyebrow uses), so the line and the
- * eyebrow never disagree on focus; dual-focus drills use their primary
- * ladder. The rung is the one the drill actually sits on — no derived
- * ladder position, steering, or verdict-offer state is read.
+ * Returns `null` for any block that is not ladder-bearing: non-surfaced
+ * focus (warmup, wrap, recovery, or a non-surfaced skill), missing
+ * `drillId` (drillName-only legacy blocks stay content-free rather than
+ * guessed), or a drill off its focus's ladder (synthetic / legacy
+ * plan). Pure (no React, no Dexie) and null-safe, so render-body
+ * callers never throw (a throw in the run-flow body trips the app-root
+ * ErrorBoundary).
  */
-export function resolveBlockRungIntent(
+function resolveBlockStressRung(
   block: SessionPlanBlock | null | undefined,
   playerCount: 1 | 2,
-): string | null {
+): StressRung | null {
   const focus = getBlockSkillFocus(block, playerCount)
   if (!focus) return null
   const drillId = block?.drillId
   if (!drillId) return null
   const rung = stressRungForDrill(focus, drillId)
   if (rung === undefined) return null
-  return getStressRung(focus, rung)?.intent ?? null
+  return getStressRung(focus, rung) ?? null
+}
+
+/**
+ * Resolve the authored stress-rung `intent` for a planned block — the
+ * "what this rung trains" technique-how line surfaced on the run flow's
+ * block-opening get-ready beat (M002.2 run-time technique-how, plan
+ * `docs/plans/2026-06-22-007-feat-m002-2-technique-how-transition-intent-plan.md`;
+ * D163, relocated by the D167 Stage-4 collapse).
+ *
+ * `null` off-ladder (see `resolveBlockStressRung`) so the caller
+ * renders nothing.
+ */
+export function resolveBlockRungIntent(
+  block: SessionPlanBlock | null | undefined,
+  playerCount: 1 | 2,
+): string | null {
+  return resolveBlockStressRung(block, playerCount)?.intent ?? null
 }
 
 /**
@@ -127,37 +143,26 @@ export function resolveBlockRungIntent(
  * rung-aware live cue, plan
  * `docs/plans/2026-06-30-001-feat-m002-2-rung-aware-live-cue-plan.md` U3).
  *
- * Resolves exactly like `resolveBlockRungIntent` (primary focus via
- * `getBlockSkillFocus`, drill-actual rung via `stressRungForDrill`, no
- * block-type gate per KTD3 so the live cue and the get-ready rung-intent
- * line stay phase-matched over the same blocks), then folds in presence
- * and the guard:
- *   - off-ladder / unknown focus / no `drillId` / unknown rung → `null`
+ * On top of the shared `resolveBlockStressRung` core this folds in
+ * presence and the guard:
+ *   - off-ladder (any core `null`) → `null`
  *   - the drill's own cue is guard-protected (`isLiveCueGuardProtected`,
  *     e.g. d07's gaze cue) → `null`, so that cue stays live
  *   - the rung carries no `externalFocusCue` (empty / whitespace) → `null`
  *   - otherwise → the rung's `externalFocusCue`
  *
- * Pure and null-safe (a throw in the run-flow render body trips the
- * app-root ErrorBoundary). This helper does NOT enforce the live-cue
- * budget or the fallback chain — those stay single-sourced in
- * `selectNonSegmentedCurrentCue`, which the override feeds as a preferred
- * cue. The origin's "never grows a Now slot" invariant is gated at the
- * call site (`RunScreen`), not here: this stays a pure presence+guard
- * resolver.
+ * This helper does NOT enforce the live-cue budget or the fallback
+ * chain — those stay single-sourced in `selectNonSegmentedCurrentCue`,
+ * which the override feeds as a preferred cue. The origin's "never
+ * grows a Now slot" invariant is gated at the call site (`RunScreen`),
+ * not here: this stays a pure presence+guard resolver.
  */
 export function resolveBlockLiveCueOverride(
   block: SessionPlanBlock | null | undefined,
   playerCount: 1 | 2,
 ): string | null {
-  const focus = getBlockSkillFocus(block, playerCount)
-  if (!focus) return null
-  const drillId = block?.drillId
-  if (!drillId) return null
-  const rung = stressRungForDrill(focus, drillId)
-  if (rung === undefined) return null
-  if (isLiveCueGuardProtected(drillId)) return null
-  const cue = getStressRung(focus, rung)?.externalFocusCue?.trim()
+  if (block?.drillId && isLiveCueGuardProtected(block.drillId)) return null
+  const cue = resolveBlockStressRung(block, playerCount)?.externalFocusCue.trim()
   return cue && cue.length > 0 ? cue : null
 }
 
@@ -168,30 +173,19 @@ export function resolveBlockLiveCueOverride(
  * arc After beat, D177, plan
  * `docs/plans/2026-07-04-001-feat-m002-2-drill-check-reflection-plan.md`).
  *
- * Resolves exactly like `resolveBlockRungIntent` (primary focus via
- * `getBlockSkillFocus`, drill-actual rung via `stressRungForDrill`, no
- * block-type gate) with no guard and no budget: the reflection
- * substitutes for nothing and renders only behind the athlete's own
- * pull. Surface coverage is bounded by where Drill Check mounts (the
- * capture-eligibility bypass set — warmup/wrap, non-count support
- * slots, missing catalog ids), an accepted edge owned by the origin's
- * R4; this helper stays a pure presence resolver.
- *
- * Off-ladder block, unknown focus, missing `drillId`, unknown rung, or
- * an absent/whitespace reflection → `null`, never a throw (a throw in
- * a render body trips the app-root ErrorBoundary).
+ * On top of the shared `resolveBlockStressRung` core this adds only
+ * presence (absent / whitespace reflection → `null`) — no guard and no
+ * budget: the reflection substitutes for nothing and renders only
+ * behind the athlete's own pull. Surface coverage is bounded by where
+ * Drill Check mounts (the capture-eligibility bypass set — warmup/wrap,
+ * non-count support slots, missing catalog ids), an accepted edge owned
+ * by the origin's R4.
  */
 export function resolveBlockRungReflection(
   block: SessionPlanBlock | null | undefined,
   playerCount: 1 | 2,
 ): string | null {
-  const focus = getBlockSkillFocus(block, playerCount)
-  if (!focus) return null
-  const drillId = block?.drillId
-  if (!drillId) return null
-  const rung = stressRungForDrill(focus, drillId)
-  if (rung === undefined) return null
-  const reflection = getStressRung(focus, rung)?.reflection?.trim()
+  const reflection = resolveBlockStressRung(block, playerCount)?.reflection.trim()
   return reflection && reflection.length > 0 ? reflection : null
 }
 

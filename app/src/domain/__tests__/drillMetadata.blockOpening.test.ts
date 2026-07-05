@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { getStressRung } from '../../data/stressLadders'
+import { makeBlock } from '../../test-utils/blockFixture'
 import { resolveBlockOpeningIntent, resolveBlockRungIntent } from '../drillMetadata'
-import type { SessionPlanBlock } from '../../model'
 
 /**
  * `resolveBlockOpeningIntent` gates the authored rung `intent` to the
@@ -14,20 +14,6 @@ import type { SessionPlanBlock } from '../../model'
  */
 
 const PASS_RUNG_3_INTENT = 'Read, move, and still pass to one target.'
-
-function makeBlock(overrides: Partial<SessionPlanBlock>): SessionPlanBlock {
-  return {
-    id: 'b-test',
-    type: 'main_skill',
-    drillName: '',
-    shortName: '',
-    durationMinutes: 5,
-    coachingCue: '',
-    courtsideInstructions: '',
-    required: true,
-    ...overrides,
-  }
-}
 
 const warmup = makeBlock({ id: 'b-0', type: 'warmup', drillId: 'd28', variantId: 'd28-solo', drillName: 'Beach Prep Three' })
 const passMain = makeBlock({ id: 'b-1', type: 'main_skill', drillId: 'd24', variantId: 'd24-solo', drillName: 'Pass into a Corner' })
