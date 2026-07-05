@@ -52,6 +52,16 @@ export const RUN_FLOW_LABELS = {
    * dominant. Cancelable — tapping it again re-collapses.
    */
   adjust: 'Adjust',
+  /**
+   * Drill Check pull-to-reveal reflection trigger (the coaching arc's
+   * After beat, D177). Reads as the athlete's own question, never a
+   * second ask (the required capture question sits right above it);
+   * tapping reveals the rung's authored backward-looking line. Drill
+   * Check is a NEW lexicon consumer with this label — the cross-surface
+   * guard mounts only Transition + Run, so the rendered pin lives in
+   * `DrillCheckScreen.reflection.test.tsx`.
+   */
+  reflect: 'What did that train?',
 } as const
 
 /**

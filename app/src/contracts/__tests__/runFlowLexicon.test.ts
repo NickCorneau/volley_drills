@@ -21,6 +21,10 @@ describe('run-flow lexicon (Stage 0 beat contract)', () => {
     expect(RUN_FLOW_LABELS.adjust).toBe('Adjust')
   })
 
+  it('pins the D177 Drill Check reflection trigger label', () => {
+    expect(RUN_FLOW_LABELS.reflect).toBe('What did that train?')
+  })
+
   it('records the labels retired by Stage 1', () => {
     expect(SUNSET_RUN_FLOW_LABELS).toContain('Start next block')
     expect(SUNSET_RUN_FLOW_LABELS).toContain('GO')
