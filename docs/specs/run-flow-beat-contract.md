@@ -4,9 +4,9 @@ title: Run-Flow Beat Contract
 status: active
 stage: validation
 type: spec
-summary: "The beat contract for the run flow (Transition / Run / Drill Check / Review): each athlete-facing field gets exactly one full-weight home, with named demoted and must-not-render placements, so the flow reads as one calm instrument. Stages 1-4 are shipped (D164, D165, D166, D167); Stage 4 collapsed Transition into a read-first Run get-ready beat, leaving Transition a reversible orphan."
+summary: "The beat contract for the run flow (Transition / Run / Drill Check / Review): each athlete-facing field gets exactly one full-weight home, with named demoted and must-not-render placements, so the flow reads as one calm instrument. Stages 1-4 are shipped (D164, D165, D166, D167); Stage 4 collapsed Transition into a read-first Run get-ready beat, leaving Transition a reversible orphan. Amended by the sanctioned D177 row: the rung reflection's home is Drill Check behind the pull affordance."
 authority: canonical per-field placement contract for the run-flow beats and the run-flow label lexicon; gates where each athlete-facing field may render at full weight
-last_updated: 2026-06-30
+last_updated: 2026-07-05
 depends_on:
   - docs/decisions.md
   - docs/brainstorms/2026-06-23-run-flow-beat-contract-requirements.md
@@ -29,6 +29,8 @@ decision_refs:
   - D169
   - D171
   - D172
+  - D176
+  - D177
 ---
 
 # Run-Flow Beat Contract
@@ -63,8 +65,9 @@ Each athlete-facing field has one full-weight home. "Demoted" = present but seco
 |---|---|---|---|
 | Drill identity (title + eyebrow + duration) | Run get-ready (READ-DO setup) and Run header | — | — |
 | Full setup read (`courtsideInstructions`) | Run get-ready (full `GlossedText` read; READ-DO home migrated off Transition) | Run "Drill details" overlay (D165/D169 recovery only; timer keeps running; absent when the read is already on screen as the SegmentList) | **Run live cockpit body** (removed Stage 1; recoverable only via the transient overlay) |
-| Live coaching cue (`coachingCues[0]`) | Run "Now" | Run "Drill details" overlay (remaining cues, rule 12a; merged with the setup read into one control per D169) | **Run get-ready** (no "Cue" / "More cues" block — the cue's only home is the live "Now") |
+| Live coaching cue (`coachingCues[0]`) | Run "Now" (on a ladder-bearing block the rung's `externalFocusCue` **substitutes** for it in this same slot, guarded, per `D176` — one cue either way, never both) | Run "Drill details" overlay (remaining cues, rule 12a; merged with the setup read into one control per D169; when the rung cue substitutes, the overlay leads with it and the displaced `coachingCues[0]` is omitted, R9) | **Run get-ready** (no "Cue" / "More cues" block — the cue's only home is the live "Now") |
 | Rung `intent` (technique-how, `D163`) | Run get-ready, **block-opening only** | — | mid-block get-ready; Run live; Drill Check |
+| Rung `reflection` (After beat, `D177`) | Drill Check, **behind the collapsed "What did that train?" pull only** (pull not push; one-way reveal per visit; nothing persisted; never gates Continue) | — | Run get-ready; Run live; Review; the Transition orphan. The `intent` Drill Check ban above is untouched — this row is the sanctioned amendment, not a loosening. |
 | Segment list (`segments`) | Run `SegmentList` | — | — |
 | Reflective + readiness rung content (`explorationCriterion` / `graduationFeel`) | Review verdict-gated "Next time" card (`D161`/`D162`) | — | — |
 | Just-finished receipt | **Drill Check panel pill only** — there the finished drill is the capture *subject* (its `<h1>` is `sr-only`, `D145`), so the pill is the visible drill identity. **Removed `D171`** from the bypass beats. | — | Run get-ready and the Transition orphan (the quiet `line` receipt was dropped `D171`: restating the just-finished drill one tap later is redundant; continuity rests on stillness, `D166` R11) |
@@ -75,6 +78,7 @@ Canonical labels live in code at `app/src/contracts/runFlowLexicon.ts` (`RUN_FLO
 
 - **Action CTA = "Start"** (was "Start next block"; sunset).
 - **Live cue label = "Now"** (the Transition "Cue" label is retired).
+- **Drill Check reflection pull (D177) = "What did that train?"** (`RUN_FLOW_LABELS.reflect`) — the collapsed trigger for the rung reflection's one home; reads as the athlete's own question, never a second ask (the required capture question sits directly above it). Drill Check is a **new** lexicon consumer with this label; its rendered pin lives in `DrillCheckScreen.reflection.test.tsx` (the cross-surface guard mounts only Transition + Run).
 - **Run recovery overlay (D165, merged D169) = "Drill details"** trigger / **"Back to drill"** dismiss. One control opens the on-demand overlay carrying BOTH the remaining coaching cues AND the full setup read (sections labeled "Cues" / "Setup" only when both render; **setup read first, then cues**, per `D172` — the cues lean on terms the read defines, so the read grounds them and the crisp cues land last as the send-off above "Back to drill"). The prior split — an inline cue-only "Show more cues" disclosure plus a separate "Peek setup" read button — is retired; both strings are sunset (`SUNSET_RUN_FLOW_LABELS`), alongside the earlier-retired combined "Show more cues and instructions".
 - Swap / Shorten / Skip / block-counter strings are contextual variants recorded as canonical-at-current-strings; their normalization is a deferred founder pass, not drift.
 

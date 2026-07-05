@@ -44,6 +44,9 @@ The authored one-line "what this rung trains" technique-how note attached to a l
 ### External focus cue
 The authored, per-rung prompt that points the athlete's attention outward — to the ball, target, or the movement's effect — rather than to body mechanics. Authored on each stress rung alongside rung intent, and distinct from a drill's own generic coaching cue (`coachingCues[0]`). Since `D176`, it can also become the live "Now" cue during the rep: on a ladder-bearing block it **substitutes** for the drill's `coachingCues[0]` (never renders alongside it), guarded so a load-bearing drill cue (gaze/perceptual or safety) stays live instead.
 
+### Rung reflection
+The authored, per-rung backward-looking one-liner — "what that rep was doing to you" — that closes the coaching arc's After beat (`D177`). Its home is Drill Check, revealed only behind the collapsed "What did that train?" pull (pull not push); it names the rung's mechanism or effect as felt work, never a judgment of how the rep went (`D154` holds), never a raw rung number (`D157` holds), and never a tense-flip of the rung intent (the distinct-from-siblings rule in `docs/specs/stress-rung-taxonomy.md`). Nothing persists and it never gates Continue.
+
 ### Block-opening
 The status of being the block where a skill focus **first appears** in a session. A focus run's rung intent is surfaced once at its block-opening and then recedes for the rest of that run; "first appears" means first across the whole session so far, not merely different from the immediately-previous block.
 
