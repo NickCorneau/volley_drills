@@ -4,6 +4,7 @@ import { CUE_SEPARATOR } from '../../lib/format'
 import { LIVE_CUE_INTERNAL_FOCUS_TOKENS } from '../catalogValidation'
 import { DRILLS } from '../drills'
 import {
+  RUNG_TEXT_FIELDS,
   STRESS_LADDERS,
   startingStressRung,
   stressLadderBounds,
@@ -78,26 +79,32 @@ describe('rung progression content (M002.2)', () => {
   // future UI pass inherits clean copy.
   const UNGLOSSED_JARGON_TOKENS = ['out-of-system', 'out of system', 'in-system', 'in system']
 
+  // Coverage tripwire for the RUNG_TEXT_FIELDS single source: a new
+  // string field landing on `StressRung` fails here until it either
+  // joins the list (inheriting every field-universal lint below and the
+  // rung_content_missing hard gate) or is deliberately excluded with a
+  // rationale in this test.
+  it('RUNG_TEXT_FIELDS covers exactly the string-typed StressRung fields', () => {
+    const sample = STRESS_LADDERS.pass[0]
+    const stringFields = Object.entries(sample)
+      .filter(([, value]) => typeof value === 'string')
+      .map(([key]) => key)
+      .sort()
+    expect(stringFields).toEqual([...RUNG_TEXT_FIELDS].sort())
+  })
+
   it.each(FOCUSES)('every %s rung carries non-empty progression content', (focus) => {
     for (const rung of STRESS_LADDERS[focus]) {
-      expect(rung.intent.trim().length).toBeGreaterThan(0)
-      expect(rung.externalFocusCue.trim().length).toBeGreaterThan(0)
-      expect(rung.explorationCriterion.trim().length).toBeGreaterThan(0)
-      expect(rung.graduationFeel.trim().length).toBeGreaterThan(0)
-      expect(rung.reflection.trim().length).toBeGreaterThan(0)
+      for (const field of RUNG_TEXT_FIELDS) {
+        expect(rung[field].trim().length, `${focus} rung ${rung.rung} ${field}`).toBeGreaterThan(0)
+      }
     }
   })
 
   it.each(FOCUSES)('%s rung content uses no em-dash (courtside-copy rule 4)', (focus) => {
     for (const rung of STRESS_LADDERS[focus]) {
-      for (const field of [
-        rung.intent,
-        rung.externalFocusCue,
-        rung.explorationCriterion,
-        rung.graduationFeel,
-        rung.reflection,
-      ]) {
-        expect(field).not.toContain('\u2014')
+      for (const field of RUNG_TEXT_FIELDS) {
+        expect(rung[field], `${focus} rung ${rung.rung} ${field}`).not.toContain('\u2014')
       }
     }
   })
@@ -149,31 +156,26 @@ describe('rung progression content (M002.2)', () => {
 
   it.each(FOCUSES)('%s rung content carries no unglossed FIVB jargon (rule 2)', (focus) => {
     for (const rung of STRESS_LADDERS[focus]) {
-      for (const field of [
-        rung.intent,
-        rung.externalFocusCue,
-        rung.explorationCriterion,
-        rung.graduationFeel,
-        rung.reflection,
-      ]) {
-        const lowered = field.toLowerCase()
+      for (const field of RUNG_TEXT_FIELDS) {
+        const lowered = rung[field].toLowerCase()
         for (const token of UNGLOSSED_JARGON_TOKENS) {
-          expect(lowered).not.toContain(token)
+          expect(lowered, `${focus} rung ${rung.rung} ${field}`).not.toContain(token)
         }
       }
     }
   })
 
-  // The fields that reach a screen: explorationCriterion / graduationFeel
-  // on the M002.2 Review verdict card (plan 2026-06-22-001) and the D177
-  // reflection on Drill Check. Em-dash, pass/fail, and jargon are already
-  // covered above for all five fields; this closes the one remaining
-  // punctuation gap (en-dash) on the rendered copy so a number range
-  // never reaches the screen as "3-5" via a stray en-dash.
-  it.each(FOCUSES)('%s rendered rung fields use no en-dash', (focus) => {
+  // Every authored rung field reaches a screen now: intent on the
+  // block-opening get-ready beat (D163/D167), externalFocusCue as the
+  // live "Now" cue (D176), explorationCriterion / graduationFeel on the
+  // Review verdict card (D161/D162), reflection on Drill Check (D177).
+  // Em-dash, pass/fail, and jargon are already covered above; this
+  // closes the one remaining punctuation gap (en-dash) so a number
+  // range never reaches a screen as "3-5" via a stray en-dash.
+  it.each(FOCUSES)('%s rung fields use no en-dash', (focus) => {
     for (const rung of STRESS_LADDERS[focus]) {
-      for (const field of [rung.explorationCriterion, rung.graduationFeel, rung.reflection]) {
-        expect(field).not.toContain('\u2013')
+      for (const field of RUNG_TEXT_FIELDS) {
+        expect(rung[field], `${focus} rung ${rung.rung} ${field}`).not.toContain('\u2013')
       }
     }
   })

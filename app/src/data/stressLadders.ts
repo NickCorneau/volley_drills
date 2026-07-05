@@ -79,6 +79,30 @@ export interface StressRung {
 }
 
 /**
+ * The authored per-rung text fields as one named list — the single
+ * source for the `rung_content_missing` hard gate
+ * (`catalogValidation.ts`) and the field-universal content lints
+ * (`__tests__/stressLadders.test.ts`: non-empty, em/en-dash, unglossed
+ * jargon). Before this constant the same five-name list was
+ * copy-maintained across those files, and coverage drifted exactly the
+ * way that predicts: the en-dash lint kept a stale "rendered fields"
+ * subset after `intent` (D163/D167) and `externalFocusCue` (D176)
+ * gained render surfaces. Rule-specific lint sets (the D157 digit ban,
+ * the pass/fail trio, cue-only checks) stay explicit at their lints —
+ * only the "applies to every authored field" lanes iterate this list.
+ * A coverage tripwire in the colocated suite fails when a new string
+ * field lands on `StressRung` without joining (or being deliberately
+ * excluded from) this list.
+ */
+export const RUNG_TEXT_FIELDS = [
+  'intent',
+  'externalFocusCue',
+  'explorationCriterion',
+  'graduationFeel',
+  'reflection',
+] as const satisfies readonly (keyof StressRung)[]
+
+/**
  * Per-focus ladders, ordered low → high stress. Every catalog drill
  * whose `skillFocus` includes the focus appears exactly once in that
  * focus's ladder (D160 broadened membership beyond `m001Candidate`;

@@ -1,7 +1,7 @@
 import { CUE_COMPACT_MAX } from '../domain/policies'
 import { CUE_SEPARATOR } from '../lib/format'
 import type { Drill, DrillVariant, ProgressionChain } from '../types/drill'
-import type { StressLadderFocus, StressRung } from './stressLadders'
+import { RUNG_TEXT_FIELDS, type StressLadderFocus, type StressRung } from './stressLadders'
 
 export type DrillCatalogIssueCode =
   | 'duplicate_drill_id'
@@ -358,21 +358,12 @@ export function validateDrillCatalog({
       }
 
       // M002.2: every rung ships authored progression content. A rung
-      // missing any of intent / external-focus cue / exploration
-      // criterion / graduation feel / reflection is a hard authoring
+      // with any `RUNG_TEXT_FIELDS` entry blank is a hard authoring
       // failure (the rung-content invariant in
       // docs/specs/stress-rung-taxonomy.md).
       for (const rung of stressLadders[focus]) {
-        const missing = (
-          [
-            ['intent', rung.intent],
-            ['externalFocusCue', rung.externalFocusCue],
-            ['explorationCriterion', rung.explorationCriterion],
-            ['graduationFeel', rung.graduationFeel],
-            ['reflection', rung.reflection],
-          ] as const
-        ).filter(([, value]) => value.trim().length === 0)
-        for (const [field] of missing) {
+        const missing = RUNG_TEXT_FIELDS.filter((field) => rung[field].trim().length === 0)
+        for (const field of missing) {
           issues.push(
             issue(
               'rung_content_missing',
