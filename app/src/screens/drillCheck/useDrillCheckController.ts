@@ -10,6 +10,7 @@ import {
   mergePerDrillCaptures,
   resolveDrillCheckCaptureEligibility,
 } from '../../domain/capture'
+import { resolveBlockRungReflection } from '../../domain/drillMetadata'
 import { useSessionRunner } from '../../hooks/useSessionRunner'
 import { isSchemaBlocked } from '../../lib/schema-blocked'
 import { vibrate } from '../../platform'
@@ -69,6 +70,15 @@ export function useDrillCheckController(executionLogId: string) {
     captureEligibility.status === 'eligible_difficulty_only'
       ? captureEligibility.successRule
       : null
+
+  // M002.2 coaching-arc After beat (D177): the just-finished block's
+  // authored rung `reflection`, revealed behind the screen's pull
+  // affordance. Pure render-time derivation over the capture target —
+  // nothing persisted, never gates Continue, `null` off-ladder (the
+  // screen renders no affordance at all). Computed inline, no memo,
+  // matching the sibling `rungIntentLine` resolvers in the run /
+  // transition controllers (two map lookups).
+  const reflectionLine = resolveBlockRungReflection(captureTarget, plan?.playerCount ?? 1)
 
   const [captures, setCaptures] = useState<PerDrillCaptureRecord[]>([])
   const [hydrated, setHydrated] = useState(false)
@@ -335,6 +345,7 @@ export function useDrillCheckController(executionLogId: string) {
     captureTarget,
     captureShape,
     captureSuccessRule,
+    reflectionLine,
     difficulty,
     setDifficulty,
     captureGood,

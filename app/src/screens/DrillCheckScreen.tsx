@@ -1,12 +1,15 @@
+import { useEffect, useRef } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { PerDrillCapture } from '../components/PerDrillCapture'
 import {
   Button,
+  Disclosure,
   JustFinishedPill,
   RunFlowHeader,
   ScreenShell,
   StatusMessage,
 } from '../components/ui'
+import { RUN_FLOW_LABELS } from '../contracts/runFlowLexicon'
 import { routes } from '../routes'
 import { useDrillCheckController } from './drillCheck/useDrillCheckController'
 
@@ -40,6 +43,34 @@ import { useDrillCheckController } from './drillCheck/useDrillCheckController'
  * only the reflective layout and presentational wiring.
  */
 
+/**
+ * The revealed reflection line (D177). Rendered as `Disclosure`
+ * children, so it mounts exactly when the trigger unmounts — the
+ * mount-time focus move keeps keyboard / screen-reader users anchored
+ * (the button they just pressed is gone from the DOM; without the
+ * move, focus falls back to `<body>` and SR context resets).
+ * `tabIndex={-1}`: programmatically focusable, not in the tab order.
+ * `focus:outline-none`: quiet reveal, no ring on a non-interactive
+ * line (`focus-visible` styling never fires for programmatic focus,
+ * but WebKit paints a default outline on `focus()` regardless).
+ */
+function RevealedReflection({ line }: { line: string }) {
+  const ref = useRef<HTMLParagraphElement | null>(null)
+  useEffect(() => {
+    ref.current?.focus()
+  }, [])
+  return (
+    <p
+      ref={ref}
+      tabIndex={-1}
+      data-testid="drill-check-reflection"
+      className="text-base leading-relaxed text-text-primary focus:outline-none"
+    >
+      {line}
+    </p>
+  )
+}
+
 export function DrillCheckScreen() {
   const [searchParams] = useSearchParams()
   const executionLogId = searchParams.get('id') ?? ''
@@ -52,6 +83,7 @@ export function DrillCheckScreen() {
     captureTarget,
     captureShape,
     captureSuccessRule,
+    reflectionLine,
     difficulty,
     setDifficulty,
     captureGood,
@@ -219,6 +251,29 @@ export function DrillCheckScreen() {
             captureShape={{ kind: 'none' }}
             successRuleDescription={captureSuccessRule ?? undefined}
           />
+        )}
+
+        {/*
+          D177 coaching-arc After beat: pull-to-reveal rung reflection.
+          Sits BELOW the capture block so the required ask ("How was
+          {drill}?") stays the visible focal element and the optional
+          reflection reads as an afterword, not a second question
+          (pull-not-push, D154). Renders nothing at all off-ladder —
+          no empty affordance to wonder about. `Disclosure` is the
+          screen's native reveal idiom (same one-way contract as the
+          capture drawers: once open, open until unmount). The dotted
+          underline differentiates this "reveal a line to read" pull
+          from the capture drawers' hover-underline "reveal inputs"
+          pulls — same gesture family, visibly different payload.
+        */}
+        {reflectionLine !== null && (
+          <Disclosure
+            label={RUN_FLOW_LABELS.reflect}
+            testId="drill-check-reflection-trigger"
+            className="underline decoration-dotted"
+          >
+            <RevealedReflection line={reflectionLine} />
+          </Disclosure>
         )}
       </ScreenShell.Body>
 

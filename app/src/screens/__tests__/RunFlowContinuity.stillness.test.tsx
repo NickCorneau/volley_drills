@@ -192,6 +192,13 @@ function drillCheckController(): ReturnType<typeof useDrillCheckController> {
     },
     captureShape: { kind: 'none' },
     captureSuccessRule: null,
+    // Null keeps the D177 reflection Disclosure out of this guard's DOM.
+    // RUN_FLOW_LABELS.reflect is intentionally NOT asserted here: this
+    // cross-surface guard walks the forward beats (Transition + Run);
+    // Drill Check is a new lexicon consumer whose rendered pin lives in
+    // DrillCheckScreen.reflection.test.tsx. Do not add `reflect` to any
+    // sunset list on the strength of its absence from this file.
+    reflectionLine: null,
     difficulty: null,
     setDifficulty: vi.fn(),
     captureGood: 0,
