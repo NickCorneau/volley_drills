@@ -35,9 +35,13 @@ export interface StressRung {
   // `docs/specs/stress-rung-taxonomy.md`; the authored strings themselves
   // live here as data. `explorationCriterion` + `graduationFeel` render
   // on the Review verdict card (D161/D162, 2026-06-22); `intent` renders
-  // as a quiet line on the Transition screen (D163, plan 2026-06-22-007, via
-  // `resolveBlockRungIntent` in `domain/drillMetadata.ts`);
-  // `externalFocusCue` and any Run / Drill Check treatment stay deferred.
+  // as the quiet block-opening line on the run flow's get-ready beat
+  // (D163 on Transition, migrated by the D167 Stage-4 collapse, via
+  // `resolveBlockOpeningIntent` in `domain/drillMetadata.ts`);
+  // `externalFocusCue` substitutes for the drill's own cue as the live
+  // "Now" cue (D176, via `resolveBlockLiveCueOverride`); `reflection`
+  // is the Drill Check pull-to-reveal After beat (via
+  // `resolveBlockRungReflection`).
   /** What this rung trains, in contextual-interference terms (D68), never physiological load (D149). */
   readonly intent: string
   /**
@@ -61,6 +65,17 @@ export interface StressRung {
    * and deepening rather than stepping.
    */
   readonly graduationFeel: string
+  /**
+   * The backward-looking "what that rep was doing to you" line revealed
+   * on Drill Check behind the pull affordance (the coaching arc's After
+   * beat). One calm past-facing sentence naming the rung's mechanism or
+   * effect as felt work: never a judgment of how the rep went (D154),
+   * no rung numbers (D157), and never a tense-flip of `intent` or a
+   * restatement of `explorationCriterion` / a rung drill's success rule
+   * (the distinct-from-siblings rule in
+   * `docs/specs/stress-rung-taxonomy.md`).
+   */
+  readonly reflection: string
 }
 
 /**
@@ -94,6 +109,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
         'Notice how little you have to move when you meet the ball out in front of you.',
       graduationFeel:
         'The ball returns to the same height almost without thinking, and a steadier rhythm would feel welcome rather than rushed.',
+      reflection: 'That rep was wiring in one default contact your body can find on its own.',
     },
     // d06: fixed set-window target beside its chain-2 sibling d05; d19: controlled-input butterfly rotation — serial rhythm.
     {
@@ -106,6 +122,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
         'See whether your passes stay matched as the rally lengthens, or start to wander once you tire.',
       graduationFeel:
         'The rally feels easy to sustain, and you find yourself wanting the ball to come from somewhere new.',
+      reflection: 'That rep was training your pass to survive being needed again right away.',
     },
     // d12/d13/d14: chain-3 movement courses beside d09/d10; d16: defined-sequence footwork (one below d15's reactive read);
     // d17: two-role coordination off serve/toss; d24: move-to-ball corner targeting — varied movement/perception.
@@ -118,6 +135,8 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
         'See how reading the flight sooner gives you time to square up to your target.',
       graduationFeel:
         'You are reading and arriving in time on most balls, and a real served ball would feel like the natural next test.',
+      reflection:
+        'That rep was teaching your feet to do most of the passing before your arms touch the ball.',
     },
     // d20: live serve receive inside a pass-set-attack continuity constraint; d21: 500's scored anticipation reads — reactive/outcome pressure beside d11/d15.
     {
@@ -128,6 +147,8 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
       explorationCriterion: 'Notice what still works when you cannot get set early.',
       graduationFeel:
         'Emergency plays feel recoverable, and a live server reading you back would feel exciting rather than overwhelming.',
+      reflection:
+        'That rep was building the scrappy version of your pass that real rallies actually ask for.',
     },
     // d08: live serve receive under +3/−3 stakes beside d18/d46 — live-read.
     {
@@ -140,6 +161,8 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
         'See how committing to your read early changes how clean the pass feels, even when you guess wrong.',
       graduationFeel:
         'You are reading live serves at speed. Stay here and keep inviting new servers, spins, and conditions to keep it honest.',
+      reflection:
+        'That rep was training your eyes against a live server, the one thing a friendly feed can never fake.',
     },
   ],
   serve: [
@@ -152,6 +175,8 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
       explorationCriterion: 'Notice how a steady toss in front of you makes the contact repeatable.',
       graduationFeel:
         'Your serve lands near the circle most tries, and stringing several zones together would feel doable.',
+      reflection:
+        'That rep was building the one serve you can trust before you ever start varying it.',
     },
     // d23: full-routine serial reps; the dash is body load, not contextual interference (D149 keeps load off this scale).
     // d54: serial four-zone sequence (BAB Around the World, 4-zone beginner) beside d51's single no-serve heart zone.
@@ -164,6 +189,7 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
         'See whether your rhythm holds as the rounds add up, or your contact changes when you push for more pace.',
       graduationFeel:
         'Rhythm holds across rounds, and aiming at a scored target would feel like a welcome challenge.',
+      reflection: 'That rep was teaching you to change targets without changing your swing.',
     },
     // d55: called single-target serve under +/- pressure (BAB Server vs Passer) beside d22's multi-zone points race.
     {
@@ -175,6 +201,8 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
         'Notice how aiming at a spot, rather than just in, changes where your misses go.',
       graduationFeel:
         'You are hitting called zones under a little pressure, and a live receiver reading you would feel like the real test.',
+      reflection:
+        'That rep was training your serve routine to hold steady while something rode on the result.',
     },
     // d08: serving into live receive with error scoring — rung 4's "serve into live receive" signature beside d18.
     {
@@ -186,6 +214,8 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
         'See how serving at a target instead of at the court feels under the back-and-forth of a live point.',
       graduationFeel:
         'You are serving into live receivers with intent. Stay here and keep varying zones, receivers, and stakes.',
+      reflection:
+        'That rep was turning your serve into a move against a real opponent, not just a spot of sand.',
     },
   ],
   set: [
@@ -197,6 +227,8 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
       explorationCriterion: 'Notice how a quiet, even contact sends the ball straight up without spin.',
       graduationFeel:
         'The set shape repeats cleanly, and keeping a continuous rally going would feel natural.',
+      reflection:
+        'That rep was carving the hand position every set you hit from here on will start from.',
     },
     // d56: solo continuous-rhythm self-set route (FIVB 4.1 Set and Move) beside the pair-only d41.
     {
@@ -208,6 +240,8 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
         'See whether the rally stays smooth as it lengthens, or the ball starts to lead your partner.',
       graduationFeel:
         'The rally stays smooth, and setting from new spots to new targets would feel like the next step.',
+      reflection:
+        'That rep was training you to reset your base before every touch, not just the first one.',
     },
     // d57: changing/random targets while moving (FIVB 4.4 reduced) beside d42's two fixed corners.
     {
@@ -218,6 +252,8 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
       explorationCriterion: 'Notice how arriving early and facing the target changes how settable the ball lands.',
       graduationFeel:
         'You arrive and square up in time, and solving messier passes would feel like a fair challenge.',
+      reflection:
+        'That rep was untying your set from any one spot, so the same delivery travels with you.',
     },
     // d20: setting off live-ish passes in continuity flow; d21: 500's scored chaotic entries — reactive/graded beside d47.
     // d58: pass-to-self then choose bump/hand, reducible to pair (BAB Plan 6 Drill 2) beside d47's four pass locations.
@@ -229,6 +265,8 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
       explorationCriterion: 'See which option keeps the set clean when the pass is off.',
       graduationFeel:
         'You keep sets hittable from imperfect passes, and live scramble play would feel like the real game.',
+      reflection:
+        'That rep was training the split-second choice between hands and bump, not just the touch that follows it.',
     },
     {
       rung: 5,
@@ -239,6 +277,8 @@ export const STRESS_LADDERS: Record<StressLadderFocus, readonly StressRung[]> = 
         'Notice how committing to a target early lets you recover faster for the next play.',
       graduationFeel:
         'You are setting under live chaos and recovering. Stay here and keep raising the speed and disorder.',
+      reflection:
+        'That rep was teaching you that the set is never the end of your play, only the middle of it.',
     },
   ],
 }

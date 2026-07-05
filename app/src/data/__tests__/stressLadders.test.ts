@@ -84,6 +84,7 @@ describe('rung progression content (M002.2)', () => {
       expect(rung.externalFocusCue.trim().length).toBeGreaterThan(0)
       expect(rung.explorationCriterion.trim().length).toBeGreaterThan(0)
       expect(rung.graduationFeel.trim().length).toBeGreaterThan(0)
+      expect(rung.reflection.trim().length).toBeGreaterThan(0)
     }
   })
 
@@ -94,6 +95,7 @@ describe('rung progression content (M002.2)', () => {
         rung.externalFocusCue,
         rung.explorationCriterion,
         rung.graduationFeel,
+        rung.reflection,
       ]) {
         expect(field).not.toContain('\u2014')
       }
@@ -128,12 +130,14 @@ describe('rung progression content (M002.2)', () => {
   )
 
   it.each(FOCUSES)(
-    '%s exploration criterion and graduation feel are process-framed, never pass/fail (D154)',
+    '%s exploration criterion, graduation feel, and reflection are process-framed, never pass/fail (D154)',
     (focus) => {
       for (const rung of STRESS_LADDERS[focus]) {
         // graduationFeel is descriptive felt-readiness, never a gate, so it
         // is held to the same no-pass/fail bar as the exploration criterion.
-        for (const text of [rung.explorationCriterion, rung.graduationFeel]) {
+        // The D177 reflection is a backward-looking read of the rung's work,
+        // never a judgment of how the rep went — same bar.
+        for (const text of [rung.explorationCriterion, rung.graduationFeel, rung.reflection]) {
           const lowered = text.toLowerCase()
           for (const token of PASS_FAIL_TOKENS) {
             expect(lowered).not.toContain(token)
@@ -150,6 +154,7 @@ describe('rung progression content (M002.2)', () => {
         rung.externalFocusCue,
         rung.explorationCriterion,
         rung.graduationFeel,
+        rung.reflection,
       ]) {
         const lowered = field.toLowerCase()
         for (const token of UNGLOSSED_JARGON_TOKENS) {
@@ -159,16 +164,69 @@ describe('rung progression content (M002.2)', () => {
     }
   })
 
-  // The two fields the M002.2 Review verdict card renders (plan
-  // 2026-06-22-001). Em-dash, body-part, pass/fail, and jargon are
-  // already covered above for all four fields; this closes the one
-  // remaining punctuation gap (en-dash) on the rendered copy so a number
-  // range never reaches the screen as "3-5" via a stray en-dash.
-  it.each(FOCUSES)('%s rendered-on-Review fields use no en-dash', (focus) => {
+  // The fields that reach a screen: explorationCriterion / graduationFeel
+  // on the M002.2 Review verdict card (plan 2026-06-22-001) and the D177
+  // reflection on Drill Check. Em-dash, pass/fail, and jargon are already
+  // covered above for all five fields; this closes the one remaining
+  // punctuation gap (en-dash) on the rendered copy so a number range
+  // never reaches the screen as "3-5" via a stray en-dash.
+  it.each(FOCUSES)('%s rendered rung fields use no en-dash', (focus) => {
     for (const rung of STRESS_LADDERS[focus]) {
-      for (const field of [rung.explorationCriterion, rung.graduationFeel]) {
+      for (const field of [rung.explorationCriterion, rung.graduationFeel, rung.reflection]) {
         expect(field).not.toContain('\u2013')
       }
+    }
+  })
+
+  // D157 keeps raw rung numbers out of athlete-facing copy; the
+  // reflection renders verbatim on Drill Check, so it carries the
+  // strictest form of the rule: no digits at all (a spelled-out count
+  // is fine, "rung 3" / "3-5" is not) and never the word "rung".
+  it.each(FOCUSES)('%s reflection names no rung numbers (D157)', (focus) => {
+    for (const rung of STRESS_LADDERS[focus]) {
+      expect(rung.reflection, `${focus} rung ${rung.rung}`).not.toMatch(/\d/)
+      expect(rung.reflection.toLowerCase(), `${focus} rung ${rung.rung}`).not.toMatch(/\brungs?\b/)
+    }
+  })
+
+  // D177 register rules for the Drill Check reflection (origin R3,
+  // docs/brainstorms/2026-07-04-m002-2-drill-check-reflection-requirements.md).
+  it.each(FOCUSES)('%s reflection is one calm sentence (D177 register rule)', (focus) => {
+    for (const rung of STRESS_LADDERS[focus]) {
+      const text = rung.reflection.trim()
+      expect(text.endsWith('.'), `"${text}" must end with a period`).toBe(true)
+      // No second sentence, no exclamation, no quiz framing.
+      expect(text.slice(0, -1)).not.toContain('.')
+      expect(text).not.toContain('!')
+      expect(text).not.toContain('?')
+    }
+  })
+
+  // The coarse mechanical arm of the distinct-from-siblings rule: a
+  // reflection must never be the rung's `intent` tense-flipped. Exact
+  // equality plus a content-token overlap ceiling; the semantic bar
+  // (adds a mechanism/effect neither `intent` nor `explorationCriterion`
+  // states, and never restates a rung drill's success rule) stays on
+  // the authoring checklist in `docs/specs/stress-rung-taxonomy.md`.
+  it.each(FOCUSES)('%s reflection is not a tense-transform echo of intent (D177)', (focus) => {
+    const contentTokens = (text: string): Set<string> =>
+      new Set(
+        text
+          .toLowerCase()
+          .replace(/[^a-z\s]/g, ' ')
+          .split(/\s+/)
+          .filter((token) => token.length >= 4),
+      )
+    for (const rung of STRESS_LADDERS[focus]) {
+      expect(rung.reflection.trim().toLowerCase()).not.toBe(rung.intent.trim().toLowerCase())
+      const reflectionTokens = contentTokens(rung.reflection)
+      const intentTokens = contentTokens(rung.intent)
+      const shared = [...reflectionTokens].filter((token) => intentTokens.has(token))
+      const overlap = shared.length / Math.max(reflectionTokens.size, 1)
+      expect(
+        overlap,
+        `${focus} rung ${rung.rung} reflection shares ${shared.join(', ')} with intent`,
+      ).toBeLessThan(0.5)
     }
   })
 })

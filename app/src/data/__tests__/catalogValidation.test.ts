@@ -79,6 +79,7 @@ function rung(overrides: Partial<StressRung> = {}): StressRung {
     externalFocusCue: 'Send the ball to the same spot.',
     explorationCriterion: 'Notice how it feels.',
     graduationFeel: 'Ready for more variety.',
+    reflection: 'That rep was fixture work.',
     ...overrides,
   }
 }
@@ -772,8 +773,12 @@ describe('validateDrillCatalog', () => {
         'stressLadders.pass.1.explorationCriterion',
       ],
       ['graduationFeel', { graduationFeel: '' }, 'stressLadders.pass.1.graduationFeel'],
+      // D177 (coaching-arc After beat): the Drill Check reflection joins
+      // the same all-or-nothing presence gate as its four siblings.
+      ['reflection', { reflection: '' }, 'stressLadders.pass.1.reflection'],
       // Whitespace-only must read as missing too: both gates rely on .trim().
       ['whitespace intent', { intent: '   ' }, 'stressLadders.pass.1.intent'],
+      ['whitespace reflection', { reflection: '   ' }, 'stressLadders.pass.1.reflection'],
     ])('reports a rung whose %s field is empty', (_label, overrides, expectedPath) => {
       const issues = validateDrillCatalog({
         drills: [drill()],
@@ -792,18 +797,27 @@ describe('validateDrillCatalog', () => {
         progressionChains: [chain()],
         stressLadders: {
           ...emptyLadders,
-          pass: [rung({ intent: '', externalFocusCue: '', explorationCriterion: '', graduationFeel: '' })],
+          pass: [
+            rung({
+              intent: '',
+              externalFocusCue: '',
+              explorationCriterion: '',
+              graduationFeel: '',
+              reflection: '',
+            }),
+          ],
         },
       })
 
       const missing = issues.filter((i) => i.code === 'rung_content_missing')
-      expect(missing).toHaveLength(4)
+      expect(missing).toHaveLength(5)
       expect(missing.map((i) => i.path)).toEqual(
         expect.arrayContaining([
           'stressLadders.pass.1.intent',
           'stressLadders.pass.1.externalFocusCue',
           'stressLadders.pass.1.explorationCriterion',
           'stressLadders.pass.1.graduationFeel',
+          'stressLadders.pass.1.reflection',
         ]),
       )
     })

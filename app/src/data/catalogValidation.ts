@@ -359,8 +359,9 @@ export function validateDrillCatalog({
 
       // M002.2: every rung ships authored progression content. A rung
       // missing any of intent / external-focus cue / exploration
-      // criterion / graduation feel is a hard authoring failure (the
-      // rung-content invariant in docs/specs/stress-rung-taxonomy.md).
+      // criterion / graduation feel / reflection is a hard authoring
+      // failure (the rung-content invariant in
+      // docs/specs/stress-rung-taxonomy.md).
       for (const rung of stressLadders[focus]) {
         const missing = (
           [
@@ -368,6 +369,7 @@ export function validateDrillCatalog({
             ['externalFocusCue', rung.externalFocusCue],
             ['explorationCriterion', rung.explorationCriterion],
             ['graduationFeel', rung.graduationFeel],
+            ['reflection', rung.reflection],
           ] as const
         ).filter(([, value]) => value.trim().length === 0)
         for (const [field] of missing) {
@@ -375,7 +377,7 @@ export function validateDrillCatalog({
             issue(
               'rung_content_missing',
               `stressLadders.${focus}.${rung.rung}.${field}`,
-              `${focus} rung ${rung.rung} is missing ${field} (M002.2: every rung ships intent + external-focus cue + exploration criterion + graduation feel)`,
+              `${focus} rung ${rung.rung} is missing ${field} (M002.2: every rung ships intent + external-focus cue + exploration criterion + graduation feel + reflection)`,
             ),
           )
         }
